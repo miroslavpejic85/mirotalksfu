@@ -1,13 +1,6 @@
 # mirotalksfu
 
-`Open Source WebRTC video calls, messaging and screen sharing`
-
-![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)
-[![Donate](https://img.shields.io/badge/Donate-PayPal-brightgreen.svg)](https://paypal.me/MiroslavPejic?locale.x=it_IT)
-[![Repo Link](https://img.shields.io/badge/Repo-Link-black.svg)](https://github.com/miroslavpejic85/mirotalk)
-[![Code style: prettier](https://img.shields.io/badge/Code_style-Prettier-ff69b4.svg?)](https://github.com/prettier/prettier)
-
-Powered by `WebRTC` using [SFU](https://mediasoup.org) integrated server.
+Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 
 ![mirotalksfu](public/images/mirotalksfu.png)
 
@@ -27,9 +20,11 @@ Powered by `WebRTC` using [SFU](https://mediasoup.org) integrated server.
 -   Full Screen Mode on mouse click on the Video element
 -   Supports [REST API](api/README.md) (Application Programming Interface)
 
+---
+
 ## Quick Start
 
--   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/) `not` with `16.X`.
+You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
 
 ```bash
 # clone this repo
