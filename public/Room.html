@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- Title and Icon -->
+
+        <title>MiroTalk SFU - Room Video Calls, Messaging and Screen Sharing.</title>
+        <link rel="shortcut icon" href="images/logo.svg" />
+        <link rel="apple-touch-icon" href="images/logo.svg" />
+
+        <!-- Meta Information -->
+
+        <meta charset="utf-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <meta
+            name="description"
+            content="MiroTalk SFU powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser."
+        />
+        <meta
+            name="keywords"
+            content="webrtc, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting"
+        />
+
+        <!-- https://ogp.me -->
+
+        <meta property="og:type" content="app-webrtc" />
+        <meta property="og:site_name" content="MiroTalk SFU" />
+        <meta property="og:title" content="Click the link to make a call." />
+        <meta
+            property="og:description"
+            content="MiroTalk SFU calling provides real-time video calls, messaging and screen sharing."
+        />
+        <meta property="og:image" content="/images/mirotalksfu.png" />
+
+        <!-- StyleSheet -->
+
+        <link rel="stylesheet" href="/css/Room.css" />
+
+        <!-- https://animate.style 4 using for swal fadeIn-Out -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
+
+        <!-- Bootstrap 5 -->
+
+        <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
+
+        <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+            rel="stylesheet"
+            integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+            crossorigin="anonymous"
+        />
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM"
+            crossorigin="anonymous"
+        ></script>
+
+        <!-- Js scripts -->
+
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/modules/MediasoupClient.js"></script>
+        <script src="/js/Room.js"></script>
+        <script src="/js/RoomClient.js"></script>
+        <script src="https://kit.fontawesome.com/d2f1016e6f.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.2"></script>
+        <script src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
+        <script src="https://unpkg.com/@popperjs/core@2"></script>
+        <script src="https://unpkg.com/tippy.js@6"></script>
+    </head>
+    <body onload="initClient()">
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <div class="container-xxl">
+            <div id="control" class="fadein hidden">
+                <button id="exitButton" class="hidden">
+                    <i class="fas fa-arrow-left"></i>
+                </button>
+                <button id="shareButton" class="hidden">
+                    <i class="fas fa-users"></i>
+                </button>
+                <div class="dropdown">
+                    <button id="devicesButton" class="hidden">
+                        <i class="fas fa-cogs"></i>
+                    </button>
+                    <div id="myDevices" class="dropdown-content fadein">
+                        <div id="devicesList">
+                            <br />
+                            <i class="fas fa-video"></i> Video:
+                            <select id="videoSelect" class="form-select text-light bg-dark"></select>
+                            <br />
+                            <i class="fas fa-microphone"></i> Microphone:
+                            <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
+                            <br />
+                            <i class="fas fa-volume-up"></i> Speaker:
+                            <select id="speakerSelect" class="form-select text-light bg-dark"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="dropdown">
+                    <button id="recButton" class="hidden">
+                        <i class="fas fa-record-vinyl"></i>
+                    </button>
+                    <div id="recording" class="dropdown-content fadein">
+                        <div id="recordingCommand" class="recording">
+                            <br />
+                            <button id="startRecButton" class="hidden">
+                                <i class="fas fa-record-vinyl"></i>
+                            </button>
+                            <button id="stopRecButton" class="hidden">
+                                <i class="fas fa-stop-circle"></i>
+                            </button>
+                            <button id="pauseRecButton" class="hidden">
+                                <i class="far fa-pause-circle"></i>
+                            </button>
+                            <button id="resumeRecButton" class="hidden">
+                                <i class="far fa-play-circle"></i>
+                            </button>
+                            <p id="recordingStatus">🔴 REC 0s</p>
+                        </div>
+                    </div>
+                </div>
+                <button id="chatButton" class="hidden">
+                    <i class="fas fa-comments"></i>
+                </button>
+                <button id="fullScreenButton" class="hidden">
+                    <i class="fas fa-expand-alt"></i>
+                </button>
+                <button id="swapCameraButton" class="hidden">
+                    <i class="fas fa-sync-alt"></i>
+                </button>
+                <button id="startAudioButton" class="hidden">
+                    <i class="fas fa-microphone-slash"></i>
+                </button>
+                <button id="stopAudioButton" class="hidden">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <button id="startVideoButton" class="hidden">
+                    <i class="fas fa-video-slash"></i>
+                </button>
+                <button id="stopVideoButton" class="hidden">
+                    <i class="fas fa-video"></i>
+                </button>
+                <button id="startScreenButton" class="hidden">
+                    <i class="fas fa-desktop"></i>
+                </button>
+                <button id="stopScreenButton" class="hidden">
+                    <i class="fas fa-stop-circle"></i>
+                </button>
+                <button id="aboutButton" class="hidden">
+                    <i class="fas fa-question"></i>
+                </button>
+                <p id="sessionTime"></p>
+            </div>
+        </div>
+        <div class="container-xxl">
+            <div id="videoMedia" class="hidden">
+                <div id="localMedia" class="containers">
+                    <!--<video id="localVideo" autoplay inline class="vid mirror"></video>-->
+                    <!--<video id="localScreen" autoplay inline class="vid"></video>-->
+                </div>
+                <div id="remoteVideos" class="containers"></div>
+                <div id="remoteAudios"></div>
+            </div>
+        </div>
+        <section id="chatRoom" class="chat-room center fadein">
+            <section id="msger" class="msger">
+                <header id="chatHeader" class="chat-header">
+                    <div class="chat-header-title"><i class="fas fa-comment-alt"></i> Chat</div>
+                    <div class="chat-header-options">
+                        <button id="chatCleanButton" class="fas fa-trash"></button>
+                        <button id="chatSaveButton" class="fas fa-save"></button>
+                        <button id="chatCloseButton" class="fas fa-times"></button>
+                    </div>
+                </header>
+                <main id="chatMsger" class="chat-msger">
+                    <div class="msg left-msg">
+                        <div
+                            class="msg-img"
+                            style="
+                                background-image: url('https://eu.ui-avatars.com/api?name=Participant&size=24&background=random&rounded=true');
+                            "
+                        ></div>
+                        <div class="msg-bubble">
+                            <div class="msg-info">
+                                <div class="msg-info-name">Participant</div>
+                                <div class="msg-info-time">00:00:00</div>
+                            </div>
+                            <div class="msg-text">Public message example</div>
+                        </div>
+                    </div>
+                    <div class="msg right-msg">
+                        <div
+                            class="msg-img"
+                            style="
+                                background-image: url('https://eu.ui-avatars.com/api?name=You&size=24&background=random&rounded=true');
+                            "
+                        ></div>
+                        <div class="msg-bubble">
+                            <div class="msg-info">
+                                <div class="msg-info-name">You</div>
+                                <div class="msg-info-time">00:00:00</div>
+                            </div>
+                            <div class="msg-text">Public message example</div>
+                        </div>
+                    </div>
+                </main>
+                <div class="chat-msger-inputarea">
+                    <input
+                        id="chatMessage"
+                        class="chat-msger-input"
+                        type="text"
+                        placeholder="💬 Enter your message..."
+                    />
+                    <button id="chatEmojiButton" class="hidden">
+                        <i class="fas fa-smile"></i>
+                    </button>
+                    <button id="chatSendButton" class="hidden">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+                <div id="chatEmoji" class="hidden fadein">
+                    <emoji-picker class="dark"></emoji-picker>
+                </div>
+            </section>
+        </section>
+    </body>
+</html>

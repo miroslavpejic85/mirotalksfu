@@ -1,0 +1,18 @@
+# mac
+.DS_Store
+
+# git folder
+.git
+
+# npm
+node_modules
+npm-debug.log
+
+# package
+package-lock.json
+
+# cache
+.cache
+
+# personal config
+config.js

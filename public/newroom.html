@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+    <head>
+        <!-- Title and Icon -->
+
+        <title>MiroTalk SFU - Create your Room name and start the new call.</title>
+        <link rel="shortcut icon" href="images/logo.svg" />
+        <link rel="apple-touch-icon" href="images/logo.svg" />
+
+        <!-- Meta Information -->
+
+        <meta charset="utf-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta
+            name="description"
+            content="MiroTalk SFU powered by WebRTC and mediasoup, Real-time secure video calls, messaging and screen sharing capabilities in the browser."
+        />
+        <meta
+            name="keywords"
+            content="webrtc, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting"
+        />
+
+        <!-- https://ogp.me -->
+
+        <meta property="og:type" content="app-webrtc" />
+        <meta property="og:site_name" content="MiroTalk SFU" />
+        <meta property="og:title" content="Click the link to make a call." />
+        <meta
+            property="og:description"
+            content="MiroTalk SFU calling provides real-time video calls, messaging and screen sharing."
+        />
+        <meta property="og:image" content="images/mirotalksfu.png" />
+
+        <!-- StyleSheet -->
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
+        <link rel="stylesheet" href="css/landing.css" />
+
+        <!-- Js scripts -->
+
+        <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
+        <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+    </head>
+    <body class="is-boxed has-animations">
+        <div class="body-wrap">
+            <header class="site-header">
+                <div class="container">
+                    <div class="site-header-inner">
+                        <div class="brand header-brand">
+                            <h1 class="m-0">
+                                <a href="/">
+                                    <img class="header-logo-image" src="images/logo.svg" alt="Logo" />
+                                </a>
+                            </h1>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <main>
+                <section class="hero">
+                    <div class="container">
+                        <div class="hero-inner">
+                            <div class="hero-copy">
+                                <h1 class="hero-title mt-0">
+                                    Pick name. <br />
+                                    Share URL. <br />
+                                    Start conference.
+                                </h1>
+                                <p class="hero-paragraph">
+                                    Each room has its own disposable URL. Just pick a room name and share your custom
+                                    URL. It's really that easy.
+                                </p>
+                            </div>
+                            <div class="hero-figure anime-element">
+                                <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
+                                    <rect width="528" height="396" style="fill: transparent" />
+                                </svg>
+                                <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
+                                <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
+                                <div class="hero-figure-box hero-figure-box-05"></div>
+                                <div class="hero-figure-box hero-figure-box-06"></div>
+                                <div class="hero-figure-box hero-figure-box-07"></div>
+                                <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
+                                <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
+                                <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <hr />
+
+                <section class="cta section">
+                    <div class="container">
+                        <div class="cta-inner section-inner">
+                            <h3 class="section-title mt-0">
+                                Pick a room name.<br />
+                                How about this one?
+                            </h3>
+                            <div>
+                                <div class="mb-24">
+                                    <label for="roomName"></label>
+                                    <input class="button" type="text" id="roomName" value="" />
+                                    <button
+                                        class="button button-primary button-wide-mobile pulse"
+                                        onclick="{window.location.href = '/join/' + document.getElementById('roomName').value}"
+                                    >
+                                        Join to room
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+
+            <footer class="site-footer">
+                <div class="container">
+                    <div class="site-footer-inner">
+                        <div class="brand footer-brand">
+                            <a href="/">
+                                <img class="header-logo-image" src="images/logo.svg" alt="Logo" />
+                            </a>
+                        </div>
+                        <ul class="footer-links list-reset">
+                            <li>
+                                Contact:
+                                <a target="_blank" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
+                                    >Miroslav Pejic</a
+                                >
+                            </li>
+                        </ul>
+                        <ul class="footer-social-links list-reset">
+                            <li>
+                                <a target="_blank" href="https://github.com/miroslavpejic85/mirotalksfu">
+                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <title>GitHub</title>
+                                        <path
+                                            d="M7.95 0C3.578 0 0 3.578 0 7.95c0 3.479 2.286 6.46 5.466 7.553.397.1.497-.199.497-.397v-1.392c-2.187.497-2.683-.994-2.683-.994-.398-.894-.895-1.192-.895-1.192-.696-.497.1-.497.1-.497.795.1 1.192.795 1.192.795.696 1.292 1.888.894 2.286.696.1-.497.298-.895.497-1.093-1.79-.2-3.578-.895-3.578-3.976 0-.894.298-1.59.795-2.087-.1-.198-.397-.993.1-2.086 0 0 .695-.2 2.186.795a6.408 6.408 0 0 1 1.987-.299c.696 0 1.392.1 1.988.299 1.49-.994 2.186-.795 2.186-.795.398 1.093.199 1.888.1 2.086.496.597.795 1.292.795 2.087 0 3.081-1.889 3.677-3.677 3.876.298.398.596.895.596 1.59v2.187c0 .198.1.496.596.397C13.714 14.41 16 11.43 16 7.95 15.9 3.578 12.323 0 7.95 0z"
+                                            fill="#0270D7"
+                                        />
+                                    </svg>
+                                </a>
+                            </li>
+                        </ul>
+                        <div class="footer-copyright">&copy; 2021 MiroTalk SFU, all rights reserved</div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+
+        <script src="js/landing.js"></script>
+        <script src="js/newroom.js"></script>
+    </body>
+</html>
