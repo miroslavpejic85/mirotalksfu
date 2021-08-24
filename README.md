@@ -6,7 +6,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 
 ## Features
 
--   Is `100% Free` - `Open Source` and `Self Hosted`
+-   Is `100% Free` - `Open Source` - `Self Hosted`
 -   `No download`, `plug-in` or `login` required, entirely browser based
 -   `Unlimited` number of `conference rooms` and `users`, `without` call `time limitation`
 -   Desktop and Mobile compatible
@@ -20,56 +20,41 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   Full Screen Mode on mouse click on the Video element
 -   Supports [REST API](api/README.md) (Application Programming Interface)
 
----
-
 ## Quick Start
 
-You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
+-   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
 
 ```bash
 # Clone this repo
 $ git clone https://github.com/miroslavpejic85/mirotalksfu.git
-
 # Go to to dir mirotalksfu
 $ cd mirotalksfu
-
 # Copy src/config.template.js in src/config.js
 $ cp src/config.template.js src/config.js
-
 # Install dependencies
 $ npm install
-
 # Start the server
 $ npm start
 ```
 
 -   Open https://localhost:3010 in browser
 
----
-
 ## API
 
-The `response` will give you a `entrypoint / Room URL` for `your meeting`.
-
 ```bash
+# The response will give you a entrypoint / Room URL for your meeting.
 $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 ```
 
----
-
 ## Notes
 
-Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`. If you have a Windows system, consider to installing [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) to be able to run it.
-
----
+-   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`. If you have a Windows system, consider to installing [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) to be able to run it.
 
 ## Credits
 
 -   [Davide Pacilio](https://cruip.com/demos/solid/) (html template)
 -   [Dirk Vanbeveren](https://github.com/Dirvann) (sfu logic)
 -   [Mediasoup](https://mediasoup.org) (sfu server)
-
----
 
 ## Contributing
 
@@ -78,4 +63,4 @@ Run the project on a `Linux or Mac` system as the `mediasoup` installation could
 
 ## License
 
-[![AGPLv3](public/images/AGPLv3.png)](LICENSE)
+-   [AGPLv3](LICENSE)
