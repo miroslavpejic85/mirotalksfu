@@ -27,20 +27,20 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
 
 ```bash
-# clone this repo
-git clone https://github.com/miroslavpejic85/mirotalksfu.git
+# Clone this repo
+$ git clone https://github.com/miroslavpejic85/mirotalksfu.git
 
-# mirotalk dir
-cd mirotalksfu
+# Go to to dir mirotalksfu
+$ cd mirotalksfu
 
-# copy src/config.template.js src/config.js
-cp src/config.template.js src/config.js
+# Copy src/config.template.js in src/config.js
+$ cp src/config.template.js src/config.js
 
-# install dependencies
-npm install
+# Install dependencies
+$ npm install
 
-# start the server
-npm start
+# Start the server
+$ npm start
 ```
 
 -   Open https://localhost:3010 in browser
@@ -52,7 +52,7 @@ npm start
 The `response` will give you a `entrypoint / Room URL` for `your meeting`.
 
 ```bash
-curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
+$ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 ```
 
 ---
