@@ -39,6 +39,21 @@ $ npm start
 
 -   Open https://localhost:3010 in browser
 
+## Docker
+
+-   Install https://docs.docker.com/compose/install/
+
+```bash
+# Build or rebuild services
+$ docker-compose build
+# Create and start containers
+$ docker-compose up # -d
+# Stop and remove resources
+$ docker-compose down
+```
+
+-   Open https://localhost:3010 in browser
+
 ## API
 
 ```bash
