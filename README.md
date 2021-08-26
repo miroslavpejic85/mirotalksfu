@@ -29,7 +29,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 $ git clone https://github.com/miroslavpejic85/mirotalksfu.git
 # Go to to dir mirotalksfu
 $ cd mirotalksfu
-# Copy src/config.template.js in src/config.js
+# Copy src/config.template.js in src/config.js and edit it if needed
 $ cp src/config.template.js src/config.js
 # Install dependencies
 $ npm install
@@ -44,6 +44,8 @@ $ npm start
 -   Install https://docs.docker.com/compose/install/
 
 ```bash
+# Copy src/config.template.js in src/config.js and edit it if needed
+$ cp src/config.template.js src/config.js
 # Build or rebuild services
 $ docker-compose build
 # Create and start containers
