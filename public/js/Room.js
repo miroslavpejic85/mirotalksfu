@@ -272,6 +272,8 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             imageUrl: swalImageUrl,
+            imageWidth: 300,
+            imageHeight: 200,
             position: 'center',
             title: '<strong>Hello ' + peer_name + '</strong>',
             html:
@@ -712,6 +714,8 @@ function showAbout() {
     Swal.fire({
         background: swalBackground,
         imageUrl: swalImageUrl,
+        imageWidth: 300,
+        imageHeight: 200,
         position: 'center',
         html: `
         <br/>
