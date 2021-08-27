@@ -10,6 +10,7 @@ module.exports = class Room {
         this.worker = worker;
         this.router = null;
         this.io = io;
+        this._isLocked = false;
         this.peers = new Map();
         this.createTheRouter();
     }
@@ -185,6 +186,17 @@ module.exports = class Room {
 
     closeProducer(socket_id, producer_id) {
         this.peers.get(socket_id).closeProducer(producer_id);
+    }
+
+    // ####################################################
+    // ROOM STATUS
+    // ####################################################
+
+    isLocked() {
+        return this._isLocked;
+    }
+    setLocked(status) {
+        this._isLocked = status;
     }
 
     // ####################################################

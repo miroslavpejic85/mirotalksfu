@@ -67,6 +67,8 @@ function initClient() {
         setTippy('stopVideoButton', 'Stop Video', 'bottom');
         setTippy('startScreenButton', 'Start Screen', 'bottom');
         setTippy('stopScreenButton', 'Stop Screen', 'bottom');
+        setTippy('lockRoomButton', 'Room Lock', 'bottom');
+        setTippy('unlockRoomButton', 'Room Unlock', 'bottom');
         setTippy('aboutButton', 'About', 'bottom');
     }
     initEnumerateDevices();
@@ -273,7 +275,7 @@ async function shareRoom(useNavigator = false) {
             background: swalBackground,
             imageUrl: swalImageUrl,
             imageWidth: 300,
-            imageHeight: 200,
+            imageHeight: 150,
             position: 'center',
             title: '<strong>Hello ' + peer_name + '</strong>',
             html:
@@ -400,6 +402,7 @@ function roomIsReady() {
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
     show(videoMedia);
+    show(lockRoomButton);
     show(aboutButton);
     handleButtons();
     handleSelects();
@@ -553,6 +556,12 @@ function handleButtons() {
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
+    lockRoomButton.onclick = () => {
+        rc.roomAction('lock');
+    };
+    unlockRoomButton.onclick = () => {
+        rc.roomAction('unlock');
+    };
     aboutButton.onclick = () => {
         showAbout();
     };
@@ -667,6 +676,14 @@ function handleRoomClientEvents() {
         hide(stopScreenButton);
         show(startScreenButton);
     });
+    rc.on(RoomClient.EVENTS.roomLock, () => {
+        hide(lockRoomButton);
+        show(unlockRoomButton);
+    });
+    rc.on(RoomClient.EVENTS.roomUnlock, () => {
+        hide(unlockRoomButton);
+        show(lockRoomButton);
+    });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         window.location.href = '/newroom';
     });
@@ -715,7 +732,7 @@ function showAbout() {
         background: swalBackground,
         imageUrl: swalImageUrl,
         imageWidth: 300,
-        imageHeight: 200,
+        imageHeight: 150,
         position: 'center',
         html: `
         <br/>

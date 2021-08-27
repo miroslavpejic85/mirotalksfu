@@ -11,6 +11,7 @@ const html = {
 const image = {
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
+    locked: '../images/locked.png',
 };
 
 const mediaType = {
@@ -39,6 +40,8 @@ const _EVENTS = {
     pauseScreen: 'pauseScreen',
     resumeScreen: 'resumeScreen',
     stopScreen: 'stopScreen',
+    roomLock: 'roomLock',
+    roomUnlock: 'roomUnlock',
 };
 
 let recordedBlobs;
@@ -171,6 +174,10 @@ class RoomClient {
             .request('join', data)
             .then(
                 async function (room) {
+                    if (room === 'isLocked') {
+                        this.roomIsLocked();
+                        return;
+                    }
                     this.connectedRoom = room;
                     console.log('07 ----> Joined to room', this.connectedRoom);
                     const data = await this.socket.request('getRouterRtpCapabilities');
@@ -359,8 +366,16 @@ class RoomClient {
         this.socket.on(
             'message',
             function (data) {
-                console.log('message', data);
+                console.log('Message', data);
                 this.showMessage(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'roomAction',
+            function (data) {
+                console.log('Room action:', data);
+                this.roomAction(data, false);
             }.bind(this),
         );
 
@@ -1364,5 +1379,52 @@ class RoomClient {
         this.getId('recordingStatus').innerHTML = '🔴 REC 0s';
         this.event(_EVENTS.stopRec);
         this.sound('recStop');
+    }
+
+    // ####################################################
+    // ROOM ACTION
+    // ####################################################
+
+    roomAction(action, emit = true) {
+        if (emit) this.socket.emit('roomAction', action);
+        switch (action) {
+            case 'lock':
+                this.sound('locked');
+                this.event(_EVENTS.roomLock);
+                this.userLog('info', '🔒 LOCKED the room, no one can access!', 'top-end');
+                break;
+            case 'unlock':
+                this.event(_EVENTS.roomUnlock);
+                this.userLog('info', '🔓 UNLOCKED the room', 'top-end');
+                break;
+        }
+    }
+
+    // ####################################################
+    // HANDLE ROOM ACTION
+    // ####################################################
+
+    roomIsLocked() {
+        this.sound('locked');
+        this.event(_EVENTS.roomLock);
+        console.log('Room is Locked, try with another one');
+        Swal.fire({
+            allowOutsideClick: false,
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.locked,
+            title: 'Oops, Room Locked',
+            text: 'The room is locked, try with another one.',
+            showDenyButton: false,
+            confirmButtonText: `Ok`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) this.exit();
+        });
     }
 }

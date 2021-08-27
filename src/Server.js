@@ -203,16 +203,36 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('join', (data, cb) => {
-        log.debug('User joined', data);
+    socket.on('roomAction', (action) => {
+        switch (action) {
+            case 'lock':
+                roomList.get(socket.room_id).setLocked(true);
+                break;
+            case 'unlock':
+                roomList.get(socket.room_id).setLocked(false);
+                break;
+        }
+        log.debug('Room locked:', roomList.get(socket.room_id).isLocked());
+        // send to all participants
+        roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', action);
+    });
 
+    socket.on('join', (data, cb) => {
         if (!roomList.has(socket.room_id)) {
             return cb({
                 error: 'Room does not exist',
             });
         }
 
+        log.debug('User joined', data);
         roomList.get(socket.room_id).addPeer(new Peer(socket.id, data));
+
+        if (roomList.get(socket.room_id).isLocked()) {
+            log.debug('User rejected because room is locked');
+            cb('isLocked');
+            return;
+        }
+
         cb(roomList.get(socket.room_id).toJson());
     });
 
@@ -327,6 +347,10 @@ io.on('connection', (socket) => {
         log.debug('Disconnect', getPeerName());
 
         roomList.get(socket.room_id).removePeer(socket.id);
+
+        if (roomList.get(socket.room_id).getPeers().size === 0 && roomList.get(socket.room_id).isLocked()) {
+            roomList.get(socket.room_id).setLocked(false);
+        }
     });
 
     socket.on('exitRoom', async (_, callback) => {
