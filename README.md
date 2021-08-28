@@ -11,6 +11,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   `Unlimited` number of `conference rooms` and `users`, `without` call `time limitation`
 -   Desktop and Mobile compatible
 -   Optimized Room URL Sharing (share it to your participants, wait them to join)
+-   Possibility to Lock/Unlock the Room for the meeting
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
