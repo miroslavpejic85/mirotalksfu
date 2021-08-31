@@ -21,6 +21,12 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   Full Screen Mode on mouse click on the Video element
 -   Supports [REST API](api/README.md) (Application Programming Interface)
 
+## DigitalOcean
+
+This application has been tested and `works perfectly` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64`, with [Ngnix](https://www.nginx.com/) and [Let's encrypt](https://letsencrypt.org/).
+
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
+
 ## Quick Start
 
 -   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
