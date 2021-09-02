@@ -602,8 +602,8 @@ class RoomClient {
         d.className = 'd';
         d.id = id + '_d';
         elem = document.createElement('video');
-        elem.id = id;
-        elem.playsinline = false;
+        elem.setAttribute('id', id);
+        elem.setAttribute('playsinline', true);
         elem.autoplay = true;
         elem.poster = image.poster;
         if (this.isMobileDevice || type === mediaType.screen) elem.className = 'vid';
@@ -611,7 +611,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = id + '_name';
         p.className = 'pn';
-        p.innerHTML = '👤 ' + this.peer_name;
+        p.innerHTML = '👤 ' + this.peer_name + ' (me)';
         d.appendChild(elem);
         d.appendChild(p);
         this.localMediaEl.appendChild(d);
@@ -790,8 +790,8 @@ class RoomClient {
                 d.className = 'd';
                 d.id = id + '_d';
                 elem = document.createElement('video');
-                elem.id = id;
-                elem.playsinline = false;
+                elem.setAttribute('id', id);
+                elem.setAttribute('playsinline', true);
                 elem.autoplay = true;
                 elem.className = 'vid';
                 elem.poster = image.poster;
@@ -801,7 +801,7 @@ class RoomClient {
                 d.appendChild(elem);
                 d.appendChild(p);
                 this.remoteVideoEl.appendChild(d);
-                this.attachMediaStream(elem, stream, mediaType.video, 'Consumer');
+                this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id);
                 this.setTippy(elem.id, 'Full Screen', 'top-end');
                 if (this.debug) {
@@ -820,10 +820,9 @@ class RoomClient {
             case mediaType.audio:
                 elem = document.createElement('audio');
                 elem.id = id;
-                elem.playsinline = false;
                 elem.autoplay = true;
                 this.remoteAudioEl.appendChild(elem);
-                this.attachMediaStream(elem, stream, mediaType.audio, 'Consumer');
+                this.attachMediaStream(elem, stream, type, 'Consumer');
                 break;
         }
         return elem;
@@ -876,9 +875,21 @@ class RoomClient {
     // HELPERS
     // ####################################################
 
-    attachMediaStream(elem, stream, mediaType, type) {
-        console.log(type + ' Success attached media ' + mediaType);
-        elem.srcObject = stream;
+    attachMediaStream(elem, stream, type, who) {
+        let track;
+        switch (type) {
+            case mediaType.audio:
+                track = stream.getAudioTracks()[0];
+                break;
+            case mediaType.video:
+            case mediaType.screen:
+                track = stream.getVideoTracks()[0];
+                break;
+        }
+        const newStream = new MediaStream();
+        newStream.addTrack(track);
+        elem.srcObject = newStream;
+        console.log(who + ' Success attached media ' + type);
     }
 
     attachSinkId(elem, sinkId) {
