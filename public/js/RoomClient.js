@@ -831,9 +831,12 @@ class RoomClient {
     removeConsumer(consumer_id) {
         let elem = this.getId(consumer_id);
         let d = this.getId(consumer_id + '_d');
+
         elem.srcObject.getTracks().forEach(function (track) {
             track.stop();
         });
+
+        if (elem) elem.parentNode.removeChild(elem);
         if (d) d.parentNode.removeChild(d);
 
         this.consumers.delete(consumer_id);
