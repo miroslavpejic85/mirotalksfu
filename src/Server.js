@@ -213,8 +213,12 @@ io.on('connection', (socket) => {
                 break;
         }
         log.debug('Room locked:', roomList.get(socket.room_id).isLocked());
-        // send to all participants
         roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', action);
+    });
+
+    socket.on('peerAction', (data) => {
+        log.debug('Peer action:', data);
+        roomList.get(socket.room_id).sendTo(data.peer_id, 'peerAction', data);
     });
 
     socket.on('join', (data, cb) => {
@@ -329,7 +333,7 @@ io.on('connection', (socket) => {
         callback();
     });
 
-    socket.on('getMyRoomInfo', (_, cb) => {
+    socket.on('getRoomInfo', (_, cb) => {
         cb(roomList.get(socket.room_id).toJson());
     });
 
@@ -378,9 +382,12 @@ io.on('connection', (socket) => {
         if (json) {
             return {
                 peer_name:
-                    roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_name,
+                    roomList.get(socket.room_id) &&
+                    roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name,
             };
         }
-        return roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_name;
+        return (
+            roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name
+        );
     }
 });

@@ -67,6 +67,7 @@ function initClient() {
         setTippy('stopVideoButton', 'Stop Video', 'bottom');
         setTippy('startScreenButton', 'Start Screen', 'bottom');
         setTippy('stopScreenButton', 'Stop Screen', 'bottom');
+        setTippy('participantsButton', 'Show participants', 'bottom');
         setTippy('lockRoomButton', 'Room Lock', 'bottom');
         setTippy('unlockRoomButton', 'Room Unlock', 'bottom');
         setTippy('aboutButton', 'About', 'bottom');
@@ -114,7 +115,6 @@ async function initEnumerateDevices() {
     if (!isAudioAllowed && !isVideoAllowed) {
         window.location.href = `/permission?room_id=${room_id}&message=Not allowed both Audio and Video`;
     } else {
-        getPeerInfo();
         getPeerGeoLocation();
         whoAreYou();
     }
@@ -182,13 +182,17 @@ function appenChild(device, el) {
 
 function getPeerInfo() {
     peer_info = {
-        detectRTCversion: DetectRTC.version,
-        isWebRTCSupported: DetectRTC.isWebRTCSupported,
-        isMobileDevice: DetectRTC.isMobileDevice,
-        osName: DetectRTC.osName,
-        osVersion: DetectRTC.osVersion,
-        browserName: DetectRTC.browser.name,
-        browserVersion: DetectRTC.browser.version,
+        detect_rtc_version: DetectRTC.version,
+        is_webrtc_Supported: DetectRTC.isWebRTCSupported,
+        is_mobile_device: DetectRTC.isMobileDevice,
+        os_name: DetectRTC.osName,
+        os_version: DetectRTC.osVersion,
+        browser_name: DetectRTC.browser.name,
+        browser_version: DetectRTC.browser.version,
+        peer_id: socket.id,
+        peer_name: peer_name,
+        peer_audio: isAudioOn,
+        peer_video: isVideoOn,
     };
 }
 
@@ -229,6 +233,7 @@ function whoAreYou() {
             peer_name = name;
         },
     }).then(() => {
+        getPeerInfo();
         shareRoom();
         joinRoom(peer_name, room_id);
     });
@@ -244,12 +249,12 @@ function whoAreYou() {
 }
 
 function handleAudio(e) {
-    isAudioOn ? (isAudioOn = false) : (isAudioOn = true);
+    isAudioOn = isAudioOn ? false : true;
     e.target.className = 'fas fa-microphone' + (isAudioOn ? '' : '-slash');
 }
 
 function handleVideo(e) {
-    isVideoOn ? (isVideoOn = false) : (isVideoOn = true);
+    isVideoOn = isVideoOn ? false : true;
     e.target.className = 'fas fa-video' + (isVideoOn ? '' : '-slash');
 }
 
@@ -273,9 +278,6 @@ async function shareRoom(useNavigator = false) {
 
         Swal.fire({
             background: swalBackground,
-            imageUrl: swalImageUrl,
-            imageWidth: 300,
-            imageHeight: 150,
             position: 'center',
             title: '<strong>Hello ' + peer_name + '</strong>',
             html:
@@ -326,7 +328,7 @@ function makeRoomQR() {
         value: RoomURL,
     });
     qr.set({
-        size: 128,
+        size: 256,
     });
 }
 
@@ -402,6 +404,7 @@ function roomIsReady() {
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
     show(videoMedia);
+    show(participantsButton);
     show(lockRoomButton);
     show(aboutButton);
     handleButtons();
@@ -555,6 +558,9 @@ function handleButtons() {
     };
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
+    };
+    participantsButton.onclick = () => {
+        getRoomParticipants();
     };
     lockRoomButton.onclick = () => {
         rc.roomAction('lock');
@@ -713,12 +719,47 @@ function userLog(icon, message, position) {
 
 async function sound(name) {
     let sound = '../sounds/' + name + '.wav';
-    let audioToPlay = new Audio(sound);
+    let audio = new Audio(sound);
     try {
-        await audioToPlay.play();
+        await audio.play();
     } catch (err) {
         return false;
     }
+}
+
+// ####################################################
+// HANDLE PARTICIPANTS
+// ####################################################
+
+async function getRoomParticipants() {
+    let room_info = await rc.getRoomInfo();
+    let peers = new Map(JSON.parse(room_info.peers));
+    let lists = `<div id="roomParticipants"><ul>`;
+
+    for (let peer of Array.from(peers.keys())) {
+        let peer_info = peers.get(peer).peer_info;
+        let peer_name = peer_info.peer_name;
+        let peer_id = peer_info.peer_id;
+        rc.peer_id === peer_id
+            ? (lists += `<li>👤 ${peer_name} (me)</li>`)
+            : (lists += `<li id='${peer_id}'>👤 ${peer_name} <button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></li>`);
+    }
+    lists += `</ul></div>`;
+
+    sound('open');
+
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        title: `Participants ${peers.size}`,
+        html: lists,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp',
+        },
+    });
 }
 
 // ####################################################

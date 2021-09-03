@@ -531,6 +531,29 @@ button:hover {
 }
 
 /*--------------------------------------------------------------
+# Room Participants
+--------------------------------------------------------------*/
+
+#roomParticipants {
+    max-height: 480px;
+    overflow: auto;
+}
+
+#roomParticipants ul {
+    text-align: justify;
+    list-style: inside;
+}
+
+#roomParticipants button {
+    color: red;
+    border-radius: 5px;
+}
+#roomParticipants button:hover {
+    color: white;
+    border-radius: 5px;
+}
+
+/*--------------------------------------------------------------
 # Pulse class effect
 --------------------------------------------------------------*/
 

@@ -70,10 +70,10 @@ class RoomClient {
 
         this.socket = socket;
         this.room_id = room_id;
+        this.peer_id = socket.id;
         this.peer_name = peer_name;
         this.peer_geo = peer_geo;
         this.peer_info = peer_info;
-        this.peer_info.peerName = peer_name;
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
@@ -86,8 +86,6 @@ class RoomClient {
         this.isMobileDevice = DetectRTC.isMobileDevice;
 
         this._isConnected = false;
-        this.peerGeo = null;
-        this.peerInfo = null;
         this.isVideoOnFullScreen = false;
         this.isDocumentOnFullScreen = false;
         this.isChatOpen = false;
@@ -141,9 +139,6 @@ class RoomClient {
             async function () {
                 let data = {
                     room_id: this.room_id,
-                    peer_name: this.peer_name,
-                    peer_audio: this.isAudioOn,
-                    peer_video: this.isVideoOn,
                     peer_info: this.peer_info,
                     peer_geo: this.peer_geo,
                 };
@@ -376,6 +371,14 @@ class RoomClient {
             function (data) {
                 console.log('Room action:', data);
                 this.roomAction(data, false);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'peerAction',
+            function (data) {
+                console.log('Peer action:', data);
+                this.peerAction(data.from_peer_name, data.peer_id, data.action, false);
             }.bind(this),
         );
 
@@ -618,17 +621,7 @@ class RoomClient {
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.handleFS(elem.id);
         this.setTippy(elem.id, 'Full Screen', 'top-end');
-        if (this.debug) {
-            this.setTippy(
-                p.id,
-                JSON.stringify(
-                    this.peer_info,
-                    ['peerName', 'isMobileDevice', 'osName', 'osVersion', 'browserName', 'browserVersion'],
-                    2,
-                ),
-                'top-start',
-            );
-        }
+        this.popupPeerInfo(p.id, this.peer_info);
         this.sound('joined');
         return elem;
     }
@@ -804,17 +797,7 @@ class RoomClient {
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id);
                 this.setTippy(elem.id, 'Full Screen', 'top-end');
-                if (this.debug) {
-                    this.setTippy(
-                        p.id,
-                        JSON.stringify(
-                            peer_info,
-                            ['peerName', 'isMobileDevice', 'osName', 'osVersion', 'browserName', 'browserVersion'],
-                            2,
-                        ),
-                        'top-start',
-                    );
-                }
+                this.popupPeerInfo(p.id, peer_info);
                 this.sound('joined');
                 break;
             case mediaType.audio:
@@ -966,10 +949,9 @@ class RoomClient {
         return document.getElementById(id);
     }
 
-    async getMyRoomInfo() {
-        let roomInfo = await this.socket.request('getMyRoomInfo');
-        console.log('Room info', roomInfo);
-        return roomInfo;
+    async getRoomInfo() {
+        let room_info = await this.socket.request('getRoomInfo');
+        return room_info;
     }
 
     // ####################################################
@@ -982,9 +964,9 @@ class RoomClient {
 
     async sound(name) {
         let sound = '../sounds/' + name + '.wav';
-        let audioToPlay = new Audio(sound);
+        let audio = new Audio(sound);
         try {
-            await audioToPlay.play();
+            await audio.play();
         } catch (err) {
             return false;
         }
@@ -1440,5 +1422,74 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) this.exit();
         });
+    }
+
+    // ####################################################
+    // PEER ACTION
+    // ####################################################
+
+    peerAction(from_peer_name, peer_id, action, emit = true) {
+        switch (action) {
+            case 'eject':
+                let peer = this.getId(peer_id);
+                if (peer) peer.parentNode.removeChild(peer);
+                if (peer_id === this.peer_id) {
+                    this.sound(action);
+                    let timerInterval;
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        background: swalBackground,
+                        title: from_peer_name,
+                        html: 'Will eject you from the room after <b style="color: red;"></b> milliseconds.',
+                        timer: 5000,
+                        timerProgressBar: true,
+                        didOpen: () => {
+                            Swal.showLoading();
+                            const b = Swal.getHtmlContainer().querySelector('b');
+                            timerInterval = setInterval(() => {
+                                b.textContent = Swal.getTimerLeft();
+                            }, 100);
+                        },
+                        willClose: () => {
+                            clearInterval(timerInterval);
+                        },
+                    }).then(() => {
+                        this.exit();
+                    });
+                }
+                break;
+            // ...
+        }
+        if (emit) {
+            let data = {
+                from_peer_name: this.peer_name,
+                peer_id: peer_id,
+                action: action,
+            };
+            this.socket.emit('peerAction', data);
+        }
+    }
+
+    popupPeerInfo(id, peer_info) {
+        if (this.debug) {
+            this.setTippy(
+                id,
+                JSON.stringify(
+                    peer_info,
+                    [
+                        'peer_name',
+                        'peer_audio',
+                        'peer_video',
+                        'is_mobile_device',
+                        'os_name',
+                        'os_version',
+                        'browser_name',
+                        'browser_version',
+                    ],
+                    2,
+                ),
+                'top-start',
+            );
+        }
     }
 }

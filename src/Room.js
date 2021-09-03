@@ -203,13 +203,19 @@ module.exports = class Room {
     // SENDER
     // ####################################################
 
-    broadCast(socket_id, peer_name, data) {
+    broadCast(socket_id, action, data) {
         for (let otherID of Array.from(this.peers.keys()).filter((id) => id !== socket_id)) {
-            this.send(otherID, peer_name, data);
+            this.send(otherID, action, data);
         }
     }
 
-    send(socket_id, peer_name, data) {
-        this.io.to(socket_id).emit(peer_name, data);
+    sendTo(socket_id, action, data) {
+        for (let peer_id of Array.from(this.peers.keys()).filter((id) => id === socket_id)) {
+            this.send(peer_id, action, data);
+        }
+    }
+
+    send(socket_id, action, data) {
+        this.io.to(socket_id).emit(action, data);
     }
 };

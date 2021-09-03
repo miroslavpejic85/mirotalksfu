@@ -6,10 +6,10 @@ const log = new Logger('Peer');
 module.exports = class Peer {
     constructor(socket_id, data) {
         this.id = socket_id;
-        this.peer_name = data.peer_name;
-        this.peer_audio = data.peer_audio;
-        this.peer_video = data.peer_video;
         this.peer_info = data.peer_info;
+        this.peer_name = data.peer_info.peer_name;
+        this.peer_audio = data.peer_info.peer_audio;
+        this.peer_video = data.peer_info.peer_video;
         this.transports = new Map();
         this.consumers = new Map();
         this.producers = new Map();
@@ -55,7 +55,7 @@ module.exports = class Peer {
             'transportclose',
             function () {
                 log.debug('Producer transport close', {
-                    peer_name: this.peer_name,
+                    peer_name: this.peer_info.peer_name,
                     consumer_id: producer.id,
                 });
                 producer.close();
@@ -107,7 +107,7 @@ module.exports = class Peer {
             'transportclose',
             function () {
                 log.debug('Consumer transport close', {
-                    peer_name: this.peer_name,
+                    peer_name: this.peer_info.peer_name,
                     consumer_id: consumer.id,
                 });
                 this.consumers.delete(consumer.id);
