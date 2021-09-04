@@ -392,7 +392,9 @@ function roomIsReady() {
         setChatSize();
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
-        show(startScreenButton);
+        if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
+            show(startScreenButton);
+        }
     }
     if (DetectRTC.browser.name != 'Safari') {
         document.onfullscreenchange = () => {
