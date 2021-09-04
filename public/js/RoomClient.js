@@ -440,7 +440,7 @@ class RoomClient {
             console.log('Producer already exists for this type ' + type);
             return;
         }
-        console.log('Mediacontraints:', mediaConstraints);
+        console.log(`Media contraints ${type}:`, mediaConstraints);
         let stream;
         try {
             stream = screen
