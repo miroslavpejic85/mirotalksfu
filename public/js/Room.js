@@ -183,7 +183,7 @@ function appenChild(device, el) {
 function getPeerInfo() {
     peer_info = {
         detect_rtc_version: DetectRTC.version,
-        is_webrtc_Supported: DetectRTC.isWebRTCSupported,
+        is_webrtc_supported: DetectRTC.isWebRTCSupported,
         is_mobile_device: DetectRTC.isMobileDevice,
         os_name: DetectRTC.osName,
         os_version: DetectRTC.osVersion,
@@ -736,17 +736,20 @@ async function sound(name) {
 async function getRoomParticipants() {
     let room_info = await rc.getRoomInfo();
     let peers = new Map(JSON.parse(room_info.peers));
-    let lists = `<div id="roomParticipants"><ul>`;
-
+    let table = `<div id="roomParticipants"><table>
+    <tr>
+        <th></th>
+        <th></th>
+    </tr>`;
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
         let peer_name = peer_info.peer_name;
         let peer_id = peer_info.peer_id;
         rc.peer_id === peer_id
-            ? (lists += `<li>👤 ${peer_name} (me)</li>`)
-            : (lists += `<li id='${peer_id}'>👤 ${peer_name} <button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></li>`);
+            ? (table += `<tr><td>👤 ${peer_name} (me)</td><td></td></tr>`)
+            : (table += `<tr id='${peer_id}'><td>👤 ${peer_name}</td><td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td></tr>`);
     }
-    lists += `</ul></div>`;
+    table += `</table></div>`;
 
     sound('open');
 
@@ -754,7 +757,7 @@ async function getRoomParticipants() {
         background: swalBackground,
         position: 'center',
         title: `Participants ${peers.size}`,
-        html: lists,
+        html: table,
         showClass: {
             popup: 'animate__animated animate__fadeInDown',
         },

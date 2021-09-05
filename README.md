@@ -23,7 +23,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 
 ## DigitalOcean
 
-This application has been tested and `works perfectly` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64`, with [Ngnix](https://www.nginx.com/) and [Let's encrypt](https://letsencrypt.org/).
+This application has been tested on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 

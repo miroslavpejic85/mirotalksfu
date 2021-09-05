@@ -539,12 +539,8 @@ button:hover {
     overflow: auto;
 }
 
-#roomParticipants ul {
-    text-align: justify;
-    list-style: inside;
-}
-
 #roomParticipants button {
+    background: transparent;
     color: red;
     border-radius: 5px;
 }
@@ -552,6 +548,25 @@ button:hover {
     color: white;
     border-radius: 5px;
 }
+
+#roomParticipants table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#roomParticipants td,
+#roomParticipants th {
+    /* border: 1px solid #444444; */
+    color: white;
+    text-align: left;
+    padding: 8px;
+}
+
+/*
+#roomParticipants tr:nth-child(even) {
+    background-color: #000000;
+}
+*/
 
 /*--------------------------------------------------------------
 # Pulse class effect

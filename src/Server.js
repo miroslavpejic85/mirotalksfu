@@ -2,19 +2,20 @@
 
 const express = require('express');
 const cors = require('cors');
-const app = express();
 const compression = require('compression');
 const https = require('httpolyglot');
-const fs = require('fs');
 const mediasoup = require('mediasoup');
 const config = require('./config');
 const path = require('path');
 const ngrok = require('ngrok');
+const fs = require('fs');
 const Room = require('./Room');
 const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const log = new Logger('Server');
+
+const app = express();
 
 const options = {
     key: fs.readFileSync(path.join(__dirname, config.sslKey), 'utf-8'),
@@ -23,7 +24,7 @@ const options = {
 
 const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer);
-const localHost = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
+const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
 
 // all mediasoup workers
 let workers = [];
@@ -130,8 +131,8 @@ async function ngrokStart() {
         let pu1 = data.tunnels[1].public_url;
         let tunnel = pu0.startsWith('https') ? pu0 : pu1;
         log.debug('Listening on', {
-            https: localHost,
-            ngrok: tunnel,
+            server: host,
+            tunnel: tunnel,
         });
     } catch (err) {
         console.error('Ngrok Start error: ', err);
@@ -149,7 +150,7 @@ httpsServer.listen(config.listenPort, () => {
         return;
     }
     log.debug('Listening on', {
-        https: localHost,
+        server: host,
     });
 });
 
