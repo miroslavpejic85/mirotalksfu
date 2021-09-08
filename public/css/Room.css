@@ -34,7 +34,7 @@
     --msger-left: 50%;
     --msger-height: 680px;
     --msger-width: 420px;
-    --msger-bg: #16171b;
+    --msger-bg: linear-gradient(to left, #383838, #000000);
     --left-msg-bg: #222328;
     --right-msg-bg: #0a0b0c;
     --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -43,6 +43,10 @@
 * {
     outline: none;
     font-family: 'Verdana';
+}
+
+html {
+    min-height: 100%;
 }
 
 body {

@@ -746,8 +746,8 @@ async function getRoomParticipants() {
         let peer_name = peer_info.peer_name;
         let peer_id = peer_info.peer_id;
         rc.peer_id === peer_id
-            ? (table += `<tr><td>👤 ${peer_name} (me)</td><td></td></tr>`)
-            : (table += `<tr id='${peer_id}'><td>👤 ${peer_name}</td><td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td></tr>`);
+            ? (table += `<tr><td>- 👤 ${peer_name} (me)</td><td></td></tr>`)
+            : (table += `<tr id='${peer_id}'><td>- 👤 ${peer_name}</td><td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td></tr>`);
     }
     table += `</table></div>`;
 
