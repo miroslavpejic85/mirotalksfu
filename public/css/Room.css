@@ -41,6 +41,7 @@
     --left-msg-bg: #222328;
     --right-msg-bg: #0a0b0c;
     --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    --btns-hover-scale: scale(1.1);
 }
 
 * {
@@ -111,6 +112,7 @@ body {
 
 .sidenav button:hover {
     color: rgb(0, 180, 50);
+    transform: var(--btns-hover-scale);
 }
 
 .sidenav .closebtn {
@@ -516,6 +518,7 @@ button {
 
 button:hover {
     color: rgb(0, 180, 50);
+    transform: var(--btns-hover-scale);
 }
 
 /*--------------------------------------------------------------
