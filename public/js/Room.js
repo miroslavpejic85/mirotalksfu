@@ -323,7 +323,8 @@ function copyRoomURL() {
     document.body.appendChild(tmpInput);
     tmpInput.value = RoomURL;
     tmpInput.select();
-    document.execCommand('copy');
+    tmpInput.setSelectionRange(0, 99999); // For mobile devices
+    navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
     userLog('info', 'Room URL copied to clipboard', 'top-end');
 }
