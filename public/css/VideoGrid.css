@@ -1,0 +1,80 @@
+/*--------------------------------------------------------------
+# Video grid
+--------------------------------------------------------------*/
+
+#videoMediaContainer {
+    z-index: 1;
+    display: flex;
+    align-content: center;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    vertical-align: middle;
+    position: absolute;
+    left: 0px;
+    bottom: 0px;
+    top: 0px;
+    right: 0px;
+}
+
+#videoMediaContainer div {
+    /* Camera */
+    position: relative;
+    vertical-align: middle;
+    align-self: center;
+    border-radius: 10px;
+    overflow: hidden;
+    display: inline-block;
+    background: transparent;
+    box-shadow: 0px 12px 22px rgba(0, 0, 0, 0.4);
+    animation: show 0.4s ease;
+}
+
+#videoMediaContainer p {
+    position: absolute;
+    bottom: 0;
+    color: white;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    padding: 5px;
+    margin: 5px;
+    width: auto;
+    height: 25px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    box-shadow: var(--box-shadow);
+    cursor: pointer;
+}
+
+video:hover {
+    opacity: 0.9;
+}
+
+video:fullscreen {
+    object-fit: contain;
+    opacity: 1;
+}
+
+.mirror {
+    -webkit-transform: rotateY(180deg);
+    -moz-transform: rotateY(180deg);
+    transform: rotateY(180deg);
+}
+
+@keyframes show {
+    0% {
+        opacity: 0;
+        transform: scale(0.4) translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

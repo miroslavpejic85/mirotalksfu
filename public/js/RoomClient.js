@@ -48,9 +48,8 @@ let recordedBlobs;
 
 class RoomClient {
     constructor(
-        localMediaEl,
-        remoteVideoEl,
         remoteAudioEl,
+        videoMediaContainer,
         mediasoupClient,
         socket,
         room_id,
@@ -63,9 +62,8 @@ class RoomClient {
         isVideoOn,
         successCallback,
     ) {
-        this.localMediaEl = localMediaEl;
-        this.remoteVideoEl = remoteVideoEl;
         this.remoteAudioEl = remoteAudioEl;
+        this.videoMediaContainer = videoMediaContainer;
         this.mediasoupClient = mediasoupClient;
 
         this.socket = socket;
@@ -103,6 +101,7 @@ class RoomClient {
         this.recScreenStream = null;
         this._isRecording = false;
 
+        this.myVideoEl = null;
         this.connectedRoom = null;
         this.debug = false;
 
@@ -484,6 +483,8 @@ class RoomClient {
                         track.stop();
                     });
                     elem.parentNode.removeChild(elem);
+
+                    resizeVideoMedia();
                 }
                 this.producers.delete(producer.id);
             });
@@ -495,6 +496,8 @@ class RoomClient {
                         track.stop();
                     });
                     elem.parentNode.removeChild(elem);
+
+                    resizeVideoMedia();
                 }
                 this.producers.delete(producer.id);
             });
@@ -602,27 +605,27 @@ class RoomClient {
     async handleProducer(id, type, stream) {
         let elem, d, p;
         d = document.createElement('div');
-        d.className = 'd';
+        d.className = 'Camera';
         d.id = id + '_d';
         elem = document.createElement('video');
         elem.setAttribute('id', id);
         elem.setAttribute('playsinline', true);
         elem.autoplay = true;
         elem.poster = image.poster;
-        if (this.isMobileDevice || type === mediaType.screen) elem.className = 'vid';
-        else elem.className = 'vid mirror';
+        this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
         p.id = id + '_name';
-        p.className = 'pn';
         p.innerHTML = '👤 ' + this.peer_name + ' (me)';
         d.appendChild(elem);
         d.appendChild(p);
-        this.localMediaEl.appendChild(d);
+        this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
+        this.myVideoEl = elem;
         this.handleFS(elem.id);
         this.setTippy(elem.id, 'Full Screen', 'top-end');
         this.popupPeerInfo(p.id, this.peer_info);
         this.sound('joined');
+        resizeVideoMedia();
         return elem;
     }
 
@@ -698,6 +701,8 @@ class RoomClient {
                 track.stop();
             });
             d.parentNode.removeChild(d);
+
+            resizeVideoMedia();
         }
 
         switch (type) {
@@ -780,25 +785,26 @@ class RoomClient {
         switch (type) {
             case mediaType.video:
                 d = document.createElement('div');
-                d.className = 'd';
+                d.className = 'Camera';
                 d.id = id + '_d';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 elem.setAttribute('playsinline', true);
                 elem.autoplay = true;
-                elem.className = 'vid';
+                elem.className = '';
                 elem.poster = image.poster;
                 p = document.createElement('p');
                 p.id = id + '_name';
                 p.innerHTML = '👤 ' + peer_name;
                 d.appendChild(elem);
                 d.appendChild(p);
-                this.remoteVideoEl.appendChild(d);
+                this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id);
                 this.setTippy(elem.id, 'Full Screen', 'top-end');
                 this.popupPeerInfo(p.id, peer_info);
                 this.sound('joined');
+                resizeVideoMedia();
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
@@ -821,6 +827,8 @@ class RoomClient {
 
         if (elem) elem.parentNode.removeChild(elem);
         if (d) d.parentNode.removeChild(d);
+
+        resizeVideoMedia();
 
         this.consumers.delete(consumer_id);
         this.sound('left');
@@ -959,7 +967,7 @@ class RoomClient {
     // ####################################################
 
     toggleDevices() {
-        this.getId('myDevices').classList.toggle('show');
+        this.getId('settings').classList.toggle('show');
     }
 
     async sound(name) {

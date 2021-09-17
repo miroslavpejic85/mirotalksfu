@@ -34,6 +34,7 @@
         <!-- StyleSheet -->
 
         <link rel="stylesheet" href="/css/Room.css" />
+        <link rel="stylesheet" href="/css/VideoGrid.css" />
 
         <!-- https://animate.style 4 using for swal fadeIn-Out -->
 
@@ -61,6 +62,7 @@
         <script src="/modules/MediasoupClient.js"></script>
         <script src="/js/Room.js"></script>
         <script src="/js/RoomClient.js"></script>
+        <script src="/js/VideoGrid.js"></script>
         <script src="https://kit.fontawesome.com/d2f1016e6f.js" crossorigin="anonymous"></script>
         <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -71,107 +73,68 @@
     </head>
     <body onload="initClient()">
         <noscript>You need to enable JavaScript to run this app.</noscript>
-        <div class="container-xxl">
-            <div id="control" class="fadein hidden">
-                <button id="exitButton" class="hidden">
-                    <i class="fas fa-arrow-left"></i>
-                </button>
-                <button id="shareButton" class="hidden">
-                    <i class="fas fa-share-alt"></i>
-                </button>
-                <div class="dropdown">
-                    <button id="devicesButton" class="hidden">
-                        <i class="fas fa-cogs"></i>
-                    </button>
-                    <div id="myDevices" class="dropdown-content fadein">
-                        <div id="devicesList">
-                            <br />
-                            <i class="fas fa-video"></i> Video:
-                            <select id="videoSelect" class="form-select text-light bg-dark"></select>
-                            <br />
-                            <i class="fas fa-microphone"></i> Microphone:
-                            <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
-                            <br />
-                            <i class="fas fa-volume-up"></i> Speaker:
-                            <select id="speakerSelect" class="form-select text-light bg-dark"></select>
-                        </div>
+
+        <div id="loadingDiv" class="center pulsate">
+            <h1>Loading...</h1>
+            <pre>
+Please allow the camera or microphone
+access to use this app.
+            </pre>
+        </div>
+
+        <button id="openNavButton" class="hidden">&#9776; open</button>
+        <div id="control" class="sidenav hidden">
+            <button id="closeNavButton" class="closebtn">&times;</button>
+            <button id="shareButton" class="hidden"><i class="fas fa-share-alt"></i> Share</button>
+            <div class="dropdown">
+                <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i> Settings</button>
+                <div id="settings" class="dropdown-content fadein">
+                    <div id="devicesList">
+                        <i class="fas fa-video"></i> Video
+                        <select id="videoSelect" class="form-select text-light bg-dark"></select>
+                        <br />
+                        <i class="fas fa-microphone"></i> Microphone
+                        <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
+                        <br />
+                        <i class="fas fa-volume-up"></i> Speaker
+                        <select id="speakerSelect" class="form-select text-light bg-dark"></select>
                     </div>
                 </div>
-                <div class="dropdown">
-                    <button id="recButton" class="hidden">
-                        <i class="fas fa-record-vinyl"></i>
-                    </button>
-                    <div id="recording" class="dropdown-content fadein">
-                        <div id="recordingCommand" class="recording">
-                            <br />
-                            <button id="startRecButton" class="hidden">
-                                <i class="fas fa-record-vinyl"></i>
-                            </button>
-                            <button id="stopRecButton" class="hidden">
-                                <i class="fas fa-stop-circle"></i>
-                            </button>
-                            <button id="pauseRecButton" class="hidden">
-                                <i class="far fa-pause-circle"></i>
-                            </button>
-                            <button id="resumeRecButton" class="hidden">
-                                <i class="far fa-play-circle"></i>
-                            </button>
-                            <p id="recordingStatus">🔴 REC 0s</p>
-                        </div>
+            </div>
+            <div class="dropdown">
+                <button id="recButton" class="hidden"><i class="fas fa-record-vinyl"></i> Recording</button>
+                <div id="recording" class="dropdown-content fadein">
+                    <div id="recordingCommand" class="recording">
+                        <button id="startRecButton" class="hidden"><i class="fas fa-record-vinyl"></i> Start</button>
+                        <button id="stopRecButton" class="hidden"><i class="fas fa-stop-circle"></i> Stop</button>
+                        <button id="pauseRecButton" class="hidden"><i class="far fa-pause-circle"></i> Pause</button>
+                        <button id="resumeRecButton" class="hidden"><i class="far fa-play-circle"></i> Resume</button>
+                        <p id="recordingStatus">🔴 REC 0s</p>
                     </div>
                 </div>
-                <button id="chatButton" class="hidden">
-                    <i class="fas fa-comments"></i>
-                </button>
-                <button id="fullScreenButton" class="hidden">
-                    <i class="fas fa-expand-alt"></i>
-                </button>
-                <button id="swapCameraButton" class="hidden">
-                    <i class="fas fa-sync-alt"></i>
-                </button>
-                <button id="startAudioButton" class="hidden">
-                    <i class="fas fa-microphone-slash"></i>
-                </button>
-                <button id="stopAudioButton" class="hidden">
-                    <i class="fas fa-microphone"></i>
-                </button>
-                <button id="startVideoButton" class="hidden">
-                    <i class="fas fa-video-slash"></i>
-                </button>
-                <button id="stopVideoButton" class="hidden">
-                    <i class="fas fa-video"></i>
-                </button>
-                <button id="startScreenButton" class="hidden">
-                    <i class="fas fa-desktop"></i>
-                </button>
-                <button id="stopScreenButton" class="hidden">
-                    <i class="fas fa-stop-circle"></i>
-                </button>
-                <button id="participantsButton" class="hidden">
-                    <i class="fas fa-users"></i>
-                </button>
-                <button id="lockRoomButton" class="hidden">
-                    <i class="fas fa-lock-open"></i>
-                </button>
-                <button id="unlockRoomButton" class="hidden">
-                    <i class="fas fa-lock"></i>
-                </button>
-                <button id="aboutButton" class="hidden">
-                    <i class="fas fa-question"></i>
-                </button>
-                <p id="sessionTime"></p>
             </div>
+            <button id="chatButton" class="hidden"><i class="fas fa-comments"></i> Chat</button>
+            <button id="fullScreenButton" class="hidden"><i class="fas fa-expand-alt"></i> Full screen</button>
+            <button id="swapCameraButton" class="hidden"><i class="fas fa-sync-alt"></i> Swap Cam</button>
+            <button id="startAudioButton" class="hidden"><i class="fas fa-microphone-slash"></i> Start audio</button>
+            <button id="stopAudioButton" class="hidden"><i class="fas fa-microphone"></i> Stop audio</button>
+            <button id="startVideoButton" class="hidden"><i class="fas fa-video-slash"></i> Start video</button>
+            <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i> Stop video</button>
+            <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i> Start screen</button>
+            <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i> Stop screen</button>
+            <button id="participantsButton" class="hidden"><i class="fas fa-users"></i> Participants</button>
+            <button id="lockRoomButton" class="hidden"><i class="fas fa-lock-open"></i> Lock room</button>
+            <button id="unlockRoomButton" class="hidden"><i class="fas fa-lock"></i> Unlock room</button>
+            <button id="aboutButton" class="hidden"><i class="fas fa-question"></i> About</button>
+            <button id="exitButton" class="hidden"><i class="fas fa-phone-slash"></i> Leave</button>
+            <button id="sessionTime" class="far fa-clock"></button>
         </div>
-        <div class="container-xxl">
-            <div id="videoMedia" class="hidden">
-                <div id="localMedia" class="containers">
-                    <!--<video id="localVideo" autoplay inline class="vid mirror"></video>-->
-                    <!--<video id="localScreen" autoplay inline class="vid"></video>-->
-                </div>
-                <div id="remoteVideos" class="containers"></div>
-                <div id="remoteAudios"></div>
-            </div>
+
+        <div id="videoMediaContainer">
+            <!-- <div class="Camera"></div> -->
         </div>
+        <div id="remoteAudios"></div>
+
         <section id="chatRoom" class="chat-room center fadein">
             <section id="msger" class="msger">
                 <header id="chatHeader" class="chat-header">

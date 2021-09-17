@@ -4,7 +4,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
-const swalBackground = 'rgba(0, 0, 0, 0.7)';
+const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
@@ -43,34 +43,14 @@ function getRandomNumber(length) {
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('sessionTime', 'Session time', 'bottom');
-        setTippy('exitButton', 'Exit room', 'bottom');
-        setTippy('shareButton', 'Share Room', 'bottom');
-        setTippy('devicesButton', 'Devices', 'bottom');
-        setTippy('chatButton', 'Chat', 'bottom');
-        setTippy('chatCleanButton', 'Clean', 'bottom');
-        setTippy('chatSaveButton', 'Save', 'bottom');
-        setTippy('chatCloseButton', 'Close', 'bottom');
+        setTippy('closeNavButton', 'Close', 'right');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
-        setTippy('fullScreenButton', 'Full Screen', 'bottom');
-        setTippy('recButton', 'Recording', 'bottom');
-        setTippy('startRecButton', 'Start Recording', 'bottom');
-        setTippy('stopRecButton', 'Stop Recording', 'bottom');
-        setTippy('pauseRecButton', 'Pause Recording', 'bottom');
-        setTippy('resumeRecButton', 'Resume Recording', 'bottom');
-        setTippy('stopAudioButton', 'Stop Audio', 'bottom');
-        setTippy('startAudioButton', 'Start Audio', 'bottom');
-        setTippy('swapCameraButton', 'Swap Camera', 'bottom');
-        setTippy('startVideoButton', 'Start Video', 'bottom');
-        setTippy('stopVideoButton', 'Stop Video', 'bottom');
-        setTippy('startScreenButton', 'Start Screen', 'bottom');
-        setTippy('stopScreenButton', 'Stop Screen', 'bottom');
-        setTippy('participantsButton', 'Show participants', 'bottom');
-        setTippy('lockRoomButton', 'Room Lock', 'bottom');
-        setTippy('unlockRoomButton', 'Room Unlock', 'bottom');
-        setTippy('aboutButton', 'About', 'bottom');
+        setTippy('chatCleanButton', 'Clean', 'bottom');
+        setTippy('chatSaveButton', 'Save', 'bottom');
+        setTippy('chatCloseButton', 'Close', 'bottom');
+        setTippy('sessionTime', 'Session time', 'right');
     }
     initEnumerateDevices();
 }
@@ -115,6 +95,7 @@ async function initEnumerateDevices() {
     if (!isAudioAllowed && !isVideoAllowed) {
         window.location.href = `/permission?room_id=${room_id}&message=Not allowed both Audio and Video`;
     } else {
+        hide(loadingDiv);
         getPeerGeoLocation();
         whoAreYou();
     }
@@ -251,11 +232,15 @@ function whoAreYou() {
 function handleAudio(e) {
     isAudioOn = isAudioOn ? false : true;
     e.target.className = 'fas fa-microphone' + (isAudioOn ? '' : '-slash');
+    setColor(e.target, isAudioOn ? 'white' : 'red');
+    setColor(startAudioButton, isAudioOn ? 'white' : 'red');
 }
 
 function handleVideo(e) {
     isVideoOn = isVideoOn ? false : true;
     e.target.className = 'fas fa-video' + (isVideoOn ? '' : '-slash');
+    setColor(e.target, isVideoOn ? 'white' : 'red');
+    setColor(startVideoButton, isVideoOn ? 'white' : 'red');
 }
 
 // ####################################################
@@ -287,8 +272,8 @@ async function shareRoom(useNavigator = false) {
                 <canvas id="qrRoom"></canvas>
             </div>
             <br/><br/>
-            <p style="color:white;">Share this meeting invite others to join.</p>
-            <p style="color:rgb(8, 189, 89);">` +
+            <p style="background:transparent; color:white;">Share this meeting invite others to join.</p>
+            <p style="background:transparent; color:rgb(8, 189, 89);">` +
                 RoomURL +
                 `</p>`,
             showDenyButton: true,
@@ -323,12 +308,13 @@ async function shareRoom(useNavigator = false) {
 // ####################################################
 
 function makeRoomQR() {
+    let qrSize = DetectRTC.isMobileDevice ? 128 : 256;
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
         value: RoomURL,
     });
     qr.set({
-        size: 256,
+        size: qrSize,
     });
 }
 
@@ -359,9 +345,8 @@ function joinRoom(peer_name, room_id) {
     } else {
         console.log('05 ----> join to Room ' + room_id);
         rc = new RoomClient(
-            localMedia,
-            remoteVideos,
             remoteAudios,
+            videoMediaContainer,
             window.mediasoupClient,
             socket,
             room_id,
@@ -379,7 +364,7 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
-    control.className = '';
+    show(openNavButton);
     show(exitButton);
     show(shareButton);
     show(recButton);
@@ -402,10 +387,9 @@ function roomIsReady() {
         };
         show(fullScreenButton);
     }
-    show(devicesButton);
+    show(settingsButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
-    show(videoMedia);
     show(participantsButton);
     show(lockRoomButton);
     show(aboutButton);
@@ -421,6 +405,10 @@ function hide(elem) {
 
 function show(elem) {
     elem.className = '';
+}
+
+function setColor(elem, color) {
+    elem.style.color = color;
 }
 
 // ####################################################
@@ -441,7 +429,7 @@ function startSessionTimer() {
     let callStartTime = Date.now();
     setInterval(function printTime() {
         let callElapsedTime = Date.now() - callStartTime;
-        sessionTime.innerHTML = getTimeToString(callElapsedTime);
+        sessionTime.innerHTML = ' ' + getTimeToString(callElapsedTime);
     }, 1000);
 }
 
@@ -491,13 +479,19 @@ function stopRecordingTimer() {
 // ####################################################
 
 function handleButtons() {
+    openNavButton.onclick = () => {
+        openNav();
+    };
+    closeNavButton.onclick = () => {
+        closeNav();
+    };
     exitButton.onclick = () => {
         rc.exit();
     };
     shareButton.onclick = () => {
         shareRoom(true);
     };
-    devicesButton.onclick = () => {
+    settingsButton.onclick = () => {
         rc.toggleDevices();
     };
     chatButton.onclick = () => {
@@ -584,7 +578,7 @@ function handleSelects() {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
     };
     speakerSelect.onchange = () => {
-        rc.attachSinkId(localMedia, speakerSelect.value);
+        rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
@@ -614,20 +608,24 @@ function handleInputs() {
 
 function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.startRec, () => {
+        console.log('Room Client start recoding');
         hide(startRecButton);
         show(stopRecButton);
         show(pauseRecButton);
         startRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.pauseRec, () => {
+        console.log('Room Client pause recoding');
         hide(pauseRecButton);
         show(resumeRecButton);
     });
     rc.on(RoomClient.EVENTS.resumeRec, () => {
+        console.log('Room Client resume recoding');
         hide(resumeRecButton);
         show(pauseRecButton);
     });
     rc.on(RoomClient.EVENTS.stopRec, () => {
+        console.log('Room Client stop recoding');
         hide(stopRecButton);
         hide(pauseRecButton);
         hide(resumeRecButton);
@@ -635,8 +633,10 @@ function handleRoomClientEvents() {
         stopRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.startAudio, () => {
+        console.log('Room Client start audio');
         hide(startAudioButton);
         show(stopAudioButton);
+        setColor(startAudioButton, 'red');
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room Client pause audio');
@@ -649,12 +649,15 @@ function handleRoomClientEvents() {
         show(stopAudioButton);
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
+        console.log('Room Client stop audio');
         hide(stopAudioButton);
         show(startAudioButton);
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
+        console.log('Room Client start video');
         hide(startVideoButton);
         show(stopVideoButton);
+        setColor(startVideoButton, 'red');
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room Client pause video');
@@ -667,10 +670,12 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
+        console.log('Room Client stop audio');
         hide(stopVideoButton);
         show(startVideoButton);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
+        console.log('Room Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
     });
@@ -681,20 +686,33 @@ function handleRoomClientEvents() {
         console.log('Room Client resume screen');
     });
     rc.on(RoomClient.EVENTS.stopScreen, () => {
+        console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
+        console.log('Room Client lock room');
         hide(lockRoomButton);
         show(unlockRoomButton);
+        setColor(unlockRoomButton, 'red');
     });
     rc.on(RoomClient.EVENTS.roomUnlock, () => {
+        console.log('Room Client unlock room');
         hide(unlockRoomButton);
         show(lockRoomButton);
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
+        console.log('Room Client leave room');
         window.location.href = '/newroom';
     });
+}
+
+function openNav() {
+    control.classList.toggle('show');
+}
+
+function closeNav() {
+    control.classList.toggle('show');
 }
 
 // ####################################################
@@ -746,8 +764,14 @@ async function getRoomParticipants() {
         let peer_name = peer_info.peer_name;
         let peer_id = peer_info.peer_id;
         rc.peer_id === peer_id
-            ? (table += `<tr><td>- 👤 ${peer_name} (me)</td><td></td></tr>`)
-            : (table += `<tr id='${peer_id}'><td>- 👤 ${peer_name}</td><td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td></tr>`);
+            ? (table += `<tr>
+                            <td>👤 ${peer_name} (me)</td>
+                            <td></td>
+                        </tr>`)
+            : (table += `<tr id='${peer_id}'>
+                            <td>👤 ${peer_name}</td>
+                            <td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td>
+                        </tr>`);
     }
     table += `</table></div>`;
 
