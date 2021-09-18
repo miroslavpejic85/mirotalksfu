@@ -4,6 +4,16 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
+const _PEER = {
+    audioOn: '<i class="fas fa-microphone"></i>',
+    audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
+    videoOn: '<i class="fas fa-video"></i>',
+    videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
+    raiseHand: '<i style="color: rgb(0, 180, 50);" class="fas fa-hand-paper pulsate"></i>',
+    lowerHand: '',
+    ejectPeer: '<i class="fas fa-times"></i>',
+};
+
 const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
@@ -174,6 +184,7 @@ function getPeerInfo() {
         peer_name: peer_name,
         peer_audio: isAudioOn,
         peer_video: isVideoOn,
+        peer_hand: false,
     };
 }
 
@@ -389,6 +400,7 @@ function roomIsReady() {
         show(fullScreenButton);
     }
     show(settingsButton);
+    show(raiseHandButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
     show(participantsButton);
@@ -534,6 +546,12 @@ function handleButtons() {
     swapCameraButton.onclick = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
     };
+    raiseHandButton.onclick = () => {
+        rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', true);
+    };
+    lowerHandButton.onclick = () => {
+        rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', false);
+    };
     startAudioButton.onclick = () => {
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.audio);
@@ -633,6 +651,17 @@ function handleRoomClientEvents() {
         show(startRecButton);
         stopRecordingTimer();
     });
+    rc.on(RoomClient.EVENTS.raiseHand, () => {
+        console.log('Room Client raise hand');
+        hide(raiseHandButton);
+        show(lowerHandButton);
+        setColor(lowerHandButton, 'green');
+    });
+    rc.on(RoomClient.EVENTS.lowerHand, () => {
+        console.log('Room Client lower hand');
+        hide(lowerHandButton);
+        show(raiseHandButton);
+    });
     rc.on(RoomClient.EVENTS.startAudio, () => {
         console.log('Room Client start audio');
         hide(startAudioButton);
@@ -720,13 +749,13 @@ function closeNav() {
 // SHOW LOG
 // ####################################################
 
-function userLog(icon, message, position) {
+function userLog(icon, message, position, timer = 3000) {
     const Toast = Swal.mixin({
         background: swalBackground,
         toast: true,
         position: position,
         showConfirmButton: false,
-        timer: 3000,
+        timer: timer,
     });
     Toast.fire({
         icon: icon,
@@ -755,26 +784,7 @@ async function sound(name) {
 async function getRoomParticipants() {
     let room_info = await rc.getRoomInfo();
     let peers = new Map(JSON.parse(room_info.peers));
-    let table = `<div id="roomParticipants"><table>
-    <tr>
-        <th></th>
-        <th></th>
-    </tr>`;
-    for (let peer of Array.from(peers.keys())) {
-        let peer_info = peers.get(peer).peer_info;
-        let peer_name = peer_info.peer_name;
-        let peer_id = peer_info.peer_id;
-        rc.peer_id === peer_id
-            ? (table += `<tr>
-                            <td>👤 ${peer_name} (me)</td>
-                            <td></td>
-                        </tr>`)
-            : (table += `<tr id='${peer_id}'>
-                            <td>👤 ${peer_name}</td>
-                            <td><button id='${peer_id}' onclick="rc.peerAction('me',this.id,'eject')">eject</button></td>
-                        </tr>`);
-    }
-    table += `</table></div>`;
+    let table = await getParticipantsTable(peers);
 
     sound('open');
 
@@ -783,13 +793,64 @@ async function getRoomParticipants() {
         position: 'center',
         title: `Participants ${peers.size}`,
         html: table,
+        showCancelButton: true,
+        confirmButtonText: `Refresh`,
+        cancelButtonText: `Close`,
         showClass: {
             popup: 'animate__animated animate__fadeInDown',
         },
         hideClass: {
             popup: 'animate__animated animate__fadeOutUp',
         },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            getRoomParticipants();
+        }
     });
+}
+
+async function getParticipantsTable(peers) {
+    let table = `<div id="roomParticipants">
+    <table>
+    <tr>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+        <th></th>
+    </tr>`;
+    for (let peer of Array.from(peers.keys())) {
+        let peer_info = peers.get(peer).peer_info;
+        let peer_name = '👤 ' + peer_info.peer_name;
+        let peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
+        let peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
+        let peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
+        let peer_eject = _PEER.ejectPeer;
+        let peer_id = peer_info.peer_id;
+        if (rc.peer_id === peer_id) {
+            table += `
+            <tr>
+                <td>${peer_name} (me)</td>
+                <td><button>${peer_audio}</button></td>
+                <td><button>${peer_video}</button></td>
+                <td><button>${peer_hand}</button></td>
+                <td></td>
+            </tr>
+            `;
+        } else {
+            table += `
+            <tr id='${peer_id}'>
+                <td>${peer_name}</td>
+                <td><button id='${peer_id}__audio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
+                <td><button id='${peer_id}__video' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                <td><button>${peer_hand}</button></td>
+                <td><button id='${peer_id}__eject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
+            </tr>
+            `;
+        }
+    }
+    table += `</table></div>`;
+    return table;
 }
 
 // ####################################################

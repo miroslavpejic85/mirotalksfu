@@ -219,7 +219,18 @@ io.on('connection', (socket) => {
 
     socket.on('peerAction', (data) => {
         log.debug('Peer action:', data);
-        roomList.get(socket.room_id).sendTo(data.peer_id, 'peerAction', data);
+        if (data.broadcast) {
+            roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'peerAction', data);
+        }
+    });
+
+    socket.on('updatePeerInfo', (data) => {
+        log.debug('Peer info update:', data);
+        // peer_info hand raise Or lower
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
+        roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });
 
     socket.on('join', (data, cb) => {
@@ -290,15 +301,25 @@ io.on('connection', (socket) => {
             return callback({ error: 'Room not found' });
         }
 
+        let peer_name = getPeerName(false);
+
         let producer_id = await roomList
             .get(socket.room_id)
             .produce(socket.id, producerTransportId, rtpParameters, kind);
 
         log.debug('Produce', {
             kind: kind,
-            peer_name: getPeerName(false),
+            peer_name: peer_name,
             producer_id: producer_id,
         });
+
+        // peer_info audio Or video ON
+        let data = {
+            peer_name: peer_name,
+            type: kind,
+            status: true,
+        };
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
 
         callback({
             producer_id,
@@ -323,10 +344,12 @@ io.on('connection', (socket) => {
         callback(params);
     });
 
-    socket.on('producerClosed', ({ producer_id }) => {
-        log.debug('Producer close', getPeerName());
+    socket.on('producerClosed', (data) => {
+        log.debug('Producer close', data);
 
-        roomList.get(socket.room_id).closeProducer(socket.id, producer_id);
+        // peer_info audio Or video OFF
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
+        roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
     });
 
     socket.on('resume', async (_, callback) => {

@@ -10,9 +10,30 @@ module.exports = class Peer {
         this.peer_name = data.peer_info.peer_name;
         this.peer_audio = data.peer_info.peer_audio;
         this.peer_video = data.peer_info.peer_video;
+        this.peer_hand = data.peer_info.peer_hand;
         this.transports = new Map();
         this.consumers = new Map();
         this.producers = new Map();
+    }
+
+    // ####################################################
+    // UPDATE PEER INFO
+    // ####################################################
+
+    updatePeerInfo(data) {
+        switch (data.type) {
+            case 'audio':
+            case 'audioType':
+                this.peer_info.peer_audio = data.status;
+                break;
+            case 'video':
+            case 'videoType':
+                this.peer_info.peer_video = data.status;
+                break;
+            case 'hand':
+                this.peer_info.peer_hand = data.status;
+                break;
+        }
     }
 
     // ####################################################

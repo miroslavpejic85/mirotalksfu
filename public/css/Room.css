@@ -532,16 +532,6 @@ button:hover {
     overflow: auto;
 }
 
-#roomParticipants button {
-    background: transparent;
-    color: red;
-    border-radius: 5px;
-}
-#roomParticipants button:hover {
-    color: white;
-    border-radius: 5px;
-}
-
 #roomParticipants table {
     border-collapse: collapse;
     width: 100%;

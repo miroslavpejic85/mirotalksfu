@@ -12,6 +12,8 @@ const image = {
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
     locked: '../images/locked.png',
+    mute: '../images/mute.png',
+    hide: '../images/hide.png',
 };
 
 const mediaType = {
@@ -28,6 +30,8 @@ const _EVENTS = {
     pauseRec: 'pauseRec',
     resumeRec: 'resumeRec',
     stopRec: 'stopRec',
+    raiseHand: 'raiseHand',
+    lowerHand: 'lowerHand',
     startVideo: 'startVideo',
     pauseVideo: 'pauseVideo',
     resumeVideo: 'resumeVideo',
@@ -382,6 +386,14 @@ class RoomClient {
         );
 
         this.socket.on(
+            'updatePeerInfo',
+            function (data) {
+                console.log('Peer info update:', data);
+                this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'disconnect',
             function () {
                 this.exit(true);
@@ -606,7 +618,7 @@ class RoomClient {
         let elem, d, p;
         d = document.createElement('div');
         d.className = 'Camera';
-        d.id = id + '_d';
+        d.id = id + '__d';
         elem = document.createElement('video');
         elem.setAttribute('id', id);
         elem.setAttribute('playsinline', true);
@@ -614,7 +626,7 @@ class RoomClient {
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
-        p.id = id + '_name';
+        p.id = id + '__name';
         p.innerHTML = '👤 ' + this.peer_name + ' (me)';
         d.appendChild(elem);
         d.appendChild(p);
@@ -684,11 +696,16 @@ class RoomClient {
         }
 
         let producer_id = this.producerLabel.get(type);
-        console.log('Close producer', producer_id);
 
-        this.socket.emit('producerClosed', {
-            producer_id,
-        });
+        let data = {
+            peer_name: this.peer_name,
+            producer_id: producer_id,
+            type: type,
+            status: false,
+        };
+        console.log('Close producer', data);
+
+        this.socket.emit('producerClosed', data);
 
         this.producers.get(producer_id).close();
         this.producers.delete(producer_id);
@@ -696,7 +713,7 @@ class RoomClient {
 
         if (type !== mediaType.audio) {
             let elem = this.getId(producer_id);
-            let d = this.getId(producer_id + '_d');
+            let d = this.getId(producer_id + '__d');
             elem.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -786,7 +803,7 @@ class RoomClient {
             case mediaType.video:
                 d = document.createElement('div');
                 d.className = 'Camera';
-                d.id = id + '_d';
+                d.id = id + '__d';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 elem.setAttribute('playsinline', true);
@@ -794,7 +811,7 @@ class RoomClient {
                 elem.className = '';
                 elem.poster = image.poster;
                 p = document.createElement('p');
-                p.id = id + '_name';
+                p.id = id + '__name';
                 p.innerHTML = '👤 ' + peer_name;
                 d.appendChild(elem);
                 d.appendChild(p);
@@ -819,7 +836,7 @@ class RoomClient {
 
     removeConsumer(consumer_id) {
         let elem = this.getId(consumer_id);
-        let d = this.getId(consumer_id + '_d');
+        let d = this.getId(consumer_id + '__d');
 
         elem.srcObject.getTracks().forEach(function (track) {
             track.stop();
@@ -980,13 +997,13 @@ class RoomClient {
         }
     }
 
-    userLog(icon, message, position) {
+    userLog(icon, message, position, timer = 5000) {
         const Toast = Swal.mixin({
             background: swalBackground,
             toast: true,
             position: position,
             showConfirmButton: false,
-            timer: 5000,
+            timer: timer,
         });
         Toast.fire({
             icon: icon,
@@ -1436,45 +1453,136 @@ class RoomClient {
     // PEER ACTION
     // ####################################################
 
-    peerAction(from_peer_name, peer_id, action, emit = true) {
-        switch (action) {
-            case 'eject':
-                let peer = this.getId(peer_id);
-                if (peer) peer.parentNode.removeChild(peer);
-                if (peer_id === this.peer_id) {
-                    this.sound(action);
-                    let timerInterval;
-                    Swal.fire({
-                        allowOutsideClick: false,
-                        background: swalBackground,
-                        title: from_peer_name,
-                        html: 'Will eject you from the room after <b style="color: red;"></b> milliseconds.',
-                        timer: 5000,
-                        timerProgressBar: true,
-                        didOpen: () => {
-                            Swal.showLoading();
-                            const b = Swal.getHtmlContainer().querySelector('b');
-                            timerInterval = setInterval(() => {
-                                b.textContent = Swal.getTimerLeft();
-                            }, 100);
-                        },
-                        willClose: () => {
-                            clearInterval(timerInterval);
-                        },
-                    }).then(() => {
-                        this.exit();
-                    });
-                }
-                break;
-            // ...
-        }
+    peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
+        let peer_id = id;
+
         if (emit) {
+            const words = peer_id.split('__');
+            peer_id = words[0];
+
+            switch (action) {
+                case 'eject':
+                    let peer = this.getId(peer_id);
+                    if (peer) peer.parentNode.removeChild(peer);
+                    break;
+                case 'mute':
+                    let peerAudioButton = this.getId(peer_id + '__audio');
+                    if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
+                    break;
+                case 'hide':
+                    let peerVideoButton = this.getId(peer_id + '__video');
+                    if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+            }
+
             let data = {
                 from_peer_name: this.peer_name,
                 peer_id: peer_id,
                 action: action,
+                broadcast: broadcast,
             };
             this.socket.emit('peerAction', data);
+        } else {
+            switch (action) {
+                case 'eject':
+                    if (peer_id === this.peer_id) {
+                        this.sound(action);
+                        let timerInterval;
+                        Swal.fire({
+                            allowOutsideClick: false,
+                            background: swalBackground,
+                            title: from_peer_name,
+                            html: 'Will eject you from the room after <b style="color: red;"></b> milliseconds.',
+                            timer: 5000,
+                            timerProgressBar: true,
+                            didOpen: () => {
+                                Swal.showLoading();
+                                const b = Swal.getHtmlContainer().querySelector('b');
+                                timerInterval = setInterval(() => {
+                                    b.textContent = Swal.getTimerLeft();
+                                }, 100);
+                            },
+                            willClose: () => {
+                                clearInterval(timerInterval);
+                            },
+                        }).then(() => {
+                            this.exit();
+                        });
+                    }
+                    break;
+                case 'mute':
+                    if (peer_id === this.peer_id) {
+                        this.closeProducer(mediaType.audio);
+                        this.userLog(
+                            'warning',
+                            from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
+                            'top-end',
+                            10000,
+                        );
+                    }
+                    break;
+                case 'hide':
+                    if (peer_id === this.peer_id) {
+                        this.closeProducer(mediaType.video);
+                        this.userLog(
+                            'warning',
+                            from_peer_name + '  ' + _PEER.videoOff + ' has closed yours video',
+                            'top-end',
+                            10000,
+                        );
+                    }
+                    break;
+                // ...
+            }
+        }
+    }
+
+    // ####################################################
+    // UPDATE PEER INFO
+    // ####################################################
+
+    updatePeerInfo(peer_name, peer_id, type, status, emit = true) {
+        if (emit) {
+            switch (type) {
+                case 'audio':
+                    this.peer_info.peer_audio = status;
+                    break;
+                case 'video':
+                    this.peer_info.peer_video = status;
+                    break;
+                case 'hand':
+                    this.peer_info.peer_hand = status;
+                    if (status) {
+                        this.event(_EVENTS.raiseHand);
+                        this.sound('raiseHand');
+                    } else {
+                        this.event(_EVENTS.lowerHand);
+                    }
+                    break;
+            }
+            let data = {
+                peer_name: peer_name,
+                peer_id: peer_id,
+                type: type,
+                status: status,
+            };
+            this.socket.emit('updatePeerInfo', data);
+        } else {
+            switch (type) {
+                case 'audio':
+                    break;
+                case 'video':
+                    break;
+                case 'hand':
+                    if (status)
+                        this.userLog(
+                            'warning',
+                            peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',
+                            'top-end',
+                            10000,
+                        );
+                    this.sound('raiseHand');
+                    break;
+            }
         }
     }
 
@@ -1488,6 +1596,7 @@ class RoomClient {
                         'peer_name',
                         'peer_audio',
                         'peer_video',
+                        'peer_hand',
                         'is_mobile_device',
                         'os_name',
                         'os_version',
