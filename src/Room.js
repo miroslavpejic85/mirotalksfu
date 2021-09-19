@@ -140,6 +140,7 @@ module.exports = class Room {
                         producer_id: producer.id,
                         producer_socket_id: socket_id,
                         peer_name: this.peers.get(socket_id).peer_name,
+                        peer_info: this.peers.get(socket_id).peer_info,
                     },
                 ]);
             }.bind(this),

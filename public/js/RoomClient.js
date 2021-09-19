@@ -615,7 +615,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, d, p;
+        let elem, d, p, i;
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = id + '__d';
@@ -626,10 +626,14 @@ class RoomClient {
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
-        p.id = id + '__name';
+        p.id = this.peer_id + '__name';
         p.innerHTML = '👤 ' + this.peer_name + ' (me)';
+        i = document.createElement('i');
+        i.id = this.peer_id + '__peerHand';
+        i.className = 'fas fa-hand-paper pulsate';
         d.appendChild(elem);
         d.appendChild(p);
+        d.appendChild(i);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
@@ -798,7 +802,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, d, p;
+        let elem, d, p, i;
         switch (type) {
             case mediaType.video:
                 d = document.createElement('div');
@@ -811,15 +815,20 @@ class RoomClient {
                 elem.className = '';
                 elem.poster = image.poster;
                 p = document.createElement('p');
-                p.id = id + '__name';
+                p.id = peer_info.peer_id + '__name';
                 p.innerHTML = '👤 ' + peer_name;
+                i = document.createElement('i');
+                i.id = peer_info.peer_id + '__peerHand';
+                i.className = 'fas fa-hand-paper pulsate';
                 d.appendChild(elem);
                 d.appendChild(p);
+                d.appendChild(i);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id);
                 this.setTippy(elem.id, 'Full Screen', 'top-end');
                 this.popupPeerInfo(p.id, peer_info);
+                this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
                 resizeVideoMedia();
                 break;
@@ -1551,10 +1560,13 @@ class RoomClient {
                     break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
+                    let peer_hand = this.getId(peer_id + '__peerHand');
                     if (status) {
+                        peer_hand.style.display = 'flex';
                         this.event(_EVENTS.raiseHand);
                         this.sound('raiseHand');
                     } else {
+                        peer_hand.style.display = 'none';
                         this.event(_EVENTS.lowerHand);
                     }
                     break;
@@ -1573,17 +1585,32 @@ class RoomClient {
                 case 'video':
                     break;
                 case 'hand':
-                    if (status)
+                    let peer_hand = this.getId(peer_id + '__peerHand');
+                    if (status) {
+                        peer_hand.style.display = 'flex';
                         this.userLog(
                             'warning',
                             peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',
                             'top-end',
                             10000,
                         );
-                    this.sound('raiseHand');
+                        this.sound('raiseHand');
+                    } else {
+                        peer_hand.style.display = 'none';
+                    }
                     break;
             }
         }
+    }
+
+    checkPeerInfoStatus(peer_info) {
+        let peer_id = peer_info.peer_id;
+        let peer_hand_status = peer_info.peer_hand;
+        if (peer_hand_status) {
+            let peer_hand = this.getId(peer_id + '__peerHand');
+            peer_hand.style.display = 'flex';
+        }
+        //...
     }
 
     popupPeerInfo(id, peer_info) {

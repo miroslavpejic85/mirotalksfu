@@ -46,6 +46,21 @@
     background: rgba(0, 0, 0, 0.4);
 }
 
+#videoMediaContainer i {
+    position: absolute;
+    display: none;
+    top: 0;
+    color: rgb(0, 255, 71);
+    font-size: 14px;
+    align-items: center;
+    padding: 5px;
+    margin: 5px;
+    width: auto;
+    height: 25px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
 video {
     width: 100%;
     height: 100%;
@@ -68,6 +83,14 @@ video:fullscreen {
     -webkit-transform: rotateY(180deg);
     -moz-transform: rotateY(180deg);
     transform: rotateY(180deg);
+}
+
+.blur {
+    -webkit-filter: blur(5px);
+    -moz-filter: blur(5px);
+    -o-filter: blur(5px);
+    -ms-filter: blur(5px);
+    filter: blur(5px);
 }
 
 @keyframes show {

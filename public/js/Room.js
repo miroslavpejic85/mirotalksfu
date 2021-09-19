@@ -9,7 +9,7 @@ const _PEER = {
     audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
     videoOn: '<i class="fas fa-video"></i>',
     videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
-    raiseHand: '<i style="color: rgb(0, 180, 50);" class="fas fa-hand-paper pulsate"></i>',
+    raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     ejectPeer: '<i class="fas fa-times"></i>',
 };
