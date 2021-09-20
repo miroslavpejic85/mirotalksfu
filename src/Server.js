@@ -70,6 +70,11 @@ app.get(['/permission'], (req, res) => {
     res.sendFile(path.join(__dirname, '..', 'public/permission.html'));
 });
 
+// privacy policy
+app.get(['/privacy'], (req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public/privacy.html'));
+});
+
 // no room name specified to join
 app.get('/join/', (req, res) => {
     res.redirect('/');
