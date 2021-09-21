@@ -493,10 +493,10 @@ function stopRecordingTimer() {
 
 function handleButtons() {
     openNavButton.onclick = () => {
-        openNav();
+        toggleNav();
     };
     closeNavButton.onclick = () => {
-        closeNav();
+        toggleNav();
     };
     exitButton.onclick = () => {
         rc.exit();
@@ -737,11 +737,7 @@ function handleRoomClientEvents() {
     });
 }
 
-function openNav() {
-    control.classList.toggle('show');
-}
-
-function closeNav() {
+function toggleNav() {
     control.classList.toggle('show');
 }
 
@@ -819,6 +815,17 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
     </tr>`;
+
+    table += `
+    <tr>
+        <td>All</td>
+        <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff} Mute</button></td>
+        <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff} Hide</button></td>
+        <td></td>
+        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer} Eject</button></td>
+    </tr>
+    `;
+
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
         let peer_name = '👤 ' + peer_info.peer_name;

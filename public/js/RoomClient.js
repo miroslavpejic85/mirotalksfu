@@ -381,7 +381,7 @@ class RoomClient {
             'peerAction',
             function (data) {
                 console.log('Peer action:', data);
-                this.peerAction(data.from_peer_name, data.peer_id, data.action, false);
+                this.peerAction(data.from_peer_name, data.peer_id, data.action, false, data.broadcast);
             }.bind(this),
         );
 
@@ -640,6 +640,7 @@ class RoomClient {
         this.handleFS(elem.id);
         this.setTippy(elem.id, 'Full Screen', 'top-end');
         this.popupPeerInfo(p.id, this.peer_info);
+        this.checkPeerInfoStatus(this.peer_info);
         this.sound('joined');
         resizeVideoMedia();
         return elem;
@@ -1466,21 +1467,40 @@ class RoomClient {
         let peer_id = id;
 
         if (emit) {
-            const words = peer_id.split('__');
-            peer_id = words[0];
+            if (!broadcast) {
+                const words = peer_id.split('__');
+                peer_id = words[0];
 
-            switch (action) {
-                case 'eject':
-                    let peer = this.getId(peer_id);
-                    if (peer) peer.parentNode.removeChild(peer);
-                    break;
-                case 'mute':
-                    let peerAudioButton = this.getId(peer_id + '__audio');
-                    if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
-                    break;
-                case 'hide':
-                    let peerVideoButton = this.getId(peer_id + '__video');
-                    if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                switch (action) {
+                    case 'eject':
+                        let peer = this.getId(peer_id);
+                        if (peer) peer.parentNode.removeChild(peer);
+                        break;
+                    case 'mute':
+                        let peerAudioButton = this.getId(peer_id + '__audio');
+                        if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
+                        break;
+                    case 'hide':
+                        let peerVideoButton = this.getId(peer_id + '__video');
+                        if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                }
+            } else {
+                let actionButton = this.getId(action + 'AllButton');
+                if (actionButton) actionButton.style.display = 'none';
+
+                switch (action) {
+                    case 'eject':
+                        setTimeout(() => {
+                            getRoomParticipants();
+                        }, 6000);
+                        break;
+                    case 'mute':
+                    case 'hide':
+                        setTimeout(() => {
+                            getRoomParticipants();
+                        }, 2000);
+                        break;
+                }
             }
 
             let data = {
@@ -1493,7 +1513,7 @@ class RoomClient {
         } else {
             switch (action) {
                 case 'eject':
-                    if (peer_id === this.peer_id) {
+                    if (peer_id === this.peer_id || broadcast) {
                         this.sound(action);
                         let timerInterval;
                         Swal.fire({
@@ -1519,7 +1539,7 @@ class RoomClient {
                     }
                     break;
                 case 'mute':
-                    if (peer_id === this.peer_id) {
+                    if (peer_id === this.peer_id || broadcast) {
                         this.closeProducer(mediaType.audio);
                         this.userLog(
                             'warning',
@@ -1530,7 +1550,7 @@ class RoomClient {
                     }
                     break;
                 case 'hide':
-                    if (peer_id === this.peer_id) {
+                    if (peer_id === this.peer_id || broadcast) {
                         this.closeProducer(mediaType.video);
                         this.userLog(
                             'warning',
@@ -1562,11 +1582,11 @@ class RoomClient {
                     this.peer_info.peer_hand = status;
                     let peer_hand = this.getId(peer_id + '__peerHand');
                     if (status) {
-                        peer_hand.style.display = 'flex';
+                        if (peer_hand) peer_hand.style.display = 'flex';
                         this.event(_EVENTS.raiseHand);
                         this.sound('raiseHand');
                     } else {
-                        peer_hand.style.display = 'none';
+                        if (peer_hand) peer_hand.style.display = 'none';
                         this.event(_EVENTS.lowerHand);
                     }
                     break;
@@ -1587,7 +1607,7 @@ class RoomClient {
                 case 'hand':
                     let peer_hand = this.getId(peer_id + '__peerHand');
                     if (status) {
-                        peer_hand.style.display = 'flex';
+                        if (peer_hand) peer_hand.style.display = 'flex';
                         this.userLog(
                             'warning',
                             peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',
@@ -1596,7 +1616,7 @@ class RoomClient {
                         );
                         this.sound('raiseHand');
                     } else {
-                        peer_hand.style.display = 'none';
+                        if (peer_hand) peer_hand.style.display = 'none';
                     }
                     break;
             }
@@ -1608,7 +1628,7 @@ class RoomClient {
         let peer_hand_status = peer_info.peer_hand;
         if (peer_hand_status) {
             let peer_hand = this.getId(peer_id + '__peerHand');
-            peer_hand.style.display = 'flex';
+            if (peer_hand) peer_hand.style.display = 'flex';
         }
         //...
     }
