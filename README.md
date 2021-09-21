@@ -78,7 +78,7 @@ $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotal
 
 ## Notes
 
--   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`. If you have a Windows system, consider to installing [WSL](https://docs.microsoft.com/en-us/windows/wsl/install-win10) to be able to run it.
+-   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
 
 ## Credits
 
