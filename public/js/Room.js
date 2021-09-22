@@ -4,6 +4,13 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
+const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
+const swalImageUrl = '../images/pricing-illustration.svg';
+
+const url = {
+    ipLookup: 'https://extreme-ip-lookup.com/json/',
+};
+
 const _PEER = {
     audioOn: '<i class="fas fa-microphone"></i>',
     audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
@@ -14,12 +21,7 @@ const _PEER = {
     ejectPeer: '<i class="fas fa-times"></i>',
 };
 
-const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
-const swalImageUrl = '../images/pricing-illustration.svg';
-
-const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/',
-};
+let participantsCount = 0;
 
 let rc = null;
 let producer = null;
@@ -54,6 +56,8 @@ function getRandomNumber(length) {
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('closeNavButton', 'Close', 'right');
+        setTippy('participantsRefreshBtn', 'Refresh', 'top');
+        setTippy('participantsCloseBtn', 'Close', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -389,6 +393,7 @@ function roomIsReady() {
         setChatSize();
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
+        rc.makeDraggable(participants, participantsHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             show(startScreenButton);
         }
@@ -493,10 +498,10 @@ function stopRecordingTimer() {
 
 function handleButtons() {
     openNavButton.onclick = () => {
-        toggleNav();
+        rc.toggleNav();
     };
     closeNavButton.onclick = () => {
-        toggleNav();
+        rc.toggleNav();
     };
     exitButton.onclick = () => {
         rc.exit();
@@ -576,6 +581,12 @@ function handleButtons() {
     };
     participantsButton.onclick = () => {
         getRoomParticipants();
+    };
+    participantsRefreshBtn.onclick = () => {
+        getRoomParticipants(true);
+    };
+    participantsCloseBtn.onclick = () => {
+        toggleParticipants();
     };
     lockRoomButton.onclick = () => {
         rc.roomAction('lock');
@@ -737,10 +748,6 @@ function handleRoomClientEvents() {
     });
 }
 
-function toggleNav() {
-    control.classList.toggle('show');
-}
-
 // ####################################################
 // SHOW LOG
 // ####################################################
@@ -777,36 +784,30 @@ async function sound(name) {
 // HANDLE PARTICIPANTS
 // ####################################################
 
-async function getRoomParticipants() {
+function toggleParticipants() {
+    let participants = rc.getId('participants');
+    participants.classList.toggle('show');
+    participants.style.top = '50%';
+    participants.style.left = '50%';
+}
+
+async function getRoomParticipants(refresh = false) {
     let room_info = await rc.getRoomInfo();
     let peers = new Map(JSON.parse(room_info.peers));
     let table = await getParticipantsTable(peers);
 
-    sound('open');
+    participantsCount = peers.size;
+    roomParticipants.innerHTML = table;
+    refreshParticipantsCount(participantsCount);
 
-    Swal.fire({
-        background: swalBackground,
-        position: 'center',
-        title: `Participants ${peers.size}`,
-        html: table,
-        showCancelButton: true,
-        confirmButtonText: `Refresh`,
-        cancelButtonText: `Close`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            getRoomParticipants();
-        }
-    });
+    if (!refresh) {
+        toggleParticipants();
+        sound('open');
+    }
 }
 
 async function getParticipantsTable(peers) {
-    let table = `<div id="roomParticipants">
+    let table = `
     <table>
     <tr>
         <th></th>
@@ -856,8 +857,12 @@ async function getParticipantsTable(peers) {
             `;
         }
     }
-    table += `</table></div>`;
+    table += `</table>`;
     return table;
+}
+
+function refreshParticipantsCount(count) {
+    participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
 }
 
 // ####################################################

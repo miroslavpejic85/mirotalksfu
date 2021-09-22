@@ -993,6 +993,10 @@ class RoomClient {
     // UTILITY
     // ####################################################
 
+    toggleNav() {
+        this.getId('control').classList.toggle('show');
+    }
+
     toggleDevices() {
         this.getId('settings').classList.toggle('show');
     }
@@ -1468,6 +1472,8 @@ class RoomClient {
 
         if (emit) {
             if (!broadcast) {
+                if (participantsCount === 1) return;
+
                 const words = peer_id.split('__');
                 peer_id = words[0];
 
@@ -1475,6 +1481,8 @@ class RoomClient {
                     case 'eject':
                         let peer = this.getId(peer_id);
                         if (peer) peer.parentNode.removeChild(peer);
+                        participantsCount--;
+                        refreshParticipantsCount(participantsCount);
                         break;
                     case 'mute':
                         let peerAudioButton = this.getId(peer_id + '__audio');
@@ -1485,19 +1493,23 @@ class RoomClient {
                         if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
                 }
             } else {
+                if (participantsCount === 1) return;
+
                 let actionButton = this.getId(action + 'AllButton');
                 if (actionButton) actionButton.style.display = 'none';
 
                 switch (action) {
                     case 'eject':
+                        participantsCount = 1;
+                        refreshParticipantsCount(participantsCount);
                         setTimeout(() => {
-                            getRoomParticipants();
+                            getRoomParticipants(true);
                         }, 6000);
                         break;
                     case 'mute':
                     case 'hide':
                         setTimeout(() => {
-                            getRoomParticipants();
+                            getRoomParticipants(true);
                         }, 2000);
                         break;
                 }

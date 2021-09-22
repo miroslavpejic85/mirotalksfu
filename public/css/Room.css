@@ -527,6 +527,31 @@ button:hover {
 # Room Participants
 --------------------------------------------------------------*/
 
+#participants {
+    z-index: 17;
+    position: absolute;
+    margin: auto;
+    padding: 10px;
+    min-width: 320px;
+    background: var(--body-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.participants-header {
+    display: flex;
+    justify-content: space-between;
+    background: rgb(0, 0, 0);
+    border-radius: 10px;
+    padding: 10px;
+    color: #666;
+    cursor: move;
+}
+
+.participants-header-title {
+    color: white;
+}
+
 #roomParticipants {
     max-height: 480px;
     overflow: auto;
