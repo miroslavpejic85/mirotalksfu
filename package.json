@@ -16,14 +16,14 @@
         "cors": "^2.8.5",
         "express": "^4.17.1",
         "httpolyglot": "^0.1.2",
-        "mediasoup": "^3.8.3",
+        "mediasoup": "^3.8.4",
         "mediasoup-client": "^3.6.37",
-        "ngrok": "^4.1.0",
+        "ngrok": "^4.2.2",
         "socket.io": "^4.2.0",
         "uuid": "8.3.2"
     },
     "devDependencies": {
-        "node-fetch": "^2.6.1",
-        "prettier": "2.3.2"
+        "node-fetch": "^3.0.0",
+        "prettier": "2.4.1"
     }
 }
