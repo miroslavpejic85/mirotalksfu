@@ -819,7 +819,7 @@ async function getParticipantsTable(peers) {
 
     table += `
     <tr>
-        <td>All</td>
+        <td>👥 All</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff} Mute</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff} Hide</button></td>
         <td></td>

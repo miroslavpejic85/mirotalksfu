@@ -528,7 +528,7 @@ button:hover {
 --------------------------------------------------------------*/
 
 #participants {
-    z-index: 17;
+    z-index: 5;
     position: absolute;
     margin: auto;
     padding: 10px;
@@ -544,12 +544,8 @@ button:hover {
     background: rgb(0, 0, 0);
     border-radius: 10px;
     padding: 10px;
-    color: #666;
-    cursor: move;
-}
-
-.participants-header-title {
     color: white;
+    cursor: move;
 }
 
 #roomParticipants {
@@ -630,4 +626,5 @@ z-index:
     - 2 buttonBar
     - 3 sidenav
     - 4 chat
+    - 5 participants
 */
