@@ -41,6 +41,14 @@ let isVideoOn = true;
 let recTimer = null;
 let recElapsedTime = null;
 
+const wbWidth = 800;
+const wbHeight = 600;
+let wbCanvas = null;
+let wbIsDrawing = false;
+let wbIsOpen = false;
+var wbIsRedoing = false;
+var wbPop = [];
+
 const socket = io();
 
 function getRandomNumber(length) {
@@ -56,6 +64,11 @@ function getRandomNumber(length) {
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('closeNavButton', 'Close', 'right');
+        setTippy('whiteboardUndoBtn', 'Undo', 'top');
+        setTippy('whiteboardRedoBtn', 'Redo', 'top');
+        setTippy('whiteboardSaveBtn', 'Save', 'top');
+        setTippy('whiteboardCleanBtn', 'Clear', 'top');
+        setTippy('whiteboardCloseBtn', 'Close', 'top');
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('participantsCloseBtn', 'Close', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
@@ -66,6 +79,7 @@ function initClient() {
         setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
     }
+    setupWhiteboard();
     initEnumerateDevices();
 }
 
@@ -394,6 +408,7 @@ function roomIsReady() {
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(participants, participantsHeader);
+        rc.makeDraggable(whiteboard, whiteboardHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             show(startScreenButton);
         }
@@ -408,6 +423,7 @@ function roomIsReady() {
     show(raiseHandButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
+    show(whiteboardButton);
     show(participantsButton);
     show(lockRoomButton);
     show(aboutButton);
@@ -579,6 +595,24 @@ function handleButtons() {
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
+    whiteboardButton.onclick = () => {
+        toggleWhiteboard();
+    };
+    whiteboardUndoBtn.onclick = () => {
+        whiteboardAction(getWhiteboardAction('undo'));
+    };
+    whiteboardRedoBtn.onclick = () => {
+        whiteboardAction(getWhiteboardAction('redo'));
+    };
+    whiteboardSaveBtn.onclick = () => {
+        wbCanvasSaveImg();
+    };
+    whiteboardCleanBtn.onclick = () => {
+        whiteboardAction(getWhiteboardAction('clear'));
+    };
+    whiteboardCloseBtn.onclick = () => {
+        whiteboardAction(getWhiteboardAction('close'));
+    };
     participantsButton.onclick = () => {
         getRoomParticipants();
     };
@@ -604,6 +638,7 @@ function handleButtons() {
 // ####################################################
 
 function handleSelects() {
+    // devices options
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
     };
@@ -612,6 +647,13 @@ function handleSelects() {
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+    };
+    // whiteboard options
+    wbDrawingLineWidthEl.onchange = () => {
+        wbCanvas.freeDrawingBrush.width = parseInt(wbDrawingLineWidthEl.value, 10) || 1;
+    };
+    wbDrawingColorEl.onchange = () => {
+        wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
     };
 }
 
@@ -749,7 +791,7 @@ function handleRoomClientEvents() {
 }
 
 // ####################################################
-// SHOW LOG
+// UTILITY
 // ####################################################
 
 function userLog(icon, message, position, timer = 3000) {
@@ -766,6 +808,26 @@ function userLog(icon, message, position, timer = 3000) {
     });
 }
 
+function saveDataToFile(dataURL, fileName) {
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = dataURL;
+    a.download = fileName;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(dataURL);
+    }, 100);
+}
+
+function getDataTimeString() {
+    const d = new Date();
+    const date = d.toISOString().split('T')[0];
+    const time = d.toTimeString().split(' ')[0];
+    return `${date}-${time}`;
+}
+
 // ####################################################
 // SOUND
 // ####################################################
@@ -777,6 +839,174 @@ async function sound(name) {
         await audio.play();
     } catch (err) {
         return false;
+    }
+}
+
+// ####################################################
+// HANDLE WHITEBOARD
+// ####################################################
+
+function toggleWhiteboard() {
+    toggleWhiteboardSettings();
+    let whiteboard = rc.getId('whiteboard');
+    whiteboard.classList.toggle('show');
+    whiteboard.style.top = '50%';
+    whiteboard.style.left = '50%';
+    wbIsOpen = wbIsOpen ? false : true;
+}
+
+function toggleWhiteboardSettings() {
+    rc.getId('whiteboardSettings').classList.toggle('show');
+}
+
+function setupWhiteboard() {
+    setupWhiteboardCanvas();
+    setupWhiteboardCanvasSize();
+    setupWhiteboardLocalListners();
+}
+
+function setupWhiteboardCanvas() {
+    wbCanvas = new fabric.Canvas('wbCanvas');
+    wbCanvas.freeDrawingBrush.color = '#FFFFFF';
+    wbCanvas.freeDrawingBrush.width = 3;
+    wbCanvas.isDrawingMode = true;
+}
+
+function setupWhiteboardCanvasSize() {
+    let optimalSize = [wbWidth, wbHeight];
+    let scaleFactorX = window.innerWidth / optimalSize[0];
+    let scaleFactorY = window.innerHeight / optimalSize[1];
+    if (scaleFactorX < scaleFactorY && scaleFactorX < 1) {
+        wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
+        wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
+        wbCanvas.setZoom(scaleFactorX);
+        document.documentElement.style.setProperty('--wb-width', optimalSize[0] * scaleFactorX);
+        document.documentElement.style.setProperty('--wb-height', optimalSize[1] * scaleFactorX);
+    } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
+        wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
+        wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
+        wbCanvas.setZoom(scaleFactorY);
+        document.documentElement.style.setProperty('--wb-width', optimalSize[0] * scaleFactorY);
+        document.documentElement.style.setProperty('--wb-height', optimalSize[1] * scaleFactorY);
+    } else {
+        wbCanvas.setWidth(optimalSize[0]);
+        wbCanvas.setHeight(optimalSize[1]);
+        wbCanvas.setZoom(1);
+        document.documentElement.style.setProperty('--wb-width', optimalSize[0]);
+        document.documentElement.style.setProperty('--wb-height', optimalSize[1]);
+    }
+    wbCanvas.calcOffset();
+    wbCanvas.renderAll();
+}
+
+function setupWhiteboardLocalListners() {
+    wbCanvas.on('mouse:down', function () {
+        mouseDown();
+    });
+    wbCanvas.on('mouse:up', function () {
+        mouseUp();
+    });
+    wbCanvas.on('mouse:move', function () {
+        mouseMove();
+    });
+    wbCanvas.on('object:added', function () {
+        objectAdded();
+    });
+}
+
+function mouseDown() {
+    wbIsDrawing = true;
+}
+
+function mouseUp() {
+    wbIsDrawing = false;
+    wbCanvasToJson();
+}
+
+function mouseMove() {
+    if (!wbIsDrawing) return;
+}
+
+function objectAdded() {
+    if (!wbIsRedoing) wbPop = [];
+    wbIsRedoing = false;
+}
+
+function wbCanvasUndo() {
+    if (wbCanvas._objects.length > 0) {
+        wbPop.push(wbCanvas._objects.pop());
+        wbCanvas.renderAll();
+    }
+}
+
+function wbCanvasRedo() {
+    if (wbPop.length > 0) {
+        wbIsRedoing = true;
+        wbCanvas.add(wbPop.pop());
+    }
+}
+
+function wbCanvasSaveImg() {
+    const dataURL = wbCanvas.toDataURL({
+        width: wbCanvas.getWidth(),
+        height: wbCanvas.getHeight(),
+        left: 0,
+        top: 0,
+        format: 'png',
+    });
+    const dataNow = getDataTimeString();
+    const fileName = `whiteboard-${dataNow}.png`;
+    saveDataToFile(dataURL, fileName);
+}
+
+function wbCanvasToJson() {
+    if (rc.thereIsConsumers()) {
+        var wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
+        rc.socket.emit('wbCanvasToJson', wbCanvasJson);
+    }
+}
+
+function JsonToWbCanvas(json) {
+    if (!wbIsOpen) toggleWhiteboard();
+
+    wbCanvas.loadFromJSON(json);
+    wbCanvas.renderAll();
+}
+
+function getWhiteboardAction(action) {
+    return {
+        peer_name: peer_name,
+        action: action,
+    };
+}
+
+function whiteboardAction(data, emit = true) {
+    if (emit) {
+        if (rc.thereIsConsumers()) {
+            rc.socket.emit('whiteboardAction', data);
+        }
+    } else {
+        userLog(
+            'info',
+            `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
+            'top-end',
+        );
+    }
+
+    switch (data.action) {
+        case 'undo':
+            wbCanvasUndo();
+            break;
+        case 'redo':
+            wbCanvasRedo();
+            break;
+        case 'clear':
+            wbCanvas.clear();
+            break;
+        case 'close':
+            if (wbIsOpen) toggleWhiteboard();
+            break;
+        //...
     }
 }
 

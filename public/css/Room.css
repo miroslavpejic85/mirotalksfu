@@ -38,6 +38,9 @@
     --msger-height: 680px;
     --msger-width: 420px;
     --msger-bg: linear-gradient(to left, #1f1e1e, #000000);
+    --wb-width: 800px;
+    --wb-height: 600px;
+    --wb-bg: linear-gradient(to left, #1f1e1e, #000000);
     --left-msg-bg: #222328;
     --right-msg-bg: #0a0b0c;
     --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
@@ -50,7 +53,7 @@
 }
 
 html {
-    min-height: 100%;
+    height: 100%;
 }
 
 body {
@@ -81,7 +84,7 @@ body {
 --------------------------------------------------------------*/
 
 #openNavButton {
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     cursor: pointer;
     padding: 10px;
@@ -92,7 +95,7 @@ body {
 }
 
 .sidenav {
-    z-index: 3;
+    z-index: 4;
     height: 100%;
     width: 0;
     position: fixed;
@@ -149,7 +152,7 @@ body {
     padding: 10px;
     top: 0;
     width: 250px;
-    background: black;
+    background: var(--body-bg);
 }
 
 #control button {
@@ -162,6 +165,7 @@ body {
 
 #settings {
     position: relative;
+    background: var(--body-bg);
 }
 
 /*--------------------------------------------------------------
@@ -207,6 +211,7 @@ body {
 
 #recording {
     position: relative;
+    background: var(--body-bg);
 }
 
 #recording button,
@@ -222,7 +227,7 @@ body {
 --------------------------------------------------------------*/
 
 .chat-room {
-    z-index: 4;
+    z-index: 5;
     display: none;
     position: fixed;
     height: var(--msger-height);
@@ -528,7 +533,7 @@ button:hover {
 --------------------------------------------------------------*/
 
 #participants {
-    z-index: 5;
+    z-index: 6;
     position: absolute;
     margin: auto;
     padding: 10px;
@@ -571,6 +576,37 @@ button:hover {
     background-color: #000000;
 }
 */
+
+/*--------------------------------------------------------------
+# Whiteboard
+--------------------------------------------------------------*/
+
+#whiteboardSettings {
+    position: relative;
+    background: var(--body-bg);
+}
+
+#whiteboard {
+    z-index: 2;
+    position: absolute;
+    margin: auto;
+    padding: 10px;
+    width: var(--wb-width);
+    height: var(--wb-height);
+    background: var(--wb-bg);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.whiteboard-header {
+    display: flex;
+    justify-content: space-between;
+    background: rgb(0, 0, 0);
+    border-radius: 10px;
+    padding: 10px;
+    color: white;
+    cursor: move;
+}
 
 /*--------------------------------------------------------------
 # Pulse class effect
@@ -623,8 +659,10 @@ button:hover {
 /*
 z-index:
     - 1 videoMediaContainer
-    - 2 buttonBar
-    - 3 sidenav
-    - 4 chat
-    - 5 participants
+    - 2 whiteboard
+    - 3 buttonBar
+    - 4 sidenav
+    - 4 whiteboard
+    - 5 chat
+    - 6 participants
 */

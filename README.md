@@ -16,6 +16,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
 -   Chat with Emoji Picker to show you feeling and possibility to Save the conversations
+-   Collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
 -   Recording your Screen, Audio or Video
 -   Full Screen Mode on mouse click on the Video element

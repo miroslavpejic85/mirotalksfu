@@ -394,6 +394,22 @@ class RoomClient {
         );
 
         this.socket.on(
+            'wbCanvasToJson',
+            function (data) {
+                console.log('Received whiteboard canvas JSON');
+                JsonToWbCanvas(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'whiteboardAction',
+            function (data) {
+                console.log('Whiteboard action', data);
+                whiteboardAction(data, false);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'disconnect',
             function () {
                 this.exit(true);
@@ -1029,7 +1045,6 @@ class RoomClient {
         if (this.consumers.size > 0) {
             return true;
         }
-        this.userLog('info', 'No participants in the room', 'top-end');
         return false;
     }
 
@@ -1156,6 +1171,7 @@ class RoomClient {
     sendMessage() {
         if (!this.thereIsConsumers()) {
             chatMessage.value = '';
+            this.userLog('info', 'No participants in the room', 'top-end');
             return;
         }
         let peer_msg = this.formatMsg(chatMessage.value);

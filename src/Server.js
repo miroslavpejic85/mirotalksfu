@@ -252,6 +252,17 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });
 
+    socket.on('wbCanvasToJson', (data) => {
+        // let objLength = bytesToSize(Object.keys(data).length);
+        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+        roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
+    });
+
+    socket.on('whiteboardAction', (data) => {
+        log.debug('Whiteboard', data);
+        roomList.get(socket.room_id).broadCast(socket.id, 'whiteboardAction', data);
+    });
+
     socket.on('join', (data, cb) => {
         if (!roomList.has(socket.room_id)) {
             return cb({
@@ -433,5 +444,12 @@ io.on('connection', (socket) => {
         return (
             roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name
         );
+    }
+
+    function bytesToSize(bytes) {
+        let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 });
