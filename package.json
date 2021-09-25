@@ -17,7 +17,7 @@
         "express": "^4.17.1",
         "httpolyglot": "^0.1.2",
         "mediasoup": "^3.8.4",
-        "mediasoup-client": "^3.6.37",
+        "mediasoup-client": "^3.6.42",
         "ngrok": "^4.2.2",
         "socket.io": "^4.2.0",
         "uuid": "8.3.2"

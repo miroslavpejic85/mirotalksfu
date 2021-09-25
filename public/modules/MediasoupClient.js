@@ -34,13 +34,6 @@
     {
         1: [
             function (require, module, exports) {
-                const client = require('mediasoup-client');
-                window.mediasoupClient = client;
-            },
-            { 'mediasoup-client': 35 },
-        ],
-        2: [
-            function (require, module, exports) {
                 'use strict';
                 var __awaiter =
                     (this && this.__awaiter) ||
@@ -211,7 +204,7 @@
             },
             {},
         ],
-        3: [
+        2: [
             function (require, module, exports) {
                 !(function (e, t) {
                     'object' == typeof exports && 'object' == typeof module
@@ -1672,7 +1665,7 @@
             },
             {},
         ],
-        4: [
+        3: [
             function (require, module, exports) {
                 const debug = require('debug')('h264-profile-level-id');
 
@@ -2075,9 +2068,9 @@
                     return level_asymmetry_allowed === 1 || level_asymmetry_allowed === '1';
                 }
             },
-            { debug: 5 },
+            { debug: 4 },
         ],
-        5: [
+        4: [
             function (require, module, exports) {
                 (function (process) {
                     (function () {
@@ -2377,9 +2370,9 @@
                     }.call(this));
                 }.call(this, require('_process')));
             },
-            { './common': 6, _process: 48 },
+            { './common': 5, _process: 48 },
         ],
-        6: [
+        5: [
             function (require, module, exports) {
                 /**
                  * This is the common logic for both the Node.js and web browser
@@ -2660,9 +2653,9 @@
 
                 module.exports = setup;
             },
-            { ms: 7 },
+            { ms: 6 },
         ],
-        7: [
+        6: [
             function (require, module, exports) {
                 /**
                  * Helpers.
@@ -2827,7 +2820,7 @@
             },
             {},
         ],
-        8: [
+        7: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2842,6 +2835,8 @@
                      * @emits trackended
                      * @emits @getstats
                      * @emits @close
+                     * @emits @pause
+                     * @emits @resume
                      */
                     constructor({ id, localId, producerId, rtpReceiver, track, rtpParameters, appData }) {
                         super();
@@ -2980,6 +2975,7 @@
                         }
                         this._paused = true;
                         this._track.enabled = false;
+                        this.emit('@pause');
                         // Emit observer event.
                         this._observer.safeEmit('pause');
                     }
@@ -2994,6 +2990,7 @@
                         }
                         this._paused = false;
                         this._track.enabled = true;
+                        this.emit('@resume');
                         // Emit observer event.
                         this._observer.safeEmit('resume');
                     }
@@ -3015,9 +3012,9 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './EnhancedEventEmitter': 12, './Logger': 13, './errors': 18 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        9: [
+        8: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3182,9 +3179,9 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './EnhancedEventEmitter': 12, './Logger': 13 },
+            { './EnhancedEventEmitter': 11, './Logger': 12 },
         ],
-        10: [
+        9: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3363,9 +3360,9 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './EnhancedEventEmitter': 12, './Logger': 13, './errors': 18 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        11: [
+        10: [
             function (require, module, exports) {
                 'use strict';
                 /* global RTCRtpTransceiver */
@@ -3800,25 +3797,25 @@
                 exports.Device = Device;
             },
             {
-                './EnhancedEventEmitter': 12,
-                './Logger': 13,
-                './Transport': 17,
-                './errors': 18,
-                './handlers/Chrome55': 19,
-                './handlers/Chrome67': 20,
-                './handlers/Chrome70': 21,
-                './handlers/Chrome74': 22,
-                './handlers/Edge11': 23,
-                './handlers/Firefox60': 24,
-                './handlers/ReactNative': 26,
-                './handlers/Safari11': 27,
-                './handlers/Safari12': 28,
-                './ortc': 36,
-                './utils': 39,
-                bowser: 3,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/Chrome55': 18,
+                './handlers/Chrome67': 19,
+                './handlers/Chrome70': 20,
+                './handlers/Chrome74': 21,
+                './handlers/Edge11': 22,
+                './handlers/Firefox60': 23,
+                './handlers/ReactNative': 25,
+                './handlers/Safari11': 26,
+                './handlers/Safari12': 27,
+                './ortc': 35,
+                './utils': 38,
+                bowser: 2,
             },
         ],
-        12: [
+        11: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3857,9 +3854,9 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 13, events: 47 },
+            { './Logger': 12, events: 47 },
         ],
-        13: [
+        12: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -3900,9 +3897,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 40 },
+            { debug: 39 },
         ],
-        14: [
+        13: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4181,9 +4178,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './EnhancedEventEmitter': 12, './Logger': 13, './errors': 18 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        15: [
+        14: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -4194,14 +4191,14 @@
             },
             {},
         ],
-        16: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        17: [
+        16: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -4782,6 +4779,22 @@
                                 )
                                 .catch(() => {});
                         });
+                        consumer.on('@pause', () => {
+                            this._awaitQueue
+                                .push(
+                                    async () => this._handler.pauseReceiving(consumer.localId),
+                                    'consumer @pause event',
+                                )
+                                .catch(() => {});
+                        });
+                        consumer.on('@resume', () => {
+                            this._awaitQueue
+                                .push(
+                                    async () => this._handler.resumeReceiving(consumer.localId),
+                                    'consumer @resume event',
+                                )
+                                .catch(() => {});
+                        });
                         consumer.on('@getstats', (callback, errback) => {
                             if (this._closed) return errback(new errors_1.InvalidStateError('closed'));
                             this._handler.getReceiverStats(consumer.localId).then(callback).catch(errback);
@@ -4801,19 +4814,19 @@
                 exports.Transport = Transport;
             },
             {
-                './Consumer': 8,
-                './DataConsumer': 9,
-                './DataProducer': 10,
-                './EnhancedEventEmitter': 12,
-                './Logger': 13,
-                './Producer': 14,
-                './errors': 18,
-                './ortc': 36,
-                './utils': 39,
-                awaitqueue: 2,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Producer': 13,
+                './errors': 17,
+                './ortc': 35,
+                './utils': 38,
+                awaitqueue: 1,
             },
         ],
-        18: [
+        17: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4855,7 +4868,7 @@
             },
             {},
         ],
-        19: [
+        18: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5283,6 +5296,18 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async getReceiverStats(localId) {
                         throw new errors_1.UnsupportedError('not implemented');
@@ -5348,18 +5373,18 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 13,
-                '../errors': 18,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/planBUtils': 33,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/planBUtils': 32,
+                'sdp-transform': 43,
             },
         ],
-        20: [
+        19: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5816,6 +5841,18 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     async getReceiverStats(localId) {
                         this._assertRecvDirection();
                         const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) || {};
@@ -5883,17 +5920,17 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 13,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/planBUtils': 33,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/planBUtils': 32,
+                'sdp-transform': 43,
             },
         ],
-        21: [
+        20: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6363,6 +6400,18 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     async getReceiverStats(localId) {
                         this._assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6430,18 +6479,18 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 13,
-                '../ortc': 36,
-                '../scalabilityModes': 37,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 35,
+                '../scalabilityModes': 36,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/unifiedPlanUtils': 33,
+                'sdp-transform': 43,
             },
         ],
-        22: [
+        21: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6899,6 +6948,32 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('pauseReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
+                    async resumeReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('resumeReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'recvonly';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('resumeReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
                     async getReceiverStats(localId) {
                         this._assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6965,18 +7040,18 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 13,
-                '../ortc': 36,
-                '../scalabilityModes': 37,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 35,
+                '../scalabilityModes': 36,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/unifiedPlanUtils': 33,
+                'sdp-transform': 43,
             },
         ],
-        23: [
+        22: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7251,6 +7326,18 @@
                             logger.warn('stopReceiving() | rtpReceiver.stop() failed:%o', error);
                         }
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     async getReceiverStats(localId) {
                         const rtpReceiver = this._rtpReceivers.get(localId);
                         if (!rtpReceiver) throw new Error('RTCRtpReceiver not found');
@@ -7379,15 +7466,15 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 13,
-                '../errors': 18,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './ortc/edgeUtils': 29,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './ortc/edgeUtils': 28,
             },
         ],
-        24: [
+        23: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7868,6 +7955,32 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('pauseReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
+                    async resumeReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('resumeReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'recvonly';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('resumeReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
                     async getReceiverStats(localId) {
                         this._assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -7934,18 +8047,18 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 13,
-                '../errors': 18,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/unifiedPlanUtils': 33,
+                'sdp-transform': 43,
             },
         ],
-        25: [
+        24: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -7966,9 +8079,9 @@
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../EnhancedEventEmitter': 12 },
+            { '../EnhancedEventEmitter': 11 },
         ],
-        26: [
+        25: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8051,9 +8164,10 @@
                     }
                     close() {
                         logger.debug('close()');
-                        // Free/dispose native stream and tracks.
+                        // Free/dispose native MediaStream but DO NOT free/dispose native
+                        // MediaStreamTracks (that is parent's business).
                         // @ts-ignore (proprietary API in react-native-webrtc).
-                        this._sendStream.release();
+                        this._sendStream.release(/* releaseTracks */ false);
                         // Close RTCPeerConnection.
                         if (this._pc) {
                             try {
@@ -8408,6 +8522,18 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async getReceiverStats(localId) {
                         throw new errors_1.UnsupportedError('not implemented');
@@ -8473,18 +8599,18 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 13,
-                '../errors': 18,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/planBUtils': 33,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/planBUtils': 32,
+                'sdp-transform': 43,
             },
         ],
-        27: [
+        26: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8943,6 +9069,18 @@
                         if (!rtpReceiver) throw new Error('associated RTCRtpReceiver not found');
                         return rtpReceiver.getStats();
                     }
+                    async pauseReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
+                    async resumeReceiving(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                    ) {
+                        // Unimplemented.
+                    }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         this._assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
@@ -9003,17 +9141,17 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 13,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/planBUtils': 33,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/planBUtils': 32,
+                'sdp-transform': 43,
             },
         ],
-        28: [
+        27: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9443,6 +9581,32 @@
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
+                    async pauseReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('pauseReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
+                    async resumeReceiving(localId) {
+                        this._assertRecvDirection();
+                        logger.debug('resumeReceiving() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'recvonly';
+                        const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
+                        await this._pc.setRemoteDescription(offer);
+                        const answer = await this._pc.createAnswer();
+                        logger.debug('resumeReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
+                        await this._pc.setLocalDescription(answer);
+                    }
                     async getReceiverStats(localId) {
                         this._assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -9509,17 +9673,17 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 13,
-                '../ortc': 36,
-                '../utils': 39,
-                './HandlerInterface': 25,
-                './sdp/RemoteSdp': 31,
-                './sdp/commonUtils': 32,
-                './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 35,
+                '../utils': 38,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 30,
+                './sdp/commonUtils': 31,
+                './sdp/unifiedPlanUtils': 33,
+                'sdp-transform': 43,
             },
         ],
-        29: [
+        28: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9615,9 +9779,9 @@
                 }
                 exports.mangleRtpParameters = mangleRtpParameters;
             },
-            { '../../utils': 39 },
+            { '../../utils': 38 },
         ],
-        30: [
+        29: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10166,9 +10330,9 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 39 },
+            { '../../utils': 38 },
         ],
-        31: [
+        30: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10473,9 +10637,9 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 13, './MediaSection': 30, 'sdp-transform': 44 },
+            { '../../Logger': 12, './MediaSection': 29, 'sdp-transform': 43 },
         ],
-        32: [
+        31: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10670,9 +10834,9 @@
                 }
                 exports.applyCodecParameters = applyCodecParameters;
             },
-            { 'sdp-transform': 44 },
+            { 'sdp-transform': 43 },
         ],
-        33: [
+        32: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -10810,7 +10974,7 @@
             },
             {},
         ],
-        34: [
+        33: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -10926,7 +11090,7 @@
             },
             {},
         ],
-        35: [
+        34: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10993,7 +11157,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.37';
+                exports.version = '3.6.42';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -11005,9 +11169,9 @@
                     },
                 });
             },
-            { './Device': 11, './scalabilityModes': 37, './types': 38, debug: 40 },
+            { './Device': 10, './scalabilityModes': 36, './types': 37, debug: 39 },
         ],
-        36: [
+        35: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11816,9 +11980,9 @@
                     return reducedRtcpFeedback;
                 }
             },
-            { './utils': 39, 'h264-profile-level-id': 4 },
+            { './utils': 38, 'h264-profile-level-id': 3 },
         ],
-        37: [
+        36: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -11842,7 +12006,7 @@
             },
             {},
         ],
-        38: [
+        37: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11880,19 +12044,19 @@
                 __exportStar(require('./errors'), exports);
             },
             {
-                './Consumer': 8,
-                './DataConsumer': 9,
-                './DataProducer': 10,
-                './Device': 11,
-                './Producer': 14,
-                './RtpParameters': 15,
-                './SctpParameters': 16,
-                './Transport': 17,
-                './errors': 18,
-                './handlers/HandlerInterface': 25,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './Device': 10,
+                './Producer': 13,
+                './RtpParameters': 14,
+                './SctpParameters': 15,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/HandlerInterface': 24,
             },
         ],
-        39: [
+        38: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -11915,25 +12079,25 @@
             },
             {},
         ],
+        39: [
+            function (require, module, exports) {
+                arguments[4][4][0].apply(exports, arguments);
+            },
+            { './common': 40, _process: 48, dup: 4 },
+        ],
         40: [
             function (require, module, exports) {
                 arguments[4][5][0].apply(exports, arguments);
             },
-            { './common': 41, _process: 48, dup: 5 },
+            { dup: 5, ms: 41 },
         ],
         41: [
             function (require, module, exports) {
                 arguments[4][6][0].apply(exports, arguments);
             },
-            { dup: 6, ms: 42 },
+            { dup: 6 },
         ],
         42: [
-            function (require, module, exports) {
-                arguments[4][7][0].apply(exports, arguments);
-            },
-            { dup: 7 },
-        ],
-        43: [
             function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
@@ -12446,7 +12610,7 @@
             },
             {},
         ],
-        44: [
+        43: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -12460,9 +12624,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './parser': 45, './writer': 46 },
+            { './parser': 44, './writer': 45 },
         ],
-        45: [
+        44: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -12595,9 +12759,9 @@
                     });
                 };
             },
-            { './grammar': 43 },
+            { './grammar': 42 },
         ],
-        46: [
+        45: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -12707,7 +12871,14 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 43 },
+            { './grammar': 42 },
+        ],
+        46: [
+            function (require, module, exports) {
+                const client = require('mediasoup-client');
+                window.mediasoupClient = client;
+            },
+            { 'mediasoup-client': 34 },
         ],
         47: [
             function (require, module, exports) {
@@ -13390,5 +13561,5 @@
         ],
     },
     {},
-    [1],
+    [46],
 );
