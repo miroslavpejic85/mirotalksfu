@@ -46,8 +46,8 @@ const wbHeight = 600;
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
-var wbIsRedoing = false;
-var wbPop = [];
+let wbIsRedoing = false;
+let wbPop = [];
 
 const socket = io();
 
@@ -64,8 +64,14 @@ function getRandomNumber(length) {
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('closeNavButton', 'Close', 'right');
+        setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
+        setTippy('whiteboardObjectBtn', 'Object mode', 'top');
         setTippy('whiteboardUndoBtn', 'Undo', 'top');
         setTippy('whiteboardRedoBtn', 'Redo', 'top');
+        setTippy('whiteboardTextBtn', 'Add Text', 'top');
+        setTippy('whiteboardLineBtn', 'Add Line', 'top');
+        setTippy('whiteboardRectBtn', 'Add Rectangle', 'top');
+        setTippy('whiteboardCircleBtn', 'Add Circle', 'top');
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardCleanBtn', 'Clear', 'top');
         setTippy('whiteboardCloseBtn', 'Close', 'top');
@@ -598,6 +604,12 @@ function handleButtons() {
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };
+    whiteboardPencilBtn.onclick = () => {
+        whiteboardIsDrawingMode(true);
+    };
+    whiteboardObjectBtn.onclick = () => {
+        whiteboardIsDrawingMode(false);
+    };
     whiteboardUndoBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('undo'));
     };
@@ -606,6 +618,18 @@ function handleButtons() {
     };
     whiteboardSaveBtn.onclick = () => {
         wbCanvasSaveImg();
+    };
+    whiteboardTextBtn.onclick = () => {
+        whiteboardAddObj('text');
+    };
+    whiteboardLineBtn.onclick = () => {
+        whiteboardAddObj('line');
+    };
+    whiteboardRectBtn.onclick = () => {
+        whiteboardAddObj('rect');
+    };
+    whiteboardCircleBtn.onclick = () => {
+        whiteboardAddObj('circle');
     };
     whiteboardCleanBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('clear'));
@@ -869,7 +893,7 @@ function setupWhiteboardCanvas() {
     wbCanvas = new fabric.Canvas('wbCanvas');
     wbCanvas.freeDrawingBrush.color = '#FFFFFF';
     wbCanvas.freeDrawingBrush.width = 3;
-    wbCanvas.isDrawingMode = true;
+    whiteboardIsDrawingMode(true);
 }
 
 function setupWhiteboardCanvasSize() {
@@ -897,6 +921,83 @@ function setupWhiteboardCanvasSize() {
     }
     wbCanvas.calcOffset();
     wbCanvas.renderAll();
+}
+
+function whiteboardIsDrawingMode(b) {
+    wbCanvas.isDrawingMode = b;
+    if (b) {
+        whiteboardPencilBtn.style.color = 'green';
+        whiteboardObjectBtn.style.color = 'white';
+    } else {
+        whiteboardPencilBtn.style.color = 'white';
+        whiteboardObjectBtn.style.color = 'green';
+    }
+}
+
+function whiteboardAddObj(type) {
+    let obj = null;
+    switch (type) {
+        case 'text':
+            Swal.fire({
+                background: swalBackground,
+                title: 'Enter the text',
+                input: 'text',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let wbCanvasText = result.value;
+                    const text = new fabric.Text(wbCanvasText, {
+                        top: 0,
+                        left: 0,
+                        fontFamily: 'Comfortaa',
+                        fill: wbCanvas.freeDrawingBrush.color,
+                        strokeWidth: wbCanvas.freeDrawingBrush.width,
+                        stroke: wbCanvas.freeDrawingBrush.color,
+                    });
+                    wbCanvas.add(text);
+                    whiteboardIsDrawingMode(false);
+                    wbCanvasToJson();
+                }
+            });
+            break;
+        case 'line':
+            const line = new fabric.Line([50, 100, 200, 200], {
+                top: 0,
+                left: 0,
+                fill: wbCanvas.freeDrawingBrush.color,
+                strokeWidth: wbCanvas.freeDrawingBrush.width,
+                stroke: wbCanvas.freeDrawingBrush.color,
+            });
+            obj = line;
+            break;
+        case 'circle':
+            const circle = new fabric.Circle({
+                radius: 50,
+                fill: 'transparent',
+                stroke: wbCanvas.freeDrawingBrush.color,
+                strokeWidth: wbCanvas.freeDrawingBrush.width,
+            });
+            obj = circle;
+            break;
+        case 'rect':
+            const rect = new fabric.Rect({
+                top: 0,
+                left: 0,
+                width: 150,
+                height: 100,
+                fill: 'transparent',
+                stroke: wbCanvas.freeDrawingBrush.color,
+                strokeWidth: wbCanvas.freeDrawingBrush.width,
+            });
+            obj = rect;
+            break;
+    }
+    if (obj) {
+        wbCanvas.add(obj);
+        whiteboardIsDrawingMode(false);
+        wbCanvasToJson();
+    }
 }
 
 function setupWhiteboardLocalListners() {
