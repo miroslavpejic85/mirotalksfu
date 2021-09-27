@@ -595,6 +595,7 @@ button:hover {
     height: var(--wb-height);
     background: var(--wb-bg);
     border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
 }
 

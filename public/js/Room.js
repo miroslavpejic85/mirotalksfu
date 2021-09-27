@@ -238,8 +238,10 @@ function whoAreYou() {
         input: 'text',
         inputPlaceholder: 'Enter your name',
         html: `<br />
-        <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-        <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>`,
+        <div style="overflow: hidden;">
+            <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
+            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
+        </div>`,
         confirmButtonText: `Join meeting`,
         showClass: {
             popup: 'animate__animated animate__fadeInDown',
@@ -956,7 +958,6 @@ function whiteboardIsDrawingMode(b) {
 }
 
 function whiteboardAddObj(type) {
-    let obj = null;
     switch (type) {
         case 'imgUrl':
             Swal.fire({
@@ -970,9 +971,7 @@ function whiteboardAddObj(type) {
                     let wbCanvasImgURL = result.value;
                     if (isImageURL(wbCanvasImgURL)) {
                         fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
-                            wbCanvas.add(myImg);
-                            whiteboardIsDrawingMode(false);
-                            wbCanvasToJson();
+                            addWbCanvasObj(myImg);
                         });
                     } else {
                         userLog('error', 'The URL is not a valid image', 'top-end');
@@ -1004,15 +1003,8 @@ function whiteboardAddObj(type) {
                             imgObj.src = event.target.result;
                             imgObj.onload = function () {
                                 let image = new fabric.Image(imgObj);
-                                image
-                                    .set({
-                                        top: 0,
-                                        left: 0,
-                                    })
-                                    .scale(0.5);
-                                wbCanvas.add(image);
-                                whiteboardIsDrawingMode(false);
-                                wbCanvasToJson();
+                                image.set({ top: 0, left: 0 }).scale(0.5);
+                                addWbCanvasObj(image);
                             };
                         };
                         reader.readAsDataURL(wbCanvasImg);
@@ -1032,17 +1024,17 @@ function whiteboardAddObj(type) {
             }).then((result) => {
                 if (result.isConfirmed) {
                     let wbCanvasText = result.value;
-                    const text = new fabric.Text(wbCanvasText, {
-                        top: 0,
-                        left: 0,
-                        fontFamily: 'Comfortaa',
-                        fill: wbCanvas.freeDrawingBrush.color,
-                        strokeWidth: wbCanvas.freeDrawingBrush.width,
-                        stroke: wbCanvas.freeDrawingBrush.color,
-                    });
-                    wbCanvas.add(text);
-                    whiteboardIsDrawingMode(false);
-                    wbCanvasToJson();
+                    if (wbCanvasText) {
+                        const text = new fabric.Text(wbCanvasText, {
+                            top: 0,
+                            left: 0,
+                            fontFamily: 'Comfortaa',
+                            fill: wbCanvas.freeDrawingBrush.color,
+                            strokeWidth: wbCanvas.freeDrawingBrush.width,
+                            stroke: wbCanvas.freeDrawingBrush.color,
+                        });
+                        addWbCanvasObj(text);
+                    }
                 }
             });
             break;
@@ -1054,7 +1046,7 @@ function whiteboardAddObj(type) {
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
                 stroke: wbCanvas.freeDrawingBrush.color,
             });
-            obj = line;
+            addWbCanvasObj(line);
             break;
         case 'circle':
             const circle = new fabric.Circle({
@@ -1063,7 +1055,7 @@ function whiteboardAddObj(type) {
                 stroke: wbCanvas.freeDrawingBrush.color,
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
             });
-            obj = circle;
+            addWbCanvasObj(circle);
             break;
         case 'rect':
             const rect = new fabric.Rect({
@@ -1075,9 +1067,12 @@ function whiteboardAddObj(type) {
                 stroke: wbCanvas.freeDrawingBrush.color,
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
             });
-            obj = rect;
+            addWbCanvasObj(rect);
             break;
     }
+}
+
+function addWbCanvasObj(obj) {
     if (obj) {
         wbCanvas.add(obj);
         whiteboardIsDrawingMode(false);
