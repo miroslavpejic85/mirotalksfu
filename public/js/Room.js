@@ -41,6 +41,7 @@ let isVideoOn = true;
 let recTimer = null;
 let recElapsedTime = null;
 
+const fileSharingInput = 'image/*';
 const wbWidth = 800;
 const wbHeight = 600;
 let wbCanvas = null;
@@ -68,10 +69,12 @@ function initClient() {
         setTippy('whiteboardObjectBtn', 'Object mode', 'top');
         setTippy('whiteboardUndoBtn', 'Undo', 'top');
         setTippy('whiteboardRedoBtn', 'Redo', 'top');
-        setTippy('whiteboardTextBtn', 'Add Text', 'top');
-        setTippy('whiteboardLineBtn', 'Add Line', 'top');
-        setTippy('whiteboardRectBtn', 'Add Rectangle', 'top');
-        setTippy('whiteboardCircleBtn', 'Add Circle', 'top');
+        setTippy('whiteboardImgFileBtn', 'Add image file', 'top');
+        setTippy('whiteboardImgUrlBtn', 'Add image url', 'top');
+        setTippy('whiteboardTextBtn', 'Add text', 'top');
+        setTippy('whiteboardLineBtn', 'Add line', 'top');
+        setTippy('whiteboardRectBtn', 'Add rectangle', 'top');
+        setTippy('whiteboardCircleBtn', 'Add circle', 'top');
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardCleanBtn', 'Clear', 'top');
         setTippy('whiteboardCloseBtn', 'Close', 'top');
@@ -619,6 +622,12 @@ function handleButtons() {
     whiteboardSaveBtn.onclick = () => {
         wbCanvasSaveImg();
     };
+    whiteboardImgFileBtn.onclick = () => {
+        whiteboardAddObj('imgFile');
+    };
+    whiteboardImgUrlBtn.onclick = () => {
+        whiteboardAddObj('imgUrl');
+    };
     whiteboardTextBtn.onclick = () => {
         whiteboardAddObj('text');
     };
@@ -853,7 +862,7 @@ function getDataTimeString() {
 }
 
 // ####################################################
-// SOUND
+// UTILITY
 // ####################################################
 
 async function sound(name) {
@@ -864,6 +873,10 @@ async function sound(name) {
     } catch (err) {
         return false;
     }
+}
+
+function isImageURL(url) {
+    return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
 }
 
 // ####################################################
@@ -937,6 +950,70 @@ function whiteboardIsDrawingMode(b) {
 function whiteboardAddObj(type) {
     let obj = null;
     switch (type) {
+        case 'imgUrl':
+            Swal.fire({
+                background: swalBackground,
+                title: 'Image URL',
+                input: 'text',
+                showCancelButton: true,
+                confirmButtonText: 'OK',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let wbCanvasImgURL = result.value;
+                    if (isImageURL(wbCanvasImgURL)) {
+                        fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
+                            wbCanvas.add(myImg);
+                            whiteboardIsDrawingMode(false);
+                            wbCanvasToJson();
+                        });
+                    } else {
+                        userLog('error', 'The URL is not a valid image', 'top-end');
+                    }
+                }
+            });
+            break;
+        case 'imgFile':
+            Swal.fire({
+                allowOutsideClick: false,
+                background: swalBackground,
+                position: 'center',
+                title: 'Select the image',
+                input: 'file',
+                inputAttributes: {
+                    accept: fileSharingInput,
+                    'aria-label': 'Select the image',
+                },
+                showDenyButton: true,
+                confirmButtonText: `OK`,
+                denyButtonText: `Cancel`,
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let wbCanvasImg = result.value;
+                    if (wbCanvasImg && wbCanvasImg.size > 0) {
+                        let reader = new FileReader();
+                        reader.onload = function (event) {
+                            let imgObj = new Image();
+                            imgObj.src = event.target.result;
+                            imgObj.onload = function () {
+                                let image = new fabric.Image(imgObj);
+                                image
+                                    .set({
+                                        top: 0,
+                                        left: 0,
+                                    })
+                                    .scale(0.5);
+                                wbCanvas.add(image);
+                                whiteboardIsDrawingMode(false);
+                                wbCanvasToJson();
+                            };
+                        };
+                        reader.readAsDataURL(wbCanvasImg);
+                    } else {
+                        userLog('error', 'File not selected or empty', 'top-end');
+                    }
+                }
+            });
+            break;
         case 'text':
             Swal.fire({
                 background: swalBackground,
