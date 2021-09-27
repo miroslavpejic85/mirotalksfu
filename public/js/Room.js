@@ -48,6 +48,7 @@ let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
+let wbIsEraser = false;
 let wbPop = [];
 
 const socket = io();
@@ -76,6 +77,7 @@ function initClient() {
         setTippy('whiteboardRectBtn', 'Add rectangle', 'top');
         setTippy('whiteboardCircleBtn', 'Add circle', 'top');
         setTippy('whiteboardSaveBtn', 'Save', 'top');
+        setTippy('whiteboardEraserBtn', 'Eraser', 'top');
         setTippy('whiteboardCleanBtn', 'Clear', 'top');
         setTippy('whiteboardCloseBtn', 'Close', 'top');
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
@@ -642,6 +644,9 @@ function handleButtons() {
     whiteboardCircleBtn.onclick = () => {
         whiteboardAddObj('circle');
     };
+    whiteboardEraserBtn.onclick = () => {
+        whiteboardIsEraser(true);
+    };
     whiteboardCleanBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('clear'));
     };
@@ -951,10 +956,18 @@ function whiteboardIsDrawingMode(b) {
     if (b) {
         whiteboardPencilBtn.style.color = 'green';
         whiteboardObjectBtn.style.color = 'white';
+        whiteboardEraserBtn.style.color = 'white';
+        wbIsEraser = false;
     } else {
         whiteboardPencilBtn.style.color = 'white';
         whiteboardObjectBtn.style.color = 'green';
     }
+}
+
+function whiteboardIsEraser(b) {
+    whiteboardIsDrawingMode(false);
+    wbIsEraser = b;
+    whiteboardEraserBtn.style.color = wbIsEraser ? 'green' : 'white';
 }
 
 function whiteboardAddObj(type) {
@@ -1081,8 +1094,8 @@ function addWbCanvasObj(obj) {
 }
 
 function setupWhiteboardLocalListners() {
-    wbCanvas.on('mouse:down', function () {
-        mouseDown();
+    wbCanvas.on('mouse:down', function (e) {
+        mouseDown(e);
     });
     wbCanvas.on('mouse:up', function () {
         mouseUp();
@@ -1095,8 +1108,12 @@ function setupWhiteboardLocalListners() {
     });
 }
 
-function mouseDown() {
+function mouseDown(e) {
     wbIsDrawing = true;
+    if (wbIsEraser && e.target) {
+        wbCanvas.remove(e.target);
+        return;
+    }
 }
 
 function mouseUp() {
@@ -1105,6 +1122,10 @@ function mouseUp() {
 }
 
 function mouseMove() {
+    if (wbIsEraser) {
+        wbCanvas.hoverCursor = 'not-allowed';
+        return;
+    }
     if (!wbIsDrawing) return;
 }
 
