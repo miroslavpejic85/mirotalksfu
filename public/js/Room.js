@@ -688,6 +688,14 @@ function handleSelects() {
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
     };
+    wbBackgroundColorEl.onchange = () => {
+        let data = {
+            peer_name: peer_name,
+            action: 'bgcolor',
+            color: wbBackgroundColorEl.value,
+        };
+        whiteboardAction(data);
+    };
 }
 
 // ####################################################
@@ -1110,6 +1118,13 @@ function objectAdded() {
     wbIsRedoing = false;
 }
 
+function wbCanvasBackgroundColor(color) {
+    document.documentElement.style.setProperty('--wb-bg', color);
+    wbBackgroundColorEl.value = color;
+    wbCanvas.setBackgroundColor(color);
+    wbCanvas.renderAll();
+}
+
 function wbCanvasUndo() {
     if (wbCanvas._objects.length > 0) {
         wbPop.push(wbCanvas._objects.pop());
@@ -1172,6 +1187,9 @@ function whiteboardAction(data, emit = true) {
     }
 
     switch (data.action) {
+        case 'bgcolor':
+            wbCanvasBackgroundColor(data.color);
+            break;
         case 'undo':
             wbCanvasUndo();
             break;
