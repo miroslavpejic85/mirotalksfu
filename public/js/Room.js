@@ -41,7 +41,7 @@ let isVideoOn = true;
 let recTimer = null;
 let recElapsedTime = null;
 
-const fileSharingInput = 'image/*';
+const wbImageInput = 'image/*';
 const wbWidth = 800;
 const wbHeight = 600;
 let wbCanvas = null;
@@ -932,42 +932,44 @@ function setupWhiteboardCanvasSize() {
         wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
         wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
         wbCanvas.setZoom(scaleFactorX);
-        document.documentElement.style.setProperty('--wb-width', optimalSize[0] * scaleFactorX);
-        document.documentElement.style.setProperty('--wb-height', optimalSize[1] * scaleFactorX);
+        setWhiteboardSize(optimalSize[0] * scaleFactorX, optimalSize[1] * scaleFactorX);
     } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
         wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
         wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
         wbCanvas.setZoom(scaleFactorY);
-        document.documentElement.style.setProperty('--wb-width', optimalSize[0] * scaleFactorY);
-        document.documentElement.style.setProperty('--wb-height', optimalSize[1] * scaleFactorY);
+        setWhiteboardSize(optimalSize[0] * scaleFactorY, optimalSize[1] * scaleFactorY);
     } else {
         wbCanvas.setWidth(optimalSize[0]);
         wbCanvas.setHeight(optimalSize[1]);
         wbCanvas.setZoom(1);
-        document.documentElement.style.setProperty('--wb-width', optimalSize[0]);
-        document.documentElement.style.setProperty('--wb-height', optimalSize[1]);
+        setWhiteboardSize(optimalSize[0], optimalSize[1]);
     }
     wbCanvas.calcOffset();
     wbCanvas.renderAll();
 }
 
-function whiteboardIsDrawingMode(b) {
-    wbCanvas.isDrawingMode = b;
-    if (b) {
-        whiteboardPencilBtn.style.color = 'green';
-        whiteboardObjectBtn.style.color = 'white';
-        whiteboardEraserBtn.style.color = 'white';
+function setWhiteboardSize(w, h) {
+    document.documentElement.style.setProperty('--wb-width', w);
+    document.documentElement.style.setProperty('--wb-height', h);
+}
+
+function whiteboardIsDrawingMode(status) {
+    wbCanvas.isDrawingMode = status;
+    if (status) {
+        setColor(whiteboardPencilBtn, 'green');
+        setColor(whiteboardObjectBtn, 'white');
+        setColor(whiteboardEraserBtn, 'white');
         wbIsEraser = false;
     } else {
-        whiteboardPencilBtn.style.color = 'white';
-        whiteboardObjectBtn.style.color = 'green';
+        setColor(whiteboardPencilBtn, 'white');
+        setColor(whiteboardObjectBtn, 'green');
     }
 }
 
-function whiteboardIsEraser(b) {
+function whiteboardIsEraser(status) {
     whiteboardIsDrawingMode(false);
-    wbIsEraser = b;
-    whiteboardEraserBtn.style.color = wbIsEraser ? 'green' : 'white';
+    wbIsEraser = status;
+    setColor(whiteboardEraserBtn, wbIsEraser ? 'green' : 'white');
 }
 
 function whiteboardAddObj(type) {
@@ -1000,7 +1002,7 @@ function whiteboardAddObj(type) {
                 title: 'Select the image',
                 input: 'file',
                 inputAttributes: {
-                    accept: fileSharingInput,
+                    accept: wbImageInput,
                     'aria-label': 'Select the image',
                 },
                 showDenyButton: true,
@@ -1016,7 +1018,7 @@ function whiteboardAddObj(type) {
                             imgObj.src = event.target.result;
                             imgObj.onload = function () {
                                 let image = new fabric.Image(imgObj);
-                                image.set({ top: 0, left: 0 }).scale(0.5);
+                                image.set({ top: 0, left: 0 }).scale(0.3);
                                 addWbCanvasObj(image);
                             };
                         };
@@ -1170,7 +1172,7 @@ function wbCanvasSaveImg() {
 
 function wbCanvasToJson() {
     if (rc.thereIsConsumers()) {
-        var wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
+        let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
         rc.socket.emit('wbCanvasToJson', wbCanvasJson);
     }
 }

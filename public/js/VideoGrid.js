@@ -41,7 +41,7 @@ function resizeVideoMedia() {
 
 function setWidth(width, margin) {
     let Cameras = document.getElementsByClassName('Camera');
-    for (var s = 0; s < Cameras.length; s++) {
+    for (let s = 0; s < Cameras.length; s++) {
         Cameras[s].style.width = width + 'px';
         Cameras[s].style.margin = margin + 'px';
         Cameras[s].style.height = width * 0.7 + 'px';
