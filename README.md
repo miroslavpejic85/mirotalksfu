@@ -2,7 +2,7 @@
 
 Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 
-[![mirotalksfu](public/images/mirotalksfu.png)](https://mirotalksfu.ddns.net/)
+[![mirotalksfu](public/images/mirotalksfu.png)](https://sfu.mirotalk.org/)
 
 ## Features
 
@@ -32,7 +32,7 @@ If you want to deploy an `MiroTalk SFU` instance on `your own dedicated droplet`
 
 ## Live Demo
 
-[Live demo](https://mirotalksfu.ddns.net)
+[Live demo](https://sfu.mirotalk.org)
 
 ## Run it locally
 
