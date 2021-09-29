@@ -1501,7 +1501,7 @@ class RoomClient {
                     }
                     // send some metadata about our file to peers in the room
                     this.socket.emit('fileInfo', {
-                        peer_name: peer_name,
+                        peer_name: this.peer_name,
                         fileName: this.fileToSend.name,
                         fileSize: this.fileToSend.size,
                         fileType: this.fileToSend.type,
@@ -1603,7 +1603,7 @@ class RoomClient {
             sendFileDiv.style.display = 'none';
             this.sendInProgress = false;
             this.socket.emit('fileAbort', {
-                peer_name: peer_name,
+                peer_name: this.peer_name,
             });
         }
     }
