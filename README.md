@@ -15,6 +15,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
+-   File Sharing, share any files to your participants in the room
 -   Chat with Emoji Picker to show you feeling and possibility to Save the conversations
 -   Collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
