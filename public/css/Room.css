@@ -578,6 +578,40 @@ button:hover {
 */
 
 /*--------------------------------------------------------------
+# Send File
+--------------------------------------------------------------*/
+
+#sendFileDiv {
+    z-index: 7;
+    display: none;
+    padding: 10px;
+    margin: auto;
+    min-width: 320px;
+    background: var(--body-bg);
+    border-radius: 5px;
+    color: white;
+    overflow: hidden;
+}
+
+#sendAbortBtn {
+    padding: 5px;
+    border-radius: 5px;
+    color: white;
+    background: transparent;
+}
+
+#sendAbortBtn:hover {
+    color: rgb(255, 0, 0);
+    transform: var(--btns-hover-scale);
+    transition: all 0.3s ease-in-out;
+}
+
+progress {
+    width: 0;
+    min-width: 100%;
+}
+
+/*--------------------------------------------------------------
 # Whiteboard
 --------------------------------------------------------------*/
 

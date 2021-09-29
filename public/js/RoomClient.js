@@ -105,6 +105,17 @@ class RoomClient {
         this.recScreenStream = null;
         this._isRecording = false;
 
+        // file transfer settings
+        this.fileToSend = null;
+        this.fileReader = null;
+        this.receiveBuffer = [];
+        this.receivedSize = 0;
+        this.incomingFileInfo = null;
+        this.incomingFileData = null;
+        this.sendInProgress = false;
+        this.fileSharingInput = '*';
+        this.chunkSize = 1024 * 16; // 16kb/s
+
         this.myVideoEl = null;
         this.connectedRoom = null;
         this.debug = false;
@@ -390,6 +401,28 @@ class RoomClient {
             function (data) {
                 console.log('Peer info update:', data);
                 this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'fileInfo',
+            function (data) {
+                console.log('File info:', data);
+                this.handleFileInfo(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'file',
+            function (data) {
+                this.handleFile(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'fileAbort',
+            function (data) {
+                this.handleFileAbort(data);
             }.bind(this),
         );
 
@@ -1430,6 +1463,249 @@ class RoomClient {
         this.getId('recordingStatus').innerHTML = '🔴 REC 0s';
         this.event(_EVENTS.stopRec);
         this.sound('recStop');
+    }
+
+    // ####################################################
+    // FILE SHARING
+    // ####################################################
+
+    selectFileToShare() {
+        this.sound('open');
+
+        Swal.fire({
+            allowOutsideClick: false,
+            background: swalBackground,
+            position: 'center',
+            title: 'Share the file',
+            input: 'file',
+            inputAttributes: {
+                accept: this.fileSharingInput,
+                'aria-label': 'Select the file',
+            },
+            showDenyButton: true,
+            confirmButtonText: `Send`,
+            denyButtonText: `Cancel`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.fileToSend = result.value;
+                if (this.fileToSend && this.fileToSend.size > 0) {
+                    if (!this.thereIsConsumers()) {
+                        userLog('info', 'No participants detected', 'top-end');
+                        return;
+                    }
+                    // send some metadata about our file to peers in the room
+                    this.socket.emit('fileInfo', {
+                        peer_name: peer_name,
+                        fileName: this.fileToSend.name,
+                        fileSize: this.fileToSend.size,
+                        fileType: this.fileToSend.type,
+                    });
+                    setTimeout(() => {
+                        this.sendFileData();
+                    }, 1000);
+                } else {
+                    userLog('error', 'File not selected or empty.', 'top-end');
+                }
+            }
+        });
+    }
+
+    handleFileInfo(data) {
+        this.incomingFileInfo = data;
+        this.incomingFileData = [];
+        this.receiveBuffer = [];
+        this.receivedSize = 0;
+        let fileToReceiveInfo =
+            ' From: ' +
+            this.incomingFileInfo.peer_name +
+            '\n' +
+            ' incoming file: ' +
+            this.incomingFileInfo.fileName +
+            '\n' +
+            ' size: ' +
+            this.bytesToSize(this.incomingFileInfo.fileSize) +
+            '\n' +
+            ' type: ' +
+            this.incomingFileInfo.fileType;
+        console.log(fileToReceiveInfo);
+        this.userLog('info', fileToReceiveInfo, 'top-end');
+    }
+
+    sendFileData() {
+        console.log(
+            'Send file ' +
+                this.fileToSend.name +
+                ' size ' +
+                this.bytesToSize(this.fileToSend.size) +
+                ' type ' +
+                this.fileToSend.type,
+        );
+
+        this.sendInProgress = true;
+
+        sendFileInfo.innerHTML =
+            'File name: ' +
+            this.fileToSend.name +
+            '<br>' +
+            'File type: ' +
+            this.fileToSend.type +
+            '<br>' +
+            'File size: ' +
+            this.bytesToSize(this.fileToSend.size) +
+            '<br>';
+
+        sendFileDiv.style.display = 'inline';
+        sendProgress.max = this.fileToSend.size;
+
+        this.fileReader = new FileReader();
+        let offset = 0;
+
+        this.fileReader.addEventListener('error', (err) => console.error('fileReader error', err));
+        this.fileReader.addEventListener('abort', (e) => console.log('fileReader aborted', e));
+        this.fileReader.addEventListener('load', (e) => {
+            if (!this.sendInProgress) return;
+
+            this.sendFSData(e.target.result);
+            offset += e.target.result.byteLength;
+
+            sendProgress.value = offset;
+            sendFilePercentage.innerHTML = 'Send progress: ' + ((offset / this.fileToSend.size) * 100).toFixed(2) + '%';
+
+            // send file completed
+            if (offset === this.fileToSend.size) {
+                this.sendInProgress = false;
+                sendFileDiv.style.display = 'none';
+                userLog('success', 'The file ' + this.fileToSend.name + ' was sent successfully.', 'top-end');
+            }
+
+            if (offset < this.fileToSend.size) readSlice(offset);
+        });
+        const readSlice = (o) => {
+            const slice = this.fileToSend.slice(offset, o + this.chunkSize);
+            this.fileReader.readAsArrayBuffer(slice);
+        };
+        readSlice(0);
+    }
+
+    sendFSData(data) {
+        if (data) this.socket.emit('file', data);
+    }
+
+    abortFileTransfer() {
+        if (this.fileReader && this.fileReader.readyState === 1) {
+            this.fileReader.abort();
+            sendFileDiv.style.display = 'none';
+            this.sendInProgress = false;
+            this.socket.emit('fileAbort', {
+                peer_name: peer_name,
+            });
+        }
+    }
+
+    handleFileAbort(data) {
+        this.receiveBuffer = [];
+        this.incomingFileData = [];
+        this.receivedSize = 0;
+        console.log(data.peer_name + ' aborted the file transfer');
+        userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
+    }
+
+    handleFile(data) {
+        this.receiveBuffer.push(data);
+        this.receivedSize += data.byteLength;
+        // let getPercentage = ((receivedSize / this.incomingFileInfo.fileSize) * 100).toFixed(2);
+        // console.log("Received progress: " + getPercentage + "%");
+        if (this.receivedSize === this.incomingFileInfo.fileSize) {
+            this.incomingFileData = this.receiveBuffer;
+            this.receiveBuffer = [];
+            this.endFileDownload();
+        }
+    }
+
+    endFileDownload() {
+        this.sound('download');
+
+        // save received file into Blob
+        const blob = new Blob(this.incomingFileData);
+        const file = this.incomingFileInfo.fileName;
+
+        this.incomingFileData = [];
+
+        // if file is image, show the preview
+        if (isImageURL(this.incomingFileInfo.fileName)) {
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                Swal.fire({
+                    allowOutsideClick: false,
+                    background: swalBackground,
+                    position: 'center',
+                    title: 'Received file',
+                    text: this.incomingFileInfo.fileName + ' size ' + this.bytesToSize(this.incomingFileInfo.fileSize),
+                    imageUrl: e.target.result,
+                    imageAlt: 'mirotalksfu-file-img-download',
+                    showDenyButton: true,
+                    confirmButtonText: `Save`,
+                    denyButtonText: `Cancel`,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) this.saveBlobToFile(blob, file);
+                });
+            };
+            // blob where is stored downloaded file
+            reader.readAsDataURL(blob);
+        } else {
+            // not img file
+            Swal.fire({
+                allowOutsideClick: false,
+                background: swalBackground,
+                position: 'center',
+                title: 'Received file',
+                text: this.incomingFileInfo.fileName + ' size ' + this.bytesToSize(this.incomingFileInfo.fileSize),
+                showDenyButton: true,
+                confirmButtonText: `Save`,
+                denyButtonText: `Cancel`,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
+            }).then((result) => {
+                if (result.isConfirmed) this.saveBlobToFile(blob, file);
+            });
+        }
+    }
+
+    saveBlobToFile(blob, file) {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = file;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
+    }
+
+    bytesToSize(bytes) {
+        let sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+        if (bytes == 0) return '0 Byte';
+        let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
+        return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 
     // ####################################################

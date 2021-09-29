@@ -436,6 +436,7 @@ function roomIsReady() {
     show(raiseHandButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
+    show(fileShareButton);
     show(whiteboardButton);
     show(participantsButton);
     show(lockRoomButton);
@@ -607,6 +608,12 @@ function handleButtons() {
     };
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
+    };
+    fileShareButton.onclick = () => {
+        rc.selectFileToShare();
+    };
+    sendAbortBtn.onclick = () => {
+        rc.abortFileTransfer();
     };
     whiteboardButton.onclick = () => {
         toggleWhiteboard();

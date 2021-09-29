@@ -138,6 +138,7 @@ access to use this app.
             <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i> Stop video</button>
             <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i> Start screen</button>
             <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i> Stop screen</button>
+            <button id="fileShareButton" class="hidden"><i class="fas fa-folder-open"></i> File Sharing</button>
             <div class="dropdown">
                 <button id="whiteboardButton" class="hidden">
                     <i class="fas fa-chalkboard-teacher"></i> Whiteboard
@@ -170,6 +171,13 @@ access to use this app.
             <!-- <div class="Camera"></div> -->
         </div>
         <div id="remoteAudios"></div>
+
+        <div id="sendFileDiv" class="fadein center">
+            <div id="sendFileInfo"></div>
+            <div id="sendFilePercentage"></div>
+            <progress id="sendProgress" max="0" value="0"></progress>
+            <button id="sendAbortBtn" class="fas fa-stop-circle">&nbsp; Abort</button>
+        </div>
 
         <section id="participants" class="fadein center hidden">
             <header id="participantsHeader" class="participants-header">

@@ -252,6 +252,19 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });
 
+    socket.on('fileInfo', (data) => {
+        log.debug('Send File Info', data);
+        roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
+    });
+
+    socket.on('file', (data) => {
+        roomList.get(socket.room_id).broadCast(socket.id, 'file', data);
+    });
+
+    socket.on('fileAbort', (data) => {
+        roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
+    });
+
     socket.on('wbCanvasToJson', (data) => {
         // let objLength = bytesToSize(Object.keys(data).length);
         // log.debug('Send Whiteboard canvas JSON', { length: objLength });
