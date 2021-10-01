@@ -398,8 +398,6 @@ function joinRoom(peer_name, room_id) {
             peer_info,
             isAudioAllowed,
             isVideoAllowed,
-            isAudioOn,
-            isVideoOn,
             roomIsReady,
         );
         handleRoomClientEvents();
@@ -589,10 +587,12 @@ function handleButtons() {
     };
     startAudioButton.onclick = () => {
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+        rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.audio);
+        rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', false);
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
@@ -1178,7 +1178,7 @@ function wbCanvasSaveImg() {
 }
 
 function wbCanvasToJson() {
-    if (rc.thereIsConsumers()) {
+    if (rc.thereIsParticipants()) {
         let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
         rc.socket.emit('wbCanvasToJson', wbCanvasJson);
     }
@@ -1200,7 +1200,7 @@ function getWhiteboardAction(action) {
 
 function whiteboardAction(data, emit = true) {
     if (emit) {
-        if (rc.thereIsConsumers()) {
+        if (rc.thereIsParticipants()) {
             rc.socket.emit('whiteboardAction', data);
         }
     } else {
@@ -1300,10 +1300,10 @@ async function getParticipantsTable(peers) {
             table += `
             <tr id='${peer_id}'>
                 <td>${peer_name}</td>
-                <td><button id='${peer_id}__audio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
-                <td><button id='${peer_id}__video' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
+                <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}__eject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
+                <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;
         }

@@ -216,6 +216,12 @@ module.exports = class Room {
         }
     }
 
+    sendToAll(action, data) {
+        for (let peer_id of Array.from(this.peers.keys())) {
+            this.send(peer_id, action, data);
+        }
+    }
+
     send(socket_id, action, data) {
         this.io.to(socket_id).emit(action, data);
     }

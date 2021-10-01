@@ -276,6 +276,11 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'whiteboardAction', data);
     });
 
+    socket.on('setVideoOff', (data) => {
+        log.debug('Video off', getPeerName());
+        roomList.get(socket.room_id).broadCast(socket.id, 'setVideoOff', data);
+    });
+
     socket.on('join', (data, cb) => {
         if (!roomList.has(socket.room_id)) {
             return cb({
@@ -331,9 +336,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
+        if (!roomList.has(socket.room_id)) return;
         log.debug('Connect transport', getPeerName());
 
-        if (!roomList.has(socket.room_id)) return;
         await roomList.get(socket.room_id).connectPeerTransport(socket.id, transport_id, dtlsParameters);
 
         callback('success');
@@ -401,8 +406,17 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRoomInfo', (_, cb) => {
-        cb(roomList.get(socket.room_id).toJson());
         log.debug('Send Room Info');
+        cb(roomList.get(socket.room_id).toJson());
+    });
+
+    socket.on('refreshParticipantsCount', () => {
+        let data = {
+            room_id: socket.room_id,
+            peer_counts: roomList.get(socket.room_id).getPeers().size,
+        };
+        log.debug('Refresh Participants count', data);
+        roomList.get(socket.room_id).sendToAll('refreshParticipantsCount', data);
     });
 
     socket.on('message', (data) => {
@@ -423,6 +437,8 @@ io.on('connection', (socket) => {
         if (roomList.get(socket.room_id).getPeers().size === 0 && roomList.get(socket.room_id).isLocked()) {
             roomList.get(socket.room_id).setLocked(false);
         }
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
     });
 
     socket.on('exitRoom', async (_, callback) => {
@@ -439,6 +455,8 @@ io.on('connection', (socket) => {
         if (roomList.get(socket.room_id).getPeers().size === 0) {
             roomList.delete(socket.room_id);
         }
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
 
         socket.room_id = null;
 
@@ -457,6 +475,14 @@ io.on('connection', (socket) => {
         return (
             roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name
         );
+    }
+
+    function removeMeData() {
+        return {
+            room_id: socket.room_id,
+            peer_id: socket.id,
+            peer_counts: roomList.get(socket.room_id).getPeers().size,
+        };
     }
 
     function bytesToSize(bytes) {

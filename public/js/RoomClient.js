@@ -6,6 +6,10 @@ const cfg = {
 
 const html = {
     newline: '<br />',
+    audioOn: 'fas fa-microphone',
+    audioOff: 'fas fa-microphone-slash',
+    videoOn: 'fas fa-video',
+    videoOff: 'fas fa-video-slash',
 };
 
 const image = {
@@ -62,8 +66,6 @@ class RoomClient {
         peer_info,
         isAudioAllowed,
         isVideoAllowed,
-        isAudioOn,
-        isVideoOn,
         successCallback,
     ) {
         this.remoteAudioEl = remoteAudioEl;
@@ -79,8 +81,6 @@ class RoomClient {
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
-        this.isAudioOn = isAudioOn;
-        this.isVideoOn = isVideoOn;
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
@@ -117,7 +117,7 @@ class RoomClient {
         this.chunkSize = 1024 * 16; // 16kb/s
 
         this.myVideoEl = null;
-        this.connectedRoom = null;
+        this.room_info = null;
         this.debug = false;
 
         this.consumers = new Map();
@@ -187,8 +187,9 @@ class RoomClient {
                         this.roomIsLocked();
                         return;
                     }
-                    this.connectedRoom = room;
-                    console.log('07 ----> Joined to room', this.connectedRoom);
+                    this.room_info = room;
+                    console.log('07 ----> Joined to room', this.room_info);
+                    await this.handleRoomInfo(this.room_info);
                     const data = await this.socket.request('getRouterRtpCapabilities');
                     this.device = await this.loadDevice(data);
                     console.log('08 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
@@ -200,6 +201,19 @@ class RoomClient {
             .catch((err) => {
                 console.log('Join error:', err);
             });
+    }
+
+    async handleRoomInfo(room_info) {
+        let peers = new Map(JSON.parse(room_info.peers));
+        participantsCount = peers.size;
+        for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
+            let peer_info = peers.get(peer).peer_info;
+            console.log('|| ----> Remote Peer info', peer_info);
+            if (!peer_info.peer_video) {
+                await this.setVideoOff(peer_info, true);
+            }
+        }
+        this.refreshParticipantsCount();
     }
 
     async loadDevice(routerRtpCapabilities) {
@@ -361,6 +375,31 @@ class RoomClient {
         );
 
         this.socket.on(
+            'setVideoOff',
+            function (data) {
+                console.log('Video off:', data);
+                this.setVideoOff(data, true);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'removeMe',
+            function (data) {
+                console.log('Remove me:', data);
+                this.removeVideoOff(data.peer_id);
+                participantsCount = data.peer_counts;
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'refreshParticipantsCount',
+            function (data) {
+                console.log('Participants Count:', data);
+                participantsCount = data.peer_counts;
+            }.bind(this),
+        );
+
+        this.socket.on(
             'newProducers',
             async function (data) {
                 if (data.length > 0) {
@@ -455,13 +494,18 @@ class RoomClient {
     // ####################################################
 
     startLocalMedia() {
-        if (this.isAudioAllowed && this.isAudioOn) {
+        if (this.isAudioAllowed && this.peer_info.peer_audio) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         }
-        if (this.isVideoAllowed && this.isVideoOn) {
+        if (this.isVideoAllowed && this.peer_info.peer_video) {
             console.log('10 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
+        }
+        if (!this.peer_info.peer_video) {
+            console.log('10 ----> Video is off');
+            this.setVideoOff(this.peer_info, false);
+            this.sendVideoOff();
         }
     }
 
@@ -567,12 +611,15 @@ class RoomClient {
 
             switch (type) {
                 case mediaType.audio:
+                    this.setIsAudio(this.peer_id, true);
                     this.event(_EVENTS.startAudio);
                     break;
                 case mediaType.video:
+                    this.setIsVideo(true);
                     this.event(_EVENTS.startVideo);
                     break;
                 case mediaType.screen:
+                    this.setIsScreen(true);
                     this.event(_EVENTS.startScreen);
                     break;
                 default:
@@ -664,7 +711,8 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, d, p, i;
+        let elem, d, p, i, b;
+        this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = id + '__d';
@@ -678,11 +726,15 @@ class RoomClient {
         p.id = this.peer_id + '__name';
         p.innerHTML = '👤 ' + this.peer_name + ' (me)';
         i = document.createElement('i');
-        i.id = this.peer_id + '__peerHand';
+        i.id = this.peer_id + '__hand';
         i.className = 'fas fa-hand-paper pulsate';
+        b = document.createElement('button');
+        b.id = this.peer_id + '__audio';
+        b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
         d.appendChild(elem);
-        d.appendChild(p);
         d.appendChild(i);
+        d.appendChild(p);
+        d.appendChild(b);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
@@ -778,12 +830,15 @@ class RoomClient {
 
         switch (type) {
             case mediaType.audio:
+                this.setIsAudio(this.peer_id, false);
                 this.event(_EVENTS.stopAudio);
                 break;
             case mediaType.video:
+                this.setIsVideo(false);
                 this.event(_EVENTS.stopVideo);
                 break;
             case mediaType.screen:
+                this.setIsScreen(false);
                 this.event(_EVENTS.stopScreen);
                 break;
             default:
@@ -852,9 +907,10 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, d, p, i;
+        let elem, d, p, i, b;
         switch (type) {
             case mediaType.video:
+                this.removeVideoOff(peer_info.peer_id);
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__d';
@@ -868,11 +924,15 @@ class RoomClient {
                 p.id = peer_info.peer_id + '__name';
                 p.innerHTML = '👤 ' + peer_name;
                 i = document.createElement('i');
-                i.id = peer_info.peer_id + '__peerHand';
+                i.id = peer_info.peer_id + '__hand';
                 i.className = 'fas fa-hand-paper pulsate';
+                b = document.createElement('button');
+                b.id = peer_info.peer_id + '__audio';
+                b.className = peer_info.peer_audio ? html.audioOn : html.audioOff;
                 d.appendChild(elem);
                 d.appendChild(p);
                 d.appendChild(i);
+                d.appendChild(b);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id);
@@ -894,6 +954,8 @@ class RoomClient {
     }
 
     removeConsumer(consumer_id) {
+        console.log('Remove consumer_id:', consumer_id);
+
         let elem = this.getId(consumer_id);
         let d = this.getId(consumer_id + '__d');
 
@@ -908,6 +970,45 @@ class RoomClient {
 
         this.consumers.delete(consumer_id);
         this.sound('left');
+    }
+
+    // ####################################################
+    // HANDLE VIDEO OFF
+    // ####################################################
+
+    async setVideoOff(peer_info, remotePeer = false) {
+        let d, i, b, p;
+        let peer_id = peer_info.peer_id;
+        let peer_name = peer_info.peer_name;
+        let peer_audio = peer_info.peer_audio;
+        d = document.createElement('div');
+        d.className = 'Camera';
+        d.id = peer_id + '__videoOff';
+        i = document.createElement('img');
+        i.className = 'center pulsate';
+        i.id = peer_id + '__img';
+        p = document.createElement('p');
+        p.id = peer_id + '__name';
+        p.innerHTML = '👤 ' + peer_name + (remotePeer ? '' : ' (me) ');
+        b = document.createElement('button');
+        b.id = peer_id + '__audio';
+        b.className = peer_audio ? html.audioOn : html.audioOff;
+        d.appendChild(i);
+        d.appendChild(p);
+        d.appendChild(b);
+        this.videoMediaContainer.appendChild(d);
+        this.setVideoAvatarImgName(i.id, peer_name);
+        this.getId(i.id).style.display = 'block';
+        resizeVideoMedia();
+    }
+
+    removeVideoOff(peer_id) {
+        let pvOff = this.getId(peer_id + '__videoOff');
+        if (pvOff) {
+            pvOff.parentNode.removeChild(pvOff);
+            resizeVideoMedia();
+            this.sound('left');
+        }
     }
 
     // ####################################################
@@ -1005,6 +1106,37 @@ class RoomClient {
         });
     }
 
+    setVideoAvatarImgName(elemId, peer_name) {
+        let elem = this.getId(elemId);
+        let avatarImgSize = 250;
+        elem.setAttribute(
+            'src',
+            cfg.msgAvatar + '?name=' + peer_name + '&size=' + avatarImgSize + '&background=random&rounded=true',
+        );
+    }
+
+    setIsAudio(peer_id, status) {
+        this.peer_info.peer_audio = status;
+        let b = this.getPeerAudioBtn(peer_id);
+        if (b) b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
+    }
+
+    setIsVideo(status) {
+        this.peer_info.peer_video = status;
+        if (!this.peer_info.peer_video) {
+            this.setVideoOff(this.peer_info, false);
+            this.sendVideoOff();
+        }
+    }
+
+    setIsScreen(status) {
+        return status;
+    }
+
+    sendVideoOff() {
+        this.socket.emit('setVideoOff', this.peer_info);
+    }
+
     // ####################################################
     // GET
     // ####################################################
@@ -1036,6 +1168,18 @@ class RoomClient {
     async getRoomInfo() {
         let room_info = await this.socket.request('getRoomInfo');
         return room_info;
+    }
+
+    refreshParticipantsCount() {
+        this.socket.emit('refreshParticipantsCount');
+    }
+
+    getPeerAudioBtn(peer_id) {
+        return this.getId(peer_id + '__audio');
+    }
+
+    getPeerHandBtn(peer_id) {
+        return this.getId(peer_id + '__hand');
     }
 
     // ####################################################
@@ -1074,8 +1218,8 @@ class RoomClient {
         });
     }
 
-    thereIsConsumers() {
-        if (this.consumers.size > 0) {
+    thereIsParticipants() {
+        if (this.consumers.size > 0 || participantsCount > 1) {
             return true;
         }
         return false;
@@ -1202,7 +1346,7 @@ class RoomClient {
     }
 
     sendMessage() {
-        if (!this.thereIsConsumers()) {
+        if (!this.thereIsParticipants()) {
             chatMessage.value = '';
             this.userLog('info', 'No participants in the room', 'top-end');
             return;
@@ -1495,7 +1639,7 @@ class RoomClient {
             if (result.isConfirmed) {
                 this.fileToSend = result.value;
                 if (this.fileToSend && this.fileToSend.size > 0) {
-                    if (!this.thereIsConsumers()) {
+                    if (!this.thereIsParticipants()) {
                         userLog('info', 'No participants detected', 'top-end');
                         return;
                     }
@@ -1761,27 +1905,28 @@ class RoomClient {
 
     peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
         let peer_id = id;
-
         if (emit) {
             if (!broadcast) {
                 if (participantsCount === 1) return;
 
-                const words = peer_id.split('__');
+                const words = peer_id.split('___');
                 peer_id = words[0];
 
                 switch (action) {
                     case 'eject':
                         let peer = this.getId(peer_id);
-                        if (peer) peer.parentNode.removeChild(peer);
-                        participantsCount--;
-                        refreshParticipantsCount(participantsCount);
+                        if (peer) {
+                            peer.parentNode.removeChild(peer);
+                            participantsCount--;
+                            refreshParticipantsCount(participantsCount);
+                        }
                         break;
                     case 'mute':
-                        let peerAudioButton = this.getId(peer_id + '__audio');
+                        let peerAudioButton = this.getId(peer_id + '___pAudio');
                         if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
                         break;
                     case 'hide':
-                        let peerVideoButton = this.getId(peer_id + '__video');
+                        let peerVideoButton = this.getId(peer_id + '___pVideo');
                         if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
                 }
             } else {
@@ -1845,6 +1990,7 @@ class RoomClient {
                 case 'mute':
                     if (peer_id === this.peer_id || broadcast) {
                         this.closeProducer(mediaType.audio);
+                        this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
                         this.userLog(
                             'warning',
                             from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
@@ -1877,14 +2023,14 @@ class RoomClient {
         if (emit) {
             switch (type) {
                 case 'audio':
-                    this.peer_info.peer_audio = status;
+                    this.setIsAudio(peer_id, status);
                     break;
                 case 'video':
-                    this.peer_info.peer_video = status;
+                    this.setIsVideo(status);
                     break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
-                    let peer_hand = this.getId(peer_id + '__peerHand');
+                    let peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
                         if (peer_hand) peer_hand.style.display = 'flex';
                         this.event(_EVENTS.raiseHand);
@@ -1905,11 +2051,13 @@ class RoomClient {
         } else {
             switch (type) {
                 case 'audio':
+                    this.setIsAudio(peer_id, status);
                     break;
                 case 'video':
+                    this.setIsVideo(status);
                     break;
                 case 'hand':
-                    let peer_hand = this.getId(peer_id + '__peerHand');
+                    let peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
                         if (peer_hand) peer_hand.style.display = 'flex';
                         this.userLog(
@@ -1931,7 +2079,7 @@ class RoomClient {
         let peer_id = peer_info.peer_id;
         let peer_hand_status = peer_info.peer_hand;
         if (peer_hand_status) {
-            let peer_hand = this.getId(peer_id + '__peerHand');
+            let peer_hand = this.getPeerHandBtn(peer_id);
             if (peer_hand) peer_hand.style.display = 'flex';
         }
         //...
