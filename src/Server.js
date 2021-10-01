@@ -452,11 +452,12 @@ io.on('connection', (socket) => {
 
         // close transports
         await roomList.get(socket.room_id).removePeer(socket.id);
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
+
         if (roomList.get(socket.room_id).getPeers().size === 0) {
             roomList.delete(socket.room_id);
         }
-
-        roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
 
         socket.room_id = null;
 
@@ -479,9 +480,9 @@ io.on('connection', (socket) => {
 
     function removeMeData() {
         return {
-            room_id: socket.room_id,
+            room_id: roomList.get(socket.room_id) && socket.room_id,
             peer_id: socket.id,
-            peer_counts: roomList.get(socket.room_id).getPeers().size,
+            peer_counts: roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().size,
         };
     }
 
