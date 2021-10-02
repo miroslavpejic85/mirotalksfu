@@ -416,7 +416,7 @@ io.on('connection', (socket) => {
             peer_counts: roomList.get(socket.room_id).getPeers().size,
         };
         log.debug('Refresh Participants count', data);
-        roomList.get(socket.room_id).sendToAll('refreshParticipantsCount', data);
+        roomList.get(socket.room_id).broadCast(socket.id, 'refreshParticipantsCount', data);
     });
 
     socket.on('message', (data) => {

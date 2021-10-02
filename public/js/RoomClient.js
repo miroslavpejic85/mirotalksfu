@@ -1219,6 +1219,7 @@ class RoomClient {
     }
 
     thereIsParticipants() {
+        // console.log('participantsCount ---->', participantsCount);
         if (this.consumers.size > 0 || participantsCount > 1) {
             return true;
         }
