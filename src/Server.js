@@ -140,7 +140,7 @@ async function ngrokStart() {
             tunnel: tunnel,
         });
     } catch (err) {
-        console.error('Ngrok Start error: ', err);
+        log.error('Ngrok Start error: ', err);
         process.exit(1);
     }
 }
@@ -192,7 +192,7 @@ async function createWorkers() {
             rtcMaxPort: config.mediasoup.worker.rtcMaxPort,
         });
         worker.on('died', () => {
-            console.error('Mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid);
+            log.error('Mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid);
             setTimeout(() => process.exit(1), 2000);
         });
         workers.push(worker);
@@ -265,6 +265,11 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
     });
 
+    socket.on('youTubeAction', (data) => {
+        log.debug('YouTube: ', data);
+        roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+    });
+
     socket.on('wbCanvasToJson', (data) => {
         // let objLength = bytesToSize(Object.keys(data).length);
         // log.debug('Send Whiteboard canvas JSON', { length: objLength });
@@ -328,7 +333,7 @@ io.on('connection', (socket) => {
             const { params } = await roomList.get(socket.room_id).createWebRtcTransport(socket.id);
             callback(params);
         } catch (err) {
-            console.error('Create WebRtc Transport error: ', err);
+            log.error('Create WebRtc Transport error: ', err);
             callback({
                 error: err.message,
             });

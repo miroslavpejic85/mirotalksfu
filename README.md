@@ -20,6 +20,7 @@ Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
 -   Collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
 -   Recording your Screen, Audio or Video
+-   Share any YouTube video in real time to your participants
 -   Full Screen Mode on mouse click on the Video element
 -   Supports [REST API](api/README.md) (Application Programming Interface)
 

@@ -18,6 +18,7 @@ const image = {
     locked: '../images/locked.png',
     mute: '../images/mute.png',
     hide: '../images/hide.png',
+    youtube: '../images/youtube.png',
 };
 
 const mediaType = {
@@ -455,6 +456,13 @@ class RoomClient {
             'file',
             function (data) {
                 this.handleFile(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'youTubeAction',
+            function (data) {
+                this.youTubeAction(data);
             }.bind(this),
         );
 
@@ -1855,6 +1863,117 @@ class RoomClient {
         if (bytes == 0) return '0 Byte';
         let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
+    // ####################################################
+    // YOUTUBE SHARE VIDEO
+    // ####################################################
+
+    youTubeShareVideo() {
+        rc.sound('open');
+
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.youtube,
+            title: 'Share YouTube Video',
+            text: 'Past YouTube video URL',
+            input: 'text',
+            showCancelButton: true,
+            confirmButtonText: `Share`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.value) {
+                if (!this.thereIsParticipants()) {
+                    userLog('info', 'No participants detected', 'top-end');
+                    return;
+                }
+                // https://www.youtube.com/watch?v=RT6_Id5-7-s
+
+                let you_tube_url = this.getYoutubeEmbed(result.value);
+                if (you_tube_url) {
+                    let data = {
+                        peer_name: this.peer_name,
+                        you_tube_url: you_tube_url,
+                        action: 'open',
+                    };
+                    console.log('YouTube video URL: ', you_tube_url);
+                    this.socket.emit('youTubeAction', data);
+                    this.openYouTube(data);
+                } else {
+                    this.userLog('error', 'Not valid YouTube URL', 'top-end');
+                }
+            }
+        });
+    }
+
+    getYoutubeEmbed(url) {
+        let regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#&?]*).*/;
+        let match = url.match(regExp);
+        return match && match[7].length == 11 ? 'https://www.youtube.com/embed/' + match[7] + '?autoplay=1' : false;
+    }
+
+    youTubeAction(data) {
+        let action = data.action;
+        switch (action) {
+            case 'open':
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the YouTube video`, 'top-end');
+                this.openYouTube(data);
+                break;
+            case 'close':
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the YouTube video`, 'top-end');
+                this.closeYouTube();
+                break;
+        }
+    }
+
+    openYouTube(data) {
+        let d, iframe;
+        let peer_name = data.peer_name;
+        let you_tube_url = data.you_tube_url;
+        this.closeYouTube();
+        youTubeSettings.style.display = 'block';
+        d = document.createElement('div');
+        d.className = 'Camera';
+        d.id = '__youTube';
+        iframe = document.createElement('iframe');
+        iframe.setAttribute('id', '__youTubeIframe');
+        iframe.setAttribute('title', peer_name);
+        iframe.setAttribute('width', '100%');
+        iframe.setAttribute('height', '100%');
+        iframe.setAttribute('src', you_tube_url);
+        iframe.setAttribute(
+            'allow',
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+        );
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute('allowfullscreen', true);
+        d.appendChild(iframe);
+        this.videoMediaContainer.appendChild(d);
+        resizeVideoMedia();
+        rc.sound('joined');
+    }
+
+    closeYouTube(emit = false) {
+        if (emit) {
+            let data = {
+                peer_name: this.peer_name,
+                action: 'close',
+            };
+            this.socket.emit('youTubeAction', data);
+        }
+        let youTubeDiv = this.getId('__youTube');
+        if (youTubeDiv) {
+            youTubeSettings.style.display = 'none';
+            youTubeDiv.parentNode.removeChild(youTubeDiv);
+            resizeVideoMedia();
+            rc.sound('left');
+        }
     }
 
     // ####################################################

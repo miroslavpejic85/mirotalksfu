@@ -434,6 +434,7 @@ function roomIsReady() {
     show(raiseHandButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
+    show(youTubeShareButton);
     show(fileShareButton);
     show(whiteboardButton);
     show(participantsButton);
@@ -611,6 +612,12 @@ function handleButtons() {
     };
     fileShareButton.onclick = () => {
         rc.selectFileToShare();
+    };
+    youTubeShareButton.onclick = () => {
+        rc.youTubeShareVideo();
+    };
+    youTubeCloseBtn.onclick = () => {
+        rc.closeYouTube(true);
     };
     sendAbortBtn.onclick = () => {
         rc.abortFileTransfer();
