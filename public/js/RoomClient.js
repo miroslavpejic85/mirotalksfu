@@ -505,10 +505,14 @@ class RoomClient {
         if (this.isAudioAllowed && this.peer_info.peer_audio) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
+        } else {
+            setColor(startAudioButton, 'red');
         }
         if (this.isVideoAllowed && this.peer_info.peer_video) {
             console.log('10 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
+        } else {
+            setColor(startVideoButton, 'red');
         }
         if (!this.peer_info.peer_video) {
             console.log('10 ----> Video is off');
