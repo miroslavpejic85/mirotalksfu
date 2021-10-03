@@ -37,6 +37,8 @@ let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isAudioOn = true;
 let isVideoOn = true;
+let initAudioButton = null;
+let initVideoButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -242,7 +244,8 @@ function whoAreYou() {
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
+            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>&nbsp;|
+            <button id="initDisableAllButton" class="fas fa-eye-slash" style="color: red;" onclick="disableAudioVideo()"></button>
         </div>`,
         confirmButtonText: `Join meeting`,
         showClass: {
@@ -261,13 +264,14 @@ function whoAreYou() {
         joinRoom(peer_name, room_id);
     });
 
-    let initAudioButton = document.getElementById('initAudioButton');
-    let initVideoButton = document.getElementById('initVideoButton');
+    initAudioButton = document.getElementById('initAudioButton');
+    initVideoButton = document.getElementById('initVideoButton');
     if (!isAudioAllowed) initAudioButton.className = 'hidden';
     if (!isVideoAllowed) initVideoButton.className = 'hidden';
     if (!DetectRTC.isMobileDevice) {
         setTippy('initAudioButton', 'Enable / Disable audio', 'left');
         setTippy('initVideoButton', 'Enable / Disable video', 'right');
+        setTippy('initDisableAllButton', 'Disable audio & video', 'right');
     }
 }
 
@@ -283,6 +287,14 @@ function handleVideo(e) {
     e.target.className = 'fas fa-video' + (isVideoOn ? '' : '-slash');
     setColor(e.target, isVideoOn ? 'white' : 'red');
     setColor(startVideoButton, isVideoOn ? 'white' : 'red');
+}
+
+function disableAudioVideo() {
+    isAudioOn, (isVideoOn = false);
+    initAudioButton.className = 'fas fa-microphone-slash';
+    initVideoButton.className = 'fas fa-video-slash';
+    setColor(initAudioButton, 'red');
+    setColor(initVideoButton, 'red');
 }
 
 // ####################################################
