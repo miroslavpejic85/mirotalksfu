@@ -1870,7 +1870,7 @@ class RoomClient {
     // ####################################################
 
     youTubeShareVideo() {
-        rc.sound('open');
+        this.sound('open');
 
         Swal.fire({
             background: swalBackground,
@@ -1956,7 +1956,7 @@ class RoomClient {
         d.appendChild(iframe);
         this.videoMediaContainer.appendChild(d);
         resizeVideoMedia();
-        rc.sound('joined');
+        this.sound('joined');
     }
 
     closeYouTube(emit = false) {
@@ -1972,7 +1972,7 @@ class RoomClient {
             youTubeSettings.style.display = 'none';
             youTubeDiv.parentNode.removeChild(youTubeDiv);
             resizeVideoMedia();
-            rc.sound('left');
+            this.sound('left');
         }
     }
 
