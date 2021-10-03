@@ -977,7 +977,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, i, b, p;
+        let d, i, h, b, p;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -992,10 +992,14 @@ class RoomClient {
         p.innerHTML = '👤 ' + peer_name + (remotePeer ? '' : ' (me) ');
         b = document.createElement('button');
         b.id = peer_id + '__audio';
+        h = document.createElement('i');
+        h.id = peer_info.peer_id + '__hand';
+        h.className = 'fas fa-hand-paper pulsate';
         b.className = peer_audio ? html.audioOn : html.audioOff;
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
+        d.appendChild(h);
         this.videoMediaContainer.appendChild(d);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
