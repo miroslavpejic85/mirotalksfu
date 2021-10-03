@@ -992,10 +992,10 @@ class RoomClient {
         p.innerHTML = '👤 ' + peer_name + (remotePeer ? '' : ' (me) ');
         b = document.createElement('button');
         b.id = peer_id + '__audio';
+        b.className = peer_audio ? html.audioOn : html.audioOff;
         h = document.createElement('i');
         h.id = peer_info.peer_id + '__hand';
         h.className = 'fas fa-hand-paper pulsate';
-        b.className = peer_audio ? html.audioOn : html.audioOff;
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
