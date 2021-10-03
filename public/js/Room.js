@@ -290,7 +290,8 @@ function handleVideo(e) {
 }
 
 function disableAudioVideo() {
-    isAudioOn, (isVideoOn = false);
+    isAudioOn = false;
+    isVideoOn = false;
     initAudioButton.className = 'fas fa-microphone-slash';
     initVideoButton.className = 'fas fa-video-slash';
     setColor(initAudioButton, 'red');
