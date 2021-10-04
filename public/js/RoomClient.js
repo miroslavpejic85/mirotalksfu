@@ -118,7 +118,6 @@ class RoomClient {
         this.chunkSize = 1024 * 16; // 16kb/s
 
         this.myVideoEl = null;
-        this.room_info = null;
         this.debug = false;
 
         this.consumers = new Map();
@@ -188,12 +187,10 @@ class RoomClient {
                         this.roomIsLocked();
                         return;
                     }
-                    this.room_info = room;
-                    console.log('07 ----> Joined to room', this.room_info);
-                    await this.handleRoomInfo(this.room_info);
+                    await this.handleRoomInfo(room);
                     const data = await this.socket.request('getRouterRtpCapabilities');
                     this.device = await this.loadDevice(data);
-                    console.log('08 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
+                    console.log('07 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
                     await this.initTransports(this.device);
                     this.startLocalMedia();
                     this.socket.emit('getProducers');
@@ -204,12 +201,12 @@ class RoomClient {
             });
     }
 
-    async handleRoomInfo(room_info) {
-        let peers = new Map(JSON.parse(room_info.peers));
+    async handleRoomInfo(room) {
+        let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
-            console.log('|| ----> Remote Peer info', peer_info);
+            // console.log('07 ----> Remote Peer info', peer_info);
             if (!peer_info.peer_video) {
                 await this.setVideoOff(peer_info, true);
             }
@@ -415,7 +412,7 @@ class RoomClient {
         this.socket.on(
             'message',
             function (data) {
-                console.log('Message', data);
+                console.log('New message:', data);
                 this.showMessage(data);
             }.bind(this),
         );
@@ -503,19 +500,17 @@ class RoomClient {
 
     startLocalMedia() {
         if (this.isAudioAllowed && this.peer_info.peer_audio) {
-            console.log('09 ----> Start audio media');
+            console.log('08 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
             setColor(startAudioButton, 'red');
         }
         if (this.isVideoAllowed && this.peer_info.peer_video) {
-            console.log('10 ----> Start video media');
+            console.log('09 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
         } else {
             setColor(startVideoButton, 'red');
-        }
-        if (!this.peer_info.peer_video) {
-            console.log('10 ----> Video is off');
+            console.log('09 ----> Video is off');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
@@ -577,7 +572,7 @@ class RoomClient {
             }
             producer = await this.producerTransport.produce(params);
 
-            console.log('Producer', producer);
+            console.log('Producer id', producer.id);
 
             this.producers.set(producer.id, producer);
 
@@ -1016,6 +1011,7 @@ class RoomClient {
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         resizeVideoMedia();
+        this.sound('joined');
     }
 
     removeVideoOff(peer_id) {
@@ -1374,6 +1370,7 @@ class RoomClient {
             peer_name: this.peer_name,
             peer_msg: peer_msg,
         };
+        console.log('Send message:', data);
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
         this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg);

@@ -39,6 +39,7 @@ let isAudioOn = true;
 let isVideoOn = true;
 let initAudioButton = null;
 let initVideoButton = null;
+let initDisableAllButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -244,7 +245,7 @@ function whoAreYou() {
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>&nbsp;|
+            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button><i id="separator" class="">&nbsp;|</i>
             <button id="initDisableAllButton" class="fas fa-eye-slash" style="color: red;" onclick="disableAudioVideo()"></button>
         </div>`,
         confirmButtonText: `Join meeting`,
@@ -266,8 +267,14 @@ function whoAreYou() {
 
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
+    initDisableAllButton = document.getElementById('initDisableAllButton');
+    let separator = document.getElementById('separator');
     if (!isAudioAllowed) initAudioButton.className = 'hidden';
-    if (!isVideoAllowed) initVideoButton.className = 'hidden';
+    if (!isVideoAllowed) {
+        initVideoButton.className = 'hidden';
+        initDisableAllButton.className = 'hidden';
+        separator.className = 'hidden';
+    }
     if (!DetectRTC.isMobileDevice) {
         setTippy('initAudioButton', 'Enable / Disable audio', 'left');
         setTippy('initVideoButton', 'Enable / Disable video', 'right');
