@@ -1682,41 +1682,40 @@ class RoomClient {
         let fileToReceiveInfo =
             ' From: ' +
             this.incomingFileInfo.peer_name +
-            '\n' +
-            ' incoming file: ' +
+            html.newline +
+            ' Incoming file: ' +
             this.incomingFileInfo.fileName +
-            '\n' +
-            ' size: ' +
-            this.bytesToSize(this.incomingFileInfo.fileSize) +
-            '\n' +
-            ' type: ' +
-            this.incomingFileInfo.fileType;
-        console.log(fileToReceiveInfo);
+            html.newline +
+            ' File type: ' +
+            this.incomingFileInfo.fileType +
+            html.newline +
+            ' File size: ' +
+            this.bytesToSize(this.incomingFileInfo.fileSize);
+        receiveFileInfo.innerHTML = fileToReceiveInfo;
+        receiveFileDiv.style.display = 'inline';
+        receiveProgress.max = this.incomingFileInfo.fileSize;
         this.userLog('info', fileToReceiveInfo, 'top-end');
     }
 
     sendFileData() {
-        console.log(
-            'Send file ' +
-                this.fileToSend.name +
-                ' size ' +
-                this.bytesToSize(this.fileToSend.size) +
-                ' type ' +
-                this.fileToSend.type,
-        );
+        console.log('Send file ', {
+            name: this.fileToSend.name,
+            size: this.bytesToSize(this.fileToSend.size),
+            type: this.fileToSend.type,
+        });
 
         this.sendInProgress = true;
 
         sendFileInfo.innerHTML =
             'File name: ' +
             this.fileToSend.name +
-            '<br>' +
+            html.newline +
             'File type: ' +
             this.fileToSend.type +
-            '<br>' +
+            html.newline +
             'File size: ' +
             this.bytesToSize(this.fileToSend.size) +
-            '<br>';
+            html.newline;
 
         sendFileDiv.style.display = 'inline';
         sendProgress.max = this.fileToSend.size;
@@ -1770,6 +1769,7 @@ class RoomClient {
         this.receiveBuffer = [];
         this.incomingFileData = [];
         this.receivedSize = 0;
+        receiveFileDiv.style.display = 'none';
         console.log(data.peer_name + ' aborted the file transfer');
         userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
     }
@@ -1777,9 +1777,11 @@ class RoomClient {
     handleFile(data) {
         this.receiveBuffer.push(data);
         this.receivedSize += data.byteLength;
-        // let getPercentage = ((receivedSize / this.incomingFileInfo.fileSize) * 100).toFixed(2);
-        // console.log("Received progress: " + getPercentage + "%");
+        receiveProgress.value = this.receivedSize;
+        receiveFilePercentage.innerHTML =
+            'Receive progress: ' + ((this.receivedSize / this.incomingFileInfo.fileSize) * 100).toFixed(2) + '%';
         if (this.receivedSize === this.incomingFileInfo.fileSize) {
+            receiveFileDiv.style.display = 'none';
             this.incomingFileData = this.receiveBuffer;
             this.receiveBuffer = [];
             this.endFileDownload();

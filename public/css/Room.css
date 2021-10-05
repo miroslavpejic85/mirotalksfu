@@ -92,6 +92,12 @@ body {
     color: white;
     background: rgba(0, 0, 0, 0.4);
     border-radius: 10px;
+    /* pulsate */
+    animation: pulsate 5s ease-out;
+    animation-iteration-count: infinite;
+    -webkit-animation: pulsate 5s ease-out;
+    -webkit-animation-iteration-count: infinite;
+    opacity: 0.5;
 }
 
 .sidenav {
@@ -581,7 +587,8 @@ button:hover {
 # Send File
 --------------------------------------------------------------*/
 
-#sendFileDiv {
+#sendFileDiv,
+#receiveFileDiv {
     z-index: 7;
     display: none;
     padding: 10px;
