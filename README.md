@@ -1,6 +1,18 @@
 # mirotalksfu
 
-Powered by `WebRTC` with [SFU](https://mediasoup.org) integrated server.
+[![Author](https://img.shields.io/badge/Author-Miroslav-brightgreen.svg)](https://www.linkedin.com/in/miroslav-pejic-976a07101/)
+[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://github.com/miroslavpejic85/mirotalksfu/blob/main/LICENSE)
+[![PayPal](https://img.shields.io/badge/Support-PayPal-brightgreen.svg)](https://paypal.me/MiroslavPejic?locale.x=it_IT)
+[![Digital Ocean](https://img.shields.io/badge/Powered%20by-DigitalOcean-blue)](https://m.do.co/c/1070207afbb1)
+[![Code style: prettier](https://img.shields.io/badge/Code_style-Prettier-ff69b4.svg?)](https://github.com/prettier/prettier)
+
+Powered by `WebRTC` and [SFU](https://mediasoup.org) integrated server.
+
+Open the app with the following **supported browsers** & many more...
+
+[![Foo](public/images/browsers.png)](https://sfu.mirotalk.org/)
+
+## https://sfu.mirotalk.org/
 
 [![mirotalksfu](public/images/mirotalksfu.png)](https://sfu.mirotalk.org/)
 
@@ -38,7 +50,7 @@ If you want to deploy an `MiroTalk SFU` instance on `your own dedicated droplet`
 
 ## Run it locally
 
--   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/)
+-   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/), `build-essential DEB package` and `python3`.
 
 ```bash
 # Clone this repo
