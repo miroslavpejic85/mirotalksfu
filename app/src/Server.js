@@ -35,7 +35,7 @@ let roomList = new Map();
 
 app.use(cors());
 app.use(compression());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+app.use(express.static(path.join(__dirname, '../../', 'public')));
 
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
@@ -57,22 +57,22 @@ app.use((err, req, res, next) => {
 
 // all start from here
 app.get(['/'], (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public/landing.html'));
+    res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
 });
 
 // set new room name and join
 app.get(['/newroom'], (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public/newroom.html'));
+    res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
 });
 
 // if not allow video/audio
 app.get(['/permission'], (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public/permission.html'));
+    res.sendFile(path.join(__dirname, '../../', 'public/view/permission.html'));
 });
 
 // privacy policy
 app.get(['/privacy'], (req, res) => {
-    res.sendFile(path.join(__dirname, '..', 'public/privacy.html'));
+    res.sendFile(path.join(__dirname, '../../', 'public/view/privacy.html'));
 });
 
 // no room name specified to join
@@ -86,7 +86,7 @@ app.get('/join/*', (req, res) => {
         log.debug('redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
         res.redirect(url.parse(req.url).pathname);
     } else {
-        res.sendFile(path.join(__dirname, '..', 'public/Room.html'));
+        res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
     }
 });
 

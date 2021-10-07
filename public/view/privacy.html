@@ -16,9 +16,9 @@
 
         <!-- Title and Icon -->
 
-        <title>MiroTalk SFU - Allow Video or Audio access to join in the Room.</title>
-        <link rel="shortcut icon" href="images/logo.svg" />
-        <link rel="apple-touch-icon" href="images/logo.svg" />
+        <title>MiroTalk SFU - privacy policy.</title>
+        <link rel="shortcut icon" href="../images/logo.svg" />
+        <link rel="apple-touch-icon" href="../images/logo.svg" />
 
         <!-- Meta Information -->
 
@@ -35,12 +35,12 @@
             property="og:description"
             content="MiroTalk SFU calling provides real-time HD quality and latency simply not available with traditional technology."
         />
-        <meta property="og:image" content="/images/mirotalksfu.png" />
+        <meta property="og:image" content="../images/mirotalksfu.png" />
 
         <!-- StyleSheet -->
 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
-        <link rel="stylesheet" href="css/landing.css" />
+        <link rel="stylesheet" href="../css/landing.css" />
 
         <!-- Js scripts -->
 
@@ -55,7 +55,7 @@
                         <div class="brand header-brand">
                             <h1 class="m-0">
                                 <a href="/">
-                                    <img class="header-logo-image" src="images/logo.svg" alt="Logo" />
+                                    <img class="header-logo-image" src="../images/logo.svg" alt="Logo" />
                                 </a>
                             </h1>
                         </div>
@@ -68,29 +68,25 @@
                     <div class="container">
                         <div class="hero-inner">
                             <div class="hero-copy">
-                                <h1 class="hero-title mt-0">Access denied.</h1>
+                                <h1 class="hero-title mt-0">Privacy Policy</h1>
                                 <p class="hero-paragraph" id="message"></p>
                                 <p class="hero-paragraph">
-                                    This app will not work without camera or microphone access. Please Try again and
-                                    allow it.
+                                    <strong>MiroTalk SFU</strong> has an integrated
+                                    <a href="https://mediasoup.org/" target="_blank">mediasoup server</a>. Routing is a
+                                    multiparty topology, where each participant sends its media to this server, and
+                                    receives all other's media from it. Thanks to the SFU architecture, it allows having
+                                    many users connected in the same room. The media streams are encrypted using Secure
+                                    Real-time Transport Protocol (SRTP).<br /><br />
+                                    If you record a meeting, the recording of the meeting is temporarily stored on
+                                    <strong>Your browser</strong>
+                                    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank"
+                                        >Blob</a
+                                    >, then will be downloaded on Your PC/Mobile Device.<br /><br />
+                                    We use Google Analytics to track aggregated usage statistics in order to improve our
+                                    service. The maker of
+                                    <strong>MiroTalk SFU</strong> has no intention of using personally or selling any of
+                                    the above-mentioned data.
                                 </p>
-                                <script>
-                                    let qs = new URLSearchParams(window.location.search);
-                                    let room_id = qs.get('room_id');
-                                    let message = qs.get('message');
-                                    console.log('Allow Camera or Audio', {
-                                        room_id: room_id,
-                                        message: message,
-                                    });
-                                    document.getElementById('message').innerHTML = message;
-                                </script>
-                                <div class="hero-cta">
-                                    <a
-                                        class="button button-primary pulse"
-                                        onclick="room_id ? window.location.href = '/join/' + room_id : window.location.href = '/newroom';"
-                                        >TRY AGAIN</a
-                                    >
-                                </div>
                             </div>
                             <div class="hero-figure anime-element">
                                 <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
@@ -117,13 +113,10 @@
                     <div class="site-footer-inner">
                         <div class="brand footer-brand">
                             <a href="/">
-                                <img class="header-logo-image" src="images/logo.svg" alt="Logo" />
+                                <img class="header-logo-image" src="../images/logo.svg" alt="Logo" />
                             </a>
                         </div>
                         <ul class="footer-links list-reset">
-                            <li>
-                                <a href="/privacy">Privacy Policy</a>
-                            </li>
                             <li>
                                 Contact:
                                 <a target="_blank" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
@@ -161,6 +154,6 @@
             </footer>
         </div>
 
-        <script src="js/landing.js"></script>
+        <script src="../js/landing.js"></script>
     </body>
 </html>

@@ -5,8 +5,8 @@
     "main": "Server.js",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
-        "start": "node src/Server.js",
-        "compile": "npx browserify public/modules/MediasoupClientCompile.js -o public/modules/MediasoupClient.js",
+        "start": "node app/src/Server.js",
+        "compile": "npx browserify public/sfu/MediasoupClientCompile.js -o public/sfu/MediasoupClient.js",
         "lint": "npx prettier --write ."
     },
     "author": "Miroslav Pejic",

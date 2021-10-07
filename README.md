@@ -36,7 +36,7 @@ Open the app with the following **supported browsers** & many more...
 -   Recording your Screen, Audio or Video
 -   Share any YouTube video in real time to your participants
 -   Full Screen Mode on mouse click on the Video element
--   Supports [REST API](api/README.md) (Application Programming Interface)
+-   Supports [REST API](app/api/README.md) (Application Programming Interface)
 
 ## DigitalOcean
 
