@@ -1628,7 +1628,7 @@ class RoomClient {
     // FILE SHARING
     // ####################################################
 
-    selectFileToShare() {
+    selectFileToShare(peer_id, broadcast = true) {
         this.sound('open');
 
         Swal.fire({
@@ -1660,13 +1660,15 @@ class RoomClient {
                     }
                     // send some metadata about our file to peers in the room
                     this.socket.emit('fileInfo', {
+                        peer_id: peer_id,
+                        broadcast: broadcast,
                         peer_name: this.peer_name,
                         fileName: this.fileToSend.name,
                         fileSize: this.fileToSend.size,
                         fileType: this.fileToSend.type,
                     });
                     setTimeout(() => {
-                        this.sendFileData();
+                        this.sendFileData(peer_id, broadcast);
                     }, 1000);
                 } else {
                     userLog('error', 'File not selected or empty.', 'top-end');
@@ -1699,7 +1701,7 @@ class RoomClient {
         this.receiveInProgress = true;
     }
 
-    sendFileData() {
+    sendFileData(peer_id, broadcast) {
         console.log('Send file ', {
             name: this.fileToSend.name,
             size: this.bytesToSize(this.fileToSend.size),
@@ -1730,8 +1732,13 @@ class RoomClient {
         this.fileReader.addEventListener('load', (e) => {
             if (!this.sendInProgress) return;
 
-            this.sendFSData(e.target.result);
-            offset += e.target.result.byteLength;
+            let data = {
+                peer_id: peer_id,
+                broadcast: broadcast,
+                fileData: e.target.result,
+            };
+            this.sendFSData(data);
+            offset += data.fileData.byteLength;
 
             sendProgress.value = offset;
             sendFilePercentage.innerHTML = 'Send progress: ' + ((offset / this.fileToSend.size) * 100).toFixed(2) + '%';
@@ -1783,8 +1790,8 @@ class RoomClient {
 
     handleFile(data) {
         if (!this.receiveInProgress) return;
-        this.receiveBuffer.push(data);
-        this.receivedSize += data.byteLength;
+        this.receiveBuffer.push(data.fileData);
+        this.receivedSize += data.fileData.byteLength;
         receiveProgress.value = this.receivedSize;
         receiveFilePercentage.innerHTML =
             'Receive progress: ' + ((this.receivedSize / this.incomingFileInfo.fileSize) * 100).toFixed(2) + '%';

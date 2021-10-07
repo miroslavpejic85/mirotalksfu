@@ -254,11 +254,19 @@ io.on('connection', (socket) => {
 
     socket.on('fileInfo', (data) => {
         log.debug('Send File Info', data);
-        roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
+        if (data.broadcast) {
+            roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'fileInfo', data);
+        }
     });
 
     socket.on('file', (data) => {
-        roomList.get(socket.room_id).broadCast(socket.id, 'file', data);
+        if (data.broadcast) {
+            roomList.get(socket.room_id).broadCast(socket.id, 'file', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'file', data);
+        }
     });
 
     socket.on('fileAbort', (data) => {
