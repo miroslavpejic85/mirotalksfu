@@ -50,6 +50,8 @@ If you want to deploy an `MiroTalk SFU` instance on `your own dedicated droplet`
 
 [Live demo](https://sfu.mirotalk.org)
 
+[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
+
 ## Run it locally
 
 -   You will need to have `Node.js` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/), `build-essential DEB package` and `python3`.
