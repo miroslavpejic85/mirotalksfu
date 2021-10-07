@@ -642,6 +642,9 @@ function handleButtons() {
     sendAbortBtn.onclick = () => {
         rc.abortFileTransfer();
     };
+    receiveHideBtn.onclick = () => {
+        rc.hideFileTransfer();
+    };
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };

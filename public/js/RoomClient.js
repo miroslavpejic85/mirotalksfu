@@ -114,6 +114,7 @@ class RoomClient {
         this.incomingFileInfo = null;
         this.incomingFileData = null;
         this.sendInProgress = false;
+        this.receiveInProgress = false;
         this.fileSharingInput = '*';
         this.chunkSize = 1024 * 16; // 16kb/s
 
@@ -1695,6 +1696,7 @@ class RoomClient {
         receiveFileDiv.style.display = 'inline';
         receiveProgress.max = this.incomingFileInfo.fileSize;
         this.userLog('info', fileToReceiveInfo, 'top-end');
+        this.receiveInProgress = true;
     }
 
     sendFileData() {
@@ -1765,16 +1767,22 @@ class RoomClient {
         }
     }
 
+    hideFileTransfer() {
+        receiveFileDiv.style.display = 'none';
+    }
+
     handleFileAbort(data) {
         this.receiveBuffer = [];
         this.incomingFileData = [];
         this.receivedSize = 0;
+        this.receiveInProgress = false;
         receiveFileDiv.style.display = 'none';
         console.log(data.peer_name + ' aborted the file transfer');
         userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
     }
 
     handleFile(data) {
+        if (!this.receiveInProgress) return;
         this.receiveBuffer.push(data);
         this.receivedSize += data.byteLength;
         receiveProgress.value = this.receivedSize;
