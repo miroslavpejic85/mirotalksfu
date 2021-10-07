@@ -1,4 +1,4 @@
-# mirotalksfu
+# MiroTalk SFU
 
 [![Author](https://img.shields.io/badge/Author-Miroslav-brightgreen.svg)](https://www.linkedin.com/in/miroslav-pejic-976a07101/)
 [![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://github.com/miroslavpejic85/mirotalksfu/blob/main/LICENSE)
