@@ -16,3 +16,4 @@ package-lock.json
 
 # personal config
 config.js
+docker-compose.yml
