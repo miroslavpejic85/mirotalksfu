@@ -78,6 +78,8 @@ $ npm start
 ```bash
 # Copy src/config.template.js in src/config.js and edit it if needed
 $ cp src/config.template.js src/config.js
+# Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
+$ cp docker-compose.template.yml docker-compose.yml
 # Build or rebuild services
 $ docker-compose build
 # Create and start containers
