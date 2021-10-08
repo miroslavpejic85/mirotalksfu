@@ -2,14 +2,21 @@ version: '3'
 
 services:
     mirotalksfu:
-        image: mirotalksfu:latest
-        build:
-            context: .
-            dockerfile: Dockerfile
+        image: node
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
+        volumes:
+          - .:/src/
         ports:
-            - '3010:3010/tcp'
+            # - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'
             - '40000-40100:40000-40100/udp'
+        working_dir: /src/
+        command: bash -c "npm install && npm start"
+        labels:
+          - "traefik.http.routers.mirotalksfu-secure.entrypoints=https"
+          - "traefik.http.routers.mirotalksfu-secure.rule=Host(`mirotalksfu.mydomain.com`)"
+          - "traefik.http.routers.mirotalksfu-secure.tls=true"
+          - "traefik.http.routers.mirotalksfu-secure.tls.certresolver=letsencrypt"
+          - "traefik.http.services.mirotalksfu-service.loadbalancer.server.port=3010"
