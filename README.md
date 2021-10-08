@@ -76,7 +76,7 @@ $ npm start
 -   Install https://docs.docker.com/compose/install/
 
 ```bash
-# Copy src/config.template.js in src/config.js and edit it if needed
+# Copy app/src/config.template.js in app/src/config.js and edit it if needed
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
