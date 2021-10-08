@@ -14,6 +14,9 @@ const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const log = new Logger('Server');
+const yamlJS = require('yamljs');
+const swaggerUi = require('swagger-ui-express');
+const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
 
 const app = express();
 
@@ -25,6 +28,9 @@ const options = {
 const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer);
 const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
+
+const apiBasePath = '/api/v1'; // api endpoint path
+const api_docs = host + apiBasePath + '/docs'; // api docs
 
 // all mediasoup workers
 let workers = [];
@@ -97,6 +103,9 @@ app.get('/join/*', (req, res) => {
 // Api parse body data as json
 app.use(express.json());
 
+// api docs
+app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
 // request meeting room endpoint
 app.post(['/api/v1/meeting'], (req, res) => {
     // check if user was authorized for the api call
@@ -138,6 +147,7 @@ async function ngrokStart() {
         log.debug('Listening on', {
             server: host,
             tunnel: tunnel,
+            api_docs: api_docs,
         });
     } catch (err) {
         log.error('Ngrok Start error: ', err);
@@ -170,6 +180,7 @@ httpsServer.listen(config.listenPort, () => {
     }
     log.debug('Listening on', {
         server: host,
+        api_docs: api_docs,
     });
 });
 

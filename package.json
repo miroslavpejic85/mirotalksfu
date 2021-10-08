@@ -20,7 +20,9 @@
         "mediasoup-client": "^3.6.42",
         "ngrok": "^4.2.2",
         "socket.io": "^4.2.0",
-        "uuid": "8.3.2"
+        "swagger-ui-express": "^4.1.6",
+        "uuid": "8.3.2",
+        "yamljs": "^0.3.0"
     },
     "devDependencies": {
         "node-fetch": "^3.0.0",
