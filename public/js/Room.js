@@ -686,7 +686,7 @@ function handleButtons() {
         whiteboardIsEraser(true);
     };
     whiteboardCleanBtn.onclick = () => {
-        whiteboardAction(getWhiteboardAction('clear'));
+        confirmClearBoard();
     };
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
@@ -732,6 +732,7 @@ function handleSelects() {
     };
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
+        whiteboardIsDrawingMode(true);
     };
     wbBackgroundColorEl.onchange = () => {
         let data = {
@@ -937,6 +938,7 @@ function isImageURL(url) {
 // ####################################################
 
 function toggleWhiteboard() {
+    if (!wbIsOpen) rc.sound('open');
     toggleWhiteboardSettings();
     let whiteboard = rc.getId('whiteboard');
     whiteboard.classList.toggle('show');
@@ -1227,6 +1229,29 @@ function getWhiteboardAction(action) {
         peer_name: peer_name,
         action: action,
     };
+}
+
+function confirmClearBoard() {
+    Swal.fire({
+        background: swalBackground,
+        imageUrl: image.delete,
+        position: 'center',
+        title: 'Clean the board',
+        text: 'Are you sure you want to clean the board?',
+        showDenyButton: true,
+        confirmButtonText: `Yes`,
+        denyButtonText: `No`,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp',
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            whiteboardAction(getWhiteboardAction('clear'));
+        }
+    });
 }
 
 function whiteboardAction(data, emit = true) {

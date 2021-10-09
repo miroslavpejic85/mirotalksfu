@@ -31,7 +31,7 @@ Open the app with the following **supported browsers** & many more...
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing, share any files to your participants in the room
 -   Chat with Emoji Picker to show you feeling and possibility to Save the conversations
--   Collaborative whiteboard for the teachers
+-   Advance collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
 -   Recording your Screen, Audio or Video
 -   Share any YouTube video in real time to your participants
