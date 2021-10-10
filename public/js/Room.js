@@ -69,6 +69,7 @@ function getRandomNumber(length) {
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
+        setTippy('openNavButton', 'Open', 'right');
         setTippy('closeNavButton', 'Close', 'right');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
         setTippy('whiteboardObjectBtn', 'Object mode', 'top');
