@@ -96,11 +96,6 @@ app.get('/join/*', (req, res) => {
     }
 });
 
-// not match any of page before, so 404 not found
-app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/404.html'));
-});
-
 // ####################################################
 // API
 // ####################################################
@@ -134,6 +129,11 @@ app.post(['/api/v1/meeting'], (req, res) => {
         body: req.body,
         meeting: meetingURL,
     });
+});
+
+// not match any of page before, so 404 not found
+app.get('*', function (req, res) {
+    res.sendFile(path.join(__dirname, '../../', 'public/view/404.html'));
 });
 
 // ####################################################
