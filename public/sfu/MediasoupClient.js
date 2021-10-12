@@ -6269,7 +6269,6 @@
                         const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
@@ -6400,7 +6399,6 @@
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -6820,7 +6818,6 @@
                         const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
@@ -6950,7 +6947,6 @@
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async pauseReceiving(localId) {
                         this._assertRecvDirection();
@@ -7826,7 +7822,6 @@
                         const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
@@ -7959,7 +7954,6 @@
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async pauseReceiving(localId) {
                         this._assertRecvDirection();
@@ -9457,7 +9451,6 @@
                         const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
@@ -9587,7 +9580,6 @@
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
                     }
                     async pauseReceiving(localId) {
                         this._assertRecvDirection();
@@ -11165,7 +11157,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.43';
+                exports.version = '3.6.42';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
