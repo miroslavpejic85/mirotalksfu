@@ -84,11 +84,7 @@
                                     Start your next video call with a single click. No download, plug-in or login
                                     required. Just get straight to talking, messaging and sharing your screen.
                                 </p>
-                                <div class="hero-cta">
-                                    <a class="button button-primary pulse" href="/newroom">TRY NOW</a>
-                                </div>
                             </div>
-
                             <div class="hero-figure anime-element">
                                 <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
                                     <rect width="528" height="396" style="fill: transparent" />
@@ -103,6 +99,29 @@
                                 <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
                                 <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
                                 <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="cta section">
+                    <div class="container">
+                        <div class="cta-inner section-inner">
+                            <h3 class="section-title mt-0">
+                                Pick a room name.<br />
+                                How about this one?
+                            </h3>
+                            <div>
+                                <div class="mb-24">
+                                    <label for="roomName"></label>
+                                    <input class="button" type="text" id="roomName" value="" />
+                                    <button
+                                        class="button button-primary button-wide-mobile pulse"
+                                        onclick="{window.location.href = '/join/' + document.getElementById('roomName').value}"
+                                    >
+                                        Join to room
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -316,5 +335,6 @@
         </div>
 
         <script src="../js/landing.js"></script>
+        <script src="../js/newroom.js"></script>
     </body>
 </html>
