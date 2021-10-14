@@ -122,7 +122,7 @@ body {
 }
 
 .sidenav button:hover {
-    color: rgb(0, 180, 50);
+    color: grey;
     transform: var(--btns-hover-scale);
 }
 
@@ -471,7 +471,7 @@ emoji-picker {
 }
 
 #about a:hover {
-    color: rgb(0, 180, 50);
+    color: grey;
     transition: all 0.3s ease-in-out;
 }
 
@@ -530,7 +530,7 @@ button {
 }
 
 button:hover {
-    color: rgb(0, 180, 50);
+    color: grey;
     transform: var(--btns-hover-scale);
 }
 

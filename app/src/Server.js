@@ -153,6 +153,7 @@ async function ngrokStart() {
             server: host,
             tunnel: tunnel,
             api_docs: api_docs,
+            mediasoup_version: mediasoup.version,
         });
     } catch (err) {
         log.error('Ngrok Start error: ', err);
@@ -186,6 +187,7 @@ httpsServer.listen(config.listenPort, () => {
     log.debug('Listening on', {
         server: host,
         api_docs: api_docs,
+        mediasoup_version: mediasoup.version,
     });
 });
 
