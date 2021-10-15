@@ -117,13 +117,15 @@
                             <div>
                                 <div class="mb-24">
                                     <label for="roomName"></label>
-                                    <input class="button" type="text" id="roomName" value="" />
-                                    <button
-                                        class="button button-primary button-wide-mobile pulse"
-                                        onclick="{window.location.href = '/join/' + document.getElementById('roomName').value}"
-                                    >
-                                        Join to room
-                                    </button>
+                                    <div class="form-group-desktop">
+                                        <input class="form-input" type="text" id="roomName" value="" />
+                                        <button
+                                            class="button button-primary pulse"
+                                            onclick="{window.location.href = '/join/' + document.getElementById('roomName').value}"
+                                        >
+                                            Join to room
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
