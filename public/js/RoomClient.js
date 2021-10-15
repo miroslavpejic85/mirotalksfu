@@ -90,7 +90,6 @@ class RoomClient {
 
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
-        this.isDocumentOnFullScreen = false;
         this.isChatOpen = false;
         this.camVideo = false;
         this.camera = 'user';
@@ -1243,59 +1242,36 @@ class RoomClient {
     // FULL SCREEN
     // ####################################################
 
-    toggleFullScreen() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen();
-            this.isDocumentOnFullScreen = true;
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-                this.isDocumentOnFullScreen = false;
-            }
+    toggleFullScreen(elem = null) {
+        let el = elem ? elem : document.documentElement;
+        document.fullscreenEnabled =
+            document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled;
+        document.exitFullscreen =
+            document.exitFullscreen ||
+            document.webkitExitFullscreen ||
+            document.mozCancelFullScreen ||
+            document.msExitFullscreen;
+        el.requestFullscreen =
+            el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullScreen;
+        if (document.fullscreenEnabled) {
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement
+                ? document.exitFullscreen()
+                : el.requestFullscreen();
         }
     }
 
     handleFS(id) {
         let videoPlayer = this.getId(id);
-        videoPlayer.addEventListener('fullscreenchange', (e) => {
-            if (videoPlayer.controls || this.isDocumentOnFullScreen) return;
-            let fullscreenElement = document.fullscreenElement;
-            if (!fullscreenElement) {
-                videoPlayer.style.pointerEvents = 'auto';
-                this.isVideoOnFullScreen = false;
-            }
-        });
-        videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
-            if (videoPlayer.controls || this.isDocumentOnFullScreen) return;
-            let webkitIsFullScreen = document.webkitIsFullScreen;
-            if (!webkitIsFullScreen) {
-                videoPlayer.style.pointerEvents = 'auto';
-                this.isVideoOnFullScreen = false;
-            }
-        });
         videoPlayer.addEventListener('click', () => {
-            if (videoPlayer.controls || this.isDocumentOnFullScreen) return;
-            if (!this.isVideoOnFullScreen) {
-                if (videoPlayer.requestFullscreen) {
-                    videoPlayer.requestFullscreen();
-                } else if (videoPlayer.webkitRequestFullscreen) {
-                    videoPlayer.webkitRequestFullscreen();
-                } else if (videoPlayer.msRequestFullscreen) {
-                    videoPlayer.msRequestFullscreen();
-                }
-                this.isVideoOnFullScreen = true;
-                videoPlayer.style.pointerEvents = 'none';
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitCancelFullScreen) {
-                    document.webkitCancelFullScreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                }
-                this.isVideoOnFullScreen = false;
-                videoPlayer.style.pointerEvents = 'auto';
-            }
+            videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+            this.toggleFullScreen(videoPlayer);
+            this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
     }
 
