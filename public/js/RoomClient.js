@@ -1290,15 +1290,15 @@ class RoomClient {
                 document.documentElement.style.setProperty('--btns-right', '0px');
                 document.documentElement.style.setProperty('--btns-left', '20px');
                 document.documentElement.style.setProperty('--btns-margin-left', '0px');
-                document.documentElement.style.setProperty('--btns-width', '40px');
+                document.documentElement.style.setProperty('--btns-width', '60px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'column');
                 break;
             case 'horizontal':
                 document.documentElement.style.setProperty('--btns-top', '95%');
                 document.documentElement.style.setProperty('--btns-right', '25%');
                 document.documentElement.style.setProperty('--btns-left', '50%');
-                document.documentElement.style.setProperty('--btns-margin-left', '-160px');
-                document.documentElement.style.setProperty('--btns-width', '320px');
+                document.documentElement.style.setProperty('--btns-margin-left', '-200px');
+                document.documentElement.style.setProperty('--btns-width', '400px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'row');
                 break;
         }
