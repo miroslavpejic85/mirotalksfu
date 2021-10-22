@@ -40,7 +40,6 @@ let isAudioOn = true;
 let isVideoOn = true;
 let initAudioButton = null;
 let initVideoButton = null;
-let initDisableAllButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -54,6 +53,8 @@ let wbIsOpen = false;
 let wbIsRedoing = false;
 let wbIsEraser = false;
 let wbPop = [];
+
+let isButtonsVisible = false;
 
 const socket = io();
 
@@ -69,8 +70,12 @@ function getRandomNumber(length) {
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('openNavButton', 'Open', 'right');
-        setTippy('closeNavButton', 'Close', 'right');
+        setTippy('tabDevicesBtn', 'Devices', 'top');
+        setTippy('tabWhiteboardBtn', 'Whiteboard', 'top');
+        setTippy('tabRecordingBtn', 'Recording', 'top');
+        setTippy('tabRoomBtn', 'Room', 'top');
+        setTippy('tabYoutubeBtn', 'YouTube', 'top');
+        setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
         setTippy('whiteboardObjectBtn', 'Object mode', 'top');
         setTippy('whiteboardUndoBtn', 'Undo', 'top');
@@ -84,15 +89,12 @@ function initClient() {
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
         setTippy('whiteboardCleanBtn', 'Clear', 'top');
-        setTippy('whiteboardCloseBtn', 'Close', 'top');
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
-        setTippy('participantsCloseBtn', 'Close', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
-        setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
     }
     setupWhiteboard();
@@ -247,8 +249,7 @@ function whoAreYou() {
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button><i id="separator" class="">&nbsp;|</i>
-            <button id="initDisableAllButton" class="fas fa-eye-slash" style="color: red;" onclick="disableAudioVideo()"></button>
+            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
         </div>`,
         confirmButtonText: `Join meeting`,
         showClass: {
@@ -269,19 +270,8 @@ function whoAreYou() {
 
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
-    initDisableAllButton = document.getElementById('initDisableAllButton');
-    let separator = document.getElementById('separator');
     if (!isAudioAllowed) initAudioButton.className = 'hidden';
-    if (!isVideoAllowed) {
-        initVideoButton.className = 'hidden';
-        initDisableAllButton.className = 'hidden';
-        separator.className = 'hidden';
-    }
-    if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Enable / Disable audio', 'left');
-        setTippy('initVideoButton', 'Enable / Disable video', 'right');
-        setTippy('initDisableAllButton', 'Disable audio & video', 'right');
-    }
+    if (!isVideoAllowed) initVideoButton.className = 'hidden';
 }
 
 function handleAudio(e) {
@@ -296,15 +286,6 @@ function handleVideo(e) {
     e.target.className = 'fas fa-video' + (isVideoOn ? '' : '-slash');
     setColor(e.target, isVideoOn ? 'white' : 'red');
     setColor(startVideoButton, isVideoOn ? 'white' : 'red');
-}
-
-function disableAudioVideo() {
-    isAudioOn = false;
-    isVideoOn = false;
-    initAudioButton.className = 'fas fa-microphone-slash';
-    initVideoButton.className = 'fas fa-video-slash';
-    setColor(initAudioButton, 'red');
-    setColor(initVideoButton, 'red');
 }
 
 // ####################################################
@@ -427,10 +408,8 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
-    show(openNavButton);
     show(exitButton);
     show(shareButton);
-    show(recButton);
     show(startRecButton);
     show(chatButton);
     show(chatSendButton);
@@ -440,6 +419,7 @@ function roomIsReady() {
         setChatSize();
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
+        rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(participants, participantsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
@@ -456,9 +436,7 @@ function roomIsReady() {
     show(raiseHandButton);
     if (isAudioAllowed) show(startAudioButton);
     if (isVideoAllowed) show(startVideoButton);
-    show(youTubeShareButton);
     show(fileShareButton);
-    show(whiteboardButton);
     show(participantsButton);
     show(lockRoomButton);
     show(aboutButton);
@@ -466,6 +444,9 @@ function roomIsReady() {
     handleSelects();
     handleInputs();
     startSessionTimer();
+    document.body.addEventListener('mousemove', (e) => {
+        showButtons();
+    });
 }
 
 function hide(elem) {
@@ -548,20 +529,35 @@ function stopRecordingTimer() {
 // ####################################################
 
 function handleButtons() {
-    openNavButton.onclick = () => {
-        rc.toggleNav();
-    };
-    closeNavButton.onclick = () => {
-        rc.toggleNav();
-    };
     exitButton.onclick = () => {
-        rc.exit();
+        rc.exitRoom();
     };
     shareButton.onclick = () => {
         shareRoom(true);
     };
     settingsButton.onclick = () => {
-        rc.toggleDevices();
+        rc.toggleMySettings();
+    };
+    mySettingsCloseBtn.onclick = () => {
+        rc.toggleMySettings();
+    };
+    tabDevicesBtn.onclick = (e) => {
+        rc.openTab(e, 'tabDevices');
+    };
+    tabWhiteboardBtn.onclick = (e) => {
+        rc.openTab(e, 'tabWhiteboard');
+    };
+    tabRecordingBtn.onclick = (e) => {
+        rc.openTab(e, 'tabRecording');
+    };
+    tabRoomBtn.onclick = (e) => {
+        rc.openTab(e, 'tabRoom');
+    };
+    tabYoutubeBtn.onclick = (e) => {
+        rc.openTab(e, 'tabYoutube');
+    };
+    tabStylingBtn.onclick = (e) => {
+        rc.openTab(e, 'tabStyling');
     };
     chatButton.onclick = () => {
         rc.toggleChat();
@@ -583,9 +579,6 @@ function handleButtons() {
     };
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
-    };
-    recButton.onclick = () => {
-        rc.toggleRecording();
     };
     startRecButton.onclick = () => {
         rc.startRecording();
@@ -726,6 +719,10 @@ function handleSelects() {
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+    };
+    // styling
+    BtnsBarPosition.onchange = () => {
+        rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
     // whiteboard options
     wbDrawingLineWidthEl.onchange = () => {
@@ -916,6 +913,16 @@ function getDataTimeString() {
     return `${date}-${time}`;
 }
 
+function showButtons() {
+    if (isButtonsVisible || (rc.isMobileDevice && rc.isChatOpen) || (rc.isMobileDevice && rc.isMySettingsOpen)) return;
+    control.style.display = 'flex';
+    isButtonsVisible = true;
+    setTimeout(() => {
+        control.style.display = 'none';
+        isButtonsVisible = false;
+    }, 10000);
+}
+
 // ####################################################
 // UTILITY
 // ####################################################
@@ -940,16 +947,11 @@ function isImageURL(url) {
 
 function toggleWhiteboard() {
     if (!wbIsOpen) rc.sound('open');
-    toggleWhiteboardSettings();
     let whiteboard = rc.getId('whiteboard');
     whiteboard.classList.toggle('show');
     whiteboard.style.top = '50%';
     whiteboard.style.left = '50%';
     wbIsOpen = wbIsOpen ? false : true;
-}
-
-function toggleWhiteboardSettings() {
-    rc.getId('whiteboardSettings').classList.toggle('show');
 }
 
 function setupWhiteboard() {
@@ -1329,11 +1331,11 @@ async function getParticipantsTable(peers) {
     table += `
     <tr>
         <td>👥 All</td>
-        <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff} Mute</button></td>
-        <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff} Hide</button></td>
+        <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
+        <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
-        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile} File</button></td>
-        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer} Eject</button></td>
+        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile}</button></td>
+        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
 

@@ -88,6 +88,8 @@ class RoomClient {
 
         this.isMobileDevice = DetectRTC.isMobileDevice;
 
+        this.isMySettingsOpen = false;
+
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
         this.isChatOpen = false;
@@ -1054,6 +1056,27 @@ class RoomClient {
         this.event(_EVENTS.exitRoom);
     }
 
+    exitRoom() {
+        this.sound('open');
+
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Leave this room?',
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) this.exit();
+        });
+    }
+
     // ####################################################
     // HELPERS
     // ####################################################
@@ -1177,6 +1200,10 @@ class RoomClient {
         return document.getElementById(id);
     }
 
+    getEcN(cn) {
+        return document.getElementsByClassName(cn);
+    }
+
     async getRoomInfo() {
         let room_info = await this.socket.request('getRoomInfo');
         return room_info;
@@ -1197,14 +1224,6 @@ class RoomClient {
     // ####################################################
     // UTILITY
     // ####################################################
-
-    toggleNav() {
-        this.getId('control').classList.toggle('show');
-    }
-
-    toggleDevices() {
-        this.getId('settings').classList.toggle('show');
-    }
 
     async sound(name) {
         let sound = '../sounds/' + name + '.wav';
@@ -1236,6 +1255,53 @@ class RoomClient {
             return true;
         }
         return false;
+    }
+
+    // ####################################################
+    // MY SETTINGS
+    // ####################################################
+
+    toggleMySettings() {
+        let mySettings = this.getId('mySettings');
+        mySettings.style.top = '50%';
+        mySettings.style.left = '50%';
+        mySettings.classList.toggle('show');
+        this.isMySettingsOpen = this.isMySettingsOpen ? false : true;
+    }
+
+    openTab(evt, tabName) {
+        let i, tabcontent, tablinks;
+        tabcontent = this.getEcN('tabcontent');
+        for (i = 0; i < tabcontent.length; i++) {
+            tabcontent[i].style.display = 'none';
+        }
+        tablinks = this.getEcN('tablinks');
+        for (i = 0; i < tablinks.length; i++) {
+            tablinks[i].className = tablinks[i].className.replace(' active', '');
+        }
+        this.getId(tabName).style.display = 'block';
+        evt.currentTarget.className += ' active';
+    }
+
+    changeBtnsBarPosition(position) {
+        switch (position) {
+            case 'vertical':
+                document.documentElement.style.setProperty('--btns-top', '50%');
+                document.documentElement.style.setProperty('--btns-right', '0px');
+                document.documentElement.style.setProperty('--btns-left', '20px');
+                document.documentElement.style.setProperty('--btns-margin-left', '0px');
+                document.documentElement.style.setProperty('--btns-width', '40px');
+                document.documentElement.style.setProperty('--btns-flex-direction', 'column');
+                break;
+            case 'horizontal':
+                document.documentElement.style.setProperty('--btns-top', '95%');
+                document.documentElement.style.setProperty('--btns-right', '25%');
+                document.documentElement.style.setProperty('--btns-left', '50%');
+                document.documentElement.style.setProperty('--btns-margin-left', '-160px');
+                document.documentElement.style.setProperty('--btns-width', '320px');
+                document.documentElement.style.setProperty('--btns-flex-direction', 'row');
+                break;
+        }
     }
 
     // ####################################################
@@ -1453,10 +1519,6 @@ class RoomClient {
     // ####################################################
     // RECORDING
     // ####################################################
-
-    toggleRecording() {
-        this.getId('recording').classList.toggle('show');
-    }
 
     getSupportedMimeTypes() {
         const possibleTypes = [
@@ -1931,7 +1993,7 @@ class RoomClient {
         let peer_name = data.peer_name;
         let you_tube_url = data.you_tube_url;
         this.closeYouTube();
-        youTubeSettings.style.display = 'block';
+        show(youTubeCloseBtn);
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = '__youTube';
@@ -1963,7 +2025,7 @@ class RoomClient {
         }
         let youTubeDiv = this.getId('__youTube');
         if (youTubeDiv) {
-            youTubeSettings.style.display = 'none';
+            hide(youTubeCloseBtn);
             youTubeDiv.parentNode.removeChild(youTubeDiv);
             resizeVideoMedia();
             this.sound('left');

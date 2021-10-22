@@ -45,6 +45,21 @@
     --right-msg-bg: #0a0b0c;
     --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     --btns-hover-scale: scale(1.1);
+    /* buttons bar horizontal */
+    --btns-top: 50%;
+    --btns-right: 0%;
+    --btns-left: 20px;
+    --btns-margin-left: 0px;
+    --btns-width: 60px;
+    --btns-flex-direction: column;
+    /* buttons bar horizontal
+    --btns-top: 95%;
+    --btns-right: 25%;
+    --btns-left: 50%;
+    --btns-margin-left: -160px;
+    --btns-width: 320px;
+    --btns-flex-direction: row;
+    */
 }
 
 * {
@@ -79,99 +94,54 @@ body {
     font-family: 'Comfortaa';
 }
 
+#initAudioButton,
+#initVideoButton {
+    font-size: 1.8rem;
+}
+
 /*--------------------------------------------------------------
 # Buttons bar
 --------------------------------------------------------------*/
 
-#openNavButton {
+#control {
     z-index: 3;
     position: absolute;
-    cursor: pointer;
-    padding: 10px;
-    font-size: 24px;
-    color: white;
-    background: rgba(0, 0, 0, 0.4);
-    border-radius: 10px;
-    /* pulsate */
-    animation: pulsate 5s ease-out;
-    animation-iteration-count: infinite;
-    -webkit-animation: pulsate 5s ease-out;
-    -webkit-animation-iteration-count: infinite;
-    opacity: 0.5;
-}
+    display: flex;
+    padding: 15px;
 
-.sidenav {
-    z-index: 4;
-    height: 100%;
-    width: 0;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background-color: transparent;
-    overflow-x: hidden;
-    transition: 0.5s;
-    padding-top: 60px;
-    animation: show 0.4s ease;
-}
+    top: var(--btns-top);
+    right: var(--btns-right);
+    left: var(--btns-left);
+    margin-left: var(--btns-margin-left);
+    width: var(--btns-width);
+    flex-direction: var(--btns-flex-direction);
 
-.sidenav button {
-    padding: 8px 8px 8px 32px;
-    text-decoration: none;
-    font-size: 20px;
-    transition: 0.3s;
-}
+    grid-gap: 0.4rem;
+    align-items: center;
+    justify-content: center;
 
-.sidenav button:hover {
-    color: grey;
-    transform: var(--btns-hover-scale);
-}
+    -webkit-transform: translate(0%, -50%);
+    -ms-transform: translate(0%, -50%);
+    transform: translate(0%, -50%);
 
-.sidenav .closebtn {
-    position: absolute;
-    top: 0;
-    right: 25px;
-    font-size: 36px;
-    margin-left: 50px;
-}
-
-.sidenav::-webkit-scrollbar {
-    width: 5px;
-}
-.sidenav::-webkit-scrollbar-track {
-    background: transparent;
-}
-.sidenav::-webkit-scrollbar-thumb {
-    background: rgb(255 255 255 / 40%);
-}
-
-@media screen and (max-height: 450px) {
-    .sidenav {
-        padding-top: 20px;
-    }
-    .sidenav button {
-        font-size: 20px;
-    }
-}
-
-#control {
-    position: fixed;
-    padding: 10px;
-    top: 0;
-    width: 250px;
-    background: var(--body-bg);
+    border-radius: 20px;
+    background: rgba(0, 0, 0, 0.7);
 }
 
 #control button {
+    border: none;
+    font-size: 1.5rem;
+    transition: all 0.3s ease-in-out;
+    background: transparent;
     border-radius: 5px;
 }
-
-#exitButton:hover {
-    color: red;
+#control p {
+    font-size: small;
+    cursor: default;
 }
 
-#settings {
-    position: relative;
-    background: var(--body-bg);
+#exitButton {
+    color: red;
 }
 
 /*--------------------------------------------------------------
@@ -185,47 +155,89 @@ body {
 }
 
 /*--------------------------------------------------------------
-# Dropdown menù
+# My settings
 --------------------------------------------------------------*/
 
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-content {
-    display: none;
+#mySettings {
+    z-index: 6;
     position: absolute;
     margin: auto;
     padding: 10px;
-    max-width: 230px;
-    background-color: rgba(0, 0, 0, 0.7);
-    color: white;
-    overflow: hidden;
-    border-radius: 5px;
+    width: 320px;
+    height: 480px;
+    background: var(--msger-bg);
     box-shadow: var(--box-shadow);
+    border-radius: 10px;
+    overflow: scroll;
 }
 
-.dropdown-content select {
-    width: 210px;
-    font-size: small;
+#mySettingsHeader {
+    cursor: move;
+}
+
+#mySettings i,
+#mySettings p {
+    display: inline-block;
+    color: white;
+    padding: 5px;
+    background: transparent;
+}
+
+#mySettings select {
+    width: auto;
+    max-width: 270px;
+    height: 40px;
+    color: white;
+    background-color: transparent;
+    border-radius: 5px;
+}
+
+#mySettings button:hover {
+    background-color: rgb(42 42 42 / 70%);
+    border-radius: 5px;
 }
 
 /*--------------------------------------------------------------
-# Recording
+# Style the tab
 --------------------------------------------------------------*/
-
-#recording {
-    position: relative;
-    background: var(--body-bg);
+.tab {
+    overflow: hidden;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-#recording button,
-#recording p {
-    padding: 5px;
-    margin: 1px;
-    font-size: 1.2rem;
-    border-radius: 5px;
+/* Style the buttons inside the tab */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    color: white;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: transparent;
+    color: grey;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: rgb(42 42 42 / 70%);
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border-top: none;
+}
+
+/* on open display devices tab */
+#tabDevices {
+    display: block;
 }
 
 /*--------------------------------------------------------------
@@ -539,11 +551,11 @@ button:hover {
 --------------------------------------------------------------*/
 
 #participants {
-    z-index: 6;
+    z-index: 7;
     position: absolute;
     margin: auto;
     padding: 10px;
-    min-width: 320px;
+    width: 320px;
     background: var(--body-bg);
     border-radius: 10px;
     overflow: hidden;
@@ -589,7 +601,7 @@ button:hover {
 
 #sendFileDiv,
 #receiveFileDiv {
-    z-index: 7;
+    z-index: 8;
     display: none;
     padding: 10px;
     margin: auto;
@@ -619,27 +631,8 @@ progress {
 }
 
 /*--------------------------------------------------------------
-# YouTube Video
---------------------------------------------------------------*/
-
-#youTubeSettings {
-    display: 'none';
-    position: relative;
-    background: var(--body-bg);
-}
-
-#youTubeCloseBtn:hover {
-    color: red;
-}
-
-/*--------------------------------------------------------------
 # Whiteboard
 --------------------------------------------------------------*/
-
-#whiteboardSettings {
-    position: relative;
-    background: var(--body-bg);
-}
 
 #whiteboard {
     z-index: 2;
@@ -716,9 +709,9 @@ progress {
 z-index:
     - 1 videoMediaContainer
     - 2 whiteboard
-    - 3 buttonBar
-    - 4 sidenav
-    - 4 whiteboard
+    - 3 control buttons
     - 5 chat
-    - 6 participants
+    - 6 settings
+    - 7 participants
+    - 8 send receive progress
 */
