@@ -687,6 +687,7 @@ function handleButtons() {
         whiteboardAction(getWhiteboardAction('close'));
     };
     participantsButton.onclick = () => {
+        rc.toggleMySettings();
         getRoomParticipants();
     };
     participantsRefreshBtn.onclick = () => {
