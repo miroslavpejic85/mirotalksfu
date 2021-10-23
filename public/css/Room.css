@@ -158,12 +158,12 @@ body {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 320px;
-    height: 480px;
+    min-width: 320px;
+    min-height: 480px;
     background: var(--msger-bg);
     box-shadow: var(--box-shadow);
     border-radius: 10px;
-    overflow: scroll;
+    overflow: hidden;
 }
 
 #mySettingsHeader {

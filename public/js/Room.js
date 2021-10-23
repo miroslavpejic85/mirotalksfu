@@ -641,6 +641,7 @@ function handleButtons() {
         rc.hideFileTransfer();
     };
     whiteboardButton.onclick = () => {
+        rc.toggleMySettings();
         toggleWhiteboard();
     };
     whiteboardPencilBtn.onclick = () => {
