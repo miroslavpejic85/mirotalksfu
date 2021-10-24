@@ -1297,8 +1297,8 @@ class RoomClient {
                 document.documentElement.style.setProperty('--btns-top', '95%');
                 document.documentElement.style.setProperty('--btns-right', '25%');
                 document.documentElement.style.setProperty('--btns-left', '50%');
-                document.documentElement.style.setProperty('--btns-margin-left', '-200px');
-                document.documentElement.style.setProperty('--btns-width', '400px');
+                document.documentElement.style.setProperty('--btns-margin-left', '-160px');
+                document.documentElement.style.setProperty('--btns-width', '320px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'row');
                 break;
         }
