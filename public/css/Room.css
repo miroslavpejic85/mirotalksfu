@@ -550,7 +550,7 @@ button:hover {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 320px;
+    min-width: 320px;
     background: var(--body-bg);
     border-radius: 10px;
     overflow: hidden;
