@@ -8,7 +8,7 @@ const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/',
+    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo',
 };
 
 const _PEER = {
@@ -1172,6 +1172,8 @@ function mouseMove() {
     if (wbIsEraser) {
         wbCanvas.hoverCursor = 'not-allowed';
         return;
+    } else {
+        wbCanvas.hoverCursor = 'move';
     }
     if (!wbIsDrawing) return;
 }
