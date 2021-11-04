@@ -2079,7 +2079,7 @@ class RoomClient {
                             this.RoomPassword = pwd;
                         },
                     }).then(() => {
-                        data.password = this.RoomPassword; 
+                        data.password = this.RoomPassword;
                         this.socket.emit('roomAction', data);
                         this.roomStatus(action);
                     });
@@ -2099,7 +2099,7 @@ class RoomClient {
             case 'lock':
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
-                this.userLog('info', '🔒 LOCKED the room with the password: ' + this.RoomPassword, 'top-end');
+                this.userLog('info', '🔒 LOCKED the room by the password', 'top-end');
                 break;
             case 'unlock':
                 this.event(_EVENTS.roomUnlock);
@@ -2113,7 +2113,7 @@ class RoomClient {
             case 'OK':
                 this.joinAllowed(data.room);
                 break;
-            case 'KO': 
+            case 'KO':
                 this.roomIsLocked();
                 break;
         }
@@ -2148,7 +2148,7 @@ class RoomClient {
             let data = {
                 action: 'checkPassword',
                 password: this.RoomPassword,
-            }
+            };
             this.socket.emit('roomAction', data);
         });
     }

@@ -255,7 +255,7 @@ io.on('connection', (socket) => {
                 };
                 if (data.password == roomList.get(socket.room_id).getPassword()) {
                     roomData.room = roomList.get(socket.room_id).toJson();
-                    roomData.password = 'OK'
+                    roomData.password = 'OK';
                     roomList.get(socket.room_id).sendTo(socket.id, 'roomPassword', roomData);
                 } else {
                     roomList.get(socket.room_id).sendTo(socket.id, 'roomPassword', roomData);
