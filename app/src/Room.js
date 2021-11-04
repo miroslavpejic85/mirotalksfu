@@ -11,6 +11,7 @@ module.exports = class Room {
         this.router = null;
         this.io = io;
         this._isLocked = false;
+        this._roomPassword = null;
         this.peers = new Map();
         this.createTheRouter();
     }
@@ -193,11 +194,15 @@ module.exports = class Room {
     // ROOM STATUS
     // ####################################################
 
+    getPassword() {
+        return this._roomPassword;
+    }
     isLocked() {
         return this._isLocked;
     }
-    setLocked(status) {
+    setLocked(status, password) {
         this._isLocked = status;
+        this._roomPassword = password;
     }
 
     // ####################################################

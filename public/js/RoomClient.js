@@ -107,6 +107,8 @@ class RoomClient {
         this.recScreenStream = null;
         this._isRecording = false;
 
+        this.RoomPassword = null;
+
         // file transfer settings
         this.fileToSend = null;
         this.fileReader = null;
@@ -186,21 +188,27 @@ class RoomClient {
             .then(
                 async function (room) {
                     if (room === 'isLocked') {
-                        this.roomIsLocked();
+                        this.event(_EVENTS.roomLock);
+                        console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
+                        this.unlockTheRoom();
                         return;
                     }
-                    await this.handleRoomInfo(room);
-                    const data = await this.socket.request('getRouterRtpCapabilities');
-                    this.device = await this.loadDevice(data);
-                    console.log('07 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
-                    await this.initTransports(this.device);
-                    this.startLocalMedia();
-                    this.socket.emit('getProducers');
+                    await this.joinAllowed(room);
                 }.bind(this),
             )
             .catch((err) => {
                 console.log('Join error:', err);
             });
+    }
+
+    async joinAllowed(room) {
+        await this.handleRoomInfo(room);
+        const data = await this.socket.request('getRouterRtpCapabilities');
+        this.device = await this.loadDevice(data);
+        console.log('07 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
+        await this.initTransports(this.device);
+        this.startLocalMedia();
+        this.socket.emit('getProducers');
     }
 
     async handleRoomInfo(room) {
@@ -424,6 +432,14 @@ class RoomClient {
             function (data) {
                 console.log('Room action:', data);
                 this.roomAction(data, false);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'roomPassword',
+            function (data) {
+                console.log('Room password:', data.password);
+                this.roomPassword(data);
             }.bind(this),
         );
 
@@ -2037,12 +2053,53 @@ class RoomClient {
     // ####################################################
 
     roomAction(action, emit = true) {
-        if (emit) this.socket.emit('roomAction', action);
+        let data = {
+            action: action,
+            password: null,
+        };
+        if (emit) {
+            switch (action) {
+                case 'lock':
+                    Swal.fire({
+                        allowOutsideClick: false,
+                        allowEscapeKey: false,
+                        background: swalBackground,
+                        imageUrl: image.locked,
+                        input: 'text',
+                        inputPlaceholder: 'Set Room password',
+                        confirmButtonText: `OK`,
+                        showClass: {
+                            popup: 'animate__animated animate__fadeInDown',
+                        },
+                        hideClass: {
+                            popup: 'animate__animated animate__fadeOutUp',
+                        },
+                        inputValidator: (pwd) => {
+                            if (!pwd) return 'Please enter the Room password';
+                            this.RoomPassword = pwd;
+                        },
+                    }).then(() => {
+                        data.password = this.RoomPassword; 
+                        this.socket.emit('roomAction', data);
+                        this.roomStatus(action);
+                    });
+                    break;
+                case 'unlock':
+                    this.socket.emit('roomAction', data);
+                    this.roomStatus(action);
+                    break;
+            }
+        } else {
+            this.roomStatus(action);
+        }
+    }
+
+    roomStatus(action) {
         switch (action) {
             case 'lock':
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
-                this.userLog('info', '🔒 LOCKED the room, no one can access!', 'top-end');
+                this.userLog('info', '🔒 LOCKED the room with the password: ' + this.RoomPassword, 'top-end');
                 break;
             case 'unlock':
                 this.event(_EVENTS.roomUnlock);
@@ -2051,12 +2108,53 @@ class RoomClient {
         }
     }
 
+    roomPassword(data) {
+        switch (data.password) {
+            case 'OK':
+                this.joinAllowed(data.room);
+                break;
+            case 'KO': 
+                this.roomIsLocked();
+                break;
+        }
+    }
+
     // ####################################################
     // HANDLE ROOM ACTION
     // ####################################################
 
+    unlockTheRoom() {
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.locked,
+            title: 'Oops, Room Locked',
+            text: 'The room is locked, Enter the Room password',
+            input: 'text',
+            inputPlaceholder: 'Enter the Room password',
+            confirmButtonText: `OK`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+            inputValidator: (pwd) => {
+                if (!pwd) return 'Please enter the Room password';
+                this.RoomPassword = pwd;
+            },
+        }).then(() => {
+            let data = {
+                action: 'checkPassword',
+                password: this.RoomPassword,
+            }
+            this.socket.emit('roomAction', data);
+        });
+    }
+
     roomIsLocked() {
-        this.sound('locked');
+        this.sound('eject');
         this.event(_EVENTS.roomLock);
         console.log('Room is Locked, try with another one');
         Swal.fire({
@@ -2064,7 +2162,7 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             imageUrl: image.locked,
-            title: 'Oops, Room Locked',
+            title: 'Oops, Wrong Room Password',
             text: 'The room is locked, try with another one.',
             showDenyButton: false,
             confirmButtonText: `Ok`,

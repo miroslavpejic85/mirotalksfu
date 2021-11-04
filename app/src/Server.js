@@ -241,17 +241,32 @@ io.on('connection', (socket) => {
         }
     });
 
-    socket.on('roomAction', (action) => {
-        switch (action) {
+    socket.on('roomAction', (data) => {
+        log.debug('Room action:', data);
+        switch (data.action) {
             case 'lock':
-                roomList.get(socket.room_id).setLocked(true);
+                roomList.get(socket.room_id).setLocked(true, data.password);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                break;
+            case 'checkPassword':
+                let roomData = {
+                    room: null,
+                    password: 'KO',
+                };
+                if (data.password == roomList.get(socket.room_id).getPassword()) {
+                    roomData.room = roomList.get(socket.room_id).toJson();
+                    roomData.password = 'OK'
+                    roomList.get(socket.room_id).sendTo(socket.id, 'roomPassword', roomData);
+                } else {
+                    roomList.get(socket.room_id).sendTo(socket.id, 'roomPassword', roomData);
+                }
                 break;
             case 'unlock':
                 roomList.get(socket.room_id).setLocked(false);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                 break;
         }
         log.debug('Room locked:', roomList.get(socket.room_id).isLocked());
-        roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', action);
     });
 
     socket.on('peerAction', (data) => {
