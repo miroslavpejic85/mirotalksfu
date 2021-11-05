@@ -694,7 +694,11 @@ class RoomClient {
                 },
                 deviceId: deviceId,
                 aspectRatio: 1.777, // 16:9
-                frameRate: 15, // 15fps
+                frameRate: {
+                    min: 5,
+                    ideal: 15,
+                    max: 30,
+                },
             },
         };
     }
