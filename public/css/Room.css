@@ -584,11 +584,9 @@ button:hover {
     padding: 8px;
 }
 
-/*
-#roomParticipants tr:nth-child(even) {
-    background-color: #000000;
-}
-*/
+/* #roomParticipants tr:nth-child(even) {
+    background-color: #0c0b0b;
+} */
 
 /*--------------------------------------------------------------
 # Send File

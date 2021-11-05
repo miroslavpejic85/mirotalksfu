@@ -1313,6 +1313,7 @@ async function getRoomParticipants(refresh = false) {
     participantsCount = peers.size;
     roomParticipants.innerHTML = table;
     refreshParticipantsCount(participantsCount);
+    setTableButtonsTippy();
 
     if (!refresh) {
         toggleParticipants();
@@ -1378,6 +1379,15 @@ async function getParticipantsTable(peers) {
     }
     table += `</table>`;
     return table;
+}
+
+function setTableButtonsTippy() {
+    if (!DetectRTC.isMobileDevice) {
+        setTippy('muteAllButton', 'Mute all participants', 'top');
+        setTippy('hideAllButton', 'Hide all participants', 'top');
+        setTippy('sendAllButton', 'Send file to all participants', 'top');
+        setTippy('ejectAllButton', 'Eject all participants', 'top');
+    }
 }
 
 function refreshParticipantsCount(count) {
