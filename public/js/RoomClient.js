@@ -2183,6 +2183,9 @@ class RoomClient {
 
     peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
         let peer_id = id;
+        const words = peer_id.split('___');
+        peer_id = words[0];
+
         if (emit) {
             let data = {
                 from_peer_name: this.peer_name,
@@ -2193,10 +2196,6 @@ class RoomClient {
 
             if (!broadcast) {
                 if (participantsCount === 1) return;
-
-                const words = peer_id.split('___');
-                peer_id = words[0];
-
                 switch (action) {
                     case 'eject':
                         let peer = this.getId(peer_id);
