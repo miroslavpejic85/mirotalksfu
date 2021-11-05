@@ -5,6 +5,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 const RoomURL = window.location.href;
 
 const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
+const swalBg = 'rgba(0, 0, 0, 0.7)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
@@ -267,6 +268,11 @@ function whoAreYou() {
         shareRoom();
         joinRoom(peer_name, room_id);
     });
+
+    if (!DetectRTC.isMobileDevice) {
+        setTippy('initAudioButton', 'Enable / Disable audio', 'left');
+        setTippy('initVideoButton', 'Enable / Disable video', 'right');
+    }
 
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
@@ -1313,7 +1319,6 @@ async function getRoomParticipants(refresh = false) {
     participantsCount = peers.size;
     roomParticipants.innerHTML = table;
     refreshParticipantsCount(participantsCount);
-    setTableButtonsTippy();
 
     if (!refresh) {
         toggleParticipants();
@@ -1379,15 +1384,6 @@ async function getParticipantsTable(peers) {
     }
     table += `</table>`;
     return table;
-}
-
-function setTableButtonsTippy() {
-    if (!DetectRTC.isMobileDevice) {
-        setTippy('muteAllButton', 'Mute all participants', 'top');
-        setTippy('hideAllButton', 'Hide all participants', 'top');
-        setTippy('sendAllButton', 'Send file to all participants', 'top');
-        setTippy('ejectAllButton', 'Eject all participants', 'top');
-    }
 }
 
 function refreshParticipantsCount(count) {

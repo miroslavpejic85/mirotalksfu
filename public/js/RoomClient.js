@@ -18,6 +18,7 @@ const image = {
     locked: '../images/locked.png',
     mute: '../images/mute.png',
     hide: '../images/hide.png',
+    users: '../images/participants.png',
     youtube: '../images/youtube.png',
 };
 
@@ -1076,7 +1077,7 @@ class RoomClient {
         this.sound('open');
 
         Swal.fire({
-            background: swalBackground,
+            background: swalBg,
             position: 'center',
             title: 'Leave this room?',
             showDenyButton: true,
@@ -2183,6 +2184,13 @@ class RoomClient {
     peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
         let peer_id = id;
         if (emit) {
+            let data = {
+                from_peer_name: this.peer_name,
+                peer_id: peer_id,
+                action: action,
+                broadcast: broadcast,
+            };
+
             if (!broadcast) {
                 if (participantsCount === 1) return;
 
@@ -2206,36 +2214,73 @@ class RoomClient {
                         let peerVideoButton = this.getId(peer_id + '___pVideo');
                         if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
                 }
+                this.socket.emit('peerAction', data);
             } else {
                 if (participantsCount === 1) return;
 
-                let actionButton = this.getId(action + 'AllButton');
-                if (actionButton) actionButton.style.display = 'none';
-
                 switch (action) {
                     case 'eject':
-                        participantsCount = 1;
-                        refreshParticipantsCount(participantsCount);
-                        setTimeout(() => {
-                            getRoomParticipants(true);
-                        }, 6000);
+                        Swal.fire({
+                            background: swalBackground,
+                            position: 'center',
+                            imageUrl: image.users,
+                            title: 'Eject All participants except yourself?',
+                            showDenyButton: true,
+                            confirmButtonText: `Yes`,
+                            denyButtonText: `No`,
+                            showClass: {
+                                popup: 'animate__animated animate__fadeInDown',
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOutUp',
+                            },
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                let actionButton = this.getId(action + 'AllButton');
+                                if (actionButton) actionButton.style.display = 'none';
+                                participantsCount = 1;
+                                refreshParticipantsCount(participantsCount);
+                                this.socket.emit('peerAction', data);
+                                setTimeout(() => {
+                                    getRoomParticipants(true);
+                                }, 6000);
+                            }
+                        });
                         break;
                     case 'mute':
                     case 'hide':
-                        setTimeout(() => {
-                            getRoomParticipants(true);
-                        }, 2000);
+                        Swal.fire({
+                            background: swalBackground,
+                            position: 'center',
+                            imageUrl: action == 'mute' ? image.mute : image.hide,
+                            title:
+                                action == 'mute' ? 'Mute everyone except yourself?' : 'Hide everyone except yourself?',
+                            text:
+                                action == 'mute'
+                                    ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
+                                    : "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.",
+                            showDenyButton: true,
+                            confirmButtonText: `Yes`,
+                            denyButtonText: `No`,
+                            showClass: {
+                                popup: 'animate__animated animate__fadeInDown',
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOutUp',
+                            },
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                let actionButton = this.getId(action + 'AllButton');
+                                if (actionButton) actionButton.style.display = 'none';
+                                this.socket.emit('peerAction', data);
+                                setTimeout(() => {
+                                    getRoomParticipants(true);
+                                }, 2000);
+                            }
+                        });
                         break;
                 }
             }
-
-            let data = {
-                from_peer_name: this.peer_name,
-                peer_id: peer_id,
-                action: action,
-                broadcast: broadcast,
-            };
-            this.socket.emit('peerAction', data);
         } else {
             switch (action) {
                 case 'eject':
