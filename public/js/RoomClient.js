@@ -19,6 +19,7 @@ const image = {
     mute: '../images/mute.png',
     hide: '../images/hide.png',
     users: '../images/participants.png',
+    user: '../images/participant.png',
     youtube: '../images/youtube.png',
 };
 
@@ -2198,92 +2199,8 @@ class RoomClient {
                 broadcast: broadcast,
             };
 
-            if (!broadcast) {
-                if (participantsCount === 1) return;
-                switch (action) {
-                    case 'eject':
-                        let peer = this.getId(peer_id);
-                        if (peer) {
-                            peer.parentNode.removeChild(peer);
-                            participantsCount--;
-                            refreshParticipantsCount(participantsCount);
-                        }
-                        break;
-                    case 'mute':
-                        let peerAudioButton = this.getId(peer_id + '___pAudio');
-                        if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
-                        break;
-                    case 'hide':
-                        let peerVideoButton = this.getId(peer_id + '___pVideo');
-                        if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
-                }
-                this.socket.emit('peerAction', data);
-            } else {
-                if (participantsCount === 1) return;
-
-                switch (action) {
-                    case 'eject':
-                        Swal.fire({
-                            background: swalBackground,
-                            position: 'center',
-                            imageUrl: image.users,
-                            title: 'Eject All participants except yourself?',
-                            showDenyButton: true,
-                            confirmButtonText: `Yes`,
-                            denyButtonText: `No`,
-                            showClass: {
-                                popup: 'animate__animated animate__fadeInDown',
-                            },
-                            hideClass: {
-                                popup: 'animate__animated animate__fadeOutUp',
-                            },
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                let actionButton = this.getId(action + 'AllButton');
-                                if (actionButton) actionButton.style.display = 'none';
-                                participantsCount = 1;
-                                refreshParticipantsCount(participantsCount);
-                                this.socket.emit('peerAction', data);
-                                setTimeout(() => {
-                                    getRoomParticipants(true);
-                                }, 6000);
-                            }
-                        });
-                        break;
-                    case 'mute':
-                    case 'hide':
-                        Swal.fire({
-                            background: swalBackground,
-                            position: 'center',
-                            imageUrl: action == 'mute' ? image.mute : image.hide,
-                            title:
-                                action == 'mute' ? 'Mute everyone except yourself?' : 'Hide everyone except yourself?',
-                            text:
-                                action == 'mute'
-                                    ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
-                                    : "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.",
-                            showDenyButton: true,
-                            confirmButtonText: `Yes`,
-                            denyButtonText: `No`,
-                            showClass: {
-                                popup: 'animate__animated animate__fadeInDown',
-                            },
-                            hideClass: {
-                                popup: 'animate__animated animate__fadeOutUp',
-                            },
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                let actionButton = this.getId(action + 'AllButton');
-                                if (actionButton) actionButton.style.display = 'none';
-                                this.socket.emit('peerAction', data);
-                                setTimeout(() => {
-                                    getRoomParticipants(true);
-                                }, 2000);
-                            }
-                        });
-                        break;
-                }
-            }
+            if (participantsCount === 1) return;
+            this.confirmPeerAction(action, data);
         } else {
             switch (action) {
                 case 'eject':
@@ -2337,6 +2254,98 @@ class RoomClient {
                     break;
                 // ...
             }
+        }
+    }
+
+    confirmPeerAction(action, data) {
+        switch (action) {
+            case 'eject':
+                let whoEject = data.broadcast ? 'All participants' : 'current participant';
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    imageUrl: data.broadcast ? image.users : image.user,
+                    title: 'Eject ' + whoEject + ' excpect yourself?',
+                    showDenyButton: true,
+                    confirmButtonText: `Yes`,
+                    denyButtonText: `No`,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (!data.broadcast) {
+                            let peer = this.getId(data.peer_id);
+                            if (peer) {
+                                peer.parentNode.removeChild(peer);
+                                participantsCount--;
+                                refreshParticipantsCount(participantsCount);
+                                this.socket.emit('peerAction', data);
+                            }
+                        } else {
+                            let actionButton = this.getId(action + 'AllButton');
+                            if (actionButton) actionButton.style.display = 'none';
+                            participantsCount = 1;
+                            refreshParticipantsCount(participantsCount);
+                            this.socket.emit('peerAction', data);
+                            setTimeout(() => {
+                                getRoomParticipants(true);
+                            }, 6000);
+                        }
+                    }
+                });
+                break;
+            case 'mute':
+            case 'hide':
+                let whoMuteHide = data.broadcast ? 'everyone' : 'current participant';
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    imageUrl: action == 'mute' ? image.mute : image.hide,
+                    title:
+                        action == 'mute'
+                            ? 'Mute ' + whoMuteHide + ' excpect yourself?'
+                            : 'Hide ' + whoMuteHide + ' except yourself?',
+                    text:
+                        action == 'mute'
+                            ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
+                            : "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.",
+                    showDenyButton: true,
+                    confirmButtonText: `Yes`,
+                    denyButtonText: `No`,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (!data.broadcast) {
+                            switch (action) {
+                                case 'mute':
+                                    let peerAudioButton = this.getId(data.peer_id + '___pAudio');
+                                    if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
+                                    break;
+                                case 'hide':
+                                    let peerVideoButton = this.getId(data.peer_id + '___pVideo');
+                                    if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                            }
+                            this.socket.emit('peerAction', data);
+                        } else {
+                            let actionButton = this.getId(action + 'AllButton');
+                            if (actionButton) actionButton.style.display = 'none';
+                            this.socket.emit('peerAction', data);
+                            setTimeout(() => {
+                                getRoomParticipants(true);
+                            }, 2000);
+                        }
+                    }
+                });
+                break;
         }
     }
 
