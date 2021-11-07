@@ -2240,23 +2240,16 @@ class RoomClient {
     }
 
     peerActionProgress(tt, msg, time, action = 'na') {
-        let timerInterval;
         Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
+            icon: 'success',
             title: tt,
-            html: msg + ' <b style="color: green;"></b> milliseconds.',
+            text: msg,
             timer: time,
             timerProgressBar: true,
             didOpen: () => {
                 Swal.showLoading();
-                const b = Swal.getHtmlContainer().querySelector('b');
-                timerInterval = setInterval(() => {
-                    b.textContent = Swal.getTimerLeft();
-                }, 100);
-            },
-            willClose: () => {
-                clearInterval(timerInterval);
             },
         }).then(() => {
             switch (action) {
