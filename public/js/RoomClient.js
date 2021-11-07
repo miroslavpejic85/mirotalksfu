@@ -2187,9 +2187,8 @@ class RoomClient {
     // ####################################################
 
     peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
-        let peer_id = id;
-        const words = peer_id.split('___');
-        peer_id = words[0];
+        const words = id.split('___');
+        let peer_id = words[0];
 
         if (emit) {
             let data = {
@@ -2199,34 +2198,17 @@ class RoomClient {
                 broadcast: broadcast,
             };
 
-            if (participantsCount === 1) return;
+            if (!this.thereIsParticipants()) {
+                this.userLog('info', 'No participants detected', 'top-end');
+                return;
+            }
             this.confirmPeerAction(action, data);
         } else {
             switch (action) {
                 case 'eject':
                     if (peer_id === this.peer_id || broadcast) {
                         this.sound(action);
-                        let timerInterval;
-                        Swal.fire({
-                            allowOutsideClick: false,
-                            background: swalBackground,
-                            title: from_peer_name,
-                            html: 'Will eject you from the room after <b style="color: red;"></b> milliseconds.',
-                            timer: 5000,
-                            timerProgressBar: true,
-                            didOpen: () => {
-                                Swal.showLoading();
-                                const b = Swal.getHtmlContainer().querySelector('b');
-                                timerInterval = setInterval(() => {
-                                    b.textContent = Swal.getTimerLeft();
-                                }, 100);
-                            },
-                            willClose: () => {
-                                clearInterval(timerInterval);
-                            },
-                        }).then(() => {
-                            this.exit();
-                        });
+                        this.peerActionProgress(from_peer_name, 'Will eject you from the room after', 5000, action);
                     }
                     break;
                 case 'mute':
@@ -2257,9 +2239,41 @@ class RoomClient {
         }
     }
 
+    peerActionProgress(tt, msg, time, action = 'na') {
+        let timerInterval;
+        Swal.fire({
+            allowOutsideClick: false,
+            background: swalBackground,
+            title: tt,
+            html: msg + ' <b style="color: green;"></b> milliseconds.',
+            timer: time,
+            timerProgressBar: true,
+            didOpen: () => {
+                Swal.showLoading();
+                const b = Swal.getHtmlContainer().querySelector('b');
+                timerInterval = setInterval(() => {
+                    b.textContent = Swal.getTimerLeft();
+                }, 100);
+            },
+            willClose: () => {
+                clearInterval(timerInterval);
+            },
+        }).then(() => {
+            switch (action) {
+                case 'refresh':
+                    getRoomParticipants(true);
+                    break;
+                case 'eject':
+                    this.exit();
+                    break;
+            }
+        });
+    }
+
     confirmPeerAction(action, data) {
         switch (action) {
             case 'eject':
+                let ejectConfirmed = false;
                 let whoEject = data.broadcast ? 'All participants' : 'current participant';
                 Swal.fire({
                     background: swalBackground,
@@ -2275,31 +2289,34 @@ class RoomClient {
                     hideClass: {
                         popup: 'animate__animated animate__fadeOutUp',
                     },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (!data.broadcast) {
-                            let peer = this.getId(data.peer_id);
-                            if (peer) {
-                                peer.parentNode.removeChild(peer);
-                                participantsCount--;
+                })
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            ejectConfirmed = true;
+                            if (!data.broadcast) {
+                                let peer = this.getId(data.peer_id);
+                                if (peer) {
+                                    peer.parentNode.removeChild(peer);
+                                    participantsCount--;
+                                    refreshParticipantsCount(participantsCount);
+                                    this.socket.emit('peerAction', data);
+                                }
+                            } else {
+                                let actionButton = this.getId(action + 'AllButton');
+                                if (actionButton) actionButton.style.display = 'none';
+                                participantsCount = 1;
                                 refreshParticipantsCount(participantsCount);
                                 this.socket.emit('peerAction', data);
                             }
-                        } else {
-                            let actionButton = this.getId(action + 'AllButton');
-                            if (actionButton) actionButton.style.display = 'none';
-                            participantsCount = 1;
-                            refreshParticipantsCount(participantsCount);
-                            this.socket.emit('peerAction', data);
-                            setTimeout(() => {
-                                getRoomParticipants(true);
-                            }, 6000);
                         }
-                    }
-                });
+                    })
+                    .then(() => {
+                        if (ejectConfirmed) this.peerActionProgress(action, 'In progress, wait...', 6000, 'refresh');
+                    });
                 break;
             case 'mute':
             case 'hide':
+                let muteHideConfirmed = false;
                 let whoMuteHide = data.broadcast ? 'everyone' : 'current participant';
                 Swal.fire({
                     background: swalBackground,
@@ -2322,29 +2339,31 @@ class RoomClient {
                     hideClass: {
                         popup: 'animate__animated animate__fadeOutUp',
                     },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        if (!data.broadcast) {
-                            switch (action) {
-                                case 'mute':
-                                    let peerAudioButton = this.getId(data.peer_id + '___pAudio');
-                                    if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
-                                    break;
-                                case 'hide':
-                                    let peerVideoButton = this.getId(data.peer_id + '___pVideo');
-                                    if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                })
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            muteHideConfirmed = true;
+                            if (!data.broadcast) {
+                                switch (action) {
+                                    case 'mute':
+                                        let peerAudioButton = this.getId(data.peer_id + '___pAudio');
+                                        if (peerAudioButton) peerAudioButton.innerHTML = _PEER.audioOff;
+                                        break;
+                                    case 'hide':
+                                        let peerVideoButton = this.getId(data.peer_id + '___pVideo');
+                                        if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                                }
+                                this.socket.emit('peerAction', data);
+                            } else {
+                                let actionButton = this.getId(action + 'AllButton');
+                                if (actionButton) actionButton.style.display = 'none';
+                                this.socket.emit('peerAction', data);
                             }
-                            this.socket.emit('peerAction', data);
-                        } else {
-                            let actionButton = this.getId(action + 'AllButton');
-                            if (actionButton) actionButton.style.display = 'none';
-                            this.socket.emit('peerAction', data);
-                            setTimeout(() => {
-                                getRoomParticipants(true);
-                            }, 2000);
                         }
-                    }
-                });
+                    })
+                    .then(() => {
+                        if (muteHideConfirmed) this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
+                    });
                 break;
         }
     }
