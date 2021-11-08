@@ -1421,6 +1421,7 @@ class RoomClient {
 
     toggleChatEmoji() {
         this.getId('chatEmoji').classList.toggle('show');
+        this.getId('chatCloseEmojiButton').classList.toggle('show');
     }
 
     sendMessage() {

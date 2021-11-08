@@ -94,6 +94,7 @@ function initClient() {
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatCloseEmojiButton', 'Close emoji', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
@@ -581,6 +582,9 @@ function handleButtons() {
         rc.sendMessage();
     };
     chatEmojiButton.onclick = () => {
+        rc.toggleChatEmoji();
+    };
+    chatCloseEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
     };
     fullScreenButton.onclick = () => {

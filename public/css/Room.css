@@ -438,10 +438,11 @@ body {
 --------------------------------------------------------------*/
 
 emoji-picker {
+    z-index: 0;
     position: absolute;
-    top: 45px;
+    bottom: 70px;
     width: 100%;
-    height: 92%;
+    height: 50%;
     --background: #16171b;
     --num-columns: 8;
     --emoji-size: 1.5rem;
