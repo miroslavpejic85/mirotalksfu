@@ -192,8 +192,10 @@ body {
     border-radius: 5px;
 }
 
+#sessionTimeIcon {
+    margin-left: 6px;
+}
 #sessionTime {
-    margin-left: 8px;
     cursor: default;
 }
 
