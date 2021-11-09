@@ -99,7 +99,7 @@ body {
 --------------------------------------------------------------*/
 
 #control {
-    z-index: 3;
+    z-index: 2;
     position: absolute;
     display: flex;
 
@@ -633,7 +633,7 @@ progress {
 --------------------------------------------------------------*/
 
 #whiteboard {
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     margin: auto;
     padding: 10px;
@@ -706,8 +706,8 @@ progress {
 /*
 z-index:
     - 1 videoMediaContainer
-    - 2 whiteboard
-    - 3 control buttons
+    - 2 control buttons
+    - 3 whiteboard
     - 5 chat
     - 6 settings
     - 7 participants
