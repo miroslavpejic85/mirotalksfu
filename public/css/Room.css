@@ -126,8 +126,8 @@ body {
     font-size: 1.2rem;
     transition: all 0.3s ease-in-out;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 5px;
-    width: 100%;
+    border-radius: 10px;
+    width: 60%;
     height: 100%;
 }
 #control p {
@@ -192,10 +192,7 @@ body {
     border-radius: 5px;
 }
 
-#sessionTimeIcon {
-    margin-left: 5px;
-}
-#sessionTime {
+#sessionTimeButton {
     cursor: default;
 }
 
