@@ -2209,7 +2209,7 @@ class RoomClient {
                 case 'eject':
                     if (peer_id === this.peer_id || broadcast) {
                         this.sound(action);
-                        this.peerActionProgress(from_peer_name, 'Will eject you from the room after', 5000, action);
+                        this.peerActionProgress(from_peer_name, 'Will eject you from the room', 5000, action);
                     }
                     break;
                 case 'mute':
@@ -2244,7 +2244,7 @@ class RoomClient {
         Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
-            icon: 'success',
+            icon: action == 'eject' ? 'warning' : 'success',
             title: tt,
             text: msg,
             timer: time,
