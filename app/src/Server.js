@@ -28,6 +28,7 @@ const options = {
 const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer);
 const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
+const announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp;
 
 const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
@@ -150,6 +151,7 @@ async function ngrokStart() {
         let pu1 = data.tunnels[1].public_url;
         let tunnel = pu0.startsWith('https') ? pu0 : pu1;
         log.debug('Listening on', {
+            announced_ip: announcedIP,
             server: host,
             tunnel: tunnel,
             api_docs: api_docs,
@@ -185,6 +187,7 @@ httpsServer.listen(config.listenPort, () => {
         return;
     }
     log.debug('Listening on', {
+        announced_ip: announcedIP,
         server: host,
         api_docs: api_docs,
         mediasoup_version: mediasoup.version,
