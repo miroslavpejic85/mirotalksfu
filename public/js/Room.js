@@ -37,8 +37,6 @@ let isEnumerateDevices = false;
 
 let isAudioAllowed = false;
 let isVideoAllowed = false;
-let isAudioOn = true;
-let isVideoOn = true;
 let initAudioButton = null;
 let initVideoButton = null;
 
@@ -220,8 +218,8 @@ function getPeerInfo() {
         browser_version: DetectRTC.browser.version,
         peer_id: socket.id,
         peer_name: peer_name,
-        peer_audio: isAudioOn,
-        peer_video: isVideoOn,
+        peer_audio: isAudioAllowed,
+        peer_video: isVideoAllowed,
         peer_hand: false,
     };
 }
@@ -282,17 +280,17 @@ function whoAreYou() {
 }
 
 function handleAudio(e) {
-    isAudioOn = isAudioOn ? false : true;
-    e.target.className = 'fas fa-microphone' + (isAudioOn ? '' : '-slash');
-    setColor(e.target, isAudioOn ? 'white' : 'red');
-    setColor(startAudioButton, isAudioOn ? 'white' : 'red');
+    isAudioAllowed = isAudioAllowed ? false : true;
+    e.target.className = 'fas fa-microphone' + (isAudioAllowed ? '' : '-slash');
+    setColor(e.target, isAudioAllowed ? 'white' : 'red');
+    setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
 }
 
 function handleVideo(e) {
-    isVideoOn = isVideoOn ? false : true;
-    e.target.className = 'fas fa-video' + (isVideoOn ? '' : '-slash');
-    setColor(e.target, isVideoOn ? 'white' : 'red');
-    setColor(startVideoButton, isVideoOn ? 'white' : 'red');
+    isVideoAllowed = isVideoAllowed ? false : true;
+    e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
+    setColor(e.target, isVideoAllowed ? 'white' : 'red');
+    setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
 }
 
 // ####################################################
@@ -441,8 +439,8 @@ function roomIsReady() {
     }
     show(settingsButton);
     show(raiseHandButton);
-    if (isAudioAllowed) show(startAudioButton);
-    if (isVideoAllowed) show(startVideoButton);
+    isAudioAllowed ? show(stopAudioButton) : show(startAudioButton);
+    isVideoAllowed ? show(stopVideoButton) : show(startVideoButton);
     show(fileShareButton);
     show(participantsButton);
     show(lockRoomButton);

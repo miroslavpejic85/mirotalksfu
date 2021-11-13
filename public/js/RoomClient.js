@@ -519,13 +519,13 @@ class RoomClient {
     // ####################################################
 
     startLocalMedia() {
-        if (this.isAudioAllowed && this.peer_info.peer_audio) {
+        if (this.isAudioAllowed) {
             console.log('08 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
             setColor(startAudioButton, 'red');
         }
-        if (this.isVideoAllowed && this.peer_info.peer_video) {
+        if (this.isVideoAllowed) {
             console.log('09 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
         } else {
