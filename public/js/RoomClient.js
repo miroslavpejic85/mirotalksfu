@@ -1309,8 +1309,8 @@ class RoomClient {
         switch (position) {
             case 'vertical':
                 document.documentElement.style.setProperty('--btns-top', '50%');
-                document.documentElement.style.setProperty('--btns-right', '0px');
-                document.documentElement.style.setProperty('--btns-left', '20px');
+                document.documentElement.style.setProperty('--btns-right', '0%');
+                document.documentElement.style.setProperty('--btns-left', '10px');
                 document.documentElement.style.setProperty('--btns-margin-left', '0px');
                 document.documentElement.style.setProperty('--btns-width', '60px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'column');
