@@ -1478,7 +1478,7 @@ class RoomClient {
         let urlRegex = /(https?:\/\/[^\s]+)/g;
         return message.replace(urlRegex, (url) => {
             if (message.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/))
-                return '<img src="' + url + '" alt="img" width="300" height="auto"/>';
+                return '<img src="' + url + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + url + '" target="_blank">' + url + '</a>';
         });
     }
