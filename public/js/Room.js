@@ -1352,7 +1352,16 @@ async function getRoomParticipants(refresh = false) {
 
 async function getParticipantsTable(peers) {
     let table = `
-    <table>
+    <div>
+        <input
+            id="searchParticipants"
+            type="text"
+            placeholder=" 🔍 Search participants ..."
+            name="search"
+            onkeyup="rc.searchPeer();"
+        />
+    </div>
+    <table id="myTable">
     <tr>
         <th></th>
         <th></th>
@@ -1384,7 +1393,7 @@ async function getParticipantsTable(peers) {
         let peer_id = peer_info.peer_id;
         if (rc.peer_id === peer_id) {
             table += `
-            <tr>
+            <tr id='${peer_name}'>
                 <td>${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>

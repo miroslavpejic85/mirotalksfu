@@ -589,9 +589,23 @@ button:hover {
     padding: 8px;
 }
 
+#roomParticipants tr {
+    border-bottom: 1px solid #444444;
+}
 /* #roomParticipants tr:nth-child(even) {
     background-color: #0c0b0b;
 } */
+
+#searchParticipants {
+    margin-top: 15px;
+    width: 100%;
+    padding: 15px;
+    font-size: 1rem;
+    background-color: transparent;
+    color: #ffffff;
+    border: grey 1px solid;
+    border-radius: 10px;
+}
 
 /*--------------------------------------------------------------
 # Send File
