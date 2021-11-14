@@ -653,7 +653,7 @@ class RoomClient {
                     return;
             }
         } catch (err) {
-            console.log('Produce error:', err);
+            console.error('Produce error:', err);
         }
     }
 
@@ -1187,7 +1187,11 @@ class RoomClient {
     }
 
     setIsScreen(status) {
-        return status;
+        if (!status && !this.peer_info.peer_video) {
+            this.peer_info.peer_video = status;
+            this.setVideoOff(this.peer_info, false);
+            this.sendVideoOff();
+        }
     }
 
     sendVideoOff() {
