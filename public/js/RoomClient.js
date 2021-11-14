@@ -1188,7 +1188,6 @@ class RoomClient {
 
     setIsScreen(status) {
         if (!status && !this.peer_info.peer_video) {
-            this.peer_info.peer_video = status;
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
