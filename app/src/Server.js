@@ -470,10 +470,11 @@ io.on('connection', (socket) => {
 
     socket.on('message', (data) => {
         log.debug('message', data);
-        roomList.get(socket.room_id).broadCast(socket.id, 'message', {
-            peer_name: data.peer_name,
-            peer_msg: data.peer_msg,
-        });
+        if (data.to_peer_id == 'all') {
+            roomList.get(socket.room_id).broadCast(socket.id, 'message', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.to_peer_id, 'message', data);
+        }
     });
 
     socket.on('disconnect', () => {

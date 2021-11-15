@@ -21,6 +21,7 @@ const _PEER = {
     lowerHand: '',
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
+    sendMsg: '<i class="fas fa-paper-plane"></i>',
 };
 
 let participantsCount = 0;
@@ -1367,6 +1368,7 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
     table += `
@@ -1376,6 +1378,7 @@ async function getParticipantsTable(peers) {
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile}</button></td>
+        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
@@ -1388,6 +1391,7 @@ async function getParticipantsTable(peers) {
         let peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
         let peer_eject = _PEER.ejectPeer;
         let peer_sendFile = _PEER.sendFile;
+        let peer_sendMsg = _PEER.sendMsg;
         let peer_id = peer_info.peer_id;
         if (rc.peer_id === peer_id) {
             table += `
@@ -1396,6 +1400,7 @@ async function getParticipantsTable(peers) {
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
+                <td></td>
                 <td></td>
                 <td></td>
             </tr>
@@ -1408,6 +1413,7 @@ async function getParticipantsTable(peers) {
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
                 <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id, false)">${peer_sendFile}</button></td>
+                <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;

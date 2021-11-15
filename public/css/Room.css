@@ -43,6 +43,7 @@
     --wb-bg: linear-gradient(to left, #1f1e1e, #000000);
     --left-msg-bg: #222328;
     --right-msg-bg: #0a0b0c;
+    --private-msg-bg: #510717;
     --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
     --btns-hover-scale: scale(1.1);
     /* buttons bar horizontal */
@@ -334,7 +335,7 @@ body {
     color: #fff;
 }
 
-.left-msg .private-msg-bubble {
+.left-msg .msg-bubble-private {
     background: var(--private-msg-bg);
     border-bottom-left-radius: 0;
     color: #fff;
@@ -354,7 +355,7 @@ body {
     color: #fff;
 }
 
-.right-msg .private-msg-bubble {
+.right-msg .msg-bubble-private {
     background: var(--private-msg-bg);
     border-bottom-right-radius: 0;
     color: #fff;
@@ -377,6 +378,7 @@ body {
     background-size: cover;
 }
 
+.msg-bubble-private,
 .msg-bubble {
     max-width: 200px;
     padding: 15px;

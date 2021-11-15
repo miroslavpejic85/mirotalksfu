@@ -21,6 +21,7 @@ const image = {
     users: '../images/participants.png',
     user: '../images/participant.png',
     youtube: '../images/youtube.png',
+    message: '../images/message.png',
 };
 
 const mediaType = {
@@ -1437,19 +1438,55 @@ class RoomClient {
         if (!peer_msg) return;
         let data = {
             peer_name: this.peer_name,
+            to_peer_id: 'all',
             peer_msg: peer_msg,
         };
         console.log('Send message:', data);
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
-        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg);
+        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, 'all');
         chatMessage.value = '';
+    }
+
+    sendMessageTo(to_peer_id) {
+        if (!this.thereIsParticipants()) {
+            chatMessage.value = '';
+            this.userLog('info', 'No participants in the room expect you', 'top-end');
+            return;
+        }
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.message,
+            input: 'text',
+            inputPlaceholder: '💬 Enter your message...',
+            showCancelButton: true,
+            confirmButtonText: `Send`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            let peer_msg = this.formatMsg(result.value);
+            if (!peer_msg) return;
+            let data = {
+                peer_name: this.peer_name,
+                to_peer_id: to_peer_id,
+                peer_msg: peer_msg,
+            };
+            console.log('Send message:', data);
+            this.socket.emit('message', data);
+            this.setMsgAvatar('right', this.peer_name);
+            this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, to_peer_id);
+        });
     }
 
     showMessage(data) {
         if (!this.isChatOpen) this.toggleChat();
         this.setMsgAvatar('left', data.peer_name);
-        this.appendMessage('left', this.leftMsgAvatar, data.peer_name, data.peer_msg);
+        this.appendMessage('left', this.leftMsgAvatar, data.peer_name, data.peer_msg, data.to_peer_id);
         this.sound('message');
     }
 
@@ -1458,17 +1495,19 @@ class RoomClient {
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
-    appendMessage(side, img, from, msg) {
+    appendMessage(side, img, from, msg, to) {
         let time = this.getTimeNow();
+        let msgBubble = to == 'all' ? 'msg-bubble' : 'msg-bubble-private';
+        let message = to == 'all' ? msg : msg + '<br/> (private message)';
         let msgHTML = `
         <div class="msg ${side}-msg">
             <div class="msg-img" style="background-image: url('${img}')"></div>
-            <div class="msg-bubble">
+            <div class=${msgBubble}>
                 <div class="msg-info">
                     <div class="msg-info-name">${from}</div>
                     <div class="msg-info-time">${time}</div>
                 </div>
-                <div class="msg-text">${msg}</div>
+                <div class="msg-text">${message}</div>
             </div>
         </div>
         `;
