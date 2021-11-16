@@ -1013,6 +1013,7 @@ class RoomClient {
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
+        this.removeVideoOff(peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
@@ -1188,7 +1189,8 @@ class RoomClient {
     }
 
     setIsScreen(status) {
-        if (!status && !this.peer_info.peer_video) {
+        this.peer_info.peer_screen = status;
+        if (!this.peer_info.peer_screen && !this.peer_info.peer_video) {
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }

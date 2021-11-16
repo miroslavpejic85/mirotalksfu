@@ -38,6 +38,7 @@ let isEnumerateDevices = false;
 
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isScreenAllowed = false;
 let initAudioButton = null;
 let initVideoButton = null;
 
@@ -221,6 +222,7 @@ function getPeerInfo() {
         peer_name: peer_name,
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
+        peer_screen: isScreenAllowed,
         peer_hand: false,
     };
 }
