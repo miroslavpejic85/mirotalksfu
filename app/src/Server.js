@@ -205,6 +205,8 @@ httpsServer.listen(config.listenPort, () => {
 async function createWorkers() {
     let { numWorkers } = config.mediasoup;
 
+    log.debug('WORKERS:', numWorkers);
+
     for (let i = 0; i < numWorkers; i++) {
         let worker = await mediasoup.createWorker({
             logLevel: config.mediasoup.worker.logLevel,
