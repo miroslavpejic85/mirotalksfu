@@ -23,7 +23,7 @@
         "mediasoup": "3.9.2",
         "mediasoup-client": "3.6.45",
         "ngrok": "4.2.2",
-        "socket.io": "4.3.2",
+        "socket.io": "4.4.0",
         "swagger-ui-express": "4.1.6",
         "uuid": "8.3.2",
         "yamljs": "0.3.0"
