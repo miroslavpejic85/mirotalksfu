@@ -3398,7 +3398,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -3443,8 +3443,8 @@
                         const ua = navigator.userAgent;
                         const browser = bowser_1.default.getParser(ua);
                         const engine = browser.getEngine();
-                        // Chrome and Chromium.
-                        if (browser.satisfies({ chrome: '>=74', chromium: '>=74' })) {
+                        // Chrome, Chromium, and Edge.
+                        if (browser.satisfies({ chrome: '>=74', chromium: '>=74', 'microsoft edge': '>=88' })) {
                             return 'Chrome74';
                         } else if (browser.satisfies({ chrome: '>=70', chromium: '>=70' })) {
                             return 'Chrome70';
@@ -3456,6 +3456,10 @@
                         // Firefox.
                         else if (browser.satisfies({ firefox: '>=60' })) {
                             return 'Firefox60';
+                        }
+                        // Firefox on iOS.
+                        else if (browser.satisfies({ ios: { OS: '>=14.3', firefox: '>=30.0' } })) {
+                            return 'Safari12';
                         }
                         // Safari with Unified-Plan support enabled.
                         else if (
@@ -3871,13 +3875,13 @@
                 class Logger {
                     constructor(prefix) {
                         if (prefix) {
-                            this._debug = debug_1.default(`${APP_NAME}:${prefix}`);
-                            this._warn = debug_1.default(`${APP_NAME}:WARN:${prefix}`);
-                            this._error = debug_1.default(`${APP_NAME}:ERROR:${prefix}`);
+                            this._debug = (0, debug_1.default)(`${APP_NAME}:${prefix}`);
+                            this._warn = (0, debug_1.default)(`${APP_NAME}:WARN:${prefix}`);
+                            this._error = (0, debug_1.default)(`${APP_NAME}:ERROR:${prefix}`);
                         } else {
-                            this._debug = debug_1.default(APP_NAME);
-                            this._warn = debug_1.default(`${APP_NAME}:WARN`);
-                            this._error = debug_1.default(`${APP_NAME}:ERROR`);
+                            this._debug = (0, debug_1.default)(APP_NAME);
+                            this._warn = (0, debug_1.default)(`${APP_NAME}:WARN`);
+                            this._error = (0, debug_1.default)(`${APP_NAME}:ERROR`);
                         }
                         /* eslint-disable no-console */
                         this._debug.log = console.info.bind(console);
@@ -4233,7 +4237,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -4903,7 +4907,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -5024,16 +5028,14 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                    sdpSemantics: 'plan-b',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                sdpSemantics: 'plan-b',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -5445,7 +5447,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -5565,16 +5567,14 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                    sdpSemantics: 'plan-b',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                sdpSemantics: 'plan-b',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -5774,7 +5774,7 @@
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
                         const parameters = rtpSender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await rtpSender.setParameters(parameters);
                     }
@@ -6017,7 +6017,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -6131,16 +6131,14 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                    sdpSemantics: 'unified-plan',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                sdpSemantics: 'unified-plan',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -6235,7 +6233,7 @@
                         }
                         // Special case for VP9 with SVC.
                         let hackVp9Svc = false;
-                        const layers = scalabilityModes_1.parse((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
                         if (
                             encodings &&
                             encodings.length === 1 &&
@@ -6362,7 +6360,7 @@
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         const parameters = transceiver.sender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
                     }
@@ -6605,7 +6603,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -6719,16 +6717,14 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                    sdpSemantics: 'unified-plan',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                sdpSemantics: 'unified-plan',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -6819,7 +6815,7 @@
                         }
                         // Special case for VP9 with SVC.
                         let hackVp9Svc = false;
-                        const layers = scalabilityModes_1.parse((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
                         if (
                             encodings &&
                             encodings.length === 1 &&
@@ -6939,7 +6935,7 @@
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         const parameters = transceiver.sender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
                     }
@@ -7194,7 +7190,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -7385,7 +7381,7 @@
                         if (!rtpSender) throw new Error('RTCRtpSender not found');
                         const parameters = rtpSender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await rtpSender.setParameters(parameters);
                     }
@@ -7458,6 +7454,7 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     _setIceGatherer({ iceServers, iceTransportPolicy }) {
+                        // @ts-ignore
                         const iceGatherer = new RTCIceGatherer({
                             iceServers: iceServers || [],
                             gatherPolicy: iceTransportPolicy || 'all',
@@ -7617,7 +7614,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -7752,15 +7749,13 @@
                             video: ortc.getSendingRemoteRtpParameters('video', extendedRtpCapabilities),
                         };
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -7965,7 +7960,7 @@
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         const parameters = transceiver.sender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
                     }
@@ -8226,7 +8221,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -8351,16 +8346,14 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                    sdpSemantics: 'plan-b',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                sdpSemantics: 'plan-b',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -8781,7 +8774,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -8901,15 +8894,13 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -9107,7 +9098,7 @@
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
                         const parameters = rtpSender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await rtpSender.setParameters(parameters);
                     }
@@ -9348,7 +9339,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -9460,15 +9451,13 @@
                             this._forcedLocalDtlsRole = dtlsParameters.role === 'server' ? 'client' : 'server';
                         }
                         this._pc = new RTCPeerConnection(
-                            Object.assign(
-                                {
-                                    iceServers: iceServers || [],
-                                    iceTransportPolicy: iceTransportPolicy || 'all',
-                                    bundlePolicy: 'max-bundle',
-                                    rtcpMuxPolicy: 'require',
-                                },
-                                additionalSettings,
-                            ),
+                            {
+                                iceServers: iceServers || [],
+                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                bundlePolicy: 'max-bundle',
+                                rtcpMuxPolicy: 'require',
+                                ...additionalSettings,
+                            },
                             proprietaryConstraints,
                         );
                         // Handle RTCPeerConnection connection status.
@@ -9654,7 +9643,7 @@
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         const parameters = transceiver.sender.getParameters();
                         parameters.encodings.forEach((encoding, idx) => {
-                            parameters.encodings[idx] = Object.assign(Object.assign({}, encoding), params);
+                            parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
                     }
@@ -9908,7 +9897,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -10006,7 +9995,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -10557,7 +10546,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -10864,7 +10853,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -11315,7 +11304,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -11326,7 +11315,13 @@
                         return mod && mod.__esModule ? mod : { default: mod };
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.debug = exports.detectDevice = exports.Device = exports.version = exports.types = void 0;
+                exports.debug =
+                    exports.parseScalabilityMode =
+                    exports.detectDevice =
+                    exports.Device =
+                    exports.version =
+                    exports.types =
+                        void 0;
                 const debug_1 = __importDefault(require('debug'));
                 exports.debug = debug_1.default;
                 const Device_1 = require('./Device');
@@ -11347,7 +11342,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.45';
+                exports.version = '3.6.46';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -11396,7 +11391,7 @@
                         var result = {};
                         if (mod != null)
                             for (var k in mod)
-                                if (k !== 'default' && Object.hasOwnProperty.call(mod, k))
+                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
                                     __createBinding(result, mod, k);
                         __setModuleDefault(result, mod);
                         return result;
@@ -12219,7 +12214,8 @@
                     (this && this.__exportStar) ||
                     function (m, exports) {
                         for (var p in m)
-                            if (p !== 'default' && !exports.hasOwnProperty(p)) __createBinding(exports, m, p);
+                            if (p !== 'default' && !Object.prototype.hasOwnProperty.call(exports, p))
+                                __createBinding(exports, m, p);
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
                 __exportStar(require('./Device'), exports);
