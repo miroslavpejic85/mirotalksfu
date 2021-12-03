@@ -11342,7 +11342,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.46';
+                exports.version = '3.6.47';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -12108,11 +12108,11 @@
                     // Per codec special checks.
                     switch (aMimeType) {
                         case 'video/h264': {
-                            const aPacketizationMode = aCodec.parameters['packetization-mode'] || 0;
-                            const bPacketizationMode = bCodec.parameters['packetization-mode'] || 0;
-                            if (aPacketizationMode !== bPacketizationMode) return false;
                             // If strict matching check profile-level-id.
                             if (strict) {
+                                const aPacketizationMode = aCodec.parameters['packetization-mode'] || 0;
+                                const bPacketizationMode = bCodec.parameters['packetization-mode'] || 0;
+                                if (aPacketizationMode !== bPacketizationMode) return false;
                                 if (!h264.isSameProfile(aCodec.parameters, bCodec.parameters)) return false;
                                 let selectedProfileLevelId;
                                 try {

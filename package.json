@@ -21,15 +21,15 @@
         "express": "4.17.1",
         "httpolyglot": "0.1.2",
         "mediasoup": "3.9.2",
-        "mediasoup-client": "3.6.46",
+        "mediasoup-client": "3.6.47",
         "ngrok": "4.2.2",
         "socket.io": "4.4.0",
-        "swagger-ui-express": "4.1.6",
+        "swagger-ui-express": "4.2.0",
         "uuid": "8.3.2",
         "yamljs": "0.3.0"
     },
     "devDependencies": {
         "node-fetch": "3.1.0",
-        "prettier": "2.4.1"
+        "prettier": "2.5.0"
     }
 }
