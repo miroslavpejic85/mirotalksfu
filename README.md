@@ -118,3 +118,9 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: miro
 ## License
 
 -   [AGPLv3](LICENSE)
+
+<br/>
+
+### MiroTalk P2P
+
+You can try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), The difference between the 2 projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
