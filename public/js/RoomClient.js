@@ -756,7 +756,7 @@ class RoomClient {
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
-        p.innerHTML = '👤 ' + this.peer_name + ' (me)';
+        p.innerHTML = '👤 ' + this.peer_name + ' (eu)';
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
         i.className = 'fas fa-hand-paper pulsate';
@@ -1086,10 +1086,10 @@ class RoomClient {
         Swal.fire({
             background: swalBg,
             position: 'center',
-            title: 'Leave this room?',
+            title: 'Deseja sair da sala?',
             showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            confirmButtonText: `Sim`,
+            denyButtonText: `Não`,
             showClass: {
                 popup: 'animate__animated animate__fadeInDown',
             },

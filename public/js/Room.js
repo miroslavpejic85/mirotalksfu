@@ -248,13 +248,13 @@ function whoAreYou() {
         allowEscapeKey: false,
         background: swalBackground,
         input: 'text',
-        inputPlaceholder: 'Enter your name',
+        inputPlaceholder: 'Digite seu nome',
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
             <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
         </div>`,
-        confirmButtonText: `Join meeting`,
+        confirmButtonText: `Entrar na sala`,
         showClass: {
             popup: 'animate__animated animate__fadeInDown',
         },
@@ -262,7 +262,7 @@ function whoAreYou() {
             popup: 'animate__animated animate__fadeOutUp',
         },
         inputValidator: (name) => {
-            if (!name) return 'Please enter your name';
+            if (!name) return 'Por favor digite seu nome';
             peer_name = name;
         },
     }).then(() => {
@@ -272,8 +272,8 @@ function whoAreYou() {
     });
 
     if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Enable / Disable audio', 'left');
-        setTippy('initVideoButton', 'Enable / Disable video', 'right');
+        setTippy('initAudioButton', 'Ligar / Desligar audio', 'left');
+        setTippy('initVideoButton', 'Ligar / Desligar video', 'right');
     }
 
     initAudioButton = document.getElementById('initAudioButton');
@@ -304,7 +304,7 @@ async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
             await navigator.share({ url: RoomURL });
-            userLog('info', 'Room Shared successfully', 'top-end');
+            userLog('info', 'Link copiado com sucesso', 'top-end');
         } catch (err) {
             share();
         }
@@ -317,7 +317,7 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: '<strong>Hello ' + peer_name + '</strong>',
+            title: '<strong>Ola ' + peer_name + '</strong>',
             html:
                 `
             <br/>
@@ -325,15 +325,15 @@ async function shareRoom(useNavigator = false) {
                 <canvas id="qrRoom"></canvas>
             </div>
             <br/><br/>
-            <p style="background:transparent; color:white;">Share this meeting invite others to join.</p>
+            <p style="background:transparent; color:white;">Compartilhe o convite para que os outros possam entrar.</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">` +
                 RoomURL +
                 `</p>`,
             showDenyButton: true,
             showCancelButton: true,
-            confirmButtonText: `Copy meeting URL`,
-            denyButtonText: `Email invite`,
-            cancelButtonText: `Close`,
+            confirmButtonText: `Copiar link da reunião`,
+            denyButtonText: `Convidar por email`,
+            cancelButtonText: `Fechar`,
             showClass: {
                 popup: 'animate__animated animate__fadeInUp',
             },
@@ -346,8 +346,8 @@ async function shareRoom(useNavigator = false) {
             } else if (result.isDenied) {
                 let message = {
                     email: '',
-                    subject: 'Please join our MiroTalkSfu Video Chat Meeting',
-                    body: 'Click to join: ' + RoomURL,
+                    subject: 'Por favor junte-se a nós no Comunicator',
+                    body: 'Clique para entrar: ' + RoomURL,
                 };
                 shareRoomByEmail(message);
             }
@@ -397,7 +397,7 @@ function joinRoom(peer_name, room_id) {
     if (rc && rc.isConnected()) {
         console.log('Already connected to a room');
     } else {
-        console.log('05 ----> join to Room ' + room_id);
+        console.log('05 ----> Entrar na sala ' + room_id);
         rc = new RoomClient(
             remoteAudios,
             videoMediaContainer,
@@ -1398,7 +1398,7 @@ async function getParticipantsTable(peers) {
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td>${peer_name} (me)</td>
+                <td>${peer_name} (eu)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
