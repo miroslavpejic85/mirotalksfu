@@ -72,7 +72,6 @@ function getRandomNumber(length) {
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('tabDevicesBtn', 'Devices', 'top');
-        setTippy('tabWhiteboardBtn', 'Whiteboard', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabYoutubeBtn', 'YouTube', 'top');
@@ -440,6 +439,7 @@ function roomIsReady() {
         };
         show(fullScreenButton);
     }
+    show(whiteboardButton);
     show(settingsButton);
     show(raiseHandButton);
     isAudioAllowed ? show(stopAudioButton) : show(startAudioButton);
@@ -552,9 +552,6 @@ function handleButtons() {
     tabDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabDevices');
     };
-    tabWhiteboardBtn.onclick = (e) => {
-        rc.openTab(e, 'tabWhiteboard');
-    };
     tabRecordingBtn.onclick = (e) => {
         rc.openTab(e, 'tabRecording');
     };
@@ -652,7 +649,6 @@ function handleButtons() {
         rc.hideFileTransfer();
     };
     whiteboardButton.onclick = () => {
-        rc.toggleMySettings();
         toggleWhiteboard();
     };
     whiteboardPencilBtn.onclick = () => {
@@ -738,9 +734,6 @@ function handleSelects() {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
     // whiteboard options
-    wbDrawingLineWidthEl.onchange = () => {
-        wbCanvas.freeDrawingBrush.width = parseInt(wbDrawingLineWidthEl.value, 10) || 1;
-    };
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
         whiteboardIsDrawingMode(true);

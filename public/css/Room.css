@@ -202,7 +202,7 @@ body {
 --------------------------------------------------------------*/
 .tab {
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.4);
+    background-color: #000000;
 }
 
 /* Style the buttons inside the tab */
