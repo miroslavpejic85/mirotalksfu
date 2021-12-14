@@ -1367,6 +1367,18 @@ class RoomClient {
             this.toggleFullScreen(videoPlayer);
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
+        videoPlayer.addEventListener('fullscreenchange', (e) => {
+            if (!document.fullscreenElement) {
+                videoPlayer.style.pointerEvents = 'auto';
+                this.isVideoOnFullScreen = false;
+            }
+        });
+        videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
+            if (!document.webkitIsFullScreen) {
+                videoPlayer.style.pointerEvents = 'auto';
+                this.isVideoOnFullScreen = false;
+            }
+        });
     }
 
     // ####################################################
