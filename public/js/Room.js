@@ -1368,7 +1368,7 @@ async function getParticipantsTable(peers) {
 
     table += `
     <tr>
-        <td>👥 All</td>
+        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
@@ -1380,7 +1380,7 @@ async function getParticipantsTable(peers) {
 
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
-        let peer_name = '👤 ' + peer_info.peer_name;
+        let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         let peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
         let peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
@@ -1388,10 +1388,11 @@ async function getParticipantsTable(peers) {
         let peer_sendFile = _PEER.sendFile;
         let peer_sendMsg = _PEER.sendMsg;
         let peer_id = peer_info.peer_id;
+        let avatarImg = getParticipantAvatar(peer_name);
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td>${peer_name} (me)</td>
+                <td><img src='${avatarImg}'>&nbsp;${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
@@ -1403,7 +1404,7 @@ async function getParticipantsTable(peers) {
         } else {
             table += `
             <tr id='${peer_id}'>
-                <td>${peer_name}</td>
+                <td><img src='${avatarImg}'>&nbsp;${peer_name}</td>
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
@@ -1420,6 +1421,10 @@ async function getParticipantsTable(peers) {
 
 function refreshParticipantsCount(count) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
+}
+
+function getParticipantAvatar(peerName) {
+    return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
 }
 
 // ####################################################
