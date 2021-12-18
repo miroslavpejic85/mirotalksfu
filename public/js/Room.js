@@ -72,16 +72,16 @@ function getRandomNumber(length) {
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('shareButton', 'Share the room', 'right');
-        setTippy('startAudioButton', 'Start audio', 'right');
-        setTippy('stopAudioButton', 'Stop audio', 'right');
-        setTippy('startVideoButton', 'Start video', 'right');
-        setTippy('stopVideoButton', 'Stop video', 'right');
-        setTippy('swapCameraButton', 'Swap camera', 'right');
-        setTippy('chatButton', 'Toggle chat', 'right');
+        setTippy('startAudioButton', 'Start the audio', 'right');
+        setTippy('stopAudioButton', 'Stop the audio', 'right');
+        setTippy('startVideoButton', 'Start the video', 'right');
+        setTippy('stopVideoButton', 'Stop the video', 'right');
+        setTippy('swapCameraButton', 'Swap the camera', 'right');
+        setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('startScreenButton', 'Start screen share', 'right');
         setTippy('stopScreenButton', 'Stop screen share', 'right');
-        setTippy('whiteboardButton', 'Toggle whiteboard', 'right');
-        setTippy('settingsButton', 'Toggle settings', 'right');
+        setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
+        setTippy('settingsButton', 'Toggle the settings', 'right');
         setTippy('exitButton', 'Leave the room', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
@@ -283,8 +283,8 @@ function whoAreYou() {
     });
 
     if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Toggle audio', 'left');
-        setTippy('initVideoButton', 'Toggle video', 'right');
+        setTippy('initAudioButton', 'Toggle the audio', 'left');
+        setTippy('initVideoButton', 'Toggle the video', 'right');
     }
 
     initAudioButton = document.getElementById('initAudioButton');
