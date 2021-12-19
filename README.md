@@ -117,7 +117,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: miro
 
 ## License
 
-[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg?style=for-the-badge&logo=AdGuard)](LICENSE)
+[![AGPLv3](public/images/AGPLv3.png)](LICENSE)
 
 <br/>
 
