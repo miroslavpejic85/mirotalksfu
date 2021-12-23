@@ -22,6 +22,15 @@ const getLocalIp = () => {
 // https://api.ipify.org
 
 module.exports = {
+    /*
+        Host Protection (default False)
+        In order to protect your host set 
+        hostProtected to true and set your own Username and Password
+    */
+    hostProtected: false,
+    hostUsername: 'username',
+    hostPassword: 'password',
+    // app listen on
     listenIp: '0.0.0.0',
     listenPort: 3010,
     // ssl/README.md

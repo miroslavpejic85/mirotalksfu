@@ -30,6 +30,13 @@ const io = require('socket.io')(httpsServer);
 const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
 const announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp;
 
+const hostCfg = {
+    protected: config.hostProtected,
+    username: config.hostUsername,
+    password: config.hostPassword,
+    authenticated: false,
+};
+
 const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
 
@@ -64,7 +71,24 @@ app.use((err, req, res, next) => {
 
 // all start from here
 app.get(['/'], (req, res) => {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
+    if (hostCfg.protected == true) {
+        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
+    }
+});
+
+// handle login on host protected
+app.get(['/login'], (req, res) => {
+    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    log.debug(`request login to host from: ${ip}`, req.query);
+    if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
+        hostCfg.authenticated = true;
+        res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
+    } else {
+        hostCfg.authenticated = false;
+        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+    }
 });
 
 // set new room name and join
@@ -89,11 +113,15 @@ app.get('/join/', (req, res) => {
 
 // join to room
 app.get('/join/*', (req, res) => {
-    if (Object.keys(req.query).length > 0) {
-        log.debug('redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
-        res.redirect(url.parse(req.url).pathname);
+    if (hostCfg.authenticated) {
+        if (Object.keys(req.query).length > 0) {
+            log.debug('redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
+            res.redirect(url.parse(req.url).pathname);
+        } else {
+            res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
+        }
     } else {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
+        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
     }
 });
 
@@ -151,6 +179,7 @@ async function ngrokStart() {
         let pu1 = data.tunnels[1].public_url;
         let tunnel = pu0.startsWith('https') ? pu0 : pu1;
         log.debug('Listening on', {
+            hostConfig: hostCfg,
             announced_ip: announcedIP,
             server: host,
             tunnel: tunnel,
@@ -187,6 +216,7 @@ httpsServer.listen(config.listenPort, () => {
         return;
     }
     log.debug('Listening on', {
+        hostConfig: hostCfg,
         announced_ip: announcedIP,
         server: host,
         api_docs: api_docs,
