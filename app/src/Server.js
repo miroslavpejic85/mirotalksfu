@@ -34,7 +34,7 @@ const hostCfg = {
     protected: config.hostProtected,
     username: config.hostUsername,
     password: config.hostPassword,
-    authenticated: false,
+    authenticated: true,
 };
 
 const apiBasePath = '/api/v1'; // api endpoint path
