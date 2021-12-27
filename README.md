@@ -75,7 +75,7 @@ $ npm start
 
 ## Docker
 
--   Install Docker engine: https://docs.docker.com/engine/install/
+-   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
 
 ```bash
