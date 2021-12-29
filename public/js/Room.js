@@ -742,9 +742,15 @@ function handleSelects() {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
     };
     // styling
+    BtnsAspectRatio.onchange = () => {
+        setAspectRatio(BtnsAspectRatio.value);
+    };
+    BtnsAspectRatio.selectedIndex = '1';
+
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
+
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
