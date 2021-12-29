@@ -1,12 +1,15 @@
 'use strict';
 
-// aspect       0       1      2      3
-let ratios = ['4:3', '16:9', '1:1', '1:2'];
-let aspect = 1;
+let customRatio = true;
+
+// aspect       0      1      2      3       4
+let ratios = ['0:0', '4:3', '16:9', '1:1', '1:2'];
+let aspect = 0;
 
 let ratio = getAspectRatio();
 
 function getAspectRatio() {
+    customRatio = aspect == 0 ? true : false;
     var ratio = ratios[aspect].split(':');
     return ratio[1] / ratio[0];
 }
@@ -18,6 +21,7 @@ function setAspectRatio(i) {
 }
 
 function Area(Increment, Count, Width, Height, Margin = 10) {
+    ratio = customRatio ? 0.75 : ratio;
     let i = 0;
     let w = 0;
     let h = Increment * ratio + Margin * 2;
@@ -34,7 +38,7 @@ function Area(Increment, Count, Width, Height, Margin = 10) {
 }
 
 function resizeVideoMedia() {
-    let Margin = 2;
+    let Margin = 3;
     let Scenary = document.getElementById('videoMediaContainer');
     let Width = Scenary.offsetWidth - Margin * 2;
     let Height = Scenary.offsetHeight - Margin * 2;
@@ -57,6 +61,7 @@ function resizeVideoMedia() {
 }
 
 function setWidth(width, margin) {
+    ratio = customRatio ? 0.68 : ratio;
     let Cameras = document.getElementsByClassName('Camera');
     for (let s = 0; s < Cameras.length; s++) {
         Cameras[s].style.width = width + 'px';

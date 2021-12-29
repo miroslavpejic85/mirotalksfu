@@ -745,8 +745,7 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
-    // Video aspect ratio for Mobile device 4:3 on Desktop 16:9
-    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? 0 : 1;
+    BtnsAspectRatio.selectedIndex = 0; // default
     setAspectRatio(BtnsAspectRatio.selectedIndex);
 
     BtnsBarPosition.onchange = () => {
