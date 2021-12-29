@@ -745,7 +745,9 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
-    BtnsAspectRatio.selectedIndex = '1';
+    // Video aspect ratio for Mobile device 4:3 on Desktop 16:9
+    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? 0 : 1;
+    setAspectRatio(BtnsAspectRatio.selectedIndex);
 
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
