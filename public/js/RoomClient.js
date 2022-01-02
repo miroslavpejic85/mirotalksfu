@@ -756,7 +756,8 @@ class RoomClient {
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
-        p.innerHTML = '👤 ' + this.peer_name + ' (me)';
+        p.className = 'fas fa-user';
+        p.innerHTML = '&nbsp;' + this.peer_name + ' (me)';
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
         i.className = 'fas fa-hand-paper pulsate';
@@ -954,7 +955,8 @@ class RoomClient {
                 elem.poster = image.poster;
                 p = document.createElement('p');
                 p.id = peer_info.peer_id + '__name';
-                p.innerHTML = '👤 ' + peer_name;
+                p.className = 'fas fa-user';
+                p.innerHTML = '&nbsp;' + peer_name;
                 i = document.createElement('i');
                 i.id = peer_info.peer_id + '__hand';
                 i.className = 'fas fa-hand-paper pulsate';
@@ -1022,7 +1024,8 @@ class RoomClient {
         i.id = peer_id + '__img';
         p = document.createElement('p');
         p.id = peer_id + '__name';
-        p.innerHTML = '👤 ' + peer_name + (remotePeer ? '' : ' (me) ');
+        p.className = 'fas fa-user';
+        p.innerHTML = '&nbsp;' + peer_name + (remotePeer ? '' : ' (me) ');
         b = document.createElement('button');
         b.id = peer_id + '__audio';
         b.className = peer_audio ? html.audioOn : html.audioOff;
@@ -1358,6 +1361,7 @@ class RoomClient {
                 ? document.exitFullscreen()
                 : el.requestFullscreen();
         }
+        this.isVideoOnFullScreen = document.fullscreenEnabled;
     }
 
     handleFS(id) {

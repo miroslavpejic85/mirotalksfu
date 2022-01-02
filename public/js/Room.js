@@ -781,7 +781,7 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
-    BtnsAspectRatio.selectedIndex = 0; // default
+    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? 1 : 0;
     setAspectRatio(BtnsAspectRatio.selectedIndex);
 
     BtnsBarPosition.onchange = () => {

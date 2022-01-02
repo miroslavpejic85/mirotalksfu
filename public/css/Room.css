@@ -679,14 +679,16 @@ progress {
     border: none;
     width: 20px;
     height: 15px;
+    margin-top: 10px;
     margin-left: 10px;
     margin-right: 15px;
-    border-radius: 50px;
+    border-radius: 20px;
     border: solid 0.5px #afadad38;
 }
 .whiteboardColorPicker:hover {
     transform: var(--btns-hover-scale);
     transition: all 0.3s ease-in-out;
+    cursor: pointer;
 }
 .whiteboardColorPicker::-webkit-color-swatch {
     border: none;
