@@ -110,8 +110,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
 ## Direct Join
 
 -   You can also `join` directly to your `room` by going to
-
-https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0
+-   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0
 
 | Params | Description            | Value             |
 | ------ | ---------------------- | ----------------- |
