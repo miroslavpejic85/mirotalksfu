@@ -105,7 +105,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: miro
 
 ## Direct Join
 
-You can also `join` directly to your `room` by going to
+-   You can also `join` directly to your `room` by going to
 
 https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0
 
