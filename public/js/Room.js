@@ -29,13 +29,12 @@ let participantsCount = 0;
 let rc = null;
 let producer = null;
 
-let peer_name = 'peer_' + getRandomNumber(5);
+let room_id = getRoomId();
+let peer_name = getPeerName();
 let peer_geo = null;
 let peer_info = null;
 
-let room_id = location.pathname.substring(6);
 let isEnumerateDevices = false;
-
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isScreenAllowed = false;
@@ -58,16 +57,6 @@ let wbPop = [];
 let isButtonsVisible = false;
 
 const socket = io();
-
-function getRandomNumber(length) {
-    let result = '';
-    let characters = '0123456789';
-    let charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
-}
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
@@ -119,6 +108,30 @@ function setTippy(elem, content, placement) {
         content: content,
         placement: placement,
     });
+}
+
+// ####################################################
+// GET ROOM ID
+// ####################################################
+
+function getRoomId() {
+    let qs = new URLSearchParams(window.location.search);
+    let queryRoomId = qs.get('room');
+    let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
+    if (roomId == '') {
+        roomId = makeId(12);
+    }
+    return roomId;
+}
+
+function makeId(length) {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
 }
 
 // ####################################################
@@ -220,6 +233,11 @@ function appenChild(device, el) {
 // SOME PEER INFO
 // ####################################################
 
+function getPeerName() {
+    let qs = new URLSearchParams(window.location.search);
+    return qs.get('name');
+}
+
 function getPeerInfo() {
     peer_info = {
         detect_rtc_version: DetectRTC.version,
@@ -253,6 +271,14 @@ function getPeerGeoLocation() {
 
 function whoAreYou() {
     console.log('04 ----> Who are you');
+
+    if (peer_name) {
+        checkMedia();
+        getPeerInfo();
+        shareRoom();
+        joinRoom(peer_name, room_id);
+        return;
+    }
 
     Swal.fire({
         allowOutsideClick: false,
@@ -305,6 +331,16 @@ function handleVideo(e) {
     e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
     setColor(e.target, isVideoAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
+}
+
+function checkMedia() {
+    let qs = new URLSearchParams(window.location.search);
+    let audio = qs.get('audio').toLowerCase();
+    let video = qs.get('video').toLowerCase();
+    let queryPeerAudio = audio === '1' || audio === 'true';
+    let queryPeerVideo = video === '1' || video === 'true';
+    if (queryPeerAudio != null) isAudioAllowed = queryPeerAudio;
+    if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
 }
 
 // ####################################################

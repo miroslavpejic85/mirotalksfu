@@ -103,6 +103,17 @@ $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotal
 $ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 ```
 
+## Direct Join
+
+-   You can also `join` directly to your `room` by going to https://sfu.mirotalksfu.org/join?room=test&name=mirotalksfu&audio=0&video=0
+
+| Params | Description            | Value             |
+| ------ | ---------------------- | ----------------- |
+| room   | Room Id                | test              |
+| name   | Your name              | mirotalksfu       |
+| audio  | Enable / Disable audio | 0/1 or true/false |
+| video  | Enable / Disable video | 0/1 or true/false |
+
 ## Notes
 
 -   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.

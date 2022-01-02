@@ -34,7 +34,7 @@ const hostCfg = {
     protected: config.hostProtected,
     username: config.hostUsername,
     password: config.hostPassword,
-    authenticated: true,
+    authenticated: !config.hostProtected,
 };
 
 const apiBasePath = '/api/v1'; // api endpoint path
@@ -93,7 +93,11 @@ app.get(['/login'], (req, res) => {
 
 // set new room name and join
 app.get(['/newroom'], (req, res) => {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
+    if (hostCfg.authenticated) {
+        res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+    }
 });
 
 // if not allow video/audio
@@ -108,6 +112,18 @@ app.get(['/privacy'], (req, res) => {
 
 // no room name specified to join
 app.get('/join/', (req, res) => {
+    if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
+        log.debug('Direct Join', req.query);
+        // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1
+        let roomName = req.query.room;
+        let peerName = req.query.name;
+        let peerAudio = req.query.audio;
+        let peerVideo = req.query.video;
+        if (roomName && peerName && peerAudio && peerVideo) {
+            res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
+            return;
+        }
+    }
     res.redirect('/');
 });
 
