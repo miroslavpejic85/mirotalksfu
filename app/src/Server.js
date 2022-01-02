@@ -176,6 +176,31 @@ app.post(['/api/v1/meeting'], (req, res) => {
     });
 });
 
+// request join room endpoint
+app.post(['/api/v1/join'], (req, res) => {
+    // check if user was authorized for the api call
+    let host = req.headers.host;
+    let authorization = req.headers.authorization;
+    let api = new ServerApi(host, authorization);
+    if (!api.isAuthorized()) {
+        log.debug('MiroTalk get join - Unauthorized', {
+            header: req.headers,
+            body: req.body,
+        });
+        return res.status(403).json({ error: 'Unauthorized!' });
+    }
+    // setup Join URL
+    let joinURL = api.getJoinURL(req.body);
+    res.setHeader('Content-Type', 'application/json');
+    res.end(JSON.stringify({ join: joinURL }));
+    // log.debug the output if all done
+    log.debug('MiroTalk get join - Authorized', {
+        header: req.headers,
+        body: req.body,
+        join: joinURL,
+    });
+});
+
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
     res.sendFile(path.join(__dirname, '../../', 'public/view/404.html'));

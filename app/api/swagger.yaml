@@ -31,6 +31,45 @@ paths:
                         $ref: '#/definitions/MeetingResponse'
                 '403':
                     description: 'Unauthorized!'
+    /join:
+        post:
+            tags:
+                - 'join'
+            summary: 'Create direct join'
+            description: 'Create join'
+            parameters:
+                - in: body
+                  name: Join
+                  description: Custom Join URL.
+                  schema:
+                      type: object
+                      required:
+                          - room
+                          - name
+                          - audio
+                          - video
+                      properties:
+                          room:
+                              type: string
+                          name:
+                              type: string
+                          audio:
+                              type: boolean
+                          video:
+                              type: boolean
+            consumes:
+                - 'application/json'
+            produces:
+                - 'application/json'
+            security:
+                - secretApiKey: []
+            responses:
+                '200':
+                    description: 'Direct join created'
+                    schema:
+                        $ref: '#/definitions/JoinResponse'
+                '403':
+                    description: 'Unauthorized!'
 
 securityDefinitions:
     secretApiKey:
@@ -44,4 +83,9 @@ definitions:
         type: 'object'
         properties:
             meeting:
+                type: 'string'
+    JoinResponse:
+        type: 'object'
+        properties:
+            join:
                 type: 'string'

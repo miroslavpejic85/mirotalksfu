@@ -7,12 +7,19 @@ Create a meeting with a `HTTP request` containing the `API_KEY` sent to MiroTalk
 ```bash
 # js
 node meeting.js
+node join.js
+
 # php
 php meeting.php
+php join.php
+
 # python
-python meeting.py
+python3 meeting.py
+python3 join.py
+
 # bash
 ./meeting.sh
+./join.sh
 ```
 
 ## Embed a meeting

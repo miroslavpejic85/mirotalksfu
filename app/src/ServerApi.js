@@ -18,4 +18,19 @@ module.exports = class ServerApi {
     getMeetingURL() {
         return 'https://' + this._host + '/join/' + uuidV4();
     }
+
+    getJoinURL(data) {
+        return (
+            'https://' +
+            this._host +
+            '/join?room=' +
+            data.room +
+            '&name=' +
+            data.name +
+            '&audio=' +
+            data.audio +
+            '&video=' +
+            data.video
+        );
+    }
 };
