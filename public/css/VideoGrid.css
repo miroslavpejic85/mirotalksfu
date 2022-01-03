@@ -32,21 +32,6 @@
     animation: show 0.4s ease;
 }
 
-#videoMediaContainer p {
-    position: absolute;
-    bottom: 0;
-    color: white;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    padding: 5px;
-    margin: 5px;
-    width: auto;
-    height: 25px;
-    border-radius: 5px;
-    background: rgba(0, 0, 0, 0.4);
-}
-
 #videoMediaContainer i {
     position: absolute;
     display: none;
@@ -62,12 +47,37 @@
     background: rgba(0, 0, 0, 0.4);
 }
 
-#videoMediaContainer button {
+.audio {
     position: absolute;
     right: 0;
     color: white;
+    margin: 5px;
+    width: auto;
+    height: 25px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.username {
+    position: absolute;
+    bottom: 0;
+    color: white;
+    font-size: 14px;
     display: flex;
     align-items: center;
+    padding: 5px;
+    margin: 5px;
+    width: auto;
+    height: 25px;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.4);
+}
+
+.fscreen {
+    position: absolute;
+    right: 0;
+    bottom: 0px;
+    color: white;
     margin: 5px;
     width: auto;
     height: 25px;

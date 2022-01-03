@@ -6,10 +6,13 @@ const cfg = {
 
 const html = {
     newline: '<br />',
-    audioOn: 'fas fa-microphone',
-    audioOff: 'fas fa-microphone-slash',
+    audioOn: 'fas fa-microphone audio',
+    audioOff: 'fas fa-microphone-slash audio',
     videoOn: 'fas fa-video',
     videoOff: 'fas fa-video-slash',
+    userName: 'fas fa-user username',
+    userHand: 'fas fa-hand-paper pulsate',
+    fullScreen: 'fas fa-expand fscreen',
 };
 
 const image = {
@@ -743,7 +746,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, d, p, i, b;
+        let elem, d, p, i, b, fs;
         this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
@@ -756,22 +759,26 @@ class RoomClient {
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
-        p.className = 'fas fa-user';
+        p.className = html.userName;
         p.innerHTML = '&nbsp;' + this.peer_name + ' (me)';
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
-        i.className = 'fas fa-hand-paper pulsate';
+        i.className = html.userHand;
         b = document.createElement('button');
         b.id = this.peer_id + '__audio';
         b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
+        fs = document.createElement('button');
+        fs.id = id + '__fullScreen';
+        fs.className = html.fullScreen;
         d.appendChild(elem);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
+        d.appendChild(fs);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
-        this.handleFS(elem.id);
+        this.handleFS(elem.id, fs.id);
         this.setTippy(elem.id, 'Full Screen', 'top-end');
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
@@ -940,7 +947,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, d, p, i, b;
+        let elem, d, p, i, b, fs;
         switch (type) {
             case mediaType.video:
                 this.removeVideoOff(peer_info.peer_id);
@@ -955,21 +962,25 @@ class RoomClient {
                 elem.poster = image.poster;
                 p = document.createElement('p');
                 p.id = peer_info.peer_id + '__name';
-                p.className = 'fas fa-user';
+                p.className = html.userName;
                 p.innerHTML = '&nbsp;' + peer_name;
                 i = document.createElement('i');
                 i.id = peer_info.peer_id + '__hand';
-                i.className = 'fas fa-hand-paper pulsate';
+                i.className = html.userHand;
                 b = document.createElement('button');
                 b.id = peer_info.peer_id + '__audio';
                 b.className = peer_info.peer_audio ? html.audioOn : html.audioOff;
+                fs = document.createElement('button');
+                fs.id = id + '__fullScreen';
+                fs.className = html.fullScreen;
                 d.appendChild(elem);
                 d.appendChild(p);
                 d.appendChild(i);
                 d.appendChild(b);
+                d.appendChild(fs);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
-                this.handleFS(elem.id);
+                this.handleFS(elem.id, fs.id);
                 this.setTippy(elem.id, 'Full Screen', 'top-end');
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
@@ -1024,14 +1035,14 @@ class RoomClient {
         i.id = peer_id + '__img';
         p = document.createElement('p');
         p.id = peer_id + '__name';
-        p.className = 'fas fa-user';
+        p.className = html.userName;
         p.innerHTML = '&nbsp;' + peer_name + (remotePeer ? '' : ' (me) ');
         b = document.createElement('button');
         b.id = peer_id + '__audio';
         b.className = peer_audio ? html.audioOn : html.audioOff;
         h = document.createElement('i');
         h.id = peer_info.peer_id + '__hand';
-        h.className = 'fas fa-hand-paper pulsate';
+        h.className = html.userHand;
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
@@ -1361,15 +1372,28 @@ class RoomClient {
                 ? document.exitFullscreen()
                 : el.requestFullscreen();
         }
-        this.isVideoOnFullScreen = document.fullscreenEnabled;
+        if (elem == null) this.isVideoOnFullScreen = document.fullscreenEnabled;
     }
 
-    handleFS(id) {
-        let videoPlayer = this.getId(id);
-        videoPlayer.addEventListener('click', () => {
+    handleFS(elemId, fsId) {
+        let videoPlayer = this.getId(elemId);
+        let btnFs = this.getId(fsId);
+        this.setTippy(fsId, 'Full screen', 'top');
+
+        btnFs.addEventListener('click', () => {
             videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
             this.toggleFullScreen(videoPlayer);
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+        });
+        videoPlayer.addEventListener('click', () => {
+            if (
+                (this.isMobileDevice && this.isVideoOnFullScreen) ||
+                (!this.isMobileDevice && !this.isVideoOnFullScreen)
+            ) {
+                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                this.toggleFullScreen(videoPlayer);
+                this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+            }
         });
         videoPlayer.addEventListener('fullscreenchange', (e) => {
             if (!document.fullscreenElement) {
