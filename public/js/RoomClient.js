@@ -1386,10 +1386,7 @@ class RoomClient {
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
         videoPlayer.addEventListener('click', () => {
-            if (
-                (this.isMobileDevice && this.isVideoOnFullScreen) ||
-                (!this.isMobileDevice && !this.isVideoOnFullScreen)
-            ) {
+            if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
                 this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
