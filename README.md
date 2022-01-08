@@ -131,6 +131,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
 
 -   Contributions are welcome and greatly appreciated!
 -   Just run before `npm run lint`
+-   For communication we use [discord](https://discord.gg/MYTznypZ5k)
 
 ## License
 
