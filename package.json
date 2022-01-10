@@ -20,7 +20,7 @@
         "cors": "2.8.5",
         "express": "4.17.2",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.9.3",
+        "mediasoup": "3.9.4",
         "mediasoup-client": "3.6.47",
         "ngrok": "4.2.2",
         "socket.io": "4.4.1",
