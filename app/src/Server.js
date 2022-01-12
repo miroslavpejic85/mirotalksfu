@@ -86,7 +86,6 @@ app.get(['/login'], (req, res) => {
         hostCfg.authenticated = true;
         res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
     } else {
-        hostCfg.authenticated = false;
         res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
     }
 });
