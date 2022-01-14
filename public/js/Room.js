@@ -93,6 +93,8 @@ function initClient() {
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
+        setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
+        setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatCloseEmojiButton', 'Close emoji', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
@@ -469,6 +471,9 @@ function roomIsReady() {
     show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    if (isWebkitSpeechRecognitionSupported) {
+        show(chatSpeechStartButton);
+    }
     if (DetectRTC.isMobileDevice) {
         show(swapCameraButton);
         setChatSize();
@@ -632,6 +637,12 @@ function handleButtons() {
     };
     chatCloseEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatSpeechStartButton.onclick = () => {
+        startSpeech(true);
+    };
+    chatSpeechStopButton.onclick = () => {
+        startSpeech(false);
     };
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
