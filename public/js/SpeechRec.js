@@ -93,133 +93,137 @@ function startSpeech(action) {
 function execVoiceCommands(transcript) {
     switch (transcript.trim()) {
         case commands.shareRoom:
-            console.log('Command detected', commands.shareRoom);
+            printCommand(commands.shareRoom);
             shareButton.click();
             break;
         case commands.leaveRoom:
-            console.log('Command detected', commands.leaveRoom);
+            printCommand(commands.leaveRoom);
             exitButton.click();
             break;
         case commands.audioOn:
-            console.log('Command detected', commands.audioOn);
+            printCommand(commands.audioOn);
             startAudioButton.click();
             break;
         case commands.audioOff:
-            console.log('Command detected', commands.audioOff);
+            printCommand(commands.audioOff);
             stopAudioButton.click();
             break;
         case commands.videoOn:
-            console.log('Command detected', commands.videoOn);
+            printCommand(commands.videoOn);
             startVideoButton.click();
             break;
         case commands.videoOff:
-            console.log('Command detected', commands.videoOff);
+            printCommand(commands.videoOff);
             stopVideoButton.click();
             break;
         case commands.screenOn:
-            console.log('Command detected', commands.screenOn);
+            printCommand(commands.screenOn);
             startScreenButton.click();
             break;
         case commands.screenOff:
-            console.log('Command detected', commands.screenOff);
+            printCommand(commands.screenOff);
             stopScreenButton.click();
             break;
         case commands.chatOn:
-            console.log('Command detected', commands.chatOn);
+            printCommand(commands.chatOn);
             chatButton.click();
             break;
         case commands.chatSend:
-            console.log('Command detected', commands.chatSend);
+            printCommand(commands.chatSend);
             chatSendButton.click();
             break;
         case commands.chatOff:
-            console.log('Command detected', commands.chatOff);
+            printCommand(commands.chatOff);
             chatCloseButton.click();
             break;
         case commands.whiteboardOn:
-            console.log('Command detected', commands.whiteboardOn);
+            printCommand(commands.whiteboardOn);
             whiteboardButton.click();
             break;
         case commands.whiteboardOff:
-            console.log('Command detected', commands.whiteboardOff);
+            printCommand(commands.whiteboardOff);
             whiteboardCloseBtn.click();
             break;
         case commands.recordingOn:
-            console.log('Command detected', commands.recordingOn);
+            printCommand(commands.recordingOn);
             startRecButton.click();
             break;
         case commands.recordingPause:
-            console.log('Command detected', commands.recordingPause);
+            printCommand(commands.recordingPause);
             pauseRecButton.click();
             break;
         case commands.recordingResume:
-            console.log('Command detected', commands.recordingResume);
+            printCommand(commands.recordingResume);
             recordingResume.click();
             break;
         case commands.recordingOff:
-            console.log('Command detected', commands.recordingOff);
+            printCommand(commands.recordingOff);
             stopRecButton.click();
             break;
         case commands.settingsOn:
-            console.log('Command detected', commands.settingsOn);
+            printCommand(commands.settingsOn);
             settingsButton.click();
             break;
         case commands.settingsOff:
-            console.log('Command detected', commands.settingsOff);
+            printCommand(commands.settingsOff);
             mySettingsCloseBtn.click();
             break;
         case commands.participantsOn:
-            console.log('Command detected', commands.participantsOn);
+            printCommand(commands.participantsOn);
             participantsButton.click();
             break;
         case commands.participantsRefresh:
-            console.log('Command detected', commands.participantsRefresh);
+            printCommand(commands.participantsRefresh);
             participantsRefreshBtn.click();
             break;
         case commands.participantsOff:
-            console.log('Command detected', commands.participantsOff);
+            printCommand(commands.participantsOff);
             participantsCloseBtn.click();
             break;
         case commands.fileShareOn:
-            console.log('Command detected', commands.fileShareOn);
+            printCommand(commands.fileShareOn);
             fileShareButton.click();
             break;
         case commands.fileShareOff:
-            console.log('Command detected', commands.fileShareOff);
+            printCommand(commands.fileShareOff);
             sendAbortBtn.click();
             break;
         case commands.youtubeOn:
-            console.log('Command detected', commands.youtubeOn);
+            printCommand(commands.youtubeOn);
             youTubeShareButton.click();
             break;
         case commands.youtubeOff:
-            console.log('Command detected', commands.youtubeOff);
+            printCommand(commands.youtubeOff);
             youTubeCloseBtn.click();
             break;
         case commands.swapCamera:
-            console.log('Command detected', commands.swapCamera);
+            printCommand(commands.swapCamera);
             swapCameraButton.click();
             break;
         case commands.raiseHand:
-            console.log('Command detected', commands.raiseHand);
+            printCommand(commands.raiseHand);
             raiseHandButton.click();
             break;
         case commands.lowerHand:
-            console.log('Command detected', commands.lowerHand);
+            printCommand(commands.lowerHand);
             lowerHandButton.click();
             break;
         case commands.roomLock:
-            console.log('Command detected', commands.roomLock);
+            printCommand(commands.roomLock);
             lockRoomButton.click();
             break;
         case commands.roomUnlock:
-            console.log('Command detected', commands.roomUnlock);
+            printCommand(commands.roomUnlock);
             unlockRoomButton.click();
             break;
         case commands.about:
-            console.log('Command detected', commands.about);
+            printCommand(commands.about);
             aboutButton.click();
             break;
         // ...
     }
+}
+
+function printCommand(command) {
+    console.log('Detected', { command: command });
 }
