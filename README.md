@@ -31,7 +31,7 @@ Open the app with the following **supported browsers** and many more.
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing, share any files to your participants in the room
 -   Chat with Emoji Picker to show you feeling and the possibility to Save the conversations
--   Speech recognition, ability to identify a person based on their voiceprint.
+-   Speech recognition, execute the app features simply with your voice.
 -   Advance collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
 -   Recording your Screen, Audio, or Video
