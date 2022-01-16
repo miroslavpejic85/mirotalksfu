@@ -99,6 +99,7 @@ class RoomClient {
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
         this.isChatOpen = false;
+        this.isChatEmojiOpen = false;
         this.camVideo = false;
         this.camera = 'user';
 
@@ -1464,7 +1465,8 @@ class RoomClient {
 
     toggleChatEmoji() {
         this.getId('chatEmoji').classList.toggle('show');
-        this.getId('chatCloseEmojiButton').classList.toggle('show');
+        this.isChatEmojiOpen = this.isChatEmojiOpen ? false : true;
+        this.getId('chatEmojiButton').style.color = this.isChatEmojiOpen ? '#FFFF00' : '#FFFFFF';
     }
 
     sendMessage() {

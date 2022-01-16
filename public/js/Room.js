@@ -96,7 +96,6 @@ function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
-        setTippy('chatCloseEmojiButton', 'Close emoji', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
@@ -633,9 +632,6 @@ function handleButtons() {
         rc.sendMessage();
     };
     chatEmojiButton.onclick = () => {
-        rc.toggleChatEmoji();
-    };
-    chatCloseEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
     };
     chatSpeechStartButton.onclick = () => {

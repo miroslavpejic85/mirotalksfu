@@ -27,6 +27,9 @@ const commands = {
     participantsOn: 'show the participants',
     participantsRefresh: 'refresh the participants',
     participantsOff: 'hide the participants',
+    participantsVideoOff: 'stop the participants video',
+    participantsAudioOff: 'stop the participants audio',
+    participantsKickOut: 'kick out the participants',
     fileShareOn: 'open the file',
     fileShareOff: 'close the file',
     youtubeOn: 'open the YouTube',
@@ -179,6 +182,18 @@ function execVoiceCommands(transcript) {
         case commands.participantsOff:
             printCommand(commands.participantsOff);
             participantsCloseBtn.click();
+            break;
+        case commands.participantsVideoOff:
+            printCommand(commands.participantsVideoOff);
+            rc.peerAction('me', rc.peer_id, 'hide', true, true);
+            break;
+        case commands.participantsAudioOff:
+            printCommand(commands.participantsAudioOff);
+            rc.peerAction('me', rc.peer_id, 'mute', true, true);
+            break;
+        case commands.participantsKickOut:
+            printCommand(commands.participantsAudioOff);
+            rc.peerAction('me', rc.peer_id, 'eject', true, true);
             break;
         case commands.fileShareOn:
             printCommand(commands.fileShareOn);
