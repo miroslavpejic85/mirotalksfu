@@ -2409,7 +2409,7 @@
 
                     /**
                      * Selects a color for a debug namespace
-                     * @param {String} namespace The namespace string for the for the debug instance to be colored
+                     * @param {String} namespace The namespace string for the debug instance to be colored
                      * @return {Number|String} An ANSI color code for the given namespace
                      * @api private
                      */
@@ -4254,6 +4254,15 @@
                 const Consumer_1 = require('./Consumer');
                 const DataProducer_1 = require('./DataProducer');
                 const DataConsumer_1 = require('./DataConsumer');
+                class ConsumerCreationTask {
+                    constructor(consumerOptions) {
+                        this.consumerOptions = consumerOptions;
+                        this.promise = new Promise((resolve, reject) => {
+                            this.resolve = resolve;
+                            this.reject = reject;
+                        });
+                    }
+                }
                 const logger = new Logger_1.Logger('Transport');
                 class Transport extends EnhancedEventEmitter_1.EnhancedEventEmitter {
                     /**
@@ -4297,6 +4306,10 @@
                         this._awaitQueue = new awaitqueue_1.AwaitQueue({
                             ClosedErrorClass: errors_1.InvalidStateError,
                         });
+                        // Consumer creation tasks awaiting to be processed.
+                        this._pendingConsumerTasks = [];
+                        // Consumer creation in progress flag.
+                        this._consumerCreationInProgress = false;
                         // Observer instance.
                         this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
                         logger.debug('constructor() [id:%s, direction:%s]', id, direction);
@@ -4573,49 +4586,23 @@
                             throw new TypeError('no "connect" listener set into this transport');
                         else if (appData && typeof appData !== 'object')
                             throw new TypeError('if given, appData must be an object');
-                        // Enqueue command.
-                        return this._awaitQueue.push(async () => {
-                            // Ensure the device can consume it.
-                            const canConsume = ortc.canReceive(rtpParameters, this._extendedRtpCapabilities);
-                            if (!canConsume) throw new errors_1.UnsupportedError('cannot consume this Producer');
-                            const { localId, rtpReceiver, track } = await this._handler.receive({
-                                trackId: id,
-                                kind,
-                                rtpParameters,
-                            });
-                            const consumer = new Consumer_1.Consumer({
-                                id,
-                                localId,
-                                producerId,
-                                rtpReceiver,
-                                track,
-                                rtpParameters,
-                                appData,
-                            });
-                            this._consumers.set(consumer.id, consumer);
-                            this._handleConsumer(consumer);
-                            // If this is the first video Consumer and the Consumer for RTP probation
-                            // has not yet been created, create it now.
-                            if (!this._probatorConsumerCreated && kind === 'video') {
-                                try {
-                                    const probatorRtpParameters = ortc.generateProbatorRtpParameters(
-                                        consumer.rtpParameters,
-                                    );
-                                    await this._handler.receive({
-                                        trackId: 'probator',
-                                        kind: 'video',
-                                        rtpParameters: probatorRtpParameters,
-                                    });
-                                    logger.debug('consume() | Consumer for RTP probation created');
-                                    this._probatorConsumerCreated = true;
-                                } catch (error) {
-                                    logger.error('consume() | failed to create Consumer for RTP probation:%o', error);
-                                }
-                            }
-                            // Emit observer event.
-                            this._observer.safeEmit('newconsumer', consumer);
-                            return consumer;
-                        }, 'transport.consume()');
+                        // Ensure the device can consume it.
+                        const canConsume = ortc.canReceive(rtpParameters, this._extendedRtpCapabilities);
+                        if (!canConsume) throw new errors_1.UnsupportedError('cannot consume this Producer');
+                        const consumerCreationTask = new ConsumerCreationTask({
+                            id,
+                            producerId,
+                            kind,
+                            rtpParameters,
+                            appData,
+                        });
+                        // Store the Consumer creation task.
+                        this._pendingConsumerTasks.push(consumerCreationTask);
+                        // There is no Consumer creation in progress, create it now.
+                        if (this._consumerCreationInProgress === false) {
+                            this._createPendingConsumers();
+                        }
+                        return consumerCreationTask.promise;
                     }
                     /**
                      * Create a DataProducer
@@ -4715,6 +4702,95 @@
                             this._observer.safeEmit('newdataconsumer', dataConsumer);
                             return dataConsumer;
                         }, 'transport.consumeData()');
+                    }
+                    // This method is guaranteed to never throw.
+                    async _createPendingConsumers() {
+                        this._awaitQueue
+                            .push(async () => {
+                                this._consumerCreationInProgress = true;
+                                const pendingConsumerTasks = [...this._pendingConsumerTasks];
+                                // Clear pending Consumer tasks.
+                                this._pendingConsumerTasks = [];
+                                // Video Consumer in order to create the probator.
+                                let videoConsumerForProbator = undefined;
+                                // Fill options list.
+                                const optionsList = [];
+                                for (const task of pendingConsumerTasks) {
+                                    const { id, kind, rtpParameters } = task.consumerOptions;
+                                    optionsList.push({
+                                        trackId: id,
+                                        kind: kind,
+                                        rtpParameters,
+                                    });
+                                }
+                                try {
+                                    const results = await this._handler.receive(optionsList);
+                                    for (let idx = 0; idx < results.length; idx++) {
+                                        const task = pendingConsumerTasks[idx];
+                                        const result = results[idx];
+                                        const { id, producerId, kind, rtpParameters, appData } = task.consumerOptions;
+                                        const { localId, rtpReceiver, track } = result;
+                                        const consumer = new Consumer_1.Consumer({
+                                            id: id,
+                                            localId,
+                                            producerId: producerId,
+                                            rtpReceiver,
+                                            track,
+                                            rtpParameters,
+                                            appData,
+                                        });
+                                        this._consumers.set(consumer.id, consumer);
+                                        this._handleConsumer(consumer);
+                                        // If this is the first video Consumer and the Consumer for RTP probation
+                                        // has not yet been created, it's time to create it.
+                                        if (
+                                            !this._probatorConsumerCreated &&
+                                            !videoConsumerForProbator &&
+                                            kind === 'video'
+                                        ) {
+                                            videoConsumerForProbator = consumer;
+                                        }
+                                        // Emit observer event.
+                                        this._observer.safeEmit('newconsumer', consumer);
+                                        task.resolve(consumer);
+                                    }
+                                } catch (error) {
+                                    for (const task of pendingConsumerTasks) {
+                                        task.reject(error);
+                                    }
+                                }
+                                // If RTP probation must be handled, do it now.
+                                if (videoConsumerForProbator) {
+                                    try {
+                                        const probatorRtpParameters = ortc.generateProbatorRtpParameters(
+                                            videoConsumerForProbator.rtpParameters,
+                                        );
+                                        await this._handler.receive([
+                                            {
+                                                trackId: 'probator',
+                                                kind: 'video',
+                                                rtpParameters: probatorRtpParameters,
+                                            },
+                                        ]);
+                                        logger.debug('_createPendingConsumers() | Consumer for RTP probation created');
+                                        this._probatorConsumerCreated = true;
+                                    } catch (error) {
+                                        logger.error(
+                                            '_createPendingConsumers() | failed to create Consumer for RTP probation:%o',
+                                            error,
+                                        );
+                                    }
+                                }
+                                this._consumerCreationInProgress = false;
+                            }, 'transport._createPendingConsumers()')
+                            .then(() => {
+                                // There are pending Consumer tasks, enqueue their creation.
+                                if (this._pendingConsumerTasks.length > 0) {
+                                    this._createPendingConsumers();
+                                }
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
                     }
                     _handleHandler() {
                         const handler = this._handler;
@@ -5262,32 +5338,39 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = trackId;
-                        const mid = kind;
-                        const streamId = rtpParameters.rtcp.cname;
-                        this._remoteSdp.receive({
-                            mid,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const mid = kind;
+                            const streamId = rtpParameters.rtcp.cname;
+                            this._remoteSdp.receive({
+                                mid,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { kind, rtpParameters } = options;
+                            const mid = kind;
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -5298,12 +5381,19 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
-                        const track = stream.getTrackById(localId);
-                        if (!track) throw new Error('remote track not found');
-                        // Insert into the map.
-                        this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters });
-                        return { localId, track };
+                        for (const options of optionsList) {
+                            const { kind, trackId, rtpParameters } = options;
+                            const mid = kind;
+                            const localId = trackId;
+                            const streamId = rtpParameters.rtcp.cname;
+                            const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
+                            const track = stream.getTrackById(localId);
+                            if (!track) throw new Error('remote track not found');
+                            // Insert into the map.
+                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters });
+                            results.push({ localId, track });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -5829,31 +5919,41 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        optionsList,
+                    ) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = trackId;
-                        const mid = kind;
-                        this._remoteSdp.receive({
-                            mid,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const mid = kind;
+                            this._remoteSdp.receive({
+                                mid,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { kind, rtpParameters } = options;
+                            const mid = kind;
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -5864,15 +5964,21 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const rtpReceiver = this._pc.getReceivers().find((r) => r.track && r.track.id === localId);
-                        if (!rtpReceiver) throw new Error('new RTCRtpReceiver not');
-                        // Insert into the map.
-                        this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
-                        return {
-                            localId,
-                            track: rtpReceiver.track,
-                            rtpReceiver,
-                        };
+                        for (const options of optionsList) {
+                            const { kind, trackId, rtpParameters } = options;
+                            const localId = trackId;
+                            const mid = kind;
+                            const rtpReceiver = this._pc.getReceivers().find((r) => r.track && r.track.id === localId);
+                            if (!rtpReceiver) throw new Error('new RTCRtpReceiver not');
+                            // Insert into the map.
+                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
+                            results.push({
+                                localId,
+                                track: rtpReceiver.track,
+                                rtpReceiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -6415,30 +6521,38 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
-                        this._remoteSdp.receive({
-                            mid: localId,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            this._remoteSdp.receive({
+                                mid: localId,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -6449,15 +6563,20 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
-                        if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
-                        // Store in the map.
-                        this._mapMidTransceiver.set(localId, transceiver);
-                        return {
-                            localId,
-                            track: transceiver.receiver.track,
-                            rtpReceiver: transceiver.receiver,
-                        };
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
+                            if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
+                            // Store in the map.
+                            this._mapMidTransceiver.set(localId, transceiver);
+                            results.push({
+                                localId,
+                                track: transceiver.receiver.track,
+                                rtpReceiver: transceiver.receiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -6989,30 +7108,38 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
-                        this._remoteSdp.receive({
-                            mid: localId,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            this._remoteSdp.receive({
+                                mid: localId,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -7023,15 +7150,23 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
-                        if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
-                        // Store in the map.
-                        this._mapMidTransceiver.set(localId, transceiver);
-                        return {
-                            localId,
-                            track: transceiver.receiver.track,
-                            rtpReceiver: transceiver.receiver,
-                        };
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
+                            if (!transceiver) {
+                                throw new Error('new RTCRtpTransceiver not found');
+                            } else {
+                                // Store in the map.
+                                this._mapMidTransceiver.set(localId, transceiver);
+                                results.push({
+                                    localId,
+                                    track: transceiver.receiver.track,
+                                    rtpReceiver: transceiver.receiver,
+                                });
+                            }
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -7396,27 +7531,35 @@
                     ) {
                         throw new errors_1.UnsupportedError('not implemented');
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                    async receive(optionsList) {
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                        }
                         if (!this._transportReady) await this._setupTransport({ localDtlsRole: 'server' });
-                        logger.debug('receive() | calling new RTCRtpReceiver()');
-                        const rtpReceiver = new RTCRtpReceiver(this._dtlsTransport, kind);
-                        rtpReceiver.addEventListener('error', (event) => {
-                            logger.error('rtpReceiver "error" event [event:%o]', event);
-                        });
-                        // NOTE: Convert our standard RTCRtpParameters into those that Edge
-                        // expects.
-                        const edgeRtpParameters = edgeUtils.mangleRtpParameters(rtpParameters);
-                        logger.debug('receive() | calling rtpReceiver.receive() [params:%o]', edgeRtpParameters);
-                        await rtpReceiver.receive(edgeRtpParameters);
-                        const localId = trackId;
-                        // Store it.
-                        this._rtpReceivers.set(localId, rtpReceiver);
-                        return {
-                            localId,
-                            track: rtpReceiver.track,
-                            rtpReceiver,
-                        };
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() | calling new RTCRtpReceiver()');
+                            const rtpReceiver = new RTCRtpReceiver(this._dtlsTransport, kind);
+                            rtpReceiver.addEventListener('error', (event) => {
+                                logger.error('rtpReceiver "error" event [event:%o]', event);
+                            });
+                            // NOTE: Convert our standard RTCRtpParameters into those that Edge
+                            // expects.
+                            const edgeRtpParameters = edgeUtils.mangleRtpParameters(rtpParameters);
+                            logger.debug('receive() | calling rtpReceiver.receive() [params:%o]', edgeRtpParameters);
+                            await rtpReceiver.receive(edgeRtpParameters);
+                            const localId = trackId;
+                            // Store it.
+                            this._rtpReceivers.set(localId, rtpReceiver);
+                            results.push({
+                                localId,
+                                track: rtpReceiver.track,
+                                rtpReceiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         logger.debug('stopReceiving() [localId:%s]', localId);
@@ -8008,43 +8151,59 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        optionsList,
+                    ) {
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
-                        this._remoteSdp.receive({
-                            mid: localId,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            this._remoteSdp.receive({
+                                mid: localId,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
-                        answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                            answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
+                        }
                         if (!this._transportReady)
                             await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
-                        if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
-                        // Store in the map.
-                        this._mapMidTransceiver.set(localId, transceiver);
-                        return {
-                            localId,
-                            track: transceiver.receiver.track,
-                            rtpReceiver: transceiver.receiver,
-                        };
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
+                            if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
+                            // Store in the map.
+                            this._mapMidTransceiver.set(localId, transceiver);
+                            results.push({
+                                localId,
+                                track: transceiver.receiver.track,
+                                rtpReceiver: transceiver.receiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -8581,40 +8740,47 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = trackId;
-                        const mid = kind;
-                        let streamId = rtpParameters.rtcp.cname;
-                        // NOTE: In React-Native we cannot reuse the same remote MediaStream for new
-                        // remote tracks. This is because react-native-webrtc does not react on new
-                        // tracks generated within already existing streams, so force the streamId
-                        // to be different.
-                        logger.debug(
-                            'receive() | forcing a random remote streamId to avoid well known bug in react-native-webrtc',
-                        );
-                        streamId += `-hack-${utils.generateRandomNumber()}`;
-                        this._remoteSdp.receive({
-                            mid,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const mid = kind;
+                            let streamId = rtpParameters.rtcp.cname;
+                            // NOTE: In React-Native we cannot reuse the same remote MediaStream for new
+                            // remote tracks. This is because react-native-webrtc does not react on new
+                            // tracks generated within already existing streams, so force the streamId
+                            // to be different.
+                            logger.debug(
+                                'receive() | forcing a random remote streamId to avoid well known bug in react-native-webrtc',
+                            );
+                            streamId += `-hack-${utils.generateRandomNumber()}`;
+                            this._remoteSdp.receive({
+                                mid,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { kind, rtpParameters } = options;
+                            const mid = kind;
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -8625,12 +8791,19 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
-                        const track = stream.getTrackById(localId);
-                        if (!track) throw new Error('remote track not found');
-                        // Insert into the map.
-                        this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters });
-                        return { localId, track };
+                        for (const options of optionsList) {
+                            const { kind, trackId, rtpParameters } = options;
+                            const localId = trackId;
+                            const mid = kind;
+                            const streamId = rtpParameters.rtcp.cname;
+                            const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
+                            const track = stream.getTrackById(localId);
+                            if (!track) throw new Error('remote track not found');
+                            // Insert into the map.
+                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters });
+                            results.push({ localId, track });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -9152,31 +9325,38 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = trackId;
-                        const mid = kind;
-                        this._remoteSdp.receive({
-                            mid,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const mid = kind;
+                            this._remoteSdp.receive({
+                                mid,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { kind, rtpParameters } = options;
+                            const mid = kind;
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === mid);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -9187,15 +9367,21 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const rtpReceiver = this._pc.getReceivers().find((r) => r.track && r.track.id === localId);
-                        if (!rtpReceiver) throw new Error('new RTCRtpReceiver not');
-                        // Insert into the map.
-                        this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
-                        return {
-                            localId,
-                            track: rtpReceiver.track,
-                            rtpReceiver,
-                        };
+                        for (const options of optionsList) {
+                            const { kind, trackId, rtpParameters } = options;
+                            const mid = kind;
+                            const localId = trackId;
+                            const rtpReceiver = this._pc.getReceivers().find((r) => r.track && r.track.id === localId);
+                            if (!rtpReceiver) throw new Error('new RTCRtpReceiver not');
+                            // Insert into the map.
+                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
+                            results.push({
+                                localId,
+                                track: rtpReceiver.track,
+                                rtpReceiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -9697,30 +9883,38 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive({ trackId, kind, rtpParameters }) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
-                        logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                        const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
-                        this._remoteSdp.receive({
-                            mid: localId,
-                            kind,
-                            offerRtpParameters: rtpParameters,
-                            streamId: rtpParameters.rtcp.cname,
-                            trackId,
-                        });
+                        const results = [];
+                        for (const options of optionsList) {
+                            const { trackId, kind, rtpParameters } = options;
+                            logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            this._remoteSdp.receive({
+                                mid: localId,
+                                kind,
+                                offerRtpParameters: rtpParameters,
+                                streamId: rtpParameters.rtcp.cname,
+                                trackId,
+                            });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('receive() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
-                        const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
-                        // May need to modify codec parameters in the answer based on codec
-                        // parameters in the offer.
-                        sdpCommonUtils.applyCodecParameters({
-                            offerRtpParameters: rtpParameters,
-                            answerMediaObject,
-                        });
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
+                            // May need to modify codec parameters in the answer based on codec
+                            // parameters in the offer.
+                            sdpCommonUtils.applyCodecParameters({
+                                offerRtpParameters: rtpParameters,
+                                answerMediaObject,
+                            });
+                        }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this._setupTransport({
@@ -9731,15 +9925,20 @@
                         }
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
-                        if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
-                        // Store in the map.
-                        this._mapMidTransceiver.set(localId, transceiver);
-                        return {
-                            localId,
-                            track: transceiver.receiver.track,
-                            rtpReceiver: transceiver.receiver,
-                        };
+                        for (const options of optionsList) {
+                            const { rtpParameters } = options;
+                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
+                            if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
+                            // Store in the map.
+                            this._mapMidTransceiver.set(localId, transceiver);
+                            results.push({
+                                localId,
+                                track: transceiver.receiver.track,
+                                rtpReceiver: transceiver.receiver,
+                            });
+                        }
+                        return results;
                     }
                     async stopReceiving(localId) {
                         this._assertRecvDirection();
@@ -11342,7 +11541,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.47';
+                exports.version = '3.6.48';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -12108,7 +12307,6 @@
                     // Per codec special checks.
                     switch (aMimeType) {
                         case 'video/h264': {
-                            // If strict matching check profile-level-id.
                             if (strict) {
                                 const aPacketizationMode = aCodec.parameters['packetization-mode'] || 0;
                                 const bPacketizationMode = bCodec.parameters['packetization-mode'] || 0;
@@ -12136,7 +12334,6 @@
                             break;
                         }
                         case 'video/vp9': {
-                            // If strict matching check profile-id.
                             if (strict) {
                                 const aProfileId = aCodec.parameters['profile-id'] || 0;
                                 const bProfileId = bCodec.parameters['profile-id'] || 0;
