@@ -192,7 +192,7 @@ function execVoiceCommands(transcript) {
             rc.peerAction('me', rc.peer_id, 'mute', true, true);
             break;
         case commands.participantsKickOut:
-            printCommand(commands.participantsAudioOff);
+            printCommand(commands.participantsKickOut);
             rc.peerAction('me', rc.peer_id, 'eject', true, true);
             break;
         case commands.fileShareOn:
