@@ -524,6 +524,13 @@ emoji-picker {
     transform: translate(-50%, -50%);
 }
 
+.center-img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 50%;
+}
+
 .fadein {
     -webkit-animation: fadeIn ease-in 1;
     -moz-animation: fadeIn ease-in 1;
@@ -626,14 +633,16 @@ button:hover {
     overflow: hidden;
 }
 
-#sendAbortBtn {
+#sendAbortBtn,
+#receiveHideBtn {
     padding: 5px;
     border-radius: 5px;
     color: white;
     background: transparent;
 }
 
-#sendAbortBtn:hover {
+#sendAbortBtn:hover,
+#receiveHideBtn:hover {
     color: rgb(255, 0, 0);
     transform: var(--btns-hover-scale);
     transition: all 0.3s ease-in-out;
@@ -642,6 +651,11 @@ button:hover {
 progress {
     width: 0;
     min-width: 100%;
+}
+
+#imgShareSend:hover,
+#imgShareReceive:hover {
+    cursor: move;
 }
 
 /*--------------------------------------------------------------

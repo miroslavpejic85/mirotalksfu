@@ -25,6 +25,7 @@ const image = {
     user: '../images/participant.png',
     youtube: '../images/youtube.png',
     message: '../images/message.png',
+    share: '../images/share.png',
 };
 
 const mediaType = {
@@ -1778,6 +1779,8 @@ class RoomClient {
         Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
+            imageAlt: 'mirotalksfu-file-sharing',
+            imageUrl: image.share,
             position: 'center',
             title: 'Share the file',
             input: 'file',

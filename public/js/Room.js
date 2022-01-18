@@ -481,6 +481,8 @@ function roomIsReady() {
         rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(participants, participantsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
+        rc.makeDraggable(sendFileDiv, imgShareSend);
+        rc.makeDraggable(receiveFileDiv, imgShareReceive);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             show(startScreenButton);
         }
