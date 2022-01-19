@@ -40,6 +40,7 @@ const commands = {
     roomLock: 'lock the room',
     roomUnlock: 'unlock the room',
     about: 'show the about',
+    stopRecognition: 'stop the voice recognition',
 };
 
 if ('webkitSpeechRecognition' in window) {
@@ -234,6 +235,10 @@ function execVoiceCommands(transcript) {
         case commands.about:
             printCommand(commands.about);
             aboutButton.click();
+            break;
+        case commands.stopRecognition:
+            printCommand(commands.stopRecognition);
+            chatSpeechStopButton.click();
             break;
         // ...
     }

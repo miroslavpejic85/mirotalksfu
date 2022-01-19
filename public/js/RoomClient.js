@@ -26,6 +26,7 @@ const image = {
     youtube: '../images/youtube.png',
     message: '../images/message.png',
     share: '../images/share.png',
+    exit: '../images/exit.png',
 };
 
 const mediaType = {
@@ -1101,6 +1102,8 @@ class RoomClient {
 
         Swal.fire({
             background: swalBg,
+            imageAlt: 'mirotalksfu-leave-room',
+            imageUrl: image.exit,
             position: 'center',
             title: 'Leave this room?',
             showDenyButton: true,
