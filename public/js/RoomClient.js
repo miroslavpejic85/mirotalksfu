@@ -133,6 +133,9 @@ class RoomClient {
         this.myVideoEl = null;
         this.debug = false;
 
+        this.videoProducerId = null;
+        this.audioProducerId = null;
+
         this.consumers = new Map();
         this.producers = new Map();
         this.producerLabel = new Map();
@@ -514,6 +517,13 @@ class RoomClient {
         );
 
         this.socket.on(
+            'audioVolume',
+            function (data) {
+                this.handleAudioVolume(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'disconnect',
             function () {
                 this.exit(true);
@@ -599,7 +609,7 @@ class RoomClient {
             }
             producer = await this.producerTransport.produce(params);
 
-            console.log('Producer id', producer.id);
+            console.log('PRODUCER', producer);
 
             this.producers.set(producer.id, producer);
 
@@ -607,8 +617,10 @@ class RoomClient {
             if (!audio) {
                 this.localVideoStream = stream;
                 elem = await this.handleProducer(producer.id, type, stream);
+                this.videoProducerId = producer.id;
             } else {
                 this.localAudioStream = stream;
+                this.audioProducerId = producer.id;
             }
 
             producer.on('trackended', () => {
@@ -749,7 +761,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, d, p, i, b, fs;
+        let elem, d, p, i, b, fs, pm, pb;
         this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
@@ -773,11 +785,20 @@ class RoomClient {
         fs = document.createElement('button');
         fs.id = id + '__fullScreen';
         fs.className = html.fullScreen;
+        pm = document.createElement('div');
+        pb = document.createElement('div');
+        pm.setAttribute('id', this.peer_id + '_pitchMeter');
+        pb.setAttribute('id', this.peer_id + '_pitchBar');
+        pm.className = 'speechbar';
+        pb.className = 'bar';
+        pb.style.height = '1%';
+        pm.appendChild(pb);
         d.appendChild(elem);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
         d.appendChild(fs);
+        d.appendChild(pm);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
@@ -950,7 +971,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, d, p, i, b, fs;
+        let elem, d, p, i, b, fs, pb, pm;
         switch (type) {
             case mediaType.video:
                 this.removeVideoOff(peer_info.peer_id);
@@ -976,11 +997,20 @@ class RoomClient {
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
+                pm = document.createElement('div');
+                pb = document.createElement('div');
+                pm.setAttribute('id', peer_info.peer_id + '__pitchMeter');
+                pb.setAttribute('id', peer_info.peer_id + '__pitchBar');
+                pm.className = 'speechbar';
+                pb.className = 'bar';
+                pb.style.height = '1%';
+                pm.appendChild(pb);
                 d.appendChild(elem);
                 d.appendChild(p);
                 d.appendChild(i);
                 d.appendChild(b);
                 d.appendChild(fs);
+                d.appendChild(pm);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id, fs.id);
@@ -1025,7 +1055,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, i, h, b, p;
+        let d, i, h, b, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1046,10 +1076,19 @@ class RoomClient {
         h = document.createElement('i');
         h.id = peer_info.peer_id + '__hand';
         h.className = html.userHand;
+        pm = document.createElement('div');
+        pb = document.createElement('div');
+        pm.setAttribute('id', peer_id + '__pitchMeter');
+        pb.setAttribute('id', peer_id + '__pitchBar');
+        pm.className = 'speechbar';
+        pb.className = 'bar';
+        pb.style.height = '1%';
+        pm.appendChild(pb);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(b);
         d.appendChild(h);
+        d.appendChild(pm);
         this.videoMediaContainer.appendChild(d);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
@@ -2270,6 +2309,31 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) this.exit();
         });
+    }
+
+    // ####################################################
+    // HANDLE AUDIO VOLUME
+    // ####################################################
+
+    handleAudioVolume(data) {
+        let peerId = data.peer_id;
+        let pbProducer = this.getId(peerId + '_pitchBar');
+        let pbConsumer = this.getId(peerId + '__pitchBar');
+        let audioVolume = data.audioVolume * 10; //10-100
+        // console.log('Active speaker', { peer_id: peerId, audioVolume: audioVolume });
+        if (audioVolume > 40) {
+            if (pbProducer) pbProducer.style.backgroundColor = 'orange';
+            if (pbConsumer) pbConsumer.style.backgroundColor = 'orange';
+        } else {
+            if (pbProducer) pbProducer.style.backgroundColor = '#19bb5c';
+            if (pbConsumer) pbConsumer.style.backgroundColor = '#19bb5c';
+        }
+        if (pbProducer) pbProducer.style.height = audioVolume + '%';
+        if (pbConsumer) pbConsumer.style.height = audioVolume + '%';
+        setTimeout(function () {
+            if (pbProducer) pbProducer.style.height = '0%';
+            if (pbConsumer) pbConsumer.style.height = '0%';
+        }, 2000);
     }
 
     // ####################################################

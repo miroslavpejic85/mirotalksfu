@@ -9,6 +9,7 @@ module.exports = class Room {
         this.id = room_id;
         this.worker = worker;
         this.router = null;
+        this.audioLevelObserver = null;
         this.io = io;
         this._isLocked = false;
         this._roomPassword = null;
@@ -29,8 +30,47 @@ module.exports = class Room {
             .then(
                 function (router) {
                     this.router = router;
+                    this.startAudioLevelObservation(router);
                 }.bind(this),
             );
+    }
+
+    // ####################################################
+    // PRODUCER AUDIO LEVEL OBSERVER
+    // ####################################################
+
+    async startAudioLevelObservation(router) {
+        log.debug('Start audioLevelObserver for signaling active speaker...');
+
+        this.audioLevelObserver = await router.createAudioLevelObserver({
+            maxEntries: 1,
+            threshold: -80,
+            interval: 800,
+        });
+
+        this.audioLevelObserver.on('volumes', (volumes) => {
+            const volume = volumes[0].volume;
+            let audioVolume = Math.round(Math.pow(10, volume / 85) * 10); // 1-10
+            if (audioVolume > 2) {
+                //console.log('PEERS', this.peers);
+                this.peers.forEach((peer) => {
+                    peer.producers.forEach((producer) => {
+                        if (producer.kind == 'audio') {
+                            let data = { peer_id: peer.id, audioVolume: audioVolume };
+                            //log.debug('audioLevelObserver', data);
+                            this.io.emit('audioVolume', data);
+                        }
+                    });
+                });
+            }
+        });
+        this.audioLevelObserver.on('silence', () => {
+            log.debug('audioLevelObserver', { volume: 'silence' });
+        });
+    }
+
+    addProducerToAudioLevelObserver(producer) {
+        this.audioLevelObserver.addProducer(producer);
     }
 
     getRtpCapabilities() {

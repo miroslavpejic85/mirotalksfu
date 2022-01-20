@@ -736,6 +736,31 @@ progress {
 }
 
 /*--------------------------------------------------------------
+# Speech bar
+--------------------------------------------------------------*/
+
+.speechbar {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 2px;
+    width: 10px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none;
+}
+
+.bar {
+    width: 6px;
+    border-radius: 6px;
+    background: rgba(#19bb5c, 0.65);
+    transition-property: height background-color;
+    transition-duration: 0.25s;
+}
+
+/*--------------------------------------------------------------
 # Pulse class effect
 --------------------------------------------------------------*/
 

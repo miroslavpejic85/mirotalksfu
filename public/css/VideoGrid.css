@@ -17,8 +17,7 @@
     right: 0px;
 }
 
-#videoMediaContainer div {
-    /* Camera */
+.Camera {
     position: relative;
     vertical-align: middle;
     align-self: center;
