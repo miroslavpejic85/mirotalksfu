@@ -743,7 +743,7 @@ progress {
     position: absolute;
     top: 0;
     bottom: 0;
-    right: 2px;
+    right: 10px;
     width: 10px;
     display: flex;
     flex-direction: column;
