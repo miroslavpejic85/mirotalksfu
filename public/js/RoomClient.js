@@ -607,6 +607,7 @@ class RoomClient {
                     videoGoogleStartBitrate: 1000,
                 };
             }
+
             producer = await this.producerTransport.produce(params);
 
             console.log('PRODUCER', producer);
