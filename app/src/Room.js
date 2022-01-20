@@ -52,10 +52,10 @@ module.exports = class Room {
             const volume = volumes[0].volume;
             let audioVolume = Math.round(Math.pow(10, volume / 85) * 10); // 1-10
             if (audioVolume > 2) {
-                //console.log('PEERS', this.peers);
+                console.log('PEERS', this.peers);
                 this.peers.forEach((peer) => {
                     peer.producers.forEach((producer) => {
-                        if (producer.kind == 'audio') {
+                        if (producer.kind == 'audio' && peer.peer_audio === true) {
                             let data = { peer_id: peer.id, audioVolume: audioVolume };
                             //log.debug('audioLevelObserver', data);
                             this.io.emit('audioVolume', data);
