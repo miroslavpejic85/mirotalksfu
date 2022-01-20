@@ -2318,20 +2318,28 @@ class RoomClient {
 
     handleAudioVolume(data) {
         let peerId = data.peer_id;
+        let producerAudioBtn = this.getId(peerId + '_audio');
+        let consumerAudioBtn = this.getId(peerId + '__audio');
         let pbProducer = this.getId(peerId + '_pitchBar');
         let pbConsumer = this.getId(peerId + '__pitchBar');
         let audioVolume = data.audioVolume * 10; //10-100
         // console.log('Active speaker', { peer_id: peerId, audioVolume: audioVolume });
         if (audioVolume > 40) {
+            if (producerAudioBtn) producerAudioBtn.style.color = 'orange';
+            if (consumerAudioBtn) consumerAudioBtn.style.color = 'orange';
             if (pbProducer) pbProducer.style.backgroundColor = 'orange';
             if (pbConsumer) pbConsumer.style.backgroundColor = 'orange';
         } else {
-            if (pbProducer) pbProducer.style.backgroundColor = '#19bb5c';
-            if (pbConsumer) pbConsumer.style.backgroundColor = '#19bb5c';
+            if (producerAudioBtn) producerAudioBtn.style.color = 'lime';
+            if (consumerAudioBtn) consumerAudioBtn.style.color = 'lime';
+            if (pbProducer) pbProducer.style.backgroundColor = 'lime';
+            if (pbConsumer) pbConsumer.style.backgroundColor = 'lime';
         }
         if (pbProducer) pbProducer.style.height = audioVolume + '%';
         if (pbConsumer) pbConsumer.style.height = audioVolume + '%';
         setTimeout(function () {
+            if (producerAudioBtn) producerAudioBtn.style.color = 'white';
+            if (consumerAudioBtn) consumerAudioBtn.style.color = 'white';
             if (pbProducer) pbProducer.style.height = '0%';
             if (pbConsumer) pbConsumer.style.height = '0%';
         }, 2000);
