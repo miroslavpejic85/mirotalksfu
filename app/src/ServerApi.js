@@ -30,7 +30,9 @@ module.exports = class ServerApi {
             '&audio=' +
             data.audio +
             '&video=' +
-            data.video
+            data.video +
+            '&notify=' +
+            data.notify
         );
     }
 };

@@ -16,10 +16,11 @@ $headers = [
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $data = array(
-    "room"  => "test",
-    "name"  => "mirotalksfu",
-    "audio" => true,
-    "video" => true,
+    "room"   => "test",
+    "name"   => "mirotalksfu",
+    "audio"  => true,
+    "video"  => true,
+    "notify" => true,
 );
 $data_string = json_encode($data);
 

@@ -31,6 +31,8 @@ let producer = null;
 
 let room_id = getRoomId();
 let peer_name = getPeerName();
+let notify = getNotify();
+
 let peer_geo = null;
 let peer_info = null;
 
@@ -231,13 +233,27 @@ function appenChild(device, el) {
 }
 
 // ####################################################
-// SOME PEER INFO
+// API CHECK
 // ####################################################
+
+function getNotify() {
+    let qs = new URLSearchParams(window.location.search);
+    let notify = qs.get('notify');
+    if (notify) {
+        let queryNotify = notify === '1' || notify === 'true';
+        if (queryNotify != null) return queryNotify;
+    }
+    return true;
+}
 
 function getPeerName() {
     let qs = new URLSearchParams(window.location.search);
     return qs.get('name');
 }
+
+// ####################################################
+// SOME PEER INFO
+// ####################################################
 
 function getPeerInfo() {
     peer_info = {
@@ -276,7 +292,7 @@ function whoAreYou() {
     if (peer_name) {
         checkMedia();
         getPeerInfo();
-        shareRoom();
+        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
         return;
     }
@@ -305,7 +321,7 @@ function whoAreYou() {
         },
     }).then(() => {
         getPeerInfo();
-        shareRoom();
+        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
     });
 
@@ -336,12 +352,18 @@ function handleVideo(e) {
 
 function checkMedia() {
     let qs = new URLSearchParams(window.location.search);
-    let audio = qs.get('audio').toLowerCase();
-    let video = qs.get('video').toLowerCase();
-    let queryPeerAudio = audio === '1' || audio === 'true';
-    let queryPeerVideo = video === '1' || video === 'true';
-    if (queryPeerAudio != null) isAudioAllowed = queryPeerAudio;
-    if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
+    let audio = qs.get('audio');
+    let video = qs.get('video');
+    if (audio) {
+        audio = audio.toLowerCase();
+        let queryPeerAudio = audio === '1' || audio === 'true';
+        if (queryPeerAudio != null) isAudioAllowed = queryPeerAudio;
+    }
+    if (video) {
+        video = video.toLowerCase();
+        let queryPeerVideo = video === '1' || video === 'true';
+        if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
+    }
 }
 
 // ####################################################

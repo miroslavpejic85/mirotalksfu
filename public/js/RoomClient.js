@@ -920,6 +920,8 @@ class RoomClient {
     async consume(producer_id, peer_name, peer_info) {
         this.getConsumeStream(producer_id).then(
             function ({ consumer, stream, kind }) {
+                console.log('CONSUMER', consumer);
+
                 this.consumers.set(consumer.id, consumer);
 
                 if (kind === 'video') {

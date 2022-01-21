@@ -102,14 +102,14 @@ $ docker-compose down
 $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 $ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 # The response will give you a entrypoint / URL for the direct join to the meeting.
-$ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0"}'
-$ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0"}'
+$ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","notify":"0"}'
+$ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","notify":"0"}'
 ```
 
 ## Direct Join
 
 -   You can also `join` directly to your `room` by going to
--   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0
+-   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0&notify=0
 
     | Params | Type    | Description      |
     | ------ | ------- | ---------------- |
@@ -117,6 +117,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | name   | string  | your name        |
     | audio  | boolean | enable / disable |
     | video  | boolean | enable / disable |
+    | notify | boolean | enable / disable |
 
 ## Notes
 

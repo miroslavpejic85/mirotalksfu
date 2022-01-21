@@ -14,6 +14,7 @@ data = {
     "name": "mirotalksfu",
     "audio": "true",
     "video": "true",
+    "notify": "true",
 }
 
 response = requests.post(

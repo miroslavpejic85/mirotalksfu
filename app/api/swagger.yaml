@@ -48,6 +48,7 @@ paths:
                           - name
                           - audio
                           - video
+                          - notify
                       properties:
                           room:
                               type: string
@@ -56,6 +57,8 @@ paths:
                           audio:
                               type: boolean
                           video:
+                              type: boolean
+                          notify:
                               type: boolean
             consumes:
                 - 'application/json'
