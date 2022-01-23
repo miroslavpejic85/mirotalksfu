@@ -1494,8 +1494,8 @@ class RoomClient {
         btnTs.addEventListener('click', () => {
             this.sound('snapshot');
             let context, canvas, width, height, dataURL;
-            width = videoPlayer.offsetWidth;
-            height = videoPlayer.offsetHeight;
+            width = videoPlayer.videoWidth;
+            height = videoPlayer.videoHeight;
             canvas = canvas || document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
