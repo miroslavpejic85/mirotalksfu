@@ -30,6 +30,7 @@ Open the app with the following **supported browsers** and many more.
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing, share any files to your participants in the room
+-   Take a snapshot from the video frame(screen/cam) to save it as an image.
 -   Chat with Emoji Picker to show you feeling and the possibility to Save the conversations
 -   Speech recognition, execute the app features simply with your voice.
 -   Advance collaborative whiteboard for the teachers
