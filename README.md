@@ -119,6 +119,10 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | video  | boolean | enable / disable |
     | notify | boolean | enable / disable |
 
+## Https
+
+You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
+
 ## Notes
 
 -   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
