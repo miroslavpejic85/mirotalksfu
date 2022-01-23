@@ -6,13 +6,14 @@ const cfg = {
 
 const html = {
     newline: '<br />',
-    audioOn: 'fas fa-microphone audio',
-    audioOff: 'fas fa-microphone-slash audio',
+    audioOn: 'fas fa-microphone',
+    audioOff: 'fas fa-microphone-slash',
     videoOn: 'fas fa-video',
     videoOff: 'fas fa-video-slash',
     userName: 'fas fa-user username',
     userHand: 'fas fa-hand-paper pulsate',
-    fullScreen: 'fas fa-expand fscreen',
+    fullScreen: 'fas fa-expand',
+    snapshot: 'fas fa-camera-retro',
 };
 
 const image = {
@@ -762,7 +763,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, d, p, i, b, fs, pm, pb;
+        let elem, vb, ts, d, p, i, b, fs, pm, pb;
         this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
@@ -773,6 +774,18 @@ class RoomClient {
         elem.autoplay = true;
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
+        vb = document.createElement('div');
+        vb.setAttribute('id', this.peer_id + '__vb');
+        vb.className = 'videoMenuBar fadein';
+        fs = document.createElement('button');
+        fs.id = id + '__fullScreen';
+        fs.className = html.fullScreen;
+        ts = document.createElement('button');
+        ts.id = id + '__snapshot';
+        ts.className = html.snapshot;
+        b = document.createElement('button');
+        b.id = this.peer_id + '__audio';
+        b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
         p.className = html.userName;
@@ -780,12 +793,6 @@ class RoomClient {
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
         i.className = html.userHand;
-        b = document.createElement('button');
-        b.id = this.peer_id + '__audio';
-        b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
-        fs = document.createElement('button');
-        fs.id = id + '__fullScreen';
-        fs.className = html.fullScreen;
         pm = document.createElement('div');
         pb = document.createElement('div');
         pm.setAttribute('id', this.peer_id + '_pitchMeter');
@@ -794,21 +801,27 @@ class RoomClient {
         pb.className = 'bar';
         pb.style.height = '1%';
         pm.appendChild(pb);
+        vb.appendChild(b);
+        vb.appendChild(ts);
+        vb.appendChild(fs);
         d.appendChild(elem);
+        d.appendChild(pm);
         d.appendChild(i);
         d.appendChild(p);
-        d.appendChild(b);
-        d.appendChild(fs);
-        d.appendChild(pm);
+        d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
         this.handleFS(elem.id, fs.id);
-        this.setTippy(elem.id, 'Full Screen', 'top-end');
+        this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         this.sound('joined');
         resizeVideoMedia();
+        if (!this.isMobileDevice) {
+            this.setTippy(elem.id, 'Full Screen', 'top-end');
+            this.setTippy(ts.id, 'Snapshot', 'top-end');
+        }
         return elem;
     }
 
@@ -974,10 +987,12 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, d, p, i, b, fs, pb, pm;
+        let elem, vb, d, p, i, b, fs, ts, pb, pm;
         switch (type) {
             case mediaType.video:
-                this.removeVideoOff(peer_info.peer_id);
+                let remotePeerId = peer_info.peer_id;
+                let remotePeerAudio = peer_info.peer_audio;
+                this.removeVideoOff(remotePeerId);
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__d';
@@ -987,41 +1002,53 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
-                p = document.createElement('p');
-                p.id = peer_info.peer_id + '__name';
-                p.className = html.userName;
-                p.innerHTML = '&nbsp;' + peer_name;
-                i = document.createElement('i');
-                i.id = peer_info.peer_id + '__hand';
-                i.className = html.userHand;
-                b = document.createElement('button');
-                b.id = peer_info.peer_id + '__audio';
-                b.className = peer_info.peer_audio ? html.audioOn : html.audioOff;
+                vb = document.createElement('div');
+                vb.setAttribute('id', remotePeerId + '__vb');
+                vb.className = 'videoMenuBar fadein';
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
+                ts = document.createElement('button');
+                ts.id = id + '__snapshot';
+                ts.className = html.snapshot;
+                b = document.createElement('button');
+                b.id = remotePeerId + '__audio';
+                b.className = remotePeerAudio ? html.audioOn : html.audioOff;
+                i = document.createElement('i');
+                i.id = remotePeerId + '__hand';
+                i.className = html.userHand;
+                p = document.createElement('p');
+                p.id = remotePeerId + '__name';
+                p.className = html.userName;
+                p.innerHTML = '&nbsp;' + peer_name;
                 pm = document.createElement('div');
                 pb = document.createElement('div');
-                pm.setAttribute('id', peer_info.peer_id + '__pitchMeter');
-                pb.setAttribute('id', peer_info.peer_id + '__pitchBar');
+                pm.setAttribute('id', remotePeerId + '__pitchMeter');
+                pb.setAttribute('id', remotePeerId + '__pitchBar');
                 pm.className = 'speechbar';
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
+                vb.appendChild(b);
+                vb.appendChild(ts);
+                vb.appendChild(fs);
                 d.appendChild(elem);
-                d.appendChild(p);
                 d.appendChild(i);
-                d.appendChild(b);
-                d.appendChild(fs);
+                d.appendChild(p);
                 d.appendChild(pm);
+                d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id, fs.id);
-                this.setTippy(elem.id, 'Full Screen', 'top-end');
+                this.handleTS(elem.id, ts.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
                 resizeVideoMedia();
+                if (!this.isMobileDevice) {
+                    this.setTippy(elem.id, 'Full Screen', 'top-end');
+                    this.setTippy(ts.id, 'Snapshot', 'top-end');
+                }
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
@@ -1058,7 +1085,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, i, h, b, p, pm, pb;
+        let d, vb, i, h, b, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1066,6 +1093,12 @@ class RoomClient {
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
+        vb = document.createElement('div');
+        vb.setAttribute('id', this.peer_id + 'vb');
+        vb.className = 'videoMenuBar fadein';
+        b = document.createElement('button');
+        b.id = peer_id + '__audio';
+        b.className = peer_audio ? html.audioOn : html.audioOff;
         i = document.createElement('img');
         i.className = 'center pulsate';
         i.id = peer_id + '__img';
@@ -1073,11 +1106,8 @@ class RoomClient {
         p.id = peer_id + '__name';
         p.className = html.userName;
         p.innerHTML = '&nbsp;' + peer_name + (remotePeer ? '' : ' (me) ');
-        b = document.createElement('button');
-        b.id = peer_id + '__audio';
-        b.className = peer_audio ? html.audioOn : html.audioOff;
         h = document.createElement('i');
-        h.id = peer_info.peer_id + '__hand';
+        h.id = peer_id + '__hand';
         h.className = html.userHand;
         pm = document.createElement('div');
         pb = document.createElement('div');
@@ -1087,11 +1117,12 @@ class RoomClient {
         pb.className = 'bar';
         pb.style.height = '1%';
         pm.appendChild(pb);
+        vb.appendChild(b);
         d.appendChild(i);
         d.appendChild(p);
-        d.appendChild(b);
         d.appendChild(h);
         d.appendChild(pm);
+        d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
@@ -1450,6 +1481,29 @@ class RoomClient {
                 videoPlayer.style.pointerEvents = 'auto';
                 this.isVideoOnFullScreen = false;
             }
+        });
+    }
+
+    // ####################################################
+    // TAKE SNAPSHOT
+    // ####################################################
+
+    handleTS(elemId, tsId) {
+        let videoPlayer = this.getId(elemId);
+        let btnTs = this.getId(tsId);
+        btnTs.addEventListener('click', () => {
+            this.sound('snapshot');
+            let context, canvas, width, height, dataURL;
+            width = videoPlayer.offsetWidth;
+            height = videoPlayer.offsetHeight;
+            canvas = canvas || document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            context = canvas.getContext('2d');
+            context.drawImage(videoPlayer, 0, 0, width, height);
+            dataURL = canvas.toDataURL('image/png');
+            console.log(dataURL);
+            saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
         });
     }
 

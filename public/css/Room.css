@@ -100,7 +100,7 @@ body {
 --------------------------------------------------------------*/
 
 #control {
-    z-index: 2;
+    z-index: 3;
     position: absolute;
     display: flex;
     padding: 5px;
@@ -663,7 +663,7 @@ progress {
 --------------------------------------------------------------*/
 
 #whiteboard {
-    z-index: 3;
+    z-index: 4;
     position: absolute;
     margin: auto;
     padding: 10px;
@@ -811,8 +811,9 @@ progress {
 /*
 z-index:
     - 1 videoMediaContainer
-    - 2 control buttons
-    - 3 whiteboard
+    - 2 Video menu bar
+    - 3 control buttons
+    - 4 whiteboard
     - 5 chat
     - 6 settings
     - 7 participants

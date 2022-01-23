@@ -92,6 +92,40 @@
     display: none;
 }
 
+.videoMenuBar {
+    z-index: 2;
+    position: absolute;
+    padding: 3px;
+    background: var(--bg);
+    font-size: small;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    cursor: default;
+    /* center */
+    top: 18px;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    -webkit-transform: translate(-50%, -50%);
+    -moz-transform: translate(-50%, -50%);
+    overflow: hidden;
+}
+
+.videoMenuBar button {
+    float: right;
+    margin-right: 3px;
+    color: white;
+    background: transparent;
+    border-radius: 5px;
+    display: inline;
+    border: none;
+}
+
+.videoMenuBar button:hover {
+    color: grey;
+    transition: all 0.3s ease-in-out;
+}
+
 #videoMediaContainer video {
     position: absolute;
     margin-left: auto;
