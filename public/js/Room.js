@@ -79,6 +79,8 @@ function initClient() {
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabYoutubeBtn', 'YouTube', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
+        setTippy('wbBackgroundColorEl', 'Background color', 'top');
+        setTippy('wbDrawingColorEl', 'Drawing color', 'top');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
         setTippy('whiteboardObjectBtn', 'Object mode', 'top');
         setTippy('whiteboardUndoBtn', 'Undo', 'top');

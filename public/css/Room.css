@@ -693,9 +693,7 @@ progress {
     border: none;
     width: 20px;
     height: 15px;
-    margin-top: 10px;
-    margin-left: 10px;
-    margin-right: 15px;
+    margin-left: 5px;
     border-radius: 20px;
     border: solid 0.5px #afadad38;
 }
