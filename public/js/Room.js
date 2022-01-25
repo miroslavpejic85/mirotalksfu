@@ -1467,7 +1467,7 @@ async function getParticipantsTable(peers) {
 
     table += `
     <tr>
-        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
+        <td>&nbsp;<i class="fas fa-users fa-lg"></i>&nbsp;&nbsp;all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
@@ -1491,7 +1491,7 @@ async function getParticipantsTable(peers) {
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td><img src='${avatarImg}'>&nbsp;${peer_name} (me)</td>
+                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
@@ -1503,7 +1503,7 @@ async function getParticipantsTable(peers) {
         } else {
             table += `
             <tr id='${peer_id}'>
-                <td><img src='${avatarImg}'>&nbsp;${peer_name}</td>
+                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>

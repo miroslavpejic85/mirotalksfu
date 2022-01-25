@@ -65,7 +65,8 @@ module.exports = class Room {
             }
         });
         this.audioLevelObserver.on('silence', () => {
-            log.debug('audioLevelObserver', { volume: 'silence' });
+            //log.debug('audioLevelObserver', { volume: 'silence' });
+            return;
         });
     }
 
