@@ -1062,8 +1062,8 @@ function isImageURL(url) {
     return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
 }
 
-function openURL(url) {
-    window.location.href = url;
+function openURL(url, blank = false) {
+    blank ? windows.open(url, '_blank') : (window.location.href = url);
 }
 
 // ####################################################
