@@ -1,8 +1,10 @@
 'use strict';
 
 let isWebkitSpeechRecognitionSupported = false;
-let isVoiceCommandsEnabled = true;
 let recognition;
+let isVoiceCommandsEnabled = true;
+let browserLanguage = navigator.language || navigator.userLanguage;
+let isVoiceCommandSupported = browserLanguage.includes('en-');
 
 const commands = {
     shareRoom: 'room',
@@ -48,6 +50,7 @@ if ('webkitSpeechRecognition' in window) {
 
     recognition.maxAlternatives = 1;
     recognition.continuous = true;
+    recognition.lang = browserLanguage;
 
     console.log('Speech recognition', recognition);
 
@@ -65,7 +68,7 @@ if ('webkitSpeechRecognition' in window) {
             chatMessage.value = transcript;
         }
 
-        if (isVoiceCommandsEnabled) {
+        if (isVoiceCommandsEnabled && isVoiceCommandSupported) {
             execVoiceCommands(transcript);
         }
     };
@@ -84,10 +87,12 @@ if ('webkitSpeechRecognition' in window) {
     console.info('Browser supports webkitSpeechRecognition');
 } else {
     console.warn('This browser not supports webkitSpeechRecognition');
+    hide(chatSpeechStartButton);
 }
 
 function startSpeech(action) {
     if (action) {
+        recognition.lang = browserLanguage;
         recognition.start();
     } else {
         recognition.stop();
