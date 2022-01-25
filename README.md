@@ -16,7 +16,7 @@ Open the app with the following **supported browsers** and many more.
 
 <br />
 
-[![mirotalksfu](public/images/mirotalksfu.png)](https://sfu.mirotalk.org/)
+[![mirotalksfu](public/images/mirotalksfu-header.png)](https://sfu.mirotalk.org/)
 
 ## Features
 
