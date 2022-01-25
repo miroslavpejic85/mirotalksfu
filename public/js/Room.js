@@ -10,6 +10,7 @@ const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
     ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo',
+    survey: 'https://www.questionpro.com/t/AUs7VZq02P',
 };
 
 const _PEER = {
@@ -23,6 +24,8 @@ const _PEER = {
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
 };
+
+const surveyAvtive = true;
 
 let participantsCount = 0;
 
@@ -170,7 +173,7 @@ async function initEnumerateDevices() {
         });
 
     if (!isAudioAllowed && !isVideoAllowed) {
-        window.location.href = `/permission?room_id=${room_id}&message=Not allowed both Audio and Video`;
+        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
         hide(loadingDiv);
         getPeerGeoLocation();
@@ -985,7 +988,11 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
-        window.location.href = '/newroom';
+        if (surveyAvtive) {
+            openURL(url.survey);
+        } else {
+            openURL('/newroom');
+        }
     });
 }
 
@@ -1053,6 +1060,10 @@ async function sound(name) {
 
 function isImageURL(url) {
     return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
+}
+
+function openURL(url) {
+    window.location.href = url;
 }
 
 // ####################################################
