@@ -152,6 +152,8 @@ Support this project by [becoming a sponsor](https://github.com/sponsors/mirosla
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
 
+---
+
 <br/>
 
 ### MiroTalk P2P
