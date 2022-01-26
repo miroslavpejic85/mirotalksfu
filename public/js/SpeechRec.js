@@ -10,6 +10,7 @@ const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 
 const commands = {
     shareRoom: 'room',
+    newRoom: 'new room',
     leaveRoom: 'exit the room',
     audioOn: 'start the audio',
     audioOff: 'stop the audio',
@@ -36,7 +37,7 @@ const commands = {
     participantsKickOut: 'kick out the participants',
     fileShareOn: 'open the file',
     fileShareOff: 'close the file',
-    youtubeOn: 'open the YouTube',
+    youtubeOn: 'share the YouTube',
     youtubeOff: 'close the YouTube',
     swapCamera: 'swap the camera',
     raiseHand: 'raise the hand',
@@ -44,8 +45,30 @@ const commands = {
     roomLock: 'lock the room',
     roomUnlock: 'unlock the room',
     about: 'show the about',
-    email: 'open the email',
+    email: 'open email',
+    google: 'open Google',
+    googleTr: 'open Google Translate',
+    youtube: 'open YouTube',
+    facebook: 'open Facebook',
+    linkedin: 'open Linkedin',
+    twitter: 'open Twitter',
+    tiktok: 'open tiktok',
+    github: 'open github',
+    survey: 'open survey',
     stopRecognition: 'stop the voice recognition',
+};
+
+const browser = {
+    newroom: '/newroom',
+    email: 'mailto:?subject=&body=',
+    google: 'https://www.google.com',
+    googleTr: 'https://translate.google.com/',
+    youtube: 'https://www.youtube.com',
+    facebook: 'https://www.facebook.com',
+    linkedin: 'https://www.linkedin.com',
+    twitter: 'https://www.twitter.com',
+    tiktok: 'https://www.tiktok.com',
+    github: 'https://github.com/miroslavpejic85',
 };
 
 if (speechRecognition) {
@@ -107,6 +130,10 @@ function execVoiceCommands(transcript) {
         case commands.shareRoom:
             printCommand(commands.shareRoom);
             shareButton.click();
+            break;
+        case commands.newRoom:
+            printCommand(commands.newRoom);
+            openURL(browser.newroom);
             break;
         case commands.leaveRoom:
             printCommand(commands.leaveRoom);
@@ -245,7 +272,54 @@ function execVoiceCommands(transcript) {
             aboutButton.click();
             break;
         case commands.email:
-            openURL('mailto:?subject=&body=', true);
+            printCommand(commands.email);
+            openURL(browser.email, true);
+            sound('open');
+            break;
+        case commands.google:
+            printCommand(commands.google);
+            openURL(browser.google, true);
+            sound('open');
+            break;
+        case commands.googleTr:
+            printCommand(commands.googleTr);
+            openURL(browser.googleTr, true);
+            sound('open');
+            break;
+        case commands.youtube:
+            printCommand(commands.youtube);
+            openURL(browser.youtube, true);
+            sound('open');
+            break;
+        case commands.facebook:
+            printCommand(commands.facebook);
+            openURL(browser.facebook, true);
+            sound('open');
+            break;
+        case commands.linkedin:
+            printCommand(commands.linkedin);
+            openURL(browser.linkedin, true);
+            sound('open');
+            break;
+        case commands.twitter:
+            printCommand(commands.twitter);
+            openURL(browser.twitter, true);
+            sound('open');
+            break;
+        case commands.tiktok:
+            printCommand(commands.tiktok);
+            openURL(browser.tiktok, true);
+            sound('open');
+            break;
+        case commands.github:
+            printCommand(commands.github);
+            openURL(browser.github, true);
+            sound('open');
+            break;
+        case commands.survey:
+            printCommand(commands.survey);
+            openURL(url.survey, true);
+            sound('open');
             break;
         case commands.stopRecognition:
             printCommand(commands.stopRecognition);
