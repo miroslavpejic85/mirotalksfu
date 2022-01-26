@@ -21,7 +21,7 @@
         "express": "4.17.2",
         "httpolyglot": "0.1.2",
         "mediasoup": "3.9.5",
-        "mediasoup-client": "3.6.49",
+        "mediasoup-client": "3.6.50",
         "ngrok": "4.3.0",
         "socket.io": "4.4.1",
         "swagger-ui-express": "4.3.0",

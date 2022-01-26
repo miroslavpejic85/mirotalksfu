@@ -6523,10 +6523,12 @@
                         var _a;
                         this._assertRecvDirection();
                         const results = [];
+                        const mapLocalId = new Map();
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
@@ -6541,8 +6543,8 @@
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId, rtpParameters } = options;
+                            const localId = mapLocalId.get(trackId);
                             const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
                             // May need to modify codec parameters in the answer based on codec
                             // parameters in the offer.
@@ -6562,8 +6564,8 @@
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId } = options;
+                            const localId = mapLocalId.get(trackId);
                             const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
                             if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
                             // Store in the map.
@@ -7110,10 +7112,12 @@
                         var _a;
                         this._assertRecvDirection();
                         const results = [];
+                        const mapLocalId = new Map();
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
@@ -7128,8 +7132,8 @@
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId, rtpParameters } = options;
+                            const localId = mapLocalId.get(trackId);
                             const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
                             // May need to modify codec parameters in the answer based on codec
                             // parameters in the offer.
@@ -7149,8 +7153,8 @@
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId } = options;
+                            const localId = mapLocalId.get(trackId);
                             const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
                             if (!transceiver) {
                                 throw new Error('new RTCRtpTransceiver not found');
@@ -8155,10 +8159,12 @@
                     ) {
                         this._assertRecvDirection();
                         const results = [];
+                        const mapLocalId = new Map();
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
@@ -8173,8 +8179,8 @@
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId, rtpParameters } = options;
+                            const localId = mapLocalId.get(trackId);
                             const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
                             // May need to modify codec parameters in the answer based on codec
                             // parameters in the offer.
@@ -8189,8 +8195,8 @@
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId } = options;
+                            const localId = mapLocalId.get(trackId);
                             const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
                             if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
                             // Store in the map.
@@ -9887,10 +9893,12 @@
                         var _a;
                         this._assertRecvDirection();
                         const results = [];
+                        const mapLocalId = new Map();
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
@@ -9905,8 +9913,8 @@
                         let answer = await this._pc.createAnswer();
                         const localSdpObject = sdpTransform.parse(answer.sdp);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId, rtpParameters } = options;
+                            const localId = mapLocalId.get(trackId);
                             const answerMediaObject = localSdpObject.media.find((m) => String(m.mid) === localId);
                             // May need to modify codec parameters in the answer based on codec
                             // parameters in the offer.
@@ -9926,8 +9934,8 @@
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                         for (const options of optionsList) {
-                            const { rtpParameters } = options;
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const { trackId } = options;
+                            const localId = mapLocalId.get(trackId);
                             const transceiver = this._pc.getTransceivers().find((t) => t.mid === localId);
                             if (!transceiver) throw new Error('new RTCRtpTransceiver not found');
                             // Store in the map.
@@ -11541,7 +11549,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.49';
+                exports.version = '3.6.50';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
