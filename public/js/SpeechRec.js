@@ -6,6 +6,8 @@ let isVoiceCommandsEnabled = true;
 let browserLanguage = navigator.language || navigator.userLanguage;
 let isVoiceCommandSupported = browserLanguage.includes('en-');
 
+const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+
 const commands = {
     shareRoom: 'room',
     leaveRoom: 'exit the room',
@@ -45,8 +47,8 @@ const commands = {
     stopRecognition: 'stop the voice recognition',
 };
 
-if ('webkitSpeechRecognition' in window) {
-    recognition = new webkitSpeechRecognition();
+if (speechRecognition) {
+    recognition = new speechRecognition();
 
     recognition.maxAlternatives = 1;
     recognition.continuous = true;
