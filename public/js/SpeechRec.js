@@ -44,6 +44,7 @@ const commands = {
     roomLock: 'lock the room',
     roomUnlock: 'unlock the room',
     about: 'show the about',
+    email: 'open the email',
     stopRecognition: 'stop the voice recognition',
 };
 
@@ -242,6 +243,9 @@ function execVoiceCommands(transcript) {
         case commands.about:
             printCommand(commands.about);
             aboutButton.click();
+            break;
+        case commands.email:
+            openURL('mailto:?subject=&body=', true);
             break;
         case commands.stopRecognition:
             printCommand(commands.stopRecognition);
