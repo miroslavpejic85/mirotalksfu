@@ -144,6 +144,12 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 [![AGPLv3](public/images/AGPLv3.png)](LICENSE)
 
+# Sponsors
+
+Support this project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
+
+[![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
+
 <br/>
 
 ### MiroTalk P2P
