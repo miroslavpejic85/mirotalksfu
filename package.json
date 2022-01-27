@@ -20,7 +20,7 @@
         "cors": "2.8.5",
         "express": "4.17.2",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.9.5",
+        "mediasoup": "3.9.6",
         "mediasoup-client": "3.6.50",
         "ngrok": "4.3.0",
         "socket.io": "4.4.1",
@@ -29,7 +29,7 @@
         "yamljs": "0.3.0"
     },
     "devDependencies": {
-        "node-fetch": "2.6.6",
+        "node-fetch": "^2.6.7",
         "prettier": "2.5.1"
     }
 }
