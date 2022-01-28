@@ -485,9 +485,9 @@ io.on('connection', (socket) => {
         });
 
         // add & monitor producer audio level
-        if (kind === 'audio') {
-            roomList.get(socket.room_id).addProducerToAudioLevelObserver({ producerId: producer_id });
-        }
+        // if (kind === 'audio') {
+        //     roomList.get(socket.room_id).addProducerToAudioLevelObserver({ producerId: producer_id });
+        // }
 
         // peer_info audio Or video ON
         let data = {
