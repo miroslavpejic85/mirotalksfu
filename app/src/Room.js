@@ -10,6 +10,7 @@ module.exports = class Room {
         this.worker = worker;
         this.router = null;
         this.audioLevelObserver = null;
+        this.audioLevelObserverEnabled = false;
         this.io = io;
         this._isLocked = false;
         this._roomPassword = null;
@@ -30,7 +31,9 @@ module.exports = class Room {
             .then(
                 function (router) {
                     this.router = router;
-                    this.startAudioLevelObservation(router);
+                    if (this.audioLevelObserverEnabled) {
+                        this.startAudioLevelObservation(router);
+                    }
                 }.bind(this),
             );
     }
@@ -75,7 +78,9 @@ module.exports = class Room {
     }
 
     addProducerToAudioLevelObserver(producer) {
-        this.audioLevelObserver.addProducer(producer);
+        if (this.audioLevelObserverEnabled) {
+            this.audioLevelObserver.addProducer(producer);
+        }
     }
 
     getRtpCapabilities() {
