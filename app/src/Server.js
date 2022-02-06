@@ -127,7 +127,7 @@ app.get('/join/', (req, res) => {
     res.redirect('/');
 });
 
-// join to room
+// join room
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
         if (Object.keys(req.query).length > 0) {

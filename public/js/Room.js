@@ -65,7 +65,7 @@ const socket = io();
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('shareButton', 'Share the room', 'right');
+        setTippy('shareButton', 'Share room', 'right');
         setTippy('startAudioButton', 'Start the audio', 'right');
         setTippy('stopAudioButton', 'Stop the audio', 'right');
         setTippy('startVideoButton', 'Start the video', 'right');
@@ -76,7 +76,7 @@ function initClient() {
         setTippy('stopScreenButton', 'Stop screen share', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
-        setTippy('exitButton', 'Leave the room', 'right');
+        setTippy('exitButton', 'Leave room', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
@@ -400,7 +400,7 @@ async function shareRoom(useNavigator = false) {
                 <canvas id="qrRoom"></canvas>
             </div>
             <br/><br/>
-            <p style="background:transparent; color:white;">Share this meeting invite others to join.</p>
+            <p style="background:transparent; color:white;">Invite others to join. Share this meeting link.</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">` +
                 RoomURL +
                 `</p>`,
@@ -465,14 +465,14 @@ function shareRoomByEmail(message) {
 }
 
 // ####################################################
-// JOIN TO ROOM
+// JOIN ROOM
 // ####################################################
 
 function joinRoom(peer_name, room_id) {
     if (rc && rc.isConnected()) {
         console.log('Already connected to a room');
     } else {
-        console.log('05 ----> join to Room ' + room_id);
+        console.log('05 ----> join Room ' + room_id);
         rc = new RoomClient(
             remoteAudios,
             videoMediaContainer,

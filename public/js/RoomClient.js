@@ -1881,11 +1881,11 @@ class RoomClient {
             imageAlt: 'mirotalksfu-file-sharing',
             imageUrl: image.share,
             position: 'center',
-            title: 'Share the file',
+            title: 'Share file',
             input: 'file',
             inputAttributes: {
                 accept: this.fileSharingInput,
-                'aria-label': 'Select the file',
+                'aria-label': 'Select file',
             },
             showDenyButton: true,
             confirmButtonText: `Send`,
