@@ -94,10 +94,10 @@ app.get(['/login'], (req, res) => {
 
 // set new room name and join
 app.get(['/newroom'], (req, res) => {
-    if (hostCfg.authenticated) {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
-    } else {
+    if (hostCfg.protected == true) {
         res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+    } else {
+        res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
     }
 });
 
