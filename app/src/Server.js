@@ -9,6 +9,7 @@ const config = require('./config');
 const path = require('path');
 const ngrok = require('ngrok');
 const fs = require('fs');
+const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
@@ -42,6 +43,9 @@ const hostCfg = {
 const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
 
+// Authenticated IP by Login
+let authHost;
+
 // all mediasoup workers
 let workers = [];
 let nextMediasoupWorkerIdx = 0;
@@ -49,9 +53,25 @@ let nextMediasoupWorkerIdx = 0;
 // all Room lists
 let roomList = new Map();
 
+// directory
+const dir = {
+    public: path.join(__dirname, '../../', 'public'),
+};
+
+// html views
+const view = {
+    landing: path.join(__dirname, '../../', 'public/view/landing.html'),
+    login: path.join(__dirname, '../../', 'public/view/login.html'),
+    newRoom: path.join(__dirname, '../../', 'public/view/newroom.html'),
+    notFound: path.join(__dirname, '../../', 'public/view/404.html'),
+    permission: path.join(__dirname, '../../', 'public/view/permission.html'),
+    privacy: path.join(__dirname, '../../', 'public/view/privacy.html'),
+    room: path.join(__dirname, '../../', 'public/view/Room.html'),
+};
+
 app.use(cors());
 app.use(compression());
-app.use(express.static(path.join(__dirname, '../../', 'public')));
+app.use(express.static(dir.public));
 
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
@@ -74,44 +94,45 @@ app.use((err, req, res, next) => {
 // all start from here
 app.get(['/'], (req, res) => {
     if (hostCfg.protected == true) {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+        hostCfg.authenticated = false;
+        res.sendFile(view.login);
     } else {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
+        res.sendFile(view.landing);
     }
 });
 
 // handle login on host protected
 app.get(['/login'], (req, res) => {
-    let ip = req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+    let ip = getIP(req);
     log.debug(`request login to host from: ${ip}`, req.query);
     if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
         hostCfg.authenticated = true;
-        res.sendFile(path.join(__dirname, '../../', 'public/view/landing.html'));
+        authHost = new Host(ip, true);
+        log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+        res.sendFile(view.landing);
     } else {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+        log.debug('LOGIN KO', { ip: ip, authorized: false });
+        hostCfg.authenticated = false;
+        res.sendFile(view.login);
     }
 });
 
 // set new room name and join
 app.get(['/newroom'], (req, res) => {
+    let ip = getIP(req);
     if (hostCfg.protected == true) {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+        if (allowedIP(ip)) {
+            res.sendFile(view.newRoom);
+        } else {
+            hostCfg.authenticated = false;
+            res.sendFile(view.login);
+        }
     } else {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/newroom.html'));
+        res.sendFile(view.newRoom);
     }
 });
 
-// if not allow video/audio
-app.get(['/permission'], (req, res) => {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/permission.html'));
-});
-
-// privacy policy
-app.get(['/privacy'], (req, res) => {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/privacy.html'));
-});
-
-// no room name specified to join
+// no room name specified to join || direct join
 app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
@@ -122,8 +143,7 @@ app.get('/join/', (req, res) => {
         let peerVideo = req.query.video;
         let notify = req.query.notify;
         if (roomName && peerName && peerAudio && peerVideo && notify) {
-            res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
-            return;
+            return res.sendFile(view.room);
         }
     }
     res.redirect('/');
@@ -136,11 +156,26 @@ app.get('/join/*', (req, res) => {
             log.debug('redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
             res.redirect(url.parse(req.url).pathname);
         } else {
-            res.sendFile(path.join(__dirname, '../../', 'public/view/Room.html'));
+            res.sendFile(view.room);
         }
     } else {
-        res.sendFile(path.join(__dirname, '../../', 'public/view/login.html'));
+        res.redirect('/');
     }
+});
+
+// if not allow video/audio
+app.get(['/permission'], (req, res) => {
+    res.sendFile(view.permission);
+});
+
+// privacy policy
+app.get(['/privacy'], (req, res) => {
+    res.sendFile(view.privacy);
+});
+
+// not match any of page before, so 404 not found
+app.get('*', function (req, res) {
+    res.sendFile(view.notFound);
 });
 
 // ####################################################
@@ -201,11 +236,6 @@ app.post(['/api/v1/join'], (req, res) => {
         body: req.body,
         join: joinURL,
     });
-});
-
-// not match any of page before, so 404 not found
-app.get('*', function (req, res) {
-    res.sendFile(path.join(__dirname, '../../', 'public/view/404.html'));
 });
 
 // ####################################################
@@ -624,3 +654,10 @@ io.on('connection', (socket) => {
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
     }
 });
+
+function getIP(req) {
+    return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+}
+function allowedIP(ip) {
+    return authHost != null && authHost.isAuthorized(ip);
+}
