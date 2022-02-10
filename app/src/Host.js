@@ -12,4 +12,7 @@ module.exports = class Host {
     isAuthorized(ip) {
         return this.auth.has(ip);
     }
+    deleteIP(ip) {
+        return this.auth.delete(ip);
+    }
 };

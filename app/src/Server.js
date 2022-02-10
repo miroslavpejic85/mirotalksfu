@@ -600,6 +600,8 @@ io.on('connection', (socket) => {
         }
 
         roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
+
+        removeIP(socket);
     });
 
     socket.on('exitRoom', async (_, callback) => {
@@ -621,6 +623,8 @@ io.on('connection', (socket) => {
         }
 
         socket.room_id = null;
+
+        removeIP(socket);
 
         callback('Successfully exited room');
     });
@@ -660,4 +664,14 @@ function getIP(req) {
 }
 function allowedIP(ip) {
     return authHost != null && authHost.isAuthorized(ip);
+}
+function removeIP(socket) {
+    if (hostCfg.protected == true) {
+        let ip = socket.handshake.address;
+        if (ip && allowedIP(ip)) {
+            authHost.deleteIP(ip);
+            hostCfg.authenticated = false;
+            log.debug('Remove IP from auth', { ip: ip });
+        }
+    }
 }
