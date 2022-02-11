@@ -2183,6 +2183,7 @@ class RoomClient {
     }
 
     youTubeAction(data) {
+        let peer_name = data.peer_name;
         let action = data.action;
         switch (action) {
             case 'open':
