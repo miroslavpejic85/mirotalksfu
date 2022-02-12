@@ -406,7 +406,7 @@ async function shareRoom(useNavigator = false) {
                 `</p>`,
             showDenyButton: true,
             showCancelButton: true,
-            confirmButtonText: `Copy meeting URL`,
+            confirmButtonText: `Copy URL`,
             denyButtonText: `Email invite`,
             cancelButtonText: `Close`,
             showClass: {
@@ -454,7 +454,7 @@ function copyRoomURL() {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', 'Room URL copied to clipboard', 'top-end');
+    userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
 }
 
 function shareRoomByEmail(message) {
