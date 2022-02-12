@@ -173,11 +173,6 @@ app.get(['/privacy'], (req, res) => {
     res.sendFile(view.privacy);
 });
 
-// not match any of page before, so 404 not found
-app.get('*', function (req, res) {
-    res.sendFile(view.notFound);
-});
-
 // ####################################################
 // API
 // ####################################################
@@ -236,6 +231,11 @@ app.post(['/api/v1/join'], (req, res) => {
         body: req.body,
         join: joinURL,
     });
+});
+
+// not match any of page before, so 404 not found
+app.get('*', function (req, res) {
+    res.sendFile(view.notFound);
 });
 
 // ####################################################
