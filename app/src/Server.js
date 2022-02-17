@@ -107,7 +107,7 @@ app.get(['/'], (req, res) => {
 app.get(['/login'], (req, res) => {
     if (hostCfg.protected == true) {
         let ip = getIP(req);
-        log.debug(`request login to host from: ${ip}`, req.query);
+        log.debug(`Request login to host from: ${ip}`, req.query);
         if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
             hostCfg.authenticated = true;
             authHost = new Host(ip, true);
@@ -119,7 +119,7 @@ app.get(['/login'], (req, res) => {
             res.sendFile(view.login);
         }
     } else {
-        res.sendFile(view.landing);
+        res.redirect('/');
     }
 });
 
