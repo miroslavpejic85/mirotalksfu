@@ -105,24 +105,28 @@ app.get(['/'], (req, res) => {
 
 // handle login on host protected
 app.get(['/login'], (req, res) => {
-    let ip = getIP(req);
-    log.debug(`request login to host from: ${ip}`, req.query);
-    if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
-        hostCfg.authenticated = true;
-        authHost = new Host(ip, true);
-        log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-        res.sendFile(view.landing);
+    if (hostCfg.protected == true) {
+        let ip = getIP(req);
+        log.debug(`request login to host from: ${ip}`, req.query);
+        if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
+            hostCfg.authenticated = true;
+            authHost = new Host(ip, true);
+            log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+            res.sendFile(view.landing);
+        } else {
+            log.debug('LOGIN KO', { ip: ip, authorized: false });
+            hostCfg.authenticated = false;
+            res.sendFile(view.login);
+        }
     } else {
-        log.debug('LOGIN KO', { ip: ip, authorized: false });
-        hostCfg.authenticated = false;
-        res.sendFile(view.login);
+        res.sendFile(view.landing);
     }
 });
 
 // set new room name and join
 app.get(['/newroom'], (req, res) => {
-    let ip = getIP(req);
     if (hostCfg.protected == true) {
+        let ip = getIP(req);
         if (allowedIP(ip)) {
             res.sendFile(view.newRoom);
         } else {
