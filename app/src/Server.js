@@ -71,7 +71,9 @@ const view = {
 
 app.use(cors());
 app.use(compression());
+app.use(express.json());
 app.use(express.static(dir.public));
+app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
@@ -153,7 +155,7 @@ app.get('/join/', (req, res) => {
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
         if (Object.keys(req.query).length > 0) {
-            log.debug('redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
+            log.debug('Redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
             res.redirect(url.parse(req.url).pathname);
         } else {
             res.sendFile(view.room);
@@ -176,12 +178,6 @@ app.get(['/privacy'], (req, res) => {
 // ####################################################
 // API
 // ####################################################
-
-// Api parse body data as json
-app.use(express.json());
-
-// api docs
-app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // request meeting room endpoint
 app.post(['/api/v1/meeting'], (req, res) => {
