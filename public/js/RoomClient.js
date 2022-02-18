@@ -227,6 +227,7 @@ class RoomClient {
     async handleRoomInfo(room) {
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
+        adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
             // console.log('07 ----> Remote Peer info', peer_info);
@@ -409,6 +410,7 @@ class RoomClient {
                 console.log('Remove me:', data);
                 this.removeVideoOff(data.peer_id);
                 participantsCount = data.peer_counts;
+                adaptAspectRatio(participantsCount);
             }.bind(this),
         );
 
@@ -417,6 +419,7 @@ class RoomClient {
             function (data) {
                 console.log('Participants Count:', data);
                 participantsCount = data.peer_counts;
+                adaptAspectRatio(participantsCount);
             }.bind(this),
         );
 

@@ -817,8 +817,8 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
-    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? 1 : 0;
-    setAspectRatio(BtnsAspectRatio.selectedIndex);
+
+    adaptAspectRatio(1);
 
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
@@ -1520,10 +1520,69 @@ async function getParticipantsTable(peers) {
 
 function refreshParticipantsCount(count) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
+    adaptAspectRatio(count);
 }
 
 function getParticipantAvatar(peerName) {
     return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
+}
+
+// ####################################################
+// HANDLE ASPECT RATIO
+// ####################################################
+
+function adaptAspectRatio(participantsCount) {
+    /* 
+        ['0:0', '4:3', '16:9', '1:1', '1:2'];
+    */
+    let desktop,
+        mobile = 1;
+    // desktop aspect ratio
+    switch (participantsCount) {
+        case 1:
+        case 3:
+        case 4:
+        case 7:
+        case 9:
+            desktop = 2; // (16:9)
+            break;
+        case 5:
+        case 6:
+        case 10:
+        case 11:
+            desktop = 1; // (4:3)
+            break;
+        case 2:
+        case 8:
+            desktop = 3; // (1:1)
+            break;
+    }
+    // mobile aspect ratio
+    switch (participantsCount) {
+        case 3:
+        case 9:
+        case 10:
+            mobile = 2; // (16:9)
+            break;
+        case 2:
+        case 7:
+        case 8:
+        case 11:
+            mobile = 1; // (4:3)
+            break;
+        case 4:
+        case 5:
+        case 6:
+        case 11:
+            mobile = 3; // (1:1)
+            break;
+    }
+    if (participantsCount > 11) {
+        desktop = 1; // (4:3)
+        mobile = 3; // (1:1)
+    }
+    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? mobile : desktop;
+    setAspectRatio(BtnsAspectRatio.selectedIndex);
 }
 
 // ####################################################
