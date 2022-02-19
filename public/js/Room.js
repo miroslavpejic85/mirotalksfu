@@ -1570,10 +1570,10 @@ function adaptAspectRatio(participantsCount) {
         case 11:
             mobile = 1; // (4:3)
             break;
+        case 1:
         case 4:
         case 5:
         case 6:
-        case 11:
             mobile = 3; // (1:1)
             break;
     }
