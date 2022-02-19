@@ -16,7 +16,7 @@
 
         <!-- Title and Icon -->
 
-        <title>MiroTalk SFU - Room Video Calls, Messaging and Screen Sharing.</title>
+        <title>RoomXR - Room Video Calls, Messaging and Screen Sharing.</title>
         <link rel="shortcut icon" href="../images/logo.svg" />
         <link rel="apple-touch-icon" href="../images/logo.svg" />
 
@@ -26,7 +26,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta
             name="description"
-            content="MiroTalk SFU powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser."
+            content="RoomXR powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser."
         />
         <meta
             name="keywords"
@@ -36,11 +36,11 @@
         <!-- https://ogp.me -->
 
         <meta property="og:type" content="app-webrtc" />
-        <meta property="og:site_name" content="MiroTalk SFU" />
+        <meta property="og:site_name" content="RoomXR" />
         <meta property="og:title" content="Click the link to make a call." />
         <meta
             property="og:description"
-            content="MiroTalk SFU calling provides real-time video calls, messaging and screen sharing."
+            content="RoomXR calling provides real-time video calls, messaging and screen sharing."
         />
         <meta property="og:image" content="https://sfu.mirotalk.org/images/mirotalksfu.png" />
 
@@ -77,6 +77,8 @@
         <script src="../js/RoomClient.js"></script>
         <script src="../js/SpeechRec.js"></script>
         <script src="../js/VideoGrid.js"></script>
+        <script src="../js/WhiteBoard.js"></script>
+        <script src="../js/jscolor.js"></script>
         <script src="https://kit.fontawesome.com/d2f1016e6f.js" crossorigin="anonymous"></script>
         <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
@@ -85,6 +87,27 @@
         <script src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
         <script src="https://unpkg.com/@popperjs/core@2"></script>
         <script src="https://unpkg.com/tippy.js@6"></script>
+        <script>
+            // These options apply to all color pickers on the page
+            jscolor.presets.default = {
+                width: 201,
+                height: 81,
+                position: 'right',
+                previewPosition: 'right',
+                previewSize:20,
+                backgroundColor: '#f3f3f3',
+                borderColor: '#bbbbbb',
+                controlBorderColor: '#bbbbbb',
+                palette: [
+                    '#000000', '#7d7d7d', '#870014', '#ec1c23', '#ff7e26',
+                    '#fef100', '#22b14b', '#00a1e7', '#3f47cc', '#a349a4',
+                    '#ffffff', '#c3c3c3', '#b87957', '#feaec9', '#ffc80d',
+                    '#eee3af', '#b5e61d', '#99d9ea', '#7092be', '#00000000',
+                ],
+                paletteCols: 10,
+                hideOnPaletteClick: true,
+            }
+            </script>
     </head>
     <body onload="initClient()">
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -295,8 +318,12 @@ access to use this app.
                     <button id="whiteboardCloseBtn" class="fas fa-times"></button>
                 </div>
                 <div class="whiteboard-header-options">
-                    <input id="wbBackgroundColorEl" class="whiteboardColorPicker" type="color" value="#000000" />
-                    <input id="wbDrawingColorEl" class="whiteboardColorPicker" type="color" value="#FFFFFF" />
+                    bg
+                    <input id="wbBackgroundColorEl" class="whiteboardColorPicker" value="#000000FF" data-jscolor="{}"/>
+                    pencil
+                    <input id="wbDrawingColorEl" class="whiteboardColorPicker" value="#FFFFFFFF" data-jscolor="{}"/>
+                    fill
+                    <input id="wbFillColorEl" class="whiteboardColorPicker" value="#FFFFFF77" data-jscolor="{}"/>
                     <button id="whiteboardPencilBtn" class="fas fa-pencil-alt"></button>
                     <button id="whiteboardObjectBtn" class="fas fa-mouse-pointer"></button>
                     <button id="whiteboardUndoBtn" class="fas fa-undo"></button>

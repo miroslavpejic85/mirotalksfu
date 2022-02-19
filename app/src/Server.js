@@ -22,8 +22,10 @@ const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'
 const app = express();
 
 const options = {
-    key: fs.readFileSync(path.join(__dirname, config.sslKey), 'utf-8'),
-    cert: fs.readFileSync(path.join(__dirname, config.sslCrt), 'utf-8'),
+    //key: fs.readFileSync(path.join(__dirname, config.sslKey), 'utf-8'),
+    //cert: fs.readFileSync(path.join(__dirname, config.sslCrt), 'utf-8'),
+    key: fs.readFileSync(config.sslKey, 'utf-8'),
+    cert: fs.readFileSync(config.sslCrt, 'utf-8'),
 };
 
 const httpsServer = https.createServer(options, app);
@@ -190,7 +192,7 @@ app.post(['/api/v1/meeting'], (req, res) => {
     let authorization = req.headers.authorization;
     let api = new ServerApi(host, authorization);
     if (!api.isAuthorized()) {
-        log.debug('MiroTalk get meeting - Unauthorized', {
+        log.debug('RoomXR get meeting - Unauthorized', {
             header: req.headers,
             body: req.body,
         });
@@ -201,7 +203,7 @@ app.post(['/api/v1/meeting'], (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ meeting: meetingURL }));
     // log.debug the output if all done
-    log.debug('MiroTalk get meeting - Authorized', {
+    log.debug('RoomXR get meeting - Authorized', {
         header: req.headers,
         body: req.body,
         meeting: meetingURL,
@@ -215,7 +217,7 @@ app.post(['/api/v1/join'], (req, res) => {
     let authorization = req.headers.authorization;
     let api = new ServerApi(host, authorization);
     if (!api.isAuthorized()) {
-        log.debug('MiroTalk get join - Unauthorized', {
+        log.debug('RoomXR get join - Unauthorized', {
             header: req.headers,
             body: req.body,
         });
@@ -226,7 +228,7 @@ app.post(['/api/v1/join'], (req, res) => {
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({ join: joinURL }));
     // log.debug the output if all done
-    log.debug('MiroTalk get join - Authorized', {
+    log.debug('RoomXR get join - Authorized', {
         header: req.headers,
         body: req.body,
         join: joinURL,

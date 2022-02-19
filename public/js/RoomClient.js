@@ -1,3 +1,4 @@
+
 'use strict';
 
 const cfg = {
@@ -14,6 +15,7 @@ const html = {
     userHand: 'fas fa-hand-paper pulsate',
     fullScreen: 'fas fa-expand',
     snapshot: 'fas fa-camera-retro',
+    pin: 'fas fa-map-pin pulsate pin',
 };
 
 const image = {
@@ -101,6 +103,8 @@ class RoomClient {
 
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
+        this.isSomethingPinned = false;
+        this.pinnedElement = null;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
         this.camVideo = false;
@@ -767,6 +771,7 @@ class RoomClient {
 
     async handleProducer(id, type, stream) {
         let elem, vb, ts, d, p, i, b, fs, pm, pb;
+        let pin;
         this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
@@ -803,6 +808,9 @@ class RoomClient {
         pm.className = 'speechbar';
         pb.className = 'bar';
         pb.style.height = '1%';
+        pin = document.createElement('button');
+        pin.id = id + '__pin';
+        pin.className = html.pin;
         pm.appendChild(pb);
         vb.appendChild(b);
         vb.appendChild(ts);
@@ -812,11 +820,13 @@ class RoomClient {
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(vb);
+        d.appendChild(pin);
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
         this.handleFS(elem.id, fs.id);
         this.handleTS(elem.id, ts.id);
+        this.handlePIN(elem.id, pin.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         this.sound('joined');
@@ -1486,6 +1496,44 @@ class RoomClient {
             }
         });
     }
+
+
+
+    // ####################################################
+    // PIN
+    // ####################################################
+
+    togglePIN(elem = null) {
+        //this.isSomethingPinned = !this.isSomethingPinned;
+        if(this.pinnedElement)
+        {
+            this.pinnedElement = null;
+            elem.classList.remove('pinned');
+        }
+        else
+        {
+            this.pinnedElement = elem;
+            elem.classList.add('pinned');
+            //elem.Attributes("class") = String.Concat(elem.Attributes("class"), " ", "pinned").Trim()
+        }
+        
+        resizeVideoMedia();
+    }
+
+    handlePIN(elemId, pinId) {
+        let videoPlayer = this.getId(elemId);
+        let videoContainer = videoPlayer.parentNode;
+        let btnPin = this.getId(pinId);
+        this.setTippy(pinId, 'pin this element', 'top');
+
+        btnPin.addEventListener('click', () => {
+            //videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+            this.togglePIN(videoContainer);
+            
+            //this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+        });
+    }
+
 
     // ####################################################
     // TAKE SNAPSHOT

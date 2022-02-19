@@ -32,7 +32,8 @@
 }
 
 :root {
-    --body-bg: linear-gradient(to left, #1f1e1e, #000000);
+    /*--body-bg: linear-gradient(to left, #1f1e1e, #000000);*/
+    --body-bg: radial-gradient(#666, #333);
     --msger-top: 50%;
     --msger-left: 50%;
     --msger-height: 680px;
@@ -255,6 +256,10 @@ body {
     border-radius: 10px;
     box-shadow: var(--box-shadow);
     overflow: hidden;
+    border-color: rgb(79 114 135);
+    border-image: initial;
+    border-style: solid;
+    border-width: 2px;
 }
 
 .msger {
@@ -277,7 +282,7 @@ body {
     justify-content: space-between;
     padding: 10px;
     background: rgb(0, 0, 0);
-    color: #666;
+    color: #ffffff;
     cursor: move;
 }
 
@@ -299,7 +304,7 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
-    background: var(--msger-bg);
+    background: var(--body-bg);
 }
 
 .chat-msger::-webkit-scrollbar {
@@ -475,8 +480,9 @@ emoji-picker {
 }
 
 #about img {
+    width: 250px;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 2px;
 }
 
 #about a {
@@ -563,10 +569,11 @@ button:hover {
     z-index: 7;
     position: absolute;
     margin: auto;
-    padding: 10px;
+    /*padding: 10px;*/
     min-width: 320px;
     background: var(--body-bg);
     border-radius: 10px;
+    border: 2px solid rgba(79, 114, 135, 1.0);
     overflow: hidden;
 }
 
@@ -574,7 +581,7 @@ button:hover {
     display: flex;
     justify-content: space-between;
     background: rgb(0, 0, 0);
-    border-radius: 10px;
+    /*border-radius: 10px;*/
     padding: 10px;
     color: white;
     cursor: move;

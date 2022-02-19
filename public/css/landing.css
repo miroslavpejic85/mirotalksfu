@@ -1165,7 +1165,7 @@ label {
     left: 99.6%;
     width: 57.2%;
     height: 87.88%;
-    background-image: url('../images/hero-top-illustration.svg');
+    /* background-image: url('../images/hero-top-illustration.svg'); */
 }
 .hero-figure-box {
     position: absolute;
@@ -1860,3 +1860,23 @@ main {
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
 }
+
+.header-logo-image{
+    height: 48px;
+}
+
+.svg-icon {
+    width: 2em;
+    height: 2em;
+  }
+  
+  .svg-icon path,
+  .svg-icon polygon,
+  .svg-icon rect {
+    fill: #4691f6;
+  }
+  
+  .svg-icon circle {
+    stroke: #4691f6;
+    stroke-width: 1;
+  }
