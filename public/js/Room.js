@@ -1540,6 +1540,8 @@ function adaptAspectRatio(participantsCount) {
     // desktop aspect ratio
     switch (participantsCount) {
         case 1:
+            desktop = 0; // (0:0)
+            break;
         case 3:
         case 4:
         case 7:

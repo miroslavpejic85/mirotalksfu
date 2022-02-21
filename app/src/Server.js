@@ -18,6 +18,8 @@ const log = new Logger('Server');
 const yamlJS = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
+const Sentry = require('@sentry/node');
+const { CaptureConsole } = require('@sentry/integrations');
 
 const app = express();
 
@@ -42,6 +44,30 @@ const hostCfg = {
 
 const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
+
+// Sentry monitoring
+const sentryEnabled = config.sentry.enabled;
+const sentryDSN = config.sentry.DSN;
+const sentryTracesSampleRate = config.sentry.tracesSampleRate;
+if (sentryEnabled) {
+    Sentry.init({
+        dsn: sentryDSN,
+        integrations: [
+            new CaptureConsole({
+                // ['log', 'info', 'warn', 'error', 'debug', 'assert']
+                levels: ['warn', 'error'],
+            }),
+        ],
+        tracesSampleRate: sentryTracesSampleRate,
+    });
+    /*
+    log.log('test-log');
+    log.info('test-info');
+    log.warn('test-warning');
+    log.warn('test-error');
+    log.warn('test-debug');
+    */
+}
 
 // Authenticated IP by Login
 let authHost;
@@ -258,6 +284,7 @@ async function ngrokStart() {
             tunnel: tunnel,
             api_docs: api_docs,
             mediasoup_version: mediasoup.version,
+            sentry_enabled: sentryEnabled,
         });
     } catch (err) {
         log.error('Ngrok Start error: ', err);
@@ -294,6 +321,7 @@ httpsServer.listen(config.listenPort, () => {
         server: host,
         api_docs: api_docs,
         mediasoup_version: mediasoup.version,
+        sentry_enabled: sentryEnabled,
     });
 });
 
@@ -482,7 +510,7 @@ io.on('connection', (socket) => {
             const { params } = await roomList.get(socket.room_id).createWebRtcTransport(socket.id);
             callback(params);
         } catch (err) {
-            log.error('Create WebRtc Transport error: ', err);
+            log.error('Create WebRtc Transport error: ', err.message);
             callback({
                 error: err.message,
             });
