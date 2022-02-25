@@ -56,7 +56,8 @@ If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or 
 
 ## Run it locally
 
--   You will need to have `NodeJS` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/), `python3-pip DEB package`, `build-essential DEB package` and `python version >= 3.6 with PIP`.
+-   You will need to have `NodeJS` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
+-   python3-pip DEB package, build-essential DEB package and python version >= 3.6 with PIP.
 -   The `requirements` can also be found [here](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements).
 
 ```bash
