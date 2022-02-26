@@ -6,7 +6,7 @@
 [![Digital Ocean](https://img.shields.io/badge/Powered%20by-DigitalOcean-blue)](https://m.do.co/c/1070207afbb1)
 [![Code style: prettier](https://img.shields.io/badge/Code_style-Prettier-ff69b4.svg?)](https://github.com/prettier/prettier)
 
-Powered by `WebRTC` and [SFU](https://mediasoup.org) integrated server.
+Powered by `WebRTC` and powerful [SFU](https://mediasoup.org) integrated media server.
 
 Open the app with the following **supported browsers** and many more.
 
@@ -40,24 +40,12 @@ Open the app with the following **supported browsers** and many more.
 -   Full-Screen Mode on mouse click on the Video element
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
 
-## DigitalOcean
+---
 
-This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
-
-If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or for other needs, don't hesitate to contact me at miroslav.pejic.85@gmail.com
-
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
-
-## Live Demo
-
-[Live demo](https://sfu.mirotalk.org)
-
-[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
-
-## Run it locally
+## Quick Start
 
 -   You will need to have `NodeJS` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
--   python3-pip DEB package, build-essential DEB package and python version >= 3.6 with PIP.
+-   `python3-pip DEB package`, `build-essential DEB package` and `python version >= 3.6 with PIP`.
 -   The `requirements` can also be found [here](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements).
 
 ```bash
@@ -74,6 +62,8 @@ $ npm start
 ```
 
 -   Open https://localhost:3010 in browser
+
+---
 
 ## Docker
 
@@ -94,6 +84,8 @@ $ docker-compose down
 ```
 
 -   Open https://localhost:3010 in browser
+
+---
 
 ## API
 
@@ -120,6 +112,24 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | audio  | boolean | enable / disable |
     | video  | boolean | enable / disable |
     | notify | boolean | enable / disable |
+
+---
+
+## DigitalOcean
+
+This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
+
+If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or for other needs, don't hesitate to contact me at miroslav.pejic.85@gmail.com
+
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
+
+## Live Demo
+
+[Live demo](https://sfu.mirotalk.org)
+
+[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
+
+---
 
 ## Https
 
