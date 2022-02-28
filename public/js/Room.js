@@ -817,9 +817,6 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
-
-    adaptAspectRatio(1);
-
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };

@@ -640,7 +640,8 @@ class RoomClient {
                     });
                     elem.parentNode.removeChild(elem);
 
-                    resizeVideoMedia();
+                    adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                    console.log('[transportClose] Video-element-count', this.videoMediaContainer.childElementCount);
                 }
                 this.producers.delete(producer.id);
             });
@@ -653,7 +654,8 @@ class RoomClient {
                     });
                     elem.parentNode.removeChild(elem);
 
-                    resizeVideoMedia();
+                    adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                    console.log('[closingProducer] Video-element-count', this.videoMediaContainer.childElementCount);
                 }
                 this.producers.delete(producer.id);
             });
@@ -820,7 +822,8 @@ class RoomClient {
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         this.sound('joined');
-        resizeVideoMedia();
+        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
             this.setTippy(elem.id, 'Full Screen', 'top-end');
             this.setTippy(ts.id, 'Snapshot', 'top-end');
@@ -906,7 +909,8 @@ class RoomClient {
             });
             d.parentNode.removeChild(d);
 
-            resizeVideoMedia();
+            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            console.log('[producerClose] Video-element-count', this.videoMediaContainer.childElementCount);
         }
 
         switch (type) {
@@ -1047,7 +1051,8 @@ class RoomClient {
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
-                resizeVideoMedia();
+                adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
@@ -1077,7 +1082,8 @@ class RoomClient {
         if (elem) elem.parentNode.removeChild(elem);
         if (d) d.parentNode.removeChild(d);
 
-        resizeVideoMedia();
+        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        console.log('[removeConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
 
         this.consumers.delete(consumer_id);
         this.sound('left');
@@ -1129,7 +1135,8 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
-        resizeVideoMedia();
+        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
 
@@ -1137,7 +1144,8 @@ class RoomClient {
         let pvOff = this.getId(peer_id + '__videoOff');
         if (pvOff) {
             pvOff.parentNode.removeChild(pvOff);
-            resizeVideoMedia();
+            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
     }
@@ -2223,7 +2231,8 @@ class RoomClient {
         iframe.setAttribute('allowfullscreen', true);
         d.appendChild(iframe);
         this.videoMediaContainer.appendChild(d);
-        resizeVideoMedia();
+        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        console.log('[openYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
 
@@ -2239,7 +2248,8 @@ class RoomClient {
         if (youTubeDiv) {
             hide(youTubeCloseBtn);
             youTubeDiv.parentNode.removeChild(youTubeDiv);
-            resizeVideoMedia();
+            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            console.log('[closeYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
     }
