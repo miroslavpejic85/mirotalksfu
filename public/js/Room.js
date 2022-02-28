@@ -1555,6 +1555,8 @@ function adaptAspectRatio(participantsCount) {
         case 8:
             desktop = 3; // (1:1)
             break;
+        default:
+            desktop = 0; // (0:0)
     }
     // mobile aspect ratio
     switch (participantsCount) {
@@ -1575,6 +1577,8 @@ function adaptAspectRatio(participantsCount) {
         case 6:
             mobile = 3; // (1:1)
             break;
+        default:
+            mobile = 3; // (1:1)
     }
     if (participantsCount > 11) {
         desktop = 1; // (4:3)
