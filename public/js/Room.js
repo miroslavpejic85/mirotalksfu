@@ -1528,6 +1528,14 @@ function getParticipantAvatar(peerName) {
 // HANDLE ASPECT RATIO
 // ####################################################
 
+function handleAspectRatio() {
+    if (participantsCount > 1) {
+        adaptAspectRatio(videoMediaContainer.childElementCount);
+    } else {
+        resizeVideoMedia();
+    }
+}
+
 function adaptAspectRatio(participantsCount) {
     /* 
         ['0:0', '4:3', '16:9', '1:1', '1:2'];

@@ -640,7 +640,7 @@ class RoomClient {
                     });
                     elem.parentNode.removeChild(elem);
 
-                    adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                    handleAspectRatio();
                     console.log('[transportClose] Video-element-count', this.videoMediaContainer.childElementCount);
                 }
                 this.producers.delete(producer.id);
@@ -654,7 +654,7 @@ class RoomClient {
                     });
                     elem.parentNode.removeChild(elem);
 
-                    adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                    handleAspectRatio();
                     console.log('[closingProducer] Video-element-count', this.videoMediaContainer.childElementCount);
                 }
                 this.producers.delete(producer.id);
@@ -822,7 +822,7 @@ class RoomClient {
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         this.sound('joined');
-        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        handleAspectRatio();
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
             this.setTippy(elem.id, 'Full Screen', 'top-end');
@@ -909,7 +909,7 @@ class RoomClient {
             });
             d.parentNode.removeChild(d);
 
-            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            handleAspectRatio();
             console.log('[producerClose] Video-element-count', this.videoMediaContainer.childElementCount);
         }
 
@@ -1051,7 +1051,7 @@ class RoomClient {
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
-                adaptAspectRatio(this.videoMediaContainer.childElementCount);
+                handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
@@ -1082,7 +1082,7 @@ class RoomClient {
         if (elem) elem.parentNode.removeChild(elem);
         if (d) d.parentNode.removeChild(d);
 
-        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        handleAspectRatio();
         console.log('[removeConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
 
         this.consumers.delete(consumer_id);
@@ -1135,7 +1135,7 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
-        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        handleAspectRatio();
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
@@ -1144,7 +1144,7 @@ class RoomClient {
         let pvOff = this.getId(peer_id + '__videoOff');
         if (pvOff) {
             pvOff.parentNode.removeChild(pvOff);
-            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            handleAspectRatio();
             console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
@@ -2231,7 +2231,7 @@ class RoomClient {
         iframe.setAttribute('allowfullscreen', true);
         d.appendChild(iframe);
         this.videoMediaContainer.appendChild(d);
-        adaptAspectRatio(this.videoMediaContainer.childElementCount);
+        handleAspectRatio();
         console.log('[openYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
@@ -2248,7 +2248,7 @@ class RoomClient {
         if (youTubeDiv) {
             hide(youTubeCloseBtn);
             youTubeDiv.parentNode.removeChild(youTubeDiv);
-            adaptAspectRatio(this.videoMediaContainer.childElementCount);
+            handleAspectRatio();
             console.log('[closeYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
