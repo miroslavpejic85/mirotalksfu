@@ -9,7 +9,7 @@ const swalBg = 'rgba(0, 0, 0, 0.7)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo',
+    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
     survey: 'https://www.questionpro.com/t/AUs7VZq02P',
 };
 
