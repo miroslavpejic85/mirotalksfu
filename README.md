@@ -25,12 +25,12 @@ Open the app with the following **supported browsers** and many more.
 -   `Unlimited` number of `conference rooms` and `users`, `without` call `time limitation`
 -   Desktop and Mobile compatible
 -   Optimized Room URL Sharing (share it to your participants, wait for them to join)
--   Possibility to Lock/Unlock the Room for the meeting
+-   Possibility to Password protect the Room for the meeting
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing, share any files to your participants in the room
--   Take a snapshot from the video frame(screen/cam) to save it as an image.
+-   Take a snapshot from the video frame(screen/cam) to save it as an image on your device.
 -   Chat with Emoji Picker to show you feeling and the possibility to Save the conversations
 -   Speech recognition, execute the app features simply with your voice.
 -   Advance collaborative whiteboard for the teachers
@@ -38,6 +38,7 @@ Open the app with the following **supported browsers** and many more.
 -   Recording your Screen, Audio, or Video
 -   Share any YouTube video in real-time to your participants
 -   Full-Screen Mode on mouse click on the Video element
+-   Possibility to protect your Host with username and password (default disabled)
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
 
 ---
