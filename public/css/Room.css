@@ -33,6 +33,7 @@
 
 :root {
     --body-bg: linear-gradient(to left, #1f1e1e, #000000);
+    --border: 1px solid rgb(255 255 255 / 32%);
     --msger-top: 50%;
     --msger-left: 50%;
     --msger-height: 680px;
@@ -61,6 +62,10 @@
     --btns-width: 320px;
     --btns-flex-direction: row;
     */
+    /* 
+        https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
+    */
+    --videoObjFit: cover;
 }
 
 * {
@@ -81,7 +86,7 @@ body {
 --------------------------------------------------------------*/
 
 #loadingDiv {
-    color: white;
+    color: #fff;
     padding: 30px;
     border-radius: 10px;
     background: var(--body-bg);
@@ -163,6 +168,7 @@ body {
     min-height: 480px;
     background: var(--msger-bg);
     box-shadow: var(--box-shadow);
+    border: var(--border);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -174,7 +180,7 @@ body {
 #mySettings i,
 #mySettings p {
     display: inline-block;
-    color: white;
+    color: #fff;
     padding: 5px;
     background: transparent;
 }
@@ -183,7 +189,7 @@ body {
     width: auto;
     max-width: 270px;
     height: 40px;
-    color: white;
+    color: #fff;
     background-color: transparent;
     border-radius: 5px;
 }
@@ -214,7 +220,7 @@ body {
     cursor: pointer;
     padding: 14px 16px;
     transition: 0.3s;
-    color: white;
+    color: #fff;
 }
 
 /* Change background color of buttons on hover */
@@ -251,7 +257,7 @@ body {
     height: var(--msger-height);
     width: var(--msger-width);
     background: var(--msger-bg);
-    border-radius: 5px;
+    border: var(--border);
     border-radius: 10px;
     box-shadow: var(--box-shadow);
     overflow: hidden;
@@ -408,7 +414,7 @@ body {
 }
 
 #chat-msg-a {
-    color: white;
+    color: #fff;
 }
 
 /*--------------------------------------------------------------
@@ -427,7 +433,7 @@ body {
     border: none;
     border-top-left-radius: 10px;
     background: rgb(0, 0, 0);
-    color: white;
+    color: #fff;
 }
 
 .chat-msger-inputarea button {
@@ -458,7 +464,12 @@ emoji-picker {
 .swal2-content,
 .swal2-input {
     text-align: center;
-    color: white !important;
+    color: #fff !important;
+    background-color: transparent !important;
+}
+.swal2-html-container {
+    text-align: center;
+    color: #7c7c7c !important;
     background-color: transparent !important;
 }
 
@@ -480,7 +491,7 @@ emoji-picker {
 }
 
 #about a {
-    color: white;
+    color: #fff;
     text-decoration: none;
 }
 
@@ -546,7 +557,7 @@ emoji-picker {
 p,
 button {
     background: transparent;
-    color: white;
+    color: #fff;
     border: none;
 }
 
@@ -566,6 +577,7 @@ button:hover {
     padding: 10px;
     min-width: 320px;
     background: var(--body-bg);
+    border: var(--border);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -576,7 +588,7 @@ button:hover {
     background: rgb(0, 0, 0);
     border-radius: 10px;
     padding: 10px;
-    color: white;
+    color: #fff;
     cursor: move;
 }
 
@@ -593,7 +605,7 @@ button:hover {
 #roomParticipants td,
 #roomParticipants th {
     /* border: 1px solid #444444; */
-    color: white;
+    color: #fff;
     text-align: left;
     padding: 8px;
 }
@@ -629,7 +641,7 @@ button:hover {
     min-width: 320px;
     background: var(--body-bg);
     border-radius: 5px;
-    color: white;
+    color: #fff;
     overflow: hidden;
 }
 
@@ -637,7 +649,7 @@ button:hover {
 #receiveHideBtn {
     padding: 5px;
     border-radius: 5px;
-    color: white;
+    color: #fff;
     background: transparent;
 }
 
@@ -670,8 +682,8 @@ progress {
     width: var(--wb-width);
     height: var(--wb-height);
     background: var(--wb-bg);
+    border: var(--border);
     border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
 }
 
@@ -681,7 +693,7 @@ progress {
     background: rgb(0, 0, 0);
     border-radius: 10px;
     padding: 10px;
-    color: white;
+    color: #fff;
     cursor: move;
 }
 

@@ -817,6 +817,10 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
+    BtnVideoObjectFit.onchange = () => {
+        handleVideoObjectFit(BtnVideoObjectFit.value);
+    }; // cover
+    BtnVideoObjectFit.selectedIndex = 2;
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
@@ -1522,6 +1526,14 @@ function refreshParticipantsCount(count) {
 
 function getParticipantAvatar(peerName) {
     return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
+}
+
+// ####################################################
+// HANDLE VIDEO OBJ FIT
+// ####################################################
+
+function handleVideoObjectFit(value) {
+    document.documentElement.style.setProperty('--videoObjFit', value);
 }
 
 // ####################################################
