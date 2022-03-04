@@ -4,8 +4,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
-const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
-const swalBg = 'rgba(0, 0, 0, 0.7)';
+let swalBackground = 'radial-gradient(#393939, #000000)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
@@ -81,6 +80,7 @@ function initClient() {
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabYoutubeBtn', 'YouTube', 'top');
+        setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
         setTippy('wbDrawingColorEl', 'Drawing color', 'top');
@@ -642,6 +642,9 @@ function handleButtons() {
     tabYoutubeBtn.onclick = (e) => {
         rc.openTab(e, 'tabYoutube');
     };
+    tabAspectBtn.onclick = (e) => {
+        rc.openTab(e, 'tabAspect');
+    };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
     };
@@ -821,6 +824,10 @@ function handleSelects() {
         handleVideoObjectFit(BtnVideoObjectFit.value);
     }; // cover
     BtnVideoObjectFit.selectedIndex = 2;
+
+    selectTheme.onchange = () => {
+        setTheme(selectTheme.value);
+    };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
@@ -1534,6 +1541,28 @@ function getParticipantAvatar(peerName) {
 
 function handleVideoObjectFit(value) {
     document.documentElement.style.setProperty('--videoObjFit', value);
+}
+
+// ####################################################
+// SET THEME
+// ####################################################
+
+function setTheme(theme) {
+    switch (theme) {
+        case 'dark':
+            swalBackground = 'radial-gradient(#393939, #000000)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            break;
+        case 'grey':
+            swalBackground = 'radial-gradient(#666, #333)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            break;
+        //...
+    }
 }
 
 // ####################################################

@@ -1185,7 +1185,7 @@ class RoomClient {
         this.sound('open');
 
         Swal.fire({
-            background: swalBg,
+            background: swalBackground,
             imageAlt: 'mirotalksfu-leave-room',
             imageUrl: image.exit,
             position: 'center',

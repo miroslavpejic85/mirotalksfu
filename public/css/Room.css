@@ -32,16 +32,16 @@
 }
 
 :root {
-    --body-bg: linear-gradient(to left, #1f1e1e, #000000);
+    --body-bg: radial-gradient(#393939, #000000);
     --border: 1px solid rgb(255 255 255 / 32%);
     --msger-top: 50%;
     --msger-left: 50%;
     --msger-height: 680px;
     --msger-width: 420px;
-    --msger-bg: linear-gradient(to left, #1f1e1e, #000000);
+    --msger-bg: radial-gradient(#393939, #000000);
     --wb-width: 800px;
     --wb-height: 600px;
-    --wb-bg: linear-gradient(to left, #1f1e1e, #000000);
+    --wb-bg: radial-gradient(#393939, #000000);
     --left-msg-bg: #222328;
     --right-msg-bg: #0a0b0c;
     --private-msg-bg: #510717;
@@ -469,7 +469,7 @@ emoji-picker {
 }
 .swal2-html-container {
     text-align: center;
-    color: #7c7c7c !important;
+    color: #858585 !important;
     background-color: transparent !important;
 }
 
