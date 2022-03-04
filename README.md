@@ -38,6 +38,7 @@ Open the app with the following **supported browsers** and many more.
 -   Recording your Screen, Audio, or Video
 -   Share any YouTube video in real-time to your participants
 -   Full-Screen Mode on mouse click on the Video element
+-   Possibility to Change UI Themes
 -   Possibility to protect your Host with username and password (default disabled)
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
 
