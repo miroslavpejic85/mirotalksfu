@@ -42,10 +42,10 @@
     --wb-width: 800px;
     --wb-height: 600px;
     --wb-bg: radial-gradient(#393939, #000000);
-    --left-msg-bg: #222328;
+    --left-msg-bg: #2a2a2a;
     --right-msg-bg: #0a0b0c;
     --private-msg-bg: #510717;
-    --box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+    --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
     /* buttons bar horizontal */
     --btns-top: 50%;
@@ -578,6 +578,7 @@ button:hover {
     min-width: 320px;
     background: var(--body-bg);
     border: var(--border);
+    box-shadow: var(--box-shadow);
     border-radius: 10px;
     overflow: hidden;
 }
@@ -683,6 +684,7 @@ progress {
     height: var(--wb-height);
     background: var(--wb-bg);
     border: var(--border);
+    box-shadow: var(--box-shadow);
     border-radius: 10px;
     overflow: hidden;
 }

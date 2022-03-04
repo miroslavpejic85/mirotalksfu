@@ -1561,6 +1561,12 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
             break;
+        case 'green':
+            swalBackground = 'radial-gradient(#393, #000)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393, #000)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393, #000)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393, #000)');
+            break;
         //...
     }
 }
