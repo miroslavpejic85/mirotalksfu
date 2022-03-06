@@ -69,10 +69,10 @@ function initClient() {
         setTippy('stopAudioButton', 'Stop the audio', 'right');
         setTippy('startVideoButton', 'Start the video', 'right');
         setTippy('stopVideoButton', 'Stop the video', 'right');
-        setTippy('swapCameraButton', 'Swap the camera', 'right');
-        setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('startScreenButton', 'Start screen share', 'right');
         setTippy('stopScreenButton', 'Stop screen share', 'right');
+        setTippy('swapCameraButton', 'Swap the camera', 'right');
+        setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
         setTippy('exitButton', 'Leave room', 'right');
@@ -1586,8 +1586,6 @@ function adaptAspectRatio(participantsCount) {
     // desktop aspect ratio
     switch (participantsCount) {
         case 1:
-            desktop = 0; // (0:0)
-            break;
         case 3:
         case 4:
         case 7:

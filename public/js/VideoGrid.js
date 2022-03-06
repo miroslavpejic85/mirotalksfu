@@ -39,11 +39,17 @@ function Area(Increment, Count, Width, Height, Margin = 10) {
 
 function resizeVideoMedia() {
     let Margin = 3;
-    let Scenary = document.getElementById('videoMediaContainer');
-    let Width = Scenary.offsetWidth - Margin * 2;
-    let Height = Scenary.offsetHeight - Margin * 2;
+    let videoMediaContainer = document.getElementById('videoMediaContainer');
     let Cameras = document.getElementsByClassName('Camera');
+    let Width = videoMediaContainer.offsetWidth - Margin * 2;
+    let Height = videoMediaContainer.offsetHeight - Margin * 2;
     let max = 0;
+
+    // full screen mode
+    let bigWidth = Width * 4;
+    if (videoMediaContainer.childElementCount == 1) {
+        Width = Width - bigWidth;
+    }
 
     // loop (i recommend you optimize this)
     let i = 1;
@@ -57,16 +63,22 @@ function resizeVideoMedia() {
     }
 
     max = max - Margin * 2;
-    setWidth(max, Margin);
+    setWidth(max, bigWidth, Margin, Height);
 }
 
-function setWidth(width, margin) {
+function setWidth(width, bigWidth, margin, maxHeight) {
     ratio = customRatio ? 0.68 : ratio;
     let Cameras = document.getElementsByClassName('Camera');
     for (let s = 0; s < Cameras.length; s++) {
         Cameras[s].style.width = width + 'px';
         Cameras[s].style.margin = margin + 'px';
         Cameras[s].style.height = width * ratio + 'px';
+        if (videoMediaContainer.childElementCount == 1) {
+            Cameras[s].style.width = bigWidth + 'px';
+            Cameras[s].style.height = bigWidth * ratio + 'px';
+            let camHeigh = Cameras[s].style.height.substring(0, Cameras[s].style.height.length - 2);
+            if (camHeigh >= maxHeight) Cameras[s].style.height = maxHeight - 2 + 'px';
+        }
     }
 }
 
