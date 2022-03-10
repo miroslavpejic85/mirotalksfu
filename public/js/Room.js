@@ -24,7 +24,7 @@ const _PEER = {
     sendMsg: '<i class="fas fa-paper-plane"></i>',
 };
 
-const surveyAvtive = true;
+const surveyActive = true;
 
 let participantsCount = 0;
 
@@ -996,7 +996,7 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
-        if (surveyAvtive) {
+        if (surveyActive) {
             openURL(url.survey);
         } else {
             openURL('/newroom');
