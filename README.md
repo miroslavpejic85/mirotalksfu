@@ -151,7 +151,10 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 -   Contributions are welcome and greatly appreciated!
 -   Just run before `npm run lint`
--   For communication we use [discord](https://discord.gg/rgGYfeYW3N)
+
+## Discussions
+
+-   For discussions about the project, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
 ## License
 
@@ -183,6 +186,6 @@ Support this project by [becoming a sponsor](https://github.com/sponsors/mirosla
 
 <br/>
 
-### MiroTalk P2P
+## MiroTalk P2P
 
-You can also try [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), The difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
+Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
