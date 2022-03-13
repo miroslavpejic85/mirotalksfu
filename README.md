@@ -110,7 +110,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | Params | Type    | Description      |
     | ------ | ------- | ---------------- |
     | room   | string  | room Id          |
-    | name   | string  | your name        |
+    | name   | string  | user name        |
     | audio  | boolean | enable / disable |
     | video  | boolean | enable / disable |
     | notify | boolean | enable / disable |
@@ -127,7 +127,7 @@ If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or 
 
 ## Live Demo
 
-[Live demo](https://sfu.mirotalk.org)
+https://sfu.mirotalk.org
 
 [![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
 
@@ -156,6 +156,8 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 -   For discussions about the project, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
+<br/>
+
 ## License
 
 [![AGPLv3](public/images/AGPLv3.png)](LICENSE)
@@ -163,6 +165,8 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
 ---
+
+<br/>
 
 ## Commercial License or closed source
 
@@ -189,3 +193,5 @@ Support this project by [becoming a sponsor](https://github.com/sponsors/mirosla
 ## MiroTalk P2P
 
 Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
+
+---
