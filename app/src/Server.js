@@ -86,6 +86,7 @@ const dir = {
 
 // html views
 const view = {
+    about: path.join(__dirname, '../../', 'public/view/about.html'),
     landing: path.join(__dirname, '../../', 'public/view/landing.html'),
     login: path.join(__dirname, '../../', 'public/view/login.html'),
     newRoom: path.join(__dirname, '../../', 'public/view/newroom.html'),
@@ -203,6 +204,11 @@ app.get(['/permission'], (req, res) => {
 // privacy policy
 app.get(['/privacy'], (req, res) => {
     res.sendFile(view.privacy);
+});
+
+// mirotalk about
+app.get(['/about'], (req, res) => {
+    res.sendFile(view.about);
 });
 
 // ####################################################

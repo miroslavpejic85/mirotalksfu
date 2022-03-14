@@ -44,6 +44,10 @@ Open the app with the following **supported browsers** and many more.
 
 ---
 
+## Presentation
+
+https://www.canva.com/design/DAE693uLOIU/view
+
 ## Quick Start
 
 -   You will need to have `NodeJS` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
