@@ -5,6 +5,7 @@
 [![PayPal](https://img.shields.io/badge/Support-PayPal-brightgreen.svg)](https://paypal.me/MiroslavPejic?locale.x=it_IT)
 [![Digital Ocean](https://img.shields.io/badge/Powered%20by-DigitalOcean-blue)](https://m.do.co/c/1070207afbb1)
 [![Code style: prettier](https://img.shields.io/badge/Code_style-Prettier-ff69b4.svg?)](https://github.com/prettier/prettier)
+[![Discord](https://img.shields.io/badge/chat-discord-green)](https://discord.gg/rgGYfeYW3N)
 
 Powered by `WebRTC` and powerful [SFU](https://mediasoup.org) integrated media server.
 

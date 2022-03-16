@@ -185,12 +185,7 @@ app.get('/join/', (req, res) => {
 // join room
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
-        if (Object.keys(req.query).length > 0) {
-            log.debug('Redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
-            res.redirect(url.parse(req.url).pathname);
-        } else {
-            res.sendFile(view.room);
-        }
+        res.sendFile(view.room);
     } else {
         res.redirect('/');
     }
