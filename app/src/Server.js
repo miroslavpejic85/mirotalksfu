@@ -5,6 +5,7 @@ const cors = require('cors');
 const compression = require('compression');
 const https = require('httpolyglot');
 const mediasoup = require('mediasoup');
+const mediasoupClient = require('mediasoup-client');
 const config = require('./config');
 const path = require('path');
 const ngrok = require('ngrok');
@@ -284,7 +285,8 @@ async function ngrokStart() {
             server: host,
             tunnel: tunnel,
             api_docs: api_docs,
-            mediasoup_version: mediasoup.version,
+            mediasoup_server_version: mediasoup.version,
+            mediasoup_client_version: mediasoupClient.version,
             sentry_enabled: sentryEnabled,
         });
     } catch (err) {
@@ -321,7 +323,8 @@ httpsServer.listen(config.listenPort, () => {
         announced_ip: announcedIP,
         server: host,
         api_docs: api_docs,
-        mediasoup_version: mediasoup.version,
+        mediasoup_server_version: mediasoup.version,
+        mediasoup_client_version: mediasoupClient.version,
         sentry_enabled: sentryEnabled,
     });
 });

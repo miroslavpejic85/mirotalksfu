@@ -2073,299 +2073,301 @@
         4: [
             function (require, module, exports) {
                 (function (process) {
-                    /* eslint-env browser */
+                    (function () {
+                        /* eslint-env browser */
 
-                    /**
-                     * This is the web browser implementation of `debug()`.
-                     */
+                        /**
+                         * This is the web browser implementation of `debug()`.
+                         */
 
-                    exports.formatArgs = formatArgs;
-                    exports.save = save;
-                    exports.load = load;
-                    exports.useColors = useColors;
-                    exports.storage = localstorage();
-                    exports.destroy = (() => {
-                        let warned = false;
+                        exports.formatArgs = formatArgs;
+                        exports.save = save;
+                        exports.load = load;
+                        exports.useColors = useColors;
+                        exports.storage = localstorage();
+                        exports.destroy = (() => {
+                            let warned = false;
 
-                        return () => {
-                            if (!warned) {
-                                warned = true;
-                                console.warn(
-                                    'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
-                                );
+                            return () => {
+                                if (!warned) {
+                                    warned = true;
+                                    console.warn(
+                                        'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
+                                    );
+                                }
+                            };
+                        })();
+
+                        /**
+                         * Colors.
+                         */
+
+                        exports.colors = [
+                            '#0000CC',
+                            '#0000FF',
+                            '#0033CC',
+                            '#0033FF',
+                            '#0066CC',
+                            '#0066FF',
+                            '#0099CC',
+                            '#0099FF',
+                            '#00CC00',
+                            '#00CC33',
+                            '#00CC66',
+                            '#00CC99',
+                            '#00CCCC',
+                            '#00CCFF',
+                            '#3300CC',
+                            '#3300FF',
+                            '#3333CC',
+                            '#3333FF',
+                            '#3366CC',
+                            '#3366FF',
+                            '#3399CC',
+                            '#3399FF',
+                            '#33CC00',
+                            '#33CC33',
+                            '#33CC66',
+                            '#33CC99',
+                            '#33CCCC',
+                            '#33CCFF',
+                            '#6600CC',
+                            '#6600FF',
+                            '#6633CC',
+                            '#6633FF',
+                            '#66CC00',
+                            '#66CC33',
+                            '#9900CC',
+                            '#9900FF',
+                            '#9933CC',
+                            '#9933FF',
+                            '#99CC00',
+                            '#99CC33',
+                            '#CC0000',
+                            '#CC0033',
+                            '#CC0066',
+                            '#CC0099',
+                            '#CC00CC',
+                            '#CC00FF',
+                            '#CC3300',
+                            '#CC3333',
+                            '#CC3366',
+                            '#CC3399',
+                            '#CC33CC',
+                            '#CC33FF',
+                            '#CC6600',
+                            '#CC6633',
+                            '#CC9900',
+                            '#CC9933',
+                            '#CCCC00',
+                            '#CCCC33',
+                            '#FF0000',
+                            '#FF0033',
+                            '#FF0066',
+                            '#FF0099',
+                            '#FF00CC',
+                            '#FF00FF',
+                            '#FF3300',
+                            '#FF3333',
+                            '#FF3366',
+                            '#FF3399',
+                            '#FF33CC',
+                            '#FF33FF',
+                            '#FF6600',
+                            '#FF6633',
+                            '#FF9900',
+                            '#FF9933',
+                            '#FFCC00',
+                            '#FFCC33',
+                        ];
+
+                        /**
+                         * Currently only WebKit-based Web Inspectors, Firefox >= v31,
+                         * and the Firebug extension (any Firefox version) are known
+                         * to support "%c" CSS customizations.
+                         *
+                         * TODO: add a `localStorage` variable to explicitly enable/disable colors
+                         */
+
+                        // eslint-disable-next-line complexity
+                        function useColors() {
+                            // NB: In an Electron preload script, document will be defined but not fully
+                            // initialized. Since we know we're in Chrome, we'll just detect this case
+                            // explicitly
+                            if (
+                                typeof window !== 'undefined' &&
+                                window.process &&
+                                (window.process.type === 'renderer' || window.process.__nwjs)
+                            ) {
+                                return true;
                             }
-                        };
-                    })();
 
-                    /**
-                     * Colors.
-                     */
-
-                    exports.colors = [
-                        '#0000CC',
-                        '#0000FF',
-                        '#0033CC',
-                        '#0033FF',
-                        '#0066CC',
-                        '#0066FF',
-                        '#0099CC',
-                        '#0099FF',
-                        '#00CC00',
-                        '#00CC33',
-                        '#00CC66',
-                        '#00CC99',
-                        '#00CCCC',
-                        '#00CCFF',
-                        '#3300CC',
-                        '#3300FF',
-                        '#3333CC',
-                        '#3333FF',
-                        '#3366CC',
-                        '#3366FF',
-                        '#3399CC',
-                        '#3399FF',
-                        '#33CC00',
-                        '#33CC33',
-                        '#33CC66',
-                        '#33CC99',
-                        '#33CCCC',
-                        '#33CCFF',
-                        '#6600CC',
-                        '#6600FF',
-                        '#6633CC',
-                        '#6633FF',
-                        '#66CC00',
-                        '#66CC33',
-                        '#9900CC',
-                        '#9900FF',
-                        '#9933CC',
-                        '#9933FF',
-                        '#99CC00',
-                        '#99CC33',
-                        '#CC0000',
-                        '#CC0033',
-                        '#CC0066',
-                        '#CC0099',
-                        '#CC00CC',
-                        '#CC00FF',
-                        '#CC3300',
-                        '#CC3333',
-                        '#CC3366',
-                        '#CC3399',
-                        '#CC33CC',
-                        '#CC33FF',
-                        '#CC6600',
-                        '#CC6633',
-                        '#CC9900',
-                        '#CC9933',
-                        '#CCCC00',
-                        '#CCCC33',
-                        '#FF0000',
-                        '#FF0033',
-                        '#FF0066',
-                        '#FF0099',
-                        '#FF00CC',
-                        '#FF00FF',
-                        '#FF3300',
-                        '#FF3333',
-                        '#FF3366',
-                        '#FF3399',
-                        '#FF33CC',
-                        '#FF33FF',
-                        '#FF6600',
-                        '#FF6633',
-                        '#FF9900',
-                        '#FF9933',
-                        '#FFCC00',
-                        '#FFCC33',
-                    ];
-
-                    /**
-                     * Currently only WebKit-based Web Inspectors, Firefox >= v31,
-                     * and the Firebug extension (any Firefox version) are known
-                     * to support "%c" CSS customizations.
-                     *
-                     * TODO: add a `localStorage` variable to explicitly enable/disable colors
-                     */
-
-                    // eslint-disable-next-line complexity
-                    function useColors() {
-                        // NB: In an Electron preload script, document will be defined but not fully
-                        // initialized. Since we know we're in Chrome, we'll just detect this case
-                        // explicitly
-                        if (
-                            typeof window !== 'undefined' &&
-                            window.process &&
-                            (window.process.type === 'renderer' || window.process.__nwjs)
-                        ) {
-                            return true;
-                        }
-
-                        // Internet Explorer and Edge do not support colors.
-                        if (
-                            typeof navigator !== 'undefined' &&
-                            navigator.userAgent &&
-                            navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
-                        ) {
-                            return false;
-                        }
-
-                        // Is webkit? http://stackoverflow.com/a/16459606/376773
-                        // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-                        return (
-                            (typeof document !== 'undefined' &&
-                                document.documentElement &&
-                                document.documentElement.style &&
-                                document.documentElement.style.WebkitAppearance) ||
-                            // Is firebug? http://stackoverflow.com/a/398120/376773
-                            (typeof window !== 'undefined' &&
-                                window.console &&
-                                (window.console.firebug || (window.console.exception && window.console.table))) ||
-                            // Is firefox >= v31?
-                            // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-                            (typeof navigator !== 'undefined' &&
+                            // Internet Explorer and Edge do not support colors.
+                            if (
+                                typeof navigator !== 'undefined' &&
                                 navigator.userAgent &&
-                                navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) &&
-                                parseInt(RegExp.$1, 10) >= 31) ||
-                            // Double check webkit in userAgent just in case we are in a worker
-                            (typeof navigator !== 'undefined' &&
-                                navigator.userAgent &&
-                                navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
-                        );
-                    }
+                                navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
+                            ) {
+                                return false;
+                            }
 
-                    /**
-                     * Colorize log arguments if enabled.
-                     *
-                     * @api public
-                     */
-
-                    function formatArgs(args) {
-                        args[0] =
-                            (this.useColors ? '%c' : '') +
-                            this.namespace +
-                            (this.useColors ? ' %c' : ' ') +
-                            args[0] +
-                            (this.useColors ? '%c ' : ' ') +
-                            '+' +
-                            module.exports.humanize(this.diff);
-
-                        if (!this.useColors) {
-                            return;
+                            // Is webkit? http://stackoverflow.com/a/16459606/376773
+                            // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+                            return (
+                                (typeof document !== 'undefined' &&
+                                    document.documentElement &&
+                                    document.documentElement.style &&
+                                    document.documentElement.style.WebkitAppearance) ||
+                                // Is firebug? http://stackoverflow.com/a/398120/376773
+                                (typeof window !== 'undefined' &&
+                                    window.console &&
+                                    (window.console.firebug || (window.console.exception && window.console.table))) ||
+                                // Is firefox >= v31?
+                                // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
+                                (typeof navigator !== 'undefined' &&
+                                    navigator.userAgent &&
+                                    navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/) &&
+                                    parseInt(RegExp.$1, 10) >= 31) ||
+                                // Double check webkit in userAgent just in case we are in a worker
+                                (typeof navigator !== 'undefined' &&
+                                    navigator.userAgent &&
+                                    navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
+                            );
                         }
 
-                        const c = 'color: ' + this.color;
-                        args.splice(1, 0, c, 'color: inherit');
+                        /**
+                         * Colorize log arguments if enabled.
+                         *
+                         * @api public
+                         */
 
-                        // The final "%c" is somewhat tricky, because there could be other
-                        // arguments passed either before or after the %c, so we need to
-                        // figure out the correct index to insert the CSS into
-                        let index = 0;
-                        let lastC = 0;
-                        args[0].replace(/%[a-zA-Z%]/g, (match) => {
-                            if (match === '%%') {
+                        function formatArgs(args) {
+                            args[0] =
+                                (this.useColors ? '%c' : '') +
+                                this.namespace +
+                                (this.useColors ? ' %c' : ' ') +
+                                args[0] +
+                                (this.useColors ? '%c ' : ' ') +
+                                '+' +
+                                module.exports.humanize(this.diff);
+
+                            if (!this.useColors) {
                                 return;
                             }
-                            index++;
-                            if (match === '%c') {
-                                // We only are interested in the *last* %c
-                                // (the user may have provided their own)
-                                lastC = index;
+
+                            const c = 'color: ' + this.color;
+                            args.splice(1, 0, c, 'color: inherit');
+
+                            // The final "%c" is somewhat tricky, because there could be other
+                            // arguments passed either before or after the %c, so we need to
+                            // figure out the correct index to insert the CSS into
+                            let index = 0;
+                            let lastC = 0;
+                            args[0].replace(/%[a-zA-Z%]/g, (match) => {
+                                if (match === '%%') {
+                                    return;
+                                }
+                                index++;
+                                if (match === '%c') {
+                                    // We only are interested in the *last* %c
+                                    // (the user may have provided their own)
+                                    lastC = index;
+                                }
+                            });
+
+                            args.splice(lastC, 0, c);
+                        }
+
+                        /**
+                         * Invokes `console.debug()` when available.
+                         * No-op when `console.debug` is not a "function".
+                         * If `console.debug` is not available, falls back
+                         * to `console.log`.
+                         *
+                         * @api public
+                         */
+                        exports.log = console.debug || console.log || (() => {});
+
+                        /**
+                         * Save `namespaces`.
+                         *
+                         * @param {String} namespaces
+                         * @api private
+                         */
+                        function save(namespaces) {
+                            try {
+                                if (namespaces) {
+                                    exports.storage.setItem('debug', namespaces);
+                                } else {
+                                    exports.storage.removeItem('debug');
+                                }
+                            } catch (error) {
+                                // Swallow
+                                // XXX (@Qix-) should we be logging these?
                             }
-                        });
+                        }
 
-                        args.splice(lastC, 0, c);
-                    }
-
-                    /**
-                     * Invokes `console.debug()` when available.
-                     * No-op when `console.debug` is not a "function".
-                     * If `console.debug` is not available, falls back
-                     * to `console.log`.
-                     *
-                     * @api public
-                     */
-                    exports.log = console.debug || console.log || (() => {});
-
-                    /**
-                     * Save `namespaces`.
-                     *
-                     * @param {String} namespaces
-                     * @api private
-                     */
-                    function save(namespaces) {
-                        try {
-                            if (namespaces) {
-                                exports.storage.setItem('debug', namespaces);
-                            } else {
-                                exports.storage.removeItem('debug');
+                        /**
+                         * Load `namespaces`.
+                         *
+                         * @return {String} returns the previously persisted debug modes
+                         * @api private
+                         */
+                        function load() {
+                            let r;
+                            try {
+                                r = exports.storage.getItem('debug');
+                            } catch (error) {
+                                // Swallow
+                                // XXX (@Qix-) should we be logging these?
                             }
-                        } catch (error) {
-                            // Swallow
-                            // XXX (@Qix-) should we be logging these?
-                        }
-                    }
 
-                    /**
-                     * Load `namespaces`.
-                     *
-                     * @return {String} returns the previously persisted debug modes
-                     * @api private
-                     */
-                    function load() {
-                        let r;
-                        try {
-                            r = exports.storage.getItem('debug');
-                        } catch (error) {
-                            // Swallow
-                            // XXX (@Qix-) should we be logging these?
+                            // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
+                            if (!r && typeof process !== 'undefined' && 'env' in process) {
+                                r = process.env.DEBUG;
+                            }
+
+                            return r;
                         }
 
-                        // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-                        if (!r && typeof process !== 'undefined' && 'env' in process) {
-                            r = process.env.DEBUG;
+                        /**
+                         * Localstorage attempts to return the localstorage.
+                         *
+                         * This is necessary because safari throws
+                         * when a user disables cookies/localstorage
+                         * and you attempt to access it.
+                         *
+                         * @return {LocalStorage}
+                         * @api private
+                         */
+
+                        function localstorage() {
+                            try {
+                                // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
+                                // The Browser also has localStorage in the global context.
+                                return localStorage;
+                            } catch (error) {
+                                // Swallow
+                                // XXX (@Qix-) should we be logging these?
+                            }
                         }
 
-                        return r;
-                    }
+                        module.exports = require('./common')(exports);
 
-                    /**
-                     * Localstorage attempts to return the localstorage.
-                     *
-                     * This is necessary because safari throws
-                     * when a user disables cookies/localstorage
-                     * and you attempt to access it.
-                     *
-                     * @return {LocalStorage}
-                     * @api private
-                     */
+                        const { formatters } = module.exports;
 
-                    function localstorage() {
-                        try {
-                            // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
-                            // The Browser also has localStorage in the global context.
-                            return localStorage;
-                        } catch (error) {
-                            // Swallow
-                            // XXX (@Qix-) should we be logging these?
-                        }
-                    }
+                        /**
+                         * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
+                         */
 
-                    module.exports = require('./common')(exports);
-
-                    const { formatters } = module.exports;
-
-                    /**
-                     * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
-                     */
-
-                    formatters.j = function (v) {
-                        try {
-                            return JSON.stringify(v);
-                        } catch (error) {
-                            return '[UnexpectedJSONParseError]: ' + error.message;
-                        }
-                    };
+                        formatters.j = function (v) {
+                            try {
+                                return JSON.stringify(v);
+                            } catch (error) {
+                                return '[UnexpectedJSONParseError]: ' + error.message;
+                            }
+                        };
+                    }.call(this));
                 }.call(this, require('_process')));
             },
             { './common': 5, _process: 48 },
@@ -2407,7 +2409,7 @@
 
                     /**
                      * Selects a color for a debug namespace
-                     * @param {String} namespace The namespace string for the for the debug instance to be colored
+                     * @param {String} namespace The namespace string for the debug instance to be colored
                      * @return {Number|String} An ANSI color code for the given namespace
                      * @api private
                      */
@@ -4308,6 +4310,14 @@
                         this._pendingConsumerTasks = [];
                         // Consumer creation in progress flag.
                         this._consumerCreationInProgress = false;
+                        // Consumers pending to be paused.
+                        this._pendingPauseConsumers = new Map();
+                        // Consumer pause in progress flag.
+                        this._consumerPauseInProgress = false;
+                        // Consumers pending to be resumed.
+                        this._pendingResumeConsumers = new Map();
+                        // Consumer resume in progress flag.
+                        this._consumerResumeInProgress = false;
                         // Observer instance.
                         this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
                         logger.debug('constructor() [id:%s, direction:%s]', id, direction);
@@ -4790,6 +4800,46 @@
                             // NOTE: We only get here when the await queue is closed.
                             .catch(() => {});
                     }
+                    _pausePendingConsumers() {
+                        this._awaitQueue
+                            .push(async () => {
+                                this._consumerPauseInProgress = true;
+                                const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
+                                // Clear pending pause Consumer map.
+                                this._pendingPauseConsumers.clear();
+                                await this._handler.pauseReceiving(
+                                    pendingPauseConsumers.map((consumer) => consumer.localId),
+                                );
+                            }, 'consumer @pause event')
+                            .catch(() => {})
+                            .finally(() => {
+                                this._consumerPauseInProgress = false;
+                                // There are pending Consumers to be paused, do it.
+                                if (this._pendingPauseConsumers.size > 0) {
+                                    this._pausePendingConsumers();
+                                }
+                            });
+                    }
+                    _resumePendingConsumers() {
+                        this._awaitQueue
+                            .push(async () => {
+                                this._consumerResumeInProgress = true;
+                                const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
+                                // Clear pending resume Consumer map.
+                                this._pendingResumeConsumers.clear();
+                                await this._handler.resumeReceiving(
+                                    pendingResumeConsumers.map((consumer) => consumer.localId),
+                                );
+                            }, 'consumer @resume event')
+                            .catch(() => {})
+                            .finally(() => {
+                                this._consumerResumeInProgress = false;
+                                // There are pending Consumer to be resumed, do it.
+                                if (this._pendingResumeConsumers.size > 0) {
+                                    this._resumePendingConsumers();
+                                }
+                            });
+                    }
                     _handleHandler() {
                         const handler = this._handler;
                         handler.on('@connect', ({ dtlsParameters }, callback, errback) => {
@@ -4849,6 +4899,8 @@
                     _handleConsumer(consumer) {
                         consumer.on('@close', () => {
                             this._consumers.delete(consumer.id);
+                            this._pendingPauseConsumers.delete(consumer.id);
+                            this._pendingResumeConsumers.delete(consumer.id);
                             if (this._closed) return;
                             this._awaitQueue
                                 .push(
@@ -4858,20 +4910,28 @@
                                 .catch(() => {});
                         });
                         consumer.on('@pause', () => {
-                            this._awaitQueue
-                                .push(
-                                    async () => this._handler.pauseReceiving(consumer.localId),
-                                    'consumer @pause event',
-                                )
-                                .catch(() => {});
+                            // If Consumer is pending to be resumed, remove from pending resume list.
+                            if (this._pendingResumeConsumers.has(consumer.id)) {
+                                this._pendingResumeConsumers.delete(consumer.id);
+                            }
+                            // Store the Consumer into the pending list.
+                            this._pendingPauseConsumers.set(consumer.id, consumer);
+                            // There is no Consumer pause in progress, do it now.
+                            if (this._consumerPauseInProgress === false) {
+                                this._pausePendingConsumers();
+                            }
                         });
                         consumer.on('@resume', () => {
-                            this._awaitQueue
-                                .push(
-                                    async () => this._handler.resumeReceiving(consumer.localId),
-                                    'consumer @resume event',
-                                )
-                                .catch(() => {});
+                            // If Consumer is pending to be paused, remove from pending pause list.
+                            if (this._pendingPauseConsumers.has(consumer.id)) {
+                                this._pendingPauseConsumers.delete(consumer.id);
+                            }
+                            // Store the Consumer into the pending list.
+                            this._pendingResumeConsumers.set(consumer.id, consumer);
+                            // There is no Consumer resume in progress, do it now.
+                            if (this._consumerResumeInProgress === false) {
+                                this._resumePendingConsumers();
+                            }
                         });
                         consumer.on('@getstats', (callback, errback) => {
                             if (this._closed) return errback(new errors_1.InvalidStateError('closed'));
@@ -5409,13 +5469,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -5994,13 +6054,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -6594,13 +6654,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -7184,12 +7244,14 @@
                         await this._pc.setLocalDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    async pauseReceiving(localId) {
+                    async pauseReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('pauseReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'inactive';
+                        for (const localId of localIds) {
+                            logger.debug('pauseReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'inactive';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -7197,12 +7259,14 @@
                         logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
-                    async resumeReceiving(localId) {
+                    async resumeReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('resumeReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'recvonly';
+                        for (const localId of localIds) {
+                            logger.debug('resumeReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'recvonly';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -7577,13 +7641,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -8223,12 +8287,14 @@
                         await this._pc.setLocalDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    async pauseReceiving(localId) {
+                    async pauseReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('pauseReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'inactive';
+                        for (const localId of localIds) {
+                            logger.debug('pauseReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'inactive';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -8236,12 +8302,14 @@
                         logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
-                    async resumeReceiving(localId) {
+                    async resumeReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('resumeReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'recvonly';
+                        for (const localId of localIds) {
+                            logger.debug('resumeReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'recvonly';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -8827,13 +8895,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -9411,13 +9479,13 @@
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
                     async resumeReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        localId,
+                        localIds,
                     ) {
                         // Unimplemented.
                     }
@@ -9962,12 +10030,14 @@
                         await this._pc.setLocalDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    async pauseReceiving(localId) {
+                    async pauseReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('pauseReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'inactive';
+                        for (const localId of localIds) {
+                            logger.debug('pauseReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'inactive';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -9975,12 +10045,14 @@
                         logger.debug('pauseReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                     }
-                    async resumeReceiving(localId) {
+                    async resumeReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('resumeReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        transceiver.direction = 'recvonly';
+                        for (const localId of localIds) {
+                            logger.debug('resumeReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            transceiver.direction = 'recvonly';
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -11549,7 +11621,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.50';
+                exports.version = '3.6.51';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -12478,286 +12550,9 @@
         ],
         40: [
             function (require, module, exports) {
-                /**
-                 * This is the common logic for both the Node.js and web browser
-                 * implementations of `debug()`.
-                 */
-
-                function setup(env) {
-                    createDebug.debug = createDebug;
-                    createDebug.default = createDebug;
-                    createDebug.coerce = coerce;
-                    createDebug.disable = disable;
-                    createDebug.enable = enable;
-                    createDebug.enabled = enabled;
-                    createDebug.humanize = require('ms');
-                    createDebug.destroy = destroy;
-
-                    Object.keys(env).forEach((key) => {
-                        createDebug[key] = env[key];
-                    });
-
-                    /**
-                     * The currently active debug mode names, and names to skip.
-                     */
-
-                    createDebug.names = [];
-                    createDebug.skips = [];
-
-                    /**
-                     * Map of special "%n" handling functions, for the debug "format" argument.
-                     *
-                     * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-                     */
-                    createDebug.formatters = {};
-
-                    /**
-                     * Selects a color for a debug namespace
-                     * @param {String} namespace The namespace string for the debug instance to be colored
-                     * @return {Number|String} An ANSI color code for the given namespace
-                     * @api private
-                     */
-                    function selectColor(namespace) {
-                        let hash = 0;
-
-                        for (let i = 0; i < namespace.length; i++) {
-                            hash = (hash << 5) - hash + namespace.charCodeAt(i);
-                            hash |= 0; // Convert to 32bit integer
-                        }
-
-                        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-                    }
-                    createDebug.selectColor = selectColor;
-
-                    /**
-                     * Create a debugger with the given `namespace`.
-                     *
-                     * @param {String} namespace
-                     * @return {Function}
-                     * @api public
-                     */
-                    function createDebug(namespace) {
-                        let prevTime;
-                        let enableOverride = null;
-                        let namespacesCache;
-                        let enabledCache;
-
-                        function debug(...args) {
-                            // Disabled?
-                            if (!debug.enabled) {
-                                return;
-                            }
-
-                            const self = debug;
-
-                            // Set `diff` timestamp
-                            const curr = Number(new Date());
-                            const ms = curr - (prevTime || curr);
-                            self.diff = ms;
-                            self.prev = prevTime;
-                            self.curr = curr;
-                            prevTime = curr;
-
-                            args[0] = createDebug.coerce(args[0]);
-
-                            if (typeof args[0] !== 'string') {
-                                // Anything else let's inspect with %O
-                                args.unshift('%O');
-                            }
-
-                            // Apply any `formatters` transformations
-                            let index = 0;
-                            args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-                                // If we encounter an escaped % then don't increase the array index
-                                if (match === '%%') {
-                                    return '%';
-                                }
-                                index++;
-                                const formatter = createDebug.formatters[format];
-                                if (typeof formatter === 'function') {
-                                    const val = args[index];
-                                    match = formatter.call(self, val);
-
-                                    // Now we need to remove `args[index]` since it's inlined in the `format`
-                                    args.splice(index, 1);
-                                    index--;
-                                }
-                                return match;
-                            });
-
-                            // Apply env-specific formatting (colors, etc.)
-                            createDebug.formatArgs.call(self, args);
-
-                            const logFn = self.log || createDebug.log;
-                            logFn.apply(self, args);
-                        }
-
-                        debug.namespace = namespace;
-                        debug.useColors = createDebug.useColors();
-                        debug.color = createDebug.selectColor(namespace);
-                        debug.extend = extend;
-                        debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
-
-                        Object.defineProperty(debug, 'enabled', {
-                            enumerable: true,
-                            configurable: false,
-                            get: () => {
-                                if (enableOverride !== null) {
-                                    return enableOverride;
-                                }
-                                if (namespacesCache !== createDebug.namespaces) {
-                                    namespacesCache = createDebug.namespaces;
-                                    enabledCache = createDebug.enabled(namespace);
-                                }
-
-                                return enabledCache;
-                            },
-                            set: (v) => {
-                                enableOverride = v;
-                            },
-                        });
-
-                        // Env-specific initialization logic for debug instances
-                        if (typeof createDebug.init === 'function') {
-                            createDebug.init(debug);
-                        }
-
-                        return debug;
-                    }
-
-                    function extend(namespace, delimiter) {
-                        const newDebug = createDebug(
-                            this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace,
-                        );
-                        newDebug.log = this.log;
-                        return newDebug;
-                    }
-
-                    /**
-                     * Enables a debug mode by namespaces. This can include modes
-                     * separated by a colon and wildcards.
-                     *
-                     * @param {String} namespaces
-                     * @api public
-                     */
-                    function enable(namespaces) {
-                        createDebug.save(namespaces);
-                        createDebug.namespaces = namespaces;
-
-                        createDebug.names = [];
-                        createDebug.skips = [];
-
-                        let i;
-                        const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-                        const len = split.length;
-
-                        for (i = 0; i < len; i++) {
-                            if (!split[i]) {
-                                // ignore empty strings
-                                continue;
-                            }
-
-                            namespaces = split[i].replace(/\*/g, '.*?');
-
-                            if (namespaces[0] === '-') {
-                                createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
-                            } else {
-                                createDebug.names.push(new RegExp('^' + namespaces + '$'));
-                            }
-                        }
-                    }
-
-                    /**
-                     * Disable debug output.
-                     *
-                     * @return {String} namespaces
-                     * @api public
-                     */
-                    function disable() {
-                        const namespaces = [
-                            ...createDebug.names.map(toNamespace),
-                            ...createDebug.skips.map(toNamespace).map((namespace) => '-' + namespace),
-                        ].join(',');
-                        createDebug.enable('');
-                        return namespaces;
-                    }
-
-                    /**
-                     * Returns true if the given mode name is enabled, false otherwise.
-                     *
-                     * @param {String} name
-                     * @return {Boolean}
-                     * @api public
-                     */
-                    function enabled(name) {
-                        if (name[name.length - 1] === '*') {
-                            return true;
-                        }
-
-                        let i;
-                        let len;
-
-                        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-                            if (createDebug.skips[i].test(name)) {
-                                return false;
-                            }
-                        }
-
-                        for (i = 0, len = createDebug.names.length; i < len; i++) {
-                            if (createDebug.names[i].test(name)) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    }
-
-                    /**
-                     * Convert regexp to namespace
-                     *
-                     * @param {RegExp} regxep
-                     * @return {String} namespace
-                     * @api private
-                     */
-                    function toNamespace(regexp) {
-                        return regexp
-                            .toString()
-                            .substring(2, regexp.toString().length - 2)
-                            .replace(/\.\*\?$/, '*');
-                    }
-
-                    /**
-                     * Coerce `val`.
-                     *
-                     * @param {Mixed} val
-                     * @return {Mixed}
-                     * @api private
-                     */
-                    function coerce(val) {
-                        if (val instanceof Error) {
-                            return val.stack || val.message;
-                        }
-                        return val;
-                    }
-
-                    /**
-                     * XXX DO NOT USE. This is a temporary stub function.
-                     * XXX It WILL be removed in the next major release.
-                     */
-                    function destroy() {
-                        console.warn(
-                            'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
-                        );
-                    }
-
-                    createDebug.enable(createDebug.load());
-
-                    return createDebug;
-                }
-
-                module.exports = setup;
+                arguments[4][5][0].apply(exports, arguments);
             },
-            { ms: 41 },
+            { dup: 5, ms: 41 },
         ],
         41: [
             function (require, module, exports) {
@@ -13571,168 +13366,145 @@
                 // OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE
                 // USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-                var objectCreate = Object.create || objectCreatePolyfill;
-                var objectKeys = Object.keys || objectKeysPolyfill;
-                var bind = Function.prototype.bind || functionBindPolyfill;
+                'use strict';
+
+                var R = typeof Reflect === 'object' ? Reflect : null;
+                var ReflectApply =
+                    R && typeof R.apply === 'function'
+                        ? R.apply
+                        : function ReflectApply(target, receiver, args) {
+                              return Function.prototype.apply.call(target, receiver, args);
+                          };
+
+                var ReflectOwnKeys;
+                if (R && typeof R.ownKeys === 'function') {
+                    ReflectOwnKeys = R.ownKeys;
+                } else if (Object.getOwnPropertySymbols) {
+                    ReflectOwnKeys = function ReflectOwnKeys(target) {
+                        return Object.getOwnPropertyNames(target).concat(Object.getOwnPropertySymbols(target));
+                    };
+                } else {
+                    ReflectOwnKeys = function ReflectOwnKeys(target) {
+                        return Object.getOwnPropertyNames(target);
+                    };
+                }
+
+                function ProcessEmitWarning(warning) {
+                    if (console && console.warn) console.warn(warning);
+                }
+
+                var NumberIsNaN =
+                    Number.isNaN ||
+                    function NumberIsNaN(value) {
+                        return value !== value;
+                    };
 
                 function EventEmitter() {
-                    if (!this._events || !Object.prototype.hasOwnProperty.call(this, '_events')) {
-                        this._events = objectCreate(null);
-                        this._eventsCount = 0;
-                    }
-
-                    this._maxListeners = this._maxListeners || undefined;
+                    EventEmitter.init.call(this);
                 }
                 module.exports = EventEmitter;
+                module.exports.once = once;
 
                 // Backwards-compat with node 0.10.x
                 EventEmitter.EventEmitter = EventEmitter;
 
                 EventEmitter.prototype._events = undefined;
+                EventEmitter.prototype._eventsCount = 0;
                 EventEmitter.prototype._maxListeners = undefined;
 
                 // By default EventEmitters will print a warning if more than 10 listeners are
                 // added to it. This is a useful default which helps finding memory leaks.
                 var defaultMaxListeners = 10;
 
-                var hasDefineProperty;
-                try {
-                    var o = {};
-                    if (Object.defineProperty) Object.defineProperty(o, 'x', { value: 0 });
-                    hasDefineProperty = o.x === 0;
-                } catch (err) {
-                    hasDefineProperty = false;
+                function checkListener(listener) {
+                    if (typeof listener !== 'function') {
+                        throw new TypeError(
+                            'The "listener" argument must be of type Function. Received type ' + typeof listener,
+                        );
+                    }
                 }
-                if (hasDefineProperty) {
-                    Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
-                        enumerable: true,
-                        get: function () {
-                            return defaultMaxListeners;
-                        },
-                        set: function (arg) {
-                            // check whether the input is a positive number (whose value is zero or
-                            // greater and not a NaN).
-                            if (typeof arg !== 'number' || arg < 0 || arg !== arg)
-                                throw new TypeError('"defaultMaxListeners" must be a positive number');
-                            defaultMaxListeners = arg;
-                        },
-                    });
-                } else {
-                    EventEmitter.defaultMaxListeners = defaultMaxListeners;
-                }
+
+                Object.defineProperty(EventEmitter, 'defaultMaxListeners', {
+                    enumerable: true,
+                    get: function () {
+                        return defaultMaxListeners;
+                    },
+                    set: function (arg) {
+                        if (typeof arg !== 'number' || arg < 0 || NumberIsNaN(arg)) {
+                            throw new RangeError(
+                                'The value of "defaultMaxListeners" is out of range. It must be a non-negative number. Received ' +
+                                    arg +
+                                    '.',
+                            );
+                        }
+                        defaultMaxListeners = arg;
+                    },
+                });
+
+                EventEmitter.init = function () {
+                    if (this._events === undefined || this._events === Object.getPrototypeOf(this)._events) {
+                        this._events = Object.create(null);
+                        this._eventsCount = 0;
+                    }
+
+                    this._maxListeners = this._maxListeners || undefined;
+                };
 
                 // Obviously not all Emitters should be limited to 10. This function allows
                 // that to be increased. Set to zero for unlimited.
                 EventEmitter.prototype.setMaxListeners = function setMaxListeners(n) {
-                    if (typeof n !== 'number' || n < 0 || isNaN(n))
-                        throw new TypeError('"n" argument must be a positive number');
+                    if (typeof n !== 'number' || n < 0 || NumberIsNaN(n)) {
+                        throw new RangeError(
+                            'The value of "n" is out of range. It must be a non-negative number. Received ' + n + '.',
+                        );
+                    }
                     this._maxListeners = n;
                     return this;
                 };
 
-                function $getMaxListeners(that) {
+                function _getMaxListeners(that) {
                     if (that._maxListeners === undefined) return EventEmitter.defaultMaxListeners;
                     return that._maxListeners;
                 }
 
                 EventEmitter.prototype.getMaxListeners = function getMaxListeners() {
-                    return $getMaxListeners(this);
+                    return _getMaxListeners(this);
                 };
 
-                // These standalone emit* functions are used to optimize calling of event
-                // handlers for fast cases because emit() itself often has a variable number of
-                // arguments and can be deoptimized because of that. These functions always have
-                // the same number of arguments and thus do not get deoptimized, so the code
-                // inside them can execute faster.
-                function emitNone(handler, isFn, self) {
-                    if (isFn) handler.call(self);
-                    else {
-                        var len = handler.length;
-                        var listeners = arrayClone(handler, len);
-                        for (var i = 0; i < len; ++i) listeners[i].call(self);
-                    }
-                }
-                function emitOne(handler, isFn, self, arg1) {
-                    if (isFn) handler.call(self, arg1);
-                    else {
-                        var len = handler.length;
-                        var listeners = arrayClone(handler, len);
-                        for (var i = 0; i < len; ++i) listeners[i].call(self, arg1);
-                    }
-                }
-                function emitTwo(handler, isFn, self, arg1, arg2) {
-                    if (isFn) handler.call(self, arg1, arg2);
-                    else {
-                        var len = handler.length;
-                        var listeners = arrayClone(handler, len);
-                        for (var i = 0; i < len; ++i) listeners[i].call(self, arg1, arg2);
-                    }
-                }
-                function emitThree(handler, isFn, self, arg1, arg2, arg3) {
-                    if (isFn) handler.call(self, arg1, arg2, arg3);
-                    else {
-                        var len = handler.length;
-                        var listeners = arrayClone(handler, len);
-                        for (var i = 0; i < len; ++i) listeners[i].call(self, arg1, arg2, arg3);
-                    }
-                }
-
-                function emitMany(handler, isFn, self, args) {
-                    if (isFn) handler.apply(self, args);
-                    else {
-                        var len = handler.length;
-                        var listeners = arrayClone(handler, len);
-                        for (var i = 0; i < len; ++i) listeners[i].apply(self, args);
-                    }
-                }
-
                 EventEmitter.prototype.emit = function emit(type) {
-                    var er, handler, len, args, i, events;
+                    var args = [];
+                    for (var i = 1; i < arguments.length; i++) args.push(arguments[i]);
                     var doError = type === 'error';
 
-                    events = this._events;
-                    if (events) doError = doError && events.error == null;
+                    var events = this._events;
+                    if (events !== undefined) doError = doError && events.error === undefined;
                     else if (!doError) return false;
 
                     // If there is no 'error' event listener then throw.
                     if (doError) {
-                        if (arguments.length > 1) er = arguments[1];
+                        var er;
+                        if (args.length > 0) er = args[0];
                         if (er instanceof Error) {
+                            // Note: The comments on the `throw` lines are intentional, they show
+                            // up in Node's output if this results in an unhandled exception.
                             throw er; // Unhandled 'error' event
-                        } else {
-                            // At least give some kind of context to the user
-                            var err = new Error('Unhandled "error" event. (' + er + ')');
-                            err.context = er;
-                            throw err;
                         }
-                        return false;
+                        // At least give some kind of context to the user
+                        var err = new Error('Unhandled error.' + (er ? ' (' + er.message + ')' : ''));
+                        err.context = er;
+                        throw err; // Unhandled 'error' event
                     }
 
-                    handler = events[type];
+                    var handler = events[type];
 
-                    if (!handler) return false;
+                    if (handler === undefined) return false;
 
-                    var isFn = typeof handler === 'function';
-                    len = arguments.length;
-                    switch (len) {
-                        // fast cases
-                        case 1:
-                            emitNone(handler, isFn, this);
-                            break;
-                        case 2:
-                            emitOne(handler, isFn, this, arguments[1]);
-                            break;
-                        case 3:
-                            emitTwo(handler, isFn, this, arguments[1], arguments[2]);
-                            break;
-                        case 4:
-                            emitThree(handler, isFn, this, arguments[1], arguments[2], arguments[3]);
-                            break;
-                        // slower
-                        default:
-                            args = new Array(len - 1);
-                            for (i = 1; i < len; i++) args[i - 1] = arguments[i];
-                            emitMany(handler, isFn, this, args);
+                    if (typeof handler === 'function') {
+                        ReflectApply(handler, this, args);
+                    } else {
+                        var len = handler.length;
+                        var listeners = arrayClone(handler, len);
+                        for (var i = 0; i < len; ++i) ReflectApply(listeners[i], this, args);
                     }
 
                     return true;
@@ -13743,16 +13515,16 @@
                     var events;
                     var existing;
 
-                    if (typeof listener !== 'function') throw new TypeError('"listener" argument must be a function');
+                    checkListener(listener);
 
                     events = target._events;
-                    if (!events) {
-                        events = target._events = objectCreate(null);
+                    if (events === undefined) {
+                        events = target._events = Object.create(null);
                         target._eventsCount = 0;
                     } else {
                         // To avoid recursion in the case that type === "newListener"! Before
                         // adding it to the listeners, first emit "newListener".
-                        if (events.newListener) {
+                        if (events.newListener !== undefined) {
                             target.emit('newListener', type, listener.listener ? listener.listener : listener);
 
                             // Re-assign `events` because a newListener handler could have caused the
@@ -13762,7 +13534,7 @@
                         existing = events[type];
                     }
 
-                    if (!existing) {
+                    if (existing === undefined) {
                         // Optimize the case of one listener. Don't need the extra array object.
                         existing = events[type] = listener;
                         ++target._eventsCount;
@@ -13770,37 +13542,33 @@
                         if (typeof existing === 'function') {
                             // Adding the second element, need to change to array.
                             existing = events[type] = prepend ? [listener, existing] : [existing, listener];
-                        } else {
                             // If we've already got an array, just append.
-                            if (prepend) {
-                                existing.unshift(listener);
-                            } else {
-                                existing.push(listener);
-                            }
+                        } else if (prepend) {
+                            existing.unshift(listener);
+                        } else {
+                            existing.push(listener);
                         }
 
                         // Check for listener leak
-                        if (!existing.warned) {
-                            m = $getMaxListeners(target);
-                            if (m && m > 0 && existing.length > m) {
-                                existing.warned = true;
-                                var w = new Error(
-                                    'Possible EventEmitter memory leak detected. ' +
-                                        existing.length +
-                                        ' "' +
-                                        String(type) +
-                                        '" listeners ' +
-                                        'added. Use emitter.setMaxListeners() to ' +
-                                        'increase limit.',
-                                );
-                                w.name = 'MaxListenersExceededWarning';
-                                w.emitter = target;
-                                w.type = type;
-                                w.count = existing.length;
-                                if (typeof console === 'object' && console.warn) {
-                                    console.warn('%s: %s', w.name, w.message);
-                                }
-                            }
+                        m = _getMaxListeners(target);
+                        if (m > 0 && existing.length > m && !existing.warned) {
+                            existing.warned = true;
+                            // No error code for this since it is a Warning
+                            // eslint-disable-next-line no-restricted-syntax
+                            var w = new Error(
+                                'Possible EventEmitter memory leak detected. ' +
+                                    existing.length +
+                                    ' ' +
+                                    String(type) +
+                                    ' listeners ' +
+                                    'added. Use emitter.setMaxListeners() to ' +
+                                    'increase limit',
+                            );
+                            w.name = 'MaxListenersExceededWarning';
+                            w.emitter = target;
+                            w.type = type;
+                            w.count = existing.length;
+                            ProcessEmitWarning(w);
                         }
                     }
 
@@ -13821,39 +13589,27 @@
                     if (!this.fired) {
                         this.target.removeListener(this.type, this.wrapFn);
                         this.fired = true;
-                        switch (arguments.length) {
-                            case 0:
-                                return this.listener.call(this.target);
-                            case 1:
-                                return this.listener.call(this.target, arguments[0]);
-                            case 2:
-                                return this.listener.call(this.target, arguments[0], arguments[1]);
-                            case 3:
-                                return this.listener.call(this.target, arguments[0], arguments[1], arguments[2]);
-                            default:
-                                var args = new Array(arguments.length);
-                                for (var i = 0; i < args.length; ++i) args[i] = arguments[i];
-                                this.listener.apply(this.target, args);
-                        }
+                        if (arguments.length === 0) return this.listener.call(this.target);
+                        return this.listener.apply(this.target, arguments);
                     }
                 }
 
                 function _onceWrap(target, type, listener) {
                     var state = { fired: false, wrapFn: undefined, target: target, type: type, listener: listener };
-                    var wrapped = bind.call(onceWrapper, state);
+                    var wrapped = onceWrapper.bind(state);
                     wrapped.listener = listener;
                     state.wrapFn = wrapped;
                     return wrapped;
                 }
 
                 EventEmitter.prototype.once = function once(type, listener) {
-                    if (typeof listener !== 'function') throw new TypeError('"listener" argument must be a function');
+                    checkListener(listener);
                     this.on(type, _onceWrap(this, type, listener));
                     return this;
                 };
 
                 EventEmitter.prototype.prependOnceListener = function prependOnceListener(type, listener) {
-                    if (typeof listener !== 'function') throw new TypeError('"listener" argument must be a function');
+                    checkListener(listener);
                     this.prependListener(type, _onceWrap(this, type, listener));
                     return this;
                 };
@@ -13862,16 +13618,16 @@
                 EventEmitter.prototype.removeListener = function removeListener(type, listener) {
                     var list, events, position, i, originalListener;
 
-                    if (typeof listener !== 'function') throw new TypeError('"listener" argument must be a function');
+                    checkListener(listener);
 
                     events = this._events;
-                    if (!events) return this;
+                    if (events === undefined) return this;
 
                     list = events[type];
-                    if (!list) return this;
+                    if (list === undefined) return this;
 
                     if (list === listener || list.listener === listener) {
-                        if (--this._eventsCount === 0) this._events = objectCreate(null);
+                        if (--this._eventsCount === 0) this._events = Object.create(null);
                         else {
                             delete events[type];
                             if (events.removeListener) this.emit('removeListener', type, list.listener || listener);
@@ -13890,29 +13646,34 @@
                         if (position < 0) return this;
 
                         if (position === 0) list.shift();
-                        else spliceOne(list, position);
+                        else {
+                            spliceOne(list, position);
+                        }
 
                         if (list.length === 1) events[type] = list[0];
 
-                        if (events.removeListener) this.emit('removeListener', type, originalListener || listener);
+                        if (events.removeListener !== undefined)
+                            this.emit('removeListener', type, originalListener || listener);
                     }
 
                     return this;
                 };
 
+                EventEmitter.prototype.off = EventEmitter.prototype.removeListener;
+
                 EventEmitter.prototype.removeAllListeners = function removeAllListeners(type) {
                     var listeners, events, i;
 
                     events = this._events;
-                    if (!events) return this;
+                    if (events === undefined) return this;
 
                     // not listening for removeListener, no need to emit
-                    if (!events.removeListener) {
+                    if (events.removeListener === undefined) {
                         if (arguments.length === 0) {
-                            this._events = objectCreate(null);
+                            this._events = Object.create(null);
                             this._eventsCount = 0;
-                        } else if (events[type]) {
-                            if (--this._eventsCount === 0) this._events = objectCreate(null);
+                        } else if (events[type] !== undefined) {
+                            if (--this._eventsCount === 0) this._events = Object.create(null);
                             else delete events[type];
                         }
                         return this;
@@ -13920,7 +13681,7 @@
 
                     // emit removeListener for all listeners on all events
                     if (arguments.length === 0) {
-                        var keys = objectKeys(events);
+                        var keys = Object.keys(events);
                         var key;
                         for (i = 0; i < keys.length; ++i) {
                             key = keys[i];
@@ -13928,7 +13689,7 @@
                             this.removeAllListeners(key);
                         }
                         this.removeAllListeners('removeListener');
-                        this._events = objectCreate(null);
+                        this._events = Object.create(null);
                         this._eventsCount = 0;
                         return this;
                     }
@@ -13937,7 +13698,7 @@
 
                     if (typeof listeners === 'function') {
                         this.removeListener(type, listeners);
-                    } else if (listeners) {
+                    } else if (listeners !== undefined) {
                         // LIFO order
                         for (i = listeners.length - 1; i >= 0; i--) {
                             this.removeListener(type, listeners[i]);
@@ -13950,10 +13711,10 @@
                 function _listeners(target, type, unwrap) {
                     var events = target._events;
 
-                    if (!events) return [];
+                    if (events === undefined) return [];
 
                     var evlistener = events[type];
-                    if (!evlistener) return [];
+                    if (evlistener === undefined) return [];
 
                     if (typeof evlistener === 'function')
                         return unwrap ? [evlistener.listener || evlistener] : [evlistener];
@@ -13981,12 +13742,12 @@
                 function listenerCount(type) {
                     var events = this._events;
 
-                    if (events) {
+                    if (events !== undefined) {
                         var evlistener = events[type];
 
                         if (typeof evlistener === 'function') {
                             return 1;
-                        } else if (evlistener) {
+                        } else if (evlistener !== undefined) {
                             return evlistener.length;
                         }
                     }
@@ -13995,19 +13756,18 @@
                 }
 
                 EventEmitter.prototype.eventNames = function eventNames() {
-                    return this._eventsCount > 0 ? Reflect.ownKeys(this._events) : [];
+                    return this._eventsCount > 0 ? ReflectOwnKeys(this._events) : [];
                 };
-
-                // About 1.5x faster than the two-arg version of Array#splice().
-                function spliceOne(list, index) {
-                    for (var i = index, k = i + 1, n = list.length; k < n; i += 1, k += 1) list[i] = list[k];
-                    list.pop();
-                }
 
                 function arrayClone(arr, n) {
                     var copy = new Array(n);
                     for (var i = 0; i < n; ++i) copy[i] = arr[i];
                     return copy;
+                }
+
+                function spliceOne(list, index) {
+                    for (; index + 1 < list.length; index++) list[index] = list[index + 1];
+                    list.pop();
                 }
 
                 function unwrapListeners(arr) {
@@ -14018,24 +13778,56 @@
                     return ret;
                 }
 
-                function objectCreatePolyfill(proto) {
-                    var F = function () {};
-                    F.prototype = proto;
-                    return new F();
-                }
-                function objectKeysPolyfill(obj) {
-                    var keys = [];
-                    for (var k in obj)
-                        if (Object.prototype.hasOwnProperty.call(obj, k)) {
-                            keys.push(k);
+                function once(emitter, name) {
+                    return new Promise(function (resolve, reject) {
+                        function errorListener(err) {
+                            emitter.removeListener(name, resolver);
+                            reject(err);
                         }
-                    return k;
+
+                        function resolver() {
+                            if (typeof emitter.removeListener === 'function') {
+                                emitter.removeListener('error', errorListener);
+                            }
+                            resolve([].slice.call(arguments));
+                        }
+
+                        eventTargetAgnosticAddListener(emitter, name, resolver, { once: true });
+                        if (name !== 'error') {
+                            addErrorHandlerIfEventEmitter(emitter, errorListener, { once: true });
+                        }
+                    });
                 }
-                function functionBindPolyfill(context) {
-                    var fn = this;
-                    return function () {
-                        return fn.apply(context, arguments);
-                    };
+
+                function addErrorHandlerIfEventEmitter(emitter, handler, flags) {
+                    if (typeof emitter.on === 'function') {
+                        eventTargetAgnosticAddListener(emitter, 'error', handler, flags);
+                    }
+                }
+
+                function eventTargetAgnosticAddListener(emitter, name, listener, flags) {
+                    if (typeof emitter.on === 'function') {
+                        if (flags.once) {
+                            emitter.once(name, listener);
+                        } else {
+                            emitter.on(name, listener);
+                        }
+                    } else if (typeof emitter.addEventListener === 'function') {
+                        // EventTarget does not have `error` event semantics like Node
+                        // EventEmitters, we do not listen for `error` events here.
+                        emitter.addEventListener(name, function wrapListener(arg) {
+                            // IE does not have builtin `{ once: true }` support so we
+                            // have to do it manually.
+                            if (flags.once) {
+                                emitter.removeEventListener(name, wrapListener);
+                            }
+                            listener(arg);
+                        });
+                    } else {
+                        throw new TypeError(
+                            'The "emitter" argument must be of type EventEmitter. Received type ' + typeof emitter,
+                        );
+                    }
                 }
             },
             {},
