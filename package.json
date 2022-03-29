@@ -23,8 +23,8 @@
         "mediasoup": "3.9.9",
         "mediasoup-client": "3.6.51",
         "ngrok": "4.3.1",
-        "@sentry/node": "^6.18.2",
-        "@sentry/integrations": "^6.18.2",
+        "@sentry/node": "^6.19.2",
+        "@sentry/integrations": "^6.19.2",
         "socket.io": "4.4.1",
         "swagger-ui-express": "4.3.0",
         "uuid": "8.3.2",
@@ -32,6 +32,6 @@
     },
     "devDependencies": {
         "node-fetch": "^2.6.7",
-        "prettier": "2.6.0"
+        "prettier": "2.6.1"
     }
 }
