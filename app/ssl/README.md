@@ -16,3 +16,5 @@ rm csr.pem
 
 # https://www.sslchecker.com/certdecoder
 ```
+
+For trusted certificate, take a look at [Let's Encrypt](https://letsencrypt.org/i) and [Certbot](https://certbot.eff.org/).

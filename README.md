@@ -135,6 +135,7 @@ Embedding a meeting into a service or app using an iframe.
 ```
 
 ---
+
 ## DigitalOcean
 
 This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).

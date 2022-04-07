@@ -1137,7 +1137,6 @@ class RoomClient {
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
-        this.sound('joined');
     }
 
     removeVideoOff(peer_id) {

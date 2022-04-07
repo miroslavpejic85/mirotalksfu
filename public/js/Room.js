@@ -963,7 +963,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
-        console.log('Room Client stop audio');
+        console.log('Room Client stop video');
         hide(stopVideoButton);
         show(startVideoButton);
     });

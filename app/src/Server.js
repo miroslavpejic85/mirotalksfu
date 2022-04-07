@@ -279,7 +279,7 @@ async function ngrokStart() {
         let pu0 = data.tunnels[0].public_url;
         let pu1 = data.tunnels[1].public_url;
         let tunnel = pu0.startsWith('https') ? pu0 : pu1;
-        log.debug('Listening on', {
+        log.info('Listening on', {
             hostConfig: hostCfg,
             announced_ip: announcedIP,
             server: host,
@@ -300,7 +300,7 @@ async function ngrokStart() {
 // ####################################################
 
 httpsServer.listen(config.listenPort, () => {
-    log.debug(
+    log.info(
         `%c
 
 	███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
