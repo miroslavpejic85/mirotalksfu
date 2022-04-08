@@ -22,6 +22,7 @@ const _PEER = {
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
+    sendYouTube: '<i class="fab fa-youtube"></i>',
 };
 
 const surveyActive = true;
@@ -724,7 +725,7 @@ function handleButtons() {
         rc.selectFileToShare(rc.peer_id);
     };
     youTubeShareButton.onclick = () => {
-        rc.youTubeShareVideo();
+        rc.youTubeShareVideo('all');
     };
     youTubeCloseBtn.onclick = () => {
         rc.closeYouTube(true);
@@ -1471,6 +1472,7 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
     table += `
@@ -1481,6 +1483,7 @@ async function getParticipantsTable(peers) {
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
+        <td><button id="sendYouTubeAll" onclick="rc.youTubeShareVideo('all');">${_PEER.sendYouTube}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
@@ -1506,6 +1509,7 @@ async function getParticipantsTable(peers) {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
             </tr>
             `;
         } else {
@@ -1517,6 +1521,7 @@ async function getParticipantsTable(peers) {
                 <td><button>${peer_hand}</button></td>
                 <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id, false)">${peer_sendFile}</button></td>
                 <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
+                <td><button id="sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;

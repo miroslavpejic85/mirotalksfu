@@ -448,7 +448,11 @@ io.on('connection', (socket) => {
 
     socket.on('youTubeAction', (data) => {
         log.debug('YouTube: ', data);
-        roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+        if (data.peer_id == 'all') {
+            roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'youTubeAction', data);
+        }
     });
 
     socket.on('wbCanvasToJson', (data) => {

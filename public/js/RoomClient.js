@@ -2143,7 +2143,7 @@ class RoomClient {
     // YOUTUBE SHARE VIDEO
     // ####################################################
 
-    youTubeShareVideo() {
+    youTubeShareVideo(peer_id = 'all') {
         this.sound('open');
 
         Swal.fire({
@@ -2172,6 +2172,7 @@ class RoomClient {
                 let you_tube_url = this.getYoutubeEmbed(result.value);
                 if (you_tube_url) {
                     let data = {
+                        peer_id: peer_id,
                         peer_name: this.peer_name,
                         you_tube_url: you_tube_url,
                         action: 'open',
@@ -2235,9 +2236,10 @@ class RoomClient {
         this.sound('joined');
     }
 
-    closeYouTube(emit = false) {
+    closeYouTube(emit = false, peer_id = 'all') {
         if (emit) {
             let data = {
+                peer_id: peer_id,
                 peer_name: this.peer_name,
                 action: 'close',
             };
