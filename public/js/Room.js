@@ -42,9 +42,11 @@ let peer_info = null;
 let isEnumerateDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isAudioVideoAllowed = false;
 let isScreenAllowed = false;
 let initAudioButton = null;
 let initVideoButton = null;
+let initAudioVideoButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -313,6 +315,7 @@ function whoAreYou() {
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
             <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
+            <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
         </div>`,
         confirmButtonText: `Join meeting`,
         showClass: {
@@ -334,12 +337,15 @@ function whoAreYou() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('initAudioButton', 'Toggle the audio', 'left');
         setTippy('initVideoButton', 'Toggle the video', 'right');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'right');
     }
 
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
-    if (!isAudioAllowed) initAudioButton.className = 'hidden';
-    if (!isVideoAllowed) initVideoButton.className = 'hidden';
+    initAudioVideoButton = document.getElementById('initAudioVideoButton');
+    if (!isAudioAllowed) hide(initAudioButton);
+    if (!isVideoAllowed) hide(initVideoButton);
+    if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
 }
 
 function handleAudio(e) {
@@ -353,6 +359,25 @@ function handleVideo(e) {
     isVideoAllowed = isVideoAllowed ? false : true;
     e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
     setColor(e.target, isVideoAllowed ? 'white' : 'red');
+    setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
+}
+
+function handleAudioVideo(e) {
+    isAudioAllowed = isAudioAllowed ? false : true;
+    isVideoAllowed = isVideoAllowed ? false : true;
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
+    if (isAudioVideoAllowed) {
+        initAudioButton.className = 'fas fa-microphone';
+        initVideoButton.className = 'fas fa-video';
+    } else {
+        hide(initAudioButton);
+        hide(initVideoButton);
+    }
+    e.target.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
+    setColor(e.target, isAudioVideoAllowed ? 'white' : 'red');
+    setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
+    setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
+    setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
 }
 
