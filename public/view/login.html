@@ -101,17 +101,48 @@
                                     </div>
                                 </div>
                                 <script>
+                                    let usernameInput = document.getElementById('username');
+                                    let passwordInput = document.getElementById('password');
                                     let loginBtn = document.getElementById('loginButton');
 
+                                    usernameInput.onkeyup = (e) => {
+                                        if (e.keyCode === 13) {
+                                            e.preventDefault();
+                                            login();
+                                        }
+                                    };
+                                    passwordInput.onkeyup = (e) => {
+                                        if (e.keyCode === 13) {
+                                            e.preventDefault();
+                                            login();
+                                        }
+                                    };
+
                                     loginBtn.onclick = (e) => {
+                                        login();
+                                    };
+
+                                    function login() {
                                         let username = document.getElementById('username').value;
                                         let password = document.getElementById('password').value;
+
                                         if (username && password) {
                                             window.location.href = `/login?username=${username}&password=${password}`;
                                             return;
                                         }
-                                        alert('Username and Password required');
-                                    };
+                                        if (!username && !password) {
+                                            alert('Username and Password required');
+                                            return;
+                                        }
+                                        if (!username) {
+                                            alert('Username required');
+                                            return;
+                                        }
+                                        if (!password) {
+                                            alert('Password required');
+                                            return;
+                                        }
+                                    }
                                 </script>
                             </div>
                             <div class="hero-figure anime-element">

@@ -136,7 +136,8 @@ app.get(['/login'], (req, res) => {
     if (hostCfg.protected == true) {
         let ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.query);
-        if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
+        const { username, password } = req.query;
+        if (username == hostCfg.username && password == hostCfg.password) {
             hostCfg.authenticated = true;
             authHost = new Host(ip, true);
             log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
@@ -171,12 +172,8 @@ app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
         // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&notify=1
-        let roomName = req.query.room;
-        let peerName = req.query.name;
-        let peerAudio = req.query.audio;
-        let peerVideo = req.query.video;
-        let notify = req.query.notify;
-        if (roomName && peerName && peerAudio && peerVideo && notify) {
+        const { room, name, audio, video, notify } = req.query;
+        if (room && name && audio && video && notify) {
             return res.sendFile(view.room);
         }
     }
