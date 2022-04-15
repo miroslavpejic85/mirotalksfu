@@ -823,8 +823,8 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
-        this.handleFS(elem.id, fs.id, av.id);
-        this.handleTS(elem.id, ts.id, av.id);
+        this.handleFS(elem.id, fs.id);
+        this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         this.setVideoAvatarImgName(av.id, this.peer_name);
@@ -1060,8 +1060,8 @@ class RoomClient {
                 d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
-                this.handleFS(elem.id, fs.id, av.id);
-                this.handleTS(elem.id, ts.id, av.id);
+                this.handleFS(elem.id, fs.id);
+                this.handleTS(elem.id, ts.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.setVideoAvatarImgName(av.id, remotePeerName);
@@ -1495,25 +1495,17 @@ class RoomClient {
         if (elem == null) this.isVideoOnFullScreen = document.fullscreenEnabled;
     }
 
-    handleFS(elemId, fsId, avatarId) {
+    handleFS(elemId, fsId) {
         let videoPlayer = this.getId(elemId);
         let btnFs = this.getId(fsId);
         this.setTippy(fsId, 'Full screen', 'top');
 
         btnFs.addEventListener('click', () => {
-            if (!this.isHidden(avatarId)) {
-                this.userLog('info', 'Full screen mode work when video is on', 'top-end');
-                return;
-            }
             videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
             this.toggleFullScreen(videoPlayer);
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
         videoPlayer.addEventListener('click', () => {
-            if (!this.isHidden(avatarId)) {
-                this.userLog('info', 'Full screen mode work when video is on', 'top-end');
-                return;
-            }
             if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
@@ -1538,14 +1530,10 @@ class RoomClient {
     // TAKE SNAPSHOT
     // ####################################################
 
-    handleTS(elemId, tsId, avatarId) {
+    handleTS(elemId, tsId) {
         let videoPlayer = this.getId(elemId);
         let btnTs = this.getId(tsId);
         btnTs.addEventListener('click', () => {
-            if (!this.isHidden(avatarId)) {
-                this.userLog('info', 'SnapShot work when video is on', 'top-end');
-                return;
-            }
             this.sound('snapshot');
             let context, canvas, width, height, dataURL;
             width = videoPlayer.videoWidth;
