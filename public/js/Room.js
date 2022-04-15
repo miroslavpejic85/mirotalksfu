@@ -48,9 +48,6 @@ let initAudioButton = null;
 let initVideoButton = null;
 let initAudioVideoButton = null;
 
-let isProducerAudioOn = false;
-let isProducerVideoOn = false;
-
 let recTimer = null;
 let recElapsedTime = null;
 
@@ -718,7 +715,6 @@ function handleButtons() {
     };
     swapCameraButton.onclick = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', true);
     };
     raiseHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', true);
@@ -727,28 +723,22 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', false);
     };
     startAudioButton.onclick = () => {
-        isProducerAudioOn
-            ? rc.resumeProducer(RoomClient.mediaType.audio)
-            : rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
-
+        rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
+        // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
-        isProducerAudioOn ? rc.pauseProducer(RoomClient.mediaType.audio) : rc.closeProducer(RoomClient.mediaType.audio);
-
+        rc.closeProducer(RoomClient.mediaType.audio);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', false);
+        // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
-        isProducerVideoOn
-            ? rc.resumeProducer(RoomClient.mediaType.video)
-            : rc.produce(RoomClient.mediaType.video, videoSelect.value);
-
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', true);
+        rc.produce(RoomClient.mediaType.video, videoSelect.value);
+        // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
-        isProducerVideoOn ? rc.pauseProducer(RoomClient.mediaType.video) : rc.closeProducer(RoomClient.mediaType.video);
-
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', false);
+        rc.closeProducer(RoomClient.mediaType.video);
+        // rc.pauseProducer(RoomClient.mediaType.video);
     };
     startScreenButton.onclick = () => {
         rc.produce(RoomClient.mediaType.screen);
@@ -845,14 +835,12 @@ function handleSelects() {
     // devices options
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
     };
     speakerSelect.onchange = () => {
         rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', true);
     };
     // styling
     BtnsAspectRatio.onchange = () => {
@@ -968,50 +956,42 @@ function handleRoomClientEvents() {
         hide(startAudioButton);
         show(stopAudioButton);
         setColor(startAudioButton, 'red');
-        isProducerAudioOn = true;
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room Client pause audio');
         hide(stopAudioButton);
         show(startAudioButton);
-        sound('left');
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room Client resume audio');
         hide(startAudioButton);
         show(stopAudioButton);
-        sound('joined');
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
         console.log('Room Client stop audio');
         hide(stopAudioButton);
         show(startAudioButton);
-        isProducerAudioOn = false;
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room Client start video');
         hide(startVideoButton);
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
-        isProducerVideoOn = true;
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room Client pause video');
         hide(stopVideoButton);
         show(startVideoButton);
-        sound('left');
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room Client resume video');
         hide(startVideoButton);
         show(stopVideoButton);
-        sound('joined');
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room Client stop video');
         hide(stopVideoButton);
         show(startVideoButton);
-        isProducerVideoOn = false;
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');

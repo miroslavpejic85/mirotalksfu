@@ -232,7 +232,7 @@ class RoomClient {
             let peer_info = peers.get(peer).peer_info;
             // console.log('07 ----> Remote Peer info', peer_info);
             if (!peer_info.peer_video) {
-                await this.setVideoDivOff(peer_info, true);
+                await this.setVideoOff(peer_info, true);
             }
         }
         this.refreshParticipantsCount();
@@ -400,8 +400,7 @@ class RoomClient {
             'setVideoOff',
             function (data) {
                 console.log('Video off:', data);
-                this.setVideoOff(data.peer_id, true);
-                this.setVideoDivOff(data, true);
+                this.setVideoOff(data, true);
             }.bind(this),
         );
 
@@ -409,7 +408,7 @@ class RoomClient {
             'removeMe',
             function (data) {
                 console.log('Remove me:', data);
-                this.removeVideoDivOff(data.peer_id);
+                this.removeVideoOff(data.peer_id);
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
             }.bind(this),
@@ -546,7 +545,6 @@ class RoomClient {
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
             setColor(startAudioButton, 'red');
-            console.log('08 ----> Audio is off');
         }
         if (this.isVideoAllowed) {
             console.log('09 ----> Start video media');
@@ -554,7 +552,7 @@ class RoomClient {
         } else {
             setColor(startVideoButton, 'red');
             console.log('09 ----> Video is off');
-            this.setVideoDivOff(this.peer_info, false);
+            this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
     }
@@ -670,11 +668,11 @@ class RoomClient {
                     this.event(_EVENTS.startAudio);
                     break;
                 case mediaType.video:
-                    this.setIsVideo(this.peer_id, true);
+                    this.setIsVideo(true);
                     this.event(_EVENTS.startVideo);
                     break;
                 case mediaType.screen:
-                    this.setIsScreen(this.peer_id, true);
+                    this.setIsScreen(true);
                     this.event(_EVENTS.startScreen);
                     break;
                 default:
@@ -770,8 +768,8 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, ts, d, p, i, b, fs, pm, pb, av;
-        this.removeVideoDivOff(this.peer_id);
+        let elem, vb, ts, d, p, i, b, fs, pm, pb;
+        this.removeVideoOff(this.peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = id + '__d';
@@ -781,9 +779,6 @@ class RoomClient {
         elem.autoplay = true;
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
-        av = document.createElement('img');
-        av.className = 'center pulsate';
-        av.id = this.peer_id + '__img';
         vb = document.createElement('div');
         vb.setAttribute('id', this.peer_id + '__vb');
         vb.className = 'videoMenuBar fadein';
@@ -815,7 +810,6 @@ class RoomClient {
         vb.appendChild(ts);
         vb.appendChild(fs);
         d.appendChild(elem);
-        d.appendChild(av);
         d.appendChild(pm);
         d.appendChild(i);
         d.appendChild(p);
@@ -827,8 +821,6 @@ class RoomClient {
         this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
-        this.setVideoAvatarImgName(av.id, this.peer_name);
-        this.peer_info.peer_video ? this.setVideoOn(this.peer_id) : this.setVideoOff(this.peer_id);
         this.sound('joined');
         handleAspectRatio();
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -927,11 +919,11 @@ class RoomClient {
                 this.event(_EVENTS.stopAudio);
                 break;
             case mediaType.video:
-                this.setIsVideo(this.peer_id, false);
+                this.setIsVideo(false);
                 this.event(_EVENTS.stopVideo);
                 break;
             case mediaType.screen:
-                this.setIsScreen(this.peer_id, false);
+                this.setIsScreen(false);
                 this.event(_EVENTS.stopScreen);
                 break;
             default:
@@ -1002,14 +994,12 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, b, fs, ts, pb, pm, av;
+        let elem, vb, d, p, i, b, fs, ts, pb, pm;
         switch (type) {
             case mediaType.video:
-                let remotePeerName = peer_info.peer_name;
                 let remotePeerId = peer_info.peer_id;
                 let remotePeerAudio = peer_info.peer_audio;
-                let remotePeerVideo = peer_info.peer_video;
-                this.removeVideoDivOff(remotePeerId);
+                this.removeVideoOff(remotePeerId);
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__d';
@@ -1019,9 +1009,6 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
-                av = document.createElement('img');
-                av.className = 'center pulsate';
-                av.id = remotePeerId + '__img';
                 vb = document.createElement('div');
                 vb.setAttribute('id', remotePeerId + '__vb');
                 vb.className = 'videoMenuBar fadein';
@@ -1053,7 +1040,6 @@ class RoomClient {
                 vb.appendChild(ts);
                 vb.appendChild(fs);
                 d.appendChild(elem);
-                d.appendChild(av);
                 d.appendChild(i);
                 d.appendChild(p);
                 d.appendChild(pm);
@@ -1064,8 +1050,6 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
-                this.setVideoAvatarImgName(av.id, remotePeerName);
-                remotePeerVideo ? this.setVideoOn(remotePeerId) : this.setVideoOff(remotePeerId, true);
                 this.sound('joined');
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -1109,26 +1093,12 @@ class RoomClient {
     // HANDLE VIDEO OFF
     // ####################################################
 
-    setVideoOff(peer_id, remotePeer = false) {
-        let avatarImg = this.getId(peer_id + '__img');
-        if (avatarImg) {
-            avatarImg.style.display = 'block';
-        }
-    }
-
-    setVideoOn(peer_id) {
-        let avatarImg = this.getId(peer_id + '__img');
-        if (avatarImg) {
-            avatarImg.style.display = 'none';
-        }
-    }
-
-    async setVideoDivOff(peer_info, remotePeer = false) {
+    async setVideoOff(peer_info, remotePeer = false) {
         let d, vb, i, h, b, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
-        this.removeVideoDivOff(peer_id);
+        this.removeVideoOff(peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
@@ -1166,15 +1136,15 @@ class RoomClient {
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
-        console.log('[setVideoDivOff] Video-element-count', this.videoMediaContainer.childElementCount);
+        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
     }
 
-    removeVideoDivOff(peer_id) {
+    removeVideoOff(peer_id) {
         let pvOff = this.getId(peer_id + '__videoOff');
         if (pvOff) {
             pvOff.parentNode.removeChild(pvOff);
             handleAspectRatio();
-            console.log('[removeVideoDivOff] Video-element-count', this.videoMediaContainer.childElementCount);
+            console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
     }
@@ -1312,17 +1282,20 @@ class RoomClient {
         if (b) b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
     }
 
-    setIsVideo(peer_id, status) {
-        if (this.peer_id == peer_id) this.peer_info.peer_video = status;
-        if (!status) {
-            this.setVideoOff(peer_id, false);
-        } else {
-            this.setVideoOn(peer_id);
+    setIsVideo(status) {
+        this.peer_info.peer_video = status;
+        if (!this.peer_info.peer_video) {
+            this.setVideoOff(this.peer_info, false);
+            this.sendVideoOff();
         }
     }
 
-    setIsScreen(peer_id, status) {
-        if (this.peer_id == peer_id) this.peer_info.peer_screen = status;
+    setIsScreen(status) {
+        this.peer_info.peer_screen = status;
+        if (!this.peer_info.peer_screen && !this.peer_info.peer_video) {
+            this.setVideoOff(this.peer_info, false);
+            this.sendVideoOff();
+        }
     }
 
     sendVideoOff() {
@@ -1330,7 +1303,7 @@ class RoomClient {
     }
 
     // ####################################################
-    // IS / GET
+    // GET
     // ####################################################
 
     isConnected() {
@@ -1339,11 +1312,6 @@ class RoomClient {
 
     isRecording() {
         return this._isRecording;
-    }
-
-    isHidden(elId) {
-        let el = this.getId(elId);
-        return el.style.display == 'none';
     }
 
     static get mediaType() {
@@ -2302,13 +2270,11 @@ class RoomClient {
                     Swal.fire({
                         allowOutsideClick: false,
                         allowEscapeKey: false,
-                        showDenyButton: true,
                         background: swalBackground,
                         imageUrl: image.locked,
                         input: 'text',
                         inputPlaceholder: 'Set Room password',
                         confirmButtonText: `OK`,
-                        denyButtonText: `Cancel`,
                         showClass: {
                             popup: 'animate__animated animate__fadeInDown',
                         },
@@ -2319,12 +2285,10 @@ class RoomClient {
                             if (!pwd) return 'Please enter the Room password';
                             this.RoomPassword = pwd;
                         },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            data.password = this.RoomPassword;
-                            this.socket.emit('roomAction', data);
-                            this.roomStatus(action);
-                        }
+                    }).then(() => {
+                        data.password = this.RoomPassword;
+                        this.socket.emit('roomAction', data);
+                        this.roomStatus(action);
                     });
                     break;
                 case 'unlock':
@@ -2483,7 +2447,7 @@ class RoomClient {
                     break;
                 case 'mute':
                     if (peer_id === this.peer_id || broadcast) {
-                        isProducerAudioOn ? this.pauseProducer(mediaType.audio) : this.closeProducer(mediaType.audio);
+                        this.closeProducer(mediaType.audio);
                         this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
                         this.userLog(
                             'warning',
@@ -2495,8 +2459,7 @@ class RoomClient {
                     break;
                 case 'hide':
                     if (peer_id === this.peer_id || broadcast) {
-                        isProducerVideoOn ? this.pauseProducer(mediaType.video) : this.closeProducer(mediaType.video);
-                        this.updatePeerInfo(this.peer_name, this.peer_id, 'video', false);
+                        this.closeProducer(mediaType.video);
                         this.userLog(
                             'warning',
                             from_peer_name + '  ' + _PEER.videoOff + ' has closed yours video',
@@ -2666,7 +2629,7 @@ class RoomClient {
                     this.setIsAudio(peer_id, status);
                     break;
                 case 'video':
-                    this.setIsVideo(peer_id, status);
+                    this.setIsVideo(status);
                     break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
@@ -2694,7 +2657,7 @@ class RoomClient {
                     this.setIsAudio(peer_id, status);
                     break;
                 case 'video':
-                    this.setIsVideo(peer_id, status);
+                    this.setIsVideo(status);
                     break;
                 case 'hand':
                     let peer_hand = this.getPeerHandBtn(peer_id);

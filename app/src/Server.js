@@ -171,9 +171,7 @@ app.get(['/newroom'], (req, res) => {
 app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
-        /**
-         * http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&notify=1
-         */
+        // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&notify=1
         const { room, name, audio, video, notify } = req.query;
         if (room && name && audio && video && notify) {
             return res.sendFile(view.room);
@@ -419,7 +417,7 @@ io.on('connection', (socket) => {
 
     socket.on('updatePeerInfo', (data) => {
         log.debug('Peer info update:', data);
-        // peer_info audio video hand ... status
+        // peer_info hand raise Or lower
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });
@@ -589,9 +587,15 @@ io.on('connection', (socket) => {
 
     socket.on('producerClosed', (data) => {
         log.debug('Producer close', data);
+
         // peer_info audio Or video OFF
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
+    });
+
+    socket.on('resume', async (_, callback) => {
+        await consumer.resume();
+        callback();
     });
 
     socket.on('getRoomInfo', (_, cb) => {

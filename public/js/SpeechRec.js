@@ -113,6 +113,7 @@ if (speechRecognition) {
     console.info('Browser supports webkitSpeechRecognition');
 } else {
     console.warn('This browser not supports webkitSpeechRecognition');
+    hide(chatSpeechStartButton);
 }
 
 function startSpeech(action) {
