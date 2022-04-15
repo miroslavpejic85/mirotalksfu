@@ -723,20 +723,24 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', false);
     };
     startAudioButton.onclick = () => {
+        setAudioButtonsDisabled(true);
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
+        setAudioButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.audio);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', false);
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
+        setVideoButtonsDisabled(true);
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
+        setVideoButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.video);
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
@@ -956,6 +960,7 @@ function handleRoomClientEvents() {
         hide(startAudioButton);
         show(stopAudioButton);
         setColor(startAudioButton, 'red');
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room Client pause audio');
@@ -971,12 +976,14 @@ function handleRoomClientEvents() {
         console.log('Room Client stop audio');
         hide(stopAudioButton);
         show(startAudioButton);
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room Client start video');
         hide(startVideoButton);
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
+        setVideoButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room Client pause video');
@@ -992,6 +999,7 @@ function handleRoomClientEvents() {
         console.log('Room Client stop video');
         hide(stopVideoButton);
         show(startVideoButton);
+        setVideoButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');
@@ -1076,6 +1084,16 @@ function showButtons() {
         control.style.display = 'none';
         isButtonsVisible = false;
     }, 10000);
+}
+
+function setAudioButtonsDisabled(disabled) {
+    startAudioButton.disabled = disabled;
+    stopAudioButton.disabled = disabled;
+}
+
+function setVideoButtonsDisabled(disabled) {
+    startVideoButton.disabled = disabled;
+    stopVideoButton.disabled = disabled;
 }
 
 // ####################################################

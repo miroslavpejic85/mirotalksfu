@@ -545,6 +545,7 @@ class RoomClient {
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
             setColor(startAudioButton, 'red');
+            console.log('08 ----> Audio is off');
         }
         if (this.isVideoAllowed) {
             console.log('09 ----> Start video media');
