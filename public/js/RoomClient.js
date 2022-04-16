@@ -679,6 +679,7 @@ class RoomClient {
                 default:
                     return;
             }
+            this.sound('joined');
         } catch (err) {
             console.error('Produce error:', err);
         }
@@ -822,7 +823,6 @@ class RoomClient {
         this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
-        this.sound('joined');
         handleAspectRatio();
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
@@ -1146,7 +1146,7 @@ class RoomClient {
             pvOff.parentNode.removeChild(pvOff);
             handleAspectRatio();
             console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
-            this.sound('left');
+            if (peer_id != this.peer_id) this.sound('left');
         }
     }
 
@@ -2271,11 +2271,13 @@ class RoomClient {
                     Swal.fire({
                         allowOutsideClick: false,
                         allowEscapeKey: false,
+                        showDenyButton: true,
                         background: swalBackground,
                         imageUrl: image.locked,
                         input: 'text',
                         inputPlaceholder: 'Set Room password',
                         confirmButtonText: `OK`,
+                        denyButtonText: `Cancel`,
                         showClass: {
                             popup: 'animate__animated animate__fadeInDown',
                         },
@@ -2286,10 +2288,12 @@ class RoomClient {
                             if (!pwd) return 'Please enter the Room password';
                             this.RoomPassword = pwd;
                         },
-                    }).then(() => {
-                        data.password = this.RoomPassword;
-                        this.socket.emit('roomAction', data);
-                        this.roomStatus(action);
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            data.password = this.RoomPassword;
+                            this.socket.emit('roomAction', data);
+                            this.roomStatus(action);
+                        }
                     });
                     break;
                 case 'unlock':
