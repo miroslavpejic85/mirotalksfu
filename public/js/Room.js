@@ -300,7 +300,6 @@ function whoAreYou() {
     if (peer_name) {
         checkMedia();
         getPeerInfo();
-        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
         return;
     }
@@ -330,7 +329,6 @@ function whoAreYou() {
         },
     }).then(() => {
         getPeerInfo();
-        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
     });
 
@@ -513,6 +511,7 @@ function joinRoom(peer_name, room_id) {
             roomIsReady,
         );
         handleRoomClientEvents();
+        notify ? shareRoom() : sound('joined');
     }
 }
 

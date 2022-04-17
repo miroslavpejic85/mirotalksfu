@@ -999,7 +999,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, au, fs, ts, sf, sy, ko, pb, pm;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sy, ko, pb, pm;
         switch (type) {
             case mediaType.video:
                 let remotePeerId = peer_info.peer_id;
@@ -1029,6 +1029,9 @@ class RoomClient {
                 sy = document.createElement('button');
                 sy.id = id + '___' + remotePeerId + '___sendYouTube';
                 sy.className = html.sendYouTube;
+                cm = document.createElement('button');
+                cm.id = id + '___' + remotePeerId + '___video';
+                cm.className = html.videoOn;
                 au = document.createElement('button');
                 au.id = remotePeerId + '__audio';
                 au.className = remotePeerAudio ? html.audioOn : html.audioOff;
@@ -1052,6 +1055,7 @@ class RoomClient {
                 pm.appendChild(pb);
                 vb.appendChild(ko);
                 vb.appendChild(au);
+                vb.appendChild(cm);
                 vb.appendChild(sy);
                 vb.appendChild(sf);
                 vb.appendChild(ts);
@@ -1067,6 +1071,8 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
                 this.handleSY(sy.id);
+                this.handleCM(cm.id);
+                this.handleAU(au.id);
                 this.handleKO(ko.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
@@ -1078,7 +1084,8 @@ class RoomClient {
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
                     this.setTippy(sy.id, 'Send youTube', 'top-end');
-                    this.setTippy(au.id, 'Audio status', 'top-end');
+                    this.setTippy(cm.id, 'Hide', 'top-end');
+                    this.setTippy(au.id, 'Mute', 'top-end');
                     this.setTippy(ko.id, 'Eject', 'top-end');
                 }
                 break;
@@ -1178,6 +1185,7 @@ class RoomClient {
         d.appendChild(pm);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
+        this.handleAU(au.id);
         if (remotePeer) {
             this.handleSF(sf.id);
             this.handleSY(sy.id);
@@ -1190,7 +1198,7 @@ class RoomClient {
         if (!this.isMobileDevice && remotePeer) {
             this.setTippy(sf.id, 'Send file', 'top-end');
             this.setTippy(sy.id, 'Send youTube', 'top-end');
-            this.setTippy(au.id, 'Audio status', 'top-end');
+            this.setTippy(au.id, 'Mute', 'top-end');
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
     }
@@ -2504,6 +2512,34 @@ class RoomClient {
         let btnKo = this.getId(uid);
         btnKo.addEventListener('click', () => {
             this.peerAction('me', peer_id, 'eject');
+        });
+    }
+
+    // ####################################################
+    // HANDLE VIDEO
+    // ###################################################
+
+    handleCM(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1] + '___pVideo';
+        let btnCm = this.getId(uid);
+        btnCm.addEventListener('click', () => {
+            this.peerAction('me', peer_id, 'hide');
+        });
+    }
+
+    // ####################################################
+    // HANDLE AUDIO
+    // ###################################################
+
+    handleAU(uid) {
+        const words = uid.split('__');
+        let peer_id = words[0] + '___pAudio';
+        let btnAU = this.getId(uid);
+        btnAU.addEventListener('click', (e) => {
+            if (e.target.className === html.audioOn) {
+                this.peerAction('me', peer_id, 'mute');
+            }
         });
     }
 
