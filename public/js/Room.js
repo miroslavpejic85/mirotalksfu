@@ -751,7 +751,7 @@ function handleButtons() {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     fileShareButton.onclick = () => {
-        rc.selectFileToShare(rc.peer_id);
+        rc.selectFileToShare(rc.peer_id, true);
     };
     youTubeShareButton.onclick = () => {
         rc.youTubeShareVideo('all');
@@ -1524,7 +1524,7 @@ async function getParticipantsTable(peers) {
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
-        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile}</button></td>
+        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
         <td><button id="sendYouTubeAll" onclick="rc.youTubeShareVideo('all');">${_PEER.sendYouTube}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
@@ -1562,7 +1562,7 @@ async function getParticipantsTable(peers) {
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id, false)">${peer_sendFile}</button></td>
+                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
                 <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
                 <td><button id="sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
