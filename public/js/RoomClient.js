@@ -2291,7 +2291,7 @@ class RoomClient {
     }
 
     openYouTube(data) {
-        let d, iframe;
+        let d, vb, e, iframe;
         let peer_name = data.peer_name;
         let you_tube_url = data.you_tube_url;
         this.closeYouTube();
@@ -2299,6 +2299,12 @@ class RoomClient {
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = '__youTube';
+        vb = document.createElement('div');
+        vb.setAttribute('id', '__youTubeBar');
+        vb.className = 'videoMenuBar fadein';
+        e = document.createElement('button');
+        e.className = 'fas fa-times';
+        e.id = '__youTubeExit';
         iframe = document.createElement('iframe');
         iframe.setAttribute('id', '__youTubeIframe');
         iframe.setAttribute('title', peer_name);
@@ -2311,9 +2317,18 @@ class RoomClient {
         );
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('allowfullscreen', true);
+        vb.appendChild(e);
         d.appendChild(iframe);
+        d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         handleAspectRatio();
+        let exitYouTubeBtn = this.getId(e.id);
+        exitYouTubeBtn.addEventListener('click', () => {
+            this.closeYouTube(true);
+        });
+        if (!this.isMobileDevice) {
+            this.setTippy(e.id, 'Close video', 'top-end');
+        }
         console.log('[openYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
