@@ -600,7 +600,7 @@ class RoomClient {
         let stream;
         try {
             stream = screen
-                ? await navigator.mediaDevices.getDisplayMedia()
+                ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
                 : await navigator.mediaDevices.getUserMedia(mediaConstraints);
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
 
@@ -737,9 +737,9 @@ class RoomClient {
 
     getScreenConstraints() {
         return {
+            audio: false,
             video: {
                 frameRate: {
-                    min: 5,
                     ideal: 15,
                     max: 30,
                 },
