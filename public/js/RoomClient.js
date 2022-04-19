@@ -10,7 +10,7 @@ const html = {
     audioOff: 'fas fa-microphone-slash',
     videoOn: 'fas fa-video',
     videoOff: 'fas fa-video-slash',
-    userName: 'fas fa-user username',
+    userName: 'username',
     userHand: 'fas fa-hand-paper pulsate',
     fullScreen: 'fas fa-expand',
     snapshot: 'fas fa-camera-retro',
@@ -799,7 +799,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
         p.className = html.userName;
-        p.innerHTML = '&nbsp;' + this.peer_name + ' (me)';
+        p.innerHTML = '👤 &nbsp;' + this.peer_name + ' (me)';
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
         i.className = html.userHand;
@@ -1044,7 +1044,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                p.innerHTML = '&nbsp;' + peer_name;
+                p.innerHTML = '👤 &nbsp;' + peer_name;
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', remotePeerId + '__pitchMeter');
@@ -1161,7 +1161,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
-        p.innerHTML = '&nbsp;' + peer_name + (remotePeer ? '' : ' (me) ');
+        p.innerHTML = '👤 &nbsp;' + peer_name + (remotePeer ? '' : ' (me) ');
         h = document.createElement('i');
         h.id = peer_id + '__hand';
         h.className = html.userHand;
