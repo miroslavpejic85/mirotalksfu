@@ -27,6 +27,7 @@ const image = {
     hide: '../images/hide.png',
     users: '../images/participants.png',
     user: '../images/participant.png',
+    username: '../images/user.png',
     youtube: '../images/youtube.png',
     message: '../images/message.png',
     share: '../images/share.png',

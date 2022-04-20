@@ -308,6 +308,8 @@ function whoAreYou() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
+        imageAlt: 'mirotalksfu-username',
+        imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
         html: `<br />
