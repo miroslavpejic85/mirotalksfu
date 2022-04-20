@@ -42,6 +42,7 @@ Open the app with the following **supported browsers** and many more.
 -   Possibility to Change UI Themes
 -   Possibility to protect your Host with username and password (default disabled)
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
+-   [Sentry](https://sentry.io/) error reporting
 
 ---
 
@@ -140,7 +141,7 @@ Embedding a meeting into a service or app using an iframe.
 
 This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
 
-If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or for other needs, don't hesitate to contact me at miroslav.pejic.85@gmail.com
+If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
@@ -159,6 +160,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 ## Notes
 
 -   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
+-   For the [fontawesome icons](https://fontawesome.com) please [README](https://github.com/miroslavpejic85/mirotalksfu/issues/48#issue-1207140176).
 
 ## Credits
 
@@ -183,17 +185,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
----
-
-<br/>
-
-## Commercial License or closed source
-
-For commercial use or closed source projects, we can offer licensing under the following terms.
-
-> World-wide, non-exclusive, non-transferable and non-sub-licensable license of MiroTalk as is on https://github.com/miroslavpejic85/mirotalksfu for use in purchasers products, as long as the resulting software does not stand in concurrence to the MiroTalk itself. Any liability is excluded. The law of the Federal Republic of Italy shall apply exclusively.
-
-The one time fee is 499 EUR net. Please contact miroslav.pejic.85@gmail.com.
+For a MiroTalk license under conditions other than AGPLv3, please contact us at info.mirotalk@gmail.com.
 
 ---
 
