@@ -160,7 +160,6 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 ## Notes
 
 -   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
--   For the [fontawesome icons](https://fontawesome.com) please [README](https://github.com/miroslavpejic85/mirotalksfu/issues/48#issue-1207140176).
 
 ## Credits
 
