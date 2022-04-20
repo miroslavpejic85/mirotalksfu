@@ -815,12 +815,13 @@ class RoomClient {
         vb.appendChild(b);
         vb.appendChild(ts);
         vb.appendChild(fs);
+        vb.appendChild(pin);
         d.appendChild(elem);
         d.appendChild(pm);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(vb);
-        d.appendChild(pin);
+        
         this.videoMediaContainer.appendChild(d);
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;

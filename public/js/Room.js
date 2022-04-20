@@ -25,7 +25,7 @@ const _PEER = {
     sendMsg: '<i class="fas fa-paper-plane"></i>',
 };
 
-const surveyAvtive = true;
+const surveyAvtive = false;
 
 let participantsCount = 0;
 
