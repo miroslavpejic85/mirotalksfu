@@ -29,7 +29,7 @@ Embedding a meeting into a `service` or `app` requires using an `iframe` with th
 ```html
 <iframe
     allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://localhost:3010/join/room_name"
+    src="https://sfu.mirotalk.org/join/room_name"
     style="height: 100%; width: 100%; border: 0px;"
 ></iframe>
 ```
@@ -41,7 +41,7 @@ Develop your `website` or `application`, and bring `video meetings` in with a si
 ```html
 <iframe
     allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://localhost:3010/newroom"
+    src="https://sfu.mirotalk.org/newroom"
     style="height: 100%; width: 100%; border: 0px;"
 ></iframe>
 ```

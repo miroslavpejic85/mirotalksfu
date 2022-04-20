@@ -229,6 +229,7 @@ module.exports = class Room {
                 // tell client consumer is dead
                 this.io.to(socket_id).emit('consumerClosed', {
                     consumer_id: consumer.id,
+                    consumer_kind: consumer.kind,
                 });
             }.bind(this),
         );

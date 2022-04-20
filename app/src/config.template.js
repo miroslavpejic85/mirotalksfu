@@ -44,6 +44,17 @@ module.exports = {
     */
     ngrokAuthToken: '',
     apiKeySecret: 'mirotalksfu_default_secret',
+    sentry: {
+        /*
+        Sentry
+            1. Goto https://sentry.io/
+            2. Create account
+            3. On dashboard goto Settings/Projects/YourProjectName/Client Keys (DSN)
+        */
+        enabled: false,
+        DSN: '',
+        tracesSampleRate: 0.5,
+    },
     mediasoup: {
         // Worker settings
         numWorkers: Object.keys(os.cpus()).length,

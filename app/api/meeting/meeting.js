@@ -3,7 +3,7 @@
 const fetch = require('node-fetch');
 
 const API_KEY = 'mirotalksfu_default_secret';
-const MIROTALK_URL = 'http://localhost:3010/api/v1/meeting';
+const MIROTALK_URL = 'https://sfu.mirotalk.org/api/v1/meeting';
 
 function getResponse() {
     return fetch(MIROTALK_URL, {
