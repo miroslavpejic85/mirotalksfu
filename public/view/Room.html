@@ -1,18 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <!-- Global site tag (gtag.js) - Google Analytics -->
+        <!-- https://github.com/mikecao/umami -->
 
-        <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZRF9TVSZ0J"></script>
-        <script>
-            window.dataLayer = window.dataLayer || [];
-            function gtag() {
-                dataLayer.push(arguments);
-            }
-            gtag('js', new Date());
-
-            gtag('config', 'G-ZRF9TVSZ0J');
-        </script>
+        <script
+            async
+            defer
+            data-website-id="28098c62-a100-44a1-8f03-234b3f0a8194"
+            src="https://stats.mirotalk.org/umami.js"
+        ></script>
 
         <!-- Title and Icon -->
 
@@ -30,7 +26,7 @@
         />
         <meta
             name="keywords"
-            content="webrtc, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting"
+            content="webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting"
         />
 
         <!-- https://ogp.me -->
@@ -48,6 +44,10 @@
 
         <link rel="stylesheet" href="../css/Room.css" />
         <link rel="stylesheet" href="../css/VideoGrid.css" />
+
+        <!-- https://cdnjs.com/libraries/font-awesome -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
 
         <!-- https://animate.style 4 using for swal fadeIn-Out -->
 
@@ -82,8 +82,8 @@
         <script src="https://kit.fontawesome.com/d2f1016e6f.js" crossorigin="anonymous"></script>
         <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/500/fabric.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.1.4"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/521/fabric.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
         <script src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
         <script src="https://unpkg.com/@popperjs/core@2"></script>
         <script src="https://unpkg.com/tippy.js@6"></script>
@@ -126,10 +126,10 @@ access to use this app.
             <button id="stopAudioButton" class="hidden"><i class="fas fa-microphone"></i></button>
             <button id="startVideoButton" class="hidden"><i class="fas fa-video-slash"></i></button>
             <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i></button>
-            <button id="swapCameraButton" class="hidden"><i class="fas fa-sync-alt"></i></button>
-            <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i></button>
             <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i></button>
+            <button id="swapCameraButton" class="hidden"><i class="fas fa-sync-alt"></i></button>
+            <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
             <button id="exitButton" class="hidden"><i class="fas fa-phone-slash"></i></button>
@@ -147,6 +147,7 @@ access to use this app.
                     <button id="tabRoomBtn" class="fas fa-home tablinks"></button>
                     <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks"></button>
                     <button id="tabYoutubeBtn" class="fab fa-youtube tablinks"></button>
+                    <button id="tabAspectBtn" class="fas fa-cog tablinks"></button>
                     <button id="tabStylingBtn" class="fas fa-palette tablinks"></button>
                 </div>
 
@@ -250,7 +251,7 @@ access to use this app.
                     <br />
                 </div>
 
-                <div id="tabStyling" class="tabcontent">
+                <div id="tabAspect" class="tabcontent">
                     <br />
                     <p>Aspect ratio:</p>
                     <br />
@@ -260,6 +261,27 @@ access to use this app.
                         <option value="2">16:9</option>
                         <option value="3">1:1</option>
                         <option value="4">1:2</option>
+                    </select>
+                    <br />
+                    <p>Video Object fit:</p>
+                    <br />
+                    <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
+                        <option value="fill">fill</option>
+                        <option value="contain">contain</option>
+                        <option value="cover">cover</option>
+                        <option value="scale-down">scale-down</option>
+                        <option value="none">none</option>
+                    </select>
+                    <br />
+                </div>
+
+                <div id="tabStyling" class="tabcontent">
+                    <br />
+                    <p>Theme:</p>
+                    <br />
+                    <select id="selectTheme" class="form-select text-light bg-dark">
+                        <option value="dark">⚫ &nbsp;Dark</option>
+                        <option value="grey">⚪ &nbsp;Grey</option>
                     </select>
                     <br />
                     <p>Buttons bar:</p>

@@ -5,6 +5,7 @@ const cors = require('cors');
 const compression = require('compression');
 const https = require('httpolyglot');
 const mediasoup = require('mediasoup');
+const mediasoupClient = require('mediasoup-client');
 const config = require('./config');
 const path = require('path');
 const ngrok = require('ngrok');
@@ -18,6 +19,8 @@ const log = new Logger('Server');
 const yamlJS = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
+const Sentry = require('@sentry/node');
+const { CaptureConsole } = require('@sentry/integrations');
 
 const app = express();
 
@@ -45,6 +48,30 @@ const hostCfg = {
 const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
 
+// Sentry monitoring
+const sentryEnabled = config.sentry.enabled;
+const sentryDSN = config.sentry.DSN;
+const sentryTracesSampleRate = config.sentry.tracesSampleRate;
+if (sentryEnabled) {
+    Sentry.init({
+        dsn: sentryDSN,
+        integrations: [
+            new CaptureConsole({
+                // ['log', 'info', 'warn', 'error', 'debug', 'assert']
+                levels: ['warn', 'error'],
+            }),
+        ],
+        tracesSampleRate: sentryTracesSampleRate,
+    });
+    /*
+    log.log('test-log');
+    log.info('test-info');
+    log.warn('test-warning');
+    log.warn('test-error');
+    log.warn('test-debug');
+    */
+}
+
 // Authenticated IP by Login
 let authHost;
 
@@ -62,6 +89,7 @@ const dir = {
 
 // html views
 const view = {
+    about: path.join(__dirname, '../../', 'public/view/about.html'),
     landing: path.join(__dirname, '../../', 'public/view/landing.html'),
     login: path.join(__dirname, '../../', 'public/view/login.html'),
     newRoom: path.join(__dirname, '../../', 'public/view/newroom.html'),
@@ -110,7 +138,8 @@ app.get(['/login'], (req, res) => {
     if (hostCfg.protected == true) {
         let ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.query);
-        if (req.query.username == hostCfg.username && req.query.password == hostCfg.password) {
+        const { username, password } = req.query;
+        if (username == hostCfg.username && password == hostCfg.password) {
             hostCfg.authenticated = true;
             authHost = new Host(ip, true);
             log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
@@ -145,12 +174,8 @@ app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
         // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&notify=1
-        let roomName = req.query.room;
-        let peerName = req.query.name;
-        let peerAudio = req.query.audio;
-        let peerVideo = req.query.video;
-        let notify = req.query.notify;
-        if (roomName && peerName && peerAudio && peerVideo && notify) {
+        const { room, name, audio, video, notify } = req.query;
+        if (room && name && audio && video && notify) {
             return res.sendFile(view.room);
         }
     }
@@ -160,12 +185,7 @@ app.get('/join/', (req, res) => {
 // join room
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
-        if (Object.keys(req.query).length > 0) {
-            log.debug('Redirect:' + req.url + ' to ' + url.parse(req.url).pathname);
-            res.redirect(url.parse(req.url).pathname);
-        } else {
-            res.sendFile(view.room);
-        }
+        res.sendFile(view.room);
     } else {
         res.redirect('/');
     }
@@ -179,6 +199,11 @@ app.get(['/permission'], (req, res) => {
 // privacy policy
 app.get(['/privacy'], (req, res) => {
     res.sendFile(view.privacy);
+});
+
+// mirotalk about
+app.get(['/about'], (req, res) => {
+    res.sendFile(view.about);
 });
 
 // ####################################################
@@ -253,13 +278,15 @@ async function ngrokStart() {
         let pu0 = data.tunnels[0].public_url;
         let pu1 = data.tunnels[1].public_url;
         let tunnel = pu0.startsWith('https') ? pu0 : pu1;
-        log.debug('Listening on', {
+        log.info('Listening on', {
             hostConfig: hostCfg,
             announced_ip: announcedIP,
             server: host,
             tunnel: tunnel,
             api_docs: api_docs,
-            mediasoup_version: mediasoup.version,
+            mediasoup_server_version: mediasoup.version,
+            mediasoup_client_version: mediasoupClient.version,
+            sentry_enabled: sentryEnabled,
         });
     } catch (err) {
         log.error('Ngrok Start error: ', err);
@@ -272,7 +299,7 @@ async function ngrokStart() {
 // ####################################################
 
 httpsServer.listen(config.listenPort, () => {
-    log.debug(
+    log.info(
         `%c
 
 	███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
@@ -295,7 +322,9 @@ httpsServer.listen(config.listenPort, () => {
         announced_ip: announcedIP,
         server: host,
         api_docs: api_docs,
-        mediasoup_version: mediasoup.version,
+        mediasoup_server_version: mediasoup.version,
+        mediasoup_client_version: mediasoupClient.version,
+        sentry_enabled: sentryEnabled,
     });
 });
 
@@ -418,7 +447,11 @@ io.on('connection', (socket) => {
 
     socket.on('youTubeAction', (data) => {
         log.debug('YouTube: ', data);
-        roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+        if (data.peer_id == 'all') {
+            roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'youTubeAction', data);
+        }
     });
 
     socket.on('wbCanvasToJson', (data) => {
@@ -484,7 +517,7 @@ io.on('connection', (socket) => {
             const { params } = await roomList.get(socket.room_id).createWebRtcTransport(socket.id);
             callback(params);
         } catch (err) {
-            log.error('Create WebRtc Transport error: ', err);
+            log.error('Create WebRtc Transport error: ', err.message);
             callback({
                 error: err.message,
             });

@@ -39,25 +39,17 @@ function Area(Increment, Count, Width, Height, Margin = 10) {
 
 function resizeVideoMedia() {
     let Margin = 3;
-    let Scenary = document.getElementById('videoMediaContainer');
-    let Width = Scenary.offsetWidth - Margin * 2;
-    let bigWidth = Width*3/4;
-    let Height = Scenary.offsetHeight - Margin * 2;
+    let videoMediaContainer = document.getElementById('videoMediaContainer');
     let Cameras = document.getElementsByClassName('Camera');
-    let Pins = document.getElementsByClassName('pinned');
-    let StartScreenButton = document.getElementById('startScreenButton');
-    let StopScreenButton = document.getElementById('stopScreenButton');
-    let elem = null;
-    var WeAreInScreenSharing = false;
+    let Width = videoMediaContainer.offsetWidth - Margin * 2;
+    let Height = videoMediaContainer.offsetHeight - Margin * 2;
+    let max = 0;
 
-    // determine if something is pinned
-    if(Pins && Pins.length > 0)
-    {
-        elem = Pins[0];
+    // full screen mode
+    let bigWidth = Width * 4;
+    if (videoMediaContainer.childElementCount == 1) {
         Width = Width - bigWidth;
     }
-
-    let max = 0;
 
     // loop (i recommend you optimize this)
     let i = 1;
@@ -71,34 +63,21 @@ function resizeVideoMedia() {
     }
 
     max = max - Margin * 2;
-    setWidth(max, Margin, elem, bigWidth, Height);
+    setWidth(videoMediaContainer, Cameras, max, bigWidth, Margin, Height);
 }
 
-function setWidth(width, margin, elem = null, bigWidth=null, maxHeigth=null) {
+function setWidth(videoMediaContainer, Cameras, width, bigWidth, margin, maxHeight) {
     ratio = customRatio ? 0.68 : ratio;
-    let Cameras = document.getElementsByClassName('Camera');
+    let isOneVideoElement = videoMediaContainer.childElementCount == 1 ? true : false;
     for (let s = 0; s < Cameras.length; s++) {
-
-        //if(elem == null)
-        //{
-            Cameras[s].style.width = width + 'px';
-            Cameras[s].style.margin = margin + 'px';
-            Cameras[s].style.height = width * ratio + 'px';
-        //}
-        //else
-        //{
-          //  Cameras[s].style.width = width/2 + 'px';
-          //  Cameras[s].style.margin = margin + 'px';
-          //  Cameras[s].style.height = width/2 * ratio + 'px';
-        //}
-
-        if(elem && Cameras[s] == elem)
-        {
+        Cameras[s].style.width = width + 'px';
+        Cameras[s].style.margin = margin + 'px';
+        Cameras[s].style.height = width * ratio + 'px';
+        if (isOneVideoElement) {
             Cameras[s].style.width = bigWidth + 'px';
-            Cameras[s].style.height = bigWidth * ratio + 'px';   
-            var newStr = Cameras[s].style.height.substring(0, Cameras[s].style.height.length - 2); // get rid of px substring, last two characters...
-            if(newStr >= maxHeigth)
-                Cameras[s].style.height = maxHeigth - 2 + 'px';
+            Cameras[s].style.height = bigWidth * ratio + 'px';
+            let camHeigh = Cameras[s].style.height.substring(0, Cameras[s].style.height.length - 2);
+            if (camHeigh >= maxHeight) Cameras[s].style.height = maxHeight - 2 + 'px';
         }
     }
 }

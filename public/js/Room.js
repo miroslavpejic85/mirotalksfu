@@ -4,12 +4,11 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
-const swalBackground = 'linear-gradient(to left, #1f1e1e, #000000)';
-const swalBg = 'rgba(0, 0, 0, 0.7)';
+let swalBackground = 'radial-gradient(#393939, #000000)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo',
+    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
     survey: 'https://www.questionpro.com/t/AUs7VZq02P',
 };
 
@@ -23,9 +22,10 @@ const _PEER = {
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
+    sendYouTube: '<i class="fab fa-youtube"></i>',
 };
 
-const surveyAvtive = true;
+const surveyActive = true;
 
 let participantsCount = 0;
 
@@ -42,9 +42,11 @@ let peer_info = null;
 let isEnumerateDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isAudioVideoAllowed = false;
 let isScreenAllowed = false;
 let initAudioButton = null;
 let initVideoButton = null;
+let initAudioVideoButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -73,10 +75,10 @@ function initClient() {
         setTippy('stopAudioButton', 'Stop the audio', 'right');
         setTippy('startVideoButton', 'Start the video', 'right');
         setTippy('stopVideoButton', 'Stop the video', 'right');
-        setTippy('swapCameraButton', 'Swap the camera', 'right');
-        setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('startScreenButton', 'Start screen share', 'right');
         setTippy('stopScreenButton', 'Stop screen share', 'right');
+        setTippy('swapCameraButton', 'Swap the camera', 'right');
+        setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
         setTippy('exitButton', 'Leave room', 'right');
@@ -84,6 +86,7 @@ function initClient() {
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabYoutubeBtn', 'YouTube', 'top');
+        setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
         setTippy('wbDrawingColorEl', 'Drawing color', 'top');
@@ -300,7 +303,6 @@ function whoAreYou() {
     if (peer_name) {
         checkMedia();
         getPeerInfo();
-        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
         return;
     }
@@ -309,12 +311,15 @@ function whoAreYou() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
+        imageAlt: 'mirotalksfu-username',
+        imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
             <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
+            <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
         </div>`,
         confirmButtonText: `Join meeting`,
         showClass: {
@@ -329,19 +334,21 @@ function whoAreYou() {
         },
     }).then(() => {
         getPeerInfo();
-        notify ? shareRoom() : sound('joined');
         joinRoom(peer_name, room_id);
     });
 
     if (!DetectRTC.isMobileDevice) {
         setTippy('initAudioButton', 'Toggle the audio', 'left');
         setTippy('initVideoButton', 'Toggle the video', 'right');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'right');
     }
 
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
-    if (!isAudioAllowed) initAudioButton.className = 'hidden';
-    if (!isVideoAllowed) initVideoButton.className = 'hidden';
+    initAudioVideoButton = document.getElementById('initAudioVideoButton');
+    if (!isAudioAllowed) hide(initAudioButton);
+    if (!isVideoAllowed) hide(initVideoButton);
+    if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
 }
 
 function handleAudio(e) {
@@ -355,6 +362,25 @@ function handleVideo(e) {
     isVideoAllowed = isVideoAllowed ? false : true;
     e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
     setColor(e.target, isVideoAllowed ? 'white' : 'red');
+    setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
+}
+
+function handleAudioVideo(e) {
+    isAudioAllowed = isAudioAllowed ? false : true;
+    isVideoAllowed = isVideoAllowed ? false : true;
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
+    if (isAudioVideoAllowed) {
+        initAudioButton.className = 'fas fa-microphone';
+        initVideoButton.className = 'fas fa-video';
+    } else {
+        hide(initAudioButton);
+        hide(initVideoButton);
+    }
+    e.target.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
+    setColor(e.target, isAudioVideoAllowed ? 'white' : 'red');
+    setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
+    setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
+    setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
 }
 
@@ -491,6 +517,7 @@ function joinRoom(peer_name, room_id) {
         );
         realWhiteBoard.wbRC = rc;
         handleRoomClientEvents();
+        notify ? shareRoom() : sound('joined');
     }
 }
 
@@ -646,6 +673,9 @@ function handleButtons() {
     tabYoutubeBtn.onclick = (e) => {
         rc.openTab(e, 'tabYoutube');
     };
+    tabAspectBtn.onclick = (e) => {
+        rc.openTab(e, 'tabAspect');
+    };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
     };
@@ -698,20 +728,24 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', false);
     };
     startAudioButton.onclick = () => {
+        setAudioButtonsDisabled(true);
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
+        setAudioButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.audio);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', false);
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
+        setVideoButtonsDisabled(true);
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
+        setVideoButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.video);
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
@@ -722,10 +756,10 @@ function handleButtons() {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     fileShareButton.onclick = () => {
-        rc.selectFileToShare(rc.peer_id);
+        rc.selectFileToShare(rc.peer_id, true);
     };
     youTubeShareButton.onclick = () => {
-        rc.youTubeShareVideo();
+        rc.youTubeShareVideo('all');
     };
     youTubeCloseBtn.onclick = () => {
         rc.closeYouTube(true);
@@ -822,9 +856,14 @@ function handleSelects() {
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
+    BtnVideoObjectFit.onchange = () => {
+        handleVideoObjectFit(BtnVideoObjectFit.value);
+    }; // cover
+    BtnVideoObjectFit.selectedIndex = 2;
 
-    adaptAspectRatio(1);
-
+    selectTheme.onchange = () => {
+        setTheme(selectTheme.value);
+    };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
     };
@@ -946,6 +985,7 @@ function handleRoomClientEvents() {
         hide(startAudioButton);
         show(stopAudioButton);
         setColor(startAudioButton, 'red');
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room Client pause audio');
@@ -961,12 +1001,14 @@ function handleRoomClientEvents() {
         console.log('Room Client stop audio');
         hide(stopAudioButton);
         show(startAudioButton);
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room Client start video');
         hide(startVideoButton);
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
+        setVideoButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room Client pause video');
@@ -979,9 +1021,10 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
-        console.log('Room Client stop audio');
+        console.log('Room Client stop video');
         hide(stopVideoButton);
         show(startVideoButton);
+        setVideoButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');
@@ -1012,7 +1055,7 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
-        if (surveyAvtive) {
+        if (surveyActive) {
             openURL(url.survey);
         } else {
             openURL('/newroom');
@@ -1068,6 +1111,16 @@ function showButtons() {
         isButtonsVisible = false;
     }, 10000);
     */
+}
+
+function setAudioButtonsDisabled(disabled) {
+    startAudioButton.disabled = disabled;
+    stopAudioButton.disabled = disabled;
+}
+
+function setVideoButtonsDisabled(disabled) {
+    startVideoButton.disabled = disabled;
+    stopVideoButton.disabled = disabled;
 }
 
 // ####################################################
@@ -1352,6 +1405,7 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
     table += `
@@ -1360,8 +1414,9 @@ async function getParticipantsTable(peers) {
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
-        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}')">${_PEER.sendFile}</button></td>
+        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
+        <td><button id="sendYouTubeAll" onclick="rc.youTubeShareVideo('all');">${_PEER.sendYouTube}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
@@ -1387,6 +1442,7 @@ async function getParticipantsTable(peers) {
                 <td></td>
                 <td></td>
                 <td></td>
+                <td></td>
             </tr>
             `;
         } else {
@@ -1396,8 +1452,9 @@ async function getParticipantsTable(peers) {
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id, false)">${peer_sendFile}</button></td>
+                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
                 <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
+                <td><button id="sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;
@@ -1417,8 +1474,46 @@ function getParticipantAvatar(peerName) {
 }
 
 // ####################################################
+// HANDLE VIDEO OBJ FIT
+// ####################################################
+
+function handleVideoObjectFit(value) {
+    document.documentElement.style.setProperty('--videoObjFit', value);
+}
+
+// ####################################################
+// SET THEME
+// ####################################################
+
+function setTheme(theme) {
+    switch (theme) {
+        case 'dark':
+            swalBackground = 'radial-gradient(#393939, #000000)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            break;
+        case 'grey':
+            swalBackground = 'radial-gradient(#666, #333)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            break;
+        //...
+    }
+}
+
+// ####################################################
 // HANDLE ASPECT RATIO
 // ####################################################
+
+function handleAspectRatio() {
+    if (participantsCount > 1) {
+        adaptAspectRatio(videoMediaContainer.childElementCount);
+    } else {
+        resizeVideoMedia();
+    }
+}
 
 function adaptAspectRatio(participantsCount) {
     /* 
@@ -1445,6 +1540,8 @@ function adaptAspectRatio(participantsCount) {
         case 8:
             desktop = 3; // (1:1)
             break;
+        default:
+            desktop = 0; // (0:0)
     }
     // mobile aspect ratio
     switch (participantsCount) {
@@ -1465,6 +1562,8 @@ function adaptAspectRatio(participantsCount) {
         case 6:
             mobile = 3; // (1:1)
             break;
+        default:
+            mobile = 3; // (1:1)
     }
     if (participantsCount > 11) {
         desktop = 1; // (4:3)
