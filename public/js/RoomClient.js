@@ -15,6 +15,7 @@ const html = {
     fullScreen: 'fas fa-expand',
     snapshot: 'fas fa-camera-retro',
     sendFile: 'fas fa-upload',
+    sendMsg: 'fas fa-paper-plane',
     sendYouTube: 'fab fa-youtube',
     kickOut: 'fas fa-times',
 };
@@ -1000,7 +1001,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sy, ko, pb, pm;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sy, ko, pb, pm;
         switch (type) {
             case mediaType.video:
                 let remotePeerId = peer_info.peer_id;
@@ -1027,6 +1028,9 @@ class RoomClient {
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
+                sm = document.createElement('button');
+                sm.id = id + '___' + remotePeerId + '___sendMsg';
+                sm.className = html.sendMsg;
                 sy = document.createElement('button');
                 sy.id = id + '___' + remotePeerId + '___sendYouTube';
                 sy.className = html.sendYouTube;
@@ -1059,6 +1063,7 @@ class RoomClient {
                 vb.appendChild(cm);
                 vb.appendChild(sy);
                 vb.appendChild(sf);
+                vb.appendChild(sm);
                 vb.appendChild(ts);
                 vb.appendChild(fs);
                 d.appendChild(elem);
@@ -1071,6 +1076,7 @@ class RoomClient {
                 this.handleFS(elem.id, fs.id);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
+                this.handleSM(sm.id);
                 this.handleSY(sy.id);
                 this.handleCM(cm.id);
                 this.handleAU(au.id);
@@ -1084,6 +1090,7 @@ class RoomClient {
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
+                    this.setTippy(sm.id, 'Send message', 'top-end');
                     this.setTippy(sy.id, 'Send youTube', 'top-end');
                     this.setTippy(cm.id, 'Hide', 'top-end');
                     this.setTippy(au.id, 'Mute', 'top-end');
@@ -1131,7 +1138,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, vb, i, h, au, sf, sy, ko, p, pm, pb;
+        let d, vb, i, h, au, sf, sm, sy, ko, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1149,6 +1156,9 @@ class RoomClient {
             sf = document.createElement('button');
             sf.id = 'remotePeer___' + peer_id + '___sendFile';
             sf.className = html.sendFile;
+            sm = document.createElement('button');
+            sm.id = 'remotePeer___' + peer_id + '___sendMsg';
+            sm.className = html.sendMsg;
             sy = document.createElement('button');
             sy.id = 'remotePeer___' + peer_id + '___sendYouTube';
             sy.className = html.sendYouTube;
@@ -1178,6 +1188,7 @@ class RoomClient {
             vb.appendChild(ko);
             vb.appendChild(sy);
             vb.appendChild(sf);
+            vb.appendChild(sm);
         }
         vb.appendChild(au);
         d.appendChild(i);
@@ -1188,6 +1199,7 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.handleAU(au.id);
         if (remotePeer) {
+            this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSY(sy.id);
             this.handleKO(ko.id);
@@ -1197,6 +1209,7 @@ class RoomClient {
         handleAspectRatio();
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice && remotePeer) {
+            this.setTippy(sm.id, 'Send message', 'top-end');
             this.setTippy(sf.id, 'Send file', 'top-end');
             this.setTippy(sy.id, 'Send youTube', 'top-end');
             this.setTippy(au.id, 'Mute', 'top-end');
@@ -1624,6 +1637,15 @@ class RoomClient {
     // CHAT
     // ####################################################
 
+    handleSM(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1];
+        let btnSm = this.getId(uid);
+        btnSm.addEventListener('click', () => {
+            this.sendMessageTo(peer_id);
+        });
+    }
+
     toggleChat() {
         let chatRoom = this.getId('chatRoom');
         if (this.isChatOpen == false) {
@@ -1696,6 +1718,7 @@ class RoomClient {
             this.socket.emit('message', data);
             this.setMsgAvatar('right', this.peer_name);
             this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, to_peer_id);
+            if (!this.isChatOpen) this.toggleChat();
         });
     }
 
