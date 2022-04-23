@@ -18,8 +18,8 @@
 <br/>
 
 -   Is `100% Free` - `Open Source` - `Self Hosted`
--   `No download`, `plug-in` or `login` required, entirely browser-based
--   `Unlimited` number of `conference rooms` and `users`, `without` call `time limitation`
+-   No download, plug-in or login required, entirely browser-based
+-   Unlimited number of conference rooms, without call time limitation
 -   Desktop and Mobile compatible
 -   Optimized Room URL Sharing (share it to your participants, wait for them to join)
 -   Possibility to Password protect the Room for the meeting
@@ -121,6 +121,15 @@ $ docker-compose down
 </details>
 
 <details>
+<summary>Notes</summary>
+
+<br/>
+
+-   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
+
+</details>
+
+<details>
 <summary>Rest API</summary>
 
 <br/>
@@ -143,7 +152,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
 
 <br/>
 
--   You can also `join` directly to your `room` by going to
+-   You can `join` directly to `room` by going to
 -   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0&notify=0
 
     | Params | Type    | Description      |
@@ -207,15 +216,6 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 </details>
 
 <details>
-<summary>Notes</summary>
-
-<br/>
-
--   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
-
-</details>
-
-<details>
 <summary>Credits</summary>
 
 <br/>
@@ -241,7 +241,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 <br/>
 
--   For discussions & support about the project, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
+-   For discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
 </details>
 
