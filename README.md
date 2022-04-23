@@ -1,25 +1,21 @@
-# MiroTalk SFU
+# <p align="center">MiroTalk SFU</p>
 
-[![Author](https://img.shields.io/badge/Author-Miroslav-brightgreen.svg)](https://www.linkedin.com/in/miroslav-pejic-976a07101/)
-[![License: AGPLv3](https://img.shields.io/badge/License-AGPLv3-blue.svg)](https://github.com/miroslavpejic85/mirotalksfu/blob/main/LICENSE)
-[![PayPal](https://img.shields.io/badge/Support-PayPal-brightgreen.svg)](https://paypal.me/MiroslavPejic?locale.x=it_IT)
-[![Digital Ocean](https://img.shields.io/badge/Powered%20by-DigitalOcean-blue)](https://m.do.co/c/1070207afbb1)
-[![Code style: prettier](https://img.shields.io/badge/Code_style-Prettier-ff69b4.svg?)](https://github.com/prettier/prettier)
-[![Discord](https://img.shields.io/badge/chat-discord-green)](https://discord.gg/rgGYfeYW3N)
+<p align="center">Free WebRTC - SFU - Simple, Secure, Scalable Real-Time Video Conferences Up to 4k, compatible with all browsers and platforms.</p>
 
-Powered by `WebRTC` and powerful [SFU](https://mediasoup.org) integrated media server.
+<hr />
 
-Open the app with the following **supported browsers** and many more.
+<p align="center">
+<a href="https://sfu.mirotalk.org/">
+    <img src="public/images/mirotalksfu-header.gif" />
+</a>
+</p>
 
-[![Foo](public/images/browsers.png)](https://sfu.mirotalk.org/)
+<hr />
 
-## https://sfu.mirotalk.org/
+<details>
+<summary>Features</summary>
 
-<br />
-
-[![mirotalksfu](public/images/mirotalksfu-header.gif)](https://sfu.mirotalk.org/)
-
-## Features
+<br/>
 
 -   Is `100% Free` - `Open Source` - `Self Hosted`
 -   `No download`, `plug-in` or `login` required, entirely browser-based
@@ -44,17 +40,43 @@ Open the app with the following **supported browsers** and many more.
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
 -   [Sentry](https://sentry.io/) error reporting
 
----
+</details>
 
-## Presentation
+<details>
+<summary>Presentation</summary>
 
-https://www.canva.com/design/DAE693uLOIU/view
+<br/>
 
-## Quick Start
+<a href="https://www.canva.com/design/DAE693uLOIU/view">MiroTalk presentation</a>
 
--   You will need to have `NodeJS` installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
--   `python3-pip DEB package`, `build-essential DEB package` and `python version >= 3.6 with PIP`.
--   The `requirements` can also be found [here](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements).
+</details>
+
+<details open>
+<summary>Quick Start</summary>
+
+<br/>
+
+-   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
+
+Requirements install example for `Ubuntu 20.04`
+
+```bash
+# gcc g++ make
+$ apt-get update
+$ apt-get install -y build-essential
+# Python 3.8 and pip
+$ DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
+$ apt install -y software-properties-common
+$ add-apt-repository ppa:deadsnakes/ppa
+$ apt update
+$ apt install -y python3.8 python3-pip
+# NodeJS 14.X and npm
+$ apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
+$ curl -sL https://deb.nodesource.com/setup_14.x | bash -
+$ apt-get install -y nodejs
+```
+
+Start the project
 
 ```bash
 # Clone this repo
@@ -71,9 +93,12 @@ $ npm start
 
 -   Open https://localhost:3010 in browser
 
----
+</details>
 
-## Docker
+<details open>
+<summary>Docker</summary>
+
+<br/>
 
 -   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
@@ -93,9 +118,12 @@ $ docker-compose down
 
 -   Open https://localhost:3010 in browser
 
----
+</details>
 
-## API
+<details>
+<summary>Rest API</summary>
+
+<br/>
 
 -   The API documentation uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.org/api/v1/docs).
 
@@ -108,7 +136,12 @@ $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksf
 $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","notify":"0"}'
 ```
 
-## Direct Join
+</details>
+
+<details>
+<summary>Direct Join</summary>
+
+<br/>
 
 -   You can also `join` directly to your `room` by going to
 -   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0&notify=0
@@ -121,9 +154,12 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | video  | boolean | enable / disable |
     | notify | boolean | enable / disable |
 
----
+</details>
 
-## Embed a meeting
+<details>
+<summary>Embed a meeting</summary>
+
+<br/>
 
 Embedding a meeting into a service or app using an iframe.
 
@@ -135,9 +171,12 @@ Embedding a meeting into a service or app using an iframe.
 ></iframe>
 ```
 
----
+</details>
 
-## DigitalOcean
+<details>
+<summary>DigitalOcean</summary>
+
+<br/>
 
 This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
 
@@ -145,40 +184,71 @@ If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or 
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
-## Live Demo
+</details>
+
+<details>
+<summary>Live Demo</summary>
+
+<br/>
 
 https://sfu.mirotalk.org
 
 [![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
 
----
+</details>
 
-## Https
+<details>
+<summary>Https</summary>
+
+<br/>
 
 You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
 
-## Notes
+</details>
+
+<details>
+<summary>Notes</summary>
+
+<br/>
 
 -   Run the project on a `Linux or Mac` system as the `mediasoup` installation could have issues on `Windows`.
 
-## Credits
+</details>
+
+<details>
+<summary>Credits</summary>
+
+<br/>
 
 -   [Davide Pacilio](https://cruip.com/demos/solid/) (html template)
 -   [Dirk Vanbeveren](https://github.com/Dirvann) (sfu logic)
 -   [Mediasoup](https://mediasoup.org) (sfu server)
 
-## Contributing
+</details>
+
+<details>
+<summary>Contributing</summary>
+
+<br/>
 
 -   Contributions are welcome and greatly appreciated!
 -   Just run before `npm run lint`
 
-## Discussions
+</details>
 
--   For discussions about the project, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
+<details>
+<summary>Discussions and support</summary>
 
 <br/>
 
-## License
+-   For discussions & support about the project, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
+
+</details>
+
+<details>
+<summary>License</summary>
+
+<br/>
 
 [![AGPLv3](public/images/AGPLv3.png)](LICENSE)
 
@@ -186,22 +256,26 @@ MiroTalk is free and can be modified and forked. But the conditions of the AGPLv
 
 For a MiroTalk license under conditions other than AGPLv3, please contact us at info.mirotalk@gmail.com.
 
----
+</details>
+
+<details open>
+<summary>Sponsors</summary>
 
 <br/>
-
-# Sponsors
 
 Support this project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
 
----
+</details>
 
 <br/>
 
-## MiroTalk P2P
+<details>
+<summary>MiroTalk P2P</summary>
+
+<br/>
 
 Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
 
----
+</details>
