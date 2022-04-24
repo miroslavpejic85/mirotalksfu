@@ -61,17 +61,15 @@
 -   Requirements install example for `Ubuntu 20.04`
 
 ```bash
-# gcc g++ make
+# Gcc g++ make
 $ apt-get update
 $ apt-get install -y build-essential
-
 # Python 3.8 and pip
 $ DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 $ apt install -y software-properties-common
 $ add-apt-repository ppa:deadsnakes/ppa
 $ apt update
 $ apt install -y python3.8 python3-pip
-
 # NodeJS 14.X and npm
 $ apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
 $ curl -sL https://deb.nodesource.com/setup_14.x | bash -
