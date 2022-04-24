@@ -58,7 +58,7 @@
 
 -   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
 
-Requirements install example for `Ubuntu 20.04`
+-   Requirements install example for `Ubuntu 20.04`
 
 ```bash
 # gcc g++ make
@@ -76,7 +76,7 @@ $ curl -sL https://deb.nodesource.com/setup_14.x | bash -
 $ apt-get install -y nodejs
 ```
 
-Start the project
+-   Start the server
 
 ```bash
 # Clone this repo
