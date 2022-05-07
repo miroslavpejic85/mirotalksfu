@@ -56,7 +56,7 @@
 
 <br/>
 
--   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/).
+-   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [12.X](https://nodejs.org/en/blog/release/v12.22.1/) and [14.X](https://nodejs.org/en/blog/release/v14.17.5/) and [16.X](https://nodejs.org/en/blog/release/v16.15.0/).
 
 -   Requirements install example for `Ubuntu 20.04`
 
@@ -70,9 +70,9 @@ $ apt install -y software-properties-common
 $ add-apt-repository ppa:deadsnakes/ppa
 $ apt update
 $ apt install -y python3.8 python3-pip
-# NodeJS 14.X and npm
+# NodeJS 16.X and npm
 $ apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
-$ curl -sL https://deb.nodesource.com/setup_14.x | bash -
+$ curl -sL https://deb.nodesource.com/setup_16.x | bash -
 $ apt-get install -y nodejs
 ```
 
