@@ -160,9 +160,9 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
     | ------ | ------- | ---------------- |
     | room   | string  | room Id          |
     | name   | string  | user name        |
-    | audio  | boolean | enable / disable |
-    | video  | boolean | enable / disable |
-    | notify | boolean | enable / disable |
+    | audio  | boolean | audio stream     |
+    | video  | boolean | video stream     |
+    | notify | boolean | welcome message  |
 
 </details>
 
