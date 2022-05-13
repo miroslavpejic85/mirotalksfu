@@ -241,6 +241,8 @@ class RoomClient {
             }
         }
         this.refreshParticipantsCount();
+        console.log('Participants Count:', participantsCount);
+        notify && participantsCount == 1 ? shareRoom() : sound('joined');
     }
 
     async loadDevice(routerRtpCapabilities) {

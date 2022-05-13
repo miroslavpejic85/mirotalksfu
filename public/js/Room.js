@@ -521,7 +521,7 @@ function joinRoom(peer_name, room_id) {
             roomIsReady,
         );
         handleRoomClientEvents();
-        notify ? shareRoom() : sound('joined');
+        //notify ? shareRoom() : sound('joined');
     }
 }
 
