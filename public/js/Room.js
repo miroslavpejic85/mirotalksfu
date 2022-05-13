@@ -43,6 +43,7 @@ let isEnumerateDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isAudioVideoAllowed = false;
+let joinRoomWithoutAudioVideo = true;
 let isScreenAllowed = false;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -175,15 +176,13 @@ async function initEnumerateDevices() {
             isVideoAllowed = false;
         });
 
-    // The user without audio or webcam can't join
-    // if (!isAudioAllowed && !isVideoAllowed) {
-    //     openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
-    //     return false;
-    // }
-
-    hide(loadingDiv);
-    getPeerGeoLocation();
-    whoAreYou();
+    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
+        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
+    } else {
+        hide(loadingDiv);
+        getPeerGeoLocation();
+        whoAreYou();
+    }
 }
 
 function enumerateAudioDevices(stream) {
