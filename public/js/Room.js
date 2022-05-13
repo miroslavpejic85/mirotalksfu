@@ -175,13 +175,15 @@ async function initEnumerateDevices() {
             isVideoAllowed = false;
         });
 
-    if (!isAudioAllowed && !isVideoAllowed) {
-        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
-    } else {
-        hide(loadingDiv);
-        getPeerGeoLocation();
-        whoAreYou();
-    }
+    // The user without audio or webcam can't join
+    // if (!isAudioAllowed && !isVideoAllowed) {
+    //     openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
+    //     return false;
+    // }
+
+    hide(loadingDiv);
+    getPeerGeoLocation();
+    whoAreYou();
 }
 
 function enumerateAudioDevices(stream) {
