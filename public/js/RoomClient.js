@@ -629,9 +629,11 @@ class RoomClient {
                 this.localVideoStream = stream;
                 elem = await this.handleProducer(producer.id, type, stream);
                 this.videoProducerId = producer.id;
+                //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
                 this.audioProducerId = producer.id;
+                //if (!isEnumerateDevices) enumerateAudioDevices(stream);
             }
 
             producer.on('trackended', () => {

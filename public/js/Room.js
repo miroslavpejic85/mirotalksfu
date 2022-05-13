@@ -39,7 +39,8 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
-let isEnumerateDevices = false;
+let isEnumerateAudioDevices = false;
+let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isAudioVideoAllowed = false;
@@ -151,9 +152,20 @@ function makeId(length) {
 // ####################################################
 
 async function initEnumerateDevices() {
-    if (isEnumerateDevices) return;
     console.log('01 ----> init Enumerate Devices');
+    await initEnumerateAudioDevices();
+    await initEnumerateVideoDevices();
+    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
+        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
+    } else {
+        hide(loadingDiv);
+        getPeerGeoLocation();
+        whoAreYou();
+    }
+}
 
+async function initEnumerateAudioDevices() {
+    if (isEnumerateAudioDevices) return;
     // allow the audio
     await navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -164,7 +176,10 @@ async function initEnumerateDevices() {
         .catch(() => {
             isAudioAllowed = false;
         });
+}
 
+async function initEnumerateVideoDevices() {
+    if (isEnumerateVideoDevices) return;
     // allow the video
     await navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -175,14 +190,6 @@ async function initEnumerateDevices() {
         .catch(() => {
             isVideoAllowed = false;
         });
-
-    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
-        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
-    } else {
-        hide(loadingDiv);
-        getPeerGeoLocation();
-        whoAreYou();
-    }
 }
 
 function enumerateAudioDevices(stream) {
@@ -203,7 +210,7 @@ function enumerateAudioDevices(stream) {
         )
         .then(() => {
             stopTracks(stream);
-            isEnumerateDevices = true;
+            isEnumerateAudioDevices = true;
             speakerSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
         });
 }
@@ -224,7 +231,7 @@ function enumerateVideoDevices(stream) {
         )
         .then(() => {
             stopTracks(stream);
-            isEnumerateDevices = true;
+            isEnumerateVideoDevices = true;
         });
 }
 
@@ -726,6 +733,7 @@ function handleButtons() {
     };
     startAudioButton.onclick = () => {
         setAudioButtonsDisabled(true);
+        if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
@@ -738,6 +746,7 @@ function handleButtons() {
     };
     startVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
+        if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
