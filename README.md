@@ -86,7 +86,7 @@ $ git clone https://github.com/miroslavpejic85/mirotalksfu.git
 $ cd mirotalksfu
 # Copy app/src/config.template.js in app/src/config.js and edit it if needed
 $ cp app/src/config.template.js app/src/config.js
-# Install dependencies
+# Install dependencies - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
 $ npm install
 # Start the server
 $ npm start
@@ -109,7 +109,7 @@ $ npm start
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build or rebuild services
+# Build or rebuild services - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
 $ docker-compose build
 # Create and start containers
 $ docker-compose up # -d
