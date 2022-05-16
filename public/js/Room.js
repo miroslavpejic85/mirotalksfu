@@ -54,8 +54,8 @@ let recTimer = null;
 let recElapsedTime = null;
 
 const wbImageInput = 'image/*';
-const wbWidth = 800;
-const wbHeight = 600;
+const wbWidth = 1366;
+const wbHeight = 768;
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;

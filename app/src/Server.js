@@ -288,7 +288,7 @@ async function ngrokStart() {
             sentry_enabled: sentryEnabled,
         });
     } catch (err) {
-        log.error('Ngrok Start error: ', err);
+        log.error('Ngrok Start error: ', err.body);
         process.exit(1);
     }
 }
