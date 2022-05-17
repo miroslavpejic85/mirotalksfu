@@ -1443,6 +1443,7 @@ function confirmClearBoard() {
     }).then((result) => {
         if (result.isConfirmed) {
             whiteboardAction(getWhiteboardAction('clear'));
+            sound('delete');
         }
     });
 }
