@@ -122,6 +122,39 @@ $ docker-compose down
 </details>
 
 <details>
+<summary>Https</summary>
+
+<br/>
+
+You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
+
+</details>
+
+<details>
+<summary>Self Host</summary>
+
+<br/>
+
+Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`:
+
+```js
+{
+    ip: '0.0.0.0',
+    announcedIp: 'Server Public IPv4', // 'xx.xxx.xxx.xx'
+}
+```
+
+Set the inbound rules:
+
+| Port range  | Protocol | Source    | Description         |
+| ----------- | -------- | --------- | ------------------- |
+| 3010        | TCP      | 0.0.0.0/0 | App listen on tcp   |
+| 40000-40100 | TCP      | 0.0.0.0/0 | RTC port ranges tcp |
+| 40000-40100 | UDP      | 0.0.0.0/0 | RTC port ranges udp |
+
+</details>
+
+<details>
 <summary>Notes</summary>
 
 <br/>
@@ -204,15 +237,6 @@ If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or 
 https://sfu.mirotalk.org
 
 [![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
-
-</details>
-
-<details>
-<summary>Https</summary>
-
-<br/>
-
-You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
 
 </details>
 
