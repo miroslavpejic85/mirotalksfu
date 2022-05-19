@@ -69,9 +69,10 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 class AwaitQueue {
                     constructor(
-                        { ClosedErrorClass = Error, StoppedErrorClass = Error } = {
+                        { ClosedErrorClass = Error, StoppedErrorClass = Error, RemovedTaskErrorClass = Error } = {
                             ClosedErrorClass: Error,
                             StoppedErrorClass: Error,
+                            RemovedTaskErrorClass: Error,
                         },
                     ) {
                         // Closed flag.
@@ -82,19 +83,15 @@
                         this.ClosedErrorClass = Error;
                         // Error class used when rejecting a task due to AwaitQueue being stopped.
                         this.StoppedErrorClass = Error;
+                        // Error class used when removing a pending task when calling removeTask().
+                        this.RemovedTaskErrorClass = Error;
                         this.ClosedErrorClass = ClosedErrorClass;
                         this.StoppedErrorClass = StoppedErrorClass;
+                        this.RemovedTaskErrorClass = RemovedTaskErrorClass;
                     }
-                    /**
-                     * The number of ongoing enqueued tasks.
-                     */
                     get size() {
                         return this.pendingTasks.length;
                     }
-                    /**
-                     * Closes the AwaitQueue. Pending tasks will be rejected with ClosedErrorClass
-                     * error.
-                     */
                     close() {
                         if (this.closed) return;
                         this.closed = true;
@@ -105,13 +102,6 @@
                         // Enpty the pending tasks array.
                         this.pendingTasks.length = 0;
                     }
-                    /**
-                     * Accepts a task as argument (and an optional task name) and enqueues it after
-                     * pending tasks. Once processed, the push() method resolves (or rejects) with
-                     * the result returned by the given task.
-                     *
-                     * The given task must return a Promise or directly a value.
-                     */
                     push(task, name) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (this.closed) throw new this.ClosedErrorClass('AwaitQueue closed');
@@ -138,11 +128,15 @@
                             });
                         });
                     }
-                    /**
-                     * Make ongoing pending tasks reject with the given StoppedErrorClass error.
-                     * The AwaitQueue instance is still usable for future tasks added via push()
-                     * method.
-                     */
+                    removeTask(idx) {
+                        if (idx === 0) {
+                            throw new TypeError('cannot remove task with index 0');
+                        }
+                        const pendingTask = this.pendingTasks[idx];
+                        if (!pendingTask) return;
+                        this.pendingTasks.splice(idx, 1);
+                        pendingTask.reject(new this.RemovedTaskErrorClass('task removed from the queue'));
+                    }
                     stop() {
                         if (this.closed) return;
                         for (const pendingTask of this.pendingTasks) {
@@ -154,18 +148,18 @@
                     }
                     dump() {
                         const now = new Date();
-                        return this.pendingTasks.map((pendingTask) => {
-                            return {
-                                task: pendingTask.task,
-                                name: pendingTask.name,
-                                enqueuedTime: pendingTask.executedAt
-                                    ? pendingTask.executedAt.getTime() - pendingTask.enqueuedAt.getTime()
-                                    : now.getTime() - pendingTask.enqueuedAt.getTime(),
-                                executingTime: pendingTask.executedAt
-                                    ? now.getTime() - pendingTask.executedAt.getTime()
-                                    : 0,
-                            };
-                        });
+                        let idx = 0;
+                        return this.pendingTasks.map((pendingTask) => ({
+                            idx: idx++,
+                            task: pendingTask.task,
+                            name: pendingTask.name,
+                            enqueuedTime: pendingTask.executedAt
+                                ? pendingTask.executedAt.getTime() - pendingTask.enqueuedAt.getTime()
+                                : now.getTime() - pendingTask.enqueuedAt.getTime(),
+                            executingTime: pendingTask.executedAt
+                                ? now.getTime() - pendingTask.executedAt.getTime()
+                                : 0,
+                        }));
                     }
                     next() {
                         return __awaiter(this, void 0, void 0, function* () {
@@ -2852,7 +2846,7 @@
                         this._track = track;
                         this._rtpParameters = rtpParameters;
                         this._paused = !track.enabled;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._onTrackEnded = this._onTrackEnded.bind(this);
                         this._handleTrack();
                     }
@@ -2919,6 +2913,7 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
@@ -3042,7 +3037,7 @@
                         this._dataProducerId = dataProducerId;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleDataChannel();
                     }
                     /**
@@ -3108,6 +3103,7 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
@@ -3209,7 +3205,7 @@
                         this._id = id;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleDataChannel();
                     }
                     /**
@@ -3275,6 +3271,7 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
@@ -3371,12 +3368,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -3704,7 +3705,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         logger.debug('createSendTransport()');
                         return this._createTransport({
@@ -3737,7 +3738,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         logger.debug('createRecvTransport()');
                         return this._createTransport({
@@ -3765,7 +3766,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         if (!this._loaded) throw new errors_1.InvalidStateError('not loaded');
                         else if (typeof id !== 'string') throw new TypeError('missing id');
@@ -3950,7 +3951,7 @@
                         this._stopTracks = stopTracks;
                         this._disableTrackOnPause = disableTrackOnPause;
                         this._zeroRtpOnPause = zeroRtpOnPause;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._onTrackEnded = this._onTrackEnded.bind(this);
                         // NOTE: Minor issue. If zeroRtpOnPause is true, we cannot emit the
                         // '@replacetrack' event here, so RTCRtpSender.track won't be null.
@@ -4021,6 +4022,7 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
@@ -4210,12 +4212,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -4346,7 +4352,7 @@
                             proprietaryConstraints,
                             extendedRtpCapabilities,
                         });
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleHandler();
                     }
                     /**
@@ -4388,6 +4394,7 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
@@ -4807,18 +4814,23 @@
                                 const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
                                 // Clear pending pause Consumer map.
                                 this._pendingPauseConsumers.clear();
-                                await this._handler.pauseReceiving(
-                                    pendingPauseConsumers.map((consumer) => consumer.localId),
-                                );
-                            }, 'consumer @pause event')
-                            .catch(() => {})
-                            .finally(() => {
+                                try {
+                                    await this._handler.pauseReceiving(
+                                        pendingPauseConsumers.map((consumer) => consumer.localId),
+                                    );
+                                } catch (error) {
+                                    logger.error('_pausePendingConsumers() | failed to pause Consumers:', error);
+                                }
                                 this._consumerPauseInProgress = false;
+                            }, 'consumer @pause event')
+                            .then(() => {
                                 // There are pending Consumers to be paused, do it.
                                 if (this._pendingPauseConsumers.size > 0) {
                                     this._pausePendingConsumers();
                                 }
-                            });
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
                     }
                     _resumePendingConsumers() {
                         this._awaitQueue
@@ -4827,18 +4839,23 @@
                                 const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
                                 // Clear pending resume Consumer map.
                                 this._pendingResumeConsumers.clear();
-                                await this._handler.resumeReceiving(
-                                    pendingResumeConsumers.map((consumer) => consumer.localId),
-                                );
+                                try {
+                                    await this._handler.resumeReceiving(
+                                        pendingResumeConsumers.map((consumer) => consumer.localId),
+                                    );
+                                } catch (error) {
+                                    logger.error('_resumePendingConsumers() | failed to resume Consumers:', error);
+                                }
                             }, 'consumer @resume event')
-                            .catch(() => {})
-                            .finally(() => {
+                            .then(() => {
                                 this._consumerResumeInProgress = false;
                                 // There are pending Consumer to be resumed, do it.
                                 if (this._pendingResumeConsumers.size > 0) {
                                     this._resumePendingConsumers();
                                 }
-                            });
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
                     }
                     _handleHandler() {
                         const handler = this._handler;
@@ -5014,12 +5031,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -5568,12 +5589,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -6154,12 +6179,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -6755,12 +6784,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7364,12 +7397,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7796,12 +7833,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8425,12 +8466,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8994,12 +9039,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -9572,12 +9621,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10149,12 +10202,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10247,12 +10304,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10798,12 +10859,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11105,12 +11170,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11556,12 +11625,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11621,7 +11694,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.51';
+                exports.version = '3.6.52';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -11643,12 +11716,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -12476,12 +12553,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -12550,9 +12631,286 @@
         ],
         40: [
             function (require, module, exports) {
-                arguments[4][5][0].apply(exports, arguments);
+                /**
+                 * This is the common logic for both the Node.js and web browser
+                 * implementations of `debug()`.
+                 */
+
+                function setup(env) {
+                    createDebug.debug = createDebug;
+                    createDebug.default = createDebug;
+                    createDebug.coerce = coerce;
+                    createDebug.disable = disable;
+                    createDebug.enable = enable;
+                    createDebug.enabled = enabled;
+                    createDebug.humanize = require('ms');
+                    createDebug.destroy = destroy;
+
+                    Object.keys(env).forEach((key) => {
+                        createDebug[key] = env[key];
+                    });
+
+                    /**
+                     * The currently active debug mode names, and names to skip.
+                     */
+
+                    createDebug.names = [];
+                    createDebug.skips = [];
+
+                    /**
+                     * Map of special "%n" handling functions, for the debug "format" argument.
+                     *
+                     * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
+                     */
+                    createDebug.formatters = {};
+
+                    /**
+                     * Selects a color for a debug namespace
+                     * @param {String} namespace The namespace string for the debug instance to be colored
+                     * @return {Number|String} An ANSI color code for the given namespace
+                     * @api private
+                     */
+                    function selectColor(namespace) {
+                        let hash = 0;
+
+                        for (let i = 0; i < namespace.length; i++) {
+                            hash = (hash << 5) - hash + namespace.charCodeAt(i);
+                            hash |= 0; // Convert to 32bit integer
+                        }
+
+                        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
+                    }
+                    createDebug.selectColor = selectColor;
+
+                    /**
+                     * Create a debugger with the given `namespace`.
+                     *
+                     * @param {String} namespace
+                     * @return {Function}
+                     * @api public
+                     */
+                    function createDebug(namespace) {
+                        let prevTime;
+                        let enableOverride = null;
+                        let namespacesCache;
+                        let enabledCache;
+
+                        function debug(...args) {
+                            // Disabled?
+                            if (!debug.enabled) {
+                                return;
+                            }
+
+                            const self = debug;
+
+                            // Set `diff` timestamp
+                            const curr = Number(new Date());
+                            const ms = curr - (prevTime || curr);
+                            self.diff = ms;
+                            self.prev = prevTime;
+                            self.curr = curr;
+                            prevTime = curr;
+
+                            args[0] = createDebug.coerce(args[0]);
+
+                            if (typeof args[0] !== 'string') {
+                                // Anything else let's inspect with %O
+                                args.unshift('%O');
+                            }
+
+                            // Apply any `formatters` transformations
+                            let index = 0;
+                            args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
+                                // If we encounter an escaped % then don't increase the array index
+                                if (match === '%%') {
+                                    return '%';
+                                }
+                                index++;
+                                const formatter = createDebug.formatters[format];
+                                if (typeof formatter === 'function') {
+                                    const val = args[index];
+                                    match = formatter.call(self, val);
+
+                                    // Now we need to remove `args[index]` since it's inlined in the `format`
+                                    args.splice(index, 1);
+                                    index--;
+                                }
+                                return match;
+                            });
+
+                            // Apply env-specific formatting (colors, etc.)
+                            createDebug.formatArgs.call(self, args);
+
+                            const logFn = self.log || createDebug.log;
+                            logFn.apply(self, args);
+                        }
+
+                        debug.namespace = namespace;
+                        debug.useColors = createDebug.useColors();
+                        debug.color = createDebug.selectColor(namespace);
+                        debug.extend = extend;
+                        debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
+
+                        Object.defineProperty(debug, 'enabled', {
+                            enumerable: true,
+                            configurable: false,
+                            get: () => {
+                                if (enableOverride !== null) {
+                                    return enableOverride;
+                                }
+                                if (namespacesCache !== createDebug.namespaces) {
+                                    namespacesCache = createDebug.namespaces;
+                                    enabledCache = createDebug.enabled(namespace);
+                                }
+
+                                return enabledCache;
+                            },
+                            set: (v) => {
+                                enableOverride = v;
+                            },
+                        });
+
+                        // Env-specific initialization logic for debug instances
+                        if (typeof createDebug.init === 'function') {
+                            createDebug.init(debug);
+                        }
+
+                        return debug;
+                    }
+
+                    function extend(namespace, delimiter) {
+                        const newDebug = createDebug(
+                            this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace,
+                        );
+                        newDebug.log = this.log;
+                        return newDebug;
+                    }
+
+                    /**
+                     * Enables a debug mode by namespaces. This can include modes
+                     * separated by a colon and wildcards.
+                     *
+                     * @param {String} namespaces
+                     * @api public
+                     */
+                    function enable(namespaces) {
+                        createDebug.save(namespaces);
+                        createDebug.namespaces = namespaces;
+
+                        createDebug.names = [];
+                        createDebug.skips = [];
+
+                        let i;
+                        const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
+                        const len = split.length;
+
+                        for (i = 0; i < len; i++) {
+                            if (!split[i]) {
+                                // ignore empty strings
+                                continue;
+                            }
+
+                            namespaces = split[i].replace(/\*/g, '.*?');
+
+                            if (namespaces[0] === '-') {
+                                createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
+                            } else {
+                                createDebug.names.push(new RegExp('^' + namespaces + '$'));
+                            }
+                        }
+                    }
+
+                    /**
+                     * Disable debug output.
+                     *
+                     * @return {String} namespaces
+                     * @api public
+                     */
+                    function disable() {
+                        const namespaces = [
+                            ...createDebug.names.map(toNamespace),
+                            ...createDebug.skips.map(toNamespace).map((namespace) => '-' + namespace),
+                        ].join(',');
+                        createDebug.enable('');
+                        return namespaces;
+                    }
+
+                    /**
+                     * Returns true if the given mode name is enabled, false otherwise.
+                     *
+                     * @param {String} name
+                     * @return {Boolean}
+                     * @api public
+                     */
+                    function enabled(name) {
+                        if (name[name.length - 1] === '*') {
+                            return true;
+                        }
+
+                        let i;
+                        let len;
+
+                        for (i = 0, len = createDebug.skips.length; i < len; i++) {
+                            if (createDebug.skips[i].test(name)) {
+                                return false;
+                            }
+                        }
+
+                        for (i = 0, len = createDebug.names.length; i < len; i++) {
+                            if (createDebug.names[i].test(name)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+                    }
+
+                    /**
+                     * Convert regexp to namespace
+                     *
+                     * @param {RegExp} regxep
+                     * @return {String} namespace
+                     * @api private
+                     */
+                    function toNamespace(regexp) {
+                        return regexp
+                            .toString()
+                            .substring(2, regexp.toString().length - 2)
+                            .replace(/\.\*\?$/, '*');
+                    }
+
+                    /**
+                     * Coerce `val`.
+                     *
+                     * @param {Mixed} val
+                     * @return {Mixed}
+                     * @api private
+                     */
+                    function coerce(val) {
+                        if (val instanceof Error) {
+                            return val.stack || val.message;
+                        }
+                        return val;
+                    }
+
+                    /**
+                     * XXX DO NOT USE. This is a temporary stub function.
+                     * XXX It WILL be removed in the next major release.
+                     */
+                    function destroy() {
+                        console.warn(
+                            'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
+                        );
+                    }
+
+                    createDebug.enable(createDebug.load());
+
+                    return createDebug;
+                }
+
+                module.exports = setup;
             },
-            { dup: 5, ms: 41 },
+            { ms: 41 },
         ],
         41: [
             function (require, module, exports) {
