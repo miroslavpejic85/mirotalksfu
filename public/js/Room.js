@@ -1505,6 +1505,8 @@ async function getRoomParticipants(refresh = false) {
         toggleParticipants();
         sound('open');
     }
+
+    setParticipantsTippy(peers);
 }
 
 async function getParticipantsTable(peers) {
@@ -1574,9 +1576,9 @@ async function getParticipantsTable(peers) {
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
-                <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
-                <td><button id="sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
+                <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
+                <td><button id="${peer_id}___sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;
@@ -1584,6 +1586,29 @@ async function getParticipantsTable(peers) {
     }
     table += `</table>`;
     return table;
+}
+
+function setParticipantsTippy(peers) {
+    //
+    if (!DetectRTC.isMobileDevice) {
+        setTippy('muteAllButton', 'Mute all participants', 'top');
+        setTippy('hideAllButton', 'Hide all participants', 'top');
+        setTippy('sendAllButton', 'Share file to all', 'top');
+        setTippy('sendMessageToAll', 'Send message to all', 'top');
+        setTippy('sendYouTubeAll', 'Share YouTube to all', 'top');
+        setTippy('ejectAllButton', 'Eject all participants', 'top');
+    }
+    //
+    for (let peer of Array.from(peers.keys())) {
+        let peer_info = peers.get(peer).peer_info;
+        let peer_id = peer_info.peer_id;
+        setTippy(peer_id + '___pAudio', 'Mute', 'top');
+        setTippy(peer_id + '___pVideo', 'Hide', 'top');
+        setTippy(peer_id + '___shareFile', 'Share file to all', 'top');
+        setTippy(peer_id + '___sendMessageTo', 'Send message', 'top');
+        setTippy(peer_id + '___sendYouTubeTo', 'Share YouTube', 'top');
+        setTippy(peer_id + '___pEject', 'Eject', 'top');
+    }
 }
 
 function refreshParticipantsCount(count) {
