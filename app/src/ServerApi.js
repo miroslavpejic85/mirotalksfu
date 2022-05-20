@@ -31,6 +31,8 @@ module.exports = class ServerApi {
             data.audio +
             '&video=' +
             data.video +
+            '&screen=' +
+            data.screen +
             '&notify=' +
             data.notify
         );

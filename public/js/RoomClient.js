@@ -81,6 +81,7 @@ class RoomClient {
         peer_info,
         isAudioAllowed,
         isVideoAllowed,
+        isScreenAllowed,
         successCallback,
     ) {
         this.remoteAudioEl = remoteAudioEl;
@@ -96,6 +97,7 @@ class RoomClient {
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
+        this.isScreenAllowed = isScreenAllowed;
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
@@ -242,7 +244,15 @@ class RoomClient {
         }
         this.refreshParticipantsCount();
         console.log('Participants Count:', participantsCount);
-        notify && participantsCount == 1 ? shareRoom() : sound('joined');
+        // notify && participantsCount == 1 ? shareRoom() : sound('joined');
+        if (notify && participantsCount == 1) {
+            shareRoom();
+        } else {
+            if (this.isScreenAllowed) {
+                this.shareScreen();
+            }
+            sound('joined');
+        }
     }
 
     async loadDevice(routerRtpCapabilities) {
@@ -563,6 +573,9 @@ class RoomClient {
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
+        // if (this.isScreenAllowed) {
+        //     this.shareScreen();
+        // }
     }
 
     // ####################################################
@@ -1228,6 +1241,42 @@ class RoomClient {
             handleAspectRatio();
             console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             if (peer_id != this.peer_id) this.sound('left');
+        }
+    }
+
+    // ####################################################
+    // SHARE SCREEN ON JOIN
+    // ####################################################
+
+    shareScreen() {
+        if (!this.isMobileDevice && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia)) {
+            this.sound('open');
+            // startScreenButton.click(); // Chrome - Opera - Edge - Brave
+            // handle error: getDisplayMedia requires transient activation from a user gesture on Safari - FireFox
+            Swal.fire({
+                background: swalBackground,
+                position: 'center',
+                icon: 'question',
+                text: 'Do you want to share your screen?',
+                showDenyButton: true,
+                confirmButtonText: `Yes`,
+                denyButtonText: `No`,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    startScreenButton.click();
+                    console.log('10 ----> Screen is on');
+                } else {
+                    console.log('10 ----> Screen is on');
+                }
+            });
+        } else {
+            console.log('10 ----> Screen is off');
         }
     }
 

@@ -43,9 +43,9 @@ let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let joinRoomWithoutAudioVideo = true;
-let isScreenAllowed = false;
 let initAudioButton = null;
 let initVideoButton = null;
 let initAudioVideoButton = null;
@@ -252,10 +252,23 @@ function appenChild(device, el) {
 // API CHECK
 // ####################################################
 
+function getScreen() {
+    let qs = new URLSearchParams(window.location.search);
+    let screen = qs.get('screen');
+    if (screen) {
+        screen = screen.toLowerCase();
+        let queryScreen = screen === '1' || screen === 'true';
+        if (queryScreen != null && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia))
+            return queryScreen;
+    }
+    return false;
+}
+
 function getNotify() {
     let qs = new URLSearchParams(window.location.search);
     let notify = qs.get('notify');
     if (notify) {
+        notify = notify.toLowerCase();
         let queryNotify = notify === '1' || notify === 'true';
         if (queryNotify != null) return queryNotify;
     }
@@ -460,6 +473,10 @@ async function shareRoom(useNavigator = false) {
                 };
                 shareRoomByEmail(message);
             }
+            // share screen on join
+            if (isScreenAllowed) {
+                rc.shareScreen();
+            }
         });
         makeRoomQR();
     }
@@ -518,6 +535,7 @@ function joinRoom(peer_name, room_id) {
             peer_info,
             isAudioAllowed,
             isVideoAllowed,
+            isScreenAllowed,
             roomIsReady,
         );
         handleRoomClientEvents();

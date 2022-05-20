@@ -17,6 +17,7 @@ function getResponse() {
             name: 'mirotalksfu',
             audio: true,
             video: true,
+            screen: true,
             notify: true,
         }),
     });

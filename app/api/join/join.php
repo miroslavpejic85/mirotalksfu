@@ -20,6 +20,7 @@ $data = array(
     "name"   => "mirotalksfu",
     "audio"  => true,
     "video"  => true,
+    "screen" => true,
     "notify" => true,
 );
 $data_string = json_encode($data);
