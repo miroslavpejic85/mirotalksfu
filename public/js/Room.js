@@ -1597,17 +1597,17 @@ function setParticipantsTippy(peers) {
         setTippy('sendMessageToAll', 'Send message to all', 'top');
         setTippy('sendYouTubeAll', 'Share YouTube to all', 'top');
         setTippy('ejectAllButton', 'Eject all participants', 'top');
-    }
-    //
-    for (let peer of Array.from(peers.keys())) {
-        let peer_info = peers.get(peer).peer_info;
-        let peer_id = peer_info.peer_id;
-        setTippy(peer_id + '___pAudio', 'Mute', 'top');
-        setTippy(peer_id + '___pVideo', 'Hide', 'top');
-        setTippy(peer_id + '___shareFile', 'Share file to all', 'top');
-        setTippy(peer_id + '___sendMessageTo', 'Send message', 'top');
-        setTippy(peer_id + '___sendYouTubeTo', 'Share YouTube', 'top');
-        setTippy(peer_id + '___pEject', 'Eject', 'top');
+        //
+        for (let peer of Array.from(peers.keys())) {
+            let peer_info = peers.get(peer).peer_info;
+            let peer_id = peer_info.peer_id;
+            setTippy(peer_id + '___pAudio', 'Mute', 'top');
+            setTippy(peer_id + '___pVideo', 'Hide', 'top');
+            setTippy(peer_id + '___shareFile', 'Share file to all', 'top');
+            setTippy(peer_id + '___sendMessageTo', 'Send message', 'top');
+            setTippy(peer_id + '___sendYouTubeTo', 'Share YouTube', 'top');
+            setTippy(peer_id + '___pEject', 'Eject', 'top');
+        }
     }
 }
 
