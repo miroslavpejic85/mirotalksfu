@@ -33,7 +33,8 @@
 -   Advance collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
 -   Recording your Screen, Audio, or Video
--   Share any YouTube video in real-time to your participants
+-   Share any video YouTube in real-time to your participants
+-   Share any video MP4 in real-time to your participants with possibility to download it
 -   Full-Screen Mode on mouse click on the Video element
 -   Possibility to Change UI Themes
 -   Possibility to protect your Host with username and password (default disabled)

@@ -22,7 +22,7 @@ const _PEER = {
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
-    sendYouTube: '<i class="fab fa-youtube"></i>',
+    sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
 const surveyActive = true;
@@ -84,7 +84,7 @@ function initClient() {
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
-        setTippy('tabYoutubeBtn', 'YouTube', 'top');
+        setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
@@ -692,8 +692,8 @@ function handleButtons() {
     tabRoomBtn.onclick = (e) => {
         rc.openTab(e, 'tabRoom');
     };
-    tabYoutubeBtn.onclick = (e) => {
-        rc.openTab(e, 'tabYoutube');
+    tabVideoShareBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVideoShare');
     };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
@@ -782,11 +782,11 @@ function handleButtons() {
     fileShareButton.onclick = () => {
         rc.selectFileToShare(rc.peer_id, true);
     };
-    youTubeShareButton.onclick = () => {
-        rc.youTubeShareVideo('all');
+    videoShareButton.onclick = () => {
+        rc.shareVideo('all');
     };
-    youTubeCloseBtn.onclick = () => {
-        rc.closeYouTube(true);
+    videoCloseBtn.onclick = () => {
+        rc.closeVideo(true);
     };
     sendAbortBtn.onclick = () => {
         rc.abortFileTransfer();
@@ -1558,7 +1558,7 @@ async function getParticipantsTable(peers) {
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
-        <td><button id="sendYouTubeAll" onclick="rc.youTubeShareVideo('all');">${_PEER.sendYouTube}</button></td>
+        <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
@@ -1596,7 +1596,7 @@ async function getParticipantsTable(peers) {
                 <td><button>${peer_hand}</button></td>
                 <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
                 <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
-                <td><button id="${peer_id}___sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
+                <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;
@@ -1613,7 +1613,7 @@ function setParticipantsTippy(peers) {
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('sendAllButton', 'Share file to all', 'top');
         setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendYouTubeAll', 'Share YouTube to all', 'top');
+        setTippy('sendVideoAll', 'Share video mp4 or YouTube to all', 'top');
         setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
@@ -1623,7 +1623,7 @@ function setParticipantsTippy(peers) {
             setTippy(peer_id + '___pVideo', 'Hide', 'top');
             setTippy(peer_id + '___shareFile', 'Share file', 'top');
             setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
-            setTippy(peer_id + '___sendYouTubeTo', 'Share YouTube', 'top');
+            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
             setTippy(peer_id + '___pEject', 'Eject', 'top');
         }
     }

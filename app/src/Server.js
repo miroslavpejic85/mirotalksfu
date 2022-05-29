@@ -443,12 +443,12 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
     });
 
-    socket.on('youTubeAction', (data) => {
-        log.debug('YouTube: ', data);
+    socket.on('shareVideoAction', (data) => {
+        log.debug('Share video: ', data);
         if (data.peer_id == 'all') {
-            roomList.get(socket.room_id).broadCast(socket.id, 'youTubeAction', data);
+            roomList.get(socket.room_id).broadCast(socket.id, 'shareVideoAction', data);
         } else {
-            roomList.get(socket.room_id).sendTo(data.peer_id, 'youTubeAction', data);
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'shareVideoAction', data);
         }
     });
 

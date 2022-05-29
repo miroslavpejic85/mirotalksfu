@@ -16,7 +16,7 @@ const html = {
     snapshot: 'fas fa-camera-retro',
     sendFile: 'fas fa-upload',
     sendMsg: 'fas fa-paper-plane',
-    sendYouTube: 'fab fa-youtube',
+    sendVideo: 'fab fa-youtube',
     kickOut: 'fas fa-times',
 };
 
@@ -29,7 +29,7 @@ const image = {
     users: '../images/participants.png',
     user: '../images/participant.png',
     username: '../images/user.png',
-    youtube: '../images/youtube.png',
+    videoShare: '../images/video-share.png',
     message: '../images/message.png',
     share: '../images/share.png',
     exit: '../images/exit.png',
@@ -508,9 +508,9 @@ class RoomClient {
         );
 
         this.socket.on(
-            'youTubeAction',
+            'shareVideoAction',
             function (data) {
-                this.youTubeAction(data);
+                this.shareVideoAction(data);
             }.bind(this),
         );
 
@@ -1018,7 +1018,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sy, ko, pb, pm;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm;
         switch (type) {
             case mediaType.video:
                 let remotePeerId = peer_info.peer_id;
@@ -1048,9 +1048,9 @@ class RoomClient {
                 sm = document.createElement('button');
                 sm.id = id + '___' + remotePeerId + '___sendMsg';
                 sm.className = html.sendMsg;
-                sy = document.createElement('button');
-                sy.id = id + '___' + remotePeerId + '___sendYouTube';
-                sy.className = html.sendYouTube;
+                sv = document.createElement('button');
+                sv.id = id + '___' + remotePeerId + '___sendVideo';
+                sv.className = html.sendVideo;
                 cm = document.createElement('button');
                 cm.id = id + '___' + remotePeerId + '___video';
                 cm.className = html.videoOn;
@@ -1078,7 +1078,7 @@ class RoomClient {
                 vb.appendChild(ko);
                 vb.appendChild(au);
                 vb.appendChild(cm);
-                vb.appendChild(sy);
+                vb.appendChild(sv);
                 vb.appendChild(sf);
                 vb.appendChild(sm);
                 vb.appendChild(ts);
@@ -1094,7 +1094,7 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
                 this.handleSM(sm.id);
-                this.handleSY(sy.id);
+                this.handleSV(sv.id);
                 this.handleCM(cm.id);
                 this.handleAU(au.id);
                 this.handleKO(ko.id);
@@ -1108,7 +1108,7 @@ class RoomClient {
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
                     this.setTippy(sm.id, 'Send message', 'top-end');
-                    this.setTippy(sy.id, 'Send youTube', 'top-end');
+                    this.setTippy(sv.id, 'Send video', 'top-end');
                     this.setTippy(cm.id, 'Hide', 'top-end');
                     this.setTippy(au.id, 'Mute', 'top-end');
                     this.setTippy(ko.id, 'Eject', 'top-end');
@@ -1155,7 +1155,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, vb, i, h, au, sf, sm, sy, ko, p, pm, pb;
+        let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1176,9 +1176,9 @@ class RoomClient {
             sm = document.createElement('button');
             sm.id = 'remotePeer___' + peer_id + '___sendMsg';
             sm.className = html.sendMsg;
-            sy = document.createElement('button');
-            sy.id = 'remotePeer___' + peer_id + '___sendYouTube';
-            sy.className = html.sendYouTube;
+            sv = document.createElement('button');
+            sv.id = 'remotePeer___' + peer_id + '___sendVideo';
+            sv.className = html.sendVideo;
             ko = document.createElement('button');
             ko.id = 'remotePeer___' + peer_id + '___kickOut';
             ko.className = html.kickOut;
@@ -1203,7 +1203,7 @@ class RoomClient {
         pm.appendChild(pb);
         if (remotePeer) {
             vb.appendChild(ko);
-            vb.appendChild(sy);
+            vb.appendChild(sv);
             vb.appendChild(sf);
             vb.appendChild(sm);
         }
@@ -1218,7 +1218,7 @@ class RoomClient {
         if (remotePeer) {
             this.handleSM(sm.id);
             this.handleSF(sf.id);
-            this.handleSY(sy.id);
+            this.handleSV(sv.id);
             this.handleKO(ko.id);
         }
         this.setVideoAvatarImgName(i.id, peer_name);
@@ -1228,7 +1228,7 @@ class RoomClient {
         if (!this.isMobileDevice && remotePeer) {
             this.setTippy(sm.id, 'Send message', 'top-end');
             this.setTippy(sf.id, 'Send file', 'top-end');
-            this.setTippy(sy.id, 'Send youTube', 'top-end');
+            this.setTippy(sv.id, 'Send video', 'top-end');
             this.setTippy(au.id, 'Mute', 'top-end');
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
@@ -2291,27 +2291,27 @@ class RoomClient {
     }
 
     // ####################################################
-    // YOUTUBE SHARE VIDEO
+    // SHARE VIDEO YOUTUBE or MP4
     // ####################################################
 
-    handleSY(uid) {
+    handleSV(uid) {
         const words = uid.split('___');
         let peer_id = words[1];
-        let btnSy = this.getId(uid);
-        btnSy.addEventListener('click', () => {
-            this.youTubeShareVideo(peer_id);
+        let btnSv = this.getId(uid);
+        btnSv.addEventListener('click', () => {
+            this.shareVideo(peer_id);
         });
     }
 
-    youTubeShareVideo(peer_id = 'all') {
+    shareVideo(peer_id = 'all') {
         this.sound('open');
 
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            imageUrl: image.youtube,
-            title: 'Share YouTube Video',
-            text: 'Past YouTube video URL',
+            imageUrl: image.videoShare,
+            title: 'Share YouTube or Mp4 Video',
+            text: 'Past YouTube or Mp4 video URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
@@ -2328,20 +2328,23 @@ class RoomClient {
                     return;
                 }
                 // https://www.youtube.com/watch?v=RT6_Id5-7-s
+                // http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 
-                let you_tube_url = this.getYoutubeEmbed(result.value);
-                if (you_tube_url) {
+                let is_youtube = result.value.endsWith('.mp4') ? false : true;
+                let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
+                if (video_url) {
                     let data = {
                         peer_id: peer_id,
                         peer_name: this.peer_name,
-                        you_tube_url: you_tube_url,
+                        video_url: video_url,
+                        is_youtube: is_youtube,
                         action: 'open',
                     };
-                    console.log('YouTube video URL: ', you_tube_url);
-                    this.socket.emit('youTubeAction', data);
-                    this.openYouTube(data);
+                    console.log('Video URL: ', video_url);
+                    this.socket.emit('shareVideoAction', data);
+                    this.openVideo(data);
                 } else {
-                    this.userLog('error', 'Not valid YouTube URL', 'top-end');
+                    this.userLog('error', 'Not valid mp4 or YouTube URL', 'top-end');
                 }
             }
         });
@@ -2353,79 +2356,86 @@ class RoomClient {
         return match && match[7].length == 11 ? 'https://www.youtube.com/embed/' + match[7] + '?autoplay=1' : false;
     }
 
-    youTubeAction(data) {
+    shareVideoAction(data) {
         let peer_name = data.peer_name;
         let action = data.action;
         switch (action) {
             case 'open':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the YouTube video`, 'top-end');
-                this.openYouTube(data);
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top-end');
+                this.openVideo(data);
                 break;
             case 'close':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the YouTube video`, 'top-end');
-                this.closeYouTube();
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top-end');
+                this.closeVideo();
                 break;
         }
     }
 
-    openYouTube(data) {
-        let d, vb, e, iframe;
+    openVideo(data) {
+        let d, vb, e, video;
         let peer_name = data.peer_name;
-        let you_tube_url = data.you_tube_url;
-        this.closeYouTube();
-        show(youTubeCloseBtn);
+        let video_url = data.video_url;
+        let is_youtube = data.is_youtube;
+        this.closeVideo();
+        show(videoCloseBtn);
         d = document.createElement('div');
         d.className = 'Camera';
-        d.id = '__youTube';
+        d.id = '__shareVideo';
         vb = document.createElement('div');
-        vb.setAttribute('id', '__youTubeBar');
+        vb.setAttribute('id', '__videoBar');
         vb.className = 'videoMenuBar fadein';
         e = document.createElement('button');
         e.className = 'fas fa-times';
-        e.id = '__youTubeExit';
-        iframe = document.createElement('iframe');
-        iframe.setAttribute('id', '__youTubeIframe');
-        iframe.setAttribute('title', peer_name);
-        iframe.setAttribute('width', '100%');
-        iframe.setAttribute('height', '100%');
-        iframe.setAttribute('src', you_tube_url);
-        iframe.setAttribute(
-            'allow',
-            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
-        );
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allowfullscreen', true);
+        e.id = '__videoExit';
+        if (is_youtube) {
+            video = document.createElement('iframe');
+            video.setAttribute('title', peer_name);
+            video.setAttribute(
+                'allow',
+                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+            );
+            video.setAttribute('frameborder', '0');
+            video.setAttribute('allowfullscreen', true);
+        } else {
+            video = document.createElement('video');
+            video.autoplay = true;
+            video.controls = true;
+        }
+        video.setAttribute('id', '__videoShare');
+        video.setAttribute('src', video_url);
+        video.setAttribute('width', '100%');
+        video.setAttribute('height', '100%');
         vb.appendChild(e);
-        d.appendChild(iframe);
+        d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         handleAspectRatio();
-        let exitYouTubeBtn = this.getId(e.id);
-        exitYouTubeBtn.addEventListener('click', () => {
-            this.closeYouTube(true);
+        let exitVideoBtn = this.getId(e.id);
+        exitVideoBtn.addEventListener('click', () => {
+            this.closeVideo(true);
         });
         if (!this.isMobileDevice) {
             this.setTippy(e.id, 'Close video', 'top-end');
         }
-        console.log('[openYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
+        console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
 
-    closeYouTube(emit = false, peer_id = 'all') {
+    closeVideo(emit = false, peer_id = 'all') {
         if (emit) {
             let data = {
                 peer_id: peer_id,
                 peer_name: this.peer_name,
                 action: 'close',
             };
-            this.socket.emit('youTubeAction', data);
+            this.socket.emit('shareVideoAction', data);
         }
-        let youTubeDiv = this.getId('__youTube');
-        if (youTubeDiv) {
-            hide(youTubeCloseBtn);
-            youTubeDiv.parentNode.removeChild(youTubeDiv);
+        let shareVideoDiv = this.getId('__shareVideo');
+        if (shareVideoDiv) {
+            hide(videoCloseBtn);
+            shareVideoDiv.parentNode.removeChild(shareVideoDiv);
             handleAspectRatio();
-            console.log('[closeYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
+            console.log('[closeVideo] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
     }
