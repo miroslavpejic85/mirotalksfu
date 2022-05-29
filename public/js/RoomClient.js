@@ -203,7 +203,7 @@ class RoomClient {
     }
 
     async join(data) {
-        socket
+        this.socket
             .request('join', data)
             .then(
                 async function (room) {
