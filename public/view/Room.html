@@ -125,6 +125,7 @@ access to use this app.
                     <button id="tabVideoShareBtn" class="fab fa-youtube tablinks"></button>
                     <button id="tabAspectBtn" class="fas fa-cog tablinks"></button>
                     <button id="tabStylingBtn" class="fas fa-palette tablinks"></button>
+                    <button id="tabLanguagesBtn" class="fas fa-globe tablinks"></button>
                 </div>
 
                 <div id="tabDevices" class="tabcontent">
@@ -268,6 +269,11 @@ access to use this app.
                     </select>
                     <br />
                 </div>
+
+                <div id="tabLanguages" class="tabcontent">
+                    <br />
+                    <div id="google_translate_element"></div>
+                </div>
             </main>
         </section>
 
@@ -376,5 +382,14 @@ access to use this app.
                 </div>
             </section>
         </section>
+        <!-- 
+            Start Google Translate 
+        -->
+        <script>
+            function googleTranslateElementInit() {
+                new google.translate.TranslateElement({ pageLanguage: 'en' }, 'google_translate_element');
+            }
+        </script>
+        <script src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
     </body>
 </html>
