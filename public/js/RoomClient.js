@@ -2310,8 +2310,8 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             imageUrl: image.videoShare,
-            title: 'Share YouTube or Mp4 Video',
-            text: 'Past YouTube or Mp4 video URL',
+            title: 'Share YouTube, mp4, webm, ogg video',
+            text: 'Past YouTube, mp4, webm, ogg URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
@@ -2327,10 +2327,14 @@ class RoomClient {
                     userLog('info', 'No participants detected', 'top-end');
                     return;
                 }
+                if (!this.isVideoTypeSupported(result.value)) {
+                    userLog('info', 'Video type supported: youtube, mp4, webm, ogg', 'top-end');
+                    return;
+                }
                 // https://www.youtube.com/watch?v=RT6_Id5-7-s
                 // http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
 
-                let is_youtube = result.value.endsWith('.mp4') ? false : true;
+                let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
                 let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
                 if (video_url) {
                     let data = {
@@ -2344,10 +2348,23 @@ class RoomClient {
                     this.socket.emit('shareVideoAction', data);
                     this.openVideo(data);
                 } else {
-                    this.userLog('error', 'Not valid mp4 or YouTube URL', 'top-end');
+                    this.userLog('error', 'Not valid video URL', 'top-end');
                 }
             }
         });
+    }
+
+    getVideoType(url) {
+        if (url.endsWith('.mp4')) return 'video/mp4';
+        if (url.endsWith('.webm')) return 'video/webm';
+        if (url.endsWith('.ogg')) return 'video/ogg';
+        return 'na';
+    }
+
+    isVideoTypeSupported(url) {
+        if (url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg') || url.includes('youtube'))
+            return true;
+        return false;
     }
 
     getYoutubeEmbed(url) {
@@ -2376,6 +2393,7 @@ class RoomClient {
         let peer_name = data.peer_name;
         let video_url = data.video_url;
         let is_youtube = data.is_youtube;
+        let video_type = this.getVideoType(video_url);
         this.closeVideo();
         show(videoCloseBtn);
         d = document.createElement('div');
@@ -2398,6 +2416,7 @@ class RoomClient {
             video.setAttribute('allowfullscreen', true);
         } else {
             video = document.createElement('video');
+            video.type = video_type;
             video.autoplay = true;
             video.controls = true;
         }
