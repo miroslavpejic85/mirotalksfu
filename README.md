@@ -4,17 +4,17 @@
 
 <hr />
 
-<div style="text-align: center;">
+<p align="center">
     <a href="https://sfu.mirotalk.org/">https://sfu.mirotalk.org/</a>
-</div>
+</p>
 
 <hr />
 
-<div style="text-align: center;">
+<p align="center">
     <a href="https://sfu.mirotalk.org/">
         <img src="public/images/mirotalksfu-header.gif" />
     </a>
-</div>
+</p>
 
 <hr />
 
