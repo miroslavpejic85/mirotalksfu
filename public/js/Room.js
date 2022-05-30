@@ -87,7 +87,6 @@ function initClient() {
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
-        setTippy('tabLanguagesBtn', 'Languages', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
         setTippy('wbDrawingColorEl', 'Drawing color', 'top');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
@@ -701,9 +700,6 @@ function handleButtons() {
     };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
-    };
-    tabLanguagesBtn.onclick = (e) => {
-        rc.openTab(e, 'tabLanguages');
     };
     chatButton.onclick = () => {
         rc.toggleChat();
