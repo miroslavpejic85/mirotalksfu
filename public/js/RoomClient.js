@@ -2311,7 +2311,7 @@ class RoomClient {
             position: 'center',
             imageUrl: image.videoShare,
             title: 'Share YouTube, mp4, webm, ogg video',
-            text: 'Past YouTube, mp4, webm, ogg URL',
+            text: 'Paste YouTube, mp4, webm, ogg URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,

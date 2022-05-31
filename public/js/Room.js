@@ -101,7 +101,7 @@ function initClient() {
         setTippy('whiteboardCircleBtn', 'Add circle', 'top');
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
-        setTippy('whiteboardCleanBtn', 'Clear', 'top');
+        setTippy('whiteboardCleanBtn', 'Clean', 'top');
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
