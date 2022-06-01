@@ -1312,26 +1312,8 @@ class RoomClient {
     }
 
     exitRoom() {
-        this.sound('open');
-
-        Swal.fire({
-            background: swalBackground,
-            imageAlt: 'mirotalksfu-leave-room',
-            imageUrl: image.exit,
-            position: 'center',
-            title: 'Leave this room?',
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) this.exit();
-        });
+        this.sound('eject');
+        this.exit();
     }
 
     // ####################################################
