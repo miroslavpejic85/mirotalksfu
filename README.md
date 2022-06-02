@@ -27,6 +27,7 @@
 -   No download, plug-in or login required, entirely browser-based
 -   Unlimited number of conference rooms, without call time limitation
 -   Desktop and Mobile compatible
+-   Translated in 133 languages
 -   Optimized Room URL Sharing (share it to your participants, wait for them to join)
 -   Possibility to Password protect the Room for the meeting
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
@@ -41,7 +42,6 @@
 -   Recording your Screen, Audio, or Video
 -   Share any YouTube video in real-time to your participants
 -   Share any mp4, webm, ogg video in real-time to your participants with possibility to download it
--   Translated in all languages thanks to google translate
 -   Full-Screen Mode on mouse click on the Video element
 -   Possibility to Change UI Themes
 -   Possibility to protect your Host with username and password (default disabled)
