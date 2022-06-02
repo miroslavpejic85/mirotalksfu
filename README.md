@@ -232,7 +232,9 @@ Embedding a meeting into a service or app using an iframe.
 
 This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
 
-If you want to deploy a `MiroTalk SFU` instance on `your dedicated droplet`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
+For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use this [link](https://m.do.co/c/1070207afbb1) to get a $100 credit for the first 60 days.
+
+If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
