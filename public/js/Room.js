@@ -108,6 +108,7 @@ function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
@@ -550,6 +551,7 @@ function roomIsReady() {
     show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
     }
@@ -718,6 +720,9 @@ function handleButtons() {
     };
     chatEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatShareFileButton.onclick = () => {
+        fileShareButton.click();
     };
     chatSpeechStartButton.onclick = () => {
         startSpeech(true);
