@@ -842,6 +842,7 @@ class RoomClient {
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
         this.handleFS(elem.id, fs.id);
+        this.handleDD(elem.id, this.peer_id, true);
         this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
@@ -1091,6 +1092,7 @@ class RoomClient {
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id, fs.id);
+                this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
                 this.handleSM(sm.id);
@@ -1221,6 +1223,7 @@ class RoomClient {
             this.handleSV(sv.id);
             this.handleKO(ko.id);
         }
+        this.handleDD(d.id, peer_id, !remotePeer);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
@@ -2015,6 +2018,32 @@ class RoomClient {
         });
     }
 
+    handleDD(uid, peer_id, itsMe = false) {
+        let videoPlayer = this.getId(uid);
+        videoPlayer.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
+        videoPlayer.addEventListener('drop', function (e) {
+            e.preventDefault();
+            if (itsMe) {
+                userLog('warning', 'You cannot send files to yourself.', 'top-end');
+                return;
+            }
+            if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
+                userLog('warning', 'Please drag and drop a single file.', 'top-end');
+                return;
+            }
+            if (e.dataTransfer.items) {
+                if (e.dataTransfer.items[0].kind === 'file') {
+                    var file = e.dataTransfer.items[0].getAsFile();
+                    rc.sendFileInformations(file, peer_id);
+                }
+            } else {
+                rc.sendFileInformations(e.dataTransfer.files[0], peer_id);
+            }
+        });
+    }
+
     selectFileToShare(peer_id, broadcast = false) {
         this.sound('open');
 
@@ -2041,29 +2070,34 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.isConfirmed) {
-                this.fileToSend = result.value;
-                if (this.fileToSend && this.fileToSend.size > 0) {
-                    if (!this.thereIsParticipants()) {
-                        userLog('info', 'No participants detected', 'top-end');
-                        return;
-                    }
-                    // send some metadata about our file to peers in the room
-                    this.socket.emit('fileInfo', {
-                        peer_id: peer_id,
-                        broadcast: broadcast,
-                        peer_name: this.peer_name,
-                        fileName: this.fileToSend.name,
-                        fileSize: this.fileToSend.size,
-                        fileType: this.fileToSend.type,
-                    });
-                    setTimeout(() => {
-                        this.sendFileData(peer_id, broadcast);
-                    }, 1000);
-                } else {
-                    userLog('error', 'File not selected or empty.', 'top-end');
-                }
+                this.sendFileInformations(result.value, peer_id, broadcast);
             }
         });
+    }
+
+    sendFileInformations(file, peer_id, broadcast = false) {
+        this.fileToSend = file;
+        //
+        if (this.fileToSend && this.fileToSend.size > 0) {
+            if (!this.thereIsParticipants()) {
+                userLog('info', 'No participants detected', 'top-end');
+                return;
+            }
+            // send some metadata about our file to peers in the room
+            this.socket.emit('fileInfo', {
+                peer_id: peer_id,
+                broadcast: broadcast,
+                peer_name: this.peer_name,
+                fileName: this.fileToSend.name,
+                fileSize: this.fileToSend.size,
+                fileType: this.fileToSend.type,
+            });
+            setTimeout(() => {
+                this.sendFileData(peer_id, broadcast);
+            }, 1000);
+        } else {
+            userLog('error', 'File not selected or empty.', 'top-end');
+        }
     }
 
     handleFileInfo(data) {
