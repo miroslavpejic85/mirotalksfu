@@ -2029,6 +2029,10 @@ class RoomClient {
                 userLog('warning', 'You cannot send files to yourself.', 'top-end');
                 return;
             }
+            if (this.sendInProgress) {
+                userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
+                return;
+            }
             if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
                 userLog('warning', 'Please drag and drop a single file.', 'top-end');
                 return;
