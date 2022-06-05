@@ -117,8 +117,8 @@ $ npm start
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build or rebuild services - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
-$ docker-compose build
+# Build image and install dependencies
+$ docker-compose run --rm npm install
 # Create and start containers
 $ docker-compose up # -d
 # Stop and remove resources
