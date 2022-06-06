@@ -644,6 +644,10 @@ button:hover {
     background-color: #0c0b0b;
 } */
 
+#inviteParticipants {
+    margin: 15px 0px 0px 5px;
+}
+
 #searchParticipants {
     margin-top: 15px;
     width: 100%;
