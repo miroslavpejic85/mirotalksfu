@@ -1538,7 +1538,7 @@ async function getParticipantsTable(peers) {
         <button
             id="inviteParticipants"
             onclick="shareRoom();"
-        ><i class="fas fa-user-plus"></i> Invite Someone</button>
+        ><i class="fas fa-user-plus"></i>&nbsp; Invite Someone</button>
     </div>
     <div>
         <input

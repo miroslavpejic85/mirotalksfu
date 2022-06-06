@@ -645,7 +645,15 @@ button:hover {
 } */
 
 #inviteParticipants {
-    margin: 15px 0px 0px 5px;
+    width: 100%;
+    padding: 10px;
+    margin: 10px auto 0px auto;
+    background-color: #191919;
+    border-radius: 10px;
+}
+#inviteParticipants:hover {
+    color: #fff;
+    transform: scale(1);
 }
 
 #searchParticipants {
