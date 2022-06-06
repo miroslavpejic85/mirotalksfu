@@ -1,13 +1,6 @@
-FROM node:latest
+FROM node:alpine
 
 WORKDIR /src
+RUN apk add --update linux-headers alpine-sdk
 
-# gcc g++ make
-RUN \
-	apt-get update && \
-	apt-get install -y build-essential
-
-# Python 3.8 and pip
-RUN \
-	apt update && \
-	apt install -y python3-pip
+RUN apk add --update py-pip
