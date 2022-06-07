@@ -2038,10 +2038,14 @@ class RoomClient {
                 return;
             }
             if (e.dataTransfer.items) {
-                if (e.dataTransfer.items[0].kind === 'file') {
-                    var file = e.dataTransfer.items[0].getAsFile();
-                    rc.sendFileInformations(file, peer_id);
+                let item = e.dataTransfer.items[0].webkitGetAsEntry();
+                console.log('Drag and drop', item);
+                if (item.isDirectory) {
+                    userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
+                    return;
                 }
+                var file = e.dataTransfer.items[0].getAsFile();
+                rc.sendFileInformations(file, peer_id);
             } else {
                 rc.sendFileInformations(e.dataTransfer.files[0], peer_id);
             }

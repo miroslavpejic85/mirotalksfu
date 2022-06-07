@@ -333,7 +333,12 @@ httpsServer.listen(config.listenPort, () => {
 // ####################################################
 
 (async () => {
-    await createWorkers();
+    try {
+        await createWorkers();
+    } catch (err) {
+        log.error('Create Worker ERR --->', err);
+        process.exit(1);
+    }
 })();
 
 async function createWorkers() {

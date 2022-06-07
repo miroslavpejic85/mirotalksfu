@@ -1535,6 +1535,12 @@ async function getRoomParticipants(refresh = false) {
 async function getParticipantsTable(peers) {
     let table = `
     <div>
+        <button
+            id="inviteParticipants"
+            onclick="shareRoom(true);"
+        ><i class="fas fa-user-plus"></i>&nbsp; Invite Someone</button>
+    </div>
+    <div>
         <input
             id="searchParticipants"
             type="text"
