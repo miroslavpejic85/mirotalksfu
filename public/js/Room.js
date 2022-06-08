@@ -65,7 +65,7 @@ let wbPop = [];
 
 let isButtonsVisible = false;
 
-const socket = io();
+const socket = io({ transports: ['websocket'] });
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
