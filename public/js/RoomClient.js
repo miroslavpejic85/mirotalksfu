@@ -2879,7 +2879,9 @@ class RoomClient {
                 break;
             case 'screenStart':
             case 'screenStop':
-                this.socket.emit('peerAction', data);
+                setTimeout(() => {
+                    this.socket.emit('peerAction', data);
+                }, 2000);
                 break;
         }
     }
