@@ -846,7 +846,13 @@ class RoomClient {
         this.handleTS(elem.id, ts.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
-        handleAspectRatio();
+        if (participantsCount <= 3 && type === mediaType.screen) {
+            this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true);
+            setAspectRatio(2); // 16:9
+        } else {
+            this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true);
+            handleAspectRatio();
+        }
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
             this.setTippy(elem.id, 'Full Screen', 'top-end');
@@ -2741,6 +2747,12 @@ class RoomClient {
                         );
                     }
                     break;
+                case 'screenStart':
+                    if (!this.isMobileDevice) setAspectRatio(2);
+                    break;
+                case 'screenStop':
+                    if (!this.isMobileDevice) handleAspectRatio();
+                    break;
                 // ...
             }
         }
@@ -2864,6 +2876,10 @@ class RoomClient {
                     .then(() => {
                         if (muteHideConfirmed) this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
+                break;
+            case 'screenStart':
+            case 'screenStop':
+                this.socket.emit('peerAction', data);
                 break;
         }
     }
