@@ -1800,7 +1800,7 @@ class RoomClient {
     }
 
     formatMsg(message) {
-        if (message.startsWith('<img')) {
+        if (message.includes('<img')) {
             chatMessage.value = '';
             return '';
         }
