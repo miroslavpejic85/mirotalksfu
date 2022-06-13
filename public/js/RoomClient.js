@@ -1800,6 +1800,10 @@ class RoomClient {
     }
 
     formatMsg(message) {
+        if (message.startsWith('<img')) {
+            chatMessage.value = '';
+            return '';
+        }
         let urlRegex = /(https?:\/\/[^\s]+)/g;
         return message.replace(urlRegex, (url) => {
             if (message.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/))
