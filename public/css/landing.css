@@ -608,6 +608,9 @@ label {
     list-style: none;
     padding: 0;
 }
+.list-reset li {
+    margin: 0;
+}
 .text-left {
     text-align: left;
 }
@@ -1859,4 +1862,32 @@ main {
     padding: 40px;
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 10px;
+}
+
+/*--------------------------------------------------------------
+# Sponsors
+--------------------------------------------------------------*/
+
+.clients .section-inner {
+    padding-top: 26px;
+    padding-bottom: 26px;
+}
+
+.clients-inner ul {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin: 0;
+}
+
+.clients-inner li {
+    padding: 12px 28px;
+}
+
+@media (min-width: 641px) {
+    .clients .clients-inner ul {
+        flex-direction: row;
+    }
 }

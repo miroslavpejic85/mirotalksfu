@@ -5,13 +5,13 @@
 <hr />
 
 <p align="center">
-    <a href="https://sfu.mirotalk.org/">https://sfu.mirotalk.org/</a>
+    <a href="https://sfu.mirotalk.com/">sfu.mirotalk.com</a>
 </p>
 
 <hr />
 
 <p align="center">
-    <a href="https://sfu.mirotalk.org/">
+    <a href="https://sfu.mirotalk.com/">
         <img src="public/images/mirotalksfu-header.gif">
     </a>
 </p>
@@ -176,15 +176,15 @@ Set the inbound rules:
 
 <br/>
 
--   The API documentation uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.org/api/v1/docs).
+-   The API documentation uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.com/api/v1/docs).
 
 ```bash
 # The response will give you a entrypoint / Room URL for your meeting.
 $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-$ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
+$ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 # The response will give you a entrypoint / URL for the direct join to the meeting.
 $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
-$ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
+$ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
 ```
 
 </details>
@@ -195,7 +195,7 @@ $ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotal
 <br/>
 
 -   You can `join` directly to `room` by going to
--   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+-   https://sfu.mirotalk.com/join?room=test&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
 
     | Params | Type    | Description     |
     | ------ | ------- | --------------- |
@@ -218,10 +218,23 @@ Embedding a meeting into a service or app using an iframe.
 ```html
 <iframe
     allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://sfu.mirotalk.org/newroom"
+    src="https://sfu.mirotalk.com/newroom"
     style="height: 100%; width: 100%; border: 0px;"
 ></iframe>
 ```
+
+</details>
+
+<details open>
+<summary>Hetzner</summary>
+
+<br/>
+
+[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
+
+This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
+
+If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
 </details>
 
@@ -230,13 +243,11 @@ Embedding a meeting into a service or app using an iframe.
 
 <br/>
 
-This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
 For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use this [link](https://m.do.co/c/1070207afbb1) to get a $100 credit for the first 60 days.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
-
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
 </details>
 
@@ -245,9 +256,11 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 <br/>
 
-https://sfu.mirotalk.org
+<a target="_blank" href="https://p2p.mirotalk.com"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
 
-[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
+https://sfu.mirotalk.com
+
+[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.com/)
 
 </details>
 
@@ -302,6 +315,8 @@ For a MiroTalk license under conditions other than AGPLv3, please contact us at 
 Support this project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
+
+[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
 
 </details>
 
