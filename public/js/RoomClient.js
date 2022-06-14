@@ -1800,16 +1800,27 @@ class RoomClient {
     }
 
     formatMsg(message) {
-        if (message.includes('<img')) {
-            chatMessage.value = '';
-            return '';
-        }
+        if (this.isHtml(message)) return this.stripHtml(message);
         let urlRegex = /(https?:\/\/[^\s]+)/g;
         return message.replace(urlRegex, (url) => {
             if (message.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/))
                 return '<img src="' + url + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + url + '" target="_blank">' + url + '</a>';
         });
+    }
+
+    stripHtml(html) {
+        let doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent || '';
+    }
+
+    isHtml(str) {
+        var a = document.createElement('div');
+        a.innerHTML = str;
+        for (var c = a.childNodes, i = c.length; i--; ) {
+            if (c[i].nodeType == 1) return true;
+        }
+        return false;
     }
 
     collectMessages(time, from, msg) {
