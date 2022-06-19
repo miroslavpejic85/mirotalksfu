@@ -2,9 +2,7 @@
 
 If you want to expose MiroTalk SFU from your `Local PC` to outside in `HTTPS`, you need to do 2 things:
 
-1. Add the [Ngrok](https://ngrok.com) `authToken` and change the `announcedIp`
-
-In `app/src/` copy config.template.js to `config.js` then edit it
+1. Add the [Ngrok](https://ngrok.com) `authToken` and change the `announcedIp` on `app/src/config.js`.
 
 ```js
     /*
@@ -17,6 +15,8 @@ In `app/src/` copy config.template.js to `config.js` then edit it
 
     announcedIp: 'Your-Public-Static-IP-here' <--- take it from https://api.ipify.org
 ```
+
+---
 
 2. You need to do a `port forwarding` on your router, something like this:
 
@@ -35,12 +35,14 @@ server_tunnel: 'https://xxxxxxxxxxxxxxxxxx.ngrok.io'
 
 So open it in your browser, join in the room, share it to whom you want and wait participants to join.
 
-<br/>
+<br />
+
+---
 
 ## Do you find MiroTalk useful?
 
 Show your appreciation by becoming a [backer or sponsor](https://github.com/sponsors/miroslavpejic85)
 
-Thank you for your support! ❤️
+Thank you for your support!
 
 ---

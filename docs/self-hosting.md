@@ -6,6 +6,8 @@ Requirments:
 -   [Node.js](https://nodejs.org/en/) at least 12x, better `16.15.1 LTS`
 -   Your domain example: `your.domain.name` (Set a DNS A record for that domain that point to Your Server public IPv4)
 
+---
+
 Install the requirements (Note: Many of the installation steps require `root` or `sudo` access)
 
 ```bash
@@ -27,6 +29,8 @@ $ apt-get install -y nodejs
 $ npm install -g npm@latest
 ```
 
+---
+
 Quick start
 
 ```bash
@@ -37,6 +41,8 @@ $ cd mirotalksfu
 # Copy app/src/config.template.js in app/src/config.js
 $ cp app/src/config.template.js app/src/config.js
 ```
+
+---
 
 Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`
 
@@ -55,6 +61,8 @@ Set the `inbound rules` if you have the Firewall enalbled
 | 40000-40100 | TCP      | 0.0.0.0/0 | RTC port ranges tcp |
 | 40000-40100 | UDP      | 0.0.0.0/0 | RTC port ranges udp |
 
+---
+
 ```bash
 # Install dependencies - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
 $ npm install
@@ -64,6 +72,8 @@ $ npm start
 
 Check if is correctly installed: https://your.domain.name:3010
 
+---
+
 Using [PM2](https://pm2.keymetrics.io) to run it as deamon
 
 ```bash
@@ -71,7 +81,9 @@ $ npm install -g pm2
 $ pm2 start app/src/Server.js
 ```
 
-If you want to use Docker
+---
+
+If you want to use `Docker`
 
 ```bash
 # Install docker and docker-compose
@@ -89,6 +101,8 @@ $ docker-compose up -d
 ```
 
 Check if is correctly installed: https://your.domain.name:3010
+
+---
 
 In order to use it without the port number at the end, and to have encrypted communications, we going to install [nginx](https://www.nginx.com) and [certbot](https://certbot.eff.org)
 
@@ -169,6 +183,8 @@ $ sudo certbot certificates
 
 Check Your MiroTalk SFU instance: https://your.domain.name/
 
+---
+
 ## Update script
 
 In order to have always Your MiroTalk SFU updated to latest, we going to create a script
@@ -177,6 +193,8 @@ In order to have always Your MiroTalk SFU updated to latest, we going to create 
 # Create a file sfuUpdate.sh
 $ vim sfuUpdate.sh
 ```
+
+---
 
 If you use `PM2`, paste this:
 
@@ -190,6 +208,8 @@ sudo npm install
 pm2 start app/src/Server.js
 ```
 
+---
+
 If you use `Docker`, paste this:
 
 ```bash
@@ -202,6 +222,8 @@ docker-compose build
 docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
 docker-compose up -d
 ```
+
+---
 
 Make the script executable
 
@@ -219,10 +241,12 @@ To update your instance of MiroTalk SFU at latest commit, execute:
 
 <br/>
 
+---
+
 ## Do you find MiroTalk useful?
 
 Show your appreciation by becoming a [backer or sponsor](https://github.com/sponsors/miroslavpejic85)
 
-Thank you for your support! ❤️
+Thank you for your support!
 
 ---
