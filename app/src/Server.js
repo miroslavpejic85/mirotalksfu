@@ -282,7 +282,7 @@ async function ngrokStart() {
             hostConfig: hostCfg,
             announced_ip: announcedIP,
             server: host,
-            tunnel: tunnel,
+            server_tunnel: tunnel,
             api_docs: api_docs,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,

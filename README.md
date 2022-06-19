@@ -130,35 +130,20 @@ $ docker-compose down
 </details>
 
 <details>
-<summary>Https</summary>
+<summary>Ngrok - Https</summary>
 
 <br/>
 
-You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
+You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these documentation](docs/ngrok.md).
 
 </details>
 
 <details>
-<summary>Self Host</summary>
+<summary>Self Hosting</summary>
 
 <br/>
 
-Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`:
-
-```js
-{
-    ip: '0.0.0.0',
-    announcedIp: 'Server Public IPv4', // 'xx.xxx.xxx.xx'
-}
-```
-
-Set the inbound rules:
-
-| Port range  | Protocol | Source    | Description         |
-| ----------- | -------- | --------- | ------------------- |
-| 3010        | TCP      | 0.0.0.0/0 | App listen on tcp   |
-| 40000-40100 | TCP      | 0.0.0.0/0 | RTC port ranges tcp |
-| 40000-40100 | UDP      | 0.0.0.0/0 | RTC port ranges udp |
+Follow [this documentation](docs/self-hosting.md).
 
 </details>
 
@@ -308,11 +293,13 @@ For a MiroTalk license under conditions other than AGPLv3, please contact us at 
 </details>
 
 <details open>
-<summary>Sponsors</summary>
+<summary>Support the project</summary>
 
 <br/>
 
-Support this project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
+Do you find MiroTalk useful?
+
+Support the project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
 
