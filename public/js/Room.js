@@ -391,6 +391,10 @@ function handleAudioVideo(e) {
     isVideoAllowed = isAudioVideoAllowed;
     initAudioButton.className = 'fas fa-microphone' + (isAudioVideoAllowed ? '' : '-slash');
     initVideoButton.className = 'fas fa-video' + (isAudioVideoAllowed ? '' : '-slash');
+    if (!isAudioVideoAllowed) {
+        hide(initAudioButton);
+        hide(initVideoButton);
+    }
     e.target.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
     setColor(e.target, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
