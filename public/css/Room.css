@@ -80,7 +80,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: var(--body-bg);
+    background: url('../images/background.jpg');
 }
 
 /*--------------------------------------------------------------
@@ -103,7 +103,7 @@ body {
     color: #fff;
     padding: 30px;
     border-radius: 10px;
-    background: var(--body-bg);
+    background: transparent;
 }
 #loadingDiv h1 {
     font-size: 60px;

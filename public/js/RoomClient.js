@@ -847,10 +847,10 @@ class RoomClient {
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
         if (participantsCount <= 3 && type === mediaType.screen) {
-            this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true);
+            this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true, false);
             setAspectRatio(2); // 16:9
         } else {
-            this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true);
+            this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
             handleAspectRatio();
         }
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -2714,7 +2714,7 @@ class RoomClient {
     // PEER ACTION
     // ####################################################
 
-    peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
+    peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true) {
         const words = id.split('___');
         let peer_id = words[0];
 
@@ -2727,7 +2727,7 @@ class RoomClient {
             };
 
             if (!this.thereIsParticipants()) {
-                this.userLog('info', 'No participants detected', 'top-end');
+                if (info) this.userLog('info', 'No participants detected', 'top-end');
                 return;
             }
             this.confirmPeerAction(action, data);

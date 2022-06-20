@@ -4,7 +4,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
-let swalBackground = 'radial-gradient(#393939, #000000)';
+let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
@@ -368,6 +368,7 @@ function whoAreYou() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
 function handleAudio(e) {
@@ -385,16 +386,11 @@ function handleVideo(e) {
 }
 
 function handleAudioVideo(e) {
-    isAudioAllowed = isAudioAllowed ? false : true;
-    isVideoAllowed = isVideoAllowed ? false : true;
-    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
-    if (isAudioVideoAllowed) {
-        initAudioButton.className = 'fas fa-microphone';
-        initVideoButton.className = 'fas fa-video';
-    } else {
-        hide(initAudioButton);
-        hide(initVideoButton);
-    }
+    isAudioVideoAllowed = isAudioVideoAllowed ? false : true;
+    isAudioAllowed = isAudioVideoAllowed;
+    isVideoAllowed = isAudioVideoAllowed;
+    initAudioButton.className = 'fas fa-microphone' + (isAudioVideoAllowed ? '' : '-slash');
+    initVideoButton.className = 'fas fa-video' + (isAudioVideoAllowed ? '' : '-slash');
     e.target.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
     setColor(e.target, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
@@ -545,6 +541,7 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
+    setTheme('dark');
     show(exitButton);
     show(shareButton);
     show(startRecButton);
@@ -1668,12 +1665,14 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            document.body.style.background = 'radial-gradient(#393939, #000000)';
             break;
         case 'grey':
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            document.body.style.background = 'radial-gradient(#666, #333)';
             break;
         //...
     }
