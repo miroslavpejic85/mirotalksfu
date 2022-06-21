@@ -55,6 +55,16 @@ module.exports = {
         DSN: '',
         tracesSampleRate: 0.5,
     },
+    slack: {
+        /*
+            1. Goto https://api.slack.com/apps/
+            2. Create your app
+            3. On Settings - Basic Information - App Credentials, chose your Signing Secret
+            4. Create a Slash Commands and put as Request URL: https://your.domain.name/slack
+        */
+        enabled: false,
+        signingSecret: '',
+    },
     mediasoup: {
         // Worker settings
         numWorkers: Object.keys(os.cpus()).length,

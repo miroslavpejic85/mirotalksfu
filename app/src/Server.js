@@ -22,6 +22,13 @@ const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
 
+// Slack API
+const CryptoJS = require('crypto-js');
+const qS = require('qs');
+const slackEnabled = config.slack.enabled;
+const slackSigningSecret = config.slack.signingSecret;
+const bodyParser = require('body-parser');
+
 const app = express();
 
 const options = {
@@ -102,6 +109,7 @@ app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.static(dir.public));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
 // Remove trailing slashes in url handle bad requests
@@ -257,6 +265,37 @@ app.post(['/api/v1/join'], (req, res) => {
         body: req.body,
         join: joinURL,
     });
+});
+
+// ####################################################
+// SLACK API
+// ####################################################
+
+app.post('/slack', (req, res) => {
+    if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
+
+    log.debug('Slack', req.headers);
+
+    if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
+
+    let slackSignature = req.headers['x-slack-signature'];
+    let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
+    let timeStamp = req.headers['x-slack-request-timestamp'];
+    let time = Math.floor(new Date().getTime() / 1000);
+
+    if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
+
+    let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
+    let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
+
+    if (mySignature == slackSignature) {
+        let host = req.headers.host;
+        let api = new ServerApi(host);
+        let meetingURL = api.getMeetingURL();
+        log.debug('Slack', { meeting: meetingURL });
+        return res.end(meetingURL);
+    }
+    return res.end('`Wrong signature` - Verification failed!');
 });
 
 // not match any of page before, so 404 not found
