@@ -31,6 +31,10 @@
     animation: show 0.4s ease;
 }
 
+.Camera:hover {
+    border: 3px solid rgb(113, 157, 239);
+}
+
 #videoMediaContainer i {
     position: absolute;
     display: none;

@@ -87,15 +87,15 @@ const dir = {
 };
 
 // html views
-const view = {
-    about: path.join(__dirname, '../../', 'public/view/about.html'),
-    landing: path.join(__dirname, '../../', 'public/view/landing.html'),
-    login: path.join(__dirname, '../../', 'public/view/login.html'),
-    newRoom: path.join(__dirname, '../../', 'public/view/newroom.html'),
-    notFound: path.join(__dirname, '../../', 'public/view/404.html'),
-    permission: path.join(__dirname, '../../', 'public/view/permission.html'),
-    privacy: path.join(__dirname, '../../', 'public/view/privacy.html'),
-    room: path.join(__dirname, '../../', 'public/view/Room.html'),
+const views = {
+    about: path.join(__dirname, '../../', 'public/views/about.html'),
+    landing: path.join(__dirname, '../../', 'public/views/landing.html'),
+    login: path.join(__dirname, '../../', 'public/views/login.html'),
+    newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
+    notFound: path.join(__dirname, '../../', 'public/views/404.html'),
+    permission: path.join(__dirname, '../../', 'public/views/permission.html'),
+    privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
+    room: path.join(__dirname, '../../', 'public/views/Room.html'),
 };
 
 app.use(cors());
@@ -126,9 +126,9 @@ app.use((err, req, res, next) => {
 app.get(['/'], (req, res) => {
     if (hostCfg.protected == true) {
         hostCfg.authenticated = false;
-        res.sendFile(view.login);
+        res.sendFile(views.login);
     } else {
-        res.sendFile(view.landing);
+        res.sendFile(views.landing);
     }
 });
 
@@ -142,11 +142,11 @@ app.get(['/login'], (req, res) => {
             hostCfg.authenticated = true;
             authHost = new Host(ip, true);
             log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-            res.sendFile(view.landing);
+            res.sendFile(views.landing);
         } else {
             log.debug('LOGIN KO', { ip: ip, authorized: false });
             hostCfg.authenticated = false;
-            res.sendFile(view.login);
+            res.sendFile(views.login);
         }
     } else {
         res.redirect('/');
@@ -158,13 +158,13 @@ app.get(['/newroom'], (req, res) => {
     if (hostCfg.protected == true) {
         let ip = getIP(req);
         if (allowedIP(ip)) {
-            res.sendFile(view.newRoom);
+            res.sendFile(views.newRoom);
         } else {
             hostCfg.authenticated = false;
-            res.sendFile(view.login);
+            res.sendFile(views.login);
         }
     } else {
-        res.sendFile(view.newRoom);
+        res.sendFile(views.newRoom);
     }
 });
 
@@ -175,7 +175,7 @@ app.get('/join/', (req, res) => {
         // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
         const { room, name, audio, video, screen, notify } = req.query;
         if (room && name && audio && video && screen && notify) {
-            return res.sendFile(view.room);
+            return res.sendFile(views.room);
         }
     }
     res.redirect('/');
@@ -184,7 +184,7 @@ app.get('/join/', (req, res) => {
 // join room
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
-        res.sendFile(view.room);
+        res.sendFile(views.room);
     } else {
         res.redirect('/');
     }
@@ -192,17 +192,17 @@ app.get('/join/*', (req, res) => {
 
 // if not allow video/audio
 app.get(['/permission'], (req, res) => {
-    res.sendFile(view.permission);
+    res.sendFile(views.permission);
 });
 
 // privacy policy
 app.get(['/privacy'], (req, res) => {
-    res.sendFile(view.privacy);
+    res.sendFile(views.privacy);
 });
 
 // mirotalk about
 app.get(['/about'], (req, res) => {
-    res.sendFile(view.about);
+    res.sendFile(views.about);
 });
 
 // ####################################################
@@ -261,7 +261,7 @@ app.post(['/api/v1/join'], (req, res) => {
 
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
-    res.sendFile(view.notFound);
+    res.sendFile(views.notFound);
 });
 
 // ####################################################
