@@ -109,9 +109,11 @@ body {
     font-size: 60px;
     font-family: 'Comfortaa';
 }
-#loadingDiv pre {
+#loadingDiv p {
     padding: 5px;
     font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------

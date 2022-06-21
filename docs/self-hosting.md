@@ -232,7 +232,7 @@ docker-compose up -d
 Make the script executable
 
 ```bash
-$ chmod +x ./sfuUpdate.sh
+$ chmod +x sfuUpdate.sh
 ```
 
 Follow the commits of the MiroTalk SFU project [here](https://github.com/miroslavpejic85/mirotalksfu/commits/master)
