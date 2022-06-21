@@ -31,9 +31,9 @@
     animation: show 0.4s ease;
 }
 
-.Camera:hover {
+/* .Camera:hover {
     border: 3px solid rgb(113, 157, 239);
-}
+} */
 
 #videoMediaContainer i {
     position: absolute;
@@ -145,7 +145,7 @@ video {
 }
 
 video:hover {
-    opacity: 0.8;
+    opacity: 0.7;
 }
 
 video:fullscreen {
