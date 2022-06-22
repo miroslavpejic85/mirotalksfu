@@ -132,8 +132,10 @@ module.exports = {
                     announcedIp: getLocalIp(), // replace by public static IP address https://api.ipify.org
                 },
             ],
-            maxIncomingBitrate: 1500000,
             initialAvailableOutgoingBitrate: 1000000,
+            minimumAvailableOutgoingBitrate: 600000,
+            maxSctpMessageSize: 262144,
+            maxIncomingBitrate: 1500000,
         },
     },
 };
