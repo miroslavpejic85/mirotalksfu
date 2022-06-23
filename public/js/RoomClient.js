@@ -1517,6 +1517,10 @@ class RoomClient {
         let mySettings = this.getId('mySettings');
         mySettings.style.top = '50%';
         mySettings.style.left = '50%';
+        if (this.isMobileDevice){
+            mySettings.style.width = '100%';
+            mySettings.style.height = '100%';
+        }
         mySettings.classList.toggle('show');
         this.isMySettingsOpen = this.isMySettingsOpen ? false : true;
     }

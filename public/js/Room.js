@@ -1514,6 +1514,10 @@ function toggleParticipants() {
     participants.classList.toggle('show');
     participants.style.top = '50%';
     participants.style.left = '50%';
+    if (DetectRTC.isMobileDevice){
+        participants.style.width = '100%';
+        participants.style.height = '100%';
+    }
 }
 
 async function getRoomParticipants(refresh = false) {
