@@ -1,6 +1,11 @@
-FROM node:alpine
+FROM node:slim
 
 WORKDIR /src
-RUN apk add --update linux-headers alpine-sdk
 
-RUN apk add --update py3-pip
+RUN \
+    apt-get update && \
+    apt-get install -y build-essential
+
+RUN \
+    apt update && \
+    apt install -y python3-pip
