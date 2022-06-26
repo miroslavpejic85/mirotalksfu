@@ -428,6 +428,7 @@ class RoomClient {
                 this.removeVideoOff(data.peer_id);
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
+                if (isParticipantsListOpen) getRoomParticipants(true);
             }.bind(this),
         );
 
@@ -977,6 +978,7 @@ class RoomClient {
 
                 if (kind === 'video') {
                     this.handleConsumer(consumer.id, mediaType.video, stream, peer_name, peer_info);
+                    if (isParticipantsListOpen) getRoomParticipants(true);
                 } else {
                     this.handleConsumer(consumer.id, mediaType.audio, stream, peer_name, peer_info);
                 }
@@ -1233,7 +1235,7 @@ class RoomClient {
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
-        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
+        if (isParticipantsListOpen) getRoomParticipants(true);
         if (!this.isMobileDevice && remotePeer) {
             this.setTippy(sm.id, 'Send message', 'top-end');
             this.setTippy(sf.id, 'Send file', 'top-end');
@@ -1241,6 +1243,7 @@ class RoomClient {
             this.setTippy(au.id, 'Mute', 'top-end');
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
+        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
     }
 
     removeVideoOff(peer_id) {
@@ -1316,7 +1319,6 @@ class RoomClient {
         } else {
             clean();
         }
-
         this.event(_EVENTS.exitRoom);
     }
 
@@ -1517,7 +1519,7 @@ class RoomClient {
         let mySettings = this.getId('mySettings');
         mySettings.style.top = '50%';
         mySettings.style.left = '50%';
-        if (this.isMobileDevice){
+        if (this.isMobileDevice) {
             mySettings.style.width = '100%';
             mySettings.style.height = '100%';
         }
@@ -2986,6 +2988,7 @@ class RoomClient {
                     break;
             }
         }
+        if (isParticipantsListOpen) getRoomParticipants(true);
     }
 
     checkPeerInfoStatus(peer_info) {

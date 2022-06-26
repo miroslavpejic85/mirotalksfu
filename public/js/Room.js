@@ -45,6 +45,7 @@ let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
+let isParticipantsListOpen = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -1514,10 +1515,11 @@ function toggleParticipants() {
     participants.classList.toggle('show');
     participants.style.top = '50%';
     participants.style.left = '50%';
-    if (DetectRTC.isMobileDevice){
+    if (DetectRTC.isMobileDevice) {
         participants.style.width = '100%';
         participants.style.height = '100%';
     }
+    isParticipantsListOpen = !isParticipantsListOpen;
 }
 
 async function getRoomParticipants(refresh = false) {
