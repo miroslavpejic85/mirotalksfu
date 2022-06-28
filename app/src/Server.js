@@ -644,7 +644,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRoomInfo', (_, cb) => {
-        log.debug('Send Room Info', getPeerName());
+        log.debug('Send Room Info to', getPeerName());
         cb(roomList.get(socket.room_id).toJson());
     });
 
