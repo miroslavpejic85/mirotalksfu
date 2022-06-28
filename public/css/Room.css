@@ -106,11 +106,14 @@ body {
     background: transparent;
 }
 #loadingDiv h1 {
+    padding: 10px;
     font-size: 60px;
     font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
 }
 #loadingDiv p {
-    padding: 5px;
+    padding: 10px;
     font-family: 'Comfortaa';
     background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
