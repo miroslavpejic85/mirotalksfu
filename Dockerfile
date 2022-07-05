@@ -1,11 +1,7 @@
-FROM node:slim
+FROM node:16-slim
 
 WORKDIR /src
 
 RUN \
-    apt-get update && \
-    apt-get install -y build-essential
-
-RUN \
-    apt update && \
-    apt install -y python3-pip
+    DEBIAN_FRONTEND=noninteractive apt update && \
+    apt install -y --no-install-recommends build-essential python3-pip
