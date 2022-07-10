@@ -2361,8 +2361,8 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             imageUrl: image.videoShare,
-            title: 'Share YouTube, mp4, webm, ogg video',
-            text: 'Paste YouTube, mp4, webm, ogg URL',
+            title: 'Share YouTube, mp4, webm, ogg video or mp3 audio',
+            text: 'Paste YouTube, mp4, webm, ogg, mp3 URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
@@ -2379,7 +2379,7 @@ class RoomClient {
                     return;
                 }
                 if (!this.isVideoTypeSupported(result.value)) {
-                    userLog('info', 'Video type supported: youtube, mp4, webm, ogg', 'top-end');
+                    userLog('info', 'Video type supported: youtube, mp4, webm, ogg or Audio mp3', 'top-end');
                     return;
                 }
                 // https://www.youtube.com/watch?v=RT6_Id5-7-s
@@ -2407,13 +2407,20 @@ class RoomClient {
 
     getVideoType(url) {
         if (url.endsWith('.mp4')) return 'video/mp4';
+        if (url.endsWith('.mp3')) return 'video/mp3';
         if (url.endsWith('.webm')) return 'video/webm';
         if (url.endsWith('.ogg')) return 'video/ogg';
         return 'na';
     }
 
     isVideoTypeSupported(url) {
-        if (url.endsWith('.mp4') || url.endsWith('.webm') || url.endsWith('.ogg') || url.includes('youtube'))
+        if (
+            url.endsWith('.mp4') ||
+            url.endsWith('.mp3') ||
+            url.endsWith('.webm') ||
+            url.endsWith('.ogg') ||
+            url.includes('youtube')
+        )
             return true;
         return false;
     }
