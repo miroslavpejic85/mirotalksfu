@@ -33,6 +33,7 @@ let rc = null;
 let producer = null;
 
 let room_id = getRoomId();
+let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let notify = getNotify();
 
@@ -280,6 +281,18 @@ function getNotify() {
 function getPeerName() {
     let qs = new URLSearchParams(window.location.search);
     return qs.get('name');
+}
+
+function getRoomPassword() {
+    let qs = new URLSearchParams(window.location.search);
+    let roomPassword = qs.get('password');
+    if (roomPassword) {
+        let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
+        if (queryNoRoomPassword != null) {
+            return false;
+        }
+        return roomPassword;
+    }
 }
 
 // ####################################################
@@ -593,6 +606,9 @@ function roomIsReady() {
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
     });
+    if (room_password) {
+        lockRoomButton.click();
+    }
 }
 
 function hide(elem) {

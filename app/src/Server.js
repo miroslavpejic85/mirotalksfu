@@ -180,9 +180,9 @@ app.get(['/newroom'], (req, res) => {
 app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
-        // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-        const { room, name, audio, video, screen, notify } = req.query;
-        if (room && name && audio && video && screen && notify) {
+        // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
+        const { room, password, name, audio, video, screen, notify } = req.query;
+        if (room && password && name && audio && video && screen && notify) {
             return res.sendFile(views.room);
         }
     }

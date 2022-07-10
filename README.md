@@ -181,16 +181,17 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotal
 <br/>
 
 -   You can `join` directly to `room` by going to
--   https://sfu.mirotalk.com/join?room=test&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+-   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
 
-    | Params | Type    | Description     |
-    | ------ | ------- | --------------- |
-    | room   | string  | room Id         |
-    | name   | string  | user name       |
-    | audio  | boolean | audio stream    |
-    | video  | boolean | video stream    |
-    | screen | boolean | screen stream   |
-    | notify | boolean | welcome message |
+    | Params   | Type           | Description     |
+    | -------- | -------------- | --------------- |
+    | room     | string         | room Id         |
+    | password | string/boolean | room password   |
+    | name     | string         | user name       |
+    | audio    | boolean        | audio stream    |
+    | video    | boolean        | video stream    |
+    | screen   | boolean        | screen stream   |
+    | notify   | boolean        | welcome message |
 
 </details>
 

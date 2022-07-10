@@ -2522,33 +2522,39 @@ class RoomClient {
         if (emit) {
             switch (action) {
                 case 'lock':
-                    Swal.fire({
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showDenyButton: true,
-                        background: swalBackground,
-                        imageUrl: image.locked,
-                        input: 'text',
-                        inputPlaceholder: 'Set Room password',
-                        confirmButtonText: `OK`,
-                        denyButtonText: `Cancel`,
-                        showClass: {
-                            popup: 'animate__animated animate__fadeInDown',
-                        },
-                        hideClass: {
-                            popup: 'animate__animated animate__fadeOutUp',
-                        },
-                        inputValidator: (pwd) => {
-                            if (!pwd) return 'Please enter the Room password';
-                            this.RoomPassword = pwd;
-                        },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            data.password = this.RoomPassword;
-                            this.socket.emit('roomAction', data);
-                            this.roomStatus(action);
-                        }
-                    });
+                    if (room_password) {
+                        data.password = room_password;
+                        this.socket.emit('roomAction', data);
+                        this.roomStatus(action);
+                    } else {
+                        Swal.fire({
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showDenyButton: true,
+                            background: swalBackground,
+                            imageUrl: image.locked,
+                            input: 'text',
+                            inputPlaceholder: 'Set Room password',
+                            confirmButtonText: `OK`,
+                            denyButtonText: `Cancel`,
+                            showClass: {
+                                popup: 'animate__animated animate__fadeInDown',
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOutUp',
+                            },
+                            inputValidator: (pwd) => {
+                                if (!pwd) return 'Please enter the Room password';
+                                this.RoomPassword = pwd;
+                            },
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                data.password = this.RoomPassword;
+                                this.socket.emit('roomAction', data);
+                                this.roomStatus(action);
+                            }
+                        });
+                    }
                     break;
                 case 'unlock':
                     this.socket.emit('roomAction', data);
