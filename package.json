@@ -13,6 +13,13 @@
         "type": "git",
         "url": "git+https://github.com/miroslavpejic85/mirotalksfu"
     },
+    "keywords": [
+        "webrtc",
+        "socket.io",
+        "sfu",
+        "nodejs",
+        "video"
+    ],
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "dependencies": {
