@@ -2550,7 +2550,7 @@
                             namespaces = split[i].replace(/\*/g, '.*?');
 
                             if (namespaces[0] === '-') {
-                                createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+                                createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
                             } else {
                                 createDebug.names.push(new RegExp('^' + namespaces + '$'));
                             }
@@ -2824,14 +2824,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Consumer');
                 class Consumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits trackended
-                     * @emits @getstats
-                     * @emits @close
-                     * @emits @pause
-                     * @emits @resume
-                     */
                     constructor({ id, localId, producerId, rtpReceiver, track, rtpParameters, appData }) {
                         super();
                         // Closed flag.
@@ -2917,14 +2909,6 @@
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits pause
-                     * @emits resume
-                     * @emits trackended
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -2957,7 +2941,9 @@
                      */
                     async getStats() {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        return this.safeEmitAsPromise('@getstats');
+                        return new Promise((resolve, reject) => {
+                            this.safeEmit('@getstats', resolve, reject);
+                        });
                     }
                     /**
                      * Pauses receiving media.
@@ -3018,14 +3004,6 @@
                 const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
                 const logger = new Logger_1.Logger('DataConsumer');
                 class DataConsumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits open
-                     * @emits error - (error: Error)
-                     * @emits close
-                     * @emits message - (message: any)
-                     * @emits @close
-                     */
                     constructor({ id, dataProducerId, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
@@ -3107,11 +3085,6 @@
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3187,14 +3160,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('DataProducer');
                 class DataProducer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits open
-                     * @emits error - (error: Error)
-                     * @emits close
-                     * @emits bufferedamountlow
-                     * @emits @close
-                     */
                     constructor({ id, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
@@ -3275,11 +3240,6 @@
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3626,11 +3586,6 @@
                         if (!this._loaded) throw new errors_1.InvalidStateError('not loaded');
                         return this._sctpCapabilities;
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits newtransport - (transport: Transport)
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3833,28 +3788,65 @@
                         super();
                         this.setMaxListeners(Infinity);
                     }
-                    safeEmit(event, ...args) {
-                        const numListeners = this.listenerCount(event);
+                    emit(eventName, ...args) {
+                        return super.emit(eventName, ...args);
+                    }
+                    /**
+                     * Special addition to the EventEmitter API.
+                     */
+                    safeEmit(eventName, ...args) {
+                        const numListeners = super.listenerCount(eventName);
                         try {
-                            return this.emit(event, ...args);
+                            return super.emit(eventName, ...args);
                         } catch (error) {
-                            logger.error('safeEmit() | event listener threw an error [event:%s]:%o', event, error);
+                            logger.error(
+                                'safeEmit() | event listener threw an error [eventName:%s]:%o',
+                                eventName,
+                                error,
+                            );
                             return Boolean(numListeners);
                         }
                     }
-                    async safeEmitAsPromise(event, ...args) {
-                        return new Promise((resolve, reject) => {
-                            try {
-                                this.emit(event, ...args, resolve, reject);
-                            } catch (error) {
-                                logger.error(
-                                    'safeEmitAsPromise() | event listener threw an error [event:%s]:%o',
-                                    event,
-                                    error,
-                                );
-                                reject(error);
-                            }
-                        });
+                    on(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    off(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    addListener(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    prependListener(eventName, listener) {
+                        super.prependListener(eventName, listener);
+                        return this;
+                    }
+                    once(eventName, listener) {
+                        super.once(eventName, listener);
+                        return this;
+                    }
+                    prependOnceListener(eventName, listener) {
+                        super.prependOnceListener(eventName, listener);
+                        return this;
+                    }
+                    removeListener(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    removeAllListeners(eventName) {
+                        super.removeAllListeners(eventName);
+                        return this;
+                    }
+                    listenerCount(eventName) {
+                        return super.listenerCount(eventName);
+                    }
+                    listeners(eventName) {
+                        return super.listeners(eventName);
+                    }
+                    rawListeners(eventName) {
+                        return super.rawListeners(eventName);
                     }
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
@@ -3914,15 +3906,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Producer');
                 class Producer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits trackended
-                     * @emits @replacetrack - (track: MediaStreamTrack | null)
-                     * @emits @setmaxspatiallayer - (spatialLayer: string)
-                     * @emits @setrtpencodingparameters - (params: any)
-                     * @emits @getstats
-                     * @emits @close
-                     */
                     constructor({
                         id,
                         localId,
@@ -4026,14 +4009,6 @@
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits pause
-                     * @emits resume
-                     * @emits trackended
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -4066,7 +4041,9 @@
                      */
                     async getStats() {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        return this.safeEmitAsPromise('@getstats');
+                        return new Promise((resolve, reject) => {
+                            this.safeEmit('@getstats', resolve, reject);
+                        });
                     }
                     /**
                      * Pauses sending media.
@@ -4082,7 +4059,9 @@
                             this._track.enabled = false;
                         }
                         if (this._zeroRtpOnPause) {
-                            this.safeEmitAsPromise('@replacetrack', null).catch(() => {});
+                            new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', null, resolve, reject);
+                            }).catch(() => {});
                         }
                         // Emit observer event.
                         this._observer.safeEmit('pause');
@@ -4101,7 +4080,9 @@
                             this._track.enabled = true;
                         }
                         if (this._zeroRtpOnPause) {
-                            this.safeEmitAsPromise('@replacetrack', this._track).catch(() => {});
+                            new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', this._track, resolve, reject);
+                            }).catch(() => {});
                         }
                         // Emit observer event.
                         this._observer.safeEmit('resume');
@@ -4129,7 +4110,9 @@
                             return;
                         }
                         if (!this._zeroRtpOnPause || !this._paused) {
-                            await this.safeEmitAsPromise('@replacetrack', track);
+                            await new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', track, resolve, reject);
+                            });
                         }
                         // Destroy the previous track.
                         this._destroyTrack();
@@ -4152,16 +4135,17 @@
                         else if (this._kind !== 'video') throw new errors_1.UnsupportedError('not a video Producer');
                         else if (typeof spatialLayer !== 'number') throw new TypeError('invalid spatialLayer');
                         if (spatialLayer === this._maxSpatialLayer) return;
-                        await this.safeEmitAsPromise('@setmaxspatiallayer', spatialLayer);
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@setmaxspatiallayer', spatialLayer, resolve, reject);
+                        }).catch(() => {});
                         this._maxSpatialLayer = spatialLayer;
                     }
-                    /**
-                     * Sets the DSCP value.
-                     */
                     async setRtpEncodingParameters(params) {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
                         else if (typeof params !== 'object') throw new TypeError('invalid params');
-                        await this.safeEmitAsPromise('@setrtpencodingparameters', params);
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@setrtpencodingparameters', params, resolve, reject);
+                        });
                     }
                     _onTrackEnded() {
                         logger.debug('track "ended" event');
@@ -4260,6 +4244,7 @@
                 const Consumer_1 = require('./Consumer');
                 const DataProducer_1 = require('./DataProducer');
                 const DataConsumer_1 = require('./DataConsumer');
+                const logger = new Logger_1.Logger('Transport');
                 class ConsumerCreationTask {
                     constructor(consumerOptions) {
                         this.consumerOptions = consumerOptions;
@@ -4269,14 +4254,7 @@
                         });
                     }
                 }
-                const logger = new Logger_1.Logger('Transport');
                 class Transport extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits connect - (transportLocalParameters: any, callback: Function, errback: Function)
-                     * @emits connectionstatechange - (connectionState: ConnectionState)
-                     * @emits produce - (producerLocalParameters: any, callback: Function, errback: Function)
-                     * @emits producedata - (dataProducerLocalParameters: any, callback: Function, errback: Function)
-                     */
                     constructor({
                         direction,
                         id,
@@ -4398,15 +4376,6 @@
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits newproducer - (producer: Producer)
-                     * @emits newconsumer - (producer: Producer)
-                     * @emits newdataproducer - (dataProducer: DataProducer)
-                     * @emits newdataconsumer - (dataProducer: DataProducer)
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -4547,10 +4516,17 @@
                                     try {
                                         // This will fill rtpParameters's missing fields with default values.
                                         ortc.validateRtpParameters(rtpParameters);
-                                        const { id } = await this.safeEmitAsPromise('produce', {
-                                            kind: track.kind,
-                                            rtpParameters,
-                                            appData,
+                                        const { id } = await new Promise((resolve, reject) => {
+                                            this.safeEmit(
+                                                'produce',
+                                                {
+                                                    kind: track.kind,
+                                                    rtpParameters,
+                                                    appData,
+                                                },
+                                                resolve,
+                                                reject,
+                                            );
                                         });
                                         const producer = new Producer_1.Producer({
                                             id,
@@ -4652,11 +4628,18 @@
                             });
                             // This will fill sctpStreamParameters's missing fields with default values.
                             ortc.validateSctpStreamParameters(sctpStreamParameters);
-                            const { id } = await this.safeEmitAsPromise('producedata', {
-                                sctpStreamParameters,
-                                label,
-                                protocol,
-                                appData,
+                            const { id } = await new Promise((resolve, reject) => {
+                                this.safeEmit(
+                                    'producedata',
+                                    {
+                                        sctpStreamParameters,
+                                        label,
+                                        protocol,
+                                        appData,
+                                    },
+                                    resolve,
+                                    reject,
+                                );
                             });
                             const dataProducer = new DataProducer_1.DataProducer({
                                 id,
@@ -5553,7 +5536,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -6144,7 +6129,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -6748,7 +6735,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -7361,7 +7350,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -7787,7 +7778,9 @@
                         const dtlsParameters = this._dtlsTransport.getLocalParameters();
                         dtlsParameters.role = localDtlsRole;
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         // Start the RTCIceTransport.
                         this._iceTransport.start(this._iceGatherer, this._remoteIceParameters, 'controlling');
                         // Add remote ICE candidates.
@@ -8407,7 +8400,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -8442,14 +8437,6 @@
                 exports.HandlerInterface = void 0;
                 const EnhancedEventEmitter_1 = require('../EnhancedEventEmitter');
                 class HandlerInterface extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits @connect - (
-                     *     { dtlsParameters: DtlsParameters },
-                     *     callback: Function,
-                     *     errback: Function
-                     *   )
-                     * @emits @connectionstatechange - (connectionState: ConnectionState)
-                     */
                     constructor() {
                         super();
                     }
@@ -9003,7 +8990,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -9586,7 +9575,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -10167,7 +10158,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -11694,7 +11687,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.52';
+                exports.version = '3.6.53';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -12631,286 +12624,9 @@
         ],
         40: [
             function (require, module, exports) {
-                /**
-                 * This is the common logic for both the Node.js and web browser
-                 * implementations of `debug()`.
-                 */
-
-                function setup(env) {
-                    createDebug.debug = createDebug;
-                    createDebug.default = createDebug;
-                    createDebug.coerce = coerce;
-                    createDebug.disable = disable;
-                    createDebug.enable = enable;
-                    createDebug.enabled = enabled;
-                    createDebug.humanize = require('ms');
-                    createDebug.destroy = destroy;
-
-                    Object.keys(env).forEach((key) => {
-                        createDebug[key] = env[key];
-                    });
-
-                    /**
-                     * The currently active debug mode names, and names to skip.
-                     */
-
-                    createDebug.names = [];
-                    createDebug.skips = [];
-
-                    /**
-                     * Map of special "%n" handling functions, for the debug "format" argument.
-                     *
-                     * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-                     */
-                    createDebug.formatters = {};
-
-                    /**
-                     * Selects a color for a debug namespace
-                     * @param {String} namespace The namespace string for the debug instance to be colored
-                     * @return {Number|String} An ANSI color code for the given namespace
-                     * @api private
-                     */
-                    function selectColor(namespace) {
-                        let hash = 0;
-
-                        for (let i = 0; i < namespace.length; i++) {
-                            hash = (hash << 5) - hash + namespace.charCodeAt(i);
-                            hash |= 0; // Convert to 32bit integer
-                        }
-
-                        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-                    }
-                    createDebug.selectColor = selectColor;
-
-                    /**
-                     * Create a debugger with the given `namespace`.
-                     *
-                     * @param {String} namespace
-                     * @return {Function}
-                     * @api public
-                     */
-                    function createDebug(namespace) {
-                        let prevTime;
-                        let enableOverride = null;
-                        let namespacesCache;
-                        let enabledCache;
-
-                        function debug(...args) {
-                            // Disabled?
-                            if (!debug.enabled) {
-                                return;
-                            }
-
-                            const self = debug;
-
-                            // Set `diff` timestamp
-                            const curr = Number(new Date());
-                            const ms = curr - (prevTime || curr);
-                            self.diff = ms;
-                            self.prev = prevTime;
-                            self.curr = curr;
-                            prevTime = curr;
-
-                            args[0] = createDebug.coerce(args[0]);
-
-                            if (typeof args[0] !== 'string') {
-                                // Anything else let's inspect with %O
-                                args.unshift('%O');
-                            }
-
-                            // Apply any `formatters` transformations
-                            let index = 0;
-                            args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-                                // If we encounter an escaped % then don't increase the array index
-                                if (match === '%%') {
-                                    return '%';
-                                }
-                                index++;
-                                const formatter = createDebug.formatters[format];
-                                if (typeof formatter === 'function') {
-                                    const val = args[index];
-                                    match = formatter.call(self, val);
-
-                                    // Now we need to remove `args[index]` since it's inlined in the `format`
-                                    args.splice(index, 1);
-                                    index--;
-                                }
-                                return match;
-                            });
-
-                            // Apply env-specific formatting (colors, etc.)
-                            createDebug.formatArgs.call(self, args);
-
-                            const logFn = self.log || createDebug.log;
-                            logFn.apply(self, args);
-                        }
-
-                        debug.namespace = namespace;
-                        debug.useColors = createDebug.useColors();
-                        debug.color = createDebug.selectColor(namespace);
-                        debug.extend = extend;
-                        debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
-
-                        Object.defineProperty(debug, 'enabled', {
-                            enumerable: true,
-                            configurable: false,
-                            get: () => {
-                                if (enableOverride !== null) {
-                                    return enableOverride;
-                                }
-                                if (namespacesCache !== createDebug.namespaces) {
-                                    namespacesCache = createDebug.namespaces;
-                                    enabledCache = createDebug.enabled(namespace);
-                                }
-
-                                return enabledCache;
-                            },
-                            set: (v) => {
-                                enableOverride = v;
-                            },
-                        });
-
-                        // Env-specific initialization logic for debug instances
-                        if (typeof createDebug.init === 'function') {
-                            createDebug.init(debug);
-                        }
-
-                        return debug;
-                    }
-
-                    function extend(namespace, delimiter) {
-                        const newDebug = createDebug(
-                            this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace,
-                        );
-                        newDebug.log = this.log;
-                        return newDebug;
-                    }
-
-                    /**
-                     * Enables a debug mode by namespaces. This can include modes
-                     * separated by a colon and wildcards.
-                     *
-                     * @param {String} namespaces
-                     * @api public
-                     */
-                    function enable(namespaces) {
-                        createDebug.save(namespaces);
-                        createDebug.namespaces = namespaces;
-
-                        createDebug.names = [];
-                        createDebug.skips = [];
-
-                        let i;
-                        const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-                        const len = split.length;
-
-                        for (i = 0; i < len; i++) {
-                            if (!split[i]) {
-                                // ignore empty strings
-                                continue;
-                            }
-
-                            namespaces = split[i].replace(/\*/g, '.*?');
-
-                            if (namespaces[0] === '-') {
-                                createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
-                            } else {
-                                createDebug.names.push(new RegExp('^' + namespaces + '$'));
-                            }
-                        }
-                    }
-
-                    /**
-                     * Disable debug output.
-                     *
-                     * @return {String} namespaces
-                     * @api public
-                     */
-                    function disable() {
-                        const namespaces = [
-                            ...createDebug.names.map(toNamespace),
-                            ...createDebug.skips.map(toNamespace).map((namespace) => '-' + namespace),
-                        ].join(',');
-                        createDebug.enable('');
-                        return namespaces;
-                    }
-
-                    /**
-                     * Returns true if the given mode name is enabled, false otherwise.
-                     *
-                     * @param {String} name
-                     * @return {Boolean}
-                     * @api public
-                     */
-                    function enabled(name) {
-                        if (name[name.length - 1] === '*') {
-                            return true;
-                        }
-
-                        let i;
-                        let len;
-
-                        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-                            if (createDebug.skips[i].test(name)) {
-                                return false;
-                            }
-                        }
-
-                        for (i = 0, len = createDebug.names.length; i < len; i++) {
-                            if (createDebug.names[i].test(name)) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    }
-
-                    /**
-                     * Convert regexp to namespace
-                     *
-                     * @param {RegExp} regxep
-                     * @return {String} namespace
-                     * @api private
-                     */
-                    function toNamespace(regexp) {
-                        return regexp
-                            .toString()
-                            .substring(2, regexp.toString().length - 2)
-                            .replace(/\.\*\?$/, '*');
-                    }
-
-                    /**
-                     * Coerce `val`.
-                     *
-                     * @param {Mixed} val
-                     * @return {Mixed}
-                     * @api private
-                     */
-                    function coerce(val) {
-                        if (val instanceof Error) {
-                            return val.stack || val.message;
-                        }
-                        return val;
-                    }
-
-                    /**
-                     * XXX DO NOT USE. This is a temporary stub function.
-                     * XXX It WILL be removed in the next major release.
-                     */
-                    function destroy() {
-                        console.warn(
-                            'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
-                        );
-                    }
-
-                    createDebug.enable(createDebug.load());
-
-                    return createDebug;
-                }
-
-                module.exports = setup;
+                arguments[4][5][0].apply(exports, arguments);
             },
-            { ms: 41 },
+            { dup: 5, ms: 41 },
         ],
         41: [
             function (require, module, exports) {

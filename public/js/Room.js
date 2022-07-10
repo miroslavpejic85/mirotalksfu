@@ -207,7 +207,7 @@ function enumerateAudioDevices(stream) {
                     el = speakerSelect;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
@@ -228,7 +228,7 @@ function enumerateVideoDevices(stream) {
                     el = videoSelect;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
@@ -243,7 +243,7 @@ function stopTracks(stream) {
     });
 }
 
-function appenChild(device, el) {
+function addChild(device, el) {
     let option = document.createElement('option');
     option.value = device.deviceId;
     option.innerText = device.label;
