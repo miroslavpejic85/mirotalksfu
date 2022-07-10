@@ -21,6 +21,7 @@ const html = {
 };
 
 const image = {
+    audio: '../images/audio.gif',
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
     locked: '../images/locked.png',
@@ -2384,6 +2385,7 @@ class RoomClient {
                 }
                 // https://www.youtube.com/watch?v=RT6_Id5-7-s
                 // http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                // https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
 
                 let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
                 let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
@@ -2477,6 +2479,9 @@ class RoomClient {
             video.type = video_type;
             video.autoplay = true;
             video.controls = true;
+            if (video_type == 'video/mp3') {
+                video.poster = image.audio;
+            }
         }
         video.setAttribute('id', '__videoShare');
         video.setAttribute('src', video_url);
