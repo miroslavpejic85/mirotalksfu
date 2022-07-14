@@ -2362,8 +2362,8 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             imageUrl: image.videoShare,
-            title: 'Share YouTube, mp4, webm, ogg video or mp3 audio',
-            text: 'Paste YouTube, mp4, webm, ogg, mp3 URL',
+            title: 'Share a Video or Audio',
+            text: 'Paste a Video or Audio URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
@@ -2380,7 +2380,7 @@ class RoomClient {
                     return;
                 }
                 if (!this.isVideoTypeSupported(result.value)) {
-                    userLog('info', 'Video type supported: youtube, mp4, webm, ogg or Audio mp3', 'top-end');
+                    userLog('warning', 'Something wrong, try with another Video or audio URL');
                     return;
                 }
                 // https://www.youtube.com/watch?v=RT6_Id5-7-s
