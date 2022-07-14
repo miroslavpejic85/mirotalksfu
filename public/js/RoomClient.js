@@ -2383,10 +2383,11 @@ class RoomClient {
                     userLog('warning', 'Something wrong, try with another Video or audio URL');
                     return;
                 }
-                // https://www.youtube.com/watch?v=RT6_Id5-7-s
-                // http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
-                // https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
-
+                /*
+                    https://www.youtube.com/watch?v=RT6_Id5-7-s
+                    http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                    https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
+                */
                 let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
                 let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
                 if (video_url) {
@@ -2497,7 +2498,7 @@ class RoomClient {
             this.closeVideo(true);
         });
         if (!this.isMobileDevice) {
-            this.setTippy(e.id, 'Close video', 'top-end');
+            this.setTippy(e.id, 'Close video player', 'top-end');
         }
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
