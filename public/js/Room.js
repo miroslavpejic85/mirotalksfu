@@ -1795,7 +1795,7 @@ function showAbout() {
             <b>Open Source</b> project on
             <a href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank"><br/><br />
             <img alt="mirotalksfu-github" src="../images/github.png"></a><br/><br />
-            <button class="pulsate" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Sponsor</button>
+            <button class="pulsate" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
             Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> Miroslav Pejic</a>
         </div>
