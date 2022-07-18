@@ -4703,9 +4703,9 @@
                     }
                     // This method is guaranteed to never throw.
                     async _createPendingConsumers() {
+                        this._consumerCreationInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerCreationInProgress = true;
                                 const pendingConsumerTasks = [...this._pendingConsumerTasks];
                                 // Clear pending Consumer tasks.
                                 this._pendingConsumerTasks = [];
@@ -4791,9 +4791,9 @@
                             .catch(() => {});
                     }
                     _pausePendingConsumers() {
+                        this._consumerPauseInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerPauseInProgress = true;
                                 const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
                                 // Clear pending pause Consumer map.
                                 this._pendingPauseConsumers.clear();
@@ -4816,9 +4816,9 @@
                             .catch(() => {});
                     }
                     _resumePendingConsumers() {
+                        this._consumerResumeInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerResumeInProgress = true;
                                 const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
                                 // Clear pending resume Consumer map.
                                 this._pendingResumeConsumers.clear();
@@ -11687,7 +11687,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.53';
+                exports.version = '3.6.54';
                 /**
                  * Expose parseScalabilityMode() function.
                  */

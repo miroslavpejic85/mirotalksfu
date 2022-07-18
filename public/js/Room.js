@@ -789,13 +789,11 @@ function handleButtons() {
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', true);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.video);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'video', false);
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
     startScreenButton.onclick = () => {

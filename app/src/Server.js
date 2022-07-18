@@ -634,7 +634,7 @@ io.on('connection', (socket) => {
         log.debug('Producer close', data);
 
         // peer_info audio Or video OFF
-        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
+        // roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
     });
 
