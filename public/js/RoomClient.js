@@ -2385,7 +2385,7 @@ class RoomClient {
                 }
                 /*
                     https://www.youtube.com/watch?v=RT6_Id5-7-s
-                    http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                    https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
                     https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
                 */
                 let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
