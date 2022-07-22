@@ -47,6 +47,7 @@ let isVideoAllowed = false;
 let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
+let isVideoControlsOn = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -903,10 +904,13 @@ function handleSelects() {
         setAspectRatio(BtnsAspectRatio.value);
     };
     BtnVideoObjectFit.onchange = () => {
-        handleVideoObjectFit(BtnVideoObjectFit.value);
+        rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     }; // cover
     BtnVideoObjectFit.selectedIndex = 2;
 
+    BtnVideoControls.onchange = () => {
+        rc.handleVideoControls(BtnVideoControls.value);
+    };
     selectTheme.onchange = () => {
         setTheme(selectTheme.value);
     };
@@ -1670,14 +1674,6 @@ function refreshParticipantsCount(count) {
 
 function getParticipantAvatar(peerName) {
     return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
-}
-
-// ####################################################
-// HANDLE VIDEO OBJ FIT
-// ####################################################
-
-function handleVideoObjectFit(value) {
-    document.documentElement.style.setProperty('--videoObjFit', value);
 }
 
 // ####################################################

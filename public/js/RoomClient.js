@@ -69,7 +69,6 @@ const _EVENTS = {
 };
 
 let recordedBlobs;
-
 class RoomClient {
     constructor(
         remoteAudioEl,
@@ -802,6 +801,7 @@ class RoomClient {
         elem = document.createElement('video');
         elem.setAttribute('id', id);
         elem.setAttribute('playsinline', true);
+        elem.controls = isVideoControlsOn;
         elem.autoplay = true;
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
@@ -1040,6 +1040,7 @@ class RoomClient {
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 elem.setAttribute('playsinline', true);
+                elem.controls = isVideoControlsOn;
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
@@ -1603,10 +1604,12 @@ class RoomClient {
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
         videoPlayer.addEventListener('click', () => {
-            if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
-                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-                this.toggleFullScreen(videoPlayer);
-                this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+            if (!videoPlayer.hasAttribute('controls')) {
+                if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
+                    videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                    this.toggleFullScreen(videoPlayer);
+                    this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+                }
             }
         });
         videoPlayer.addEventListener('fullscreenchange', (e) => {
@@ -1621,6 +1624,26 @@ class RoomClient {
                 this.isVideoOnFullScreen = false;
             }
         });
+    }
+
+    // ####################################################
+    // HANDLE VIDEO | OBJ FIT | CONTROLS |
+    // ####################################################
+
+    handleVideoObjectFit(value) {
+        document.documentElement.style.setProperty('--videoObjFit', value);
+    }
+
+    handleVideoControls(value) {
+        isVideoControlsOn = value == 'On' ? true : false;
+        let cameras = this.getEcN('Camera');
+        for (let i = 0; i < cameras.length; i++) {
+            let cameraId = cameras[i].id.replace('__d', '');
+            let videoPlayer = this.getId(cameraId);
+            videoPlayer.hasAttribute('controls')
+                ? videoPlayer.removeAttribute('controls')
+                : videoPlayer.setAttribute('controls', isVideoControlsOn);
+        }
     }
 
     // ####################################################
@@ -2343,7 +2366,7 @@ class RoomClient {
     }
 
     // ####################################################
-    // SHARE VIDEO YOUTUBE or MP4
+    // SHARE VIDEO YOUTUBE - MP4 - WEBM - OGG or AUDIO mp3
     // ####################################################
 
     handleSV(uid) {
