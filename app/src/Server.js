@@ -28,6 +28,7 @@ const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
+const { clearConfigCache } = require('prettier');
 
 const app = express();
 
@@ -426,6 +427,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('roomAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Room action:', data);
         switch (data.action) {
             case 'lock':
@@ -452,6 +455,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('peerAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Peer action:', data);
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
@@ -461,6 +466,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('updatePeerInfo', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Peer info update:', data);
         // peer_info hand raise Or lower
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
@@ -468,6 +475,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('fileInfo', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Send File Info', data);
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
@@ -477,6 +486,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('file', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(socket.id, 'file', data);
         } else {
@@ -485,10 +496,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('fileAbort', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
     });
 
     socket.on('shareVideoAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Share video: ', data);
         if (data.peer_id == 'all') {
             roomList.get(socket.room_id).broadCast(socket.id, 'shareVideoAction', data);
@@ -498,17 +513,23 @@ io.on('connection', (socket) => {
     });
 
     socket.on('wbCanvasToJson', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         // let objLength = bytesToSize(Object.keys(data).length);
         // log.debug('Send Whiteboard canvas JSON', { length: objLength });
         roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
     });
 
     socket.on('whiteboardAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Whiteboard', data);
         roomList.get(socket.room_id).broadCast(socket.id, 'whiteboardAction', data);
     });
 
     socket.on('setVideoOff', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Video off', getPeerName());
         roomList.get(socket.room_id).broadCast(socket.id, 'setVideoOff', data);
     });
@@ -533,6 +554,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRouterRtpCapabilities', (_, callback) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Get RouterRtpCapabilities', getPeerName());
         try {
             callback(roomList.get(socket.room_id).getRtpCapabilities());
@@ -555,6 +578,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createWebRtcTransport', async (_, callback) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Create webrtc transport', getPeerName());
         try {
             const { params } = await roomList.get(socket.room_id).createWebRtcTransport(socket.id);
@@ -569,6 +594,7 @@ io.on('connection', (socket) => {
 
     socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
         if (!roomList.has(socket.room_id)) return;
+
         log.debug('Connect transport', getPeerName());
 
         await roomList.get(socket.room_id).connectPeerTransport(socket.id, transport_id, dtlsParameters);
@@ -624,13 +650,15 @@ io.on('connection', (socket) => {
         log.debug('Consuming', {
             peer_name: getPeerName(false),
             producer_id: producerId,
-            consumer_id: params.id,
+            consumer_id: params ? params.id : undefined,
         });
 
         callback(params);
     });
 
     socket.on('producerClosed', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Producer close', data);
         roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
     });
@@ -641,11 +669,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRoomInfo', (_, cb) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Send Room Info to', getPeerName());
         cb(roomList.get(socket.room_id).toJson());
     });
 
     socket.on('refreshParticipantsCount', () => {
+        if (!roomList.has(socket.room_id)) return;
+
         let data = {
             room_id: socket.room_id,
             peer_counts: roomList.get(socket.room_id).getPeers().size,
@@ -655,6 +687,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('message', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('message', data);
         if (data.to_peer_id == 'all') {
             roomList.get(socket.room_id).broadCast(socket.id, 'message', data);
@@ -664,7 +698,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        if (!socket.room_id) return;
+        if (!roomList.has(socket.room_id)) return;
 
         log.debug('Disconnect', getPeerName());
 
