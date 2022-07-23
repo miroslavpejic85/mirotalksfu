@@ -28,7 +28,6 @@ const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
-const { clearConfigCache } = require('prettier');
 
 const app = express();
 
