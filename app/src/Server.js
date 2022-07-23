@@ -553,7 +553,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRouterRtpCapabilities', (_, callback) => {
-        if (!roomList.has(socket.room_id)) return;
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
 
         log.debug('Get RouterRtpCapabilities', getPeerName());
         try {
@@ -577,7 +579,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createWebRtcTransport', async (_, callback) => {
-        if (!roomList.has(socket.room_id)) return;
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
 
         log.debug('Create webrtc transport', getPeerName());
         try {
@@ -592,7 +596,9 @@ io.on('connection', (socket) => {
     });
 
     socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
-        if (!roomList.has(socket.room_id)) return;
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
 
         log.debug('Connect transport', getPeerName());
 
