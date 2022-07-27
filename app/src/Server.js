@@ -19,8 +19,8 @@ const log = new Logger('Server');
 const yamlJS = require('yamljs');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
-const Sentry = require('@sentry/node');
-const { CaptureConsole } = require('@sentry/integrations');
+//const Sentry = require('@sentry/node');
+//const { CaptureConsole } = require('@sentry/integrations');
 
 const app = express();
 
@@ -49,6 +49,7 @@ const apiBasePath = '/api/v1'; // api endpoint path
 const api_docs = host + apiBasePath + '/docs'; // api docs
 
 // Sentry monitoring
+/*
 const sentryEnabled = config.sentry.enabled;
 const sentryDSN = config.sentry.DSN;
 const sentryTracesSampleRate = config.sentry.tracesSampleRate;
@@ -70,7 +71,7 @@ if (sentryEnabled) {
     log.warn('test-error');
     log.warn('test-debug');
     */
-}
+//}
 
 // Authenticated IP by Login
 let authHost;
@@ -286,7 +287,7 @@ async function ngrokStart() {
             api_docs: api_docs,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,
-            sentry_enabled: sentryEnabled,
+            //sentry_enabled: sentryEnabled,
         });
     } catch (err) {
         log.error('Ngrok Start error: ', err);
@@ -324,7 +325,7 @@ httpsServer.listen(config.listenPort, () => {
         api_docs: api_docs,
         mediasoup_server_version: mediasoup.version,
         mediasoup_client_version: mediasoupClient.version,
-        sentry_enabled: sentryEnabled,
+        //sentry_enabled: sentryEnabled,
     });
 });
 
