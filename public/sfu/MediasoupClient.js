@@ -69,9 +69,10 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 class AwaitQueue {
                     constructor(
-                        { ClosedErrorClass = Error, StoppedErrorClass = Error } = {
+                        { ClosedErrorClass = Error, StoppedErrorClass = Error, RemovedTaskErrorClass = Error } = {
                             ClosedErrorClass: Error,
                             StoppedErrorClass: Error,
+                            RemovedTaskErrorClass: Error,
                         },
                     ) {
                         // Closed flag.
@@ -82,19 +83,15 @@
                         this.ClosedErrorClass = Error;
                         // Error class used when rejecting a task due to AwaitQueue being stopped.
                         this.StoppedErrorClass = Error;
+                        // Error class used when removing a pending task when calling removeTask().
+                        this.RemovedTaskErrorClass = Error;
                         this.ClosedErrorClass = ClosedErrorClass;
                         this.StoppedErrorClass = StoppedErrorClass;
+                        this.RemovedTaskErrorClass = RemovedTaskErrorClass;
                     }
-                    /**
-                     * The number of ongoing enqueued tasks.
-                     */
                     get size() {
                         return this.pendingTasks.length;
                     }
-                    /**
-                     * Closes the AwaitQueue. Pending tasks will be rejected with ClosedErrorClass
-                     * error.
-                     */
                     close() {
                         if (this.closed) return;
                         this.closed = true;
@@ -105,13 +102,6 @@
                         // Enpty the pending tasks array.
                         this.pendingTasks.length = 0;
                     }
-                    /**
-                     * Accepts a task as argument (and an optional task name) and enqueues it after
-                     * pending tasks. Once processed, the push() method resolves (or rejects) with
-                     * the result returned by the given task.
-                     *
-                     * The given task must return a Promise or directly a value.
-                     */
                     push(task, name) {
                         return __awaiter(this, void 0, void 0, function* () {
                             if (this.closed) throw new this.ClosedErrorClass('AwaitQueue closed');
@@ -138,11 +128,15 @@
                             });
                         });
                     }
-                    /**
-                     * Make ongoing pending tasks reject with the given StoppedErrorClass error.
-                     * The AwaitQueue instance is still usable for future tasks added via push()
-                     * method.
-                     */
+                    removeTask(idx) {
+                        if (idx === 0) {
+                            throw new TypeError('cannot remove task with index 0');
+                        }
+                        const pendingTask = this.pendingTasks[idx];
+                        if (!pendingTask) return;
+                        this.pendingTasks.splice(idx, 1);
+                        pendingTask.reject(new this.RemovedTaskErrorClass('task removed from the queue'));
+                    }
                     stop() {
                         if (this.closed) return;
                         for (const pendingTask of this.pendingTasks) {
@@ -154,18 +148,18 @@
                     }
                     dump() {
                         const now = new Date();
-                        return this.pendingTasks.map((pendingTask) => {
-                            return {
-                                task: pendingTask.task,
-                                name: pendingTask.name,
-                                enqueuedTime: pendingTask.executedAt
-                                    ? pendingTask.executedAt.getTime() - pendingTask.enqueuedAt.getTime()
-                                    : now.getTime() - pendingTask.enqueuedAt.getTime(),
-                                executingTime: pendingTask.executedAt
-                                    ? now.getTime() - pendingTask.executedAt.getTime()
-                                    : 0,
-                            };
-                        });
+                        let idx = 0;
+                        return this.pendingTasks.map((pendingTask) => ({
+                            idx: idx++,
+                            task: pendingTask.task,
+                            name: pendingTask.name,
+                            enqueuedTime: pendingTask.executedAt
+                                ? pendingTask.executedAt.getTime() - pendingTask.enqueuedAt.getTime()
+                                : now.getTime() - pendingTask.enqueuedAt.getTime(),
+                            executingTime: pendingTask.executedAt
+                                ? now.getTime() - pendingTask.executedAt.getTime()
+                                : 0,
+                        }));
                     }
                     next() {
                         return __awaiter(this, void 0, void 0, function* () {
@@ -2556,7 +2550,7 @@
                             namespaces = split[i].replace(/\*/g, '.*?');
 
                             if (namespaces[0] === '-') {
-                                createDebug.skips.push(new RegExp('^' + namespaces.substr(1) + '$'));
+                                createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
                             } else {
                                 createDebug.names.push(new RegExp('^' + namespaces + '$'));
                             }
@@ -2830,14 +2824,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Consumer');
                 class Consumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits trackended
-                     * @emits @getstats
-                     * @emits @close
-                     * @emits @pause
-                     * @emits @resume
-                     */
                     constructor({ id, localId, producerId, rtpReceiver, track, rtpParameters, appData }) {
                         super();
                         // Closed flag.
@@ -2852,7 +2838,7 @@
                         this._track = track;
                         this._rtpParameters = rtpParameters;
                         this._paused = !track.enabled;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._onTrackEnded = this._onTrackEnded.bind(this);
                         this._handleTrack();
                     }
@@ -2919,17 +2905,10 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits pause
-                     * @emits resume
-                     * @emits trackended
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -2962,7 +2941,9 @@
                      */
                     async getStats() {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        return this.safeEmitAsPromise('@getstats');
+                        return new Promise((resolve, reject) => {
+                            this.safeEmit('@getstats', resolve, reject);
+                        });
                     }
                     /**
                      * Pauses receiving media.
@@ -3023,14 +3004,6 @@
                 const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
                 const logger = new Logger_1.Logger('DataConsumer');
                 class DataConsumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits open
-                     * @emits error - (error: Error)
-                     * @emits close
-                     * @emits message - (message: any)
-                     * @emits @close
-                     */
                     constructor({ id, dataProducerId, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
@@ -3042,7 +3015,7 @@
                         this._dataProducerId = dataProducerId;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleDataChannel();
                     }
                     /**
@@ -3108,14 +3081,10 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3191,14 +3160,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('DataProducer');
                 class DataProducer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits open
-                     * @emits error - (error: Error)
-                     * @emits close
-                     * @emits bufferedamountlow
-                     * @emits @close
-                     */
                     constructor({ id, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
@@ -3209,7 +3170,7 @@
                         this._id = id;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleDataChannel();
                     }
                     /**
@@ -3275,14 +3236,10 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3371,12 +3328,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -3625,11 +3586,6 @@
                         if (!this._loaded) throw new errors_1.InvalidStateError('not loaded');
                         return this._sctpCapabilities;
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits newtransport - (transport: Transport)
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -3704,7 +3660,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         logger.debug('createSendTransport()');
                         return this._createTransport({
@@ -3737,7 +3693,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         logger.debug('createRecvTransport()');
                         return this._createTransport({
@@ -3765,7 +3721,7 @@
                         iceTransportPolicy,
                         additionalSettings,
                         proprietaryConstraints,
-                        appData = {},
+                        appData,
                     }) {
                         if (!this._loaded) throw new errors_1.InvalidStateError('not loaded');
                         else if (typeof id !== 'string') throw new TypeError('missing id');
@@ -3832,28 +3788,65 @@
                         super();
                         this.setMaxListeners(Infinity);
                     }
-                    safeEmit(event, ...args) {
-                        const numListeners = this.listenerCount(event);
+                    emit(eventName, ...args) {
+                        return super.emit(eventName, ...args);
+                    }
+                    /**
+                     * Special addition to the EventEmitter API.
+                     */
+                    safeEmit(eventName, ...args) {
+                        const numListeners = super.listenerCount(eventName);
                         try {
-                            return this.emit(event, ...args);
+                            return super.emit(eventName, ...args);
                         } catch (error) {
-                            logger.error('safeEmit() | event listener threw an error [event:%s]:%o', event, error);
+                            logger.error(
+                                'safeEmit() | event listener threw an error [eventName:%s]:%o',
+                                eventName,
+                                error,
+                            );
                             return Boolean(numListeners);
                         }
                     }
-                    async safeEmitAsPromise(event, ...args) {
-                        return new Promise((resolve, reject) => {
-                            try {
-                                this.emit(event, ...args, resolve, reject);
-                            } catch (error) {
-                                logger.error(
-                                    'safeEmitAsPromise() | event listener threw an error [event:%s]:%o',
-                                    event,
-                                    error,
-                                );
-                                reject(error);
-                            }
-                        });
+                    on(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    off(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    addListener(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    prependListener(eventName, listener) {
+                        super.prependListener(eventName, listener);
+                        return this;
+                    }
+                    once(eventName, listener) {
+                        super.once(eventName, listener);
+                        return this;
+                    }
+                    prependOnceListener(eventName, listener) {
+                        super.prependOnceListener(eventName, listener);
+                        return this;
+                    }
+                    removeListener(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    removeAllListeners(eventName) {
+                        super.removeAllListeners(eventName);
+                        return this;
+                    }
+                    listenerCount(eventName) {
+                        return super.listenerCount(eventName);
+                    }
+                    listeners(eventName) {
+                        return super.listeners(eventName);
+                    }
+                    rawListeners(eventName) {
+                        return super.rawListeners(eventName);
                     }
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
@@ -3913,15 +3906,6 @@
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Producer');
                 class Producer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits transportclose
-                     * @emits trackended
-                     * @emits @replacetrack - (track: MediaStreamTrack | null)
-                     * @emits @setmaxspatiallayer - (spatialLayer: string)
-                     * @emits @setrtpencodingparameters - (params: any)
-                     * @emits @getstats
-                     * @emits @close
-                     */
                     constructor({
                         id,
                         localId,
@@ -3950,7 +3934,7 @@
                         this._stopTracks = stopTracks;
                         this._disableTrackOnPause = disableTrackOnPause;
                         this._zeroRtpOnPause = zeroRtpOnPause;
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._onTrackEnded = this._onTrackEnded.bind(this);
                         // NOTE: Minor issue. If zeroRtpOnPause is true, we cannot emit the
                         // '@replacetrack' event here, so RTCRtpSender.track won't be null.
@@ -4021,17 +4005,10 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits pause
-                     * @emits resume
-                     * @emits trackended
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -4064,7 +4041,9 @@
                      */
                     async getStats() {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        return this.safeEmitAsPromise('@getstats');
+                        return new Promise((resolve, reject) => {
+                            this.safeEmit('@getstats', resolve, reject);
+                        });
                     }
                     /**
                      * Pauses sending media.
@@ -4080,7 +4059,9 @@
                             this._track.enabled = false;
                         }
                         if (this._zeroRtpOnPause) {
-                            this.safeEmitAsPromise('@replacetrack', null).catch(() => {});
+                            new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', null, resolve, reject);
+                            }).catch(() => {});
                         }
                         // Emit observer event.
                         this._observer.safeEmit('pause');
@@ -4099,7 +4080,9 @@
                             this._track.enabled = true;
                         }
                         if (this._zeroRtpOnPause) {
-                            this.safeEmitAsPromise('@replacetrack', this._track).catch(() => {});
+                            new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', this._track, resolve, reject);
+                            }).catch(() => {});
                         }
                         // Emit observer event.
                         this._observer.safeEmit('resume');
@@ -4127,7 +4110,9 @@
                             return;
                         }
                         if (!this._zeroRtpOnPause || !this._paused) {
-                            await this.safeEmitAsPromise('@replacetrack', track);
+                            await new Promise((resolve, reject) => {
+                                this.safeEmit('@replacetrack', track, resolve, reject);
+                            });
                         }
                         // Destroy the previous track.
                         this._destroyTrack();
@@ -4150,16 +4135,17 @@
                         else if (this._kind !== 'video') throw new errors_1.UnsupportedError('not a video Producer');
                         else if (typeof spatialLayer !== 'number') throw new TypeError('invalid spatialLayer');
                         if (spatialLayer === this._maxSpatialLayer) return;
-                        await this.safeEmitAsPromise('@setmaxspatiallayer', spatialLayer);
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@setmaxspatiallayer', spatialLayer, resolve, reject);
+                        }).catch(() => {});
                         this._maxSpatialLayer = spatialLayer;
                     }
-                    /**
-                     * Sets the DSCP value.
-                     */
                     async setRtpEncodingParameters(params) {
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
                         else if (typeof params !== 'object') throw new TypeError('invalid params');
-                        await this.safeEmitAsPromise('@setrtpencodingparameters', params);
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@setrtpencodingparameters', params, resolve, reject);
+                        });
                     }
                     _onTrackEnded() {
                         logger.debug('track "ended" event');
@@ -4210,12 +4196,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -4254,6 +4244,7 @@
                 const Consumer_1 = require('./Consumer');
                 const DataProducer_1 = require('./DataProducer');
                 const DataConsumer_1 = require('./DataConsumer');
+                const logger = new Logger_1.Logger('Transport');
                 class ConsumerCreationTask {
                     constructor(consumerOptions) {
                         this.consumerOptions = consumerOptions;
@@ -4263,14 +4254,7 @@
                         });
                     }
                 }
-                const logger = new Logger_1.Logger('Transport');
                 class Transport extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits connect - (transportLocalParameters: any, callback: Function, errback: Function)
-                     * @emits connectionstatechange - (connectionState: ConnectionState)
-                     * @emits produce - (producerLocalParameters: any, callback: Function, errback: Function)
-                     * @emits producedata - (dataProducerLocalParameters: any, callback: Function, errback: Function)
-                     */
                     constructor({
                         direction,
                         id,
@@ -4346,7 +4330,7 @@
                             proprietaryConstraints,
                             extendedRtpCapabilities,
                         });
-                        this._appData = appData;
+                        this._appData = appData || {};
                         this._handleHandler();
                     }
                     /**
@@ -4388,18 +4372,10 @@
                     /**
                      * Invalid setter.
                      */
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
                         throw new Error('cannot override appData object');
                     }
-                    /**
-                     * Observer.
-                     *
-                     * @emits close
-                     * @emits newproducer - (producer: Producer)
-                     * @emits newconsumer - (producer: Producer)
-                     * @emits newdataproducer - (dataProducer: DataProducer)
-                     * @emits newdataconsumer - (dataProducer: DataProducer)
-                     */
                     get observer() {
                         return this._observer;
                     }
@@ -4540,10 +4516,17 @@
                                     try {
                                         // This will fill rtpParameters's missing fields with default values.
                                         ortc.validateRtpParameters(rtpParameters);
-                                        const { id } = await this.safeEmitAsPromise('produce', {
-                                            kind: track.kind,
-                                            rtpParameters,
-                                            appData,
+                                        const { id } = await new Promise((resolve, reject) => {
+                                            this.safeEmit(
+                                                'produce',
+                                                {
+                                                    kind: track.kind,
+                                                    rtpParameters,
+                                                    appData,
+                                                },
+                                                resolve,
+                                                reject,
+                                            );
                                         });
                                         const producer = new Producer_1.Producer({
                                             id,
@@ -4645,11 +4628,18 @@
                             });
                             // This will fill sctpStreamParameters's missing fields with default values.
                             ortc.validateSctpStreamParameters(sctpStreamParameters);
-                            const { id } = await this.safeEmitAsPromise('producedata', {
-                                sctpStreamParameters,
-                                label,
-                                protocol,
-                                appData,
+                            const { id } = await new Promise((resolve, reject) => {
+                                this.safeEmit(
+                                    'producedata',
+                                    {
+                                        sctpStreamParameters,
+                                        label,
+                                        protocol,
+                                        appData,
+                                    },
+                                    resolve,
+                                    reject,
+                                );
                             });
                             const dataProducer = new DataProducer_1.DataProducer({
                                 id,
@@ -4713,9 +4703,9 @@
                     }
                     // This method is guaranteed to never throw.
                     async _createPendingConsumers() {
+                        this._consumerCreationInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerCreationInProgress = true;
                                 const pendingConsumerTasks = [...this._pendingConsumerTasks];
                                 // Clear pending Consumer tasks.
                                 this._pendingConsumerTasks = [];
@@ -4801,44 +4791,54 @@
                             .catch(() => {});
                     }
                     _pausePendingConsumers() {
+                        this._consumerPauseInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerPauseInProgress = true;
                                 const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
                                 // Clear pending pause Consumer map.
                                 this._pendingPauseConsumers.clear();
-                                await this._handler.pauseReceiving(
-                                    pendingPauseConsumers.map((consumer) => consumer.localId),
-                                );
-                            }, 'consumer @pause event')
-                            .catch(() => {})
-                            .finally(() => {
+                                try {
+                                    await this._handler.pauseReceiving(
+                                        pendingPauseConsumers.map((consumer) => consumer.localId),
+                                    );
+                                } catch (error) {
+                                    logger.error('_pausePendingConsumers() | failed to pause Consumers:', error);
+                                }
                                 this._consumerPauseInProgress = false;
+                            }, 'consumer @pause event')
+                            .then(() => {
                                 // There are pending Consumers to be paused, do it.
                                 if (this._pendingPauseConsumers.size > 0) {
                                     this._pausePendingConsumers();
                                 }
-                            });
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
                     }
                     _resumePendingConsumers() {
+                        this._consumerResumeInProgress = true;
                         this._awaitQueue
                             .push(async () => {
-                                this._consumerResumeInProgress = true;
                                 const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
                                 // Clear pending resume Consumer map.
                                 this._pendingResumeConsumers.clear();
-                                await this._handler.resumeReceiving(
-                                    pendingResumeConsumers.map((consumer) => consumer.localId),
-                                );
+                                try {
+                                    await this._handler.resumeReceiving(
+                                        pendingResumeConsumers.map((consumer) => consumer.localId),
+                                    );
+                                } catch (error) {
+                                    logger.error('_resumePendingConsumers() | failed to resume Consumers:', error);
+                                }
                             }, 'consumer @resume event')
-                            .catch(() => {})
-                            .finally(() => {
+                            .then(() => {
                                 this._consumerResumeInProgress = false;
                                 // There are pending Consumer to be resumed, do it.
                                 if (this._pendingResumeConsumers.size > 0) {
                                     this._resumePendingConsumers();
                                 }
-                            });
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
                     }
                     _handleHandler() {
                         const handler = this._handler;
@@ -5014,12 +5014,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -5532,7 +5536,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -5568,12 +5574,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -6119,7 +6129,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -6154,12 +6166,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -6719,7 +6735,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -6755,12 +6773,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7328,7 +7350,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -7364,12 +7388,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7750,7 +7778,9 @@
                         const dtlsParameters = this._dtlsTransport.getLocalParameters();
                         dtlsParameters.role = localDtlsRole;
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         // Start the RTCIceTransport.
                         this._iceTransport.start(this._iceGatherer, this._remoteIceParameters, 'controlling');
                         // Add remote ICE candidates.
@@ -7796,12 +7826,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8366,7 +8400,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -8401,14 +8437,6 @@
                 exports.HandlerInterface = void 0;
                 const EnhancedEventEmitter_1 = require('../EnhancedEventEmitter');
                 class HandlerInterface extends EnhancedEventEmitter_1.EnhancedEventEmitter {
-                    /**
-                     * @emits @connect - (
-                     *     { dtlsParameters: DtlsParameters },
-                     *     callback: Function,
-                     *     errback: Function
-                     *   )
-                     * @emits @connectionstatechange - (connectionState: ConnectionState)
-                     */
                     constructor() {
                         super();
                     }
@@ -8425,12 +8453,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8958,7 +8990,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -8994,12 +9028,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -9537,7 +9575,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -9572,12 +9612,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10114,7 +10158,9 @@
                         // Update the remote DTLS role in the SDP.
                         this._remoteSdp.updateDtlsRole(localDtlsRole === 'client' ? 'server' : 'client');
                         // Need to tell the remote transport about our parameters.
-                        await this.safeEmitAsPromise('@connect', { dtlsParameters });
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
+                        });
                         this._transportReady = true;
                     }
                     _assertSendDirection() {
@@ -10149,12 +10195,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10247,12 +10297,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10798,12 +10852,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11105,12 +11163,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11556,12 +11618,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11621,7 +11687,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.51';
+                exports.version = '3.6.54';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -11643,12 +11709,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -12476,12 +12546,16 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              Object.defineProperty(o, k2, {
-                                  enumerable: true,
-                                  get: function () {
-                                      return m[k];
-                                  },
-                              });
+                              var desc = Object.getOwnPropertyDescriptor(m, k);
+                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+                                  desc = {
+                                      enumerable: true,
+                                      get: function () {
+                                          return m[k];
+                                      },
+                                  };
+                              }
+                              Object.defineProperty(o, k2, desc);
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;

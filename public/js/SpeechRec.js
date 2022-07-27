@@ -37,8 +37,8 @@ const commands = {
     participantsKickOut: 'kick out the participants',
     fileShareOn: 'open a file',
     fileShareOff: 'close a file',
-    youtubeOn: 'share the YouTube',
-    youtubeOff: 'close the YouTube',
+    videoShareOn: 'share the video',
+    videoShareOff: 'close the video',
     swapCamera: 'swap the camera',
     raiseHand: 'raise the hand',
     lowerHand: 'lower the hand',
@@ -238,13 +238,13 @@ function execVoiceCommands(transcript) {
             printCommand(commands.fileShareOff);
             sendAbortBtn.click();
             break;
-        case commands.youtubeOn:
-            printCommand(commands.youtubeOn);
-            youTubeShareButton.click();
+        case commands.videoShareOn:
+            printCommand(commands.videoShareOn);
+            videoShareButton.click();
             break;
-        case commands.youtubeOff:
-            printCommand(commands.youtubeOff);
-            youTubeCloseBtn.click();
+        case commands.videoShareOff:
+            printCommand(commands.videoShareOff);
+            videoCloseBtn.click();
             break;
         case commands.swapCamera:
             printCommand(commands.swapCamera);

@@ -4,7 +4,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 const RoomURL = window.location.href;
 
-let swalBackground = 'radial-gradient(#393939, #000000)';
+let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const url = {
@@ -22,7 +22,7 @@ const _PEER = {
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
-    sendYouTube: '<i class="fab fa-youtube"></i>',
+    sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
 const surveyAvtive = false;
@@ -33,17 +33,22 @@ let rc = null;
 let producer = null;
 
 let room_id = getRoomId();
+let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let notify = getNotify();
 
 let peer_geo = null;
 let peer_info = null;
 
-let isEnumerateDevices = false;
+let isEnumerateAudioDevices = false;
+let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
-let isScreenAllowed = false;
+let isParticipantsListOpen = false;
+let isVideoControlsOn = false;
+let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
 let initAudioVideoButton = null;
@@ -66,7 +71,7 @@ let realWhiteBoard;
 let wbIsOpen = false;
 let isButtonsVisible = false;
 
-const socket = io();
+const socket = io({ transports: ['websocket'] });
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
@@ -85,7 +90,7 @@ function initClient() {
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
-        setTippy('tabYoutubeBtn', 'YouTube', 'top');
+        setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
@@ -102,13 +107,14 @@ function initClient() {
         setTippy('whiteboardCircleBtn', 'Add circle', 'top');
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
-        setTippy('whiteboardCleanBtn', 'Clear', 'top');
+        setTippy('whiteboardCleanBtn', 'Clean', 'top');
         setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('sessionTime', 'Session time', 'right');
@@ -153,9 +159,20 @@ function makeId(length) {
 // ####################################################
 
 async function initEnumerateDevices() {
-    if (isEnumerateDevices) return;
     console.log('01 ----> init Enumerate Devices');
+    await initEnumerateAudioDevices();
+    await initEnumerateVideoDevices();
+    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
+        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
+    } else {
+        hide(loadingDiv);
+        getPeerGeoLocation();
+        whoAreYou();
+    }
+}
 
+async function initEnumerateAudioDevices() {
+    if (isEnumerateAudioDevices) return;
     // allow the audio
     await navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -166,7 +183,10 @@ async function initEnumerateDevices() {
         .catch(() => {
             isAudioAllowed = false;
         });
+}
 
+async function initEnumerateVideoDevices() {
+    if (isEnumerateVideoDevices) return;
     // allow the video
     await navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -177,14 +197,6 @@ async function initEnumerateDevices() {
         .catch(() => {
             isVideoAllowed = false;
         });
-
-    if (!isAudioAllowed && !isVideoAllowed) {
-        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
-    } else {
-        hide(loadingDiv);
-        getPeerGeoLocation();
-        whoAreYou();
-    }
 }
 
 function enumerateAudioDevices(stream) {
@@ -200,12 +212,12 @@ function enumerateAudioDevices(stream) {
                     el = speakerSelect;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
             stopTracks(stream);
-            isEnumerateDevices = true;
+            isEnumerateAudioDevices = true;
             speakerSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
         });
 }
@@ -221,12 +233,12 @@ function enumerateVideoDevices(stream) {
                     el = videoSelect;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
             stopTracks(stream);
-            isEnumerateDevices = true;
+            isEnumerateVideoDevices = true;
         });
 }
 
@@ -236,7 +248,7 @@ function stopTracks(stream) {
     });
 }
 
-function appenChild(device, el) {
+function addChild(device, el) {
     let option = document.createElement('option');
     option.value = device.deviceId;
     option.innerText = device.label;
@@ -247,10 +259,23 @@ function appenChild(device, el) {
 // API CHECK
 // ####################################################
 
+function getScreen() {
+    let qs = new URLSearchParams(window.location.search);
+    let screen = qs.get('screen');
+    if (screen) {
+        screen = screen.toLowerCase();
+        let queryScreen = screen === '1' || screen === 'true';
+        if (queryScreen != null && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia))
+            return queryScreen;
+    }
+    return false;
+}
+
 function getNotify() {
     let qs = new URLSearchParams(window.location.search);
     let notify = qs.get('notify');
     if (notify) {
+        notify = notify.toLowerCase();
         let queryNotify = notify === '1' || notify === 'true';
         if (queryNotify != null) return queryNotify;
     }
@@ -260,6 +285,18 @@ function getNotify() {
 function getPeerName() {
     let qs = new URLSearchParams(window.location.search);
     return qs.get('name');
+}
+
+function getRoomPassword() {
+    let qs = new URLSearchParams(window.location.search);
+    let roomPassword = qs.get('password');
+    if (roomPassword) {
+        let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
+        if (queryNoRoomPassword != null) {
+            return false;
+        }
+        return roomPassword;
+    }
 }
 
 // ####################################################
@@ -349,6 +386,7 @@ function whoAreYou() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
 function handleAudio(e) {
@@ -366,13 +404,12 @@ function handleVideo(e) {
 }
 
 function handleAudioVideo(e) {
-    isAudioAllowed = isAudioAllowed ? false : true;
-    isVideoAllowed = isVideoAllowed ? false : true;
-    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
-    if (isAudioVideoAllowed) {
-        initAudioButton.className = 'fas fa-microphone';
-        initVideoButton.className = 'fas fa-video';
-    } else {
+    isAudioVideoAllowed = isAudioVideoAllowed ? false : true;
+    isAudioAllowed = isAudioVideoAllowed;
+    isVideoAllowed = isAudioVideoAllowed;
+    initAudioButton.className = 'fas fa-microphone' + (isAudioVideoAllowed ? '' : '-slash');
+    initVideoButton.className = 'fas fa-video' + (isAudioVideoAllowed ? '' : '-slash');
+    if (!isAudioVideoAllowed) {
         hide(initAudioButton);
         hide(initVideoButton);
     }
@@ -421,7 +458,7 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: '<strong>Hello ' + peer_name + '</strong>',
+            title: '<strong>Welcome ' + peer_name + '</strong>',
             html:
                 `
             <br/>
@@ -454,6 +491,10 @@ async function shareRoom(useNavigator = false) {
                     body: 'Click to join: ' + RoomURL,
                 };
                 shareRoomByEmail(message);
+            }
+            // share screen on join
+            if (isScreenAllowed) {
+                rc.shareScreen();
             }
         });
         makeRoomQR();
@@ -513,21 +554,24 @@ function joinRoom(peer_name, room_id) {
             peer_info,
             isAudioAllowed,
             isVideoAllowed,
+            isScreenAllowed,
             roomIsReady,
         );
         realWhiteBoard.wbRC = rc;
         handleRoomClientEvents();
-        notify ? shareRoom() : sound('joined');
+        //notify ? shareRoom() : sound('joined');
     }
 }
 
 function roomIsReady() {
+    setTheme('dark');
     show(exitButton);
     show(shareButton);
     show(startRecButton);
     show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
     }
@@ -567,6 +611,9 @@ function roomIsReady() {
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
     });
+    if (room_password) {
+        lockRoomButton.click();
+    }
 }
 
 function hide(elem) {
@@ -670,8 +717,8 @@ function handleButtons() {
     tabRoomBtn.onclick = (e) => {
         rc.openTab(e, 'tabRoom');
     };
-    tabYoutubeBtn.onclick = (e) => {
-        rc.openTab(e, 'tabYoutube');
+    tabVideoShareBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVideoShare');
     };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
@@ -696,6 +743,9 @@ function handleButtons() {
     };
     chatEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatShareFileButton.onclick = () => {
+        fileShareButton.click();
     };
     chatSpeechStartButton.onclick = () => {
         startSpeech(true);
@@ -729,6 +779,7 @@ function handleButtons() {
     };
     startAudioButton.onclick = () => {
         setAudioButtonsDisabled(true);
+        if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
@@ -741,6 +792,7 @@ function handleButtons() {
     };
     startVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
+        if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
@@ -758,11 +810,11 @@ function handleButtons() {
     fileShareButton.onclick = () => {
         rc.selectFileToShare(rc.peer_id, true);
     };
-    youTubeShareButton.onclick = () => {
-        rc.youTubeShareVideo('all');
+    videoShareButton.onclick = () => {
+        rc.shareVideo('all');
     };
-    youTubeCloseBtn.onclick = () => {
-        rc.closeYouTube(true);
+    videoCloseBtn.onclick = () => {
+        rc.closeVideo(true);
     };
     sendAbortBtn.onclick = () => {
         rc.abortFileTransfer();
@@ -857,10 +909,13 @@ function handleSelects() {
         setAspectRatio(BtnsAspectRatio.value);
     };
     BtnVideoObjectFit.onchange = () => {
-        handleVideoObjectFit(BtnVideoObjectFit.value);
+        rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     }; // cover
     BtnVideoObjectFit.selectedIndex = 2;
 
+    BtnVideoControls.onchange = () => {
+        rc.handleVideoControls(BtnVideoControls.value);
+    };
     selectTheme.onchange = () => {
         setTheme(selectTheme.value);
     };
@@ -1316,6 +1371,7 @@ function confirmClearBoard() {
     }).then((result) => {
         if (result.isConfirmed) {
             whiteboardAction(getWhiteboardAction('clear'));
+            sound('delete');
         }
     });
 }
@@ -1368,6 +1424,11 @@ function toggleParticipants() {
     participants.classList.toggle('show');
     participants.style.top = '50%';
     participants.style.left = '50%';
+    if (DetectRTC.isMobileDevice) {
+        participants.style.width = '100%';
+        participants.style.height = '100%';
+    }
+    isParticipantsListOpen = !isParticipantsListOpen;
 }
 
 async function getRoomParticipants(refresh = false) {
@@ -1383,10 +1444,18 @@ async function getRoomParticipants(refresh = false) {
         toggleParticipants();
         sound('open');
     }
+
+    setParticipantsTippy(peers);
 }
 
 async function getParticipantsTable(peers) {
     let table = `
+    <div>
+        <button
+            id="inviteParticipants"
+            onclick="shareRoom(true);"
+        ><i class="fas fa-user-plus"></i>&nbsp; Invite Someone</button>
+    </div>
     <div>
         <input
             id="searchParticipants"
@@ -1416,7 +1485,7 @@ async function getParticipantsTable(peers) {
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
-        <td><button id="sendYouTubeAll" onclick="rc.youTubeShareVideo('all');">${_PEER.sendYouTube}</button></td>
+        <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
@@ -1452,9 +1521,9 @@ async function getParticipantsTable(peers) {
                 <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                 <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
-                <td><button id="sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
-                <td><button id="sendYouTubeTo" onclick="rc.youTubeShareVideo('${peer_id}');">${_PEER.sendYouTube}</button></td>
+                <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
+                <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
                 <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
             </tr>
             `;
@@ -1464,6 +1533,29 @@ async function getParticipantsTable(peers) {
     return table;
 }
 
+function setParticipantsTippy(peers) {
+    //
+    if (!DetectRTC.isMobileDevice) {
+        setTippy('muteAllButton', 'Mute all participants', 'top');
+        setTippy('hideAllButton', 'Hide all participants', 'top');
+        setTippy('sendAllButton', 'Share file to all', 'top');
+        setTippy('sendMessageToAll', 'Send message to all', 'top');
+        setTippy('sendVideoAll', 'Share video mp4 or YouTube to all', 'top');
+        setTippy('ejectAllButton', 'Eject all participants', 'top');
+        //
+        for (let peer of Array.from(peers.keys())) {
+            let peer_info = peers.get(peer).peer_info;
+            let peer_id = peer_info.peer_id;
+            setTippy(peer_id + '___pAudio', 'Mute', 'top');
+            setTippy(peer_id + '___pVideo', 'Hide', 'top');
+            setTippy(peer_id + '___shareFile', 'Share file', 'top');
+            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
+            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
+            setTippy(peer_id + '___pEject', 'Eject', 'top');
+        }
+    }
+}
+
 function refreshParticipantsCount(count) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
     adaptAspectRatio(count);
@@ -1471,14 +1563,6 @@ function refreshParticipantsCount(count) {
 
 function getParticipantAvatar(peerName) {
     return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
-}
-
-// ####################################################
-// HANDLE VIDEO OBJ FIT
-// ####################################################
-
-function handleVideoObjectFit(value) {
-    document.documentElement.style.setProperty('--videoObjFit', value);
 }
 
 // ####################################################
@@ -1492,12 +1576,14 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            document.body.style.background = 'radial-gradient(#393939, #000000)';
             break;
         case 'grey':
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            document.body.style.background = 'radial-gradient(#666, #333)';
             break;
         //...
     }
