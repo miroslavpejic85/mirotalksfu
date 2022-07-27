@@ -17,11 +17,13 @@ const html = {
     snapshot: 'fas fa-camera-retro',
     pin: 'fas fa-map-pin pulsate pin',
     sendFile: 'fas fa-upload',
-    sendYouTube: 'fab fa-youtube',
+    sendMsg: 'fas fa-paper-plane',
+    sendVideo: 'fab fa-youtube',
     kickOut: 'fas fa-times',
 };
 
 const image = {
+    audio: '../images/audio.gif',
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
     locked: '../images/locked.png',
@@ -30,7 +32,7 @@ const image = {
     users: '../images/participants.png',
     user: '../images/participant.png',
     username: '../images/user.png',
-    youtube: '../images/youtube.png',
+    videoShare: '../images/video-share.png',
     message: '../images/message.png',
     share: '../images/share.png',
     exit: '../images/exit.png',
@@ -69,7 +71,6 @@ const _EVENTS = {
 };
 
 let recordedBlobs;
-
 class RoomClient {
     constructor(
         remoteAudioEl,
@@ -82,6 +83,7 @@ class RoomClient {
         peer_info,
         isAudioAllowed,
         isVideoAllowed,
+        isScreenAllowed,
         successCallback,
     ) {
         this.remoteAudioEl = remoteAudioEl;
@@ -97,6 +99,7 @@ class RoomClient {
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
+        this.isScreenAllowed = isScreenAllowed;
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
@@ -204,7 +207,7 @@ class RoomClient {
     }
 
     async join(data) {
-        socket
+        this.socket
             .request('join', data)
             .then(
                 async function (room) {
@@ -244,6 +247,16 @@ class RoomClient {
             }
         }
         this.refreshParticipantsCount();
+        console.log('Participants Count:', participantsCount);
+        // notify && participantsCount == 1 ? shareRoom() : sound('joined');
+        if (notify && participantsCount == 1) {
+            shareRoom();
+        } else {
+            if (this.isScreenAllowed) {
+                this.shareScreen();
+            }
+            sound('joined');
+        }
     }
 
     async loadDevice(routerRtpCapabilities) {
@@ -419,6 +432,7 @@ class RoomClient {
                 this.removeVideoOff(data.peer_id);
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
+                if (isParticipantsListOpen) getRoomParticipants(true);
             }.bind(this),
         );
 
@@ -499,9 +513,9 @@ class RoomClient {
         );
 
         this.socket.on(
-            'youTubeAction',
+            'shareVideoAction',
             function (data) {
-                this.youTubeAction(data);
+                this.shareVideoAction(data);
             }.bind(this),
         );
 
@@ -564,6 +578,9 @@ class RoomClient {
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
+        // if (this.isScreenAllowed) {
+        //     this.shareScreen();
+        // }
     }
 
     // ####################################################
@@ -632,9 +649,11 @@ class RoomClient {
                 this.localVideoStream = stream;
                 elem = await this.handleProducer(producer.id, type, stream);
                 this.videoProducerId = producer.id;
+                //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
                 this.audioProducerId = producer.id;
+                //if (!isEnumerateDevices) enumerateAudioDevices(stream);
             }
 
             producer.on('trackended', () => {
@@ -787,6 +806,7 @@ class RoomClient {
         elem = document.createElement('video');
         elem.setAttribute('id', id);
         elem.setAttribute('playsinline', true);
+        elem.controls = isVideoControlsOn;
         elem.autoplay = true;
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
@@ -805,7 +825,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = this.peer_id + '__name';
         p.className = html.userName;
-        p.innerHTML = '👤 &nbsp;' + this.peer_name + ' (me)';
+        p.innerHTML = '👤 ' + this.peer_name + ' (me)';
         i = document.createElement('i');
         i.id = this.peer_id + '__hand';
         i.className = html.userHand;
@@ -834,11 +854,18 @@ class RoomClient {
         this.attachMediaStream(elem, stream, type, 'Producer');
         this.myVideoEl = elem;
         this.handleFS(elem.id, fs.id);
+        this.handleDD(elem.id, this.peer_id, true);
         this.handleTS(elem.id, ts.id);
         this.handlePIN(elem.id, pin.id);
         this.popupPeerInfo(p.id, this.peer_info);
         this.checkPeerInfoStatus(this.peer_info);
-        handleAspectRatio();
+        if (participantsCount <= 3 && type === mediaType.screen) {
+            this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true, false);
+            setAspectRatio(2); // 16:9
+        } else {
+            this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
+            handleAspectRatio();
+        }
         console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
             this.setTippy(elem.id, 'Full Screen', 'top-end');
@@ -963,6 +990,7 @@ class RoomClient {
 
                 if (kind === 'video') {
                     this.handleConsumer(consumer.id, mediaType.video, stream, peer_name, peer_info);
+                    if (isParticipantsListOpen) getRoomParticipants(true);
                 } else {
                     this.handleConsumer(consumer.id, mediaType.audio, stream, peer_name, peer_info);
                 }
@@ -1011,7 +1039,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sy, ko, pb, pm;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm;
         switch (type) {
             case mediaType.video:
                 let remotePeerId = peer_info.peer_id;
@@ -1023,6 +1051,7 @@ class RoomClient {
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 elem.setAttribute('playsinline', true);
+                elem.controls = isVideoControlsOn;
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
@@ -1038,9 +1067,12 @@ class RoomClient {
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
-                sy = document.createElement('button');
-                sy.id = id + '___' + remotePeerId + '___sendYouTube';
-                sy.className = html.sendYouTube;
+                sm = document.createElement('button');
+                sm.id = id + '___' + remotePeerId + '___sendMsg';
+                sm.className = html.sendMsg;
+                sv = document.createElement('button');
+                sv.id = id + '___' + remotePeerId + '___sendVideo';
+                sv.className = html.sendVideo;
                 cm = document.createElement('button');
                 cm.id = id + '___' + remotePeerId + '___video';
                 cm.className = html.videoOn;
@@ -1056,7 +1088,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                p.innerHTML = '👤 &nbsp;' + peer_name;
+                p.innerHTML = '👤 ' + peer_name;
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', remotePeerId + '__pitchMeter');
@@ -1068,8 +1100,9 @@ class RoomClient {
                 vb.appendChild(ko);
                 vb.appendChild(au);
                 vb.appendChild(cm);
-                vb.appendChild(sy);
+                vb.appendChild(sv);
                 vb.appendChild(sf);
+                vb.appendChild(sm);
                 vb.appendChild(ts);
                 vb.appendChild(fs);
                 d.appendChild(elem);
@@ -1080,9 +1113,11 @@ class RoomClient {
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.handleFS(elem.id, fs.id);
+                this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
-                this.handleSY(sy.id);
+                this.handleSM(sm.id);
+                this.handleSV(sv.id);
                 this.handleCM(cm.id);
                 this.handleAU(au.id);
                 this.handleKO(ko.id);
@@ -1095,7 +1130,8 @@ class RoomClient {
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
-                    this.setTippy(sy.id, 'Send youTube', 'top-end');
+                    this.setTippy(sm.id, 'Send message', 'top-end');
+                    this.setTippy(sv.id, 'Send video', 'top-end');
                     this.setTippy(cm.id, 'Hide', 'top-end');
                     this.setTippy(au.id, 'Mute', 'top-end');
                     this.setTippy(ko.id, 'Eject', 'top-end');
@@ -1142,7 +1178,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, vb, i, h, au, sf, sy, ko, p, pm, pb;
+        let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1160,9 +1196,12 @@ class RoomClient {
             sf = document.createElement('button');
             sf.id = 'remotePeer___' + peer_id + '___sendFile';
             sf.className = html.sendFile;
-            sy = document.createElement('button');
-            sy.id = 'remotePeer___' + peer_id + '___sendYouTube';
-            sy.className = html.sendYouTube;
+            sm = document.createElement('button');
+            sm.id = 'remotePeer___' + peer_id + '___sendMsg';
+            sm.className = html.sendMsg;
+            sv = document.createElement('button');
+            sv.id = 'remotePeer___' + peer_id + '___sendVideo';
+            sv.className = html.sendVideo;
             ko = document.createElement('button');
             ko.id = 'remotePeer___' + peer_id + '___kickOut';
             ko.className = html.kickOut;
@@ -1187,8 +1226,9 @@ class RoomClient {
         pm.appendChild(pb);
         if (remotePeer) {
             vb.appendChild(ko);
-            vb.appendChild(sy);
+            vb.appendChild(sv);
             vb.appendChild(sf);
+            vb.appendChild(sm);
         }
         vb.appendChild(au);
         d.appendChild(i);
@@ -1199,20 +1239,24 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.handleAU(au.id);
         if (remotePeer) {
+            this.handleSM(sm.id);
             this.handleSF(sf.id);
-            this.handleSY(sy.id);
+            this.handleSV(sv.id);
             this.handleKO(ko.id);
         }
+        this.handleDD(d.id, peer_id, !remotePeer);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
-        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
+        if (isParticipantsListOpen) getRoomParticipants(true);
         if (!this.isMobileDevice && remotePeer) {
+            this.setTippy(sm.id, 'Send message', 'top-end');
             this.setTippy(sf.id, 'Send file', 'top-end');
-            this.setTippy(sy.id, 'Send youTube', 'top-end');
+            this.setTippy(sv.id, 'Send video', 'top-end');
             this.setTippy(au.id, 'Mute', 'top-end');
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
+        console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
     }
 
     removeVideoOff(peer_id) {
@@ -1222,6 +1266,42 @@ class RoomClient {
             handleAspectRatio();
             console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             if (peer_id != this.peer_id) this.sound('left');
+        }
+    }
+
+    // ####################################################
+    // SHARE SCREEN ON JOIN
+    // ####################################################
+
+    shareScreen() {
+        if (!this.isMobileDevice && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia)) {
+            this.sound('open');
+            // startScreenButton.click(); // Chrome - Opera - Edge - Brave
+            // handle error: getDisplayMedia requires transient activation from a user gesture on Safari - FireFox
+            Swal.fire({
+                background: swalBackground,
+                position: 'center',
+                icon: 'question',
+                text: 'Do you want to share your screen?',
+                showDenyButton: true,
+                confirmButtonText: `Yes`,
+                denyButtonText: `No`,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    startScreenButton.click();
+                    console.log('10 ----> Screen is on');
+                } else {
+                    console.log('10 ----> Screen is on');
+                }
+            });
+        } else {
+            console.log('10 ----> Screen is off');
         }
     }
 
@@ -1252,31 +1332,12 @@ class RoomClient {
         } else {
             clean();
         }
-
         this.event(_EVENTS.exitRoom);
     }
 
     exitRoom() {
-        this.sound('open');
-
-        Swal.fire({
-            background: swalBackground,
-            imageAlt: 'mirotalksfu-leave-room',
-            imageUrl: image.exit,
-            position: 'center',
-            title: 'Leave this room?',
-            showDenyButton: true,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
-        }).then((result) => {
-            if (result.isConfirmed) this.exit();
-        });
+        this.sound('eject');
+        this.exit();
     }
 
     // ####################################################
@@ -1471,6 +1532,10 @@ class RoomClient {
         let mySettings = this.getId('mySettings');
         mySettings.style.top = '50%';
         mySettings.style.left = '50%';
+        if (this.isMobileDevice) {
+            mySettings.style.width = '100%';
+            mySettings.style.height = '100%';
+        }
         mySettings.classList.toggle('show');
         this.isMySettingsOpen = this.isMySettingsOpen ? false : true;
     }
@@ -1550,10 +1615,12 @@ class RoomClient {
             this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
         });
         videoPlayer.addEventListener('click', () => {
-            if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
-                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-                this.toggleFullScreen(videoPlayer);
-                this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+            if (!videoPlayer.hasAttribute('controls')) {
+                if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
+                    videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                    this.toggleFullScreen(videoPlayer);
+                    this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+                }
             }
         });
         videoPlayer.addEventListener('fullscreenchange', (e) => {
@@ -1607,6 +1674,26 @@ class RoomClient {
         });
     }
 
+
+    // ####################################################
+    // HANDLE VIDEO | OBJ FIT | CONTROLS |
+    // ####################################################
+
+    handleVideoObjectFit(value) {
+        document.documentElement.style.setProperty('--videoObjFit', value);
+    }
+
+    handleVideoControls(value) {
+        isVideoControlsOn = value == 'On' ? true : false;
+        let cameras = this.getEcN('Camera');
+        for (let i = 0; i < cameras.length; i++) {
+            let cameraId = cameras[i].id.replace('__d', '');
+            let videoPlayer = this.getId(cameraId);
+            videoPlayer.hasAttribute('controls')
+                ? videoPlayer.removeAttribute('controls')
+                : videoPlayer.setAttribute('controls', isVideoControlsOn);
+        }
+    }
 
     // ####################################################
     // TAKE SNAPSHOT
@@ -1672,6 +1759,15 @@ class RoomClient {
     // ####################################################
     // CHAT
     // ####################################################
+
+    handleSM(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1];
+        let btnSm = this.getId(uid);
+        btnSm.addEventListener('click', () => {
+            this.sendMessageTo(peer_id);
+        });
+    }
 
     toggleChat() {
         let chatRoom = this.getId('chatRoom');
@@ -1745,6 +1841,7 @@ class RoomClient {
             this.socket.emit('message', data);
             this.setMsgAvatar('right', this.peer_name);
             this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, to_peer_id);
+            if (!this.isChatOpen) this.toggleChat();
         });
     }
 
@@ -1782,12 +1879,27 @@ class RoomClient {
     }
 
     formatMsg(message) {
+        if (this.isHtml(message)) return this.stripHtml(message);
         let urlRegex = /(https?:\/\/[^\s]+)/g;
         return message.replace(urlRegex, (url) => {
             if (message.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/))
                 return '<img src="' + url + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + url + '" target="_blank">' + url + '</a>';
         });
+    }
+
+    stripHtml(html) {
+        let doc = new DOMParser().parseFromString(html, 'text/html');
+        return doc.body.textContent || '';
+    }
+
+    isHtml(str) {
+        var a = document.createElement('div');
+        a.innerHTML = str;
+        for (var c = a.childNodes, i = c.length; i--; ) {
+            if (c[i].nodeType == 1) return true;
+        }
+        return false;
     }
 
     collectMessages(time, from, msg) {
@@ -1821,6 +1933,7 @@ class RoomClient {
                     msgs = chatMsger.firstChild;
                 }
                 this.chatMessages = [];
+                this.sound('delete');
             }
         });
     }
@@ -2005,6 +2118,40 @@ class RoomClient {
         });
     }
 
+    handleDD(uid, peer_id, itsMe = false) {
+        let videoPlayer = this.getId(uid);
+        videoPlayer.addEventListener('dragover', function (e) {
+            e.preventDefault();
+        });
+        videoPlayer.addEventListener('drop', function (e) {
+            e.preventDefault();
+            if (itsMe) {
+                userLog('warning', 'You cannot send files to yourself.', 'top-end');
+                return;
+            }
+            if (this.sendInProgress) {
+                userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
+                return;
+            }
+            if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
+                userLog('warning', 'Please drag and drop a single file.', 'top-end');
+                return;
+            }
+            if (e.dataTransfer.items) {
+                let item = e.dataTransfer.items[0].webkitGetAsEntry();
+                console.log('Drag and drop', item);
+                if (item.isDirectory) {
+                    userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
+                    return;
+                }
+                var file = e.dataTransfer.items[0].getAsFile();
+                rc.sendFileInformations(file, peer_id);
+            } else {
+                rc.sendFileInformations(e.dataTransfer.files[0], peer_id);
+            }
+        });
+    }
+
     selectFileToShare(peer_id, broadcast = false) {
         this.sound('open');
 
@@ -2031,29 +2178,34 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.isConfirmed) {
-                this.fileToSend = result.value;
-                if (this.fileToSend && this.fileToSend.size > 0) {
-                    if (!this.thereIsParticipants()) {
-                        userLog('info', 'No participants detected', 'top-end');
-                        return;
-                    }
-                    // send some metadata about our file to peers in the room
-                    this.socket.emit('fileInfo', {
-                        peer_id: peer_id,
-                        broadcast: broadcast,
-                        peer_name: this.peer_name,
-                        fileName: this.fileToSend.name,
-                        fileSize: this.fileToSend.size,
-                        fileType: this.fileToSend.type,
-                    });
-                    setTimeout(() => {
-                        this.sendFileData(peer_id, broadcast);
-                    }, 1000);
-                } else {
-                    userLog('error', 'File not selected or empty.', 'top-end');
-                }
+                this.sendFileInformations(result.value, peer_id, broadcast);
             }
         });
+    }
+
+    sendFileInformations(file, peer_id, broadcast = false) {
+        this.fileToSend = file;
+        //
+        if (this.fileToSend && this.fileToSend.size > 0) {
+            if (!this.thereIsParticipants()) {
+                userLog('info', 'No participants detected', 'top-end');
+                return;
+            }
+            // send some metadata about our file to peers in the room
+            this.socket.emit('fileInfo', {
+                peer_id: peer_id,
+                broadcast: broadcast,
+                peer_name: this.peer_name,
+                fileName: this.fileToSend.name,
+                fileSize: this.fileToSend.size,
+                fileType: this.fileToSend.type,
+            });
+            setTimeout(() => {
+                this.sendFileData(peer_id, broadcast);
+            }, 1000);
+        } else {
+            userLog('error', 'File not selected or empty.', 'top-end');
+        }
     }
 
     handleFileInfo(data) {
@@ -2263,27 +2415,27 @@ class RoomClient {
     }
 
     // ####################################################
-    // YOUTUBE SHARE VIDEO
+    // SHARE VIDEO YOUTUBE - MP4 - WEBM - OGG or AUDIO mp3
     // ####################################################
 
-    handleSY(uid) {
+    handleSV(uid) {
         const words = uid.split('___');
         let peer_id = words[1];
-        let btnSy = this.getId(uid);
-        btnSy.addEventListener('click', () => {
-            this.youTubeShareVideo(peer_id);
+        let btnSv = this.getId(uid);
+        btnSv.addEventListener('click', () => {
+            this.shareVideo(peer_id);
         });
     }
 
-    youTubeShareVideo(peer_id = 'all') {
+    shareVideo(peer_id = 'all') {
         this.sound('open');
 
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            imageUrl: image.youtube,
-            title: 'Share YouTube Video',
-            text: 'Past YouTube video URL',
+            imageUrl: image.videoShare,
+            title: 'Share a Video or Audio',
+            text: 'Paste a Video or Audio URL',
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
@@ -2299,24 +2451,53 @@ class RoomClient {
                     userLog('info', 'No participants detected', 'top-end');
                     return;
                 }
-                // https://www.youtube.com/watch?v=RT6_Id5-7-s
-
-                let you_tube_url = this.getYoutubeEmbed(result.value);
-                if (you_tube_url) {
+                if (!this.isVideoTypeSupported(result.value)) {
+                    userLog('warning', 'Something wrong, try with another Video or audio URL');
+                    return;
+                }
+                /*
+                    https://www.youtube.com/watch?v=RT6_Id5-7-s
+                    https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+                    https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
+                */
+                let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
+                let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
+                if (video_url) {
                     let data = {
                         peer_id: peer_id,
                         peer_name: this.peer_name,
-                        you_tube_url: you_tube_url,
+                        video_url: video_url,
+                        is_youtube: is_youtube,
                         action: 'open',
                     };
-                    console.log('YouTube video URL: ', you_tube_url);
-                    this.socket.emit('youTubeAction', data);
-                    this.openYouTube(data);
+                    console.log('Video URL: ', video_url);
+                    this.socket.emit('shareVideoAction', data);
+                    this.openVideo(data);
                 } else {
-                    this.userLog('error', 'Not valid YouTube URL', 'top-end');
+                    this.userLog('error', 'Not valid video URL', 'top-end');
                 }
             }
         });
+    }
+
+    getVideoType(url) {
+        if (url.endsWith('.mp4')) return 'video/mp4';
+        if (url.endsWith('.mp3')) return 'video/mp3';
+        if (url.endsWith('.webm')) return 'video/webm';
+        if (url.endsWith('.ogg')) return 'video/ogg';
+        return 'na';
+    }
+
+    isVideoTypeSupported(url) {
+        if (
+            url.endsWith('.mp4') ||
+            url.endsWith('.mp3') ||
+            url.endsWith('.webm') ||
+            url.endsWith('.ogg') ||
+            url.includes('youtube')
+        )
+            return true;
+        return false;
     }
 
     getYoutubeEmbed(url) {
@@ -2325,79 +2506,91 @@ class RoomClient {
         return match && match[7].length == 11 ? 'https://www.youtube.com/embed/' + match[7] + '?autoplay=1' : false;
     }
 
-    youTubeAction(data) {
+    shareVideoAction(data) {
         let peer_name = data.peer_name;
         let action = data.action;
         switch (action) {
             case 'open':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the YouTube video`, 'top-end');
-                this.openYouTube(data);
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top-end');
+                this.openVideo(data);
                 break;
             case 'close':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the YouTube video`, 'top-end');
-                this.closeYouTube();
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top-end');
+                this.closeVideo();
                 break;
         }
     }
 
-    openYouTube(data) {
-        let d, vb, e, iframe;
+    openVideo(data) {
+        let d, vb, e, video;
         let peer_name = data.peer_name;
-        let you_tube_url = data.you_tube_url;
-        this.closeYouTube();
-        show(youTubeCloseBtn);
+        let video_url = data.video_url;
+        let is_youtube = data.is_youtube;
+        let video_type = this.getVideoType(video_url);
+        this.closeVideo();
+        show(videoCloseBtn);
         d = document.createElement('div');
         d.className = 'Camera';
-        d.id = '__youTube';
+        d.id = '__shareVideo';
         vb = document.createElement('div');
-        vb.setAttribute('id', '__youTubeBar');
+        vb.setAttribute('id', '__videoBar');
         vb.className = 'videoMenuBar fadein';
         e = document.createElement('button');
         e.className = 'fas fa-times';
-        e.id = '__youTubeExit';
-        iframe = document.createElement('iframe');
-        iframe.setAttribute('id', '__youTubeIframe');
-        iframe.setAttribute('title', peer_name);
-        iframe.setAttribute('width', '100%');
-        iframe.setAttribute('height', '100%');
-        iframe.setAttribute('src', you_tube_url);
-        iframe.setAttribute(
-            'allow',
-            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
-        );
-        iframe.setAttribute('frameborder', '0');
-        iframe.setAttribute('allowfullscreen', true);
+        e.id = '__videoExit';
+        if (is_youtube) {
+            video = document.createElement('iframe');
+            video.setAttribute('title', peer_name);
+            video.setAttribute(
+                'allow',
+                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+            );
+            video.setAttribute('frameborder', '0');
+            video.setAttribute('allowfullscreen', true);
+        } else {
+            video = document.createElement('video');
+            video.type = video_type;
+            video.autoplay = true;
+            video.controls = true;
+            if (video_type == 'video/mp3') {
+                video.poster = image.audio;
+            }
+        }
+        video.setAttribute('id', '__videoShare');
+        video.setAttribute('src', video_url);
+        video.setAttribute('width', '100%');
+        video.setAttribute('height', '100%');
         vb.appendChild(e);
-        d.appendChild(iframe);
+        d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         handleAspectRatio();
-        let exitYouTubeBtn = this.getId(e.id);
-        exitYouTubeBtn.addEventListener('click', () => {
-            this.closeYouTube(true);
+        let exitVideoBtn = this.getId(e.id);
+        exitVideoBtn.addEventListener('click', () => {
+            this.closeVideo(true);
         });
         if (!this.isMobileDevice) {
-            this.setTippy(e.id, 'Close video', 'top-end');
+            this.setTippy(e.id, 'Close video player', 'top-end');
         }
-        console.log('[openYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
+        console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
 
-    closeYouTube(emit = false, peer_id = 'all') {
+    closeVideo(emit = false, peer_id = 'all') {
         if (emit) {
             let data = {
                 peer_id: peer_id,
                 peer_name: this.peer_name,
                 action: 'close',
             };
-            this.socket.emit('youTubeAction', data);
+            this.socket.emit('shareVideoAction', data);
         }
-        let youTubeDiv = this.getId('__youTube');
-        if (youTubeDiv) {
-            hide(youTubeCloseBtn);
-            youTubeDiv.parentNode.removeChild(youTubeDiv);
+        let shareVideoDiv = this.getId('__shareVideo');
+        if (shareVideoDiv) {
+            hide(videoCloseBtn);
+            shareVideoDiv.parentNode.removeChild(shareVideoDiv);
             handleAspectRatio();
-            console.log('[closeYouTube] Video-element-count', this.videoMediaContainer.childElementCount);
+            console.log('[closeVideo] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
         }
     }
@@ -2414,33 +2607,39 @@ class RoomClient {
         if (emit) {
             switch (action) {
                 case 'lock':
-                    Swal.fire({
-                        allowOutsideClick: false,
-                        allowEscapeKey: false,
-                        showDenyButton: true,
-                        background: swalBackground,
-                        imageUrl: image.locked,
-                        input: 'text',
-                        inputPlaceholder: 'Set Room password',
-                        confirmButtonText: `OK`,
-                        denyButtonText: `Cancel`,
-                        showClass: {
-                            popup: 'animate__animated animate__fadeInDown',
-                        },
-                        hideClass: {
-                            popup: 'animate__animated animate__fadeOutUp',
-                        },
-                        inputValidator: (pwd) => {
-                            if (!pwd) return 'Please enter the Room password';
-                            this.RoomPassword = pwd;
-                        },
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            data.password = this.RoomPassword;
-                            this.socket.emit('roomAction', data);
-                            this.roomStatus(action);
-                        }
-                    });
+                    if (room_password) {
+                        data.password = room_password;
+                        this.socket.emit('roomAction', data);
+                        this.roomStatus(action);
+                    } else {
+                        Swal.fire({
+                            allowOutsideClick: false,
+                            allowEscapeKey: false,
+                            showDenyButton: true,
+                            background: swalBackground,
+                            imageUrl: image.locked,
+                            input: 'text',
+                            inputPlaceholder: 'Set Room password',
+                            confirmButtonText: `OK`,
+                            denyButtonText: `Cancel`,
+                            showClass: {
+                                popup: 'animate__animated animate__fadeInDown',
+                            },
+                            hideClass: {
+                                popup: 'animate__animated animate__fadeOutUp',
+                            },
+                            inputValidator: (pwd) => {
+                                if (!pwd) return 'Please enter the Room password';
+                                this.RoomPassword = pwd;
+                            },
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                data.password = this.RoomPassword;
+                                this.socket.emit('roomAction', data);
+                                this.roomStatus(action);
+                            }
+                        });
+                    }
                     break;
                 case 'unlock':
                     this.socket.emit('roomAction', data);
@@ -2612,7 +2811,7 @@ class RoomClient {
     // PEER ACTION
     // ####################################################
 
-    peerAction(from_peer_name, id, action, emit = true, broadcast = false) {
+    peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true) {
         const words = id.split('___');
         let peer_id = words[0];
 
@@ -2625,7 +2824,7 @@ class RoomClient {
             };
 
             if (!this.thereIsParticipants()) {
-                this.userLog('info', 'No participants detected', 'top-end');
+                if (info) this.userLog('info', 'No participants detected', 'top-end');
                 return;
             }
             this.confirmPeerAction(action, data);
@@ -2659,6 +2858,12 @@ class RoomClient {
                             10000,
                         );
                     }
+                    break;
+                case 'screenStart':
+                    if (!this.isMobileDevice) setAspectRatio(2);
+                    break;
+                case 'screenStop':
+                    if (!this.isMobileDevice) handleAspectRatio();
                     break;
                 // ...
             }
@@ -2784,6 +2989,12 @@ class RoomClient {
                         if (muteHideConfirmed) this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
                 break;
+            case 'screenStart':
+            case 'screenStop':
+                setTimeout(() => {
+                    this.socket.emit('peerAction', data);
+                }, 2000);
+                break;
         }
     }
 
@@ -2868,6 +3079,7 @@ class RoomClient {
                     break;
             }
         }
+        if (isParticipantsListOpen) getRoomParticipants(true);
     }
 
     checkPeerInfoStatus(peer_info) {

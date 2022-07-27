@@ -4,7 +4,7 @@ const config = require('./config');
 const { v4: uuidV4 } = require('uuid');
 
 module.exports = class ServerApi {
-    constructor(host, authorization) {
+    constructor(host = null, authorization = null) {
         this._host = host;
         this._authorization = authorization;
         this._api_key_secret = config.apiKeySecret;
@@ -25,12 +25,16 @@ module.exports = class ServerApi {
             this._host +
             '/join?room=' +
             data.room +
+            '&password=' +
+            data.password +
             '&name=' +
             data.name +
             '&audio=' +
             data.audio +
             '&video=' +
             data.video +
+            '&screen=' +
+            data.screen +
             '&notify=' +
             data.notify
         );
