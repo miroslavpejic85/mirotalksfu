@@ -1,11 +1,19 @@
 version: '3'
 
 services:
-    mirotalksfu:
-        image: mirotalksfu:latest
+    npm: &npm
+        image: mirotalksfu-npm:latest
         build:
             context: .
             dockerfile: Dockerfile
+        container_name: mirotalksfu-npm
+        volumes:
+            - .:/src/
+        command: -v
+        entrypoint: ['npm']
+
+    mirotalksfu:
+        <<: *npm
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
@@ -16,3 +24,4 @@ services:
             - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'
             - '40000-40100:40000-40100/udp'
+        command: start
