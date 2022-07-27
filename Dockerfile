@@ -15,11 +15,12 @@ RUN \
 	apt update && \
 	apt install -y python3.8 python3-pip
 
-# NodeJS 14.X and npm
+# NodeJS 16.X and npm
 RUN \
 	apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates && \
-	curl -sL https://deb.nodesource.com/setup_14.x | bash - && \
-	apt-get install -y nodejs
+	curl -sL https://deb.nodesource.com/setup_16.x | bash - && \
+	apt-get install -y nodejs && \
+	npm install -g npm@latest
 
 # Vim editor
 RUN apt-get install -y vim

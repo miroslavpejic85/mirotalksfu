@@ -3,7 +3,7 @@
     <head>
         <!-- https://github.com/mikecao/umami -->
 
-        <!-- <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZRF9TVSZ0J"></script>
+       <!--  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ZRF9TVSZ0J"></script>
         <script>
             window.dataLayer = window.dataLayer || [];
             function gtag() {
@@ -16,7 +16,7 @@
 
         <!-- Title and Icon -->
 
-        <title>RoomXR - 404 Page not found.</title>
+        <title>RoomXR - Host Protected login required.</title>
         <link rel="shortcut icon" href="../images/logo_quadrato.png" />
         <link rel="apple-touch-icon" href="../images/logo_quadrato.png" />
 
@@ -25,6 +25,26 @@
         <meta charset="utf-8" />
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+        <meta
+            name="description"
+            content="RoomXR powered by WebRTC and mediasoup, Real-time secure video calls, messaging and screen sharing capabilities in the browser."
+        />
+        <meta
+            name="keywords"
+            content="webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting"
+        />
+
+        <!-- https://ogp.me -->
+
+        <meta property="og:type" content="app-webrtc" />
+        <meta property="og:site_name" content="RoomXR />
+        <meta property="og:title" content="Click the link to make a call." />
+        <meta
+            property="og:description"
+            content="RoomXR calling provides real-time video calls, messaging and screen sharing."
+        />
+        <!-- <meta property="og:image" content="https://sfu.mirotalk.org/images/mirotalksfu.png" /> -->
 
         <!-- StyleSheet -->
 
@@ -44,7 +64,7 @@
                         <div class="brand header-brand">
                             <h1 class="m-0">
                                 <a href="/">
-                                    <img class="header-logo-image" src="../images/_bianco.png" alt="holomask-logo" />
+                                    <img class="header-logo-image" src="../images/roomxr_logo_bianco.png" alt="holomask-logo" />
                                 </a>
                             </h1>
                         </div>
@@ -57,17 +77,77 @@
                     <div class="container">
                         <div class="hero-inner">
                             <div class="hero-copy">
-                                <h1 class="hero-title mt-0">
-                                    Oops! <br />
-                                    404 - PAGE NOT FOUND
-                                </h1>
-                                <p class="hero-paragraph" id="message"></p>
-                                <p class="hero-paragraph">This page you are looking not exist.</p>
-                                <div class="hero-cta">
-                                    <a class="button button-primary pulse" onclick="window.location.href = '/';"
-                                        >GO TO HOMEPAGE</a
-                                    >
+                                <div id="loginForm">
+                                    <br />
+                                    <div class="mb-12">
+                                        <input
+                                            id="username"
+                                            class="form-input"
+                                            type="name"
+                                            placeholder="Username"
+                                            required
+                                        />
+                                    </div>
+                                    <br />
+                                    <div class="mb-12">
+                                        <input
+                                            id="password"
+                                            class="form-input"
+                                            type="password"
+                                            placeholder="Password"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="mt-24 mb-32">
+                                        <button id="loginButton" class="button button-primary button-block">
+                                            Login
+                                        </button>
+                                    </div>
                                 </div>
+                                <script>
+                                    let usernameInput = document.getElementById('username');
+                                    let passwordInput = document.getElementById('password');
+                                    let loginBtn = document.getElementById('loginButton');
+
+                                    usernameInput.onkeyup = (e) => {
+                                        if (e.keyCode === 13) {
+                                            e.preventDefault();
+                                            login();
+                                        }
+                                    };
+                                    passwordInput.onkeyup = (e) => {
+                                        if (e.keyCode === 13) {
+                                            e.preventDefault();
+                                            login();
+                                        }
+                                    };
+
+                                    loginBtn.onclick = (e) => {
+                                        login();
+                                    };
+
+                                    function login() {
+                                        let username = document.getElementById('username').value;
+                                        let password = document.getElementById('password').value;
+
+                                        if (username && password) {
+                                            window.location.href = `/login?username=${username}&password=${password}`;
+                                            return;
+                                        }
+                                        if (!username && !password) {
+                                            alert('Username and Password required');
+                                            return;
+                                        }
+                                        if (!username) {
+                                            alert('Username required');
+                                            return;
+                                        }
+                                        if (!password) {
+                                            alert('Password required');
+                                            return;
+                                        }
+                                    }
+                                </script>
                             </div>
                             <div class="hero-figure anime-element">
                                 <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
@@ -152,6 +232,7 @@
             </footer>
         </div>
 
-        <script src="../js/landing.js"></script>
+        <script defer src="../js/landing.js"></script>
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>
