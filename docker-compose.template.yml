@@ -9,6 +9,9 @@ services:
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
+        volumes:
+            - ./app/:/src/app/:ro
+            - ./public/:/src/public/:ro
         ports:
             - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'
