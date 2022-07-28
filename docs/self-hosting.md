@@ -85,17 +85,19 @@ $ pm2 start app/src/Server.js
 
 If you want to use `Docker`
 
+Repo: https://hub.docker.com/repository/docker/mirotalk/sfu
+
 ```bash
 # Install docker and docker-compose
 $ sudo apt install docker.io
 $ sudo apt install docker-compose
 
-# Copy app/src/config.template.js in app/src/config.js and edit it if needed
+# Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build or rebuild services - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
-$ docker-compose build
+# Get official image from Docker Hub
+$ docker pull mirotalk/sfu:latest
 # Create and start containers as deamon
 $ docker-compose up -d
 ```
@@ -221,8 +223,7 @@ If you use `Docker`, paste this:
 
 cd mirotalksfu
 git pull
-docker-compose down
-docker-compose build
+docker pull mirotalk/sfu:latest
 docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
 docker-compose up -d
 ```
@@ -243,14 +244,8 @@ To update your instance of MiroTalk SFU at latest commit, execute:
 ./sfuUpdate.sh
 ```
 
-<br/>
-
 ---
 
-## Do you find MiroTalk useful?
+## Support
 
-Show your appreciation by becoming a [backer or sponsor](https://github.com/sponsors/miroslavpejic85)
-
-Thank you for your support!
-
----
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mirotalk/mirotalk-sfu-free-video-calls-messaging-screen-sharing-recording)
