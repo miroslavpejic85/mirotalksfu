@@ -112,7 +112,7 @@ $ npm start
 
 -   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
--   Repository docker hub: https://hub.docker.com/repository/docker/mirotalk/sfu
+-   Repository docker hub: https://hub.docker.com/r/mirotalk/sfu
 
 ```bash
 # Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)

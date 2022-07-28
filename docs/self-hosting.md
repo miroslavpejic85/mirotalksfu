@@ -85,7 +85,7 @@ $ pm2 start app/src/Server.js
 
 If you want to use `Docker`
 
-Repo: https://hub.docker.com/repository/docker/mirotalk/sfu
+Repo: https://hub.docker.com/r/mirotalk/sfu
 
 ```bash
 # Install docker and docker-compose
