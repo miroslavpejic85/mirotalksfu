@@ -2696,7 +2696,7 @@ class RoomClient {
         let pbProducer = this.getId(peerId + '_pitchBar');
         let pbConsumer = this.getId(peerId + '__pitchBar');
         let audioVolume = data.audioVolume * 10; //10-100
-        console.log('Active speaker', { peer_name: peerName, peer_id: peerId, audioVolume: audioVolume });
+        //console.log('Active speaker', { peer_name: peerName, peer_id: peerId, audioVolume: audioVolume });
         if (audioVolume > 40) {
             if (producerAudioBtn) producerAudioBtn.style.color = 'orange';
             if (consumerAudioBtn) consumerAudioBtn.style.color = 'orange';
