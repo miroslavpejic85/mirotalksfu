@@ -224,8 +224,8 @@ If you use `Docker`, paste this:
 cd mirotalksfu
 git pull
 docker pull mirotalk/sfu:latest
-docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
 docker-compose up -d
+docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
 ```
 
 ---
