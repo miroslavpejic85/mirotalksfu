@@ -63,9 +63,9 @@ module.exports = class Room {
                             peerProducer.kind == 'audio' &&
                             peer.peer_audio === true
                         ) {
-                            let data = { peer_id: peer.id, audioVolume: audioVolume };
+                            let data = { peer_name: peer.peer_name, peer_id: peer.id, audioVolume: audioVolume };
                             //log.debug('audioLevelObserver', data);
-                            this.io.emit('audioVolume', data);
+                            this.broadCast(0, 'audioVolume', data);
                         }
                     });
                 });
