@@ -43,9 +43,9 @@
     --wb-width: 800px;
     --wb-height: 600px;
     --wb-bg: radial-gradient(#393939, #000000);
-    --left-msg-bg: #2a2a2a;
-    --right-msg-bg: #0a0b0c;
-    --private-msg-bg: #510717;
+    --left-msg-bg: #252d31;
+    --right-msg-bg: #056162;
+    --private-msg-bg: #6b1226;
     --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
     /* buttons bar horizontal */
@@ -653,10 +653,11 @@ button:hover {
     width: 100%;
     padding: 10px;
     margin: 10px auto 0px auto;
-    background-color: #191919;
+    background-color: #056162;
     border-radius: 10px;
 }
 #inviteParticipants:hover {
+    background-color: #191919;
     color: #fff;
     transform: scale(1);
 }
@@ -820,7 +821,7 @@ progress {
     border-radius: 6px;
     background: rgba(#19bb5c, 0.65);
     transition-property: height background-color;
-    transition-duration: 0.25s;
+    transition-duration: 1s;
 }
 
 /*--------------------------------------------------------------

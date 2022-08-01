@@ -2954,6 +2954,10 @@
                             logger.error('pause() | Consumer closed');
                             return;
                         }
+                        if (this._paused) {
+                            logger.debug('pause() | Consumer is already paused');
+                            return;
+                        }
                         this._paused = true;
                         this._track.enabled = false;
                         this.emit('@pause');
@@ -2967,6 +2971,10 @@
                         logger.debug('resume()');
                         if (this._closed) {
                             logger.error('resume() | Consumer closed');
+                            return;
+                        }
+                        if (!this._paused) {
+                            logger.debug('resume() | Consumer is already resumed');
                             return;
                         }
                         this._paused = false;
@@ -3328,16 +3336,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -4060,7 +4064,7 @@
                         }
                         if (this._zeroRtpOnPause) {
                             new Promise((resolve, reject) => {
-                                this.safeEmit('@replacetrack', null, resolve, reject);
+                                this.safeEmit('@pause', resolve, reject);
                             }).catch(() => {});
                         }
                         // Emit observer event.
@@ -4081,7 +4085,7 @@
                         }
                         if (this._zeroRtpOnPause) {
                             new Promise((resolve, reject) => {
-                                this.safeEmit('@replacetrack', this._track, resolve, reject);
+                                this.safeEmit('@resume', resolve, reject);
                             }).catch(() => {});
                         }
                         // Emit observer event.
@@ -4196,16 +4200,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -4302,6 +4302,10 @@
                         this._pendingResumeConsumers = new Map();
                         // Consumer resume in progress flag.
                         this._consumerResumeInProgress = false;
+                        // Consumers pending to be closed.
+                        this._pendingCloseConsumers = new Map();
+                        // Consumer close in progress flag.
+                        this._consumerCloseInProgress = false;
                         // Observer instance.
                         this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
                         logger.debug('constructor() [id:%s, direction:%s]', id, direction);
@@ -4706,6 +4710,10 @@
                         this._consumerCreationInProgress = true;
                         this._awaitQueue
                             .push(async () => {
+                                if (this._pendingConsumerTasks.length === 0) {
+                                    logger.debug('_createPendingConsumers() | there is no Consumer to be created');
+                                    return;
+                                }
                                 const pendingConsumerTasks = [...this._pendingConsumerTasks];
                                 // Clear pending Consumer tasks.
                                 this._pendingConsumerTasks = [];
@@ -4779,9 +4787,9 @@
                                         );
                                     }
                                 }
-                                this._consumerCreationInProgress = false;
                             }, 'transport._createPendingConsumers()')
                             .then(() => {
+                                this._consumerCreationInProgress = false;
                                 // There are pending Consumer tasks, enqueue their creation.
                                 if (this._pendingConsumerTasks.length > 0) {
                                     this._createPendingConsumers();
@@ -4794,19 +4802,22 @@
                         this._consumerPauseInProgress = true;
                         this._awaitQueue
                             .push(async () => {
+                                if (this._pendingPauseConsumers.size === 0) {
+                                    logger.debug('_pausePendingConsumers() | there is no Consumer to be paused');
+                                    return;
+                                }
                                 const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
                                 // Clear pending pause Consumer map.
                                 this._pendingPauseConsumers.clear();
                                 try {
-                                    await this._handler.pauseReceiving(
-                                        pendingPauseConsumers.map((consumer) => consumer.localId),
-                                    );
+                                    const localIds = pendingPauseConsumers.map((consumer) => consumer.localId);
+                                    await this._handler.pauseReceiving(localIds);
                                 } catch (error) {
                                     logger.error('_pausePendingConsumers() | failed to pause Consumers:', error);
                                 }
-                                this._consumerPauseInProgress = false;
-                            }, 'consumer @pause event')
+                            }, 'transport._pausePendingConsumers')
                             .then(() => {
+                                this._consumerPauseInProgress = false;
                                 // There are pending Consumers to be paused, do it.
                                 if (this._pendingPauseConsumers.size > 0) {
                                     this._pausePendingConsumers();
@@ -4819,22 +4830,54 @@
                         this._consumerResumeInProgress = true;
                         this._awaitQueue
                             .push(async () => {
+                                if (this._pendingResumeConsumers.size === 0) {
+                                    logger.debug('_resumePendingConsumers() | there is no Consumer to be resumed');
+                                    return;
+                                }
                                 const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
                                 // Clear pending resume Consumer map.
                                 this._pendingResumeConsumers.clear();
                                 try {
-                                    await this._handler.resumeReceiving(
-                                        pendingResumeConsumers.map((consumer) => consumer.localId),
-                                    );
+                                    const localIds = pendingResumeConsumers.map((consumer) => consumer.localId);
+                                    await this._handler.resumeReceiving(localIds);
                                 } catch (error) {
                                     logger.error('_resumePendingConsumers() | failed to resume Consumers:', error);
                                 }
-                            }, 'consumer @resume event')
+                            }, 'transport._resumePendingConsumers')
                             .then(() => {
                                 this._consumerResumeInProgress = false;
                                 // There are pending Consumer to be resumed, do it.
                                 if (this._pendingResumeConsumers.size > 0) {
                                     this._resumePendingConsumers();
+                                }
+                            })
+                            // NOTE: We only get here when the await queue is closed.
+                            .catch(() => {});
+                    }
+                    _closePendingConsumers() {
+                        this._consumerCloseInProgress = true;
+                        this._awaitQueue
+                            .push(async () => {
+                                if (this._pendingCloseConsumers.size === 0) {
+                                    logger.debug('_closePendingConsumers() | there is no Consumer to be closed');
+                                    return;
+                                }
+                                const pendingCloseConsumers = Array.from(this._pendingCloseConsumers.values());
+                                // Clear pending close Consumer map.
+                                this._pendingCloseConsumers.clear();
+                                try {
+                                    await this._handler.stopReceiving(
+                                        pendingCloseConsumers.map((consumer) => consumer.localId),
+                                    );
+                                } catch (error) {
+                                    logger.error('_closePendingConsumers() | failed to close Consumers:', error);
+                                }
+                            }, 'transport._closePendingConsumers')
+                            .then(() => {
+                                this._consumerCloseInProgress = false;
+                                // There are pending Consumer to be resumed, do it.
+                                if (this._pendingCloseConsumers.size > 0) {
+                                    this._closePendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
@@ -4863,6 +4906,21 @@
                             this._awaitQueue
                                 .push(async () => this._handler.stopSending(producer.localId), 'producer @close event')
                                 .catch((error) => logger.warn('producer.close() failed:%o', error));
+                        });
+                        producer.on('@pause', (callback, errback) => {
+                            this._awaitQueue
+                                .push(async () => this._handler.pauseSending(producer.localId), 'producer @pause event')
+                                .then(callback)
+                                .catch(errback);
+                        });
+                        producer.on('@resume', (callback, errback) => {
+                            this._awaitQueue
+                                .push(
+                                    async () => this._handler.resumeSending(producer.localId),
+                                    'producer @resume event',
+                                )
+                                .then(callback)
+                                .catch(errback);
                         });
                         producer.on('@replacetrack', (track, callback, errback) => {
                             this._awaitQueue
@@ -4902,12 +4960,12 @@
                             this._pendingPauseConsumers.delete(consumer.id);
                             this._pendingResumeConsumers.delete(consumer.id);
                             if (this._closed) return;
-                            this._awaitQueue
-                                .push(
-                                    async () => this._handler.stopReceiving(consumer.localId),
-                                    'consumer @close event',
-                                )
-                                .catch(() => {});
+                            // Store the Consumer into the close list.
+                            this._pendingCloseConsumers.set(consumer.id, consumer);
+                            // There is no Consumer close in progress, do it now.
+                            if (this._consumerCloseInProgress === false) {
+                                this._closePendingConsumers();
+                            }
                         });
                         consumer.on('@pause', () => {
                             // If Consumer is pending to be resumed, remove from pending resume list.
@@ -5014,16 +5072,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -5336,6 +5390,14 @@
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         localId,
@@ -5457,13 +5519,15 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
-                        // Remove from the map.
-                        this._mapRecvLocalIdInfo.delete(localId);
-                        this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            // Remove from the map.
+                            this._mapRecvLocalIdInfo.delete(localId);
+                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -5574,16 +5638,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -5897,6 +5957,14 @@
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -6048,13 +6116,15 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
-                        // Remove from the map.
-                        this._mapRecvLocalIdInfo.delete(localId);
-                        this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            // Remove from the map.
+                            this._mapRecvLocalIdInfo.delete(localId);
+                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -6166,16 +6236,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -6510,6 +6576,14 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -6654,19 +6728,23 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        this._remoteSdp.closeMediaSection(transceiver.mid);
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            this._remoteSdp.closeMediaSection(transceiver.mid);
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
+                        for (const localId of localIds) {
+                            this._mapMidTransceiver.delete(localId);
+                        }
                     }
                     async pauseReceiving(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -6773,16 +6851,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7106,6 +7180,32 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
+                    async pauseSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('pauseSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
+                    async resumeSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('resumeSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'sendonly';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('resumeSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -7252,19 +7352,23 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        this._remoteSdp.closeMediaSection(transceiver.mid);
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            this._remoteSdp.closeMediaSection(transceiver.mid);
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
+                        for (const localId of localIds) {
+                            this._mapMidTransceiver.delete(localId);
+                        }
                     }
                     async pauseReceiving(localIds) {
                         this._assertRecvDirection();
@@ -7388,16 +7492,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -7583,6 +7683,14 @@
                             throw error;
                         }
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(localId, track) {
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -7655,16 +7763,18 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const rtpReceiver = this._rtpReceivers.get(localId);
-                        if (!rtpReceiver) throw new Error('RTCRtpReceiver not found');
-                        this._rtpReceivers.delete(localId);
-                        try {
-                            logger.debug('stopReceiving() | calling rtpReceiver.stop()');
-                            rtpReceiver.stop();
-                        } catch (error) {
-                            logger.warn('stopReceiving() | rtpReceiver.stop() failed:%o', error);
+                    async stopReceiving(localIds) {
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const rtpReceiver = this._rtpReceivers.get(localId);
+                            if (!rtpReceiver) throw new Error('RTCRtpReceiver not found');
+                            this._rtpReceivers.delete(localId);
+                            try {
+                                logger.debug('stopReceiving() | calling rtpReceiver.stop()');
+                                rtpReceiver.stop();
+                            } catch (error) {
+                                logger.warn('stopReceiving() | rtpReceiver.stop() failed:%o', error);
+                            }
                         }
                     }
                     async pauseReceiving(
@@ -7826,16 +7936,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8170,6 +8276,34 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('pauseSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('resumeSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'sendonly';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('resumeSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -8307,19 +8441,23 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        this._remoteSdp.closeMediaSection(transceiver.mid);
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            this._remoteSdp.closeMediaSection(transceiver.mid);
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
+                        for (const localId of localIds) {
+                            this._mapMidTransceiver.delete(localId);
+                        }
                     }
                     async pauseReceiving(localIds) {
                         this._assertRecvDirection();
@@ -8453,16 +8591,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -8780,6 +8914,14 @@
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         localId,
@@ -8911,13 +9053,15 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
-                        // Remove from the map.
-                        this._mapRecvLocalIdInfo.delete(localId);
-                        this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            // Remove from the map.
+                            this._mapRecvLocalIdInfo.delete(localId);
+                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -9028,16 +9172,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -9348,6 +9488,14 @@
                         logger.debug('stopSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        // Unimplemented.
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        // Unimplemented.
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -9495,13 +9643,15 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
-                        // Remove from the map.
-                        this._mapRecvLocalIdInfo.delete(localId);
-                        this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            // Remove from the map.
+                            this._mapRecvLocalIdInfo.delete(localId);
+                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
@@ -9612,16 +9762,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -9917,6 +10063,34 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async pauseSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('pauseSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'inactive';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    async resumeSending(localId) {
+                        this._assertSendDirection();
+                        logger.debug('resumeSending() [localId:%s]', localId);
+                        const transceiver = this._mapMidTransceiver.get(localId);
+                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                        transceiver.direction = 'sendonly';
+                        const offer = await this._pc.createOffer();
+                        logger.debug('resumeSending() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('resumeSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
+                    }
                     async replaceTrack(localId, track) {
                         this._assertSendDirection();
                         if (track) {
@@ -10060,19 +10234,23 @@
                         }
                         return results;
                     }
-                    async stopReceiving(localId) {
+                    async stopReceiving(localIds) {
                         this._assertRecvDirection();
-                        logger.debug('stopReceiving() [localId:%s]', localId);
-                        const transceiver = this._mapMidTransceiver.get(localId);
-                        if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
-                        this._remoteSdp.closeMediaSection(transceiver.mid);
+                        for (const localId of localIds) {
+                            logger.debug('stopReceiving() [localId:%s]', localId);
+                            const transceiver = this._mapMidTransceiver.get(localId);
+                            if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
+                            this._remoteSdp.closeMediaSection(transceiver.mid);
+                        }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
                         await this._pc.setRemoteDescription(offer);
                         const answer = await this._pc.createAnswer();
                         logger.debug('stopReceiving() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
-                        this._mapMidTransceiver.delete(localId);
+                        for (const localId of localIds) {
+                            this._mapMidTransceiver.delete(localId);
+                        }
                     }
                     async pauseReceiving(localIds) {
                         this._assertRecvDirection();
@@ -10195,16 +10373,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10297,16 +10471,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -10852,16 +11022,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11163,16 +11329,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11618,16 +11780,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -11687,7 +11845,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.54';
+                exports.version = '3.6.55';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -11709,16 +11867,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
@@ -12546,16 +12700,12 @@
                     (Object.create
                         ? function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;
-                              var desc = Object.getOwnPropertyDescriptor(m, k);
-                              if (!desc || ('get' in desc ? !m.__esModule : desc.writable || desc.configurable)) {
-                                  desc = {
-                                      enumerable: true,
-                                      get: function () {
-                                          return m[k];
-                                      },
-                                  };
-                              }
-                              Object.defineProperty(o, k2, desc);
+                              Object.defineProperty(o, k2, {
+                                  enumerable: true,
+                                  get: function () {
+                                      return m[k];
+                                  },
+                              });
                           }
                         : function (o, m, k, k2) {
                               if (k2 === undefined) k2 = k;

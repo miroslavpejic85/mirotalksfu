@@ -1176,7 +1176,7 @@ class RoomClient {
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
         vb = document.createElement('div');
-        vb.setAttribute('id', this.peer_id + 'vb');
+        vb.setAttribute('id', peer_id + 'vb');
         vb.className = 'videoMenuBar fadein';
         au = document.createElement('button');
         au.id = peer_id + '__audio';

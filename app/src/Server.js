@@ -665,6 +665,9 @@ io.on('connection', (socket) => {
         if (!roomList.has(socket.room_id)) return;
 
         log.debug('Producer close', data);
+
+        // peer_info audio Or video ON
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
     });
 
