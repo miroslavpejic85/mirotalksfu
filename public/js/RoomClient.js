@@ -41,6 +41,22 @@ const mediaType = {
     video: 'videoType',
     camera: 'cameraType',
     screen: 'screenType',
+    speaker: 'speakerType',
+};
+
+const LOCAL_STORAGE_DEVICES = {
+    audio: {
+        index: null,
+        select: null,
+    },
+    speaker: {
+        index: null,
+        select: null,
+    },
+    video: {
+        index: null,
+        select: null,
+    },
 };
 
 const _EVENTS = {
@@ -558,19 +574,26 @@ class RoomClient {
     // ####################################################
 
     startLocalMedia() {
+        let localStorageDevices = this.getLocalStorageDevices();
+        console.log('08 ----> Get Local Storage Devices', localStorageDevices);
+        if (localStorageDevices) {
+            microphoneSelect.selectedIndex = localStorageDevices.audio.index;
+            speakerSelect.selectedIndex = localStorageDevices.speaker.index;
+            videoSelect.selectedIndex = localStorageDevices.video.index;
+        }
         if (this.isAudioAllowed) {
-            console.log('08 ----> Start audio media');
+            console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
             setColor(startAudioButton, 'red');
-            console.log('08 ----> Audio is off');
+            console.log('09 ----> Audio is off');
         }
         if (this.isVideoAllowed) {
-            console.log('09 ----> Start video media');
+            console.log('10 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
         } else {
             setColor(startVideoButton, 'red');
-            console.log('09 ----> Video is off');
+            console.log('10 ----> Video is off');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
@@ -1284,13 +1307,13 @@ class RoomClient {
             }).then((result) => {
                 if (result.isConfirmed) {
                     startScreenButton.click();
-                    console.log('10 ----> Screen is on');
+                    console.log('11 ----> Screen is on');
                 } else {
-                    console.log('10 ----> Screen is on');
+                    console.log('11 ----> Screen is on');
                 }
             });
         } else {
-            console.log('10 ----> Screen is off');
+            console.log('11 ----> Screen is off');
         }
     }
 
@@ -3066,5 +3089,31 @@ class RoomClient {
                 'top-start',
             );
         }
+    }
+
+    // ####################################################
+    // LOCAL STORAGE DEVICES
+    // ####################################################
+
+    setLocalStorageDevices(type, index, select) {
+        switch (type) {
+            case RoomClient.mediaType.audio:
+                LOCAL_STORAGE_DEVICES.audio.index = index;
+                LOCAL_STORAGE_DEVICES.audio.select = select;
+                break;
+            case RoomClient.mediaType.video:
+                LOCAL_STORAGE_DEVICES.video.index = index;
+                LOCAL_STORAGE_DEVICES.video.select = select;
+                break;
+            case RoomClient.mediaType.speaker:
+                LOCAL_STORAGE_DEVICES.speaker.index = index;
+                LOCAL_STORAGE_DEVICES.speaker.select = select;
+                break;
+        }
+        localStorage.setItem('LOCAL_STORAGE_DEVICES', JSON.stringify(LOCAL_STORAGE_DEVICES));
+    }
+
+    getLocalStorageDevices() {
+        return JSON.parse(localStorage.getItem('LOCAL_STORAGE_DEVICES'));
     }
 }

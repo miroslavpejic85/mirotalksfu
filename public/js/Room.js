@@ -892,12 +892,15 @@ function handleSelects() {
     // devices options
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
     speakerSelect.onchange = () => {
         rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
     };
     // styling
     BtnsAspectRatio.onchange = () => {
