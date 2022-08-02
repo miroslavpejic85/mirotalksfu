@@ -46,15 +46,15 @@ const mediaType = {
 
 const LOCAL_STORAGE_DEVICES = {
     audio: {
-        index: null,
+        index: 0,
         select: null,
     },
     speaker: {
-        index: null,
+        index: 0,
         select: null,
     },
     video: {
-        index: null,
+        index: 0,
         select: null,
     },
 };
@@ -1373,7 +1373,7 @@ class RoomClient {
         console.log(who + ' Success attached media ' + type);
     }
 
-    attachSinkId(elem, sinkId) {
+    async attachSinkId(elem, sinkId) {
         if (typeof elem.sinkId !== 'undefined') {
             elem.setSinkId(sinkId)
                 .then(() => {
@@ -1381,11 +1381,13 @@ class RoomClient {
                 })
                 .catch((err) => {
                     let errorMessage = err;
+                    let speakerSelect = this.getId('speakerSelect');
                     if (err.name === 'SecurityError')
                         errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
                     console.error('Attach SinkId error: ', errorMessage);
                     this.userLog('error', errorMessage, 'top-end');
-                    this.getId('speakerSelect').selectedIndex = 0;
+                    speakerSelect.selectedIndex = 0;
+                    this.setLocalStorageDevices(mediaType.speaker, 0, speakerSelect.value);
                 });
         } else {
             let error = `Browser seems doesn't support output device selection.`;
