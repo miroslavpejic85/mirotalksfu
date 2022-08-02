@@ -46,17 +46,26 @@ const mediaType = {
 
 const LOCAL_STORAGE_DEVICES = {
     audio: {
+        count: 0,
         index: 0,
         select: null,
     },
     speaker: {
+        count: 0,
         index: 0,
         select: null,
     },
     video: {
+        count: 0,
         index: 0,
         select: null,
     },
+};
+
+const DEVICES_COUNT = {
+    audio: 0,
+    speaker: 0,
+    video: 0,
 };
 
 const _EVENTS = {
@@ -575,12 +584,30 @@ class RoomClient {
 
     startLocalMedia() {
         let localStorageDevices = this.getLocalStorageDevices();
-        console.log('08 ----> Get Local Storage Devices', localStorageDevices);
+        console.log('08 ----> Get Local Storage Devices before', localStorageDevices);
         if (localStorageDevices) {
             microphoneSelect.selectedIndex = localStorageDevices.audio.index;
             speakerSelect.selectedIndex = localStorageDevices.speaker.index;
             videoSelect.selectedIndex = localStorageDevices.video.index;
+            //
+            if (DEVICES_COUNT.audio != localStorageDevices.audio.count) {
+                console.log('08.1 ----> Audio devices seems changed, use default index 0');
+                microphoneSelect.selectedIndex = 0;
+                this.setLocalStorageDevices(mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+            }
+            if (DEVICES_COUNT.speaker != localStorageDevices.speaker.count) {
+                console.log('08.2 ----> Speaker devices seems changed, use default index 0');
+                speakerSelect.selectedIndex = 0;
+                this.setLocalStorageDevices(mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
+            }
+            if (DEVICES_COUNT.video != localStorageDevices.video.count) {
+                console.log('08.3 ----> Video devices seems changed, use default index 0');
+                videoSelect.selectedIndex = 0;
+                this.setLocalStorageDevices(mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+            }
         }
+        console.log('08.4 ----> Get Local Storage Devices after', this.getLocalStorageDevices());
+
         if (this.isAudioAllowed) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
@@ -612,10 +639,12 @@ class RoomClient {
         let screen = false;
         switch (type) {
             case mediaType.audio:
+                this.isAudioAllowed = true;
                 mediaConstraints = this.getAudioConstraints(deviceId);
                 audio = true;
                 break;
             case mediaType.video:
+                this.isVideoAllowed = true;
                 if (swapCamera) {
                     mediaConstraints = this.getCameraConstraints();
                 } else {
@@ -826,6 +855,8 @@ class RoomClient {
         elem.setAttribute('playsinline', true);
         elem.controls = isVideoControlsOn;
         elem.autoplay = true;
+        elem.muted = true;
+        elem.volume = 0;
         elem.poster = image.poster;
         this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
         vb = document.createElement('div');
@@ -878,12 +909,12 @@ class RoomClient {
             this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
             handleAspectRatio();
         }
-        console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         if (!this.isMobileDevice) {
             this.setTippy(elem.id, 'Full Screen', 'top-end');
             this.setTippy(ts.id, 'Snapshot', 'top-end');
             this.setTippy(au.id, 'Audio status', 'top-end');
         }
+        console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
         return elem;
     }
 
@@ -1357,19 +1388,31 @@ class RoomClient {
     // ####################################################
 
     attachMediaStream(elem, stream, type, who) {
-        let track;
-        switch (type) {
-            case mediaType.audio:
-                track = stream.getAudioTracks()[0];
-                break;
-            case mediaType.video:
-            case mediaType.screen:
-                track = stream.getVideoTracks()[0];
-                break;
+        if (who === 'Producer') {
+            const producerStream = new MediaStream();
+            producerStream.addTrack(stream.getVideoTracks()[0]);
+            if (this.isAudioAllowed) {
+                producerStream.addTrack(this.localAudioStream.getAudioTracks()[0]);
+            }
+            elem.srcObject = producerStream;
+            if (this.isAudioAllowed && !speakerSelect.disabled) {
+                this.attachSinkId(elem, speakerSelect.value);
+            }
+        } else {
+            let track;
+            switch (type) {
+                case mediaType.audio:
+                    track = stream.getAudioTracks()[0];
+                    break;
+                case mediaType.video:
+                case mediaType.screen:
+                    track = stream.getVideoTracks()[0];
+                    break;
+            }
+            const consumerStream = new MediaStream();
+            consumerStream.addTrack(track);
+            elem.srcObject = consumerStream;
         }
-        const newStream = new MediaStream();
-        newStream.addTrack(track);
-        elem.srcObject = newStream;
         console.log(who + ' Success attached media ' + type);
     }
 
@@ -1471,6 +1514,10 @@ class RoomClient {
 
     static get EVENTS() {
         return _EVENTS;
+    }
+
+    static get DEVICES_COUNT() {
+        return DEVICES_COUNT;
     }
 
     getTimeNow() {
@@ -3100,14 +3147,17 @@ class RoomClient {
     setLocalStorageDevices(type, index, select) {
         switch (type) {
             case RoomClient.mediaType.audio:
+                LOCAL_STORAGE_DEVICES.audio.count = DEVICES_COUNT.audio;
                 LOCAL_STORAGE_DEVICES.audio.index = index;
                 LOCAL_STORAGE_DEVICES.audio.select = select;
                 break;
             case RoomClient.mediaType.video:
+                LOCAL_STORAGE_DEVICES.video.count = DEVICES_COUNT.video;
                 LOCAL_STORAGE_DEVICES.video.index = index;
                 LOCAL_STORAGE_DEVICES.video.select = select;
                 break;
             case RoomClient.mediaType.speaker:
+                LOCAL_STORAGE_DEVICES.speaker.count = DEVICES_COUNT.speaker;
                 LOCAL_STORAGE_DEVICES.speaker.index = index;
                 LOCAL_STORAGE_DEVICES.speaker.select = select;
                 break;

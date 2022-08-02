@@ -205,8 +205,10 @@ function enumerateAudioDevices(stream) {
                 let el = null;
                 if ('audioinput' === device.kind) {
                     el = microphoneSelect;
+                    RoomClient.DEVICES_COUNT.audio++;
                 } else if ('audiooutput' === device.kind) {
                     el = speakerSelect;
+                    RoomClient.DEVICES_COUNT.speaker++;
                 }
                 if (!el) return;
                 addChild(device, el);
@@ -228,6 +230,7 @@ function enumerateVideoDevices(stream) {
                 let el = null;
                 if ('videoinput' === device.kind) {
                     el = videoSelect;
+                    RoomClient.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
                 addChild(device, el);
