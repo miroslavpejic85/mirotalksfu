@@ -605,9 +605,8 @@ class RoomClient {
                 videoSelect.selectedIndex = 0;
                 this.setLocalStorageDevices(mediaType.video, videoSelect.selectedIndex, videoSelect.value);
             }
+            console.log('08.4 ----> Get Local Storage Devices after', this.getLocalStorageDevices());
         }
-        console.log('08.4 ----> Get Local Storage Devices after', this.getLocalStorageDevices());
-
         if (this.isAudioAllowed) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
