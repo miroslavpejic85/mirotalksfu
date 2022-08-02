@@ -544,6 +544,7 @@ function joinRoom(peer_name, room_id) {
     } else {
         console.log('05 ----> join Room ' + room_id);
         rc = new RoomClient(
+            localAudio,
             remoteAudios,
             videoMediaContainer,
             window.mediasoupClient,
@@ -898,7 +899,7 @@ function handleSelects() {
         rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
     speakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
+        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
     };
     videoSelect.onchange = () => {
