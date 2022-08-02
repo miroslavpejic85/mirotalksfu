@@ -25,13 +25,16 @@ module.exports = class Peer {
             case 'audio':
             case 'audioType':
                 this.peer_info.peer_audio = data.status;
+                this.peer_audio = data.status;
                 break;
             case 'video':
             case 'videoType':
                 this.peer_info.peer_video = data.status;
+                this.peer_video = data.status;
                 break;
             case 'hand':
                 this.peer_info.peer_hand = data.status;
+                this.peer_hand = data.status;
                 break;
         }
     }
