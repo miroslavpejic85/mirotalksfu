@@ -1854,13 +1854,14 @@ class RoomClient {
         if (!peer_msg) return;
         let data = {
             peer_name: this.peer_name,
+            peer_id: this.peer_id,
             to_peer_id: 'all',
             peer_msg: peer_msg,
         };
         console.log('Send message:', data);
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
-        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, 'all');
+        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all');
         chatMessage.value = '';
     }
 
@@ -1889,13 +1890,14 @@ class RoomClient {
             if (!peer_msg) return;
             let data = {
                 peer_name: this.peer_name,
+                peer_id: this.peer_id,
                 to_peer_id: to_peer_id,
                 peer_msg: peer_msg,
             };
             console.log('Send message:', data);
             this.socket.emit('message', data);
             this.setMsgAvatar('right', this.peer_name);
-            this.appendMessage('right', this.rightMsgAvatar, this.peer_name, peer_msg, to_peer_id);
+            this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, to_peer_id);
             if (!this.isChatOpen) this.toggleChat();
         });
     }
@@ -1903,7 +1905,7 @@ class RoomClient {
     showMessage(data) {
         if (!this.isChatOpen) this.toggleChat();
         this.setMsgAvatar('left', data.peer_name);
-        this.appendMessage('left', this.leftMsgAvatar, data.peer_name, data.peer_msg, data.to_peer_id);
+        this.appendMessage('left', this.leftMsgAvatar, data.peer_name, data.peer_id, data.peer_msg, data.to_peer_id);
         this.sound('message');
     }
 
@@ -1912,23 +1914,27 @@ class RoomClient {
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
-    appendMessage(side, img, from, msg, to) {
+    appendMessage(side, img, fromName, fromId, msg, toId) {
         let time = this.getTimeNow();
-        let msgBubble = to == 'all' ? 'msg-bubble' : 'msg-bubble-private';
-        let message = to == 'all' ? msg : msg + '<br/> (private message)';
+        let msgBubble = toId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
+        let replyMsg =
+            fromId === this.peer_id
+                ? '<br/>(private message)'
+                : `<br/><button onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
+        let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
         <div class="msg ${side}-msg">
             <div class="msg-img" style="background-image: url('${img}')"></div>
             <div class=${msgBubble}>
                 <div class="msg-info">
-                    <div class="msg-info-name">${from}</div>
+                    <div class="msg-info-name">${fromName}</div>
                     <div class="msg-info-time">${time}</div>
                 </div>
                 <div class="msg-text">${message}</div>
             </div>
         </div>
         `;
-        this.collectMessages(time, from, msg);
+        this.collectMessages(time, fromName, msg);
         chatMsger.insertAdjacentHTML('beforeend', msgHTML);
         chatMsger.scrollTop += 500;
     }
@@ -2012,6 +2018,8 @@ class RoomClient {
             document.body.removeChild(a);
             window.URL.revokeObjectURL(url);
         }, 100);
+
+        this.sound('download');
     }
 
     // ####################################################
