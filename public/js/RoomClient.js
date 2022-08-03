@@ -1239,12 +1239,12 @@ class RoomClient {
         console.log('Remove consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
 
         let elem = this.getId(consumer_id);
-
-        elem.srcObject.getTracks().forEach(function (track) {
-            track.stop();
-        });
-
-        if (elem) elem.parentNode.removeChild(elem);
+        if (elem) {
+            elem.srcObject.getTracks().forEach(function (track) {
+                track.stop();
+            });
+            elem.parentNode.removeChild(elem);
+        }
 
         if (consumer_kind === 'video') {
             let d = this.getId(consumer_id + '__video');
