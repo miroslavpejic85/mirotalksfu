@@ -626,11 +626,11 @@ function roomIsReady() {
 }
 
 function hide(elem) {
-    elem.className = 'hidden';
+    elem.classList.add('hidden');
 }
 
 function show(elem) {
-    elem.className = '';
+    elem.classList.remove('hidden');
 }
 
 function setColor(elem, color) {
