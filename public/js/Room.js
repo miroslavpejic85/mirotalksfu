@@ -27,6 +27,10 @@ const _PEER = {
 
 const surveyActive = true;
 
+const userAgent = navigator.userAgent.toLowerCase();
+const isTabletDevice = isTablet(userAgent);
+const isIPadDevice = isIpad(userAgent);
+
 let participantsCount = 0;
 
 let rc = null;
@@ -59,6 +63,7 @@ let recElapsedTime = null;
 const wbImageInput = 'image/*';
 const wbWidth = 1366;
 const wbHeight = 768;
+
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
@@ -305,9 +310,13 @@ function getRoomPassword() {
 
 function getPeerInfo() {
     peer_info = {
+        user_agent: userAgent,
         detect_rtc_version: DetectRTC.version,
         is_webrtc_supported: DetectRTC.isWebRTCSupported,
+        is_desktop_device: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
         is_mobile_device: DetectRTC.isMobileDevice,
+        is_tablet_device: isTabletDevice,
+        is_ipad_pro_device: isIPadDevice,
         os_name: DetectRTC.osName,
         os_version: DetectRTC.osVersion,
         browser_name: DetectRTC.browser.name,
@@ -1175,6 +1184,16 @@ async function sound(name) {
 
 function isImageURL(url) {
     return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
+}
+
+function isTablet(userAgent) {
+    return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
+        userAgent,
+    );
+}
+
+function isIpad(userAgent) {
+    return /macintosh/.test(userAgent) && 'ontouchend' in document;
 }
 
 function openURL(url, blank = false) {
