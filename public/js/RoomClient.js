@@ -1,5 +1,17 @@
 'use strict';
 
+/**
+ * MiroTalk SFU - Client component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.org
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
 const cfg = {
     msgAvatar: 'https://eu.ui-avatars.com/api',
 };
