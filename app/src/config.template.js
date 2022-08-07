@@ -71,7 +71,7 @@ module.exports = {
         worker: {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
-            logLevel: 'warn',
+            logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
         },
         // Router settings
