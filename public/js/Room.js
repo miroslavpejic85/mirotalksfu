@@ -50,6 +50,11 @@ const BUTTONS = {
         aboutButton: true,
         exitButton: true,
     },
+    producerVideo: {
+        fullScreenButton: true,
+        snapShotButton: true,
+        muteAudioButton: true,
+    },
     consumerVideo: {
         fullScreenButton: true,
         snapShotButton: true,

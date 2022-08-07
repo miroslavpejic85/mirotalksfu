@@ -916,9 +916,9 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
-                vb.appendChild(au);
-                vb.appendChild(ts);
-                vb.appendChild(fs);
+                BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
+                BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
+                BUTTONS.producerVideo.fullScreenButton && vb.appendChild(fs);
                 d.appendChild(elem);
                 d.appendChild(pm);
                 d.appendChild(i);
