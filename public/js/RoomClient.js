@@ -1329,7 +1329,7 @@ class RoomClient {
             BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
             BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
         }
-        vb.appendChild(au);
+        BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(h);
