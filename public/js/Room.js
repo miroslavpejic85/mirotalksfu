@@ -94,6 +94,7 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
+let isSoundEnabled = true;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -1222,6 +1223,7 @@ function setVideoButtonsDisabled(disabled) {
 // ####################################################
 
 async function sound(name) {
+    if (!isSoundEnabled) return;
     let sound = '../sounds/' + name + '.wav';
     let audio = new Audio(sound);
     try {
