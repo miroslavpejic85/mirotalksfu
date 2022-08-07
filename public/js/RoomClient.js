@@ -1324,12 +1324,12 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
         if (remotePeer) {
-            BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
-            BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
-            BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
-            BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
+            BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
+            BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
+            BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
+            BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
         }
-        BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
+        BUTTONS.videoOff.muteAudioButton && vb.appendChild(au);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(h);

@@ -60,6 +60,13 @@ const BUTTONS = {
         muteAudioButton: true,
         ejectButton: true,
     },
+    videoOff: {
+        sendMessageButton: true,
+        sendFileButton: true,
+        sendVideoButton: true,
+        muteAudioButton: true,
+        ejectButton: true,
+    },
     //...
 };
 
