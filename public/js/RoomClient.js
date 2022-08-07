@@ -1196,14 +1196,14 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
-                vb.appendChild(ko);
-                vb.appendChild(au);
-                vb.appendChild(cm);
-                vb.appendChild(sv);
-                vb.appendChild(sf);
-                vb.appendChild(sm);
-                vb.appendChild(ts);
-                vb.appendChild(fs);
+                BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
+                BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
+                BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
+                BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
+                BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
+                BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
+                BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
+                BUTTONS.consumerVideo.fullScreenButton && vb.appendChild(fs);
                 d.appendChild(elem);
                 d.appendChild(i);
                 d.appendChild(p);
@@ -1324,10 +1324,10 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
         if (remotePeer) {
-            vb.appendChild(ko);
-            vb.appendChild(sv);
-            vb.appendChild(sf);
-            vb.appendChild(sm);
+            BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
+            BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
+            BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
+            BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
         }
         vb.appendChild(au);
         d.appendChild(i);
@@ -1712,34 +1712,37 @@ class RoomClient {
     handleFS(elemId, fsId) {
         let videoPlayer = this.getId(elemId);
         let btnFs = this.getId(fsId);
-        this.setTippy(fsId, 'Full screen', 'top');
-
-        btnFs.addEventListener('click', () => {
-            videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-            this.toggleFullScreen(videoPlayer);
-            this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
-        });
-        videoPlayer.addEventListener('click', () => {
-            if (!videoPlayer.hasAttribute('controls')) {
-                if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
-                    videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-                    this.toggleFullScreen(videoPlayer);
-                    this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+        if (btnFs) {
+            this.setTippy(fsId, 'Full screen', 'top');
+            btnFs.addEventListener('click', () => {
+                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                this.toggleFullScreen(videoPlayer);
+                this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+            });
+        }
+        if (videoPlayer) {
+            videoPlayer.addEventListener('click', () => {
+                if (!videoPlayer.hasAttribute('controls')) {
+                    if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
+                        videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                        this.toggleFullScreen(videoPlayer);
+                        this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+                    }
                 }
-            }
-        });
-        videoPlayer.addEventListener('fullscreenchange', (e) => {
-            if (!document.fullscreenElement) {
-                videoPlayer.style.pointerEvents = 'auto';
-                this.isVideoOnFullScreen = false;
-            }
-        });
-        videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
-            if (!document.webkitIsFullScreen) {
-                videoPlayer.style.pointerEvents = 'auto';
-                this.isVideoOnFullScreen = false;
-            }
-        });
+            });
+            videoPlayer.addEventListener('fullscreenchange', (e) => {
+                if (!document.fullscreenElement) {
+                    videoPlayer.style.pointerEvents = 'auto';
+                    this.isVideoOnFullScreen = false;
+                }
+            });
+            videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
+                if (!document.webkitIsFullScreen) {
+                    videoPlayer.style.pointerEvents = 'auto';
+                    this.isVideoOnFullScreen = false;
+                }
+            });
+        }
     }
 
     // ####################################################
@@ -1769,20 +1772,22 @@ class RoomClient {
     handleTS(elemId, tsId) {
         let videoPlayer = this.getId(elemId);
         let btnTs = this.getId(tsId);
-        btnTs.addEventListener('click', () => {
-            this.sound('snapshot');
-            let context, canvas, width, height, dataURL;
-            width = videoPlayer.videoWidth;
-            height = videoPlayer.videoHeight;
-            canvas = canvas || document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            context = canvas.getContext('2d');
-            context.drawImage(videoPlayer, 0, 0, width, height);
-            dataURL = canvas.toDataURL('image/png');
-            console.log(dataURL);
-            saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
-        });
+        if (btnTs && videoPlayer) {
+            btnTs.addEventListener('click', () => {
+                this.sound('snapshot');
+                let context, canvas, width, height, dataURL;
+                width = videoPlayer.videoWidth;
+                height = videoPlayer.videoHeight;
+                canvas = canvas || document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                context = canvas.getContext('2d');
+                context.drawImage(videoPlayer, 0, 0, width, height);
+                dataURL = canvas.toDataURL('image/png');
+                // console.log(dataURL);
+                saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
+            });
+        }
     }
 
     // ####################################################
@@ -1831,9 +1836,11 @@ class RoomClient {
         const words = uid.split('___');
         let peer_id = words[1];
         let btnSm = this.getId(uid);
-        btnSm.addEventListener('click', () => {
-            this.sendMessageTo(peer_id);
-        });
+        if (btnSm) {
+            btnSm.addEventListener('click', () => {
+                this.sendMessageTo(peer_id);
+            });
+        }
     }
 
     toggleChat() {
@@ -2188,43 +2195,47 @@ class RoomClient {
         const words = uid.split('___');
         let peer_id = words[1];
         let btnSf = this.getId(uid);
-        btnSf.addEventListener('click', () => {
-            this.selectFileToShare(peer_id);
-        });
+        if (btnSf) {
+            btnSf.addEventListener('click', () => {
+                this.selectFileToShare(peer_id);
+            });
+        }
     }
 
     handleDD(uid, peer_id, itsMe = false) {
         let videoPlayer = this.getId(uid);
-        videoPlayer.addEventListener('dragover', function (e) {
-            e.preventDefault();
-        });
-        videoPlayer.addEventListener('drop', function (e) {
-            e.preventDefault();
-            if (itsMe) {
-                userLog('warning', 'You cannot send files to yourself.', 'top-end');
-                return;
-            }
-            if (this.sendInProgress) {
-                userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
-                return;
-            }
-            if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
-                userLog('warning', 'Please drag and drop a single file.', 'top-end');
-                return;
-            }
-            if (e.dataTransfer.items) {
-                let item = e.dataTransfer.items[0].webkitGetAsEntry();
-                console.log('Drag and drop', item);
-                if (item.isDirectory) {
-                    userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
+        if (videoPlayer) {
+            videoPlayer.addEventListener('dragover', function (e) {
+                e.preventDefault();
+            });
+            videoPlayer.addEventListener('drop', function (e) {
+                e.preventDefault();
+                if (itsMe) {
+                    userLog('warning', 'You cannot send files to yourself.', 'top-end');
                     return;
                 }
-                var file = e.dataTransfer.items[0].getAsFile();
-                rc.sendFileInformations(file, peer_id);
-            } else {
-                rc.sendFileInformations(e.dataTransfer.files[0], peer_id);
-            }
-        });
+                if (this.sendInProgress) {
+                    userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
+                    return;
+                }
+                if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
+                    userLog('warning', 'Please drag and drop a single file.', 'top-end');
+                    return;
+                }
+                if (e.dataTransfer.items) {
+                    let item = e.dataTransfer.items[0].webkitGetAsEntry();
+                    console.log('Drag and drop', item);
+                    if (item.isDirectory) {
+                        userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
+                        return;
+                    }
+                    var file = e.dataTransfer.items[0].getAsFile();
+                    rc.sendFileInformations(file, peer_id);
+                } else {
+                    rc.sendFileInformations(e.dataTransfer.files[0], peer_id);
+                }
+            });
+        }
     }
 
     selectFileToShare(peer_id, broadcast = false) {
@@ -2497,9 +2508,11 @@ class RoomClient {
         const words = uid.split('___');
         let peer_id = words[1];
         let btnSv = this.getId(uid);
-        btnSv.addEventListener('click', () => {
-            this.shareVideo(peer_id);
-        });
+        if (btnSv) {
+            btnSv.addEventListener('click', () => {
+                this.shareVideo(peer_id);
+            });
+        }
     }
 
     shareVideo(peer_id = 'all') {
@@ -2847,9 +2860,11 @@ class RoomClient {
         const words = uid.split('___');
         let peer_id = words[1] + '___pEject';
         let btnKo = this.getId(uid);
-        btnKo.addEventListener('click', () => {
-            this.peerAction('me', peer_id, 'eject');
-        });
+        if (btnKo) {
+            btnKo.addEventListener('click', () => {
+                this.peerAction('me', peer_id, 'eject');
+            });
+        }
     }
 
     // ####################################################
@@ -2860,9 +2875,11 @@ class RoomClient {
         const words = uid.split('___');
         let peer_id = words[1] + '___pVideo';
         let btnCm = this.getId(uid);
-        btnCm.addEventListener('click', () => {
-            this.peerAction('me', peer_id, 'hide');
-        });
+        if (btnCm) {
+            btnCm.addEventListener('click', () => {
+                this.peerAction('me', peer_id, 'hide');
+            });
+        }
     }
 
     // ####################################################
@@ -2873,11 +2890,13 @@ class RoomClient {
         const words = uid.split('__');
         let peer_id = words[0] + '___pAudio';
         let btnAU = this.getId(uid);
-        btnAU.addEventListener('click', (e) => {
-            if (e.target.className === html.audioOn) {
-                this.peerAction('me', peer_id, 'mute');
-            }
-        });
+        if (btnAU) {
+            btnAU.addEventListener('click', (e) => {
+                if (e.target.className === html.audioOn) {
+                    this.peerAction('me', peer_id, 'mute');
+                }
+            });
+        }
     }
 
     // ####################################################

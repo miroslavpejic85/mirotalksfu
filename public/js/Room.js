@@ -1,5 +1,17 @@
 'use strict';
 
+/**
+ * MiroTalk SFU - Room component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.com
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
 if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
 
 const RoomURL = window.location.href;
@@ -23,6 +35,32 @@ const _PEER = {
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
     sendVideo: '<i class="fab fa-youtube"></i>',
+};
+
+const BUTTONS = {
+    main: {
+        shareButton: true,
+        startAudioButton: true,
+        startVideoButton: true,
+        startScreenButton: true,
+        swapCameraButton: true,
+        chatButton: true,
+        whiteboardButton: true,
+        settingsButton: true,
+        aboutButton: true,
+        exitButton: true,
+    },
+    consumerVideo: {
+        fullScreenButton: true,
+        snapShotButton: true,
+        sendMessageButton: true,
+        sendFileButton: true,
+        sendVideoButton: true,
+        muteVideoButton: true,
+        muteAudioButton: true,
+        ejectButton: true,
+    },
+    //...
 };
 
 const surveyActive = true;
@@ -574,17 +612,17 @@ function joinRoom(peer_name, room_id) {
 
 function roomIsReady() {
     setTheme('dark');
-    show(exitButton);
-    show(shareButton);
+    BUTTONS.main.exitButton && show(exitButton);
+    BUTTONS.main.shareButton && show(shareButton);
     show(startRecButton);
-    show(chatButton);
+    BUTTONS.main.chatButton && show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
     show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
     }
-    if (DetectRTC.isMobileDevice) {
+    if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
         show(swapCameraButton);
         setChatSize();
     } else {
@@ -604,15 +642,15 @@ function roomIsReady() {
         };
         show(fullScreenButton);
     }
-    show(whiteboardButton);
-    show(settingsButton);
+    BUTTONS.main.whiteboardButton && show(whiteboardButton);
+    BUTTONS.main.settingsButton && show(settingsButton);
     show(raiseHandButton);
-    isAudioAllowed ? show(stopAudioButton) : show(startAudioButton);
-    isVideoAllowed ? show(stopVideoButton) : show(startVideoButton);
+    isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
+    isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
     show(participantsButton);
     show(lockRoomButton);
-    show(aboutButton);
+    BUTTONS.main.aboutButton && show(aboutButton);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -626,11 +664,11 @@ function roomIsReady() {
 }
 
 function hide(elem) {
-    elem.classList.add('hidden');
+    elem.className = 'hidden';
 }
 
 function show(elem) {
-    elem.classList.remove('hidden');
+    elem.className = '';
 }
 
 function setColor(elem, color) {
@@ -961,7 +999,7 @@ function handleInputs() {
         }
     };
     chatMessage.oninput = function () {
-        let chatInputEmoji = {
+        const chatInputEmoji = {
             '<3': '\u2764\uFE0F',
             '</3': '\uD83D\uDC94',
             ':D': '\uD83D\uDE00',
@@ -973,7 +1011,6 @@ function handleInputs() {
             ":'(": '\uD83D\uDE22',
             ':+1:': '\uD83D\uDC4D',
         };
-
         for (let i in chatInputEmoji) {
             let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
             this.value = this.value.replace(regex, chatInputEmoji[i]);
