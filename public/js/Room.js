@@ -1,5 +1,7 @@
 'use strict';
 
+if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
+
 /**
  * MiroTalk SFU - Room component
  *
@@ -12,30 +14,9 @@
  *
  */
 
-if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
-
-const RoomURL = window.location.href;
-
-let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
-const swalImageUrl = '../images/pricing-illustration.svg';
-
-const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
-    survey: 'https://www.questionpro.com/t/AUs7VZq02P',
-};
-
-const _PEER = {
-    audioOn: '<i class="fas fa-microphone"></i>',
-    audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
-    videoOn: '<i class="fas fa-video"></i>',
-    videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
-    raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
-    lowerHand: '',
-    ejectPeer: '<i class="fas fa-times"></i>',
-    sendFile: '<i class="fas fa-upload"></i>',
-    sendMsg: '<i class="fas fa-paper-plane"></i>',
-    sendVideo: '<i class="fab fa-youtube"></i>',
-};
+// ####################################################
+// SHOW HIDE DESIRED BUTTONS
+// ####################################################
 
 const BUTTONS = {
     main: {
@@ -47,7 +28,6 @@ const BUTTONS = {
         chatButton: true,
         whiteboardButton: true,
         settingsButton: true,
-        aboutButton: true,
         exitButton: true,
     },
     producerVideo: {
@@ -75,16 +55,55 @@ const BUTTONS = {
     //...
 };
 
+// ####################################################
+// STATIC SETTINGS
+// ####################################################
+
+const RoomURL = window.location.href;
+
+const socket = io({ transports: ['websocket'] });
+
 const surveyActive = true;
+
+const isSoundEnabled = true;
+
+const url = {
+    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
+    survey: 'https://www.questionpro.com/t/AUs7VZq02P',
+};
+
+const _PEER = {
+    audioOn: '<i class="fas fa-microphone"></i>',
+    audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
+    videoOn: '<i class="fas fa-video"></i>',
+    videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
+    raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
+    lowerHand: '',
+    ejectPeer: '<i class="fas fa-times"></i>',
+    sendFile: '<i class="fas fa-upload"></i>',
+    sendMsg: '<i class="fas fa-paper-plane"></i>',
+    sendVideo: '<i class="fab fa-youtube"></i>',
+};
 
 const userAgent = navigator.userAgent.toLowerCase();
 const isTabletDevice = isTablet(userAgent);
 const isIPadDevice = isIpad(userAgent);
 
-let participantsCount = 0;
+const wbImageInput = 'image/*';
+const wbWidth = 1366;
+const wbHeight = 768;
+
+const swalImageUrl = '../images/pricing-illustration.svg';
+
+// ####################################################
+// DYNAMIC SETTINGS
+// ####################################################
+
+let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
 let rc = null;
 let producer = null;
+let participantsCount = 0;
 
 let room_id = getRoomId();
 let room_password = getRoomPassword();
@@ -94,7 +113,6 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
-let isSoundEnabled = true;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -111,10 +129,6 @@ let initAudioVideoButton = null;
 let recTimer = null;
 let recElapsedTime = null;
 
-const wbImageInput = 'image/*';
-const wbWidth = 1366;
-const wbHeight = 768;
-
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
@@ -124,7 +138,9 @@ let wbPop = [];
 
 let isButtonsVisible = false;
 
-const socket = io({ transports: ['websocket'] });
+// ####################################################
+// INIT ROOM
+// ####################################################
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
@@ -175,6 +191,10 @@ function initClient() {
     setupWhiteboard();
     initEnumerateDevices();
 }
+
+// ####################################################
+// HANDLE TOOLTIP
+// ####################################################
 
 function setTippy(elem, content, placement) {
     tippy(document.getElementById(elem), {
