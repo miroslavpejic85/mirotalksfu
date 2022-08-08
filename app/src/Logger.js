@@ -36,7 +36,7 @@ const Log = {
 };
 
 module.exports = class Logger {
-    constructor(appName, debugOn = true) {
+    constructor(appName = 'miroTalkSfu', debugOn = true) {
         this.appName = Log.fg.yellow + appName + Log.reset;
         this.debugOn = debugOn;
     }
