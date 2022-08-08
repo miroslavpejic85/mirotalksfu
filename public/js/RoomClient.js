@@ -1939,8 +1939,8 @@ class RoomClient {
         let msgBubble = toId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
         let replyMsg =
             fromId === this.peer_id
-                ? '<br/>(private message)'
-                : `<br/><button onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
+                ? '<hr/>(private message)'
+                : `<hr/><button onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
         let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
         <div class="msg ${side}-msg">
