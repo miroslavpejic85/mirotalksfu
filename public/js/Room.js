@@ -683,7 +683,7 @@ function roomIsReady() {
     show(fileShareButton);
     show(participantsButton);
     show(lockRoomButton);
-    BUTTONS.main.aboutButton && show(aboutButton);
+    show(aboutButton);
     handleButtons();
     handleSelects();
     handleInputs();
