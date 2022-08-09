@@ -1,5 +1,12 @@
 'use strict';
 
+const util = require('util');
+
+const options = {
+    depth: null,
+    colors: true,
+};
+
 const Log = {
     // action
     ac: {
@@ -50,25 +57,29 @@ module.exports = class Logger {
         if (this.debugOn) {
             this.timeEnd = performance.now();
             this.timeElapsedMs = this.getFormatTime(Math.floor(this.timeEnd - this.timeStart));
-            console.debug('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, op, this.timeElapsedMs);
+            console.debug(
+                '[' + this.getDataTime() + '] [' + this.appName + '] ' + msg,
+                util.inspect(op, options),
+                this.timeElapsedMs,
+            );
             this.timeStart = performance.now();
         }
     }
 
     log(msg, op = '') {
-        console.log('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, op);
+        console.log('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
     }
 
     info(msg, op = '') {
-        console.info('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, op);
+        console.info('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
     }
 
     warn(msg, op = '') {
-        console.warn('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, op);
+        console.warn('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
     }
 
     error(msg, op = '') {
-        console.error('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, op);
+        console.error('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
     }
 
     getDataTime() {
