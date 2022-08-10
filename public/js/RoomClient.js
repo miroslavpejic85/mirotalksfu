@@ -1906,19 +1906,21 @@ class RoomClient {
                 popup: 'animate__animated animate__fadeOutUp',
             },
         }).then((result) => {
-            let peer_msg = this.formatMsg(result.value);
-            if (!peer_msg) return;
-            let data = {
-                peer_name: this.peer_name,
-                peer_id: this.peer_id,
-                to_peer_id: to_peer_id,
-                peer_msg: peer_msg,
-            };
-            console.log('Send message:', data);
-            this.socket.emit('message', data);
-            this.setMsgAvatar('right', this.peer_name);
-            this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, to_peer_id);
-            if (!this.isChatOpen) this.toggleChat();
+            if (result.value) {
+                let peer_msg = this.formatMsg(result.value);
+                if (!peer_msg) return;
+                let data = {
+                    peer_name: this.peer_name,
+                    peer_id: this.peer_id,
+                    to_peer_id: to_peer_id,
+                    peer_msg: peer_msg,
+                };
+                console.log('Send message:', data);
+                this.socket.emit('message', data);
+                this.setMsgAvatar('right', this.peer_name);
+                this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, to_peer_id);
+                if (!this.isChatOpen) this.toggleChat();
+            }
         });
     }
 
@@ -1940,7 +1942,7 @@ class RoomClient {
         let replyMsg =
             fromId === this.peer_id
                 ? '<hr/>(private message)'
-                : `<hr/><button onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
+                : `<hr/><button class="msger-reply-btn" onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
         let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
         <div class="msg ${side}-msg">
