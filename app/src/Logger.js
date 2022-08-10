@@ -71,15 +71,24 @@ module.exports = class Logger {
     }
 
     info(msg, op = '') {
-        console.info('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
+        console.info(
+            '[' + this.getDataTime() + '] [' + this.appName + '] ' + Log.fg.green + msg + Log.ac.reset,
+            util.inspect(op, options),
+        );
     }
 
     warn(msg, op = '') {
-        console.warn('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
+        console.warn(
+            '[' + this.getDataTime() + '] [' + this.appName + '] ' + Log.fg.yellow + msg + Log.ac.reset,
+            util.inspect(op, options),
+        );
     }
 
     error(msg, op = '') {
-        console.error('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
+        console.error(
+            '[' + this.getDataTime() + '] [' + this.appName + '] ' + Log.fg.red + msg + Log.ac.reset,
+            util.inspect(op, options),
+        );
     }
 
     getDataTime() {
