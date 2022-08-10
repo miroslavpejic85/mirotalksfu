@@ -112,8 +112,8 @@ if (sentryEnabled) {
     log.log('test-log');
     log.info('test-info');
     log.warn('test-warning');
-    log.warn('test-error');
-    log.warn('test-debug');
+    log.error('test-error');
+    log.debug('test-debug');
     */
 }
 
@@ -395,7 +395,7 @@ httpsServer.listen(config.listenPort, () => {
         ngrokStart();
         return;
     }
-    log.debug('Listening on', {
+    log.debug('Settings', {
         node_version: process.versions.node,
         hostConfig: hostCfg,
         announced_ip: announcedIP,

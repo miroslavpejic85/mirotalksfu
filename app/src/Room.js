@@ -217,7 +217,11 @@ module.exports = class Room {
                 rtpCapabilities,
             })
         ) {
-            log.error('can not consume');
+            log.error('Can not consume', {
+                socket_id: socket_id,
+                consumer_transport_id: consumer_transport_id,
+                producer_id: producer_id,
+            });
             return;
         }
 
