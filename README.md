@@ -103,7 +103,7 @@ $ npm start
 $ PORT=3011 npm start
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010 or `:3011` if default port changed.
 
 </details>
 
@@ -129,7 +129,7 @@ $ docker-compose up # -d
 $ docker-compose down
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010
 
 </details>
 
