@@ -99,6 +99,8 @@ $ cp app/src/config.template.js app/src/config.js
 $ npm install
 # Start the server
 $ npm start
+# If you want to start the server on a different port than the default use an env var
+$ PORT=3011 npm start
 ```
 
 -   Open https://localhost:3010 in browser
