@@ -1215,7 +1215,7 @@ class RoomClient {
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
-                this.handleSM(sm.id);
+                this.handleSM(sm.id, peer_name);
                 this.handleSV(sv.id);
                 this.handleCM(cm.id);
                 this.handleAU(au.id);
@@ -1833,13 +1833,14 @@ class RoomClient {
     // CHAT
     // ####################################################
 
-    handleSM(uid) {
+    handleSM(uid, name) {
         const words = uid.split('___');
         let peer_id = words[1];
+        let peer_name = name;
         let btnSm = this.getId(uid);
         if (btnSm) {
             btnSm.addEventListener('click', () => {
-                this.sendMessageTo(peer_id);
+                this.sendMessageTo(peer_id, peer_name);
             });
         }
     }
@@ -1881,11 +1882,11 @@ class RoomClient {
         console.log('Send message:', data);
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
-        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all');
+        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all', 'all');
         chatMessage.value = '';
     }
 
-    sendMessageTo(to_peer_id) {
+    sendMessageTo(to_peer_id, to_peer_name) {
         if (!this.thereIsParticipants()) {
             chatMessage.value = '';
             this.userLog('info', 'No participants in the room expect you', 'top-end');
@@ -1913,12 +1914,21 @@ class RoomClient {
                     peer_name: this.peer_name,
                     peer_id: this.peer_id,
                     to_peer_id: to_peer_id,
+                    to_peer_name: to_peer_name,
                     peer_msg: peer_msg,
                 };
                 console.log('Send message:', data);
                 this.socket.emit('message', data);
                 this.setMsgAvatar('right', this.peer_name);
-                this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, to_peer_id);
+                this.appendMessage(
+                    'right',
+                    this.rightMsgAvatar,
+                    this.peer_name,
+                    this.peer_id,
+                    peer_msg,
+                    to_peer_id,
+                    to_peer_name,
+                );
                 if (!this.isChatOpen) this.toggleChat();
             }
         });
@@ -1927,7 +1937,15 @@ class RoomClient {
     showMessage(data) {
         if (!this.isChatOpen) this.toggleChat();
         this.setMsgAvatar('left', data.peer_name);
-        this.appendMessage('left', this.leftMsgAvatar, data.peer_name, data.peer_id, data.peer_msg, data.to_peer_id);
+        this.appendMessage(
+            'left',
+            this.leftMsgAvatar,
+            data.peer_name,
+            data.peer_id,
+            data.peer_msg,
+            data.to_peer_id,
+            data.to_peer_name,
+        );
         this.sound('message');
     }
 
@@ -1936,13 +1954,13 @@ class RoomClient {
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
-    appendMessage(side, img, fromName, fromId, msg, toId) {
+    appendMessage(side, img, fromName, fromId, msg, toId, toName) {
         let time = this.getTimeNow();
         let msgBubble = toId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
         let replyMsg =
             fromId === this.peer_id
-                ? '<hr/>(private message)'
-                : `<hr/><button class="msger-reply-btn" onclick="rc.sendMessageTo('${fromId}')">${_PEER.sendMsg} Reply (private)</button>`;
+                ? `<hr/>Private message to ${toName}`
+                : `<hr/><button class="msger-reply-btn" onclick="rc.sendMessageTo('${fromId}','${fromName}')">${_PEER.sendMsg} Reply (private)</button>`;
         let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
         <div class="msg ${side}-msg">
