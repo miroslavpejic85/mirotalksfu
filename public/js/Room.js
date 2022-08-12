@@ -28,6 +28,7 @@ const BUTTONS = {
         chatButton: true,
         whiteboardButton: true,
         settingsButton: true,
+        aboutButton: true, // Please keep me always visible, thank you!
         exitButton: true,
     },
     producerVideo: {
@@ -155,6 +156,7 @@ function initClient() {
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
+        setTippy('aboutButton', 'About this project', 'right')
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
@@ -683,7 +685,7 @@ function roomIsReady() {
     show(fileShareButton);
     show(participantsButton);
     show(lockRoomButton);
-    show(aboutButton);
+    BUTTONS.main.aboutButton && show(aboutButton);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -1884,11 +1886,11 @@ function showAbout() {
         <br/>
         <div id="about">
             <b>Open Source</b> project on
-            <a href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank"><br/><br />
+            <a href="https://github.com/miroslavpejic85/mirotalksfu" class="umami--click--github" target="_blank"><br/><br />
             <img alt="mirotalksfu-github" src="../images/github.png"></a><br/><br />
-            <button class="pulsate" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
+            <button class="pulsate umami--click--sponsors" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
-            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> Miroslav Pejic</a>
+            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
         </div>
         `,
         showClass: {
