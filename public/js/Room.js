@@ -156,7 +156,7 @@ function initClient() {
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
-        setTippy('aboutButton', 'About this project', 'right')
+        setTippy('aboutButton', 'About this project', 'right');
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
@@ -434,6 +434,7 @@ function whoAreYou() {
         imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
+        inputValue: window.localStorage.peer_name ? window.localStorage.peer_name : '',
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
@@ -454,6 +455,7 @@ function whoAreYou() {
     }).then(() => {
         getPeerInfo();
         joinRoom(peer_name, room_id);
+        window.localStorage.peer_name = peer_name;
     });
 
     if (!DetectRTC.isMobileDevice) {
