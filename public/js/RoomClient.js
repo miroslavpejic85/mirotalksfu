@@ -183,6 +183,7 @@ class RoomClient {
 
         this.videoProducerId = null;
         this.audioProducerId = null;
+        this.audioConsumers = new Map();
 
         this.consumers = new Map();
         this.producers = new Map();
@@ -1138,10 +1139,12 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv;
+
+        let remotePeerId = peer_info.peer_id;
+
         switch (type) {
             case mediaType.video:
-                let remotePeerId = peer_info.peer_id;
                 let remotePeerAudio = peer_info.peer_audio;
                 this.removeVideoOff(remotePeerId);
                 d = document.createElement('div');
@@ -1157,6 +1160,12 @@ class RoomClient {
                 vb = document.createElement('div');
                 vb.setAttribute('id', remotePeerId + '__vb');
                 vb.className = 'videoMenuBar fadein';
+                pv = document.createElement('input');
+                pv.id = remotePeerId + '___pVolume';
+                pv.type = 'range';
+                pv.min = 0;
+                pv.max = 100;
+                pv.value = 100;
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
@@ -1197,6 +1206,7 @@ class RoomClient {
                 pb.style.height = '1%';
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
+                BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
                 BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
                 BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
@@ -1219,6 +1229,7 @@ class RoomClient {
                 this.handleSV(sv.id);
                 this.handleCM(cm.id);
                 this.handleAU(au.id);
+                this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
@@ -1233,6 +1244,7 @@ class RoomClient {
                     this.setTippy(sv.id, 'Send video', 'top-end');
                     this.setTippy(cm.id, 'Hide', 'top-end');
                     this.setTippy(au.id, 'Mute', 'top-end');
+                    this.setTippy(pv.id, '🔊 Volume', 'top-end');
                     this.setTippy(ko.id, 'Eject', 'top-end');
                 }
                 break;
@@ -1240,8 +1252,16 @@ class RoomClient {
                 elem = document.createElement('audio');
                 elem.id = id;
                 elem.autoplay = true;
+                elem.audio = 1.0;
                 this.remoteAudioEl.appendChild(elem);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
+                let audioConsumerId = remotePeerId + '___pVolume';
+                this.audioConsumers.set(audioConsumerId, id);
+                let inputPv = this.getId(audioConsumerId);
+                if (inputPv) {
+                    this.handlePV(id + '___' + audioConsumerId);
+                }
+                console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
         }
         return elem;
@@ -1268,6 +1288,16 @@ class RoomClient {
             );
         }
 
+        if (consumer_kind === 'audio') {
+            let audioConsumerPlayerId = this.getMapKeyByValue(this.audioConsumers, consumer_id);
+            if (audioConsumerPlayerId) {
+                let inputPv = this.getId(audioConsumerPlayerId);
+                if (inputPv) inputPv.style.display = 'none';
+                this.audioConsumers.delete(audioConsumerPlayerId);
+                console.log('[Delete audioConsumers] ' + audioConsumerPlayerId, this.audioConsumers);
+            }
+        }
+
         this.consumers.delete(consumer_id);
         this.sound('left');
     }
@@ -1277,7 +1307,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
-        let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb;
+        let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb, pv;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -1292,6 +1322,12 @@ class RoomClient {
         au.id = peer_id + '__audio';
         au.className = peer_audio ? html.audioOn : html.audioOff;
         if (remotePeer) {
+            pv = document.createElement('input');
+            pv.id = peer_id + '___pVolume';
+            pv.type = 'range';
+            pv.min = 0;
+            pv.max = 100;
+            pv.value = 100;
             sf = document.createElement('button');
             sf.id = 'remotePeer___' + peer_id + '___sendFile';
             sf.className = html.sendFile;
@@ -1328,6 +1364,7 @@ class RoomClient {
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
+            BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         }
         BUTTONS.videoOff.muteAudioButton && vb.appendChild(au);
         d.appendChild(i);
@@ -1338,6 +1375,7 @@ class RoomClient {
         this.videoMediaContainer.appendChild(d);
         this.handleAU(au.id);
         if (remotePeer) {
+            this.handlePV('remotePeer___' + pv.id);
             this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSV(sv.id);
@@ -1353,6 +1391,7 @@ class RoomClient {
             this.setTippy(sf.id, 'Send file', 'top-end');
             this.setTippy(sv.id, 'Send video', 'top-end');
             this.setTippy(au.id, 'Mute', 'top-end');
+            this.setTippy(pv.id, '🔊 Volume', 'top-end');
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -1591,6 +1630,12 @@ class RoomClient {
 
     getPeerHandBtn(peer_id) {
         return this.getId(peer_id + '__hand');
+    }
+
+    getMapKeyByValue(map, searchValue) {
+        for (let [key, value] of map.entries()) {
+            if (value === searchValue) return key;
+        }
     }
 
     // ####################################################
@@ -2871,6 +2916,25 @@ class RoomClient {
             if (pbProducer) pbProducer.style.height = '0%';
             if (pbConsumer) pbConsumer.style.height = '0%';
         }, 2000);
+    }
+
+    // ####################################################
+    // HANDLE PEER VOLUME
+    // ###################################################
+
+    handlePV(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1] + '___pVolume';
+        let audioConsumerId = this.audioConsumers.get(peer_id);
+        let audioConsumerPlayer = this.getId(audioConsumerId);
+        let inputPv = this.getId(peer_id);
+        if (inputPv && audioConsumerPlayer) {
+            inputPv.style.display = 'inline';
+            inputPv.value = 100;
+            inputPv.addEventListener('input', () => {
+                audioConsumerPlayer.volume = inputPv.value / 100;
+            });
+        }
     }
 
     // ####################################################

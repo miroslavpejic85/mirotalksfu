@@ -115,6 +115,7 @@
     overflow: hidden;
 }
 
+.videoMenuBar input,
 .videoMenuBar button {
     float: right;
     margin-right: 3px;
@@ -165,6 +166,13 @@ video:fullscreen {
     -o-filter: blur(5px);
     -ms-filter: blur(5px);
     filter: blur(5px);
+}
+
+input[type='range'] {
+    display: none;
+    color: #fff;
+    width: 50px;
+    cursor: pointer;
 }
 
 @keyframes show {

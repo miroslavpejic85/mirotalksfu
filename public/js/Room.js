@@ -44,6 +44,7 @@ const BUTTONS = {
         sendVideoButton: true,
         muteVideoButton: true,
         muteAudioButton: true,
+        audioVolumeInput: true,
         ejectButton: true,
     },
     videoOff: {
@@ -51,6 +52,7 @@ const BUTTONS = {
         sendFileButton: true,
         sendVideoButton: true,
         muteAudioButton: true,
+        audioVolumeInput: true,
         ejectButton: true,
     },
     //...
