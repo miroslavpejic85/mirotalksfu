@@ -1294,7 +1294,11 @@ class RoomClient {
                 let inputPv = this.getId(audioConsumerPlayerId);
                 if (inputPv) inputPv.style.display = 'none';
                 this.audioConsumers.delete(audioConsumerPlayerId);
-                console.log('[Delete audioConsumers] ' + audioConsumerPlayerId, this.audioConsumers);
+                console.log('Remove audio Consumer', {
+                    consumer_id: consumer_id,
+                    audioConsumerPlayerId: audioConsumerPlayerId,
+                    audioConsumers: this.audioConsumers,
+                });
             }
         }
 
