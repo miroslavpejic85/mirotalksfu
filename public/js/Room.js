@@ -1754,7 +1754,7 @@ function setParticipantsTippy(peers) {
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('sendAllButton', 'Share file to all', 'top');
         setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendVideoAll', 'Share video mp4 or YouTube to all', 'top');
+        setTippy('sendVideoToAll', 'Share video to all', 'top');
         setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
