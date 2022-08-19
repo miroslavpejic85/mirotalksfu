@@ -23,6 +23,7 @@ const BUTTONS = {
     },
     settings: {
         lockRoomButton: true,
+        unlockRoomButton: true,
         participantsButton: true,
     },
     producerVideo: {
@@ -57,6 +58,7 @@ function handleRules(isPresenter) {
     if (!isRulesActive) return;
     if (!isPresenter) {
         BUTTONS.settings.lockRoomButton = false;
+        BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
@@ -69,4 +71,5 @@ function handleRules(isPresenter) {
 function handleNotPresenterButtons() {
     // main. settings.
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
+    BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
 }
