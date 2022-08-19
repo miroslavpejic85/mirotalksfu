@@ -64,8 +64,16 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.ejectButton = false;
         BUTTONS.consumerVideo.muteAudioButton = false;
         BUTTONS.consumerVideo.muteVideoButton = false;
-        handleNotPresenterButtons();
+    } else {
+        BUTTONS.settings.lockRoomButton = !isRoomLocked;
+        BUTTONS.settings.unlockRoomButton = isRoomLocked;
+        BUTTONS.videoOff.muteAudioButton = true;
+        BUTTONS.videoOff.ejectButton = true;
+        BUTTONS.consumerVideo.ejectButton = true;
+        BUTTONS.consumerVideo.muteAudioButton = true;
+        BUTTONS.consumerVideo.muteVideoButton = true;
     }
+    handleNotPresenterButtons();
 }
 
 function handleNotPresenterButtons() {

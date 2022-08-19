@@ -97,6 +97,8 @@ let wbPop = [];
 
 let isButtonsVisible = false;
 
+let isRoomLocked = false;
+
 // ####################################################
 // INIT ROOM
 // ####################################################
@@ -1126,11 +1128,13 @@ function handleRoomClientEvents() {
         hide(lockRoomButton);
         show(unlockRoomButton);
         setColor(unlockRoomButton, 'red');
+        isRoomLocked = true;
     });
     rc.on(RoomClient.EVENTS.roomUnlock, () => {
         console.log('Room Client unlock room');
         hide(unlockRoomButton);
         show(lockRoomButton);
+        isRoomLocked = false;
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');

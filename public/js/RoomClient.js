@@ -472,6 +472,11 @@ class RoomClient {
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants(true);
+                if (participantsCount == 1) {
+                    isPresenter = true;
+                    handleRules(isPresenter);
+                    console.log('I am alone in the room, got Presenter Rules');
+                }
             }.bind(this),
         );
 
