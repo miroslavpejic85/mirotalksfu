@@ -15,50 +15,6 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  */
 
 // ####################################################
-// SHOW HIDE DESIRED BUTTONS
-// ####################################################
-
-const BUTTONS = {
-    main: {
-        shareButton: true,
-        startAudioButton: true,
-        startVideoButton: true,
-        startScreenButton: true,
-        swapCameraButton: true,
-        chatButton: true,
-        whiteboardButton: true,
-        settingsButton: true,
-        aboutButton: true, // Please keep me always visible, thank you!
-        exitButton: true,
-    },
-    producerVideo: {
-        fullScreenButton: true,
-        snapShotButton: true,
-        muteAudioButton: true,
-    },
-    consumerVideo: {
-        fullScreenButton: true,
-        snapShotButton: true,
-        sendMessageButton: true,
-        sendFileButton: true,
-        sendVideoButton: true,
-        muteVideoButton: true,
-        muteAudioButton: true,
-        audioVolumeInput: true,
-        ejectButton: true,
-    },
-    videoOff: {
-        sendMessageButton: true,
-        sendFileButton: true,
-        sendVideoButton: true,
-        muteAudioButton: true,
-        audioVolumeInput: true,
-        ejectButton: true,
-    },
-    //...
-};
-
-// ####################################################
 // STATIC SETTINGS
 // ####################################################
 
@@ -672,7 +628,7 @@ function roomIsReady() {
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-            show(startScreenButton);
+            BUTTONS.main.startScreenButton && show(startScreenButton);
         }
     }
     if (DetectRTC.browser.name != 'Safari') {
@@ -687,8 +643,8 @@ function roomIsReady() {
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
-    show(participantsButton);
-    show(lockRoomButton);
+    BUTTONS.settings.participantsButton && show(participantsButton);
+    BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.main.aboutButton && show(aboutButton);
     handleButtons();
     handleSelects();
@@ -1691,7 +1647,8 @@ async function getParticipantsTable(peers) {
         <th></th>
     </tr>`;
 
-    table += `
+    if (!isRulesActive || isPresenter) {
+        table += `
     <tr>
         <td>&nbsp;<i class="fas fa-users fa-lg"></i>&nbsp;&nbsp;all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
@@ -1703,6 +1660,7 @@ async function getParticipantsTable(peers) {
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
+    }
 
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
@@ -1729,18 +1687,33 @@ async function getParticipantsTable(peers) {
             </tr>
             `;
         } else {
-            table += `
-            <tr id='${peer_id}'>
-                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
-                <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
-                <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
-                <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
-                <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
-                <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
-                <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
-            </tr>
-            `;
+            if (isRulesActive && isPresenter) {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
+                </tr>
+                `;
+            } else {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td></td>
+                </tr>
+                `;
+            }
         }
     }
     table += `</table>`;

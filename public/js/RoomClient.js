@@ -275,6 +275,8 @@ class RoomClient {
     async handleRoomInfo(room) {
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
+        isPresenter = participantsCount > 1 ? false : true;
+        handleRules(isPresenter);
         adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
@@ -284,7 +286,7 @@ class RoomClient {
             }
         }
         this.refreshParticipantsCount();
-        console.log('Participants Count:', participantsCount);
+        console.log('06.2 Participants Count ---->', participantsCount);
         // notify && participantsCount == 1 ? shareRoom() : sound('joined');
         if (notify && participantsCount == 1) {
             shareRoom();
@@ -1207,8 +1209,10 @@ class RoomClient {
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
-                BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
-                BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
+                // BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
+                // BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
+                vb.appendChild(au);
+                vb.appendChild(cm);
                 BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
                 BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
                 BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
@@ -1227,8 +1231,8 @@ class RoomClient {
                 this.handleSF(sf.id);
                 this.handleSM(sm.id, peer_name);
                 this.handleSV(sv.id);
-                this.handleCM(cm.id);
-                this.handleAU(au.id);
+                BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
+                BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
                 this.popupPeerInfo(p.id, peer_info);

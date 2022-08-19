@@ -221,6 +221,8 @@ body {
 
 #sessionTimeButton {
     cursor: default;
+    position: absolute;
+    bottom: 15px;
 }
 
 /*--------------------------------------------------------------
