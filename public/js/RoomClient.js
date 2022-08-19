@@ -1214,8 +1214,6 @@ class RoomClient {
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
-                // BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
-                // BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
                 vb.appendChild(au);
                 vb.appendChild(cm);
                 BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
