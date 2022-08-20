@@ -1655,7 +1655,7 @@ async function getParticipantsTable(peers) {
     if (!isRulesActive || isPresenter) {
         table += `
     <tr>
-        <td><i class="fas fa-users fa-lg"></i></td>
+        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
         <td>all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
