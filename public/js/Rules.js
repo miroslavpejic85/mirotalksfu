@@ -75,10 +75,6 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = true;
         //...
     }
-    handleNotPresenterButtons();
-}
-
-function handleNotPresenterButtons() {
     // main. settings.
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
