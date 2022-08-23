@@ -77,7 +77,6 @@ let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isScreenAllowed = getScreen();
-let isScreenShared = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
@@ -140,7 +139,6 @@ function initClient() {
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
         setTippy('whiteboardCleanBtn', 'Clean', 'top');
-        setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
@@ -916,9 +914,6 @@ function handleButtons() {
         rc.toggleMySettings();
         getRoomParticipants();
     };
-    participantsRefreshBtn.onclick = () => {
-        getRoomParticipants(true);
-    };
     participantsCloseBtn.onclick = () => {
         toggleParticipants();
     };
@@ -1112,7 +1107,6 @@ function handleRoomClientEvents() {
         console.log('Room Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
-        isScreenShared = true;
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room Client pause screen');
@@ -1124,7 +1118,6 @@ function handleRoomClientEvents() {
         console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
-        isScreenShared = false;
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room Client lock room');
@@ -1615,7 +1608,7 @@ async function getRoomParticipants(refresh = false) {
 
     participantsCount = peers.size;
     roomParticipants.innerHTML = table;
-    refreshParticipantsCount(participantsCount);
+    refreshParticipantsCount(participantsCount, false);
 
     if (!refresh) {
         toggleParticipants();
@@ -1755,9 +1748,9 @@ function setParticipantsTippy(peers) {
     }
 }
 
-function refreshParticipantsCount(count) {
+function refreshParticipantsCount(count, adapt = true) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
-    if (!isScreenShared) adaptAspectRatio(count);
+    if (adapt) adaptAspectRatio(count);
 }
 
 function getParticipantAvatar(peerName) {

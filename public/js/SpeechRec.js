@@ -30,7 +30,6 @@ const commands = {
     settingsOn: 'open the settings',
     settingsOff: 'close the settings',
     participantsOn: 'show the participants',
-    participantsRefresh: 'refresh the participants',
     participantsOff: 'hide the participants',
     participantsVideoOff: 'stop the participants video',
     participantsAudioOff: 'stop the participants audio',
@@ -209,10 +208,6 @@ function execVoiceCommands(transcript) {
         case commands.participantsOn:
             printCommand(commands.participantsOn);
             participantsButton.click();
-            break;
-        case commands.participantsRefresh:
-            printCommand(commands.participantsRefresh);
-            participantsRefreshBtn.click();
             break;
         case commands.participantsOff:
             printCommand(commands.participantsOff);
