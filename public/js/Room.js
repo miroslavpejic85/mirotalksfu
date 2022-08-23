@@ -77,6 +77,7 @@ let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isScreenAllowed = getScreen();
+let isScreenShared = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
@@ -1111,6 +1112,7 @@ function handleRoomClientEvents() {
         console.log('Room Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
+        isScreenShared = true;
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room Client pause screen');
@@ -1122,6 +1124,7 @@ function handleRoomClientEvents() {
         console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
+        isScreenShared = false;
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room Client lock room');
@@ -1754,7 +1757,7 @@ function setParticipantsTippy(peers) {
 
 function refreshParticipantsCount(count) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
-    adaptAspectRatio(count);
+    if (!isScreenShared) adaptAspectRatio(count);
 }
 
 function getParticipantAvatar(peerName) {
