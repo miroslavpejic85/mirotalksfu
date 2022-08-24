@@ -1595,7 +1595,7 @@ function whiteboardAction(data, emit = true) {
     }
 }
 
-function wbToggleBg(e) {
+function wbToggleBg() {
     wbIsBgTransparent = !wbIsBgTransparent;
     if (wbIsBgTransparent) {
         document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
