@@ -81,6 +81,7 @@ let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
+let isChatPastTxt = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -1018,6 +1019,10 @@ function handleInputs() {
             let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
             this.value = this.value.replace(regex, chatInputEmoji[i]);
         }
+    };
+
+    chatMessage.onpaste = () => {
+        isChatPastTxt = true;
     };
 
     rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {

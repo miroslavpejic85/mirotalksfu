@@ -481,6 +481,7 @@ body {
     border-top-left-radius: 10px;
     background: rgb(0, 0, 0);
     color: #fff;
+    resize: none;
 }
 
 .chat-msger-inputarea button {

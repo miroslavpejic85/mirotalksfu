@@ -2046,12 +2046,13 @@ class RoomClient {
 
     formatMsg(message) {
         if (this.isHtml(message)) return this.stripHtml(message);
-        let urlRegex = /(https?:\/\/[^\s]+)/g;
-        return message.replace(urlRegex, (url) => {
-            if (message.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/))
-                return '<img src="' + url + '" alt="img" width="180" height="auto"/>';
-            return '<a href="' + url + '" target="_blank">' + url + '</a>';
-        });
+        if (this.isValidHttpURL(message)) {
+            if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
+            return '<a href="' + message + '" target="_blank">' + message + '</a>';
+        }
+        message = isChatPastTxt ? '<pre>' + message + '</pre>' : message;
+        isChatPastTxt = false;
+        return message;
     }
 
     stripHtml(html) {
@@ -2066,6 +2067,16 @@ class RoomClient {
             if (c[i].nodeType == 1) return true;
         }
         return false;
+    }
+
+    isValidHttpURL(str) {
+        let url;
+        try {
+            url = new URL(str);
+        } catch (_) {
+            return false;
+        }
+        return url.protocol === 'http:' || url.protocol === 'https:';
     }
 
     collectMessages(time, from, msg) {
