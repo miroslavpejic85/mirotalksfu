@@ -1933,6 +1933,7 @@ class RoomClient {
     sendMessage() {
         if (!this.thereIsParticipants()) {
             chatMessage.value = '';
+            isChatPasteTxt = false;
             this.userLog('info', 'No participants in the room', 'top-end');
             return;
         }
@@ -1953,6 +1954,7 @@ class RoomClient {
 
     sendMessageTo(to_peer_id, to_peer_name) {
         if (!this.thereIsParticipants()) {
+            isChatPasteTxt = false;
             chatMessage.value = '';
             this.userLog('info', 'No participants in the room expect you', 'top-end');
             return;
@@ -2050,8 +2052,8 @@ class RoomClient {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + message + '" target="_blank">' + message + '</a>';
         }
-        message = isChatPastTxt ? '<pre>' + message + '</pre>' : message;
-        isChatPastTxt = false;
+        message = isChatPasteTxt ? '<pre>' + message + '</pre>' : message;
+        isChatPasteTxt = false;
         return message;
     }
 

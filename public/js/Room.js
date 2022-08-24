@@ -81,7 +81,7 @@ let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
-let isChatPastTxt = false;
+let isChatPasteTxt = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -1022,7 +1022,7 @@ function handleInputs() {
     };
 
     chatMessage.onpaste = () => {
-        isChatPastTxt = true;
+        isChatPasteTxt = true;
     };
 
     rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
