@@ -112,6 +112,8 @@ $ PORT=3011 npm start
 
 <br/>
 
+![docker](public/images/docker.png)
+
 -   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
 -   Repository docker hub: https://hub.docker.com/r/mirotalk/sfu
@@ -125,8 +127,6 @@ $ cp docker-compose.template.yml docker-compose.yml
 $ docker pull mirotalk/sfu:latest
 # Create and start containers
 $ docker-compose up # -d
-# Stop and remove resources
-$ docker-compose down
 ```
 
 -   Open in browser https://localhost:3010
