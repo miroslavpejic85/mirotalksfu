@@ -1,4 +1,6 @@
-## MiroTalk SFU - Ngrok
+# MiroTalk SFU - Ngrok
+
+![ngrok](../public/images/ngrok.png)
 
 If you want to expose MiroTalk SFU from your `Local PC` to outside in `HTTPS`, you need to do 2 things:
 
