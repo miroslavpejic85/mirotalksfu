@@ -1938,7 +1938,10 @@ class RoomClient {
             return;
         }
         let peer_msg = this.formatMsg(chatMessage.value);
-        if (!peer_msg) return;
+        if (!peer_msg) {
+            chatMessage.value = '';
+            return;
+        }
         let data = {
             peer_name: this.peer_name,
             peer_id: this.peer_id,
@@ -1976,7 +1979,10 @@ class RoomClient {
         }).then((result) => {
             if (result.value) {
                 let peer_msg = this.formatMsg(result.value);
-                if (!peer_msg) return;
+                if (!peer_msg) {
+                    chatMessage.value = '';
+                    return;
+                }
                 let data = {
                     peer_name: this.peer_name,
                     peer_id: this.peer_id,
@@ -2047,6 +2053,7 @@ class RoomClient {
     }
 
     formatMsg(message) {
+        if (message == '\n') return;
         if (this.isHtml(message)) return this.stripHtml(message);
         if (this.isValidHttpURL(message)) {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
