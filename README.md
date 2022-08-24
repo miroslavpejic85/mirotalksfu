@@ -127,6 +127,8 @@ $ cp docker-compose.template.yml docker-compose.yml
 $ docker pull mirotalk/sfu:latest
 # Create and start containers
 $ docker-compose up # -d
+# To stop and remove resources
+$ docker-compose down
 ```
 
 -   Open in browser https://localhost:3010
