@@ -30,6 +30,9 @@ const html = {
     sendMsg: 'fas fa-paper-plane',
     sendVideo: 'fab fa-youtube',
     kickOut: 'fas fa-times',
+    ghost: 'fas fa-ghost',
+    undo: 'fas fa-undo',
+    bg: 'fas fa-circle-half-stroke',
 };
 
 const image = {
@@ -149,6 +152,7 @@ class RoomClient {
         this.isVideoOnFullScreen = false;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
+        this.isChatBgTransparent = false;
         this.camVideo = false;
         this.camera = 'user';
 
@@ -2070,6 +2074,15 @@ class RoomClient {
             from: from,
             msg: msg,
         });
+    }
+
+    chatToggleBg() {
+        this.isChatBgTransparent = !this.isChatBgTransparent;
+        if (this.isChatBgTransparent) {
+            document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.100)');
+        } else {
+            setTheme(currentTheme);
+        }
     }
 
     chatClean() {

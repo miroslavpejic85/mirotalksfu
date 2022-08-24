@@ -58,6 +58,7 @@ const swalImageUrl = '../images/pricing-illustration.svg';
 // DYNAMIC SETTINGS
 // ####################################################
 
+let currentTheme = 'dark';
 let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
 let rc = null;
@@ -93,6 +94,7 @@ let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
 let wbIsEraser = false;
+let wbIsBgTransparent = false;
 let wbPop = [];
 
 let isButtonsVisible = false;
@@ -124,6 +126,7 @@ function initClient() {
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
+        setTippy('whiteboardGhostButton', 'Toggle transparent background', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
         setTippy('wbDrawingColorEl', 'Drawing color', 'top');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
@@ -147,6 +150,7 @@ function initClient() {
         setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
+        setTippy('chatGhostButton', 'Toggle transparent background', 'top');
         setTippy('sessionTime', 'Session time', 'right');
     }
     setupWhiteboard();
@@ -772,6 +776,9 @@ function handleButtons() {
     chatButton.onclick = () => {
         rc.toggleChat();
     };
+    chatGhostButton.onclick = (e) => {
+        rc.chatToggleBg();
+    };
     chatCleanButton.onclick = () => {
         rc.chatClean();
     };
@@ -867,6 +874,9 @@ function handleButtons() {
     };
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
+    };
+    whiteboardGhostButton.onclick = (e) => {
+        wbToggleBg();
     };
     whiteboardPencilBtn.onclick = () => {
         whiteboardIsDrawingMode(true);
@@ -1585,6 +1595,15 @@ function whiteboardAction(data, emit = true) {
     }
 }
 
+function wbToggleBg(e) {
+    wbIsBgTransparent = !wbIsBgTransparent;
+    if (wbIsBgTransparent) {
+        document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
+    } else {
+        setTheme(currentTheme);
+    }
+}
+
 // ####################################################
 // HANDLE PARTICIPANTS
 // ####################################################
@@ -1767,6 +1786,7 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#393939, #000000)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
             document.body.style.background = 'radial-gradient(#393939, #000000)';
             break;
@@ -1774,11 +1794,15 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
             document.body.style.background = 'radial-gradient(#666, #333)';
             break;
         //...
     }
+    currentTheme = theme;
+    wbIsBgTransparent = false;
+    rc.isChatBgTransparent = false;
 }
 
 // ####################################################
