@@ -2059,8 +2059,12 @@ class RoomClient {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + message + '" target="_blank">' + message + '</a>';
         }
-        message = isChatPasteTxt ? '<pre>' + message + '</pre>' : message;
-        isChatPasteTxt = false;
+        if (isChatMarkdownOn) return marked.parse(message);
+
+        if (isChatPasteTxt) {
+            isChatPasteTxt = false;
+            return '<pre>' + message + '</pre>';
+        }
         return message;
     }
 

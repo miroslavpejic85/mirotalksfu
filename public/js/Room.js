@@ -82,6 +82,7 @@ let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
 let isChatPasteTxt = false;
+let isChatMarkdownOn = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -148,6 +149,7 @@ function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
@@ -619,6 +621,7 @@ function roomIsReady() {
     BUTTONS.main.chatButton && show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    show(chatMarkdownButton);
     show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
@@ -794,6 +797,10 @@ function handleButtons() {
     };
     chatEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatMarkdownButton.onclick = () => {
+        isChatMarkdownOn = !isChatMarkdownOn;
+        setColor(chatMarkdownButton, isChatMarkdownOn ? 'lime' : 'white');
     };
     chatShareFileButton.onclick = () => {
         fileShareButton.click();
