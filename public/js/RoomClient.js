@@ -2053,17 +2053,21 @@ class RoomClient {
     }
 
     formatMsg(message) {
-        if (message == '\n') return;
+        if (message.trim().length == 0) return;
         if (this.isHtml(message)) return this.stripHtml(message);
         if (this.isValidHttpURL(message)) {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
             return '<a href="' + message + '" target="_blank">' + message + '</a>';
         }
         if (isChatMarkdownOn) return marked.parse(message);
-
+        let pre = '<pre>' + message + '</pre>';
         if (isChatPasteTxt) {
             isChatPasteTxt = false;
-            return '<pre>' + message + '</pre>';
+            return pre;
+        }
+        let numberOfLineBreaks = (message.match(/\n/g) || []).length;
+        if (numberOfLineBreaks > 1) {
+            return pre;
         }
         return message;
     }
