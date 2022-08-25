@@ -3124,12 +3124,12 @@ class RoomClient {
         switch (action) {
             case 'eject':
                 let ejectConfirmed = false;
-                let whoEject = data.broadcast ? 'All participants' : 'current participant';
+                let whoEject = data.broadcast ? 'All participants except yourself?' : 'current participant?';
                 Swal.fire({
                     background: swalBackground,
                     position: 'center',
                     imageUrl: data.broadcast ? image.users : image.user,
-                    title: 'Eject ' + whoEject + ' excpect yourself?',
+                    title: 'Eject ' + whoEject,
                     showDenyButton: true,
                     confirmButtonText: `Yes`,
                     denyButtonText: `No`,
@@ -3167,15 +3167,12 @@ class RoomClient {
             case 'mute':
             case 'hide':
                 let muteHideConfirmed = false;
-                let whoMuteHide = data.broadcast ? 'everyone' : 'current participant';
+                let whoMuteHide = data.broadcast ? 'everyone except yourself?' : 'current participant?';
                 Swal.fire({
                     background: swalBackground,
                     position: 'center',
                     imageUrl: action == 'mute' ? image.mute : image.hide,
-                    title:
-                        action == 'mute'
-                            ? 'Mute ' + whoMuteHide + ' excpect yourself?'
-                            : 'Hide ' + whoMuteHide + ' except yourself?',
+                    title: action == 'mute' ? 'Mute ' + whoMuteHide : 'Hide ' + whoMuteHide,
                     text:
                         action == 'mute'
                             ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."

@@ -3952,11 +3952,9 @@
                             logger.debug('replaceTrack() | same track, ignored');
                             return;
                         }
-                        if (!this._zeroRtpOnPause || !this._paused) {
-                            await new Promise((resolve, reject) => {
-                                this.safeEmit('@replacetrack', track, resolve, reject);
-                            });
-                        }
+                        await new Promise((resolve, reject) => {
+                            this.safeEmit('@replacetrack', track, resolve, reject);
+                        });
                         // Destroy the previous track.
                         this._destroyTrack();
                         // Set the new track.
@@ -11753,7 +11751,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.56';
+                exports.version = '3.6.57';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
