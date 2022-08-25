@@ -1004,7 +1004,7 @@ function handleSelects() {
 
 function handleInputs() {
     chatMessage.onkeyup = (e) => {
-        if (e.keyCode === 13 && !e.shiftKey) {
+        if (e.keyCode === 13 && (DetectRTC.isMobileDevice || !e.shiftKey)) {
             e.preventDefault();
             chatSendButton.click();
         }
