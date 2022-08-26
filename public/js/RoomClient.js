@@ -2043,13 +2043,32 @@ class RoomClient {
                     <div class="msg-info-name">${fromName}</div>
                     <div class="msg-info-time">${time}</div>
                 </div>
-                <div class="msg-text">${message}</div>
+                <div id="${chatMessagesId}" class="msg-text">${message}
+                    <hr/>
+                    <button
+                        class="fas fa-copy" 
+                        onclick="rc.copyToClipboard('${chatMessagesId}')"
+                    ></button>
+                </div>
             </div>
         </div>
         `;
         this.collectMessages(time, fromName, msg);
         chatMsger.insertAdjacentHTML('beforeend', msgHTML);
         chatMsger.scrollTop += 500;
+        chatMessagesId++;
+    }
+
+    copyToClipboard(id) {
+        const text = document.getElementById(id).innerText;
+        navigator.clipboard
+            .writeText(text)
+            .then(() => {
+                this.userLog('success', 'Message copied!', 'top-end', 1000);
+            })
+            .catch((err) => {
+                this.userLog('error', err, 'top-end', 2000);
+            });
     }
 
     formatMsg(message) {

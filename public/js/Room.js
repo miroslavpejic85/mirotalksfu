@@ -64,6 +64,7 @@ let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)'
 let rc = null;
 let producer = null;
 let participantsCount = 0;
+let chatMessagesId = 0;
 
 let room_id = getRoomId();
 let room_password = getRoomPassword();
