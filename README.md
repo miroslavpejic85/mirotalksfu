@@ -60,6 +60,43 @@
 
 </details>
 
+<details>
+<summary>Direct Join</summary>
+
+<br/>
+
+-   You can `join` directly to `room` by going to
+-   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+
+    | Params   | Type           | Description     |
+    | -------- | -------------- | --------------- |
+    | room     | string         | room Id         |
+    | password | string/boolean | room password   |
+    | name     | string         | user name       |
+    | audio    | boolean        | audio stream    |
+    | video    | boolean        | video stream    |
+    | screen   | boolean        | screen stream   |
+    | notify   | boolean        | welcome message |
+
+</details>
+
+<details>
+<summary>Embed a meeting</summary>
+
+<br/>
+
+Embedding a meeting into a service or app using an iframe.
+
+```html
+<iframe
+    allow="camera; microphone; fullscreen; display-capture; autoplay"
+    src="https://sfu.mirotalk.com/newroom"
+    style="height: 100%; width: 100%; border: 0px;"
+></iframe>
+```
+
+</details>
+
 <details open>
 <summary>Quick Start</summary>
 
@@ -176,43 +213,6 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: miro
 # The response will give you a entrypoint / URL for the direct join to the meeting.
 $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
 $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
-```
-
-</details>
-
-<details>
-<summary>Direct Join</summary>
-
-<br/>
-
--   You can `join` directly to `room` by going to
--   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
-
-    | Params   | Type           | Description     |
-    | -------- | -------------- | --------------- |
-    | room     | string         | room Id         |
-    | password | string/boolean | room password   |
-    | name     | string         | user name       |
-    | audio    | boolean        | audio stream    |
-    | video    | boolean        | video stream    |
-    | screen   | boolean        | screen stream   |
-    | notify   | boolean        | welcome message |
-
-</details>
-
-<details>
-<summary>Embed a meeting</summary>
-
-<br/>
-
-Embedding a meeting into a service or app using an iframe.
-
-```html
-<iframe
-    allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://sfu.mirotalk.com/newroom"
-    style="height: 100%; width: 100%; border: 0px;"
-></iframe>
 ```
 
 </details>
