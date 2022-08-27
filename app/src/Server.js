@@ -455,12 +455,12 @@ io.on('connection', (socket) => {
         socket.room_id = room_id;
 
         if (roomList.has(socket.room_id)) {
-            callback('already exists');
+            callback({ error: 'already exists' });
         } else {
             log.debug('Created room', { room_id: socket.room_id });
             let worker = await getMediasoupWorker();
             roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
-            callback(socket.room_id);
+            callback({ room_id: socket.room_id });
         }
     });
 
@@ -790,8 +790,9 @@ io.on('connection', (socket) => {
         if (json) {
             return {
                 peer_name:
-                    roomList.get(socket.room_id) &&
-                    roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name,
+                    (roomList.get(socket.room_id) &&
+                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name) ||
+                    undefined,
             };
         }
         return (

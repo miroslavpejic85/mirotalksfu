@@ -2419,15 +2419,25 @@ class RoomClient {
                 userLog('info', 'No participants detected', 'top-end');
                 return;
             }
-            // send some metadata about our file to peers in the room
-            this.socket.emit('fileInfo', {
+            let fileInfo = {
                 peer_id: peer_id,
                 broadcast: broadcast,
                 peer_name: this.peer_name,
                 fileName: this.fileToSend.name,
                 fileSize: this.fileToSend.size,
                 fileType: this.fileToSend.type,
-            });
+            };
+            this.appendMessage(
+                'right',
+                this.rightMsgAvatar,
+                this.peer_name,
+                this.peer_id,
+                'Send File: \n' + this.toHtmlJson(fileInfo),
+                'all',
+                'all',
+            );
+            // send some metadata about our file to peers in the room
+            this.socket.emit('fileInfo', fileInfo);
             setTimeout(() => {
                 this.sendFileData(peer_id, broadcast);
             }, 1000);
@@ -2453,6 +2463,15 @@ class RoomClient {
             html.newline +
             ' File size: ' +
             this.bytesToSize(this.incomingFileInfo.fileSize);
+        this.appendMessage(
+            'left',
+            this.leftMsgAvatar,
+            this.incomingFileInfo.peer_name,
+            this.incomingFileInfo.peer_id,
+            'Receive File: \n' + this.toHtmlJson(this.incomingFileInfo),
+            'all',
+            'all',
+        );
         receiveFileInfo.innerHTML = fileToReceiveInfo;
         receiveFileDiv.style.display = 'inline';
         receiveProgress.max = this.incomingFileInfo.fileSize;
@@ -2640,6 +2659,10 @@ class RoomClient {
         if (bytes == 0) return '0 Byte';
         let i = parseInt(Math.floor(Math.log(bytes) / Math.log(1024)));
         return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
+    }
+
+    toHtmlJson(obj) {
+        return '<pre>' + JSON.stringify(obj, null, 4) + '</pre>';
     }
 
     // ####################################################
