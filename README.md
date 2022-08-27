@@ -52,11 +52,11 @@
 </details>
 
 <details>
-<summary>Presentation</summary>
+<summary>About</summary>
 
-<br/>
+-   <a href="https://www.canva.com/design/DAE693uLOIU/view">Presentation</a>
 
-<a href="https://www.canva.com/design/DAE693uLOIU/view">MiroTalk presentation </a> - <a href="https://www.youtube.com/watch?v=_IVn2aINYww"> video</a>
+-   <a href="https://www.youtube.com/watch?v=_IVn2aINYww">Video</a>
 
 </details>
 
@@ -149,7 +149,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 <br/>
 
-Follow [this documentation](docs/self-hosting.md).
+-   [How to Self-Hosting](docs/self-hosting.md)
 
 </details>
 
