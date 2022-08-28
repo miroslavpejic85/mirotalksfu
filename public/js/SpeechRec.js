@@ -83,6 +83,7 @@ if (speechRecognition) {
         console.log('Start speech recognition');
         hide(chatSpeechStartButton);
         show(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'lime');
     };
 
     recognition.onresult = (e) => {
@@ -106,6 +107,7 @@ if (speechRecognition) {
         console.log('Stop speech recognition');
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'white');
     };
 
     isWebkitSpeechRecognitionSupported = true;
