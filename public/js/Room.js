@@ -394,8 +394,8 @@ function whoAreYou() {
     }
 
     let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : '';
-    if (getCookie(room_id + "_name")) {
-        default_name = getCookie(room_id + "_name");
+    if (getCookie(room_id + '_name')) {
+        default_name = getCookie(room_id + '_name');
     }
 
     Swal.fire({
@@ -422,10 +422,10 @@ function whoAreYou() {
         },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
-            if (!getCookie(room_id + "_name")) {
+            if (!getCookie(room_id + '_name')) {
                 window.localStorage.peer_name = name;
             }
-            setCookie(room_id + "_name", name, 30);
+            setCookie(room_id + '_name', name, 30);
             peer_name = name;
         },
     }).then(() => {
@@ -1265,21 +1265,21 @@ function openURL(url, blank = false) {
 }
 
 function setCookie(name, value, expDays) {
-        let date = new Date();
-        date.setTime(date.getTime() + (expDays * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = name + "=" + value + "; " + expires + "; path=/";
+    let date = new Date();
+    date.setTime(date.getTime() + expDays * 24 * 60 * 60 * 1000);
+    const expires = 'expires=' + date.toUTCString();
+    document.cookie = name + '=' + value + '; ' + expires + '; path=/';
 }
 
 function getCookie(cName) {
-      const name = cName + "=";
-      const cDecoded = decodeURIComponent(document.cookie);
-      const cArr = cDecoded .split('; ');
-      let res;
-      cArr.forEach(val => {
-          if (val.indexOf(name) === 0) res = val.substring(name.length);
-      })
-      return res;
+    const name = cName + '=';
+    const cDecoded = decodeURIComponent(document.cookie);
+    const cArr = cDecoded.split('; ');
+    let res;
+    cArr.forEach((val) => {
+        if (val.indexOf(name) === 0) res = val.substring(name.length);
+    });
+    return res;
 }
 
 // ####################################################
