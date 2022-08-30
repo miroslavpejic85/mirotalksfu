@@ -43,11 +43,12 @@
     --wb-width: 800px;
     --wb-height: 600px;
     --wb-bg: radial-gradient(#393939, #000000);
-    --left-msg-bg: #2a2a2a;
-    --right-msg-bg: #0a0b0c;
-    --private-msg-bg: #510717;
+    --left-msg-bg: #252d31;
+    --right-msg-bg: #056162;
+    --private-msg-bg: #6b1226;
     --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
+    --settings-bg: radial-gradient(#393939, #000000);
     /* buttons bar horizontal */
     --btns-top: 50%;
     --btns-right: 0%;
@@ -80,7 +81,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: var(--body-bg);
+    background: url('../images/background.jpg');
 }
 
 /*--------------------------------------------------------------
@@ -103,15 +104,20 @@ body {
     color: #fff;
     padding: 30px;
     border-radius: 10px;
-    background: var(--body-bg);
+    background: transparent;
 }
 #loadingDiv h1 {
+    padding: 10px;
     font-size: 60px;
     font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
 }
-#loadingDiv pre {
-    padding: 5px;
+#loadingDiv p {
+    padding: 10px;
     font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -181,7 +187,7 @@ body {
     padding: 10px;
     min-width: 320px;
     min-height: 480px;
-    background: var(--msger-bg);
+    background: var(--settings-bg);
     box-shadow: var(--box-shadow);
     border: var(--border);
     border-radius: 10px;
@@ -216,6 +222,8 @@ body {
 
 #sessionTimeButton {
     cursor: default;
+    position: absolute;
+    bottom: 15px;
 }
 
 /*--------------------------------------------------------------
@@ -325,6 +333,7 @@ body {
     overflow-y: auto;
     padding: 10px;
     background: var(--msger-bg);
+    max-width: 100%;
 }
 
 .chat-msger::-webkit-scrollbar {
@@ -444,6 +453,18 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Chat private button reply
+--------------------------------------------------------------*/
+
+.msger-reply-btn {
+    font-size: 0.9rem;
+    padding: 5px;
+    background: var(--msger-bg);
+    border-radius: 5px;
+    border: none;
+}
+
+/*--------------------------------------------------------------
 # Chat room input area
 --------------------------------------------------------------*/
 
@@ -460,6 +481,7 @@ body {
     border-top-left-radius: 10px;
     background: rgb(0, 0, 0);
     color: #fff;
+    resize: none;
 }
 
 .chat-msger-inputarea button {
@@ -648,10 +670,11 @@ button:hover {
     width: 100%;
     padding: 10px;
     margin: 10px auto 0px auto;
-    background-color: #191919;
+    background-color: #056162;
     border-radius: 10px;
 }
 #inviteParticipants:hover {
+    background-color: #191919;
     color: #fff;
     transform: scale(1);
 }
@@ -815,7 +838,7 @@ progress {
     border-radius: 6px;
     background: rgba(#19bb5c, 0.65);
     transition-property: height background-color;
-    transition-duration: 0.25s;
+    transition-duration: 1s;
 }
 
 /*--------------------------------------------------------------

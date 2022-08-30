@@ -1,5 +1,44 @@
 'use strict';
 
+/*
+███████ ███████ ██████  ██    ██ ███████ ██████  
+██      ██      ██   ██ ██    ██ ██      ██   ██ 
+███████ █████   ██████  ██    ██ █████   ██████  
+     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
+███████ ███████ ██   ██   ████   ███████ ██   ██                                           
+
+dependencies: {
+    body-parser             : https://www.npmjs.com/package/body-parser
+    compression             : https://www.npmjs.com/package/compression
+    cors                    : https://www.npmjs.com/package/cors
+    crypto-js               : https://www.npmjs.com/package/crypto-js
+    express                 : https://www.npmjs.com/package/express
+    httpolyglot             : https://www.npmjs.com/package/httpolyglot
+    mediasoup               : https://www.npmjs.com/package/mediasoup
+    mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
+    ngrok                   : https://www.npmjs.com/package/ngrok
+    qs                      : https://www.npmjs.com/package/qs
+    @sentry/node            : https://www.npmjs.com/package/@sentry/node
+    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
+    socket.io               : https://www.npmjs.com/package/socket.io
+    swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
+    uuid                    : https://www.npmjs.com/package/uuid
+    yamljs                  : https://www.npmjs.com/package/yamljs
+}
+*/
+
+/**
+ * MiroTalk SFU - Server component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.com
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -22,6 +61,13 @@ const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
 
+// Slack API
+const CryptoJS = require('crypto-js');
+const qS = require('qs');
+const slackEnabled = config.slack.enabled;
+const slackSigningSecret = config.slack.signingSecret;
+const bodyParser = require('body-parser');
+
 const app = express();
 
 const options = {
@@ -32,6 +78,7 @@ const options = {
 const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer, {
     maxHttpBufferSize: 1e7,
+    transports: ['websocket'],
 });
 const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
 const announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp;
@@ -65,8 +112,8 @@ if (sentryEnabled) {
     log.log('test-log');
     log.info('test-info');
     log.warn('test-warning');
-    log.warn('test-error');
-    log.warn('test-debug');
+    log.error('test-error');
+    log.debug('test-debug');
     */
 }
 
@@ -86,21 +133,22 @@ const dir = {
 };
 
 // html views
-const view = {
-    about: path.join(__dirname, '../../', 'public/view/about.html'),
-    landing: path.join(__dirname, '../../', 'public/view/landing.html'),
-    login: path.join(__dirname, '../../', 'public/view/login.html'),
-    newRoom: path.join(__dirname, '../../', 'public/view/newroom.html'),
-    notFound: path.join(__dirname, '../../', 'public/view/404.html'),
-    permission: path.join(__dirname, '../../', 'public/view/permission.html'),
-    privacy: path.join(__dirname, '../../', 'public/view/privacy.html'),
-    room: path.join(__dirname, '../../', 'public/view/Room.html'),
+const views = {
+    about: path.join(__dirname, '../../', 'public/views/about.html'),
+    landing: path.join(__dirname, '../../', 'public/views/landing.html'),
+    login: path.join(__dirname, '../../', 'public/views/login.html'),
+    newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
+    notFound: path.join(__dirname, '../../', 'public/views/404.html'),
+    permission: path.join(__dirname, '../../', 'public/views/permission.html'),
+    privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
+    room: path.join(__dirname, '../../', 'public/views/Room.html'),
 };
 
 app.use(cors());
 app.use(compression());
 app.use(express.json());
 app.use(express.static(dir.public));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
 // Remove trailing slashes in url handle bad requests
@@ -125,9 +173,9 @@ app.use((err, req, res, next) => {
 app.get(['/'], (req, res) => {
     if (hostCfg.protected == true) {
         hostCfg.authenticated = false;
-        res.sendFile(view.login);
+        res.sendFile(views.login);
     } else {
-        res.sendFile(view.landing);
+        res.sendFile(views.landing);
     }
 });
 
@@ -141,11 +189,11 @@ app.get(['/login'], (req, res) => {
             hostCfg.authenticated = true;
             authHost = new Host(ip, true);
             log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-            res.sendFile(view.landing);
+            res.sendFile(views.landing);
         } else {
             log.debug('LOGIN KO', { ip: ip, authorized: false });
             hostCfg.authenticated = false;
-            res.sendFile(view.login);
+            res.sendFile(views.login);
         }
     } else {
         res.redirect('/');
@@ -157,13 +205,13 @@ app.get(['/newroom'], (req, res) => {
     if (hostCfg.protected == true) {
         let ip = getIP(req);
         if (allowedIP(ip)) {
-            res.sendFile(view.newRoom);
+            res.sendFile(views.newRoom);
         } else {
             hostCfg.authenticated = false;
-            res.sendFile(view.login);
+            res.sendFile(views.login);
         }
     } else {
-        res.sendFile(view.newRoom);
+        res.sendFile(views.newRoom);
     }
 });
 
@@ -171,10 +219,10 @@ app.get(['/newroom'], (req, res) => {
 app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
-        // http://localhost:3010/join?room=test&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-        const { room, name, audio, video, screen, notify } = req.query;
-        if (room && name && audio && video && screen && notify) {
-            return res.sendFile(view.room);
+        // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
+        const { room, password, name, audio, video, screen, notify } = req.query;
+        if (room && password && name && audio && video && screen && notify) {
+            return res.sendFile(views.room);
         }
     }
     res.redirect('/');
@@ -183,7 +231,7 @@ app.get('/join/', (req, res) => {
 // join room
 app.get('/join/*', (req, res) => {
     if (hostCfg.authenticated) {
-        res.sendFile(view.room);
+        res.sendFile(views.room);
     } else {
         res.redirect('/');
     }
@@ -191,17 +239,17 @@ app.get('/join/*', (req, res) => {
 
 // if not allow video/audio
 app.get(['/permission'], (req, res) => {
-    res.sendFile(view.permission);
+    res.sendFile(views.permission);
 });
 
 // privacy policy
 app.get(['/privacy'], (req, res) => {
-    res.sendFile(view.privacy);
+    res.sendFile(views.privacy);
 });
 
 // mirotalk about
 app.get(['/about'], (req, res) => {
-    res.sendFile(view.about);
+    res.sendFile(views.about);
 });
 
 // ####################################################
@@ -258,9 +306,40 @@ app.post(['/api/v1/join'], (req, res) => {
     });
 });
 
+// ####################################################
+// SLACK API
+// ####################################################
+
+app.post('/slack', (req, res) => {
+    if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
+
+    log.debug('Slack', req.headers);
+
+    if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
+
+    let slackSignature = req.headers['x-slack-signature'];
+    let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
+    let timeStamp = req.headers['x-slack-request-timestamp'];
+    let time = Math.floor(new Date().getTime() / 1000);
+
+    if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
+
+    let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
+    let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
+
+    if (mySignature == slackSignature) {
+        let host = req.headers.host;
+        let api = new ServerApi(host);
+        let meetingURL = api.getMeetingURL();
+        log.debug('Slack', { meeting: meetingURL });
+        return res.end(meetingURL);
+    }
+    return res.end('`Wrong signature` - Verification failed!');
+});
+
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
-    res.sendFile(view.notFound);
+    res.sendFile(views.notFound);
 });
 
 // ####################################################
@@ -281,7 +360,7 @@ async function ngrokStart() {
             hostConfig: hostCfg,
             announced_ip: announcedIP,
             server: host,
-            tunnel: tunnel,
+            server_tunnel: tunnel,
             api_docs: api_docs,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,
@@ -298,7 +377,7 @@ async function ngrokStart() {
 // ####################################################
 
 httpsServer.listen(config.listenPort, () => {
-    log.info(
+    log.log(
         `%c
 
 	███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
@@ -316,7 +395,7 @@ httpsServer.listen(config.listenPort, () => {
         ngrokStart();
         return;
     }
-    log.debug('Listening on', {
+    log.debug('Settings', {
         node_version: process.versions.node,
         hostConfig: hostCfg,
         announced_ip: announcedIP,
@@ -376,16 +455,18 @@ io.on('connection', (socket) => {
         socket.room_id = room_id;
 
         if (roomList.has(socket.room_id)) {
-            callback('already exists');
+            callback({ error: 'already exists' });
         } else {
             log.debug('Created room', { room_id: socket.room_id });
             let worker = await getMediasoupWorker();
             roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
-            callback(socket.room_id);
+            callback({ room_id: socket.room_id });
         }
     });
 
     socket.on('roomAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Room action:', data);
         switch (data.action) {
             case 'lock':
@@ -412,6 +493,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('peerAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Peer action:', data);
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
@@ -421,6 +504,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('updatePeerInfo', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Peer info update:', data);
         // peer_info hand raise Or lower
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
@@ -428,6 +513,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('fileInfo', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Send File Info', data);
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
@@ -437,6 +524,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('file', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(socket.id, 'file', data);
         } else {
@@ -445,10 +534,14 @@ io.on('connection', (socket) => {
     });
 
     socket.on('fileAbort', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
     });
 
     socket.on('shareVideoAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Share video: ', data);
         if (data.peer_id == 'all') {
             roomList.get(socket.room_id).broadCast(socket.id, 'shareVideoAction', data);
@@ -458,17 +551,23 @@ io.on('connection', (socket) => {
     });
 
     socket.on('wbCanvasToJson', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         // let objLength = bytesToSize(Object.keys(data).length);
         // log.debug('Send Whiteboard canvas JSON', { length: objLength });
         roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
     });
 
     socket.on('whiteboardAction', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Whiteboard', data);
         roomList.get(socket.room_id).broadCast(socket.id, 'whiteboardAction', data);
     });
 
     socket.on('setVideoOff', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Video off', getPeerName());
         roomList.get(socket.room_id).broadCast(socket.id, 'setVideoOff', data);
     });
@@ -493,6 +592,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRouterRtpCapabilities', (_, callback) => {
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
+
         log.debug('Get RouterRtpCapabilities', getPeerName());
         try {
             callback(roomList.get(socket.room_id).getRtpCapabilities());
@@ -515,6 +618,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('createWebRtcTransport', async (_, callback) => {
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
+
         log.debug('Create webrtc transport', getPeerName());
         try {
             const { params } = await roomList.get(socket.room_id).createWebRtcTransport(socket.id);
@@ -528,7 +635,10 @@ io.on('connection', (socket) => {
     });
 
     socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
-        if (!roomList.has(socket.room_id)) return;
+        if (!roomList.has(socket.room_id)) {
+            return callback({ error: 'Room not found' });
+        }
+
         log.debug('Connect transport', getPeerName());
 
         await roomList.get(socket.room_id).connectPeerTransport(socket.id, transport_id, dtlsParameters);
@@ -584,13 +694,15 @@ io.on('connection', (socket) => {
         log.debug('Consuming', {
             peer_name: getPeerName(false),
             producer_id: producerId,
-            consumer_id: params.id,
+            consumer_id: params ? params.id : undefined,
         });
 
         callback(params);
     });
 
     socket.on('producerClosed', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('Producer close', data);
 
         // peer_info audio Or video OFF
@@ -604,11 +716,15 @@ io.on('connection', (socket) => {
     });
 
     socket.on('getRoomInfo', (_, cb) => {
-        log.debug('Send Room Info');
+        if (!roomList.has(socket.room_id)) return;
+
+        log.debug('Send Room Info to', getPeerName());
         cb(roomList.get(socket.room_id).toJson());
     });
 
     socket.on('refreshParticipantsCount', () => {
+        if (!roomList.has(socket.room_id)) return;
+
         let data = {
             room_id: socket.room_id,
             peer_counts: roomList.get(socket.room_id).getPeers().size,
@@ -618,6 +734,8 @@ io.on('connection', (socket) => {
     });
 
     socket.on('message', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
         log.debug('message', data);
         if (data.to_peer_id == 'all') {
             roomList.get(socket.room_id).broadCast(socket.id, 'message', data);
@@ -627,7 +745,7 @@ io.on('connection', (socket) => {
     });
 
     socket.on('disconnect', () => {
-        if (!socket.room_id) return;
+        if (!roomList.has(socket.room_id)) return;
 
         log.debug('Disconnect', getPeerName());
 
@@ -672,8 +790,9 @@ io.on('connection', (socket) => {
         if (json) {
             return {
                 peer_name:
-                    roomList.get(socket.room_id) &&
-                    roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name,
+                    (roomList.get(socket.room_id) &&
+                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name) ||
+                    undefined,
             };
         }
         return (

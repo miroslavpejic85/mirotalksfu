@@ -2,10 +2,29 @@
 
 if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
 
+/**
+ * MiroTalk SFU - Room component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.com
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
+// ####################################################
+// STATIC SETTINGS
+// ####################################################
+
 const RoomURL = window.location.href;
 
-let swalBackground = 'radial-gradient(#393939, #000000)';
-const swalImageUrl = '../images/pricing-illustration.svg';
+const socket = io({ transports: ['websocket'] });
+
+const surveyActive = true;
+
+const isSoundEnabled = true;
 
 const url = {
     ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
@@ -25,14 +44,30 @@ const _PEER = {
     sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
-const surveyActive = true;
+const userAgent = navigator.userAgent.toLowerCase();
+const isTabletDevice = isTablet(userAgent);
+const isIPadDevice = isIpad(userAgent);
 
-let participantsCount = 0;
+const wbImageInput = 'image/*';
+const wbWidth = 1366;
+const wbHeight = 768;
+
+const swalImageUrl = '../images/pricing-illustration.svg';
+
+// ####################################################
+// DYNAMIC SETTINGS
+// ####################################################
+
+let currentTheme = 'dark';
+let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
 let rc = null;
 let producer = null;
+let participantsCount = 0;
+let chatMessagesId = 0;
 
 let room_id = getRoomId();
+let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let notify = getNotify();
 
@@ -45,6 +80,10 @@ let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
+let isParticipantsListOpen = false;
+let isVideoControlsOn = false;
+let isChatPasteTxt = false;
+let isChatMarkdownOn = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -53,19 +92,21 @@ let initAudioVideoButton = null;
 let recTimer = null;
 let recElapsedTime = null;
 
-const wbImageInput = 'image/*';
-const wbWidth = 1366;
-const wbHeight = 768;
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
 let wbIsEraser = false;
+let wbIsBgTransparent = false;
 let wbPop = [];
 
 let isButtonsVisible = false;
 
-const socket = io();
+let isRoomLocked = false;
+
+// ####################################################
+// INIT ROOM
+// ####################################################
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
@@ -80,6 +121,7 @@ function initClient() {
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
+        setTippy('aboutButton', 'About this project', 'right');
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
@@ -87,6 +129,7 @@ function initClient() {
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
+        setTippy('whiteboardGhostButton', 'Toggle transparent background', 'top');
         setTippy('wbBackgroundColorEl', 'Background color', 'top');
         setTippy('wbDrawingColorEl', 'Drawing color', 'top');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
@@ -102,20 +145,25 @@ function initClient() {
         setTippy('whiteboardSaveBtn', 'Save', 'top');
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
         setTippy('whiteboardCleanBtn', 'Clean', 'top');
-        setTippy('participantsRefreshBtn', 'Refresh', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
+        setTippy('chatGhostButton', 'Toggle transparent background', 'top');
         setTippy('sessionTime', 'Session time', 'right');
     }
     setupWhiteboard();
     initEnumerateDevices();
 }
+
+// ####################################################
+// HANDLE TOOLTIP
+// ####################################################
 
 function setTippy(elem, content, placement) {
     tippy(document.getElementById(elem), {
@@ -202,11 +250,13 @@ function enumerateAudioDevices(stream) {
                 let el = null;
                 if ('audioinput' === device.kind) {
                     el = microphoneSelect;
+                    RoomClient.DEVICES_COUNT.audio++;
                 } else if ('audiooutput' === device.kind) {
                     el = speakerSelect;
+                    RoomClient.DEVICES_COUNT.speaker++;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
@@ -225,9 +275,10 @@ function enumerateVideoDevices(stream) {
                 let el = null;
                 if ('videoinput' === device.kind) {
                     el = videoSelect;
+                    RoomClient.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
-                appenChild(device, el);
+                addChild(device, el);
             }),
         )
         .then(() => {
@@ -242,7 +293,7 @@ function stopTracks(stream) {
     });
 }
 
-function appenChild(device, el) {
+function addChild(device, el) {
     let option = document.createElement('option');
     option.value = device.deviceId;
     option.innerText = device.label;
@@ -281,15 +332,31 @@ function getPeerName() {
     return qs.get('name');
 }
 
+function getRoomPassword() {
+    let qs = new URLSearchParams(window.location.search);
+    let roomPassword = qs.get('password');
+    if (roomPassword) {
+        let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
+        if (queryNoRoomPassword != null) {
+            return false;
+        }
+        return roomPassword;
+    }
+}
+
 // ####################################################
 // SOME PEER INFO
 // ####################################################
 
 function getPeerInfo() {
     peer_info = {
+        user_agent: userAgent,
         detect_rtc_version: DetectRTC.version,
         is_webrtc_supported: DetectRTC.isWebRTCSupported,
+        is_desktop_device: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
         is_mobile_device: DetectRTC.isMobileDevice,
+        is_tablet_device: isTabletDevice,
+        is_ipad_pro_device: isIPadDevice,
         os_name: DetectRTC.osName,
         os_version: DetectRTC.osVersion,
         browser_name: DetectRTC.browser.name,
@@ -334,6 +401,7 @@ function whoAreYou() {
         imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
+        inputValue: window.localStorage.peer_name ? window.localStorage.peer_name : '',
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
@@ -354,6 +422,7 @@ function whoAreYou() {
     }).then(() => {
         getPeerInfo();
         joinRoom(peer_name, room_id);
+        window.localStorage.peer_name = peer_name;
     });
 
     if (!DetectRTC.isMobileDevice) {
@@ -368,6 +437,7 @@ function whoAreYou() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
 function handleAudio(e) {
@@ -385,13 +455,12 @@ function handleVideo(e) {
 }
 
 function handleAudioVideo(e) {
-    isAudioAllowed = isAudioAllowed ? false : true;
-    isVideoAllowed = isVideoAllowed ? false : true;
-    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
-    if (isAudioVideoAllowed) {
-        initAudioButton.className = 'fas fa-microphone';
-        initVideoButton.className = 'fas fa-video';
-    } else {
+    isAudioVideoAllowed = isAudioVideoAllowed ? false : true;
+    isAudioAllowed = isAudioVideoAllowed;
+    isVideoAllowed = isAudioVideoAllowed;
+    initAudioButton.className = 'fas fa-microphone' + (isAudioVideoAllowed ? '' : '-slash');
+    initVideoButton.className = 'fas fa-video' + (isAudioVideoAllowed ? '' : '-slash');
+    if (!isAudioVideoAllowed) {
         hide(initAudioButton);
         hide(initVideoButton);
     }
@@ -440,7 +509,7 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: '<strong>Hello ' + peer_name + '</strong>',
+            title: '<strong>Welcome ' + peer_name + '</strong>',
             html:
                 `
             <br/>
@@ -526,6 +595,7 @@ function joinRoom(peer_name, room_id) {
     } else {
         console.log('05 ----> join Room ' + room_id);
         rc = new RoomClient(
+            localAudio,
             remoteAudios,
             videoMediaContainer,
             window.mediasoupClient,
@@ -545,17 +615,19 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
-    show(exitButton);
-    show(shareButton);
+    setTheme('dark');
+    BUTTONS.main.exitButton && show(exitButton);
+    BUTTONS.main.shareButton && show(shareButton);
     show(startRecButton);
-    show(chatButton);
+    BUTTONS.main.chatButton && show(chatButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    show(chatMarkdownButton);
     show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
     }
-    if (DetectRTC.isMobileDevice) {
+    if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
         show(swapCameraButton);
         setChatSize();
     } else {
@@ -566,7 +638,7 @@ function roomIsReady() {
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-            show(startScreenButton);
+            BUTTONS.main.startScreenButton && show(startScreenButton);
         }
     }
     if (DetectRTC.browser.name != 'Safari') {
@@ -575,15 +647,15 @@ function roomIsReady() {
         };
         show(fullScreenButton);
     }
-    show(whiteboardButton);
-    show(settingsButton);
+    BUTTONS.main.whiteboardButton && show(whiteboardButton);
+    BUTTONS.main.settingsButton && show(settingsButton);
     show(raiseHandButton);
-    isAudioAllowed ? show(stopAudioButton) : show(startAudioButton);
-    isVideoAllowed ? show(stopVideoButton) : show(startVideoButton);
+    isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
+    isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
-    show(participantsButton);
-    show(lockRoomButton);
-    show(aboutButton);
+    BUTTONS.settings.participantsButton && show(participantsButton);
+    BUTTONS.settings.lockRoomButton && show(lockRoomButton);
+    BUTTONS.main.aboutButton && show(aboutButton);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -591,6 +663,9 @@ function roomIsReady() {
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
     });
+    if (room_password) {
+        lockRoomButton.click();
+    }
 }
 
 function hide(elem) {
@@ -706,6 +781,9 @@ function handleButtons() {
     chatButton.onclick = () => {
         rc.toggleChat();
     };
+    chatGhostButton.onclick = (e) => {
+        rc.chatToggleBg();
+    };
     chatCleanButton.onclick = () => {
         rc.chatClean();
     };
@@ -720,6 +798,10 @@ function handleButtons() {
     };
     chatEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatMarkdownButton.onclick = () => {
+        isChatMarkdownOn = !isChatMarkdownOn;
+        setColor(chatMarkdownButton, isChatMarkdownOn ? 'lime' : 'white');
     };
     chatShareFileButton.onclick = () => {
         fileShareButton.click();
@@ -802,6 +884,9 @@ function handleButtons() {
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };
+    whiteboardGhostButton.onclick = (e) => {
+        wbToggleBg();
+    };
     whiteboardPencilBtn.onclick = () => {
         whiteboardIsDrawingMode(true);
     };
@@ -848,9 +933,6 @@ function handleButtons() {
         rc.toggleMySettings();
         getRoomParticipants();
     };
-    participantsRefreshBtn.onclick = () => {
-        getRoomParticipants(true);
-    };
     participantsCloseBtn.onclick = () => {
         toggleParticipants();
     };
@@ -873,22 +955,28 @@ function handleSelects() {
     // devices options
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
     speakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
+        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
     };
     // styling
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
     };
     BtnVideoObjectFit.onchange = () => {
-        handleVideoObjectFit(BtnVideoObjectFit.value);
+        rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     }; // cover
     BtnVideoObjectFit.selectedIndex = 2;
 
+    BtnVideoControls.onchange = () => {
+        rc.handleVideoControls(BtnVideoControls.value);
+    };
     selectTheme.onchange = () => {
         setTheme(selectTheme.value);
     };
@@ -917,13 +1005,13 @@ function handleSelects() {
 
 function handleInputs() {
     chatMessage.onkeyup = (e) => {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13 && (DetectRTC.isMobileDevice || !e.shiftKey)) {
             e.preventDefault();
             chatSendButton.click();
         }
     };
     chatMessage.oninput = function () {
-        let chatInputEmoji = {
+        const chatInputEmoji = {
             '<3': '\u2764\uFE0F',
             '</3': '\uD83D\uDC94',
             ':D': '\uD83D\uDE00',
@@ -935,11 +1023,14 @@ function handleInputs() {
             ":'(": '\uD83D\uDE22',
             ':+1:': '\uD83D\uDC4D',
         };
-
         for (let i in chatInputEmoji) {
             let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
             this.value = this.value.replace(regex, chatInputEmoji[i]);
         }
+    };
+
+    chatMessage.onpaste = () => {
+        isChatPasteTxt = true;
     };
 
     rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
@@ -1056,11 +1147,13 @@ function handleRoomClientEvents() {
         hide(lockRoomButton);
         show(unlockRoomButton);
         setColor(unlockRoomButton, 'red');
+        isRoomLocked = true;
     });
     rc.on(RoomClient.EVENTS.roomUnlock, () => {
         console.log('Room Client unlock room');
         hide(unlockRoomButton);
         show(lockRoomButton);
+        isRoomLocked = false;
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
@@ -1135,6 +1228,7 @@ function setVideoButtonsDisabled(disabled) {
 // ####################################################
 
 async function sound(name) {
+    if (!isSoundEnabled) return;
     let sound = '../sounds/' + name + '.wav';
     let audio = new Audio(sound);
     try {
@@ -1146,6 +1240,16 @@ async function sound(name) {
 
 function isImageURL(url) {
     return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
+}
+
+function isTablet(userAgent) {
+    return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
+        userAgent,
+    );
+}
+
+function isIpad(userAgent) {
+    return /macintosh/.test(userAgent) && 'ontouchend' in document;
 }
 
 function openURL(url, blank = false) {
@@ -1504,6 +1608,15 @@ function whiteboardAction(data, emit = true) {
     }
 }
 
+function wbToggleBg() {
+    wbIsBgTransparent = !wbIsBgTransparent;
+    if (wbIsBgTransparent) {
+        document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
+    } else {
+        setTheme(currentTheme);
+    }
+}
+
 // ####################################################
 // HANDLE PARTICIPANTS
 // ####################################################
@@ -1513,6 +1626,11 @@ function toggleParticipants() {
     participants.classList.toggle('show');
     participants.style.top = '50%';
     participants.style.left = '50%';
+    if (DetectRTC.isMobileDevice) {
+        participants.style.width = '100%';
+        participants.style.height = '100%';
+    }
+    isParticipantsListOpen = !isParticipantsListOpen;
 }
 
 async function getRoomParticipants(refresh = false) {
@@ -1522,7 +1640,7 @@ async function getRoomParticipants(refresh = false) {
 
     participantsCount = peers.size;
     roomParticipants.innerHTML = table;
-    refreshParticipantsCount(participantsCount);
+    refreshParticipantsCount(participantsCount, false);
 
     if (!refresh) {
         toggleParticipants();
@@ -1559,20 +1677,24 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
-    table += `
+    if (!isRulesActive || isPresenter) {
+        table += `
     <tr>
-        <td>&nbsp;<i class="fas fa-users fa-lg"></i>&nbsp;&nbsp;all</td>
+        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
+        <td>all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
-        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
+        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all','all')">${_PEER.sendMsg}</button></td>
         <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
+    }
 
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
@@ -1588,7 +1710,8 @@ async function getParticipantsTable(peers) {
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name} (me)</td>
+                <td><img src='${avatarImg}'></td>
+                <td>${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
@@ -1599,18 +1722,35 @@ async function getParticipantsTable(peers) {
             </tr>
             `;
         } else {
-            table += `
-            <tr id='${peer_id}'>
-                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
-                <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
-                <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
-                <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
-                <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
-                <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
-                <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
-            </tr>
-            `;
+            if (isRulesActive && isPresenter) {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'></td>
+                    <td>${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
+                </tr>
+                `;
+            } else {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'></td>
+                    <td>${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td></td>
+                </tr>
+                `;
+            }
         }
     }
     table += `</table>`;
@@ -1624,7 +1764,7 @@ function setParticipantsTippy(peers) {
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('sendAllButton', 'Share file to all', 'top');
         setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendVideoAll', 'Share video mp4 or YouTube to all', 'top');
+        setTippy('sendVideoToAll', 'Share video to all', 'top');
         setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
@@ -1640,21 +1780,13 @@ function setParticipantsTippy(peers) {
     }
 }
 
-function refreshParticipantsCount(count) {
+function refreshParticipantsCount(count, adapt = true) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
-    adaptAspectRatio(count);
+    if (adapt) adaptAspectRatio(count);
 }
 
 function getParticipantAvatar(peerName) {
     return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
-}
-
-// ####################################################
-// HANDLE VIDEO OBJ FIT
-// ####################################################
-
-function handleVideoObjectFit(value) {
-    document.documentElement.style.setProperty('--videoObjFit', value);
 }
 
 // ####################################################
@@ -1667,16 +1799,23 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#393939, #000000)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            document.body.style.background = 'radial-gradient(#393939, #000000)';
             break;
         case 'grey':
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            document.body.style.background = 'radial-gradient(#666, #333)';
             break;
         //...
     }
+    currentTheme = theme;
+    wbIsBgTransparent = false;
+    rc.isChatBgTransparent = false;
 }
 
 // ####################################################
@@ -1766,11 +1905,11 @@ function showAbout() {
         <br/>
         <div id="about">
             <b>Open Source</b> project on
-            <a href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank"><br/><br />
+            <a href="https://github.com/miroslavpejic85/mirotalksfu" class="umami--click--github" target="_blank"><br/><br />
             <img alt="mirotalksfu-github" src="../images/github.png"></a><br/><br />
-            <button class="pulsate" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Sponsor</button>
+            <button class="pulsate umami--click--sponsors" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
-            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> Miroslav Pejic</a>
+            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
         </div>
         `,
         showClass: {

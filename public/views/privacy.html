@@ -12,7 +12,7 @@
 
         <!-- Title and Icon -->
 
-        <title>MiroTalk SFU - Allow Video or Audio access to join in the Room.</title>
+        <title>MiroTalk SFU - privacy policy.</title>
         <link rel="shortcut icon" href="../images/logo.svg" />
         <link rel="apple-touch-icon" href="../images/logo.svg" />
 
@@ -31,7 +31,7 @@
             property="og:description"
             content="MiroTalk SFU calling provides real-time HD quality and latency simply not available with traditional technology."
         />
-        <meta property="og:image" content="https://sfu.mirotalk.org/images/mirotalksfu.png" />
+        <meta property="og:image" content="https://sfu.mirotalk.com/images/mirotalksfu.png" />
 
         <!-- StyleSheet -->
 
@@ -64,29 +64,25 @@
                     <div class="container">
                         <div class="hero-inner">
                             <div class="hero-copy">
-                                <h1 class="hero-title mt-0">Access denied.</h1>
+                                <h1 class="hero-title mt-0">Privacy Policy</h1>
                                 <p class="hero-paragraph" id="message"></p>
                                 <p class="hero-paragraph">
-                                    This app will not work without camera or microphone access. Please try again and
-                                    allow it.
+                                    <strong>MiroTalk SFU</strong> has an integrated
+                                    <a href="https://mediasoup.org/" target="_blank">mediasoup server</a>. Routing is a
+                                    multiparty topology, where each participant sends its media to this server and
+                                    receives all other's media from it. Thanks to the SFU architecture, it allows having
+                                    many users connected in the same room. The media streams are encrypted using Secure
+                                    Real-time Transport Protocol (SRTP).<br /><br />
+                                    If you record a meeting, the recording of the meeting is temporarily stored on
+                                    <strong>Your browser</strong>
+                                    <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank"
+                                        >Blob</a
+                                    >, then will be downloaded on Your PC/Mobile Device.<br /><br />
+                                    We use Umami to track aggregated usage statistics in order to improve our service.
+                                    The maker of
+                                    <strong>MiroTalk SFU</strong> has no intention of using personally or selling any of
+                                    the above-mentioned data.
                                 </p>
-                                <script>
-                                    let qs = new URLSearchParams(window.location.search);
-                                    let room_id = qs.get('room_id');
-                                    let message = qs.get('message');
-                                    console.log('Allow Camera or Audio', {
-                                        room_id: room_id,
-                                        message: message,
-                                    });
-                                    document.getElementById('message').innerHTML = message;
-                                </script>
-                                <div class="hero-cta">
-                                    <a
-                                        class="button button-primary pulse"
-                                        onclick="room_id ? window.location.href = '/join/' + room_id : window.location.href = '/newroom';"
-                                        >TRY AGAIN</a
-                                    >
-                                </div>
                             </div>
                             <div class="hero-figure anime-element">
                                 <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
@@ -121,9 +117,6 @@
                                 <a href="/about">About</a>
                             </li>
                             <li>
-                                <a href="/privacy">Privacy Policy</a>
-                            </li>
-                            <li>
                                 Contact:
                                 <a target="_blank" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
                                     >Miroslav Pejic</a
@@ -131,17 +124,6 @@
                             </li>
                         </ul>
                         <ul class="footer-social-links list-reset">
-                            <li>
-                                <a target="_blank" href="https://github.com/miroslavpejic85/mirotalksfu">
-                                    <svg width="16" height="16" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                                        <title>GitHub</title>
-                                        <path
-                                            d="M7.95 0C3.578 0 0 3.578 0 7.95c0 3.479 2.286 6.46 5.466 7.553.397.1.497-.199.497-.397v-1.392c-2.187.497-2.683-.994-2.683-.994-.398-.894-.895-1.192-.895-1.192-.696-.497.1-.497.1-.497.795.1 1.192.795 1.192.795.696 1.292 1.888.894 2.286.696.1-.497.298-.895.497-1.093-1.79-.2-3.578-.895-3.578-3.976 0-.894.298-1.59.795-2.087-.1-.198-.397-.993.1-2.086 0 0 .695-.2 2.186.795a6.408 6.408 0 0 1 1.987-.299c.696 0 1.392.1 1.988.299 1.49-.994 2.186-.795 2.186-.795.398 1.093.199 1.888.1 2.086.496.597.795 1.292.795 2.087 0 3.081-1.889 3.677-3.677 3.876.298.398.596.895.596 1.59v2.187c0 .198.1.496.596.397C13.714 14.41 16 11.43 16 7.95 15.9 3.578 12.323 0 7.95 0z"
-                                            fill="#0270D7"
-                                        />
-                                    </svg>
-                                </a>
-                            </li>
                             <li>
                                 <a target="_blank" href="https://www.facebook.com/mirotalk">
                                     <span class="screen-reader-text">Facebook</span>
@@ -174,6 +156,28 @@
                                     </svg>
                                 </a>
                             </li>
+                            <li>
+                                <a
+                                    class="github-button"
+                                    href="https://github.com/sponsors/miroslavpejic85"
+                                    data-color-scheme="no-preference: light; light: light; dark: dark;"
+                                    data-icon="octicon-heart"
+                                    data-size="large"
+                                    aria-label="Sponsor @miroslavpejic85 on GitHub"
+                                    >Sponsor</a
+                                >
+                            </li>
+                            <li>
+                                <a
+                                    class="github-button"
+                                    href="https://github.com/miroslavpejic85/mirotalksfu"
+                                    data-color-scheme="no-preference: light; light: light; dark: dark;"
+                                    data-size="large"
+                                    data-show-count="true"
+                                    aria-label="Star miroslavpejic85/mirotalk on GitHub"
+                                    >Star</a
+                                >
+                            </li>
                         </ul>
                         <div class="footer-copyright">&copy; 2022 MiroTalk SFU, all rights reserved</div>
                     </div>
@@ -181,6 +185,7 @@
             </footer>
         </div>
 
-        <script src="../js/landing.js"></script>
+        <script defer src="../js/landing.js"></script>
+        <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>

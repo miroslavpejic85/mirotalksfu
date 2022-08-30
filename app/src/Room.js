@@ -11,6 +11,7 @@ module.exports = class Room {
         this.router = null;
         this.audioLevelObserver = null;
         this.audioLevelObserverEnabled = false;
+        this.audioLastUpdateTime = 0;
         this.io = io;
         this._isLocked = false;
         this._roomPassword = null;
@@ -52,10 +53,21 @@ module.exports = class Room {
         });
 
         this.audioLevelObserver.on('volumes', (volumes) => {
+            this.sendActiveSpeakerVolume(volumes);
+        });
+        this.audioLevelObserver.on('silence', () => {
+            //log.debug('audioLevelObserver', { volume: 'silence' });
+            return;
+        });
+    }
+
+    sendActiveSpeakerVolume(volumes) {
+        if (Date.now() > this.audioLastUpdateTime + 1000) {
+            this.audioLastUpdateTime = Date.now();
             const { producer, volume } = volumes[0];
-            let audioVolume = Math.round(Math.pow(10, volume / 85) * 10); // 1-10
+            let audioVolume = Math.round(Math.pow(10, volume / 80) * 10); // 1-10
             if (audioVolume > 2) {
-                //log.debug('PEERS', this.peers);
+                // log.debug('PEERS', this.peers);
                 this.peers.forEach((peer) => {
                     peer.producers.forEach((peerProducer) => {
                         if (
@@ -63,18 +75,14 @@ module.exports = class Room {
                             peerProducer.kind == 'audio' &&
                             peer.peer_audio === true
                         ) {
-                            let data = { peer_id: peer.id, audioVolume: audioVolume };
-                            //log.debug('audioLevelObserver', data);
-                            this.io.emit('audioVolume', data);
+                            let data = { peer_name: peer.peer_name, peer_id: peer.id, audioVolume: audioVolume };
+                            // log.debug('audioLevelObserver id [' + this.id + ']', data);
+                            this.broadCast(0, 'audioVolume', data);
                         }
                     });
                 });
             }
-        });
-        this.audioLevelObserver.on('silence', () => {
-            //log.debug('audioLevelObserver', { volume: 'silence' });
-            return;
-        });
+        }
     }
 
     addProducerToAudioLevelObserver(producer) {
@@ -209,7 +217,11 @@ module.exports = class Room {
                 rtpCapabilities,
             })
         ) {
-            log.error('can not consume');
+            log.error('Can not consume', {
+                socket_id: socket_id,
+                consumer_transport_id: consumer_transport_id,
+                producer_id: producer_id,
+            });
             return;
         }
 

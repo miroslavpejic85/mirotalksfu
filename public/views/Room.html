@@ -38,7 +38,7 @@
             property="og:description"
             content="MiroTalk SFU calling provides real-time video calls, messaging and screen sharing."
         />
-        <meta property="og:image" content="https://sfu.mirotalk.org/images/mirotalksfu.png" />
+        <meta property="og:image" content="https://sfu.mirotalk.com/images/mirotalksfu.png" />
 
         <!-- StyleSheet -->
 
@@ -69,31 +69,30 @@
             crossorigin="anonymous"
         ></script>
 
-        <!-- Js scripts -->
+        <!-- Js scripts https://cdn.jsdelivr.net -->
 
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="../sfu/MediasoupClient.js"></script>
-        <script src="../js/Room.js"></script>
-        <script src="../js/RoomClient.js"></script>
-        <script src="../js/SpeechRec.js"></script>
-        <script src="../js/VideoGrid.js"></script>
-        <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/521/fabric.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
-        <script src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
-        <script src="https://unpkg.com/@popperjs/core@2"></script>
-        <script src="https://unpkg.com/tippy.js@6"></script>
+        <script defer src="/socket.io/socket.io.js"></script>
+        <script defer src="../sfu/MediasoupClient.js"></script>
+        <script defer src="../js/Rules.js"></script>
+        <script defer src="../js/Room.js"></script>
+        <script defer src="../js/RoomClient.js"></script>
+        <script defer src="../js/SpeechRec.js"></script>
+        <script defer src="../js/VideoGrid.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/detectrtc@1.4.1/DetectRTC.min.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/521/fabric.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.23"></script>
+        <script defer src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
+        <script defer src="https://unpkg.com/@popperjs/core@2"></script>
+        <script defer src="https://unpkg.com/tippy.js@6"></script>
     </head>
     <body onload="initClient()">
         <noscript>You need to enable JavaScript to run this app.</noscript>
 
         <div id="loadingDiv" class="center pulsate">
             <h1>Loading...</h1>
-            <pre>
-Please allow the camera or microphone
-access to use this app.
-            </pre>
+            <p>Please allow the camera or microphone access to use this app.</p>
         </div>
 
         <div id="control" class="fadein">
@@ -104,11 +103,12 @@ access to use this app.
             <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i></button>
             <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i></button>
             <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i></button>
-            <button id="swapCameraButton" class="hidden"><i class="fas fa-sync-alt"></i></button>
+            <button id="swapCameraButton" class="hidden"><i class="fas fa-camera-rotate"></i></button>
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
-            <button id="exitButton" class="hidden"><i class="fas fa-phone-slash"></i></button>
+            <button id="aboutButton" class="hidden"><i class="fas fa-question"></i></button>
+            <button id="exitButton" class="hidden"><i class="fas fa-right-from-bracket"></i></button>
         </div>
 
         <section id="mySettings" class="fadein center hidden">
@@ -137,7 +137,7 @@ access to use this app.
                     <p>Microphone:</p>
                     <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
                     <br />
-                    <i class="fas fa-volume-up"></i>
+                    <i class="fas fa-headphones"></i>
                     <p>Speaker:</p>
                     <select id="speakerSelect" class="form-select text-light bg-dark"></select>
                     <br />
@@ -178,11 +178,6 @@ access to use this app.
                         <p>Unlock room</p>
                     </button>
                     <br />
-                    <button id="aboutButton" class="hidden">
-                        <i class="fas fa-question"></i>
-                        <p>Project info</p>
-                    </button>
-                    <br />
                     <button id="sessionTimeButton">
                         <i class="fas fa-clock"></i>
                         <p id="sessionTime"></p>
@@ -217,12 +212,12 @@ access to use this app.
                     <br />
                     <button id="videoShareButton">
                         <i class="fab fa-youtube"></i>
-                        <p>Share Video</p>
+                        <p>Share a Video or Audio</p>
                     </button>
                     <br />
                     <button id="videoCloseBtn" class="hidden">
                         <i class="fas fa-times"></i>
-                        <p>Close Video</p>
+                        <p>Close Video or Audio</p>
                     </button>
                     <br />
                 </div>
@@ -247,6 +242,13 @@ access to use this app.
                         <option value="cover">cover</option>
                         <option value="scale-down">scale-down</option>
                         <option value="none">none</option>
+                    </select>
+                    <br />
+                    <p>Video Controls:</p>
+                    <br />
+                    <select id="BtnVideoControls" class="form-select text-light bg-dark">
+                        <option value="Off">Off</option>
+                        <option value="On">On</option>
                     </select>
                     <br />
                 </div>
@@ -277,6 +279,7 @@ access to use this app.
         <div id="videoMediaContainer">
             <!-- <div class="Camera"></div> -->
         </div>
+        <div id="localAudio"></div>
         <div id="remoteAudios"></div>
 
         <div id="sendFileDiv" class="fadein center">
@@ -304,7 +307,6 @@ access to use this app.
             <header id="participantsHeader" class="participants-header">
                 <div id="participantsTitle" class="participants-header-title"></div>
                 <div class="participants-header-options">
-                    <button id="participantsRefreshBtn" class="fas fa-sync-alt"></button>
                     <button id="participantsCloseBtn" class="fas fa-times"></button>
                 </div>
             </header>
@@ -319,6 +321,7 @@ access to use this app.
                     <button id="whiteboardCloseBtn" class="fas fa-times"></button>
                 </div>
                 <div class="whiteboard-header-options">
+                    <button id="whiteboardGhostButton" class="fas fa-circle-half-stroke"></button>
                     <input id="wbBackgroundColorEl" class="whiteboardColorPicker" type="color" value="#000000" />
                     <input id="wbDrawingColorEl" class="whiteboardColorPicker" type="color" value="#FFFFFF" />
                     <button id="whiteboardPencilBtn" class="fas fa-pencil-alt"></button>
@@ -344,8 +347,9 @@ access to use this app.
         <section id="chatRoom" class="chat-room center fadein">
             <section id="msger" class="msger">
                 <header id="chatHeader" class="chat-header">
-                    <div class="chat-header-title"><i class="fas fa-comment-alt"></i> Chat</div>
+                    <div class="chat-header-title"><i class="fas fa-comment-alt"></i>&nbsp; Chat</div>
                     <div class="chat-header-options">
+                        <button id="chatGhostButton" class="fas fa-circle-half-stroke"></button>
                         <button id="chatSaveButton" class="fas fa-save"></button>
                         <button id="chatCleanButton" class="fas fa-trash"></button>
                         <button id="chatCloseButton" class="fas fa-times"></button>
@@ -355,17 +359,21 @@ access to use this app.
                     <!-- chat messages -->
                 </main>
                 <div class="chat-msger-inputarea">
-                    <input
+                    <textarea
+                        rows="1"
+                        cols="1"
                         id="chatMessage"
                         class="chat-msger-input"
-                        type="text"
                         placeholder="💬 Enter your message..."
-                    />
+                    ></textarea>
                     <button id="chatEmojiButton" class="hidden">
                         <i class="fas fa-smile"></i>
                     </button>
+                    <button id="chatMarkdownButton" class="hidden">
+                        <i class="fab fa-markdown"></i>
+                    </button>
                     <button id="chatShareFileButton" class="hidden">
-                        <i class="fas fa-file"></i>
+                        <i class="fas fa-paperclip"></i>
                     </button>
                     <button id="chatSpeechStartButton" class="hidden">
                         <i class="fas fa-microphone-slash"></i>
@@ -382,6 +390,7 @@ access to use this app.
                 </div>
             </section>
         </section>
+
         <!-- 
             Start Google Translate 
         -->

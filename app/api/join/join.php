@@ -1,7 +1,8 @@
 <?php
 
 $API_KEY = "mirotalksfu_default_secret";
-$MIROTALK_URL = "https://sfu.mirotalk.org/api/v1/join";
+$MIROTALK_URL = "https://sfu.mirotalk.com/api/v1/join";
+// $MIROTALK_URL = "http://localhost:3010/api/v1/join";
 
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $MIROTALK_URL);
@@ -16,12 +17,13 @@ $headers = [
 curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 
 $data = array(
-    "room"   => "test",
-    "name"   => "mirotalksfu",
-    "audio"  => true,
-    "video"  => true,
-    "screen" => true,
-    "notify" => true,
+    "room"      => "test",
+    "password"  => false,
+    "name"      => "mirotalksfu",
+    "audio"     => true,
+    "video"     => true,
+    "screen"    => true,
+    "notify"    => true,
 );
 $data_string = json_encode($data);
 

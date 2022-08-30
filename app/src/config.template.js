@@ -32,7 +32,7 @@ module.exports = {
     hostPassword: 'password',
     // app listen on
     listenIp: '0.0.0.0',
-    listenPort: 3010,
+    listenPort: process.env.PORT || 3010,
     // ssl/README.md
     sslCrt: '../ssl/cert.pem',
     sslKey: '../ssl/key.pem',
@@ -55,13 +55,23 @@ module.exports = {
         DSN: '',
         tracesSampleRate: 0.5,
     },
+    slack: {
+        /*
+            1. Goto https://api.slack.com/apps/
+            2. Create your app
+            3. On Settings - Basic Information - App Credentials, chose your Signing Secret
+            4. Create a Slash Commands and put as Request URL: https://your.domain.name/slack
+        */
+        enabled: false,
+        signingSecret: '',
+    },
     mediasoup: {
         // Worker settings
         numWorkers: Object.keys(os.cpus()).length,
         worker: {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
-            logLevel: 'warn',
+            logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
         },
         // Router settings
@@ -122,8 +132,10 @@ module.exports = {
                     announcedIp: getLocalIp(), // replace by public static IP address https://api.ipify.org
                 },
             ],
-            maxIncomingBitrate: 1500000,
             initialAvailableOutgoingBitrate: 1000000,
+            minimumAvailableOutgoingBitrate: 600000,
+            maxSctpMessageSize: 262144,
+            maxIncomingBitrate: 1500000,
         },
     },
 };

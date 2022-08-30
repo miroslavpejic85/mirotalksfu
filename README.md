@@ -5,13 +5,13 @@
 <hr />
 
 <p align="center">
-    <a href="https://sfu.mirotalk.org/">https://sfu.mirotalk.org/</a>
+    <a href="https://sfu.mirotalk.com/">sfu.mirotalk.com</a>
 </p>
 
 <hr />
 
 <p align="center">
-    <a href="https://sfu.mirotalk.org/">
+    <a href="https://sfu.mirotalk.com/">
         <img src="public/images/mirotalksfu-header.gif">
     </a>
 </p>
@@ -23,7 +23,7 @@
 
 <br/>
 
--   Is `100% Free` - `Open Source` - `Self Hosted`
+-   Is `100% Free` - `Open Source` - `Self Hosted` and [PWA](https://en.wikipedia.org/wiki/Progressive_web_application)!
 -   No download, plug-in or login required, entirely browser-based
 -   Unlimited number of conference rooms, without call time limitation
 -   Desktop and Mobile compatible
@@ -46,16 +46,54 @@
 -   Possibility to Change UI Themes
 -   Possibility to protect your Host with username and password (default disabled)
 -   Supports [REST API](app/api/README.md) (Application Programming Interface)
+-   [Slack](https://api.slack.com/apps/) API integration
 -   [Sentry](https://sentry.io/) error reporting
 
 </details>
 
 <details>
-<summary>Presentation</summary>
+<summary>About</summary>
+
+-   [Presentation](https://www.canva.com/design/DAE693uLOIU/view)
+
+-   [Video](https://www.youtube.com/watch?v=_IVn2aINYww)
+
+</details>
+
+<details>
+<summary>Direct Join</summary>
 
 <br/>
 
-<a href="https://www.canva.com/design/DAE693uLOIU/view">MiroTalk presentation </a> - <a href="https://www.youtube.com/watch?v=_IVn2aINYww"> video</a>
+-   You can `join` directly to `room` by going to
+-   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+
+    | Params   | Type           | Description     |
+    | -------- | -------------- | --------------- |
+    | room     | string         | room Id         |
+    | password | string/boolean | room password   |
+    | name     | string         | user name       |
+    | audio    | boolean        | audio stream    |
+    | video    | boolean        | video stream    |
+    | screen   | boolean        | screen stream   |
+    | notify   | boolean        | welcome message |
+
+</details>
+
+<details>
+<summary>Embed a meeting</summary>
+
+<br/>
+
+Embedding a meeting into a service or app using an iframe.
+
+```html
+<iframe
+    allow="camera; microphone; fullscreen; display-capture; autoplay"
+    src="https://sfu.mirotalk.com/newroom"
+    style="height: 100%; width: 100%; border: 0px;"
+></iframe>
+```
 
 </details>
 
@@ -98,9 +136,11 @@ $ cp app/src/config.template.js app/src/config.js
 $ npm install
 # Start the server
 $ npm start
+# If you want to start the server on a different port than the default use an env var
+$ PORT=3011 npm start
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010 or `:3011` if default port changed.
 
 </details>
 
@@ -109,56 +149,44 @@ $ npm start
 
 <br/>
 
+![docker](public/images/docker.png)
+
 -   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
+-   Repository docker hub: https://hub.docker.com/r/mirotalk/sfu
 
 ```bash
-# Copy app/src/config.template.js in app/src/config.js and edit it if needed
+# Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build image and install dependencies
-$ docker-compose run --rm npm install
+# Get official image from Docker Hub
+$ docker pull mirotalk/sfu:latest
 # Create and start containers
 $ docker-compose up # -d
-# Stop and remove resources
+# To stop and remove resources
 $ docker-compose down
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010
 
 </details>
 
 <details>
-<summary>Https</summary>
+<summary>Ngrok - Https</summary>
 
 <br/>
 
-You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these steps](https://github.com/miroslavpejic85/mirotalksfu/issues/26#issuecomment-986309051).
+You can start videoconferencing directly from your Local PC, and be reachable from any device outside your network, simply by following [these documentation](docs/ngrok.md).
 
 </details>
 
 <details>
-<summary>Self Host</summary>
+<summary>Self Hosting</summary>
 
 <br/>
 
-Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`:
-
-```js
-{
-    ip: '0.0.0.0',
-    announcedIp: 'Server Public IPv4', // 'xx.xxx.xxx.xx'
-}
-```
-
-Set the inbound rules:
-
-| Port range  | Protocol | Source    | Description         |
-| ----------- | -------- | --------- | ------------------- |
-| 3010        | TCP      | 0.0.0.0/0 | App listen on tcp   |
-| 40000-40100 | TCP      | 0.0.0.0/0 | RTC port ranges tcp |
-| 40000-40100 | UDP      | 0.0.0.0/0 | RTC port ranges udp |
+-   [How to Self-Hosting](docs/self-hosting.md)
 
 </details>
 
@@ -176,52 +204,29 @@ Set the inbound rules:
 
 <br/>
 
--   The API documentation uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.org/api/v1/docs).
+-   The API documentation uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.com/api/v1/docs).
 
 ```bash
 # The response will give you a entrypoint / Room URL for your meeting.
 $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-$ curl -X POST "https://sfu.mirotalk.org/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
+$ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
 # The response will give you a entrypoint / URL for the direct join to the meeting.
 $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
-$ curl -X POST "https://sfu.mirotalk.org/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
+$ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
 ```
 
 </details>
 
-<details>
-<summary>Direct Join</summary>
+<details open>
+<summary>Hetzner</summary>
 
 <br/>
 
--   You can `join` directly to `room` by going to
--   https://sfu.mirotalk.org/join?room=test&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
 
-    | Params | Type    | Description     |
-    | ------ | ------- | --------------- |
-    | room   | string  | room Id         |
-    | name   | string  | user name       |
-    | audio  | boolean | audio stream    |
-    | video  | boolean | video stream    |
-    | screen | boolean | screen stream   |
-    | notify | boolean | welcome message |
+This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
 
-</details>
-
-<details>
-<summary>Embed a meeting</summary>
-
-<br/>
-
-Embedding a meeting into a service or app using an iframe.
-
-```html
-<iframe
-    allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://sfu.mirotalk.org/newroom"
-    style="height: 100%; width: 100%; border: 0px;"
-></iframe>
-```
+If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
 </details>
 
@@ -230,13 +235,11 @@ Embedding a meeting into a service or app using an iframe.
 
 <br/>
 
-This application is running just for `demonstration purposes` on [DigitalOcean](https://m.do.co/c/1070207afbb1) `droplet Ubuntu 20.04 (LTS) x64 [1 vCPU - 1GB Ram]`, with [Ngnix](https://www.nginx.com/) and [Let's Encrypt](https://letsencrypt.org/).
+[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
 For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use this [link](https://m.do.co/c/1070207afbb1) to get a $100 credit for the first 60 days.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
-
-[![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
 </details>
 
@@ -245,9 +248,11 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 <br/>
 
-https://sfu.mirotalk.org
+<a target="_blank" href="https://p2p.mirotalk.com"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
 
-[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.org/)
+https://sfu.mirotalk.com
+
+[![mirotalksfu-qr](public/images/mirotalksfu-qr.png)](https://sfu.mirotalk.com/)
 
 </details>
 
@@ -273,11 +278,11 @@ https://sfu.mirotalk.org
 </details>
 
 <details>
-<summary>Discussions and support</summary>
+<summary>Questions, Discussions and support</summary>
 
 <br/>
 
--   For discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
+-   For questions, discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
 </details>
 
@@ -295,13 +300,17 @@ For a MiroTalk license under conditions other than AGPLv3, please contact us at 
 </details>
 
 <details open>
-<summary>Sponsors</summary>
+<summary>Support the project</summary>
 
 <br/>
 
-Support this project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
+Do you find MiroTalk useful?
+
+Support the project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
+
+[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
 
 </details>
 

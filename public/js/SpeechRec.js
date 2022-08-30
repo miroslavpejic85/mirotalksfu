@@ -30,7 +30,6 @@ const commands = {
     settingsOn: 'open the settings',
     settingsOff: 'close the settings',
     participantsOn: 'show the participants',
-    participantsRefresh: 'refresh the participants',
     participantsOff: 'hide the participants',
     participantsVideoOff: 'stop the participants video',
     participantsAudioOff: 'stop the participants audio',
@@ -84,6 +83,7 @@ if (speechRecognition) {
         console.log('Start speech recognition');
         hide(chatSpeechStartButton);
         show(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'lime');
     };
 
     recognition.onresult = (e) => {
@@ -107,6 +107,7 @@ if (speechRecognition) {
         console.log('Stop speech recognition');
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'white');
     };
 
     isWebkitSpeechRecognitionSupported = true;
@@ -209,10 +210,6 @@ function execVoiceCommands(transcript) {
         case commands.participantsOn:
             printCommand(commands.participantsOn);
             participantsButton.click();
-            break;
-        case commands.participantsRefresh:
-            printCommand(commands.participantsRefresh);
-            participantsRefreshBtn.click();
             break;
         case commands.participantsOff:
             printCommand(commands.participantsOff);
