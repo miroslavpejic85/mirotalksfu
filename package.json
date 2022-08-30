@@ -29,7 +29,7 @@
         "crypto-js": "4.1.1",
         "express": "4.18.1",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.10.5",
+        "mediasoup": "3.10.6",
         "mediasoup-client": "3.6.57",
         "ngrok": "4.3.3",
         "qs": "6.11.0",
