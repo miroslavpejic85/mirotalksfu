@@ -606,6 +606,7 @@ function joinRoom(peer_name, room_id) {
             localAudio,
             remoteAudios,
             videoMediaContainer,
+            videoPinMediaContainer,
             window.mediasoupClient,
             socket,
             room_id,

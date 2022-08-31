@@ -33,6 +33,7 @@ const html = {
     ghost: 'fas fa-ghost',
     undo: 'fas fa-undo',
     bg: 'fas fa-circle-half-stroke',
+    pin: 'fas fa-map-pin',
 };
 
 const image = {
@@ -114,6 +115,7 @@ class RoomClient {
         localAudioEl,
         remoteAudioEl,
         videoMediaContainer,
+        videoPinMediaContainer,
         mediasoupClient,
         socket,
         room_id,
@@ -128,6 +130,7 @@ class RoomClient {
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
         this.videoMediaContainer = videoMediaContainer;
+        this.videoPinMediaContainer = videoPinMediaContainer;
         this.mediasoupClient = mediasoupClient;
 
         this.socket = socket;
@@ -153,6 +156,8 @@ class RoomClient {
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
         this.isChatBgTransparent = false;
+        this.isVideoPinned = false;
+        this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
 
@@ -884,7 +889,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, ts, d, p, i, au, fs, pm, pb;
+        let elem, vb, ts, d, p, i, au, fs, pm, pb, pn;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -910,6 +915,9 @@ class RoomClient {
                 ts = document.createElement('button');
                 ts.id = id + '__snapshot';
                 ts.className = html.snapshot;
+                pn = document.createElement('button');
+                pn.id = id + '__pin';
+                pn.className = html.pin;
                 au = document.createElement('button');
                 au.id = this.peer_id + '__audio';
                 au.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
@@ -931,6 +939,7 @@ class RoomClient {
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.producerVideo.fullScreenButton && vb.appendChild(fs);
+                if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
                 d.appendChild(pm);
                 d.appendChild(i);
@@ -942,6 +951,7 @@ class RoomClient {
                 this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
+                this.handlePN(elem.id, pn.id, d.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
                 if (participantsCount <= 3 && type === mediaType.screen) {
@@ -952,6 +962,7 @@ class RoomClient {
                     handleAspectRatio();
                 }
                 if (!this.isMobileDevice) {
+                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(au.id, 'Audio status', 'top-end');
@@ -1055,6 +1066,16 @@ class RoomClient {
             });
             d.parentNode.removeChild(d);
 
+            //alert(this.pinnedVideoPlayerId + '==' + producer_id);
+            if (this.isVideoPinned && this.pinnedVideoPlayerId == producer_id) {
+                this.videoPinMediaContainer.removeChild(elem);
+                this.removeVideoPinMediaContainer();
+                console.log('Remove pin container due the Producer close', {
+                    producer_id: producer_id,
+                    producer_type: type,
+                });
+            }
+
             handleAspectRatio();
             console.log('[producerClose] Video-element-count', this.videoMediaContainer.childElementCount);
         }
@@ -1155,7 +1176,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv;
+        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
 
         let remotePeerId = peer_info.peer_id;
 
@@ -1188,6 +1209,9 @@ class RoomClient {
                 ts = document.createElement('button');
                 ts.id = id + '__snapshot';
                 ts.className = html.snapshot;
+                pn = document.createElement('button');
+                pn.id = id + '__pin';
+                pn.className = html.pin;
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
@@ -1230,6 +1254,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.fullScreenButton && vb.appendChild(fs);
+                if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
                 d.appendChild(i);
                 d.appendChild(p);
@@ -1247,12 +1272,14 @@ class RoomClient {
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
+                this.handlePN(elem.id, pn.id, d.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
+                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
                     this.setTippy(elem.id, 'Full Screen', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
@@ -1296,7 +1323,18 @@ class RoomClient {
 
         if (consumer_kind === 'video') {
             let d = this.getId(consumer_id + '__video');
-            if (d) d.parentNode.removeChild(d);
+            if (d) {
+                d.parentNode.removeChild(d);
+                //alert(this.pinnedVideoPlayerId + '==' + consumer_id);
+                if (this.isVideoPinned && this.pinnedVideoPlayerId == consumer_id) {
+                    this.removeVideoPinMediaContainer();
+                    console.log('Remove pin container due the Consumer close', {
+                        consumer_id: consumer_id,
+                        consumer_kind: consumer_kind,
+                    });
+                }
+            }
+
             handleAspectRatio();
             console.log(
                 '[removeConsumer - ' + consumer_kind + '] Video-element-count',
@@ -1425,6 +1463,19 @@ class RoomClient {
             console.log('[removeVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
             if (peer_id != this.peer_id) this.sound('left');
         }
+    }
+
+    // ####################################################
+    // REMOVE VIDEO PIN MEDIA CONTAINER
+    // ####################################################
+
+    removeVideoPinMediaContainer() {
+        this.videoPinMediaContainer.style.display = 'none';
+        this.videoMediaContainer.style.width = '100%';
+        this.videoMediaContainer.style.right = null;
+        this.videoMediaContainer.style.left = 0;
+        this.pinnedVideoPlayerId = null;
+        this.isVideoPinned = false;
     }
 
     // ####################################################
@@ -1828,6 +1879,47 @@ class RoomClient {
             videoPlayer.hasAttribute('controls')
                 ? videoPlayer.removeAttribute('controls')
                 : videoPlayer.setAttribute('controls', isVideoControlsOn);
+        }
+    }
+
+    handlePN(elemId, pnId, camId) {
+        let videoPlayer = this.getId(elemId);
+        let btnPn = this.getId(pnId);
+        let cam = this.getId(camId);
+        if (btnPn && videoPlayer && cam) {
+            btnPn.addEventListener('click', () => {
+                this.isVideoPinned = !this.isVideoPinned;
+                if (this.isVideoPinned) {
+                    cam.removeChild(videoPlayer);
+                    this.videoMediaContainer.style.width = '25%';
+                    this.videoMediaContainer.style.left = null;
+                    this.videoMediaContainer.style.right = 0;
+                    this.videoPinMediaContainer.appendChild(videoPlayer);
+                    this.videoPinMediaContainer.style.display = 'block';
+                    this.pinnedVideoPlayerId = elemId;
+                    setColor(btnPn, 'lime');
+                } else {
+                    if (this.pinnedVideoPlayerId != videoPlayer.id) {
+                        this.isVideoPinned = true;
+                        return this.userLog(
+                            'info',
+                            'Another video seems pinned, unpin it before to pin this one',
+                            'top-end',
+                            3000,
+                        );
+                    }
+                    this.videoPinMediaContainer.removeChild(videoPlayer);
+                    cam.appendChild(videoPlayer);
+                    this.videoMediaContainer.style.width = '100%';
+                    this.videoMediaContainer.style.right = null;
+                    this.videoMediaContainer.style.left = 0;
+                    this.videoMediaContainer.appendChild(cam);
+                    this.videoPinMediaContainer.style.display = 'none';
+                    this.pinnedVideoPlayerId = null;
+                    setColor(btnPn, 'white');
+                }
+                handleAspectRatio();
+            });
         }
     }
 
