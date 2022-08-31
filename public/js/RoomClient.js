@@ -1386,14 +1386,14 @@ class RoomClient {
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
             BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         }
-        BUTTONS.videoOff.muteAudioButton && vb.appendChild(au);
+        vb.appendChild(au);
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(h);
         d.appendChild(pm);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
-        this.handleAU(au.id);
+        BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
         if (remotePeer) {
             this.handlePV('remotePeer___' + pv.id);
             this.handleSM(sm.id);
