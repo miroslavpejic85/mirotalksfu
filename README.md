@@ -160,8 +160,8 @@ $ PORT=3011 npm start
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Get official image from Docker Hub
-$ docker pull mirotalk/sfu:latest
+# (Optional) Get official image from Docker Hub
+$ docker-compose pull
 # Create and start containers
 $ docker-compose up # -d
 # To stop and remove resources
