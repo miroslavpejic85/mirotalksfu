@@ -1890,11 +1890,13 @@ class RoomClient {
             btnPn.addEventListener('click', () => {
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
-                    cam.removeChild(videoPlayer);
+                    cam.className = '';
+                    cam.style.width = '100%';
+                    cam.style.height = '100%';
                     this.videoMediaContainer.style.width = '25%';
                     this.videoMediaContainer.style.left = null;
                     this.videoMediaContainer.style.right = 0;
-                    this.videoPinMediaContainer.appendChild(videoPlayer);
+                    this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
                     setColor(btnPn, 'lime');
@@ -1908,8 +1910,8 @@ class RoomClient {
                             3000,
                         );
                     }
-                    this.videoPinMediaContainer.removeChild(videoPlayer);
-                    cam.appendChild(videoPlayer);
+                    this.videoPinMediaContainer.removeChild(cam);
+                    cam.className = 'Camera';
                     this.videoMediaContainer.style.width = '100%';
                     this.videoMediaContainer.style.right = null;
                     this.videoMediaContainer.style.left = 0;
