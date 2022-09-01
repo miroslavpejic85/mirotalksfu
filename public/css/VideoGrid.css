@@ -19,7 +19,7 @@
 }
 
 #videoPinMediaContainer {
-    z-index: 2;
+    z-index: 1;
     position: absolute;
     display: none;
     top: 0;
@@ -76,6 +76,7 @@
 }
 
 .username {
+    z-index: 1;
     position: absolute;
     bottom: 0;
     color: #fff;
