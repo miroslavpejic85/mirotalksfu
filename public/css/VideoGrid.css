@@ -26,8 +26,11 @@
     left: 0;
     height: 100%;
     width: 75%;
-    border-radius: 5px;
+    margin-right: 3px;
+    border-radius: 10px;
+    border: var(--border);
     overflow: hidden;
+    /* animation: show 0.4s ease; */
     /* border: 3px solid lime; */
 }
 
@@ -35,7 +38,6 @@
     position: relative;
     vertical-align: middle;
     align-self: center;
-    border-radius: 10px;
     overflow: hidden;
     display: inline-block;
     background: transparent;
