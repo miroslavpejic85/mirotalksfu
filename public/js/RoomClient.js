@@ -2868,7 +2868,7 @@ class RoomClient {
     }
 
     openVideo(data) {
-        let d, vb, e, video;
+        let d, vb, e, video, pn;
         let peer_name = data.peer_name;
         let video_url = data.video_url;
         let is_youtube = data.is_youtube;
@@ -2884,6 +2884,9 @@ class RoomClient {
         e = document.createElement('button');
         e.className = 'fas fa-times';
         e.id = '__videoExit';
+        pn = document.createElement('button');
+        pn.id = '__pinUnpin';
+        pn.className = html.pin;
         if (is_youtube) {
             video = document.createElement('iframe');
             video.setAttribute('title', peer_name);
@@ -2907,15 +2910,19 @@ class RoomClient {
         video.setAttribute('width', '100%');
         video.setAttribute('height', '100%');
         vb.appendChild(e);
+        vb.appendChild(pn);
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         handleAspectRatio();
         let exitVideoBtn = this.getId(e.id);
-        exitVideoBtn.addEventListener('click', () => {
+        exitVideoBtn.addEventListener('click', (e) => {
+            e.preventDefault();
             this.closeVideo(true);
         });
+        this.handlePN(video.id, pn.id, d.id);
         if (!this.isMobileDevice) {
+            this.setTippy(pn.id, 'Toggle Pin video player', 'top-end');
             this.setTippy(e.id, 'Close video player', 'top-end');
         }
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -2935,6 +2942,11 @@ class RoomClient {
         if (shareVideoDiv) {
             hide(videoCloseBtn);
             shareVideoDiv.parentNode.removeChild(shareVideoDiv);
+            //alert(this.isVideoPinned + ' - ' + this.pinnedVideoPlayerId);
+            if (this.isVideoPinned && this.pinnedVideoPlayerId == '__videoShare') {
+                this.removeVideoPinMediaContainer();
+                console.log('Remove pin container due the Video player close');
+            }
             handleAspectRatio();
             console.log('[closeVideo] Video-element-count', this.videoMediaContainer.childElementCount);
             this.sound('left');
