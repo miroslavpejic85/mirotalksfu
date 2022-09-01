@@ -1068,7 +1068,6 @@ class RoomClient {
 
             //alert(this.pinnedVideoPlayerId + '==' + producer_id);
             if (this.isVideoPinned && this.pinnedVideoPlayerId == producer_id) {
-                this.videoPinMediaContainer.removeChild(elem);
                 this.removeVideoPinMediaContainer();
                 console.log('Remove pin container due the Producer close', {
                     producer_id: producer_id,
