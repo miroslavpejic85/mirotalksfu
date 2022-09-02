@@ -28,7 +28,6 @@
     width: 75%;
     margin-right: 3px;
     border-radius: 5px;
-    border: var(--border);
     box-shadow: var(--box-shadow);
     overflow: hidden;
     /* animation: show 0.4s ease; */
