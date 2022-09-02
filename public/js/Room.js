@@ -146,6 +146,8 @@ function initClient() {
         setTippy('whiteboardEraserBtn', 'Eraser', 'top');
         setTippy('whiteboardCleanBtn', 'Clean', 'top');
         setTippy('chatMessage', 'Press enter to send', 'top-start');
+        setTippy('chatCleanTextButton', 'Clean', 'top');
+        setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
@@ -629,6 +631,8 @@ function roomIsReady() {
     BUTTONS.main.shareButton && show(shareButton);
     show(startRecButton);
     BUTTONS.main.chatButton && show(chatButton);
+    show(chatCleanTextButton);
+    show(chatPasteButton);
     show(chatSendButton);
     show(chatEmojiButton);
     show(chatMarkdownButton);
@@ -801,6 +805,12 @@ function handleButtons() {
     };
     chatCloseButton.onclick = () => {
         rc.toggleChat();
+    };
+    chatCleanTextButton.onclick = () => {
+        rc.cleanMessage();
+    };
+    chatPasteButton.onclick = () => {
+        rc.pasteMessage();
     };
     chatSendButton.onclick = () => {
         rc.sendMessage();

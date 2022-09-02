@@ -2029,6 +2029,22 @@ class RoomClient {
         this.getId('chatEmojiButton').style.color = this.isChatEmojiOpen ? '#FFFF00' : '#FFFFFF';
     }
 
+    cleanMessage() {
+        chatMessage.value = '';
+    }
+
+    pasteMessage() {
+        navigator.clipboard
+            .readText()
+            .then((text) => {
+                chatMessage.value = text;
+                isChatPasteTxt = true;
+            })
+            .catch((err) => {
+                console.error('Failed to read clipboard contents: ', err);
+            });
+    }
+
     sendMessage() {
         if (!this.thereIsParticipants()) {
             chatMessage.value = '';
