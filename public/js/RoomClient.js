@@ -1475,6 +1475,8 @@ class RoomClient {
         this.videoMediaContainer.style.left = 0;
         this.pinnedVideoPlayerId = null;
         this.isVideoPinned = false;
+        BtnVideoObjectFit.selectedIndex = 2; // cover
+        BtnVideoObjectFit.onchange();
     }
 
     // ####################################################
@@ -1898,6 +1900,8 @@ class RoomClient {
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
+                    BtnVideoObjectFit.selectedIndex = 1; // contain
+                    BtnVideoObjectFit.onchange();
                     setColor(btnPn, 'lime');
                 } else {
                     if (this.pinnedVideoPlayerId != videoPlayer.id) {
@@ -1917,6 +1921,8 @@ class RoomClient {
                     this.videoMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'none';
                     this.pinnedVideoPlayerId = null;
+                    BtnVideoObjectFit.selectedIndex = 2; // cover
+                    BtnVideoObjectFit.onchange();
                     setColor(btnPn, 'white');
                 }
                 handleAspectRatio();
