@@ -2151,7 +2151,7 @@ class RoomClient {
                 : `<hr/><button class="msger-reply-btn" onclick="rc.sendMessageTo('${fromId}','${fromName}')">${_PEER.sendMsg} Reply (private)</button>`;
         let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
-        <div class="msg ${side}-msg">
+        <div id="msg-${chatMessagesId}" class="msg ${side}-msg">
             <div class="msg-img" style="background-image: url('${img}')"></div>
             <div class=${msgBubble}>
                 <div class="msg-info">
@@ -2161,6 +2161,12 @@ class RoomClient {
                 <div id="${chatMessagesId}" class="msg-text">${message}
                     <hr/>
                     <button
+                        id="msg-delete-${chatMessagesId}"
+                        class="fas fa-trash" 
+                        onclick="rc.deleteMessage('msg-${chatMessagesId}')"
+                    ></button>
+                    <button
+                        id="msg-copy-${chatMessagesId}"
                         class="fas fa-copy" 
                         onclick="rc.copyToClipboard('${chatMessagesId}')"
                     ></button>
@@ -2171,11 +2177,36 @@ class RoomClient {
         this.collectMessages(time, fromName, msg);
         chatMsger.insertAdjacentHTML('beforeend', msgHTML);
         chatMsger.scrollTop += 500;
+        this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
+        this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
         chatMessagesId++;
     }
 
+    deleteMessage(id) {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Delete this Message?',
+            imageUrl: image.delete,
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.getId(id).remove();
+                this.sound('delete');
+            }
+        });
+    }
+
     copyToClipboard(id) {
-        const text = document.getElementById(id).innerText;
+        const text = this.getId(id).innerText;
         navigator.clipboard
             .writeText(text)
             .then(() => {
