@@ -2175,10 +2175,7 @@ class RoomClient {
     appendMessage(side, img, fromName, fromId, msg, toId, toName) {
         let time = this.getTimeNow();
         let msgBubble = toId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
-        let replyMsg =
-            fromId === this.peer_id
-                ? `<hr/>Private message to ${toName}`
-                : `<hr/><button class="msger-reply-btn" onclick="rc.sendMessageTo('${fromId}','${fromName}')">${_PEER.sendMsg} Reply (private)</button>`;
+        let replyMsg = fromId === this.peer_id ? `<hr/>Private message to ${toName}` : '';
         let message = toId == 'all' ? msg : msg + replyMsg;
         let msgHTML = `
         <div id="msg-${chatMessagesId}" class="msg ${side}-msg">
@@ -2200,6 +2197,17 @@ class RoomClient {
                         class="fas fa-copy" 
                         onclick="rc.copyToClipboard('${chatMessagesId}')"
                     ></button>
+                    `;
+        // add btn direct reply to private message
+        if (fromId != this.peer_id) {
+            msgHTML += `
+                <button 
+                    class="fas fa-paper-plane"
+                    id="msg-private-reply-${chatMessagesId}"
+                    onclick="rc.sendMessageTo('${fromId}','${fromName}')"
+                ></button>`;
+        }
+        msgHTML += `
                 </div>
             </div>
         </div>
@@ -2209,6 +2217,7 @@ class RoomClient {
         chatMsger.scrollTop += 500;
         this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
         this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
+        this.setTippy('msg-private-reply-' + chatMessagesId, 'Reply', 'top');
         chatMessagesId++;
     }
 
