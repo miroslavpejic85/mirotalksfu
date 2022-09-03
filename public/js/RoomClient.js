@@ -1743,6 +1743,41 @@ class RoomClient {
         });
     }
 
+    msgPopup(type, message) {
+        switch (type) {
+            case 'warning':
+            case 'error':
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    icon: type,
+                    title: type,
+                    text: message,
+                });
+                this.sound('alert');
+                break;
+            case 'info':
+            case 'success':
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    icon: type,
+                    title: type,
+                    text: message,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                });
+                break;
+            // ......
+            default:
+                alert(message);
+        }
+    }
+
     thereIsParticipants() {
         // console.log('participantsCount ---->', participantsCount);
         if (this.consumers.size > 0 || participantsCount > 1) {
@@ -1908,12 +1943,7 @@ class RoomClient {
                 } else {
                     if (this.pinnedVideoPlayerId != videoPlayer.id) {
                         this.isVideoPinned = true;
-                        return this.userLog(
-                            'info',
-                            'Another video seems pinned, unpin it before to pin this one',
-                            'top-end',
-                            3000,
-                        );
+                        return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
                     }
                     this.videoPinMediaContainer.removeChild(cam);
                     cam.className = 'Camera';
