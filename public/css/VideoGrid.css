@@ -118,8 +118,8 @@
     position: absolute;
     top: 0;
     left: 0;
-    padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
+    padding: 8px;
+    background: rgba(0, 0, 0, 0.1);
     font-size: small;
     font-weight: bold;
     text-align: center;
