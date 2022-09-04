@@ -132,7 +132,6 @@
 .videoMenuBar input,
 .videoMenuBar button {
     float: right;
-    margin-right: 3px;
     color: #fff;
     background: transparent;
     border-radius: 5px;
