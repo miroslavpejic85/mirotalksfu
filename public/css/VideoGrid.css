@@ -90,7 +90,7 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .fscreen {
@@ -116,19 +116,15 @@
 .videoMenuBar {
     z-index: 2;
     position: absolute;
-    padding: 3px;
-    background: var(--bg);
+    top: 0;
+    left: 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
     font-size: small;
     font-weight: bold;
     text-align: center;
     width: 100%;
     cursor: default;
-    /* center */
-    top: 18px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    -moz-transform: translate(-50%, -50%);
     overflow: hidden;
 }
 
@@ -200,5 +196,16 @@ input[type='range'] {
     100% {
         opacity: 1;
         transform: scale(1) translateY(0);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .username {
+        font-size: 12px;
+    }
+}
+@media screen and (max-width: 500px) {
+    .username {
+        font-size: 10px;
     }
 }
