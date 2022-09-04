@@ -1224,12 +1224,21 @@ function getDataTimeString() {
 
 function showButtons() {
     if (isButtonsVisible || (rc.isMobileDevice && rc.isChatOpen) || (rc.isMobileDevice && rc.isMySettingsOpen)) return;
+    toggleClassElements('videoMenuBar', 'inline');
     control.style.display = 'flex';
     isButtonsVisible = true;
     setTimeout(() => {
+        toggleClassElements('videoMenuBar', 'none');
         control.style.display = 'none';
         isButtonsVisible = false;
     }, 10000);
+}
+
+function toggleClassElements(className, displayState) {
+    let elements = rc.getEcN(className);
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = displayState;
+    }
 }
 
 function setAudioButtonsDisabled(disabled) {
