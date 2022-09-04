@@ -1055,6 +1055,7 @@ function handleInputs() {
 
     chatMessage.onpaste = () => {
         isChatPasteTxt = true;
+        rc.checkLineBreaks();
     };
 
     rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
