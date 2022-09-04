@@ -314,6 +314,7 @@ body {
     cursor: move;
 }
 
+.chat-header-title button,
 .chat-header-options button {
     border: none;
     font-size: 1.2rem;
