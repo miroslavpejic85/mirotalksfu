@@ -501,10 +501,6 @@ body {
     padding: 10px;
 }
 
-.chat-msger-buttons button {
-    width: 32px;
-}
-
 #chatSendButton {
     position: absolute;
     right: 10px;

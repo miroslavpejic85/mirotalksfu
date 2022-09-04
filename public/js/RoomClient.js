@@ -2061,14 +2061,16 @@ class RoomClient {
 
     cleanMessage() {
         chatMessage.value = '';
+        chatMessage.style.height = '';
     }
 
     pasteMessage() {
         navigator.clipboard
             .readText()
             .then((text) => {
-                chatMessage.value = text;
+                chatMessage.value += text;
                 isChatPasteTxt = true;
+                this.checkLineBreaks();
             })
             .catch((err) => {
                 console.error('Failed to read clipboard contents: ', err);
@@ -2077,14 +2079,14 @@ class RoomClient {
 
     sendMessage() {
         if (!this.thereIsParticipants()) {
-            chatMessage.value = '';
+            this.cleanMessage();
             isChatPasteTxt = false;
             this.userLog('info', 'No participants in the room', 'top-end');
             return;
         }
         let peer_msg = this.formatMsg(chatMessage.value);
         if (!peer_msg) {
-            chatMessage.value = '';
+            this.cleanMessage();
             return;
         }
         let data = {
@@ -2097,13 +2099,13 @@ class RoomClient {
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
         this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all', 'all');
-        chatMessage.value = '';
+        this.cleanMessage();
     }
 
     sendMessageTo(to_peer_id, to_peer_name) {
         if (!this.thereIsParticipants()) {
             isChatPasteTxt = false;
-            chatMessage.value = '';
+            this.cleanMessage();
             this.userLog('info', 'No participants in the room expect you', 'top-end');
             return;
         }
@@ -2125,7 +2127,7 @@ class RoomClient {
             if (result.value) {
                 let peer_msg = this.formatMsg(result.value);
                 if (!peer_msg) {
-                    chatMessage.value = '';
+                    this.cleanMessage();
                     return;
                 }
                 let data = {
@@ -2269,8 +2271,7 @@ class RoomClient {
             isChatPasteTxt = false;
             return pre;
         }
-        let numberOfLineBreaks = (message.match(/\n/g) || []).length;
-        if (numberOfLineBreaks > 1) {
+        if (this.getLineBreaks(message) > 1) {
             return pre;
         }
         return message;
@@ -2298,6 +2299,17 @@ class RoomClient {
             return false;
         }
         return url.protocol === 'http:' || url.protocol === 'https:';
+    }
+
+    getLineBreaks(message) {
+        return (message.match(/\n/g) || []).length;
+    }
+
+    checkLineBreaks() {
+        chatMessage.style.height = '';
+        if (this.getLineBreaks(chatMessage.value) > 1) {
+            chatMessage.style.height = '200px';
+        }
     }
 
     collectMessages(time, from, msg) {

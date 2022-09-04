@@ -1050,6 +1050,7 @@ function handleInputs() {
             let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
             this.value = this.value.replace(regex, chatInputEmoji[i]);
         }
+        rc.checkLineBreaks();
     };
 
     chatMessage.onpaste = () => {
@@ -1254,10 +1255,6 @@ function setVideoButtonsDisabled(disabled) {
     startVideoButton.disabled = disabled;
     stopVideoButton.disabled = disabled;
 }
-
-// ####################################################
-// UTILITY
-// ####################################################
 
 async function sound(name) {
     if (!isSoundEnabled) return;
