@@ -2329,6 +2329,10 @@ class RoomClient {
     }
 
     chatClean() {
+        if (this.chatMessages.length === 0) {
+            userLog('info', 'No chat messages to clean', 'top-end');
+            return;
+        }
         Swal.fire({
             background: swalBackground,
             position: 'center',
