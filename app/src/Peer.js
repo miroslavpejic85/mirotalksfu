@@ -114,8 +114,7 @@ module.exports = class Peer {
                 paused: false,
             });
         } catch (error) {
-            console.error('Consume failed', error);
-            return;
+            return console.error('Consume failed', error);
         }
 
         if (consumer.type === 'simulcast') {

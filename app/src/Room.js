@@ -217,12 +217,11 @@ module.exports = class Room {
                 rtpCapabilities,
             })
         ) {
-            log.error('Can not consume', {
+            return log.error('Can not consume', {
                 socket_id: socket_id,
                 consumer_transport_id: consumer_transport_id,
                 producer_id: producer_id,
             });
-            return;
         }
 
         let { consumer, params } = await this.peers

@@ -393,8 +393,7 @@ httpsServer.listen(config.listenPort, () => {
     );
 
     if (config.ngrokAuthToken !== '') {
-        ngrokStart();
-        return;
+        return ngrokStart();
     }
     log.debug('Settings', {
         node_version: process.versions.node,

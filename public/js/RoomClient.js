@@ -260,8 +260,7 @@ class RoomClient {
                     if (room === 'isLocked') {
                         this.event(_EVENTS.roomLock);
                         console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
-                        this.unlockTheRoom();
-                        return;
+                        return this.unlockTheRoom();
                     }
                     await this.joinAllowed(room);
                 }.bind(this),
@@ -337,8 +336,7 @@ class RoomClient {
             });
 
             if (data.error) {
-                console.error('Create WebRtc Transport for Producer err: ', data.error);
-                return;
+                return console.error('Create WebRtc Transport for Producer err: ', data.error);
             }
 
             this.producerTransport = device.createSendTransport(data);
@@ -406,8 +404,7 @@ class RoomClient {
             });
 
             if (data.error) {
-                console.error('Create WebRtc Transport for Consumer err: ', data.error);
-                return;
+                return console.error('Create WebRtc Transport for Consumer err: ', data.error);
             }
 
             this.consumerTransport = device.createRecvTransport(data);
@@ -690,12 +687,10 @@ class RoomClient {
                 return;
         }
         if (!this.device.canProduce('video') && !audio) {
-            console.error('Cannot produce video');
-            return;
+            return console.error('Cannot produce video');
         }
         if (this.producerLabel.has(type)) {
-            console.log('Producer already exists for this type ' + type);
-            return;
+            return console.log('Producer already exists for this type ' + type);
         }
         console.log(`Media contraints ${type}:`, mediaConstraints);
         let stream;
@@ -990,8 +985,7 @@ class RoomClient {
 
     pauseProducer(type) {
         if (!this.producerLabel.has(type)) {
-            console.log('There is no producer for this type ' + type);
-            return;
+            return console.log('There is no producer for this type ' + type);
         }
 
         let producer_id = this.producerLabel.get(type);
@@ -1014,8 +1008,7 @@ class RoomClient {
 
     resumeProducer(type) {
         if (!this.producerLabel.has(type)) {
-            console.log('There is no producer for this type ' + type);
-            return;
+            return console.log('There is no producer for this type ' + type);
         }
 
         let producer_id = this.producerLabel.get(type);
@@ -1038,8 +1031,7 @@ class RoomClient {
 
     closeProducer(type) {
         if (!this.producerLabel.has(type)) {
-            console.log('There is no producer for this type ' + type);
-            return;
+            return console.log('There is no producer for this type ' + type);
         }
 
         let producer_id = this.producerLabel.get(type);
@@ -2081,13 +2073,11 @@ class RoomClient {
         if (!this.thereIsParticipants()) {
             this.cleanMessage();
             isChatPasteTxt = false;
-            this.userLog('info', 'No participants in the room', 'top-end');
-            return;
+            return this.userLog('info', 'No participants in the room', 'top-end');
         }
         let peer_msg = this.formatMsg(chatMessage.value);
         if (!peer_msg) {
-            this.cleanMessage();
-            return;
+            return this.cleanMessage();
         }
         let data = {
             peer_name: this.peer_name,
@@ -2106,8 +2096,7 @@ class RoomClient {
         if (!this.thereIsParticipants()) {
             isChatPasteTxt = false;
             this.cleanMessage();
-            this.userLog('info', 'No participants in the room expect you', 'top-end');
-            return;
+            return this.userLog('info', 'No participants in the room expect you', 'top-end');
         }
         Swal.fire({
             background: swalBackground,
@@ -2127,8 +2116,7 @@ class RoomClient {
             if (result.value) {
                 let peer_msg = this.formatMsg(result.value);
                 if (!peer_msg) {
-                    this.cleanMessage();
-                    return;
+                    return this.cleanMessage();
                 }
                 let data = {
                     peer_name: this.peer_name,
@@ -2330,8 +2318,7 @@ class RoomClient {
 
     chatClean() {
         if (this.chatMessages.length === 0) {
-            userLog('info', 'No chat messages to clean', 'top-end');
-            return;
+            return userLog('info', 'No chat messages to clean', 'top-end');
         }
         Swal.fire({
             background: swalBackground,
@@ -2362,8 +2349,7 @@ class RoomClient {
 
     chatSave() {
         if (this.chatMessages.length === 0) {
-            userLog('info', 'No chat messages to save', 'top-end');
-            return;
+            return userLog('info', 'No chat messages to save', 'top-end');
         }
 
         const newDate = new Date();
@@ -2437,8 +2423,7 @@ class RoomClient {
             }
         } catch (err) {
             console.error('Exception while creating MediaRecorder: ', err);
-            this.userLog('error', "Can't start stream recording reason: " + err, 'top-end');
-            return;
+            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end');
         }
     }
 
@@ -2553,23 +2538,19 @@ class RoomClient {
             videoPlayer.addEventListener('drop', function (e) {
                 e.preventDefault();
                 if (itsMe) {
-                    userLog('warning', 'You cannot send files to yourself.', 'top-end');
-                    return;
+                    return userLog('warning', 'You cannot send files to yourself.', 'top-end');
                 }
                 if (this.sendInProgress) {
-                    userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
-                    return;
+                    return userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
                 }
                 if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
-                    userLog('warning', 'Please drag and drop a single file.', 'top-end');
-                    return;
+                    return userLog('warning', 'Please drag and drop a single file.', 'top-end');
                 }
                 if (e.dataTransfer.items) {
                     let item = e.dataTransfer.items[0].webkitGetAsEntry();
                     console.log('Drag and drop', item);
                     if (item.isDirectory) {
-                        userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
-                        return;
+                        return userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
                     }
                     var file = e.dataTransfer.items[0].getAsFile();
                     rc.sendFileInformations(file, peer_id);
@@ -2616,8 +2597,7 @@ class RoomClient {
         //
         if (this.fileToSend && this.fileToSend.size > 0) {
             if (!this.thereIsParticipants()) {
-                userLog('info', 'No participants detected', 'top-end');
-                return;
+                return userLog('info', 'No participants detected', 'top-end');
             }
             let fileInfo = {
                 peer_id: peer_id,
@@ -2901,12 +2881,10 @@ class RoomClient {
         }).then((result) => {
             if (result.value) {
                 if (!this.thereIsParticipants()) {
-                    userLog('info', 'No participants detected', 'top-end');
-                    return;
+                    return userLog('info', 'No participants detected', 'top-end');
                 }
                 if (!this.isVideoTypeSupported(result.value)) {
-                    userLog('warning', 'Something wrong, try with another Video or audio URL');
-                    return;
+                    return userLog('warning', 'Something wrong, try with another Video or audio URL');
                 }
                 /*
                     https://www.youtube.com/watch?v=RT6_Id5-7-s
@@ -3312,8 +3290,7 @@ class RoomClient {
             };
 
             if (!this.thereIsParticipants()) {
-                if (info) this.userLog('info', 'No participants detected', 'top-end');
-                return;
+                if (info) return this.userLog('info', 'No participants detected', 'top-end');
             }
             this.confirmPeerAction(action, data);
         } else {
