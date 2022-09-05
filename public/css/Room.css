@@ -450,18 +450,6 @@ body {
 }
 
 /*--------------------------------------------------------------
-# Chat private button reply
---------------------------------------------------------------*/
-
-.msger-reply-btn {
-    font-size: 0.9rem;
-    padding: 5px;
-    background: var(--msger-bg);
-    border-radius: 5px;
-    border: none;
-}
-
-/*--------------------------------------------------------------
 # Chat room input area
 --------------------------------------------------------------*/
 
@@ -478,6 +466,8 @@ body {
     background: rgb(7 7 7);
     color: #fff;
     resize: none;
+    height: 43px;
+    transition: height 1s;
 }
 
 .chat-msger-input::-webkit-scrollbar {

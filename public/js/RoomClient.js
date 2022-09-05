@@ -2061,7 +2061,7 @@ class RoomClient {
 
     cleanMessage() {
         chatMessage.value = '';
-        chatMessage.style.height = '';
+        chatMessage.style.height = '43px';
     }
 
     pasteMessage() {
