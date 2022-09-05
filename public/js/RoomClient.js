@@ -2188,7 +2188,17 @@ class RoomClient {
                     <div class="msg-info-time">${time}</div>
                 </div>
                 <div id="${chatMessagesId}" class="msg-text">${message}
-                    <hr/>
+                    <hr/>`;
+        // add btn direct reply to private message
+        if (fromId != this.peer_id) {
+            msgHTML += `
+                    <button 
+                        class="fas fa-paper-plane"
+                        id="msg-private-reply-${chatMessagesId}"
+                        onclick="rc.sendMessageTo('${fromId}','${fromName}')"
+                    ></button>`;
+        }
+        msgHTML += `                    
                     <button
                         id="msg-delete-${chatMessagesId}"
                         class="fas fa-trash" 
@@ -2199,17 +2209,6 @@ class RoomClient {
                         class="fas fa-copy" 
                         onclick="rc.copyToClipboard('${chatMessagesId}')"
                     ></button>
-                    `;
-        // add btn direct reply to private message
-        if (fromId != this.peer_id) {
-            msgHTML += `
-                <button 
-                    class="fas fa-paper-plane"
-                    id="msg-private-reply-${chatMessagesId}"
-                    onclick="rc.sendMessageTo('${fromId}','${fromName}')"
-                ></button>`;
-        }
-        msgHTML += `
                 </div>
             </div>
         </div>
