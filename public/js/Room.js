@@ -147,7 +147,7 @@ function initClient() {
         setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
         setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
-        setTippy('chatMessage', 'Press enter to send', 'top-start');
+        setTippy('chatMessage', 'New line: Shift + Enter', 'top-start');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
