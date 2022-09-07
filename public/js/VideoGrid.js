@@ -38,7 +38,7 @@ function Area(Increment, Count, Width, Height, Margin = 10) {
 }
 
 function resizeVideoMedia() {
-    let Margin = 3;
+    let Margin = 5;
     let videoMediaContainer = document.getElementById('videoMediaContainer');
     let Cameras = document.getElementsByClassName('Camera');
     let Width = videoMediaContainer.offsetWidth - Margin * 2;
