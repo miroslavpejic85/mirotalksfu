@@ -1920,6 +1920,7 @@ class RoomClient {
             btnPn.addEventListener('click', () => {
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
+                    videoPlayer.style.objectFit = 'contain';
                     cam.className = '';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
@@ -1935,6 +1936,7 @@ class RoomClient {
                         this.isVideoPinned = true;
                         return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
                     }
+                    videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
                     cam.className = 'Camera';
                     this.videoMediaContainer.style.width = '100%';
