@@ -115,7 +115,7 @@
 .videoMenuBar {
     z-index: 2;
     position: absolute;
-    display: 'inline';
+    display: inline;
     top: 0;
     left: 0;
     padding: 10px;
