@@ -888,6 +888,7 @@ class RoomClient {
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
+                let isScreen = type === mediaType.screen;
                 this.removeVideoOff(this.peer_id);
                 d = document.createElement('div');
                 d.className = 'Camera';
@@ -900,6 +901,7 @@ class RoomClient {
                 elem.muted = true;
                 elem.volume = 0;
                 elem.poster = image.poster;
+                elem.style.objectFit = isScreen ? 'contain' : 'var(--videoObjFit)';
                 this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
@@ -946,15 +948,13 @@ class RoomClient {
                 this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
-                this.handlePN(elem.id, pn.id, d.id);
+                this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
                 if (participantsCount <= 3 && type === mediaType.screen) {
                     this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true, false);
                     setAspectRatio(2); // 16:9
                 } else {
-                    if (type === mediaType.screen)
-                        this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
                     handleAspectRatio();
                 }
                 if (!this.isMobileDevice) {
@@ -1170,6 +1170,7 @@ class RoomClient {
         let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
 
         let remotePeerId = peer_info.peer_id;
+        let remoteIsScreen = peer_info.peer_screen;
 
         switch (type) {
             case mediaType.video:
@@ -1185,6 +1186,7 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
+                elem.style.objectFit = remoteIsScreen ? 'contain' : 'var(--videoObjFit)';
                 vb = document.createElement('div');
                 vb.setAttribute('id', remotePeerId + '__vb');
                 vb.className = 'videoMenuBar fadein';
@@ -1263,7 +1265,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
-                this.handlePN(elem.id, pn.id, d.id);
+                this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 this.sound('joined');
@@ -1913,7 +1915,7 @@ class RoomClient {
         }
     }
 
-    handlePN(elemId, pnId, camId) {
+    handlePN(elemId, pnId, camId, isScreen = false) {
         let videoPlayer = this.getId(elemId);
         let btnPn = this.getId(pnId);
         let cam = this.getId(camId);
@@ -1937,7 +1939,7 @@ class RoomClient {
                         this.isVideoPinned = true;
                         return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
                     }
-                    videoPlayer.style.objectFit = 'var(--videoObjFit)';
+                    if (!isScreen) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
                     cam.className = 'Camera';
                     this.videoMediaContainer.style.width = '100%';
@@ -3328,9 +3330,6 @@ class RoomClient {
                 case 'screenStart':
                     if (!this.isMobileDevice) setAspectRatio(2);
                     break;
-                case 'screenStop':
-                    if (!this.isMobileDevice) handleAspectRatio();
-                    break;
                 // ...
             }
         }
@@ -3453,10 +3452,9 @@ class RoomClient {
                     });
                 break;
             case 'screenStart':
-            case 'screenStop':
                 setTimeout(() => {
                     this.socket.emit('peerAction', data);
-                }, 2000);
+                }, 1000);
                 break;
         }
     }

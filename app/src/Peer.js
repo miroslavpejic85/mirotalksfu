@@ -33,6 +33,9 @@ module.exports = class Peer {
                 this.peer_info.peer_video = data.status;
                 this.peer_video = data.status;
                 break;
+            case 'screenType':
+                this.peer_info.peer_screen = data.status;
+                break;
             case 'hand':
                 this.peer_info.peer_hand = data.status;
                 this.peer_hand = data.status;

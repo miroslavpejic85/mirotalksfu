@@ -496,6 +496,17 @@ io.on('connection', (socket) => {
         if (!roomList.has(socket.room_id)) return;
 
         log.debug('Peer action', data);
+
+        if (data.action == 'screenStart') {
+            let screenData = {
+                peer_name: getPeerName(),
+                peer_id: socket.id,
+                type: 'screenType',
+                status: true,
+            };
+            roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(screenData);
+        }
+
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
         } else {
