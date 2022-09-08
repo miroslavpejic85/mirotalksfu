@@ -953,7 +953,8 @@ class RoomClient {
                     this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true, false);
                     setAspectRatio(2); // 16:9
                 } else {
-                    this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
+                    if (type === mediaType.screen)
+                        this.peerAction('me', this.peer_id + '___sStop', 'screenStop', true, true, false);
                     handleAspectRatio();
                 }
                 if (!this.isMobileDevice) {

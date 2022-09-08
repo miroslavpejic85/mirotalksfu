@@ -21,6 +21,7 @@ module.exports = class Peer {
     // ####################################################
 
     updatePeerInfo(data) {
+        log.debug('Update peer info', data);
         switch (data.type) {
             case 'audio':
             case 'audioType':

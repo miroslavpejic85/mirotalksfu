@@ -495,7 +495,7 @@ io.on('connection', (socket) => {
     socket.on('peerAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
-        log.debug('Peer action:', data);
+        log.debug('Peer action', data);
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
         } else {
@@ -506,7 +506,6 @@ io.on('connection', (socket) => {
     socket.on('updatePeerInfo', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
-        log.debug('Peer info update:', data);
         // peer_info hand raise Or lower
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
@@ -653,6 +652,15 @@ io.on('connection', (socket) => {
 
         let peer_name = getPeerName(false);
 
+        // peer_info audio Or video ON
+        let data = {
+            peer_name: peer_name,
+            peer_id: socket.id,
+            type: kind,
+            status: true,
+        };
+        await roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
+
         let producer_id = await roomList
             .get(socket.room_id)
             .produce(socket.id, producerTransportId, rtpParameters, kind);
@@ -668,14 +676,6 @@ io.on('connection', (socket) => {
         if (kind === 'audio') {
             roomList.get(socket.room_id).addProducerToAudioLevelObserver({ producerId: producer_id });
         }
-
-        // peer_info audio Or video ON
-        let data = {
-            peer_name: peer_name,
-            type: kind,
-            status: true,
-        };
-        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
 
         callback({
             producer_id,
