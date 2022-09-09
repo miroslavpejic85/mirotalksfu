@@ -653,7 +653,7 @@ button:hover {
 }
 
 #roomParticipants {
-    max-height: 480px;
+    max-height: 680px;
     overflow: auto;
 }
 
@@ -676,6 +676,18 @@ button:hover {
 /* #roomParticipants tr:nth-child(even) {
     background-color: #0c0b0b;
 } */
+
+#roomParticipants::-webkit-scrollbar {
+    width: 5px;
+}
+
+#roomParticipants::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#roomParticipants::-webkit-scrollbar-thumb {
+    background: #404040;
+}
 
 #inviteParticipants {
     width: 100%;
