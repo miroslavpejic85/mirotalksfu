@@ -149,12 +149,13 @@ body {
 }
 
 #control button {
-    border: none;
-    font-size: 1.8rem;
-    padding: 4px;
+    font-size: 1.2rem;
+    padding: 10px;
     transition: all 0.3s ease-in-out;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 10px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    border: var(--border);
+    /* box-shadow: var(--box-shadow); */
 }
 
 #control p {
