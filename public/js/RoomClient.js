@@ -1716,6 +1716,7 @@ class RoomClient {
         let sound = '../sounds/' + name + '.wav';
         let audio = new Audio(sound);
         try {
+            audio.volume = 0.5;
             await audio.play();
         } catch (err) {
             return false;
