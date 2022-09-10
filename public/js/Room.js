@@ -24,8 +24,6 @@ const socket = io({ transports: ['websocket'] });
 
 const surveyActive = true;
 
-const isSoundEnabled = true;
-
 const url = {
     ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
     survey: 'https://www.questionpro.com/t/AUs7VZq02P',
@@ -74,6 +72,7 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
+let isSoundEnabled = true;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -986,6 +985,10 @@ function handleSelects() {
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+    };
+    // room
+    switchSound.onchange = (e) => {
+        isSoundEnabled = e.currentTarget.checked;
     };
     // styling
     BtnsAspectRatio.onchange = () => {
