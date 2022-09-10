@@ -152,9 +152,14 @@ app.use(express.static(dir.public));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
+// all start from here
+app.get('*', function (next) {
+    next();
+});
+
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
+    if (err instanceof SyntaxError || err.status === 400 || 'body' in err) {
         log.debug('Request Error', {
             header: req.headers,
             body: req.body,
@@ -170,7 +175,7 @@ app.use((err, req, res, next) => {
     }
 });
 
-// all start from here
+// main page
 app.get(['/'], (req, res) => {
     if (hostCfg.protected == true) {
         hostCfg.authenticated = false;
