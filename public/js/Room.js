@@ -987,7 +987,7 @@ function handleSelects() {
         rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
     };
     // room
-    switchSound.onchange = (e) => {
+    switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
     };
     // styling
