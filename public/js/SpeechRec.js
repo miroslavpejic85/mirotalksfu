@@ -126,7 +126,6 @@ function startSpeech(action) {
 }
 
 function execVoiceCommands(transcript) {
-    console.log('------|', transcript.trim().toLowerCase());
     switch (transcript.trim().toLowerCase()) {
         case commands.shareRoom:
             printCommand(commands.shareRoom);
