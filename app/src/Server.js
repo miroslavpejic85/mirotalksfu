@@ -160,7 +160,7 @@ app.get('*', function (next) {
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
     if (err instanceof SyntaxError || err.status === 400 || 'body' in err) {
-        log.debug('Request Error', {
+        log.error('Request Error', {
             header: req.headers,
             body: req.body,
             error: err.message,

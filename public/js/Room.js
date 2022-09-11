@@ -100,6 +100,7 @@ let wbIsBgTransparent = false;
 let wbPop = [];
 
 let isButtonsVisible = false;
+let isButtonsBarOver = false;
 
 let isRoomLocked = false;
 
@@ -678,6 +679,7 @@ function roomIsReady() {
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
     });
+    checkButtonsBar();
     if (room_password) {
         lockRoomButton.click();
     }
@@ -763,6 +765,12 @@ function stopRecordingTimer() {
 // ####################################################
 
 function handleButtons() {
+    control.onmouseover = () => {
+        isButtonsBarOver = true;
+    };
+    control.onmouseout = () => {
+        isButtonsBarOver = false;
+    };
     exitButton.onclick = () => {
         rc.exitRoom();
     };
@@ -1231,14 +1239,26 @@ function getDataTimeString() {
 }
 
 function showButtons() {
-    if (isButtonsVisible || (rc.isMobileDevice && rc.isChatOpen) || (rc.isMobileDevice && rc.isMySettingsOpen)) return;
+    if (
+        isButtonsBarOver ||
+        isButtonsVisible ||
+        (rc.isMobileDevice && rc.isChatOpen) ||
+        (rc.isMobileDevice && rc.isMySettingsOpen)
+    )
+        return;
     toggleClassElements('videoMenuBar', 'inline');
     control.style.display = 'flex';
     isButtonsVisible = true;
-    setTimeout(() => {
+}
+
+function checkButtonsBar() {
+    if (!isButtonsBarOver) {
         toggleClassElements('videoMenuBar', 'none');
         control.style.display = 'none';
         isButtonsVisible = false;
+    }
+    setTimeout(() => {
+        checkButtonsBar();
     }, 10000);
 }
 
