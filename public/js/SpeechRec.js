@@ -45,12 +45,12 @@ const commands = {
     roomUnlock: 'unlock the room',
     about: 'show the about',
     email: 'open email',
-    google: 'open Google',
-    googleTr: 'open Google Translate',
-    youtube: 'open YouTube',
-    facebook: 'open Facebook',
-    linkedin: 'open Linkedin',
-    twitter: 'open Twitter',
+    google: 'open google',
+    googleTr: 'open google translate',
+    youtube: 'open youtube',
+    facebook: 'open facebook',
+    linkedin: 'open linkedin',
+    twitter: 'open twitter',
     tiktok: 'open tiktok',
     github: 'open github',
     survey: 'open survey',
@@ -126,6 +126,7 @@ function startSpeech(action) {
 }
 
 function execVoiceCommands(transcript) {
+    console.log('------|', transcript.trim().toLowerCase());
     switch (transcript.trim().toLowerCase()) {
         case commands.shareRoom:
             printCommand(commands.shareRoom);
