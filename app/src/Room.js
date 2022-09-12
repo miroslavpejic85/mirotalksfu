@@ -122,6 +122,7 @@ module.exports = class Room {
                     producer_id: producer.id,
                     peer_name: peer.peer_name,
                     peer_info: peer.peer_info,
+                    type: producer.appData.mediaType,
                 });
             });
         });
@@ -189,10 +190,12 @@ module.exports = class Room {
     // PRODUCE
     // ####################################################
 
-    async produce(socket_id, producerTransportId, rtpParameters, kind) {
+    async produce(socket_id, producerTransportId, rtpParameters, kind, type) {
         return new Promise(
             async function (resolve, reject) {
-                let producer = await this.peers.get(socket_id).createProducer(producerTransportId, rtpParameters, kind);
+                let producer = await this.peers
+                    .get(socket_id)
+                    .createProducer(producerTransportId, rtpParameters, kind, type);
                 resolve(producer.id);
                 this.broadCast(socket_id, 'newProducers', [
                     {
@@ -200,6 +203,7 @@ module.exports = class Room {
                         producer_socket_id: socket_id,
                         peer_name: this.peers.get(socket_id).peer_name,
                         peer_info: this.peers.get(socket_id).peer_info,
+                        type: type,
                     },
                 ]);
             }.bind(this),

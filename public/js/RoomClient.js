@@ -506,8 +506,8 @@ class RoomClient {
             async function (data) {
                 if (data.length > 0) {
                     console.log('New producers', data);
-                    for (let { producer_id, peer_name, peer_info } of data) {
-                        await this.consume(producer_id, peer_name, peer_info);
+                    for (let { producer_id, peer_name, peer_info, type } of data) {
+                        await this.consume(producer_id, peer_name, peer_info, type);
                     }
                 }
             }.bind(this),
@@ -1113,7 +1113,7 @@ class RoomClient {
     // CONSUMER
     // ####################################################
 
-    async consume(producer_id, peer_name, peer_info) {
+    async consume(producer_id, peer_name, peer_info, type) {
         //
         if (wbIsOpen && isPresenter) {
             console.log('Update whiteboard canvas to the participants in the room');
@@ -1126,11 +1126,12 @@ class RoomClient {
                 this.consumers.set(consumer.id, consumer);
 
                 if (kind === 'video') {
-                    this.handleConsumer(consumer.id, mediaType.video, stream, peer_name, peer_info);
                     if (isParticipantsListOpen) getRoomParticipants(true);
-                } else {
-                    this.handleConsumer(consumer.id, mediaType.audio, stream, peer_name, peer_info);
                 }
+
+                console.log('CONSUMER MEDIA TYPE ----> ' + type);
+
+                this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
 
                 consumer.on(
                     'trackended',
@@ -1179,10 +1180,11 @@ class RoomClient {
         let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
 
         let remotePeerId = peer_info.peer_id;
-        let remoteIsScreen = peer_info.peer_screen;
+        let remoteIsScreen = type === mediaType.screen;
 
         switch (type) {
             case mediaType.video:
+            case mediaType.screen:
                 let remotePeerAudio = peer_info.peer_audio;
                 this.removeVideoOff(remotePeerId);
                 d = document.createElement('div');

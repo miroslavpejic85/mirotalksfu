@@ -670,7 +670,7 @@ io.on('connection', (socket) => {
 
         let producer_id = await roomList
             .get(socket.room_id)
-            .produce(socket.id, producerTransportId, rtpParameters, kind);
+            .produce(socket.id, producerTransportId, rtpParameters, kind, appData.mediaType);
 
         log.debug('Produce', {
             kind: kind,
