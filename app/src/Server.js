@@ -512,7 +512,7 @@ io.on('connection', (socket) => {
     socket.on('updatePeerInfo', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
-        // peer_info hand raise Or lower
+        // update my peer_info status to all in the room
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });

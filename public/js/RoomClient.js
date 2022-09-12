@@ -960,12 +960,7 @@ class RoomClient {
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
-                if (participantsCount <= 3 && type === mediaType.screen) {
-                    this.peerAction('me', this.peer_id + '___sStart', 'screenStart', true, true, false);
-                    setAspectRatio(2); // 16:9
-                } else {
-                    handleAspectRatio();
-                }
+                handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
@@ -3339,10 +3334,7 @@ class RoomClient {
                         );
                     }
                     break;
-                case 'screenStart':
-                    if (!this.isMobileDevice) setAspectRatio(2);
-                    break;
-                // ...
+                //...
             }
         }
     }
@@ -3463,11 +3455,7 @@ class RoomClient {
                         if (muteHideConfirmed) this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
                 break;
-            case 'screenStart':
-                setTimeout(() => {
-                    this.socket.emit('peerAction', data);
-                }, 1000);
-                break;
+            //...
         }
     }
 
