@@ -23,12 +23,10 @@ module.exports = class Peer {
     updatePeerInfo(data) {
         log.debug('Update peer info', data);
         switch (data.type) {
-            case 'audio':
             case 'audioType':
                 this.peer_info.peer_audio = data.status;
                 this.peer_audio = data.status;
                 break;
-            case 'video':
             case 'videoType':
                 this.peer_info.peer_video = data.status;
                 this.peer_video = data.status;

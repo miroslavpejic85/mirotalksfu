@@ -502,16 +502,6 @@ io.on('connection', (socket) => {
 
         log.debug('Peer action', data);
 
-        if (data.action == 'screenStart') {
-            let screenData = {
-                peer_name: getPeerName(),
-                peer_id: socket.id,
-                type: 'screenType',
-                status: true,
-            };
-            roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(screenData);
-        }
-
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
         } else {
@@ -661,7 +651,7 @@ io.on('connection', (socket) => {
         callback('success');
     });
 
-    socket.on('produce', async ({ kind, rtpParameters, producerTransportId }, callback) => {
+    socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
         if (!roomList.has(socket.room_id)) {
             return callback({ error: 'Room not found' });
         }
@@ -672,7 +662,8 @@ io.on('connection', (socket) => {
         let data = {
             peer_name: peer_name,
             peer_id: socket.id,
-            type: kind,
+            kind: kind,
+            type: appData.mediaType,
             status: true,
         };
         await roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
@@ -683,6 +674,7 @@ io.on('connection', (socket) => {
 
         log.debug('Produce', {
             kind: kind,
+            type: appData.mediaType,
             peer_name: peer_name,
             peer_id: socket.id,
             producer_id: producer_id,

@@ -355,11 +355,17 @@ class RoomClient {
 
             this.producerTransport.on(
                 'produce',
-                async function ({ kind, rtpParameters }, callback, errback) {
+                async function ({ kind, appData, rtpParameters }, callback, errback) {
+                    console.log('Going to produce', {
+                        kind: kind,
+                        appData: appData,
+                        rtpParameters: rtpParameters,
+                    });
                     try {
                         const { producer_id } = await this.socket.request('produce', {
                             producerTransportId: this.producerTransport.id,
                             kind,
+                            appData,
                             rtpParameters,
                         });
                         callback({
@@ -703,6 +709,9 @@ class RoomClient {
             const track = audio ? stream.getAudioTracks()[0] : stream.getVideoTracks()[0];
             const params = {
                 track,
+                appData: {
+                    mediaType: type,
+                },
             };
 
             if (!audio && !screen) {
@@ -848,7 +857,7 @@ class RoomClient {
 
     getScreenConstraints() {
         return {
-            audio: false,
+            audio: true,
             video: {
                 frameRate: {
                     ideal: 15,
