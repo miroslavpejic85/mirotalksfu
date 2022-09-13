@@ -50,6 +50,7 @@ const image = {
     message: '../images/message.png',
     share: '../images/share.png',
     exit: '../images/exit.png',
+    feedback: '../images/feedback.png',
 };
 
 const mediaType = {

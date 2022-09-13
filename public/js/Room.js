@@ -1210,6 +1210,7 @@ function leaveFeedback() {
         allowEscapeKey: false,
         showDenyButton: true,
         background: swalBackground,
+        imageUrl: image.feedback,
         title: 'Leave a feedback',
         text: 'Do you want to rate your MiroTalk experience?',
         confirmButtonText: `Yes`,
