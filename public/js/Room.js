@@ -1193,7 +1193,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
         if (surveyActive) {
-            openURL(url.survey);
+            leaveFeedback();
         } else {
             openURL('/newroom');
         }
@@ -1203,6 +1203,31 @@ function handleRoomClientEvents() {
 // ####################################################
 // UTILITY
 // ####################################################
+
+function leaveFeedback() {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showDenyButton: true,
+        background: swalBackground,
+        title: 'Leave a feedback',
+        text: 'Do you want to rate your MiroTalk experience?',
+        confirmButtonText: `Yes`,
+        denyButtonText: `No`,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp',
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            openURL(url.survey);
+        } else {
+            openURL('/newroom');
+        }
+    });
+}
 
 function userLog(icon, message, position, timer = 3000) {
     const Toast = Swal.mixin({
