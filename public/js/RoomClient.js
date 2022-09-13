@@ -803,9 +803,83 @@ class RoomClient {
                     return;
             }
             this.sound('joined');
+
+            // if present produce the tab audio on screen share
+            if (screen && stream.getAudioTracks()[0]) {
+                this.produceScreenAudio(stream);
+            }
         } catch (err) {
             console.error('Produce error:', err);
         }
+    }
+
+    async produceScreenAudio(stream) {
+        try {
+            this.stopMyAudio();
+
+            if (this.producerLabel.has(mediaType.audio)) {
+                return console.log('Producer already exists for this type ' + mediaType.audio);
+            }
+
+            const track = stream.getAudioTracks()[0];
+            const params = {
+                track,
+                appData: {
+                    mediaType: mediaType.audio,
+                },
+            };
+
+            const producerSa = await this.producerTransport.produce(params);
+
+            console.log('PRODUCER SCREEN AUDIO', producerSa);
+
+            this.producers.set(producerSa.id, producerSa);
+
+            const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
+
+            producerSa.on('trackended', () => {
+                this.closeProducer(mediaType.audio);
+                this.startMyAudio();
+            });
+
+            producerSa.on('transportclose', () => {
+                console.log('Producer Screen audio transport close');
+                sa.srcObject.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                sa.parentNode.removeChild(sa);
+                console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
+                this.producers.delete(producerSa.id);
+            });
+
+            producerSa.on('close', () => {
+                console.log('Closing Screen audio producer');
+                sa.srcObject.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                sa.parentNode.removeChild(sa);
+                console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
+                this.producers.delete(producerSa.id);
+            });
+
+            this.producerLabel.set(mediaType.audio, producerSa.id);
+        } catch (err) {
+            console.error('Produce error:', err);
+        }
+    }
+
+    startMyAudio() {
+        startAudioButton.click();
+        this.setIsAudio(this.peer_id, true);
+        this.event(_EVENTS.startAudio);
+        setAudioButtonsDisabled(false);
+    }
+
+    stopMyAudio() {
+        stopAudioButton.click();
+        this.setIsAudio(this.peer_id, false);
+        this.event(_EVENTS.stopAudio);
+        setAudioButtonsDisabled(true);
     }
 
     getAudioConstraints(deviceId) {
