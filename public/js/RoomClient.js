@@ -154,6 +154,7 @@ class RoomClient {
 
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
+        this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
         this.isChatBgTransparent = false;
@@ -1019,7 +1020,7 @@ class RoomClient {
                 pm.appendChild(pb);
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
-                BUTTONS.producerVideo.fullScreenButton && vb.appendChild(fs);
+                BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
                 d.appendChild(pm);
@@ -1029,7 +1030,7 @@ class RoomClient {
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Producer');
                 this.myVideoEl = elem;
-                this.handleFS(elem.id, fs.id);
+                this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
@@ -1327,7 +1328,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
                 BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
-                BUTTONS.consumerVideo.fullScreenButton && vb.appendChild(fs);
+                BUTTONS.consumerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
                 d.appendChild(i);
@@ -1336,7 +1337,7 @@ class RoomClient {
                 d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
-                this.handleFS(elem.id, fs.id);
+                this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
