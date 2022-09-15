@@ -1540,25 +1540,6 @@ class RoomClient {
     }
 
     // ####################################################
-    // REMOVE VIDEO PIN MEDIA CONTAINER
-    // ####################################################
-
-    removeVideoPinMediaContainer() {
-        this.videoPinMediaContainer.style.display = 'none';
-        this.videoMediaContainer.style.width = '100%';
-        this.videoMediaContainer.style.right = null;
-        this.videoMediaContainer.style.left = 0;
-        this.pinnedVideoPlayerId = null;
-        this.isVideoPinned = false;
-    }
-
-    adaptVideoObjectFit(index) {
-        // 1 (cover) 2 (contain)
-        BtnVideoObjectFit.selectedIndex = index;
-        BtnVideoObjectFit.onchange();
-    }
-
-    // ####################################################
     // SHARE SCREEN ON JOIN
     // ####################################################
 
@@ -1979,7 +1960,7 @@ class RoomClient {
     }
 
     // ####################################################
-    // HANDLE VIDEO | OBJ FIT | CONTROLS |
+    // HANDLE VIDEO | OBJ FIT | CONTROLS | PIN-UNPIN
     // ####################################################
 
     handleVideoObjectFit(value) {
@@ -2010,9 +1991,7 @@ class RoomClient {
                     cam.className = '';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
-                    this.videoMediaContainer.style.width = '25%';
-                    this.videoMediaContainer.style.left = null;
-                    this.videoMediaContainer.style.right = 0;
+                    this.togglePin(pinVideoPosition.value);
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
@@ -2025,17 +2004,59 @@ class RoomClient {
                     if (!isScreen) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
                     cam.className = 'Camera';
-                    this.videoMediaContainer.style.width = '100%';
-                    this.videoMediaContainer.style.right = null;
-                    this.videoMediaContainer.style.left = 0;
                     this.videoMediaContainer.appendChild(cam);
-                    this.videoPinMediaContainer.style.display = 'none';
-                    this.pinnedVideoPlayerId = null;
+                    this.removeVideoPinMediaContainer();
                     setColor(btnPn, 'white');
                 }
                 handleAspectRatio();
             });
         }
+    }
+
+    togglePin(position) {
+        if (!this.isVideoPinned) return;
+        switch (position) {
+            case 'vertical':
+                this.videoPinMediaContainer.style.width = '75%';
+                this.videoPinMediaContainer.style.height = '100%';
+                this.videoMediaContainer.style.top = 0;
+                this.videoMediaContainer.style.width = '25%';
+                this.videoMediaContainer.style.height = '100%';
+                this.videoMediaContainer.style.right = 0;
+                document.documentElement.style.setProperty('--vmi-wh', '15vw');
+                break;
+            case 'horizontal':
+                this.videoPinMediaContainer.style.width = '100%';
+                this.videoPinMediaContainer.style.height = '75%';
+                this.videoMediaContainer.style.top = '75%';
+                this.videoMediaContainer.style.right = null;
+                this.videoMediaContainer.style.width = null;
+                this.videoMediaContainer.style.width = '100% !important';
+                this.videoMediaContainer.style.height = '25%';
+                document.documentElement.style.setProperty('--vmi-wh', '15vh');
+                break;
+        }
+        resizeVideoMedia();
+    }
+
+    // ####################################################
+    // REMOVE VIDEO PIN MEDIA CONTAINER
+    // ####################################################
+
+    removeVideoPinMediaContainer() {
+        this.videoPinMediaContainer.style.display = 'none';
+        this.videoMediaContainer.style.top = 0;
+        this.videoMediaContainer.style.right = null;
+        this.videoMediaContainer.style.width = '100%';
+        this.videoMediaContainer.style.height = '100%';
+        this.pinnedVideoPlayerId = null;
+        this.isVideoPinned = false;
+    }
+
+    adaptVideoObjectFit(index) {
+        // 1 (cover) 2 (contain)
+        BtnVideoObjectFit.selectedIndex = index;
+        BtnVideoObjectFit.onchange();
     }
 
     // ####################################################

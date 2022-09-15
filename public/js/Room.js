@@ -130,6 +130,7 @@ function initClient() {
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
+        setTippy('tabLanguagesBtn', 'Languages', 'top');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -672,6 +673,7 @@ function roomIsReady() {
     BUTTONS.settings.participantsButton && show(participantsButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.main.aboutButton && show(aboutButton);
+    if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -800,6 +802,9 @@ function handleButtons() {
     };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
+    };
+    tabLanguagesBtn.onclick = (e) => {
+        rc.openTab(e, 'tabLanguages');
     };
     chatButton.onclick = () => {
         rc.toggleChat();
@@ -1015,6 +1020,9 @@ function handleSelects() {
     };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
+    };
+    pinVideoPosition.onchange = () => {
+        rc.togglePin(pinVideoPosition.value);
     };
 
     // whiteboard options
