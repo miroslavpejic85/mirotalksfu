@@ -185,7 +185,7 @@ body {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 370px;
+    width: 355px;
     min-height: 480px;
     background: var(--settings-bg);
     box-shadow: var(--box-shadow);
