@@ -171,10 +171,11 @@ function initClient() {
 // HANDLE TOOLTIP
 // ####################################################
 
-function setTippy(elem, content, placement) {
+function setTippy(elem, content, placement, allowHTML = false) {
     tippy(document.getElementById(elem), {
         content: content,
         placement: placement,
+        allowHTML: allowHTML,
     });
 }
 

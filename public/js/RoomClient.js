@@ -190,7 +190,7 @@ class RoomClient {
 
         this.myVideoEl = null;
         this.myAudioEl = null;
-        this.debug = false;
+        this.showPeerInfo = false;
 
         this.videoProducerId = null;
         this.audioProducerId = null;
@@ -1514,6 +1514,7 @@ class RoomClient {
             this.handleKO(ko.id);
         }
         this.handleDD(d.id, peer_id, !remotePeer);
+        this.popupPeerInfo(p.id, peer_info);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
@@ -1668,11 +1669,12 @@ class RoomClient {
     // SET
     // ####################################################
 
-    setTippy(elem, content, placement) {
+    setTippy(elem, content, placement, allowHTML = false) {
         if (DetectRTC.isMobileDevice) return;
         tippy(this.getId(elem), {
             content: content,
             placement: placement,
+            allowHTML: allowHTML,
         });
     }
 
@@ -3651,25 +3653,33 @@ class RoomClient {
     }
 
     popupPeerInfo(id, peer_info) {
-        if (this.debug) {
+        if (this.showPeerInfo && !this.isMobileDevice) {
             this.setTippy(
                 id,
-                JSON.stringify(
-                    peer_info,
-                    [
-                        'peer_name',
-                        'peer_audio',
-                        'peer_video',
-                        'peer_hand',
-                        'is_mobile_device',
-                        'os_name',
-                        'os_version',
-                        'browser_name',
-                        'browser_version',
-                    ],
-                    2,
-                ),
+                '<pre>' +
+                    JSON.stringify(
+                        peer_info,
+                        [
+                            'peer_id',
+                            'peer_name',
+                            'peer_audio',
+                            'peer_video',
+                            'peer_screen',
+                            'peer_hand',
+                            'is_desktop_device',
+                            'is_mobile_device',
+                            'is_ipad_pro_device',
+                            'os_name',
+                            'os_version',
+                            'browser_name',
+                            'browser_version',
+                            //'user_agent',
+                        ],
+                        2,
+                    ) +
+                    '<pre/>',
                 'top-start',
+                true,
             );
         }
     }
