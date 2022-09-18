@@ -80,6 +80,7 @@
 .username {
     z-index: 1;
     position: absolute;
+    right: 0;
     bottom: 0;
     color: #fff;
     font-size: 14px;
