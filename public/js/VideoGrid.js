@@ -64,6 +64,7 @@ function resizeVideoMedia() {
 
     max = max - Margin * 2;
     setWidth(videoMediaContainer, Cameras, max, bigWidth, Margin, Height);
+    document.documentElement.style.setProperty('--vmi-wh', max / 3 + 'px');
 }
 
 function setWidth(videoMediaContainer, Cameras, width, bigWidth, margin, maxHeight) {

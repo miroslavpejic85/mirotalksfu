@@ -2025,7 +2025,6 @@ class RoomClient {
                 this.videoMediaContainer.style.width = '25%';
                 this.videoMediaContainer.style.height = '100%';
                 this.videoMediaContainer.style.right = 0;
-                document.documentElement.style.setProperty('--vmi-wh', '15vw');
                 break;
             case 'horizontal':
                 this.videoPinMediaContainer.style.width = '100%';
@@ -2035,7 +2034,6 @@ class RoomClient {
                 this.videoMediaContainer.style.width = null;
                 this.videoMediaContainer.style.width = '100% !important';
                 this.videoMediaContainer.style.height = '25%';
-                document.documentElement.style.setProperty('--vmi-wh', '15vh');
                 break;
         }
         resizeVideoMedia();
