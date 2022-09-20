@@ -440,9 +440,14 @@ body {
 }
 
 .msg-text {
+    display: inline-block;
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
+}
+
+.msg-text iframe {
+    width: 100%;
 }
 
 .msg-a {
