@@ -2357,7 +2357,7 @@ class RoomClient {
         if (this.isHtml(message)) return this.stripHtml(message);
         if (this.isValidHttpURL(message)) {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
-            return '<a href="' + message + '" target="_blank">' + message + '</a>';
+            return '<a href="' + message + '" target="_blank" class="msg-a">' + message + '</a>';
         }
         if (isChatMarkdownOn) return marked.parse(message);
         let pre = '<pre>' + message + '</pre>';
