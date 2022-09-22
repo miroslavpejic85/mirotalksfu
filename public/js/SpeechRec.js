@@ -90,7 +90,7 @@ if (speechRecognition) {
         let current = e.resultIndex;
         let transcript = e.results[current][0].transcript;
 
-        if (transcript != commands.chatSend) {
+        if (transcript.trim().toLowerCase() != commands.chatSend) {
             chatMessage.value = transcript;
         }
 
