@@ -14,6 +14,7 @@ module.exports = class Room {
         this.audioLastUpdateTime = 0;
         this.io = io;
         this._isLocked = false;
+        this._isLobbyEnabled = false;
         this._roomPassword = null;
         this.peers = new Map();
         this.createTheRouter();
@@ -266,9 +267,15 @@ module.exports = class Room {
     isLocked() {
         return this._isLocked;
     }
+    isLobbyEnabled() {
+        return this._isLobbyEnabled;
+    }
     setLocked(status, password) {
         this._isLocked = status;
         this._roomPassword = password;
+    }
+    setLobbyEnabled(status) {
+        this._isLobbyEnabled = status;
     }
 
     // ####################################################

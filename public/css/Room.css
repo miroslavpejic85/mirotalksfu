@@ -725,6 +725,66 @@ button:hover {
 }
 
 /*--------------------------------------------------------------
+# Lobby users list
+--------------------------------------------------------------*/
+
+#lobby {
+    z-index: 7;
+    position: absolute;
+    margin: auto;
+    padding: 10px;
+    min-width: 320px;
+    background: var(--body-bg);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    background: rgb(0, 0, 0);
+    border-radius: 10px;
+    padding: 10px;
+    color: #fff;
+    cursor: move;
+}
+
+#lobbyUsers {
+    max-height: 680px;
+    overflow: auto;
+}
+
+#lobbyUsers table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#lobbyUsers td,
+#lobbyUsers th {
+    color: #fff;
+    text-align: left;
+    padding: 8px;
+}
+
+#lobbyUsers tr {
+    border-bottom: 1px solid #444444;
+}
+
+#lobbyUsers::-webkit-scrollbar {
+    width: 5px;
+}
+
+#lobbyUsers::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#lobbyUsers::-webkit-scrollbar-thumb {
+    background: #404040;
+}
+
+/*--------------------------------------------------------------
 # Send File
 --------------------------------------------------------------*/
 
@@ -932,6 +992,6 @@ z-index:
     - 4 whiteboard
     - 5 chat
     - 6 settings
-    - 7 participants
+    - 7 participants/lobby
     - 8 send receive progress
 */

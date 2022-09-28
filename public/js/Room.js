@@ -36,6 +36,7 @@ const _PEER = {
     videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
+    acceptPeer: '<i class="fas fa-check"></i>',
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
@@ -62,6 +63,7 @@ let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)'
 let rc = null;
 let producer = null;
 let participantsCount = 0;
+let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
 let room_id = getRoomId();
@@ -73,6 +75,8 @@ let peer_geo = null;
 let peer_info = null;
 
 let isSoundEnabled = true;
+let isLobbyEnabled = false;
+let isLobbyOpen = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -131,6 +135,13 @@ function initClient() {
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('tabLanguagesBtn', 'Languages', 'top');
+        setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
+        setTippy('lobbyRejectAllBtn', 'Reject', 'top');
+        setTippy(
+            'switchLobby',
+            'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
+            'right',
+        );
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -655,6 +666,7 @@ function roomIsReady() {
         rc.makeDraggable(whiteboard, whiteboardHeader);
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
+        rc.makeDraggable(lobby, lobbyHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             BUTTONS.main.startScreenButton && show(startScreenButton);
         }
@@ -673,6 +685,7 @@ function roomIsReady() {
     show(fileShareButton);
     BUTTONS.settings.participantsButton && show(participantsButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
+    BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
@@ -1004,6 +1017,11 @@ function handleSelects() {
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
     };
+    switchLobby.onchange = (e) => {
+        isLobbyEnabled = e.currentTarget.checked;
+        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
+        rc.lobbyToggle();
+    };
     // styling
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
@@ -1198,6 +1216,18 @@ function handleRoomClientEvents() {
         hide(unlockRoomButton);
         show(lockRoomButton);
         isRoomLocked = false;
+    });
+    rc.on(RoomClient.EVENTS.lobbyOn, () => {
+        console.log('Room Client room lobby enabled');
+        if (isRulesActive && !isPresenter) {
+            hide(lobbyButton);
+        }
+        sound('lobby');
+        isLobbyEnabled = true;
+    });
+    rc.on(RoomClient.EVENTS.lobbyOff, () => {
+        console.log('Room Client room lobby disabled');
+        isLobbyEnabled = false;
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');

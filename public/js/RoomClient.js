@@ -51,6 +51,7 @@ const image = {
     share: '../images/share.png',
     exit: '../images/exit.png',
     feedback: '../images/feedback.png',
+    lobby: '../images/lobby.png',
 };
 
 const mediaType = {
@@ -107,6 +108,8 @@ const _EVENTS = {
     resumeScreen: 'resumeScreen',
     stopScreen: 'stopScreen',
     roomLock: 'roomLock',
+    lobbyOn: 'lobbyOn',
+    lobbyOff: 'lobbyOff',
     roomUnlock: 'roomUnlock',
 };
 
@@ -263,6 +266,11 @@ class RoomClient {
                         this.event(_EVENTS.roomLock);
                         console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
                         return this.unlockTheRoom();
+                    }
+                    if (room === 'isLobby') {
+                        this.event(_EVENTS.lobbyOn);
+                        console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
+                        return this.waitJoinConfirm();
                     }
                     await this.joinAllowed(room);
                 }.bind(this),
@@ -483,6 +491,7 @@ class RoomClient {
             function (data) {
                 console.log('Remove me:', data);
                 this.removeVideoOff(data.peer_id);
+                this.lobbyRemoveMe(data.peer_id);
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants(true);
@@ -536,6 +545,14 @@ class RoomClient {
             function (data) {
                 console.log('Room password:', data.password);
                 this.roomPassword(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'roomLobby',
+            function (data) {
+                console.log('Room lobby:', data);
+                this.roomLobby(data);
             }.bind(this),
         );
 
@@ -1186,7 +1203,7 @@ class RoomClient {
 
     async consume(producer_id, peer_name, peer_info, type) {
         //
-        if (wbIsOpen && isPresenter) {
+        if (wbIsOpen && (!isRulesActive || isPresenter)) {
             console.log('Update whiteboard canvas to the participants in the room');
             wbCanvasToJson();
         }
@@ -3210,6 +3227,14 @@ class RoomClient {
                     this.socket.emit('roomAction', data);
                     this.roomStatus(action);
                     break;
+                case 'lobbyOn':
+                    this.socket.emit('roomAction', data);
+                    this.roomStatus(action);
+                    break;
+                case 'lobbyOff':
+                    this.socket.emit('roomAction', data);
+                    this.roomStatus(action);
+                    break;
             }
         } else {
             this.roomStatus(action);
@@ -3227,6 +3252,14 @@ class RoomClient {
                 this.event(_EVENTS.roomUnlock);
                 this.userLog('info', '🔓 UNLOCKED the room', 'top-end');
                 break;
+            case 'lobbyOn':
+                this.event(_EVENTS.lobbyOn);
+                this.userLog('info', '⌛ Lobby is enabled', 'top-end');
+                break;
+            case 'lobbyOff':
+                this.event(_EVENTS.lobbyOff);
+                this.userLog('info', '⌛ Lobby is disabled', 'top-end');
+                break;
         }
     }
 
@@ -3238,6 +3271,179 @@ class RoomClient {
             case 'KO':
                 this.roomIsLocked();
                 break;
+        }
+    }
+
+    // ####################################################
+    // ROOM LOBBY
+    // ####################################################
+
+    roomLobby(data) {
+        switch (data.lobby_status) {
+            case 'waiting':
+                if (!isRulesActive || isPresenter) {
+                    let lobbyTr = '';
+                    let peer_id = data.peer_id;
+                    let peer_name = data.peer_name;
+                    let avatarImg = getParticipantAvatar(peer_name);
+                    let lobbyTb = this.getId('lobbyTb');
+                    let lobbyAccept = _PEER.acceptPeer;
+                    let lobbyReject = _PEER.ejectPeer;
+                    let lobbyAcceptId = `${peer_name}___${peer_id}___lobbyAccept`;
+                    let lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
+
+                    lobbyTr += `
+                    <tr id='${peer_id}'>
+                        <td><img src='${avatarImg}'></td>
+                        <td>${peer_name}</td>
+                        <td><button id=${lobbyAcceptId} onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
+                        <td><button id=${lobbyRejectId} onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
+                    </tr>
+                    `;
+
+                    lobbyTb.innerHTML += lobbyTr;
+                    lobbyParticipantsCount++;
+                    lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
+                    if (!isLobbyOpen) this.lobbyToggle();
+                    if (!this.isMobileDevice) {
+                        setTippy(lobbyAcceptId, 'Accept', 'top');
+                        setTippy(lobbyRejectId, 'Reject', 'top');
+                    }
+                    this.userLog('info', peer_name + ' wants to join the meeting', 'top-end');
+                }
+                break;
+            case 'accept':
+                this.joinAllowed(data.room);
+                control.style.display = 'flex';
+                this.msgPopup('info', 'Your join meeting was be accepted by moderator');
+                break;
+            case 'reject':
+                this.sound('eject');
+                Swal.fire({
+                    icon: 'warning',
+                    allowOutsideClick: false,
+                    allowEscapeKey: true,
+                    showDenyButton: false,
+                    showConfirmButton: true,
+                    background: swalBackground,
+                    title: 'Your join meeting was be rejected by moderator',
+                    confirmButtonText: `Ok`,
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.exit();
+                    }
+                });
+                break;
+        }
+    }
+
+    lobbyAction(id, lobby_status) {
+        const words = id.split('___');
+        const peer_name = words[0];
+        const peer_id = words[1];
+        const data = {
+            room_id: this.room_id,
+            peer_id: peer_id,
+            peer_name: peer_name,
+            lobby_status: lobby_status,
+            broadcast: false,
+        };
+        this.socket.emit('roomLobby', data);
+        const trElem = this.getId(peer_id);
+        trElem.parentNode.removeChild(trElem);
+        lobbyParticipantsCount--;
+        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
+        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+    }
+
+    lobbyAcceptAll() {
+        if (lobbyParticipantsCount > 0) {
+            const data = this.lobbyGetData('accept', this.lobbyGetPeerIds());
+            this.socket.emit('roomLobby', data);
+            this.lobbyRemoveAll();
+        } else {
+            this.userLog('info', 'No participants in lobby detected', 'top-end');
+        }
+    }
+
+    lobbyRejectAll() {
+        if (lobbyParticipantsCount > 0) {
+            const data = this.lobbyGetData('reject', this.lobbyGetPeerIds());
+            this.socket.emit('roomLobby', data);
+            this.lobbyRemoveAll();
+        } else {
+            this.userLog('info', 'No participants in lobby detected', 'top-end');
+        }
+    }
+
+    lobbyRemoveAll() {
+        let tr = lobbyTb.getElementsByTagName('tr');
+        for (let i = tr.length - 1; i >= 0; i--) {
+            if (tr[i].id && tr[i].id != 'lobbyAll') {
+                console.log('REMOVE LOBBY PEER ID ' + tr[i].id);
+                if (tr[i] && tr[i].parentElement) {
+                    tr[i].parentElement.removeChild(tr[i]);
+                }
+                lobbyParticipantsCount--;
+            }
+        }
+        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
+        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+    }
+
+    lobbyRemoveMe(peer_id) {
+        let tr = lobbyTb.getElementsByTagName('tr');
+        for (let i = tr.length - 1; i >= 0; i--) {
+            if (tr[i].id && tr[i].id == peer_id) {
+                console.log('REMOVE LOBBY PEER ID ' + tr[i].id);
+                if (tr[i] && tr[i].parentElement) {
+                    tr[i].parentElement.removeChild(tr[i]);
+                }
+                lobbyParticipantsCount--;
+            }
+        }
+        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
+        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+    }
+
+    lobbyGetPeerIds() {
+        let peers_id = [];
+        let tr = lobbyTb.getElementsByTagName('tr');
+        for (let i = tr.length - 1; i >= 0; i--) {
+            if (tr[i].id && tr[i].id != 'lobbyAll') {
+                peers_id.push(tr[i].id);
+            }
+        }
+        return peers_id;
+    }
+
+    lobbyGetData(status, peers_id = []) {
+        return {
+            room_id: this.room_id,
+            peer_id: this.peer_id,
+            peer_name: this.peer_name,
+            peers_id: peers_id,
+            lobby_status: status,
+            broadcast: true,
+        };
+    }
+
+    lobbyToggle() {
+        if (lobbyParticipantsCount > 0 && !isLobbyOpen) {
+            lobby.style.display = 'block';
+            lobby.style.top = '50%';
+            lobby.style.left = '50%';
+            isLobbyOpen = true;
+            this.sound('lobby');
+        } else {
+            lobby.style.display = 'none';
+            isLobbyOpen = false;
         }
     }
 
@@ -3295,6 +3501,34 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.isConfirmed) this.exit();
+        });
+    }
+
+    waitJoinConfirm() {
+        this.sound('lobby');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: true,
+            showConfirmButton: false,
+            background: swalBackground,
+            imageUrl: image.poster,
+            title: 'Room has lobby enabled',
+            text: 'Asking to join meeting...',
+            confirmButtonText: `Ok`,
+            denyButtonText: `Leave room`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                control.style.display = 'none';
+            } else {
+                this.exit();
+            }
         });
     }
 

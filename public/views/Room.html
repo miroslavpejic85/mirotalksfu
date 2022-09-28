@@ -178,7 +178,13 @@
                         <i class="fas fa-lock"></i>
                         <p>Unlock room</p>
                     </button>
-                    <div class="form-check form-switch form-switch-md" style="margin: 10px">
+                    <div id="lobbyButton" class="hidden">
+                        <div class="form-check form-switch form-switch-md">
+                            <input class="form-check-input" type="checkbox" id="switchLobby" />
+                            <label class="form-check-label" style="color: #fff" for="switchLobby">&nbsp;Lobby</label>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch form-switch-md">
                         <input class="form-check-input" type="checkbox" id="switchSounds" checked />
                         <label class="form-check-label" style="color: #fff" for="switchSounds">&nbsp;Sounds</label>
                     </div>
@@ -415,6 +421,38 @@
                     <emoji-picker class="dark"></emoji-picker>
                 </div>
             </section>
+        </section>
+
+        <section id="lobby" class="fadein center hidden">
+            <header id="lobbyHeader" class="lobby-header">
+                <div id="lobbyHeaderTitle" class="lobby-header-title">Lobby users</div>
+            </header>
+            <main>
+                <div id="lobbyUsers">
+                    <table id="lobbyTb">
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr id="lobbyAll">
+                            <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
+                            <td>All</td>
+                            <td>
+                                <button id="lobbyAcceptAllBtn" onclick="rc.lobbyAcceptAll()">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button id="lobbyRejectAllBtn" onclick="rc.lobbyRejectAll()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </main>
         </section>
 
         <!-- 

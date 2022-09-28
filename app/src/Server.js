@@ -493,8 +493,41 @@ io.on('connection', (socket) => {
                 roomList.get(socket.room_id).setLocked(false);
                 roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                 break;
+            case 'lobbyOn':
+                roomList.get(socket.room_id).setLobbyEnabled(true);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                break;
+            case 'lobbyOff':
+                roomList.get(socket.room_id).setLobbyEnabled(false);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                break;
         }
-        log.debug('Room locked:', roomList.get(socket.room_id).isLocked());
+        log.debug('Room status', {
+            locked: roomList.get(socket.room_id).isLocked(),
+            lobby: roomList.get(socket.room_id).isLobbyEnabled(),
+        });
+    });
+
+    socket.on('roomLobby', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        data.room = roomList.get(socket.room_id).toJson();
+
+        log.debug('Room lobby', {
+            peer_id: data.peer_id,
+            peer_name: data.peer_name,
+            peers_id: data.peers_id,
+            lobby: data.lobby_status,
+            broadcast: data.broadcast,
+        });
+
+        if (data.peers_id && data.broadcast) {
+            for (let peer_id in data.peers_id) {
+                roomList.get(socket.room_id).sendTo(data.peers_id[peer_id], 'roomLobby', data);
+            }
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'roomLobby', data);
+        }
     });
 
     socket.on('peerAction', (data) => {
@@ -589,8 +622,17 @@ io.on('connection', (socket) => {
 
         if (roomList.get(socket.room_id).isLocked()) {
             log.debug('User rejected because room is locked');
-            cb('isLocked');
-            return;
+            return cb('isLocked');
+        }
+
+        if (roomList.get(socket.room_id).isLobbyEnabled()) {
+            log.debug('User waiting to join room because lobby is enabled');
+            roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
+                peer_id: data.peer_info.peer_id,
+                peer_name: data.peer_info.peer_name,
+                lobby_status: 'waiting',
+            });
+            return cb('isLobby');
         }
 
         cb(roomList.get(socket.room_id).toJson());
@@ -759,8 +801,13 @@ io.on('connection', (socket) => {
 
         roomList.get(socket.room_id).removePeer(socket.id);
 
-        if (roomList.get(socket.room_id).getPeers().size === 0 && roomList.get(socket.room_id).isLocked()) {
-            roomList.get(socket.room_id).setLocked(false);
+        if (roomList.get(socket.room_id).getPeers().size === 0) {
+            if (roomList.get(socket.room_id).isLocked()) {
+                roomList.get(socket.room_id).setLocked(false);
+            }
+            if (roomList.get(socket.room_id).isLobbyEnabled()) {
+                roomList.get(socket.room_id).setLobbyEnabled(false);
+            }
         }
 
         roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
@@ -770,10 +817,9 @@ io.on('connection', (socket) => {
 
     socket.on('exitRoom', async (_, callback) => {
         if (!roomList.has(socket.room_id)) {
-            callback({
+            return callback({
                 error: 'Not currently in a room',
             });
-            return;
         }
         log.debug('Exit room', getPeerName());
 
