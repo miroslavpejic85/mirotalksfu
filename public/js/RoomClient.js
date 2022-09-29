@@ -2371,7 +2371,7 @@ class RoomClient {
 
     formatMsg(message) {
         if (message.trim().length == 0) return;
-        if (this.isHtml(message)) return this.stripHtml(message);
+        if (this.isHtml(message)) return this.sanitizeHtml(message);
         if (this.isValidHttpURL(message)) {
             if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
             if (this.isVideoTypeSupported(message)) return this.getIframe(message);
@@ -2389,9 +2389,11 @@ class RoomClient {
         return message;
     }
 
-    stripHtml(html) {
-        let doc = new DOMParser().parseFromString(html, 'text/html');
-        return doc.body.textContent || '';
+    sanitizeHtml(str) {
+        const tagsToReplace = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
+        const replaceTag = (tag) => tagsToReplace[tag] || tag;
+        const safe_tags_replace = (str) => str.replace(/[&<>]/g, replaceTag);
+        return safe_tags_replace(str);
     }
 
     isHtml(str) {
