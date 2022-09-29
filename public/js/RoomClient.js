@@ -3328,7 +3328,8 @@ class RoomClient {
                     showDenyButton: false,
                     showConfirmButton: true,
                     background: swalBackground,
-                    title: 'Your join meeting was be rejected by moderator',
+                    title: 'Rejected',
+                    text: 'Your join meeting was be rejected by moderator',
                     confirmButtonText: `Ok`,
                     showClass: {
                         popup: 'animate__animated animate__fadeInDown',
@@ -3441,6 +3442,10 @@ class RoomClient {
             lobby.style.display = 'block';
             lobby.style.top = '50%';
             lobby.style.left = '50%';
+            if (this.isMobileDevice) {
+                lobby.style.width = '100%';
+                lobby.style.height = '100%';
+            }
             isLobbyOpen = true;
             this.sound('lobby');
         } else {
