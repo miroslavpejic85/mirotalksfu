@@ -2199,7 +2199,7 @@ class RoomClient {
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
         }
-        let peer_msg = this.formatMsg(chatMessage.value);
+        let peer_msg = this.formatMsg(chatMessage.value.trim());
         if (!peer_msg) {
             return this.cleanMessage();
         }
@@ -2238,7 +2238,7 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.value) {
-                let peer_msg = this.formatMsg(result.value);
+                let peer_msg = this.formatMsg(result.value.trim());
                 if (!peer_msg) {
                     return this.cleanMessage();
                 }
