@@ -43,11 +43,12 @@
     --wb-width: 800px;
     --wb-height: 600px;
     --wb-bg: radial-gradient(#393939, #000000);
-    --left-msg-bg: #2a2a2a;
-    --right-msg-bg: #0a0b0c;
-    --private-msg-bg: #510717;
+    --left-msg-bg: #252d31;
+    --right-msg-bg: #056162;
+    --private-msg-bg: #6b1226;
     --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
+    --settings-bg: radial-gradient(#393939, #000000);
     /* buttons bar horizontal */
     --btns-top: 50%;
     --btns-right: 0%;
@@ -63,9 +64,8 @@
     --btns-width: 320px;
     --btns-flex-direction: row;
     */
-    /* 
-        https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
-    */
+    --vmi-wh: 15vw;
+    /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
 }
 
@@ -148,12 +148,13 @@ body {
 }
 
 #control button {
-    border: none;
-    font-size: 1.8rem;
-    padding: 4px;
+    font-size: 1.2rem;
+    padding: 10px;
     transition: all 0.3s ease-in-out;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
+    border: var(--border);
+    /* box-shadow: var(--box-shadow); */
 }
 
 #control p {
@@ -184,9 +185,9 @@ body {
     position: absolute;
     margin: auto;
     padding: 10px;
-    min-width: 320px;
+    width: 355px;
     min-height: 480px;
-    background: var(--msger-bg);
+    background: var(--settings-bg);
     box-shadow: var(--box-shadow);
     border: var(--border);
     border-radius: 10px;
@@ -207,7 +208,7 @@ body {
 
 #mySettings select {
     width: auto;
-    max-width: 270px;
+    max-width: 310px;
     height: 40px;
     color: #fff;
     background-color: transparent;
@@ -221,6 +222,8 @@ body {
 
 #sessionTimeButton {
     cursor: default;
+    position: absolute;
+    bottom: 15px;
 }
 
 /*--------------------------------------------------------------
@@ -276,6 +279,8 @@ body {
     position: fixed;
     height: var(--msger-height);
     width: var(--msger-width);
+    min-height: var(--msger-height);
+    min-width: var(--msger-width);
     background: var(--msger-bg);
     border: var(--border);
     border-radius: 10px;
@@ -286,11 +291,6 @@ body {
     border-image: initial;
     border-style: solid;
     border-width: 2px;
-}
-
-.chat-room:active {
-    min-height: var(--msger-height);
-    min-width: var(--msger-width);
 }
 
 .msger {
@@ -315,9 +315,9 @@ body {
     cursor: move;
 }
 
+.chat-header-title button,
 .chat-header-options button {
     border: none;
-    font-size: 1.2rem;
     transition: all 0.3s ease-in-out;
     background: rgb(0, 0, 0);
     color: #fff;
@@ -333,7 +333,8 @@ body {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
-    background: var(--body-bg);
+    background: var(--msger-bg);
+    max-width: 100%;
 }
 
 .chat-msger::-webkit-scrollbar {
@@ -443,11 +444,23 @@ body {
 }
 
 .msg-text {
+    display: inline;
     overflow-wrap: break-word;
     word-wrap: break-word;
     hyphens: auto;
 }
 
+.msg-text iframe {
+    width: 100%;
+}
+
+.msg-a {
+    color: #fff;
+}
+.msg-a:hover {
+    color: grey;
+    transition: all 0.3s ease-in-out;
+}
 #chat-msg-a {
     color: #fff;
 }
@@ -459,20 +472,46 @@ body {
 .chat-msger-inputarea {
     display: flex;
     padding: 10px;
-    background: #1f1e1e;
 }
 
 .chat-msger-input {
     flex: 1;
     padding: 10px;
-    border: none;
-    border-top-left-radius: 10px;
-    background: rgb(0, 0, 0);
+    height: 43px;
+    font-size: 14px;
     color: #fff;
+    border: none;
+    border: var(--border);
+    border-top-left-radius: 10px;
+    background: rgb(7 7 7);
+    transition: height 1s;
+    resize: none;
 }
 
-.chat-msger-inputarea button {
-    width: 32px;
+.chat-msger-input::-webkit-scrollbar {
+    width: 5px;
+}
+
+.chat-msger-input::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-msger-input::-webkit-scrollbar-thumb {
+    background: #404040;
+}
+
+/*--------------------------------------------------------------
+# Chat room buttons area
+--------------------------------------------------------------*/
+
+.chat-msger-buttons {
+    display: flex;
+    padding: 10px;
+}
+
+#chatSendButton {
+    position: absolute;
+    right: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -482,7 +521,7 @@ body {
 emoji-picker {
     z-index: 0;
     position: absolute;
-    bottom: 70px;
+    bottom: 100px;
     width: 100%;
     height: 50%;
     --background: #16171b;
@@ -631,7 +670,7 @@ button:hover {
 }
 
 #roomParticipants {
-    max-height: 480px;
+    max-height: 680px;
     overflow: auto;
 }
 
@@ -655,14 +694,27 @@ button:hover {
     background-color: #0c0b0b;
 } */
 
+#roomParticipants::-webkit-scrollbar {
+    width: 5px;
+}
+
+#roomParticipants::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#roomParticipants::-webkit-scrollbar-thumb {
+    background: #404040;
+}
+
 #inviteParticipants {
     width: 100%;
     padding: 10px;
     margin: 10px auto 0px auto;
-    background-color: #191919;
+    background-color: #056162;
     border-radius: 10px;
 }
 #inviteParticipants:hover {
+    background-color: #191919;
     color: #fff;
     transform: scale(1);
 }
@@ -676,6 +728,66 @@ button:hover {
     color: #ffffff;
     border: grey 1px solid;
     border-radius: 10px;
+}
+
+/*--------------------------------------------------------------
+# Lobby users list
+--------------------------------------------------------------*/
+
+#lobby {
+    z-index: 7;
+    position: absolute;
+    margin: auto;
+    padding: 10px;
+    min-width: 320px;
+    background: var(--body-bg);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.lobby-header {
+    display: flex;
+    justify-content: space-between;
+    background: rgb(0, 0, 0);
+    border-radius: 10px;
+    padding: 10px;
+    color: #fff;
+    cursor: move;
+}
+
+#lobbyUsers {
+    max-height: 680px;
+    overflow: auto;
+}
+
+#lobbyUsers table {
+    border-collapse: collapse;
+    width: 100%;
+}
+
+#lobbyUsers td,
+#lobbyUsers th {
+    color: #fff;
+    text-align: left;
+    padding: 8px;
+}
+
+#lobbyUsers tr {
+    border-bottom: 1px solid #444444;
+}
+
+#lobbyUsers::-webkit-scrollbar {
+    width: 5px;
+}
+
+#lobbyUsers::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+#lobbyUsers::-webkit-scrollbar-thumb {
+    background: #404040;
 }
 
 /*--------------------------------------------------------------
@@ -797,9 +909,10 @@ progress {
 }
 
 /*--------------------------------------------------------------
-# Video exit btn
+# Video exit, pin/Unpin btn
 --------------------------------------------------------------*/
 
+#__pinUnpin,
 #__videoExit {
     font-size: 1.5rem;
 }
@@ -826,7 +939,7 @@ progress {
     border-radius: 6px;
     background: rgba(#19bb5c, 0.65);
     transition-property: height background-color;
-    transition-duration: 0.25s;
+    transition-duration: 1s;
 }
 
 /*--------------------------------------------------------------
@@ -885,6 +998,6 @@ z-index:
     - 4 whiteboard
     - 5 chat
     - 6 settings
-    - 7 participants
+    - 7 participants/lobby
     - 8 send receive progress
 */

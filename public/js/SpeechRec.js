@@ -30,7 +30,6 @@ const commands = {
     settingsOn: 'open the settings',
     settingsOff: 'close the settings',
     participantsOn: 'show the participants',
-    participantsRefresh: 'refresh the participants',
     participantsOff: 'hide the participants',
     participantsVideoOff: 'stop the participants video',
     participantsAudioOff: 'stop the participants audio',
@@ -46,12 +45,12 @@ const commands = {
     roomUnlock: 'unlock the room',
     about: 'show the about',
     email: 'open email',
-    google: 'open Google',
-    googleTr: 'open Google Translate',
-    youtube: 'open YouTube',
-    facebook: 'open Facebook',
-    linkedin: 'open Linkedin',
-    twitter: 'open Twitter',
+    google: 'open google',
+    googleTr: 'open google translate',
+    youtube: 'open youtube',
+    facebook: 'open facebook',
+    linkedin: 'open linkedin',
+    twitter: 'open twitter',
     tiktok: 'open tiktok',
     github: 'open github',
     survey: 'open survey',
@@ -84,13 +83,14 @@ if (speechRecognition) {
         console.log('Start speech recognition');
         hide(chatSpeechStartButton);
         show(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'lime');
     };
 
     recognition.onresult = (e) => {
         let current = e.resultIndex;
         let transcript = e.results[current][0].transcript;
 
-        if (transcript != commands.chatSend) {
+        if (transcript.trim().toLowerCase() != commands.chatSend) {
             chatMessage.value = transcript;
         }
 
@@ -107,6 +107,7 @@ if (speechRecognition) {
         console.log('Stop speech recognition');
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
+        setColor(chatSpeechStopButton, 'white');
     };
 
     isWebkitSpeechRecognitionSupported = true;
@@ -125,7 +126,7 @@ function startSpeech(action) {
 }
 
 function execVoiceCommands(transcript) {
-    switch (transcript.trim()) {
+    switch (transcript.trim().toLowerCase()) {
         case commands.shareRoom:
             printCommand(commands.shareRoom);
             shareButton.click();
@@ -209,10 +210,6 @@ function execVoiceCommands(transcript) {
         case commands.participantsOn:
             printCommand(commands.participantsOn);
             participantsButton.click();
-            break;
-        case commands.participantsRefresh:
-            printCommand(commands.participantsRefresh);
-            participantsRefreshBtn.click();
             break;
         case commands.participantsOff:
             printCommand(commands.participantsOff);

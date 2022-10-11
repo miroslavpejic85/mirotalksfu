@@ -1,6 +1,6 @@
-## MiroTalk SFU - Self Hosting
+# MiroTalk SFU - Self Hosting
 
-Requirments:
+## Requirments
 
 -   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CPX11` it's enough, OS: `Ubuntu 20.04`)
 -   [Node.js](https://nodejs.org/en/) at least 12x, better `16.15.1 LTS`
@@ -31,7 +31,7 @@ $ npm install -g npm@latest
 
 ---
 
-Quick start
+## Quick start
 
 ```bash
 # Clone this repo
@@ -74,6 +74,10 @@ Check if is correctly installed: https://your.domain.name:3010
 
 ---
 
+## PM2
+
+![pm2](../public/images/pm2.png)
+
 Using [PM2](https://pm2.keymetrics.io) to run it as deamon
 
 ```bash
@@ -83,19 +87,25 @@ $ pm2 start app/src/Server.js
 
 ---
 
+## Docker
+
+![docker](../public/images/docker.png)
+
 If you want to use `Docker`
+
+Repo: https://hub.docker.com/r/mirotalk/sfu
 
 ```bash
 # Install docker and docker-compose
 $ sudo apt install docker.io
 $ sudo apt install docker-compose
 
-# Copy app/src/config.template.js in app/src/config.js and edit it if needed
+# Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build or rebuild services - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
-$ docker-compose build
+# Get official image from Docker Hub
+$ docker pull mirotalk/sfu:latest
 # Create and start containers as deamon
 $ docker-compose up -d
 ```
@@ -103,6 +113,10 @@ $ docker-compose up -d
 Check if is correctly installed: https://your.domain.name:3010
 
 ---
+
+## Nginx & Certbot
+
+![nginx](../public/images/nginx.png)
 
 In order to use it without the port number at the end, and to have encrypted communications, we going to install [nginx](https://www.nginx.com) and [certbot](https://certbot.eff.org)
 
@@ -221,10 +235,9 @@ If you use `Docker`, paste this:
 
 cd mirotalksfu
 git pull
-docker-compose down
-docker-compose build
-docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
+docker pull mirotalk/sfu:latest
 docker-compose up -d
+docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi
 ```
 
 ---
@@ -243,14 +256,8 @@ To update your instance of MiroTalk SFU at latest commit, execute:
 ./sfuUpdate.sh
 ```
 
-<br/>
-
 ---
 
-## Do you find MiroTalk useful?
+## Support
 
-Show your appreciation by becoming a [backer or sponsor](https://github.com/sponsors/miroslavpejic85)
-
-Thank you for your support!
-
----
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/mirotalk/mirotalk-sfu-free-video-calls-messaging-screen-sharing-recording)

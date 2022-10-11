@@ -2,10 +2,27 @@
 
 if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
 
+/**
+ * MiroTalk SFU - Room component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.com
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
+// ####################################################
+// STATIC SETTINGS
+// ####################################################
+
 const RoomURL = window.location.href;
 
-let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
-const swalImageUrl = '../images/pricing-illustration.svg';
+const socket = io({ transports: ['websocket'] });
+
+const surveyActive = false;
 
 const url = {
     ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
@@ -19,18 +36,35 @@ const _PEER = {
     videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
+    acceptPeer: '<i class="fas fa-check"></i>',
     ejectPeer: '<i class="fas fa-times"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
     sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
-const surveyAvtive = false;
+const userAgent = navigator.userAgent.toLowerCase();
+const isTabletDevice = isTablet(userAgent);
+const isIPadDevice = isIpad(userAgent);
 
-let participantsCount = 0;
+const wbImageInput = 'image/*';
+const wbWidth = 800;
+const wbHeight = 600;
+
+const swalImageUrl = '../images/pricing-illustration.svg';
+
+// ####################################################
+// DYNAMIC SETTINGS
+// ####################################################
+
+let currentTheme = 'dark';
+let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
 let rc = null;
 let producer = null;
+let participantsCount = 0;
+let lobbyParticipantsCount = 0;
+let chatMessagesId = 0;
 
 let room_id = getRoomId();
 let room_password = getRoomPassword();
@@ -40,6 +74,9 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
+let isSoundEnabled = true;
+let isLobbyEnabled = false;
+let isLobbyOpen = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -48,6 +85,8 @@ let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
+let isChatPasteTxt = false;
+let isChatMarkdownOn = false;
 let joinRoomWithoutAudioVideo = true;
 let initAudioButton = null;
 let initVideoButton = null;
@@ -56,22 +95,24 @@ let initAudioVideoButton = null;
 let recTimer = null;
 let recElapsedTime = null;
 
-/*const wbImageInput = 'image/*';
-const wbWidth = 800;
-const wbHeight = 600;
 let wbCanvas = null;
 let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
+let wbIsEraser = false;
+let wbIsBgTransparent = false;
 let wbPop = [];
 let wbCurrentTool = "select";
 let wbCurrentPoint = null;
-*/
 let realWhiteBoard;
-let wbIsOpen = false;
 let isButtonsVisible = false;
+let isButtonsBarOver = false;
 
-const socket = io({ transports: ['websocket'] });
+let isRoomLocked = false;
+
+// ####################################################
+// INIT ROOM
+// ####################################################
 
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
@@ -86,47 +127,68 @@ function initClient() {
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
+        setTippy('aboutButton', 'About this project', 'right');
         setTippy('exitButton', 'Leave room', 'right');
+        setTippy('mySettingsCloseBtn', 'Close', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
-        setTippy('wbBackgroundColorEl', 'Background color', 'top');
-        setTippy('wbDrawingColorEl', 'Drawing color', 'top');
-        setTippy('whiteboardPencilBtn', 'Drawing mode', 'top');
-        setTippy('whiteboardObjectBtn', 'Object mode', 'top');
-        setTippy('whiteboardUndoBtn', 'Undo', 'top');
-        setTippy('whiteboardRedoBtn', 'Redo', 'top');
-        setTippy('whiteboardImgFileBtn', 'Add image file', 'top');
-        setTippy('whiteboardImgUrlBtn', 'Add image url', 'top');
-        setTippy('whiteboardTextBtn', 'Add text', 'top');
-        setTippy('whiteboardLineBtn', 'Add line', 'top');
-        setTippy('whiteboardRectBtn', 'Add rectangle', 'top');
-        setTippy('whiteboardCircleBtn', 'Add circle', 'top');
-        setTippy('whiteboardSaveBtn', 'Save', 'top');
-        setTippy('whiteboardEraserBtn', 'Eraser', 'top');
-        setTippy('whiteboardCleanBtn', 'Clean', 'top');
-        setTippy('participantsRefreshBtn', 'Refresh', 'top');
-        setTippy('chatMessage', 'Press enter to send', 'top-start');
+        setTippy('tabLanguagesBtn', 'Languages', 'top');
+        setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
+        setTippy('lobbyRejectAllBtn', 'Reject', 'top');
+        setTippy(
+            'switchLobby',
+            'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
+            'right',
+        );
+        setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
+        setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
+        setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
+        setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
+        setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
+        setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
+        setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
+        setTippy('whiteboardImgFileBtn', 'Add image file', 'bottom');
+        setTippy('whiteboardImgUrlBtn', 'Add image url', 'bottom');
+        setTippy('whiteboardTextBtn', 'Add text', 'bottom');
+        setTippy('whiteboardLineBtn', 'Add line', 'bottom');
+        setTippy('whiteboardRectBtn', 'Add rectangle', 'bottom');
+        setTippy('whiteboardCircleBtn', 'Add circle', 'bottom');
+        setTippy('whiteboardSaveBtn', 'Save', 'bottom');
+        setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
+        setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
+        setTippy('whiteboardCloseBtn', 'Close', 'right');
+        setTippy('chatCleanTextButton', 'Clean', 'top');
+        setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
+        setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
+        setTippy('chatCloseButton', 'Close', 'right');
+        setTippy('participantsCloseBtn', 'Close', 'left');
         setTippy('sessionTime', 'Session time', 'right');
     }
     setupWhiteboard();
     initEnumerateDevices();
 }
 
-function setTippy(elem, content, placement) {
+// ####################################################
+// HANDLE TOOLTIP
+// ####################################################
+
+function setTippy(elem, content, placement, allowHTML = false) {
     tippy(document.getElementById(elem), {
         content: content,
         placement: placement,
+        allowHTML: allowHTML,
     });
 }
 
@@ -208,8 +270,10 @@ function enumerateAudioDevices(stream) {
                 let el = null;
                 if ('audioinput' === device.kind) {
                     el = microphoneSelect;
+                    RoomClient.DEVICES_COUNT.audio++;
                 } else if ('audiooutput' === device.kind) {
                     el = speakerSelect;
+                    RoomClient.DEVICES_COUNT.speaker++;
                 }
                 if (!el) return;
                 addChild(device, el);
@@ -231,6 +295,7 @@ function enumerateVideoDevices(stream) {
                 let el = null;
                 if ('videoinput' === device.kind) {
                     el = videoSelect;
+                    RoomClient.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
                 addChild(device, el);
@@ -305,9 +370,13 @@ function getRoomPassword() {
 
 function getPeerInfo() {
     peer_info = {
+        user_agent: userAgent,
         detect_rtc_version: DetectRTC.version,
         is_webrtc_supported: DetectRTC.isWebRTCSupported,
+        is_desktop_device: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
         is_mobile_device: DetectRTC.isMobileDevice,
+        is_tablet_device: isTabletDevice,
+        is_ipad_pro_device: isIPadDevice,
         os_name: DetectRTC.osName,
         os_version: DetectRTC.osVersion,
         browser_name: DetectRTC.browser.name,
@@ -344,6 +413,11 @@ function whoAreYou() {
         return;
     }
 
+    let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : '';
+    if (getCookie(room_id + '_name')) {
+        default_name = getCookie(room_id + '_name');
+    }
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -352,6 +426,7 @@ function whoAreYou() {
         imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
+        inputValue: default_name,
         html: `<br />
         <div style="overflow: hidden;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
@@ -367,6 +442,10 @@ function whoAreYou() {
         },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
+            if (!getCookie(room_id + '_name')) {
+                window.localStorage.peer_name = name;
+            }
+            setCookie(room_id + '_name', name, 30);
             peer_name = name;
         },
     }).then(() => {
@@ -544,8 +623,10 @@ function joinRoom(peer_name, room_id) {
     } else {
         console.log('05 ----> join Room ' + room_id);
         rc = new RoomClient(
+            localAudio,
             remoteAudios,
             videoMediaContainer,
+            videoPinMediaContainer,
             window.mediasoupClient,
             socket,
             room_id,
@@ -565,17 +646,20 @@ function joinRoom(peer_name, room_id) {
 
 function roomIsReady() {
     setTheme('dark');
-    show(exitButton);
-    show(shareButton);
+    BUTTONS.main.exitButton && show(exitButton);
+    BUTTONS.main.shareButton && show(shareButton);
     show(startRecButton);
-    show(chatButton);
+    BUTTONS.main.chatButton && show(chatButton);
+    show(chatCleanTextButton);
+    show(chatPasteButton);
     show(chatSendButton);
     show(chatEmojiButton);
+    show(chatMarkdownButton);
     show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported) {
         show(chatSpeechStartButton);
     }
-    if (DetectRTC.isMobileDevice) {
+    if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
         show(swapCameraButton);
         setChatSize();
     } else {
@@ -585,8 +669,9 @@ function roomIsReady() {
         rc.makeDraggable(whiteboard, whiteboardHeader);
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
+        rc.makeDraggable(lobby, lobbyHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-            show(startScreenButton);
+            BUTTONS.main.startScreenButton && show(startScreenButton);
         }
     }
     if (DetectRTC.browser.name != 'Safari') {
@@ -595,15 +680,17 @@ function roomIsReady() {
         };
         show(fullScreenButton);
     }
-    show(whiteboardButton);
-    show(settingsButton);
+    BUTTONS.main.whiteboardButton && show(whiteboardButton);
+    BUTTONS.main.settingsButton && show(settingsButton);
     show(raiseHandButton);
-    isAudioAllowed ? show(stopAudioButton) : show(startAudioButton);
-    isVideoAllowed ? show(stopVideoButton) : show(startVideoButton);
+    isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
+    isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
-    show(participantsButton);
-    show(lockRoomButton);
-    show(aboutButton);
+    BUTTONS.settings.participantsButton && show(participantsButton);
+    BUTTONS.settings.lockRoomButton && show(lockRoomButton);
+    BUTTONS.settings.lobbyButton && show(lobbyButton);
+    BUTTONS.main.aboutButton && show(aboutButton);
+    if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -611,6 +698,7 @@ function roomIsReady() {
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
     });
+    checkButtonsBar();
     if (room_password) {
         lockRoomButton.click();
     }
@@ -696,6 +784,12 @@ function stopRecordingTimer() {
 // ####################################################
 
 function handleButtons() {
+    control.onmouseover = () => {
+        isButtonsBarOver = true;
+    };
+    control.onmouseout = () => {
+        isButtonsBarOver = false;
+    };
     exitButton.onclick = () => {
         rc.exitRoom();
     };
@@ -726,8 +820,14 @@ function handleButtons() {
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
     };
+    tabLanguagesBtn.onclick = (e) => {
+        rc.openTab(e, 'tabLanguages');
+    };
     chatButton.onclick = () => {
         rc.toggleChat();
+    };
+    chatGhostButton.onclick = (e) => {
+        rc.chatToggleBg();
     };
     chatCleanButton.onclick = () => {
         rc.chatClean();
@@ -738,11 +838,21 @@ function handleButtons() {
     chatCloseButton.onclick = () => {
         rc.toggleChat();
     };
+    chatCleanTextButton.onclick = () => {
+        rc.cleanMessage();
+    };
+    chatPasteButton.onclick = () => {
+        rc.pasteMessage();
+    };
     chatSendButton.onclick = () => {
         rc.sendMessage();
     };
     chatEmojiButton.onclick = () => {
         rc.toggleChatEmoji();
+    };
+    chatMarkdownButton.onclick = () => {
+        isChatMarkdownOn = !isChatMarkdownOn;
+        setColor(chatMarkdownButton, isChatMarkdownOn ? 'lime' : 'white');
     };
     chatShareFileButton.onclick = () => {
         fileShareButton.click();
@@ -825,6 +935,9 @@ function handleButtons() {
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };
+    whiteboardGhostButton.onclick = (e) => {
+        wbToggleBg();
+    };
     whiteboardPencilBtn.onclick = () => {
         realWhiteBoard.whiteboardSetDrawingMode("draw");
     };
@@ -872,9 +985,6 @@ function handleButtons() {
         rc.toggleMySettings();
         getRoomParticipants();
     };
-    participantsRefreshBtn.onclick = () => {
-        getRoomParticipants(true);
-    };
     participantsCloseBtn.onclick = () => {
         toggleParticipants();
     };
@@ -897,12 +1007,24 @@ function handleSelects() {
     // devices options
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
     speakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myVideoEl, speakerSelect.value);
+        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
     };
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+    };
+    // room
+    switchSounds.onchange = (e) => {
+        isSoundEnabled = e.currentTarget.checked;
+    };
+    switchLobby.onchange = (e) => {
+        isLobbyEnabled = e.currentTarget.checked;
+        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
+        rc.lobbyToggle();
     };
     // styling
     BtnsAspectRatio.onchange = () => {
@@ -921,6 +1043,9 @@ function handleSelects() {
     };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
+    };
+    pinVideoPosition.onchange = () => {
+        rc.togglePin(pinVideoPosition.value);
     };
 
     // whiteboard options
@@ -963,13 +1088,13 @@ function handleSelects() {
 
 function handleInputs() {
     chatMessage.onkeyup = (e) => {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13 && (DetectRTC.isMobileDevice || !e.shiftKey)) {
             e.preventDefault();
             chatSendButton.click();
         }
     };
     chatMessage.oninput = function () {
-        let chatInputEmoji = {
+        const chatInputEmoji = {
             '<3': '\u2764\uFE0F',
             '</3': '\uD83D\uDC94',
             ':D': '\uD83D\uDE00',
@@ -981,11 +1106,16 @@ function handleInputs() {
             ":'(": '\uD83D\uDE22',
             ':+1:': '\uD83D\uDC4D',
         };
-
         for (let i in chatInputEmoji) {
             let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
             this.value = this.value.replace(regex, chatInputEmoji[i]);
         }
+        rc.checkLineBreaks();
+    };
+
+    chatMessage.onpaste = () => {
+        isChatPasteTxt = true;
+        rc.checkLineBreaks();
     };
 
     rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
@@ -1102,16 +1232,30 @@ function handleRoomClientEvents() {
         hide(lockRoomButton);
         show(unlockRoomButton);
         setColor(unlockRoomButton, 'red');
+        isRoomLocked = true;
     });
     rc.on(RoomClient.EVENTS.roomUnlock, () => {
         console.log('Room Client unlock room');
         hide(unlockRoomButton);
         show(lockRoomButton);
+        isRoomLocked = false;
+    });
+    rc.on(RoomClient.EVENTS.lobbyOn, () => {
+        console.log('Room Client room lobby enabled');
+        if (isRulesActive && !isPresenter) {
+            hide(lobbyButton);
+        }
+        sound('lobby');
+        isLobbyEnabled = true;
+    });
+    rc.on(RoomClient.EVENTS.lobbyOff, () => {
+        console.log('Room Client room lobby disabled');
+        isLobbyEnabled = false;
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
         if (surveyActive) {
-            openURL(url.survey);
+            leaveFeedback();
         } else {
             openURL('/newroom');
         }
@@ -1121,6 +1265,32 @@ function handleRoomClientEvents() {
 // ####################################################
 // UTILITY
 // ####################################################
+
+function leaveFeedback() {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        showDenyButton: true,
+        background: swalBackground,
+        imageUrl: image.feedback,
+        title: 'Leave a feedback',
+        text: 'Do you want to rate your MiroTalk experience?',
+        confirmButtonText: `Yes`,
+        denyButtonText: `No`,
+        showClass: {
+            popup: 'animate__animated animate__fadeInDown',
+        },
+        hideClass: {
+            popup: 'animate__animated animate__fadeOutUp',
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            openURL(url.survey);
+        } else {
+            openURL('/newroom');
+        }
+    });
+}
 
 function userLog(icon, message, position, timer = 3000) {
     const Toast = Swal.mixin({
@@ -1157,15 +1327,34 @@ function getDataTimeString() {
 }
 
 function showButtons() {
-    if (isButtonsVisible || (rc.isMobileDevice && rc.isChatOpen) || (rc.isMobileDevice && rc.isMySettingsOpen)) return;
+    if (
+        isButtonsBarOver ||
+        isButtonsVisible ||
+        (rc.isMobileDevice && rc.isChatOpen) ||
+        (rc.isMobileDevice && rc.isMySettingsOpen)
+    )
+        return;
+    toggleClassElements('videoMenuBar', 'inline');
     control.style.display = 'flex';
     isButtonsVisible = true;
-    /*
-    setTimeout(() => {
+}
+
+function checkButtonsBar() {
+    if (!isButtonsBarOver) {
+        toggleClassElements('videoMenuBar', 'none');
         control.style.display = 'none';
         isButtonsVisible = false;
+    }
+    setTimeout(() => {
+        checkButtonsBar();
     }, 10000);
-    */
+}
+
+function toggleClassElements(className, displayState) {
+    let elements = rc.getEcN(className);
+    for (let i = 0; i < elements.length; i++) {
+        elements[i].style.display = displayState;
+    }
 }
 
 function setAudioButtonsDisabled(disabled) {
@@ -1178,14 +1367,12 @@ function setVideoButtonsDisabled(disabled) {
     stopVideoButton.disabled = disabled;
 }
 
-// ####################################################
-// UTILITY
-// ####################################################
-
 async function sound(name) {
+    if (!isSoundEnabled) return;
     let sound = '../sounds/' + name + '.wav';
     let audio = new Audio(sound);
     try {
+        audio.volume = 0.5;
         await audio.play();
     } catch (err) {
         return false;
@@ -1196,8 +1383,36 @@ function isImageURL(url) {
     return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
 }
 
+function isTablet(userAgent) {
+    return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
+        userAgent,
+    );
+}
+
+function isIpad(userAgent) {
+    return /macintosh/.test(userAgent) && 'ontouchend' in document;
+}
+
 function openURL(url, blank = false) {
     blank ? window.open(url, '_blank') : (window.location.href = url);
+}
+
+function setCookie(name, value, expDays) {
+    let date = new Date();
+    date.setTime(date.getTime() + expDays * 24 * 60 * 60 * 1000);
+    const expires = 'expires=' + date.toUTCString();
+    document.cookie = name + '=' + value + '; ' + expires + '; path=/';
+}
+
+function getCookie(cName) {
+    const name = cName + '=';
+    const cDecoded = decodeURIComponent(document.cookie);
+    const cArr = cDecoded.split('; ');
+    let res;
+    cArr.forEach((val) => {
+        if (val.indexOf(name) === 0) res = val.substring(name.length);
+    });
+    return res;
 }
 
 // ####################################################
@@ -1415,6 +1630,15 @@ function whiteboardAction(data, emit = true) {
     }
 }
 
+function wbToggleBg() {
+    wbIsBgTransparent = !wbIsBgTransparent;
+    if (wbIsBgTransparent) {
+        document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
+    } else {
+        setTheme(currentTheme);
+    }
+}
+
 // ####################################################
 // HANDLE PARTICIPANTS
 // ####################################################
@@ -1438,7 +1662,7 @@ async function getRoomParticipants(refresh = false) {
 
     participantsCount = peers.size;
     roomParticipants.innerHTML = table;
-    refreshParticipantsCount(participantsCount);
+    refreshParticipantsCount(participantsCount, false);
 
     if (!refresh) {
         toggleParticipants();
@@ -1475,20 +1699,24 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
-    table += `
+    if (!isRulesActive || isPresenter) {
+        table += `
     <tr>
-        <td>&nbsp;<i class="fas fa-users fa-lg"></i>&nbsp;&nbsp;all</td>
+        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
+        <td>all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
-        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all')">${_PEER.sendMsg}</button></td>
+        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all','all')">${_PEER.sendMsg}</button></td>
         <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
         <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
+    }
 
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
@@ -1504,7 +1732,8 @@ async function getParticipantsTable(peers) {
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name} (me)</td>
+                <td><img src='${avatarImg}'></td>
+                <td>${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
                 <td><button>${peer_hand}</button></td>
@@ -1515,18 +1744,35 @@ async function getParticipantsTable(peers) {
             </tr>
             `;
         } else {
-            table += `
-            <tr id='${peer_id}'>
-                <td><img src='${avatarImg}'>&nbsp;&nbsp;${peer_name}</td>
-                <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
-                <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
-                <td><button>${peer_hand}</button></td>
-                <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
-                <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}')">${peer_sendMsg}</button></td>
-                <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
-                <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
-            </tr>
-            `;
+            if (isRulesActive && isPresenter) {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'></td>
+                    <td>${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
+                </tr>
+                `;
+            } else {
+                table += `
+                <tr id='${peer_id}'>
+                    <td><img src='${avatarImg}'></td>
+                    <td>${peer_name}</td>
+                    <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
+                    <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
+                    <td><button>${peer_hand}</button></td>
+                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare(this.id)">${peer_sendFile}</button></td>
+                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
+                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
+                    <td></td>
+                </tr>
+                `;
+            }
         }
     }
     table += `</table>`;
@@ -1540,7 +1786,7 @@ function setParticipantsTippy(peers) {
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('sendAllButton', 'Share file to all', 'top');
         setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendVideoAll', 'Share video mp4 or YouTube to all', 'top');
+        setTippy('sendVideoToAll', 'Share video to all', 'top');
         setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
@@ -1556,9 +1802,9 @@ function setParticipantsTippy(peers) {
     }
 }
 
-function refreshParticipantsCount(count) {
+function refreshParticipantsCount(count, adapt = true) {
     participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
-    adaptAspectRatio(count);
+    if (adapt) adaptAspectRatio(count);
 }
 
 function getParticipantAvatar(peerName) {
@@ -1575,6 +1821,7 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#393939, #000000)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
             document.body.style.background = 'radial-gradient(#393939, #000000)';
             break;
@@ -1582,11 +1829,15 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
             document.body.style.background = 'radial-gradient(#666, #333)';
             break;
         //...
     }
+    currentTheme = theme;
+    wbIsBgTransparent = false;
+    rc.isChatBgTransparent = false;
 }
 
 // ####################################################

@@ -21,17 +21,25 @@ module.exports = class Peer {
     // ####################################################
 
     updatePeerInfo(data) {
+        log.debug('Update peer info', data);
         switch (data.type) {
             case 'audio':
             case 'audioType':
                 this.peer_info.peer_audio = data.status;
+                this.peer_audio = data.status;
                 break;
             case 'video':
             case 'videoType':
                 this.peer_info.peer_video = data.status;
+                this.peer_video = data.status;
+                break;
+            case 'screen':
+            case 'screenType':
+                this.peer_info.peer_screen = data.status;
                 break;
             case 'hand':
                 this.peer_info.peer_hand = data.status;
+                this.peer_hand = data.status;
                 break;
         }
     }
@@ -64,11 +72,13 @@ module.exports = class Peer {
         return this.producers.get(producer_id);
     }
 
-    async createProducer(producerTransportId, rtpParameters, kind) {
+    async createProducer(producerTransportId, rtpParameters, kind, type) {
         let producer = await this.transports.get(producerTransportId).produce({
             kind,
             rtpParameters,
         });
+
+        producer.appData.mediaType = type;
 
         this.producers.set(producer.id, producer);
 
@@ -111,8 +121,7 @@ module.exports = class Peer {
                 paused: false,
             });
         } catch (error) {
-            console.error('Consume failed', error);
-            return;
+            return console.error('Consume failed', error);
         }
 
         if (consumer.type === 'simulcast') {

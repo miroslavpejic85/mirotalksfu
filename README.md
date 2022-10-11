@@ -23,7 +23,7 @@
 
 <br/>
 
--   Is `100% Free` - `Open Source` - `Self Hosted`
+-   Is `100% Free` - `Open Source` - `Self Hosted` and [PWA](https://en.wikipedia.org/wiki/Progressive_web_application)!
 -   No download, plug-in or login required, entirely browser-based
 -   Unlimited number of conference rooms, without call time limitation
 -   Desktop and Mobile compatible
@@ -52,11 +52,48 @@
 </details>
 
 <details>
-<summary>Presentation</summary>
+<summary>About</summary>
+
+-   [Presentation](https://www.canva.com/design/DAE693uLOIU/view)
+
+-   [Video](https://www.youtube.com/watch?v=_IVn2aINYww)
+
+</details>
+
+<details>
+<summary>Direct Join</summary>
 
 <br/>
 
-<a href="https://www.canva.com/design/DAE693uLOIU/view">MiroTalk presentation </a> - <a href="https://www.youtube.com/watch?v=_IVn2aINYww"> video</a>
+-   You can `join` directly to `room` by going to
+-   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+
+    | Params   | Type           | Description     |
+    | -------- | -------------- | --------------- |
+    | room     | string         | room Id         |
+    | password | string/boolean | room password   |
+    | name     | string         | user name       |
+    | audio    | boolean        | audio stream    |
+    | video    | boolean        | video stream    |
+    | screen   | boolean        | screen stream   |
+    | notify   | boolean        | welcome message |
+
+</details>
+
+<details>
+<summary>Embed a meeting</summary>
+
+<br/>
+
+Embedding a meeting into a service or app using an iframe.
+
+```html
+<iframe
+    allow="camera; microphone; fullscreen; display-capture; autoplay"
+    src="https://sfu.mirotalk.com/newroom"
+    style="height: 100%; width: 100%; border: 0px;"
+></iframe>
+```
 
 </details>
 
@@ -99,9 +136,11 @@ $ cp app/src/config.template.js app/src/config.js
 $ npm install
 # Start the server
 $ npm start
+# If you want to start the server on a different port than the default use an env var
+$ PORT=3011 npm start
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010 or `:3011` if default port changed.
 
 </details>
 
@@ -110,23 +149,26 @@ $ npm start
 
 <br/>
 
+![docker](public/images/docker.png)
+
 -   Install docker engine: https://docs.docker.com/engine/install/
 -   Install docker compose: https://docs.docker.com/compose/install/
+-   Repository docker hub: https://hub.docker.com/r/mirotalk/sfu
 
 ```bash
-# Copy app/src/config.template.js in app/src/config.js and edit it if needed
+# Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
-# Build or rebuild services - be patient, the first time will take a few minutes, in the meantime have a good coffee ;)
-$ docker-compose build
+# (Optional) Get official image from Docker Hub
+$ docker-compose pull
 # Create and start containers
 $ docker-compose up # -d
-# Stop and remove resources
+# To stop and remove resources
 $ docker-compose down
 ```
 
--   Open https://localhost:3010 in browser
+-   Open in browser https://localhost:3010
 
 </details>
 
@@ -144,7 +186,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 <br/>
 
-Follow [this documentation](docs/self-hosting.md).
+-   [How to Self-Hosting](docs/self-hosting.md)
 
 </details>
 
@@ -171,43 +213,6 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: miro
 # The response will give you a entrypoint / URL for the direct join to the meeting.
 $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
 $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","name":"mirotalksfu","audio":"0","video":"0","screen":"0","notify":"0"}'
-```
-
-</details>
-
-<details>
-<summary>Direct Join</summary>
-
-<br/>
-
--   You can `join` directly to `room` by going to
--   https://sfu.mirotalk.com/join?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
-
-    | Params   | Type           | Description     |
-    | -------- | -------------- | --------------- |
-    | room     | string         | room Id         |
-    | password | string/boolean | room password   |
-    | name     | string         | user name       |
-    | audio    | boolean        | audio stream    |
-    | video    | boolean        | video stream    |
-    | screen   | boolean        | screen stream   |
-    | notify   | boolean        | welcome message |
-
-</details>
-
-<details>
-<summary>Embed a meeting</summary>
-
-<br/>
-
-Embedding a meeting into a service or app using an iframe.
-
-```html
-<iframe
-    allow="camera; microphone; fullscreen; display-capture; autoplay"
-    src="https://sfu.mirotalk.com/newroom"
-    style="height: 100%; width: 100%; border: 0px;"
-></iframe>
 ```
 
 </details>
@@ -273,11 +278,11 @@ https://sfu.mirotalk.com
 </details>
 
 <details>
-<summary>Discussions and support</summary>
+<summary>Questions, Discussions and support</summary>
 
 <br/>
 
--   For discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
+-   For questions, discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
 </details>
 
