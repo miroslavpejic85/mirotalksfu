@@ -42,7 +42,23 @@ const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
+    cors: { origin: '*' },
 });
+
+
+
+/*
+io.engine.on('initial_headers', (headers, req) => {
+    headers['Access-Control-Allow-Origin'] = '*';
+    headers['Access-Control-Allow-Credentials'] = true;
+});
+
+io.engine.on('headers', (headers, req) => {
+    headers['Access-Control-Allow-Origin'] = '*';
+    headers['Access-Control-Allow-Credentials'] = true;
+});
+*/
+
 const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
 const announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp;
 
@@ -415,6 +431,9 @@ async function getMediasoupWorker() {
 // ####################################################
 
 io.on('connection', (socket) => {
+
+    console.log('Client connected to the WebSocket');
+
     socket.on('createRoom', async ({ room_id }, callback) => {
         socket.room_id = room_id;
 

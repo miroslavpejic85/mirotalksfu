@@ -3,6 +3,15 @@ Preparativi
 sudo update-rc.d apache2 disable
 sudo iptables -t nat -I PREROUTING -p tcp --dport 443 -j REDIRECT --to-ports 5001
 
+la seconda operazione va effettuata ad ogni riavvio... bisogna cercare di metterla in schedule nel sistema...
+
+Certificati
+===========
+certbot aggiorna in automatico i cetificati, ma ogni tre mesi va riavviato RoomXR e soprattutto vanno copiati i certificati con questi comandi:
+sudo cp /etc/letsencrypt/live/roomxr.eu/privkey.pem /home/enzo_francesca/keys/
+sudo cp /etc/letsencrypt/live/roomxr.eu/fullchain.pem /home/enzo_francesca/keys/
+
+
 
 Motori esterni
 ==============
