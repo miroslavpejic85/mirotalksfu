@@ -32,7 +32,7 @@ module.exports = {
     hostPassword: 'password',
     // app listen on
     listenIp: '0.0.0.0',
-    listenPort: 3010,
+    listenPort: process.env.PORT || 3010,
     // ssl/README.md
     sslCrt: '../ssl/cert.pem',
     sslKey: '../ssl/key.pem',
@@ -71,7 +71,7 @@ module.exports = {
         worker: {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
-            logLevel: 'warn',
+            logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
         },
         // Router settings

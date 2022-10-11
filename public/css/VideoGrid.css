@@ -4,24 +4,40 @@
 
 #videoMediaContainer {
     z-index: 1;
+    position: absolute;
     display: flex;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    border-radius: 5px;
     align-content: center;
     flex-wrap: wrap;
     align-items: center;
     justify-content: center;
     vertical-align: middle;
+    overflow: hidden;
+    /* border: 3px solid blue; */
+}
+
+#videoPinMediaContainer {
+    z-index: 1;
     position: absolute;
-    left: 0px;
-    bottom: 0px;
-    top: 0px;
-    right: 0px;
+    display: none;
+    top: 0;
+    left: 0;
+    width: 75%;
+    height: 100%;
+    border-radius: 5px;
+    box-shadow: var(--box-shadow);
+    overflow: hidden;
+    /* animation: show 0.4s ease; */
+    /* border: 3px solid lime; */
 }
 
 .Camera {
     position: relative;
     vertical-align: middle;
     align-self: center;
-    border-radius: 10px;
     overflow: hidden;
     display: inline-block;
     background: transparent;
@@ -62,7 +78,9 @@
 }
 
 .username {
+    z-index: 1;
     position: absolute;
+    right: 0;
     bottom: 0;
     color: #fff;
     font-size: 14px;
@@ -73,7 +91,7 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .fscreen {
@@ -103,34 +121,30 @@
 
 #videoMediaContainer img {
     position: absolute;
-    margin-left: auto;
-    margin-right: auto;
-    width: 250px;
     display: none;
+    width: var(--vmi-wh);
+    height: var(--vmi-wh);
 }
 
 .videoMenuBar {
     z-index: 2;
     position: absolute;
-    padding: 3px;
-    background: var(--bg);
+    display: inline;
+    top: 0;
+    left: 0;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
     font-size: small;
     font-weight: bold;
     text-align: center;
     width: 100%;
     cursor: default;
-    /* center */
-    top: 18px;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    -webkit-transform: translate(-50%, -50%);
-    -moz-transform: translate(-50%, -50%);
     overflow: hidden;
 }
 
+.videoMenuBar input,
 .videoMenuBar button {
     float: right;
-    margin-right: 3px;
     color: #fff;
     background: transparent;
     border-radius: 5px;
@@ -180,6 +194,13 @@ video:fullscreen {
     filter: blur(5px);
 }
 
+input[type='range'] {
+    display: none;
+    color: #fff;
+    width: 50px;
+    cursor: pointer;
+}
+
 @keyframes show {
     0% {
         opacity: 0;
@@ -188,5 +209,16 @@ video:fullscreen {
     100% {
         opacity: 1;
         transform: scale(1) translateY(0);
+    }
+}
+
+@media screen and (max-width: 600px) {
+    .username {
+        font-size: 12px;
+    }
+}
+@media screen and (max-width: 500px) {
+    .username {
+        font-size: 10px;
     }
 }

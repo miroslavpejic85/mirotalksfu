@@ -1,5 +1,45 @@
 'use strict';
 
+/*
+███████ ███████ ██████  ██    ██ ███████ ██████  
+██      ██      ██   ██ ██    ██ ██      ██   ██ 
+███████ █████   ██████  ██    ██ █████   ██████  
+     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
+███████ ███████ ██   ██   ████   ███████ ██   ██                                           
+
+dependencies: {
+    body-parser             : https://www.npmjs.com/package/body-parser
+    compression             : https://www.npmjs.com/package/compression
+    colors                  : https://www.npmjs.com/package/colors
+    cors                    : https://www.npmjs.com/package/cors
+    crypto-js               : https://www.npmjs.com/package/crypto-js
+    express                 : https://www.npmjs.com/package/express
+    httpolyglot             : https://www.npmjs.com/package/httpolyglot
+    mediasoup               : https://www.npmjs.com/package/mediasoup
+    mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
+    ngrok                   : https://www.npmjs.com/package/ngrok
+    qs                      : https://www.npmjs.com/package/qs
+    @sentry/node            : https://www.npmjs.com/package/@sentry/node
+    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
+    socket.io               : https://www.npmjs.com/package/socket.io
+    swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
+    uuid                    : https://www.npmjs.com/package/uuid
+    yamljs                  : https://www.npmjs.com/package/yamljs
+}
+*/
+
+/**
+ * MiroTalk SFU - Server component
+ *
+ * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
+ * @link    Live demo: https://sfu.mirotalk.com
+ * @license For open source use: AGPLv3
+ * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
+ * @version 1.0.0
+ *
+ */
+
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
@@ -92,8 +132,8 @@ if (sentryEnabled) {
     log.log('test-log');
     log.info('test-info');
     log.warn('test-warning');
-    log.warn('test-error');
-    log.warn('test-debug');
+    log.error('test-error');
+    log.debug('test-debug');
     */
 //}
 
@@ -131,10 +171,15 @@ app.use(express.static(dir.public));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
+// all start from here
+app.get('*', function (next) {
+    next();
+});
+
 // Remove trailing slashes in url handle bad requests
 app.use((err, req, res, next) => {
-    if (err instanceof SyntaxError && err.status === 400 && 'body' in err) {
-        log.debug('Request Error', {
+    if (err instanceof SyntaxError || err.status === 400 || 'body' in err) {
+        log.error('Request Error', {
             header: req.headers,
             body: req.body,
             error: err.message,
@@ -149,7 +194,7 @@ app.use((err, req, res, next) => {
     }
 });
 
-// all start from here
+// main page
 app.get(['/'], (req, res) => {
     if (hostCfg.protected == true) {
         hostCfg.authenticated = false;
@@ -357,7 +402,7 @@ async function ngrokStart() {
 // ####################################################
 
 httpsServer.listen(config.listenPort, () => {
-    log.info(
+    log.log(
         `%c
 
 	███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
@@ -372,10 +417,9 @@ httpsServer.listen(config.listenPort, () => {
     );
 
     if (config.ngrokAuthToken !== '') {
-        ngrokStart();
-        return;
+        return ngrokStart();
     }
-    log.debug('Listening on', {
+    log.debug('Settings', {
         node_version: process.versions.node,
         hostConfig: hostCfg,
         announced_ip: announcedIP,
@@ -438,12 +482,12 @@ io.on('connection', (socket) => {
         socket.room_id = room_id;
 
         if (roomList.has(socket.room_id)) {
-            callback('already exists');
+            callback({ error: 'already exists' });
         } else {
             log.debug('Created room', { room_id: socket.room_id });
             let worker = await getMediasoupWorker();
             roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
-            callback(socket.room_id);
+            callback({ room_id: socket.room_id });
         }
     });
 
@@ -471,14 +515,48 @@ io.on('connection', (socket) => {
                 roomList.get(socket.room_id).setLocked(false);
                 roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                 break;
+            case 'lobbyOn':
+                roomList.get(socket.room_id).setLobbyEnabled(true);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                break;
+            case 'lobbyOff':
+                roomList.get(socket.room_id).setLobbyEnabled(false);
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                break;
         }
-        log.debug('Room locked:', roomList.get(socket.room_id).isLocked());
+        log.debug('Room status', {
+            locked: roomList.get(socket.room_id).isLocked(),
+            lobby: roomList.get(socket.room_id).isLobbyEnabled(),
+        });
+    });
+
+    socket.on('roomLobby', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        data.room = roomList.get(socket.room_id).toJson();
+
+        log.debug('Room lobby', {
+            peer_id: data.peer_id,
+            peer_name: data.peer_name,
+            peers_id: data.peers_id,
+            lobby: data.lobby_status,
+            broadcast: data.broadcast,
+        });
+
+        if (data.peers_id && data.broadcast) {
+            for (let peer_id in data.peers_id) {
+                roomList.get(socket.room_id).sendTo(data.peers_id[peer_id], 'roomLobby', data);
+            }
+        } else {
+            roomList.get(socket.room_id).sendTo(data.peer_id, 'roomLobby', data);
+        }
     });
 
     socket.on('peerAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
-        log.debug('Peer action:', data);
+        log.debug('Peer action', data);
+
         if (data.broadcast) {
             roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
         } else {
@@ -489,8 +567,7 @@ io.on('connection', (socket) => {
     socket.on('updatePeerInfo', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
-        log.debug('Peer info update:', data);
-        // peer_info hand raise Or lower
+        // update my peer_info status to all in the room
         roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
     });
@@ -567,8 +644,17 @@ io.on('connection', (socket) => {
 
         if (roomList.get(socket.room_id).isLocked()) {
             log.debug('User rejected because room is locked');
-            cb('isLocked');
-            return;
+            return cb('isLocked');
+        }
+
+        if (roomList.get(socket.room_id).isLobbyEnabled()) {
+            log.debug('User waiting to join room because lobby is enabled');
+            roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
+                peer_id: data.peer_info.peer_id,
+                peer_name: data.peer_info.peer_name,
+                lobby_status: 'waiting',
+            });
+            return cb('isLobby');
         }
 
         cb(roomList.get(socket.room_id).toJson());
@@ -629,19 +715,30 @@ io.on('connection', (socket) => {
         callback('success');
     });
 
-    socket.on('produce', async ({ kind, rtpParameters, producerTransportId }, callback) => {
+    socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
         if (!roomList.has(socket.room_id)) {
             return callback({ error: 'Room not found' });
         }
 
         let peer_name = getPeerName(false);
 
+        // peer_info audio Or video ON
+        let data = {
+            peer_name: peer_name,
+            peer_id: socket.id,
+            kind: kind,
+            type: appData.mediaType,
+            status: true,
+        };
+        await roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
+
         let producer_id = await roomList
             .get(socket.room_id)
-            .produce(socket.id, producerTransportId, rtpParameters, kind);
+            .produce(socket.id, producerTransportId, rtpParameters, kind, appData.mediaType);
 
         log.debug('Produce', {
             kind: kind,
+            type: appData.mediaType,
             peer_name: peer_name,
             peer_id: socket.id,
             producer_id: producer_id,
@@ -651,14 +748,6 @@ io.on('connection', (socket) => {
         if (kind === 'audio') {
             roomList.get(socket.room_id).addProducerToAudioLevelObserver({ producerId: producer_id });
         }
-
-        // peer_info audio Or video ON
-        let data = {
-            peer_name: peer_name,
-            type: kind,
-            status: true,
-        };
-        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
 
         callback({
             producer_id,
@@ -687,6 +776,9 @@ io.on('connection', (socket) => {
         if (!roomList.has(socket.room_id)) return;
 
         log.debug('Producer close', data);
+
+        // peer_info audio Or video OFF
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
         roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
     });
 
@@ -731,8 +823,13 @@ io.on('connection', (socket) => {
 
         roomList.get(socket.room_id).removePeer(socket.id);
 
-        if (roomList.get(socket.room_id).getPeers().size === 0 && roomList.get(socket.room_id).isLocked()) {
-            roomList.get(socket.room_id).setLocked(false);
+        if (roomList.get(socket.room_id).getPeers().size === 0) {
+            if (roomList.get(socket.room_id).isLocked()) {
+                roomList.get(socket.room_id).setLocked(false);
+            }
+            if (roomList.get(socket.room_id).isLobbyEnabled()) {
+                roomList.get(socket.room_id).setLobbyEnabled(false);
+            }
         }
 
         roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
@@ -742,10 +839,9 @@ io.on('connection', (socket) => {
 
     socket.on('exitRoom', async (_, callback) => {
         if (!roomList.has(socket.room_id)) {
-            callback({
+            return callback({
                 error: 'Not currently in a room',
             });
-            return;
         }
         log.debug('Exit room', getPeerName());
 
@@ -770,8 +866,9 @@ io.on('connection', (socket) => {
         if (json) {
             return {
                 peer_name:
-                    roomList.get(socket.room_id) &&
-                    roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name,
+                    (roomList.get(socket.room_id) &&
+                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name) ||
+                    undefined,
             };
         }
         return (

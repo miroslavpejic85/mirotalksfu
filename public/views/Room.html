@@ -69,46 +69,24 @@
             crossorigin="anonymous"
         ></script>
 
-        <!-- Js scripts -->
+        <!-- Js scripts https://cdn.jsdelivr.net -->
 
-        <script src="/socket.io/socket.io.js"></script>
-        <script src="../sfu/MediasoupClient.js"></script>
-        <script src="../js/Room.js"></script>
-        <script src="../js/RoomClient.js"></script>
-        <script src="../js/SpeechRec.js"></script>
-        <script src="../js/VideoGrid.js"></script>
-        <script src="../js/WhiteBoard.js"></script>
-        <script src="../js/jscolor.js"></script>
-        <script src="https://kit.fontawesome.com/e8b943c5a2.js" crossorigin="anonymous"></script>
-        <script src="https://cdn.rawgit.com/muaz-khan/DetectRTC/master/DetectRTC.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/521/fabric.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
-        <script src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
-        <script src="https://unpkg.com/@popperjs/core@2"></script>
-        <script src="https://unpkg.com/tippy.js@6"></script>
-        <script defer src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/521/fabric.min.js"></script>
-        <script>
-            // These options apply to all color pickers on the page
-            jscolor.presets.default = {
-                width: 201,
-                height: 81,
-                position: 'right',
-                previewPosition: 'right',
-                previewSize:20,
-                backgroundColor: '#f3f3f3',
-                borderColor: '#bbbbbb',
-                controlBorderColor: '#bbbbbb',
-                palette: [
-                    '#000000', '#7d7d7d', '#870014', '#ec1c23', '#ff7e26',
-                    '#fef100', '#22b14b', '#00a1e7', '#3f47cc', '#a349a4',
-                    '#ffffff', '#c3c3c3', '#b87957', '#feaec9', '#ffc80d',
-                    '#eee3af', '#b5e61d', '#99d9ea', '#7092be', '#00000000',
-                ],
-                paletteCols: 10,
-                hideOnPaletteClick: true,
-            }
-            </script>
+        <script defer src="/socket.io/socket.io.js"></script>
+        <script defer src="../sfu/MediasoupClient.js"></script>
+        <script defer src="../js/Rules.js"></script>
+        <script defer src="../js/Room.js"></script>
+        <script defer src="../js/RoomClient.js"></script>
+        <script defer src="../js/SpeechRec.js"></script>
+        <script defer src="../js/VideoGrid.js"></script>
+        <script defer src="../js/WhiteBoard.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/detectrtc@1.4.1/DetectRTC.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/fabric@5.2.4-browser/dist/fabric.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.30"></script>
+        <script defer src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
+        <script defer src="https://unpkg.com/@popperjs/core@2"></script>
+        <script defer src="https://unpkg.com/tippy.js@6"></script>
     </head>
     <body onload="initClient()">
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -130,6 +108,7 @@
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
+            <button id="aboutButton" class="hidden"><i class="fas fa-question"></i></button>
             <button id="exitButton" class="hidden"><i class="fas fa-right-from-bracket"></i></button>
         </div>
 
@@ -145,8 +124,9 @@
                     <button id="tabRoomBtn" class="fas fa-home tablinks"></button>
                     <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks"></button>
                     <button id="tabVideoShareBtn" class="fab fa-youtube tablinks"></button>
-                    <button id="tabAspectBtn" class="fas fa-cog tablinks"></button>
+                    <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks"></button>
                     <button id="tabStylingBtn" class="fas fa-palette tablinks"></button>
+                    <button id="tabLanguagesBtn" class="fas fa-globe tablinks"></button>
                 </div>
 
                 <div id="tabDevices" class="tabcontent">
@@ -199,12 +179,16 @@
                         <i class="fas fa-lock"></i>
                         <p>Unlock room</p>
                     </button>
-                    <br />
-                    <button id="aboutButton" class="hidden">
-                        <i class="fas fa-question"></i>
-                        <p>Project info</p>
-                    </button>
-                    <br />
+                    <div id="lobbyButton" class="hidden">
+                        <div class="form-check form-switch form-switch-md">
+                            <input class="form-check-input" type="checkbox" id="switchLobby" />
+                            <label class="form-check-label" style="color: #fff" for="switchLobby">&nbsp;Lobby</label>
+                        </div>
+                    </div>
+                    <div class="form-check form-switch form-switch-md">
+                        <input class="form-check-input" type="checkbox" id="switchSounds" checked />
+                        <label class="form-check-label" style="color: #fff" for="switchSounds">&nbsp;Sounds</label>
+                    </div>
                     <button id="sessionTimeButton">
                         <i class="fas fa-clock"></i>
                         <p id="sessionTime"></p>
@@ -296,6 +280,18 @@
                         <option value="horizontal">Horizontal</option>
                     </select>
                     <br />
+                    <div id="pinUnpinGridDiv" class="hidden">
+                        <p>Pin grid:</p>
+                        <br />
+                        <select id="pinVideoPosition" class="form-select text-light bg-dark">
+                            <option value="vertical">Vertical</option>
+                            <option value="horizontal">Horizontal</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="tabLanguages" class="tabcontent">
+                    <br />
                     <p>Language:</p>
                     <br />
                     <div id="google_translate_element"></div>
@@ -303,9 +299,11 @@
             </main>
         </section>
 
+        <div id="videoPinMediaContainer"></div>
         <div id="videoMediaContainer">
             <!-- <div class="Camera"></div> -->
         </div>
+        <div id="localAudio"></div>
         <div id="remoteAudios"></div>
 
         <div id="sendFileDiv" class="fadein center">
@@ -333,7 +331,6 @@
             <header id="participantsHeader" class="participants-header">
                 <div id="participantsTitle" class="participants-header-title"></div>
                 <div class="participants-header-options">
-                    <button id="participantsRefreshBtn" class="fas fa-sync-alt"></button>
                     <button id="participantsCloseBtn" class="fas fa-times"></button>
                 </div>
             </header>
@@ -348,12 +345,9 @@
                     <button id="whiteboardCloseBtn" class="fas fa-times"></button>
                 </div>
                 <div class="whiteboard-header-options">
-                    bg
-                    <input id="wbBackgroundColorEl" class="whiteboardColorPicker" value="#000000FF" data-jscolor="{}"/>
-                    pencil
-                    <input id="wbDrawingColorEl" class="whiteboardColorPicker" value="#FFFFFFFF" data-jscolor="{}"/>
-                    fill
-                    <input id="wbFillColorEl" class="whiteboardColorPicker" value="#FFFFFF77" data-jscolor="{}"/>
+                    <button id="whiteboardGhostButton" class="fas fa-circle-half-stroke"></button>
+                    <input id="wbBackgroundColorEl" class="whiteboardColorPicker" type="color" value="#000000" />
+                    <input id="wbDrawingColorEl" class="whiteboardColorPicker" type="color" value="#FFFFFF" />
                     <button id="whiteboardPencilBtn" class="fas fa-pencil-alt"></button>
                     <button id="whiteboardObjectBtn" class="fas fa-mouse-pointer"></button>
                     <button id="whiteboardUndoBtn" class="fas fa-undo"></button>
@@ -377,25 +371,33 @@
         <section id="chatRoom" class="chat-room center fadein">
             <section id="msger" class="msger">
                 <header id="chatHeader" class="chat-header">
-                    <div class="chat-header-title"><i class="fas fa-comment-alt"></i>&nbsp; Chat</div>
+                    <div class="chat-header-title">
+                        <button id="chatCloseButton" class="fas fa-times"></button>
+                    </div>
                     <div class="chat-header-options">
+                        <button id="chatGhostButton" class="fas fa-circle-half-stroke"></button>
                         <button id="chatSaveButton" class="fas fa-save"></button>
                         <button id="chatCleanButton" class="fas fa-trash"></button>
-                        <button id="chatCloseButton" class="fas fa-times"></button>
                     </div>
                 </header>
                 <main id="chatMsger" class="chat-msger">
                     <!-- chat messages -->
                 </main>
                 <div class="chat-msger-inputarea">
-                    <input
+                    <textarea
+                        rows="1"
+                        cols="1"
                         id="chatMessage"
                         class="chat-msger-input"
-                        type="text"
                         placeholder="💬 Enter your message..."
-                    />
+                    ></textarea>
+                </div>
+                <div class="chat-msger-buttons">
                     <button id="chatEmojiButton" class="hidden">
                         <i class="fas fa-smile"></i>
+                    </button>
+                    <button id="chatMarkdownButton" class="hidden">
+                        <i class="fab fa-markdown"></i>
                     </button>
                     <button id="chatShareFileButton" class="hidden">
                         <i class="fas fa-paperclip"></i>
@@ -406,6 +408,12 @@
                     <button id="chatSpeechStopButton" class="hidden">
                         <i class="fas fa-microphone"></i>
                     </button>
+                    <button id="chatCleanTextButton" class="hidden">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                    <button id="chatPasteButton" class="hidden">
+                        <i class="fas fa-paste"></i>
+                    </button>
                     <button id="chatSendButton" class="hidden">
                         <i class="fas fa-paper-plane"></i>
                     </button>
@@ -414,6 +422,38 @@
                     <emoji-picker class="dark"></emoji-picker>
                 </div>
             </section>
+        </section>
+
+        <section id="lobby" class="fadein center hidden">
+            <header id="lobbyHeader" class="lobby-header">
+                <div id="lobbyHeaderTitle" class="lobby-header-title">Lobby users</div>
+            </header>
+            <main>
+                <div id="lobbyUsers">
+                    <table id="lobbyTb">
+                        <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                        </tr>
+                        <tr id="lobbyAll">
+                            <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
+                            <td>All</td>
+                            <td>
+                                <button id="lobbyAcceptAllBtn" onclick="rc.lobbyAcceptAll()">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                            <td>
+                                <button id="lobbyRejectAllBtn" onclick="rc.lobbyRejectAll()">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+            </main>
         </section>
 
         <!-- 

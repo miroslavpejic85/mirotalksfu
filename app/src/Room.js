@@ -11,8 +11,10 @@ module.exports = class Room {
         this.router = null;
         this.audioLevelObserver = null;
         this.audioLevelObserverEnabled = true;
+        this.audioLastUpdateTime = 0;
         this.io = io;
         this._isLocked = false;
+        this._isLobbyEnabled = false;
         this._roomPassword = null;
         this.peers = new Map();
         this.createTheRouter();
@@ -52,10 +54,21 @@ module.exports = class Room {
         });
 
         this.audioLevelObserver.on('volumes', (volumes) => {
+            this.sendActiveSpeakerVolume(volumes);
+        });
+        this.audioLevelObserver.on('silence', () => {
+            //log.debug('audioLevelObserver', { volume: 'silence' });
+            return;
+        });
+    }
+
+    sendActiveSpeakerVolume(volumes) {
+        if (Date.now() > this.audioLastUpdateTime + 1000) {
+            this.audioLastUpdateTime = Date.now();
             const { producer, volume } = volumes[0];
-            let audioVolume = Math.round(Math.pow(10, volume / 85) * 10); // 1-10
+            let audioVolume = Math.round(Math.pow(10, volume / 80) * 10); // 1-10
             if (audioVolume > 2) {
-                //log.debug('PEERS', this.peers);
+                // log.debug('PEERS', this.peers);
                 this.peers.forEach((peer) => {
                     peer.producers.forEach((peerProducer) => {
                         if (
@@ -63,18 +76,14 @@ module.exports = class Room {
                             peerProducer.kind == 'audio' &&
                             peer.peer_audio === true
                         ) {
-                            let data = { peer_id: peer.id, audioVolume: audioVolume };
-                            //log.debug('audioLevelObserver', data);
-                            this.io.emit('audioVolume', data);
+                            let data = { peer_name: peer.peer_name, peer_id: peer.id, audioVolume: audioVolume };
+                            // log.debug('audioLevelObserver id [' + this.id + ']', data);
+                            this.broadCast(0, 'audioVolume', data);
                         }
                     });
                 });
             }
-        });
-        this.audioLevelObserver.on('silence', () => {
-            //log.debug('audioLevelObserver', { volume: 'silence' });
-            return;
-        });
+        }
     }
 
     addProducerToAudioLevelObserver(producer) {
@@ -114,6 +123,7 @@ module.exports = class Room {
                     producer_id: producer.id,
                     peer_name: peer.peer_name,
                     peer_info: peer.peer_info,
+                    type: producer.appData.mediaType,
                 });
             });
         });
@@ -181,10 +191,12 @@ module.exports = class Room {
     // PRODUCE
     // ####################################################
 
-    async produce(socket_id, producerTransportId, rtpParameters, kind) {
+    async produce(socket_id, producerTransportId, rtpParameters, kind, type) {
         return new Promise(
             async function (resolve, reject) {
-                let producer = await this.peers.get(socket_id).createProducer(producerTransportId, rtpParameters, kind);
+                let producer = await this.peers
+                    .get(socket_id)
+                    .createProducer(producerTransportId, rtpParameters, kind, type);
                 resolve(producer.id);
                 this.broadCast(socket_id, 'newProducers', [
                     {
@@ -192,6 +204,7 @@ module.exports = class Room {
                         producer_socket_id: socket_id,
                         peer_name: this.peers.get(socket_id).peer_name,
                         peer_info: this.peers.get(socket_id).peer_info,
+                        type: type,
                     },
                 ]);
             }.bind(this),
@@ -209,8 +222,11 @@ module.exports = class Room {
                 rtpCapabilities,
             })
         ) {
-            log.error('can not consume');
-            return;
+            return log.error('Can not consume', {
+                socket_id: socket_id,
+                consumer_transport_id: consumer_transport_id,
+                producer_id: producer_id,
+            });
         }
 
         let { consumer, params } = await this.peers
@@ -251,9 +267,15 @@ module.exports = class Room {
     isLocked() {
         return this._isLocked;
     }
+    isLobbyEnabled() {
+        return this._isLobbyEnabled;
+    }
     setLocked(status, password) {
         this._isLocked = status;
         this._roomPassword = password;
+    }
+    setLobbyEnabled(status) {
+        this._isLobbyEnabled = status;
     }
 
     // ####################################################

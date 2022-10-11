@@ -137,7 +137,7 @@ adjective = adjective.charAt(0).toUpperCase() + adjective.substring(1);
 document.getElementById('roomName').value = '';
 
 // ####################################################
-// TYPPING EFECT
+// TYPING EFFECT
 // ####################################################
 
 let i = 0;
