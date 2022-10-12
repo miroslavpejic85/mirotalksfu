@@ -355,8 +355,8 @@ function getRoomPassword() {
     let roomPassword = qs.get('password');
     if (roomPassword) {
         let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
-        if (queryNoRoomPassword != null) {
-            return false;
+        if (queryNoRoomPassword) {
+            roomPassword = false;
         }
         return roomPassword;
     }

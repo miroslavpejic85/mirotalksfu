@@ -281,10 +281,11 @@ class RoomClient {
     }
 
     async joinAllowed(room) {
+        console.log('07 ----> Join Room allowed');
         await this.handleRoomInfo(room);
         const data = await this.socket.request('getRouterRtpCapabilities');
         this.device = await this.loadDevice(data);
-        console.log('07 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
+        console.log('07.1 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
         this.startLocalMedia();
         this.socket.emit('getProducers');
@@ -3459,32 +3460,41 @@ class RoomClient {
     // ####################################################
 
     unlockTheRoom() {
-        Swal.fire({
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            background: swalBackground,
-            imageUrl: image.locked,
-            title: 'Oops, Room is Locked',
-            input: 'text',
-            inputPlaceholder: 'Enter the Room password',
-            confirmButtonText: `OK`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
-            inputValidator: (pwd) => {
-                if (!pwd) return 'Please enter the Room password';
-                this.RoomPassword = pwd;
-            },
-        }).then(() => {
+        if (room_password) {
+            this.RoomPassword = room_password;
             let data = {
                 action: 'checkPassword',
                 password: this.RoomPassword,
             };
             this.socket.emit('roomAction', data);
-        });
+        } else {
+            Swal.fire({
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                background: swalBackground,
+                imageUrl: image.locked,
+                title: 'Oops, Room is Locked',
+                input: 'text',
+                inputPlaceholder: 'Enter the Room password',
+                confirmButtonText: `OK`,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
+                inputValidator: (pwd) => {
+                    if (!pwd) return 'Please enter the Room password';
+                    this.RoomPassword = pwd;
+                },
+            }).then(() => {
+                let data = {
+                    action: 'checkPassword',
+                    password: this.RoomPassword,
+                };
+                this.socket.emit('roomAction', data);
+            });
+        }
     }
 
     roomIsLocked() {
