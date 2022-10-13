@@ -30,6 +30,7 @@
 -   Translated in 133 languages
 -   Optimized Room URL Sharing (share it to your participants, wait for them to join)
 -   Possibility to Password protect the Room for the meeting
+-   Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator.
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
@@ -225,6 +226,8 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotal
 [![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
+
+Use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 IN CLOUD CREDITS` on Hetzner.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
