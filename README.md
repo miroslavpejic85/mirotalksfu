@@ -223,7 +223,7 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotal
 
 <br/>
 
-[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
+[![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
 
@@ -240,7 +240,7 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
-For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use this [link](https://m.do.co/c/1070207afbb1) to get a $100 credit for the first 60 days.
+For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use [this link](https://m.do.co/c/1070207afbb1) to get a `$100 credit for the first 60 days`.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
@@ -313,7 +313,7 @@ Support the project by [becoming a sponsor](https://github.com/sponsors/miroslav
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
 
-[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
+[![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
 </details>
 
