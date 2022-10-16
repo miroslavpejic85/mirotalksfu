@@ -475,8 +475,10 @@ io.on('connection', (socket) => {
         log.debug('Room action:', data);
         switch (data.action) {
             case 'lock':
-                roomList.get(socket.room_id).setLocked(true, data.password);
-                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                if (!roomList.get(socket.room_id).isLocked()) {
+                    roomList.get(socket.room_id).setLocked(true, data.password);
+                    roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                }
                 break;
             case 'checkPassword':
                 let roomData = {
