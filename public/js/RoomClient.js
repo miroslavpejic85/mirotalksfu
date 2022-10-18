@@ -3193,9 +3193,22 @@ class RoomClient {
             switch (action) {
                 case 'lock':
                     if (room_password) {
-                        data.password = room_password;
-                        this.socket.emit('roomAction', data);
-                        this.roomStatus(action);
+                        this.socket
+                            .request('getPeerCounts')
+                            .then(
+                                async function (data) {
+                                    // Only the presenter can lock the room
+                                    if (isPresenter || data.peerCounts == 1) {
+                                        isPresenter = true;
+                                        data.password = room_password;
+                                        this.socket.emit('roomAction', data);
+                                        this.roomStatus(action);
+                                    }
+                                }.bind(this),
+                            )
+                            .catch((err) => {
+                                console.log('Get peer counts:', err);
+                            });
                     } else {
                         Swal.fire({
                             allowOutsideClick: false,

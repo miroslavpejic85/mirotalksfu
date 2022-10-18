@@ -469,6 +469,16 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('getPeerCounts', async ({}, callback) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        let peerCounts = roomList.get(socket.room_id).getPeersCount();
+
+        log.debug('Peer counts', { peerCounts: peerCounts });
+
+        callback({ peerCounts: peerCounts });
+    });
+
     socket.on('roomAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 

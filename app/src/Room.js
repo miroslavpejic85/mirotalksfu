@@ -108,6 +108,10 @@ module.exports = class Room {
         return this.peers;
     }
 
+    getPeersCount() {
+        return this.peers.size;
+    }
+
     toJson() {
         return {
             id: this.id,
