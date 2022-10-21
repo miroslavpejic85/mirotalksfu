@@ -645,17 +645,24 @@ function roomIsReady() {
     setTheme('dark');
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
-    show(startRecButton);
+    if (BUTTONS.settings.tabRecording) {
+        show(startRecButton);
+    } else {
+        hide(tabRecordingBtn);
+    }
     BUTTONS.main.chatButton && show(chatButton);
+    !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
+    BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
+    BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
+    BUTTONS.chat.chatShareFileButton && show(chatShareFileButton);
+    if (isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton) {
+        show(chatSpeechStartButton);
+    } else {
+        BUTTONS.chat.chatSpeechStartButton = false;
+    }
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
-    show(chatEmojiButton);
-    show(chatMarkdownButton);
-    show(chatShareFileButton);
-    if (isWebkitSpeechRecognitionSupported) {
-        show(chatSpeechStartButton);
-    }
     if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
         show(swapCameraButton);
         setChatSize();
