@@ -53,7 +53,7 @@ Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`
 }
 ```
 
-Set the `inbound rules` if you have the Firewall enalbled
+Set the `inbound rules` if you have the Firewall enabled
 
 | Port range  | Protocol | Source    | Description         |
 | ----------- | -------- | --------- | ------------------- |
@@ -78,7 +78,7 @@ Check if is correctly installed: https://your.domain.name:3010
 
 ![pm2](../public/images/pm2.png)
 
-Using [PM2](https://pm2.keymetrics.io) to run it as deamon
+Using [PM2](https://pm2.keymetrics.io) to run it as daemon
 
 ```bash
 $ npm install -g pm2

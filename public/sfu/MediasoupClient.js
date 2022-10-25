@@ -7047,6 +7047,7 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'inactive';
+                        this._remoteSdp.pauseMediaSection(localId);
                         const offer = await this._pc.createOffer();
                         logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
@@ -7058,6 +7059,7 @@
                         this._assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
+                        this._remoteSdp.resumeSendingMediaSection(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'sendonly';
                         const offer = await this._pc.createOffer();
@@ -7238,6 +7240,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'inactive';
+                            this._remoteSdp.pauseMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -7253,6 +7256,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'recvonly';
+                            this._remoteSdp.resumeReceivingMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -8154,6 +8158,7 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'inactive';
+                        this._remoteSdp.pauseMediaSection(localId);
                         const offer = await this._pc.createOffer();
                         logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
@@ -8168,6 +8173,7 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'sendonly';
+                        this._remoteSdp.resumeSendingMediaSection(localId);
                         const offer = await this._pc.createOffer();
                         logger.debug('resumeSending() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
@@ -8337,6 +8343,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'inactive';
+                            this._remoteSdp.pauseMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -8352,6 +8359,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'recvonly';
+                            this._remoteSdp.resumeReceivingMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -9956,6 +9964,7 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'inactive';
+                        this._remoteSdp.pauseMediaSection(localId);
                         const offer = await this._pc.createOffer();
                         logger.debug('pauseSending() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
@@ -9970,6 +9979,7 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.direction = 'sendonly';
+                        this._remoteSdp.resumeSendingMediaSection(localId);
                         const offer = await this._pc.createOffer();
                         logger.debug('resumeSending() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
@@ -10145,6 +10155,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'inactive';
+                            this._remoteSdp.pauseMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('pauseReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -10160,6 +10171,7 @@
                             const transceiver = this._mapMidTransceiver.get(localId);
                             if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                             transceiver.direction = 'recvonly';
+                            this._remoteSdp.resumeReceivingMediaSection(localId);
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('resumeReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -10443,18 +10455,11 @@
                         this._mediaObject.iceUfrag = iceParameters.usernameFragment;
                         this._mediaObject.icePwd = iceParameters.password;
                     }
-                    disable() {
+                    pause() {
                         this._mediaObject.direction = 'inactive';
-                        delete this._mediaObject.ext;
-                        delete this._mediaObject.ssrcs;
-                        delete this._mediaObject.ssrcGroups;
-                        delete this._mediaObject.simulcast;
-                        delete this._mediaObject.simulcast_03;
-                        delete this._mediaObject.rids;
                     }
-                    close() {
-                        this._mediaObject.direction = 'inactive';
-                        this._mediaObject.port = 0;
+                    disable() {
+                        this.pause();
                         delete this._mediaObject.ext;
                         delete this._mediaObject.ssrcs;
                         delete this._mediaObject.ssrcGroups;
@@ -10462,6 +10467,10 @@
                         delete this._mediaObject.simulcast_03;
                         delete this._mediaObject.rids;
                         delete this._mediaObject.extmapAllowMixed;
+                    }
+                    close() {
+                        this.disable();
+                        this._mediaObject.port = 0;
                     }
                 }
                 exports.MediaSection = MediaSection;
@@ -10669,6 +10678,9 @@
                                 break;
                         }
                     }
+                    resume() {
+                        this._mediaObject.direction = 'recvonly';
+                    }
                 }
                 exports.AnswerMediaSection = AnswerMediaSection;
                 class OfferMediaSection extends MediaSection {
@@ -10813,6 +10825,9 @@
                     setDtlsRole(role) {
                         // Always 'actpass'.
                         this._mediaObject.setup = 'actpass';
+                    }
+                    resume() {
+                        this._mediaObject.direction = 'sendonly';
                     }
                     planBReceive({ offerRtpParameters, streamId, trackId }) {
                         const encoding = offerRtpParameters.encodings[0];
@@ -11102,20 +11117,24 @@
                             this._replaceMediaSection(mediaSection);
                         }
                     }
+                    pauseMediaSection(mid) {
+                        const mediaSection = this._findMediaSection(mid);
+                        mediaSection.pause();
+                    }
+                    resumeSendingMediaSection(mid) {
+                        const mediaSection = this._findMediaSection(mid);
+                        mediaSection.resume();
+                    }
+                    resumeReceivingMediaSection(mid) {
+                        const mediaSection = this._findMediaSection(mid);
+                        mediaSection.resume();
+                    }
                     disableMediaSection(mid) {
-                        const idx = this._midToIndex.get(mid);
-                        if (idx === undefined) {
-                            throw new Error(`no media section found with mid '${mid}'`);
-                        }
-                        const mediaSection = this._mediaSections[idx];
+                        const mediaSection = this._findMediaSection(mid);
                         mediaSection.disable();
                     }
                     closeMediaSection(mid) {
-                        const idx = this._midToIndex.get(mid);
-                        if (idx === undefined) {
-                            throw new Error(`no media section found with mid '${mid}'`);
-                        }
-                        const mediaSection = this._mediaSections[idx];
+                        const mediaSection = this._findMediaSection(mid);
                         // NOTE: Closing the first m section is a pain since it invalidates the
                         // bundled transport, so let's avoid it.
                         if (mid === this._firstMid) {
@@ -11206,6 +11225,13 @@
                             // Update the SDP object.
                             this._sdpObject.media[idx] = newMediaSection.getObject();
                         }
+                    }
+                    _findMediaSection(mid) {
+                        const idx = this._midToIndex.get(mid);
+                        if (idx === undefined) {
+                            throw new Error(`no media section found with mid '${mid}'`);
+                        }
+                        return this._mediaSections[idx];
                     }
                     _regenerateBundleMids() {
                         if (!this._dtlsParameters) return;
@@ -11751,7 +11777,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.57';
+                exports.version = '3.6.58';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
