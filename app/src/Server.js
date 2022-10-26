@@ -857,6 +857,7 @@ io.on('connection', (socket) => {
             return {
                 peer_name:
                     (roomList.get(socket.room_id) &&
+                        roomList.get(socket.room_id).getPeers() &&
                         roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name) ||
                     undefined,
             };
