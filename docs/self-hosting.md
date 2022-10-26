@@ -83,6 +83,8 @@ Using [PM2](https://pm2.keymetrics.io) to run it as daemon
 ```bash
 $ npm install -g pm2
 $ pm2 start app/src/Server.js
+$ pm2 save
+$ pm2 startup
 ```
 
 ---
