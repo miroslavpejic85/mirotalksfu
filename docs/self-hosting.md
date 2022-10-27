@@ -212,6 +212,7 @@ Check Your MiroTalk SFU instance: https://your.domain.name/
 In order to have always Your MiroTalk SFU updated to latest, we going to create a script
 
 ```bash
+cd
 # Create a file sfuUpdate.sh
 $ vim sfuUpdate.sh
 ```

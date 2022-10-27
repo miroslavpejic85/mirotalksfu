@@ -187,7 +187,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 <br/>
 
--   [How to Self-Hosting](docs/self-hosting.md)
+To `Self-Host MiroTalk SFU` on `Your` dedicated `Server`, read [this documentation](docs/self-hosting.md).
 
 </details>
 
