@@ -36,7 +36,7 @@
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing (with drag-and-drop), share any files to your participants in the room
 -   Take a snapshot from the video frame(screen/cam) to save it as an image on your device.
--   Chat with Emoji Picker to show you feeling and the possibility to Save the conversations
+-   Chat with Emoji Picker to show you feeling, Markdown support, possibility to Save the conversations, and more.
 -   Speech recognition, execute the app features simply with your voice.
 -   Advance collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
