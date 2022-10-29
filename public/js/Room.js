@@ -1102,7 +1102,10 @@ function handleInputs() {
         rc.checkLineBreaks();
     };
 
-    const pickerOptions = { onEmojiSelect: addEmojiToMsg };
+    const pickerOptions = {
+        theme: 'dark',
+        onEmojiSelect: addEmojiToMsg,
+    };
     const emojiPicker = new EmojiMart.Picker(pickerOptions);
     rc.getId('chatEmoji').appendChild(emojiPicker);
 
