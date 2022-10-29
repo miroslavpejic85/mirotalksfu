@@ -315,6 +315,8 @@ Support the project by [becoming a sponsor](https://github.com/sponsors/miroslav
 
 [![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
+[![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)
+
 </details>
 
 <br/>
