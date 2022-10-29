@@ -1102,10 +1102,14 @@ function handleInputs() {
         rc.checkLineBreaks();
     };
 
-    rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
-        chatMessage.value += e.detail.emoji.unicode;
+    const pickerOptions = { onEmojiSelect: addEmojiToMsg };
+    const emojiPicker = new EmojiMart.Picker(pickerOptions);
+    rc.getId('chatEmoji').appendChild(emojiPicker);
+
+    function addEmojiToMsg(data) {
+        chatMessage.value += data.native;
         rc.toggleChatEmoji();
-    });
+    }
 }
 
 // ####################################################

@@ -2176,6 +2176,11 @@ class RoomClient {
         this.getId('chatEmojiButton').style.color = this.isChatEmojiOpen ? '#FFFF00' : '#FFFFFF';
     }
 
+    addEmojiToMsg(data) {
+        msgerInput.value += data.native;
+        toggleChatEmoji();
+    }
+
     cleanMessage() {
         chatMessage.value = '';
         chatMessage.style.height = '43px';
