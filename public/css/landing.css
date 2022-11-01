@@ -919,6 +919,18 @@ label {
 .pl-64 {
     padding-left: 64px;
 }
+.br-6 {
+    border-radius: 6px;
+}
+.br-12 {
+    border-radius: 12px;
+}
+.br-18 {
+    border-radius: 18px;
+}
+.br-24 {
+    border-radius: 24px;
+}
 .sr .has-animations .is-revealing {
     visibility: hidden;
 }
@@ -1058,10 +1070,12 @@ label {
 .button-primary {
     background: #097dea;
     background: linear-gradient(65deg, #0270d7 0, #0f8afd 100%);
+    border-radius: 6px;
 }
 .button-primary:hover {
     background: #0982f4;
     background: linear-gradient(65deg, #0275e1 0, #198ffd 100%);
+    border-radius: 6px;
 }
 .button-block {
     display: flex;
