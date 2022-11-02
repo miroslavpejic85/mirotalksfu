@@ -418,7 +418,7 @@ h6,
 .text-light .h4,
 .text-light .h5,
 .text-light .h6 {
-    color: !important;
+    color: #f9faff !important;
 }
 .text-sm {
     font-size: 18px;
