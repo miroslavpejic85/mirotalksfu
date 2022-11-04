@@ -142,6 +142,7 @@ function initClient() {
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
             'right',
         );
+        setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -172,7 +173,7 @@ function initClient() {
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
-        setTippy('sessionTime', 'Session time', 'right');
+        setTippy('sessionTime', 'Session time', 'top');
     }
     setupWhiteboard();
     initEnumerateDevices();

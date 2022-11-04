@@ -215,6 +215,10 @@ body {
     border-radius: 5px;
 }
 
+#mySettingsCloseBtn {
+    margin: 10px;
+}
+
 #mySettings button:hover {
     background-color: rgb(42 42 42 / 70%);
     border-radius: 5px;
@@ -223,11 +227,17 @@ body {
 #sessionTimeButton {
     cursor: default;
     position: absolute;
+    right: 15px;
     bottom: 15px;
 }
 
 .form-check-input {
     cursor: pointer;
+}
+
+#soundsButton,
+#lobbyButton {
+    padding: 10px;
 }
 
 /*--------------------------------------------------------------
