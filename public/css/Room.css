@@ -216,7 +216,7 @@ body {
 }
 
 #mySettingsCloseBtn {
-    margin: 10px;
+    padding: 10px;
 }
 
 #mySettings button:hover {
