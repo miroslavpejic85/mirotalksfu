@@ -853,18 +853,20 @@ io.on('connection', (socket) => {
 
     // common
     function getPeerName(json = true) {
-        if (json) {
-            return {
-                peer_name:
-                    (roomList.get(socket.room_id) &&
-                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info &&
-                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name) ||
-                    undefined,
-            };
+        try {
+            let peer_name =
+                roomList.get(socket.room_id) &&
+                roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name;
+            if (json) {
+                return {
+                    peer_name: peer_name,
+                };
+            }
+            return peer_name;
+        } catch (err) {
+            log.error('getPeerName', err);
+            return json ? { peer_name: 'undefined' } : 'undefined';
         }
-        return (
-            roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name
-        );
     }
 
     function removeMeData() {
