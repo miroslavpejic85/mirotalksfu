@@ -298,7 +298,7 @@ https://sfu.mirotalk.com
 
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
-For a MiroTalk license under conditions other than AGPLv3, please contact us at info.mirotalk@gmail.com.
+For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [buy directly via CodeCanyon](https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970).
 
 </details>
 
