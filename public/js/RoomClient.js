@@ -13,6 +13,7 @@
  */
 
 const cfg = {
+    useAvatarApi: true,
     msgAvatar: 'https://eu.ui-avatars.com/api',
 };
 
@@ -37,6 +38,7 @@ const html = {
 };
 
 const image = {
+    avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
@@ -1698,11 +1700,15 @@ class RoomClient {
 
     setVideoAvatarImgName(elemId, peer_name) {
         let elem = this.getId(elemId);
-        let avatarImgSize = 250;
-        elem.setAttribute(
-            'src',
-            cfg.msgAvatar + '?name=' + peer_name + '&size=' + avatarImgSize + '&background=random&rounded=true',
-        );
+        if (cfg.useAvatarApi) {
+            let avatarImgSize = 250;
+            elem.setAttribute(
+                'src',
+                cfg.msgAvatar + '?name=' + peer_name + '&size=' + avatarImgSize + '&background=random&rounded=true',
+            );
+        } else {
+            elem.setAttribute('src', image.avatar);
+        }
     }
 
     setIsAudio(peer_id, status) {
