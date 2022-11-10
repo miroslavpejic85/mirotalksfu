@@ -726,9 +726,13 @@ class RoomClient {
             stream = screen
                 ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
                 : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
 
             const track = audio ? stream.getAudioTracks()[0] : stream.getVideoTracks()[0];
+
+            console.log(`${type} settings ->`, track.getSettings());
+
             const params = {
                 track,
                 appData: {
@@ -956,8 +960,8 @@ class RoomClient {
             audio: true,
             video: {
                 frameRate: {
-                    ideal: 15,
-                    max: 30,
+                    ideal: 5,
+                    max: 15,
                 },
             },
         };
