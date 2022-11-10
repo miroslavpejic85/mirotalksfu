@@ -960,8 +960,8 @@ class RoomClient {
             audio: true,
             video: {
                 frameRate: {
-                    ideal: 5,
-                    max: 15,
+                    ideal: 15,
+                    max: 30,
                 },
             },
         };
