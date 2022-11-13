@@ -940,9 +940,6 @@ function handleButtons() {
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };
-    whiteboardGhostButton.onclick = (e) => {
-        wbToggleBg();
-    };
     whiteboardPencilBtn.onclick = () => {
         whiteboardIsDrawingMode(true);
     };
@@ -1058,12 +1055,11 @@ function handleSelects() {
         whiteboardIsDrawingMode(true);
     };
     wbBackgroundColorEl.onchange = () => {
-        let data = {
-            peer_name: peer_name,
-            action: 'bgcolor',
-            color: wbBackgroundColorEl.value,
-        };
-        whiteboardAction(data);
+        setWhiteboardBgColor(wbBackgroundColorEl.value);
+    };
+    whiteboardGhostButton.onclick = (e) => {
+        wbIsBgTransparent = !wbIsBgTransparent;
+        setWhiteboardBgColor(wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value);
     };
 }
 
@@ -1462,6 +1458,15 @@ function setWhiteboardSize(w, h) {
     document.documentElement.style.setProperty('--wb-height', h);
 }
 
+function setWhiteboardBgColor(color) {
+    let data = {
+        peer_name: peer_name,
+        action: 'bgcolor',
+        color: color,
+    };
+    whiteboardAction(data);
+}
+
 function whiteboardIsDrawingMode(status) {
     wbCanvas.isDrawingMode = status;
     if (status) {
@@ -1756,15 +1761,6 @@ function whiteboardAction(data, emit = true) {
             if (wbIsOpen) toggleWhiteboard();
             break;
         //...
-    }
-}
-
-function wbToggleBg() {
-    wbIsBgTransparent = !wbIsBgTransparent;
-    if (wbIsBgTransparent) {
-        document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
-    } else {
-        setTheme(currentTheme);
     }
 }
 
