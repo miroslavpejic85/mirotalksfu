@@ -226,14 +226,14 @@ body {
     color: #fff;
     background-color: transparent;
     border-radius: 5px;
+    cursor: pointer;
 }
 
 #mySettingsCloseBtn {
     padding: 10px;
 }
 
-#mySettings button:hover {
-    background-color: rgb(42 42 42 / 70%);
+#mySettings button {
     border-radius: 5px;
 }
 
@@ -289,6 +289,12 @@ body {
     display: none;
     padding: 6px 12px;
     border-top: none;
+}
+
+.tabcontent button i {
+    margin: 5px;
+    border: var(--border);
+    border-radius: 5px;
 }
 
 /* on open display devices tab */
