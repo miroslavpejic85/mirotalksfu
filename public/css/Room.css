@@ -292,7 +292,6 @@ body {
 }
 
 .tabcontent button i {
-    margin: 5px;
     border: var(--border);
     border-radius: 5px;
 }
@@ -890,6 +889,7 @@ progress {
 
 .whiteboard-header button {
     padding: 10px;
+    margin: 2px;
     border-radius: 5px;
     border: var(--border);
 }
@@ -901,7 +901,7 @@ progress {
     padding: 0;
     width: 20px;
     height: 15px;
-    margin-left: 5px;
+    margin: 2px;
     border-radius: 20px;
     border: solid 0.5px #afadad38;
 }
