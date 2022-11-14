@@ -427,7 +427,7 @@ function whoAreYou() {
         inputPlaceholder: 'Enter your name',
         inputValue: default_name,
         html: `<br />
-        <div style="overflow: hidden;">
+        <div style="padding: 10px;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
             <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
             <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>

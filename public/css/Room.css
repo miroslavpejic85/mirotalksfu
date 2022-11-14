@@ -167,6 +167,19 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Init Audio/Video buttons
+--------------------------------------------------------------*/
+
+#initAudioButton,
+#initVideoButton,
+#initAudioVideoButton {
+    font-size: 1.2rem;
+    padding: 10px;
+    border: var(--border);
+    border-radius: 5px;
+}
+
+/*--------------------------------------------------------------
 # Room QR
 --------------------------------------------------------------*/
 
@@ -553,6 +566,11 @@ em-emoji-picker {
     background-color: transparent !important;
 }
 
+.swal2-popup {
+    /* border: var(--border) !important; */
+    border: 0.5px solid rgb(255 255 255 / 32%) !important;
+}
+
 /*--------------------------------------------------------------
 # About
 --------------------------------------------------------------*/
@@ -862,6 +880,12 @@ progress {
     padding: 10px;
     color: #fff;
     cursor: move;
+}
+
+.whiteboard-header button {
+    padding: 10px;
+    border-radius: 5px;
+    border: var(--border);
 }
 
 .whiteboardColorPicker {
