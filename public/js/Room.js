@@ -2069,9 +2069,8 @@ function showAbout() {
         html: `
         <br/>
         <div id="about">
-            <b>Open Source</b> project on
-            <a href="https://github.com/miroslavpejic85/mirotalksfu" class="umami--click--github" target="_blank"><br/><br />
-            <img alt="mirotalksfu-github" src="../images/github.png"></a><br/><br />
+            <b><a href="https://github.com/miroslavpejic85/mirotalksfu" class="umami--click--github" target="_blank">Open Source</a></b> project
+            <br/><br />
             <button class="pulsate umami--click--sponsors" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
             Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
