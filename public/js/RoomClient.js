@@ -2047,7 +2047,18 @@ class RoomClient {
     togglePin(position) {
         if (!this.isVideoPinned) return;
         switch (position) {
+            case 'top':
+                this.videoPinMediaContainer.style.top = '25%';
+                this.videoPinMediaContainer.style.width = '100%';
+                this.videoPinMediaContainer.style.height = '75%';
+                this.videoMediaContainer.style.top = '0%';
+                this.videoMediaContainer.style.right = null;
+                this.videoMediaContainer.style.width = null;
+                this.videoMediaContainer.style.width = '100% !important';
+                this.videoMediaContainer.style.height = '25%';
+                break;
             case 'vertical':
+                this.videoPinMediaContainer.style.top = 0;
                 this.videoPinMediaContainer.style.width = '75%';
                 this.videoPinMediaContainer.style.height = '100%';
                 this.videoMediaContainer.style.top = 0;
@@ -2056,6 +2067,7 @@ class RoomClient {
                 this.videoMediaContainer.style.right = 0;
                 break;
             case 'horizontal':
+                this.videoPinMediaContainer.style.top = 0;
                 this.videoPinMediaContainer.style.width = '100%';
                 this.videoPinMediaContainer.style.height = '75%';
                 this.videoMediaContainer.style.top = '75%';
