@@ -48,8 +48,8 @@ const isTabletDevice = isTablet(userAgent);
 const isIPadDevice = isIpad(userAgent);
 
 const wbImageInput = 'image/*';
-const wbWidth = 1366;
-const wbHeight = 768;
+const wbWidth = 1200;
+const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
