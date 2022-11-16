@@ -6422,7 +6422,6 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.sender.replaceTrack(null);
-                        transceiver.stop();
                         this._pc.removeTrack(transceiver.sender);
                         this._remoteSdp.closeMediaSection(transceiver.mid);
                         const offer = await this._pc.createOffer();
@@ -7032,7 +7031,6 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.sender.replaceTrack(null);
-                        transceiver.stop();
                         this._pc.removeTrack(transceiver.sender);
                         this._remoteSdp.closeMediaSection(transceiver.mid);
                         const offer = await this._pc.createOffer();
@@ -8140,7 +8138,6 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated transceiver not found');
                         transceiver.sender.replaceTrack(null);
-                        transceiver.stop();
                         this._pc.removeTrack(transceiver.sender);
                         // NOTE: Cannot use closeMediaSection() due to the the note above in send()
                         // method.
@@ -9950,7 +9947,6 @@
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         transceiver.sender.replaceTrack(null);
-                        transceiver.stop();
                         this._pc.removeTrack(transceiver.sender);
                         this._remoteSdp.closeMediaSection(transceiver.mid);
                         const offer = await this._pc.createOffer();
@@ -11781,7 +11777,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.59';
+                exports.version = '3.6.58';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
