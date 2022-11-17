@@ -251,7 +251,7 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 <br/>
 
-<a target="_blank" href="https://p2p.mirotalk.com"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
+<a target="_blank" href="https://hetzner.cloud/?ref=XdRifCzCK3bn"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
 
 https://sfu.mirotalk.com
 
