@@ -1012,7 +1012,7 @@ class RoomClient {
                 elem.volume = 0;
                 elem.poster = image.poster;
                 elem.style.objectFit = isScreen ? 'contain' : 'var(--videoObjFit)';
-                this.isMobileDevice || type === mediaType.screen ? (elem.className = '') : (elem.className = 'mirror');
+                elem.className = this.isMobileDevice || type === mediaType.screen ? '' : 'mirror';
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
                 vb.className = 'videoMenuBar fadein';
