@@ -2016,6 +2016,7 @@ class RoomClient {
         let cam = this.getId(camId);
         if (btnPn && videoPlayer && cam) {
             btnPn.addEventListener('click', () => {
+                this.sound('click');
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
                     videoPlayer.style.objectFit = 'contain';
