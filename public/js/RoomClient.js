@@ -36,6 +36,7 @@ const html = {
     undo: 'fas fa-undo',
     bg: 'fas fa-circle-half-stroke',
     pin: 'fas fa-map-pin',
+    videoPrivacy: 'far fa-circle',
 };
 
 const image = {
@@ -208,6 +209,7 @@ class RoomClient {
         this.eventListeners = new Map();
 
         console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
+        console.log('06.1 ----> PEER_ID', this.peer_id);
 
         Object.keys(_EVENTS).forEach(
             function (evt) {
@@ -561,6 +563,14 @@ class RoomClient {
         );
 
         this.socket.on(
+            'cmd',
+            function (data) {
+                console.log('Peer cmd:', data);
+                this.handleCmd(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'peerAction',
             function (data) {
                 console.log('Peer action:', data);
@@ -721,6 +731,10 @@ class RoomClient {
         if (this.producerLabel.has(type)) {
             return console.log('Producer already exists for this type ' + type);
         }
+
+        let videoPrivacyBtn = this.getId(this.peer_id + '__vp');
+        if (videoPrivacyBtn) videoPrivacyBtn.style.display = screen ? 'none' : 'inline';
+
         console.log(`Media contraints ${type}:`, mediaConstraints);
         let stream;
         try {
@@ -994,7 +1008,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, ts, d, p, i, au, fs, pm, pb, pn;
+        let elem, vb, vp, ts, d, p, i, au, fs, pm, pb, pn;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -1005,6 +1019,7 @@ class RoomClient {
                 d.id = id + '__video';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
+                !isScreen && elem.setAttribute('name', this.peer_id);
                 elem.setAttribute('playsinline', true);
                 elem.controls = isVideoControlsOn;
                 elem.autoplay = true;
@@ -1012,7 +1027,7 @@ class RoomClient {
                 elem.volume = 0;
                 elem.poster = image.poster;
                 elem.style.objectFit = isScreen ? 'contain' : 'var(--videoObjFit)';
-                elem.className = this.isMobileDevice || type === mediaType.screen ? '' : 'mirror';
+                elem.className = this.isMobileDevice || isScreen ? '' : 'mirror';
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
                 vb.className = 'videoMenuBar fadein';
@@ -1025,6 +1040,9 @@ class RoomClient {
                 pn = document.createElement('button');
                 pn.id = id + '__pin';
                 pn.className = html.pin;
+                vp = document.createElement('button');
+                vp.id = this.peer_id + +'__vp';
+                vp.className = html.videoPrivacy;
                 au = document.createElement('button');
                 au.id = this.peer_id + '__audio';
                 au.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
@@ -1044,6 +1062,7 @@ class RoomClient {
                 pb.style.height = '1%';
                 pm.appendChild(pb);
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
+                BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
@@ -1059,12 +1078,14 @@ class RoomClient {
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
+                if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
+                    this.setTippy(vp.id, 'Toggle video privacy', 'top-end');
                     this.setTippy(au.id, 'Audio status', 'top-end');
                 }
                 console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -1275,8 +1296,11 @@ class RoomClient {
     handleConsumer(id, type, stream, peer_name, peer_info) {
         let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
 
+        console.log('PEER-INFO', peer_info);
+
         let remotePeerId = peer_info.peer_id;
-        let remoteIsScreen = type === mediaType.screen;
+        let remoteIsScreen = type == mediaType.screen;
+        let remotePrivacyOn = peer_info.peer_video_privacy;
 
         switch (type) {
             case mediaType.video:
@@ -1288,6 +1312,7 @@ class RoomClient {
                 d.id = id + '__video';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
+                !remoteIsScreen && elem.setAttribute('name', remotePeerId);
                 elem.setAttribute('playsinline', true);
                 elem.controls = isVideoControlsOn;
                 elem.autoplay = true;
@@ -1375,6 +1400,9 @@ class RoomClient {
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
+                if (!remoteIsScreen && remotePrivacyOn) {
+                    this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
+                }
                 this.sound('joined');
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -1774,6 +1802,10 @@ class RoomClient {
         return document.getElementById(id);
     }
 
+    getName(name) {
+        return document.getElementsByName(name);
+    }
+
     getEcN(cn) {
         return document.getElementsByClassName(cn);
     }
@@ -1960,6 +1992,9 @@ class RoomClient {
         if (btnFs) {
             this.setTippy(fsId, 'Full screen', 'top');
             btnFs.addEventListener('click', () => {
+                if (videoPlayer.classList.contains('videoCircle')) {
+                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                }
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
                 this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
@@ -1967,6 +2002,9 @@ class RoomClient {
         }
         if (videoPlayer) {
             videoPlayer.addEventListener('click', () => {
+                if (videoPlayer.classList.contains('videoCircle')) {
+                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                }
                 if (!videoPlayer.hasAttribute('controls')) {
                     if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
                         videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
@@ -2019,7 +2057,9 @@ class RoomClient {
                 this.sound('click');
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
-                    videoPlayer.style.objectFit = 'contain';
+                    if (!videoPlayer.classList.contains('videoCircle')) {
+                        videoPlayer.style.objectFit = 'contain';
+                    }
                     cam.className = '';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
@@ -2110,6 +2150,9 @@ class RoomClient {
         let btnTs = this.getId(tsId);
         if (btnTs && videoPlayer) {
             btnTs.addEventListener('click', () => {
+                if (videoPlayer.classList.contains('videoCircle')) {
+                    return this.userLog('info', 'SnapShoot not allowed if video on privacy mode', 'top-end');
+                }
                 this.sound('snapshot');
                 let context, canvas, width, height, dataURL;
                 width = videoPlayer.videoWidth;
@@ -2123,6 +2166,36 @@ class RoomClient {
                 // console.log(dataURL);
                 saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
             });
+        }
+    }
+
+    // ####################################################
+    // VIDEO CIRCLE - PRIVACY MODE
+    // ####################################################
+
+    handleVP(elemId, vpId) {
+        let videoPlayer = this.getId(elemId);
+        let btnVp = this.getId(vpId);
+        if (btnVp && videoPlayer) {
+            btnVp.addEventListener('click', () => {
+                this.sound('click');
+                isVideoPrivacyActive = !isVideoPrivacyActive;
+                this.setVideoPrivacyStatus(this.peer_id, isVideoPrivacyActive);
+                this.emitCmd(`privacy|${this.peer_id}|${isVideoPrivacyActive}`);
+            });
+        }
+    }
+
+    setVideoPrivacyStatus(elemName, privacy) {
+        let videoPlayer = this.getName(elemName)[0];
+        if (privacy) {
+            videoPlayer.classList.remove('videoDefault');
+            videoPlayer.classList.add('videoCircle');
+            videoPlayer.style.objectFit = 'cover';
+        } else {
+            videoPlayer.classList.remove('videoCircle');
+            videoPlayer.classList.add('videoDefault');
+            videoPlayer.style.objectFit = 'var(--videoObjFit)';
         }
     }
 
@@ -3685,6 +3758,26 @@ class RoomClient {
                     this.peerAction('me', peer_id, 'mute');
                 }
             });
+        }
+    }
+
+    // ####################################################
+    // HANDLE COMMANDS
+    // ####################################################
+
+    emitCmd(data) {
+        this.socket.emit('cmd', data);
+    }
+
+    handleCmd(data) {
+        // cmd|foo|bar|....
+        const words = data.split('|');
+        let cmd = words[0];
+        switch (cmd) {
+            case 'privacy':
+                this.setVideoPrivacyStatus(words[1], words[2] == 'true');
+                break;
+            //...
         }
     }
 

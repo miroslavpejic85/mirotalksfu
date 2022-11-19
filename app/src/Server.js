@@ -479,6 +479,28 @@ io.on('connection', (socket) => {
         callback({ peerCounts: peerCounts });
     });
 
+    socket.on('cmd', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        log.debug('Cmd', data);
+
+        // cmd|foo|bar|....
+        const words = data.split('|');
+        let cmd = words[0];
+        switch (cmd) {
+            case 'privacy':
+                roomList
+                    .get(socket.room_id)
+                    .getPeers()
+                    .get(socket.id)
+                    .updatePeerInfo({ type: cmd, status: words[2] == 'true' });
+                break;
+            //...
+        }
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'cmd', data);
+    });
+
     socket.on('roomAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 

@@ -81,6 +81,7 @@ let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isVideoPrivacyActive = false;
 let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
@@ -385,6 +386,7 @@ function getPeerInfo() {
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
         peer_screen: isScreenAllowed,
+        peer_video_privacy: isVideoPrivacyActive,
         peer_hand: false,
     };
 }
@@ -1198,6 +1200,7 @@ function handleRoomClientEvents() {
         hide(stopVideoButton);
         show(startVideoButton);
         setVideoButtonsDisabled(false);
+        isVideoPrivacyActive = false;
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');

@@ -10,6 +10,7 @@ module.exports = class Peer {
         this.peer_name = data.peer_info.peer_name;
         this.peer_audio = data.peer_info.peer_audio;
         this.peer_video = data.peer_info.peer_video;
+        this.peer_video_privacy = data.peer_video_privacy;
         this.peer_hand = data.peer_info.peer_hand;
         this.transports = new Map();
         this.consumers = new Map();
@@ -32,6 +33,10 @@ module.exports = class Peer {
             case 'videoType':
                 this.peer_info.peer_video = data.status;
                 this.peer_video = data.status;
+                if (data.status == false) {
+                    this.peer_info.peer_video_privacy = data.status;
+                    this.peer_video_privacy = data.status;
+                }
                 break;
             case 'screen':
             case 'screenType':
@@ -40,6 +45,10 @@ module.exports = class Peer {
             case 'hand':
                 this.peer_info.peer_hand = data.status;
                 this.peer_hand = data.status;
+                break;
+            case 'privacy':
+                this.peer_info.peer_video_privacy = data.status;
+                this.peer_video_privacy = data.status;
                 break;
         }
     }

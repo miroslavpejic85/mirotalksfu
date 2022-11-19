@@ -32,6 +32,7 @@ const BUTTONS = {
         fullScreenButton: true,
         snapShotButton: true,
         muteAudioButton: true,
+        videoPrivacyButton: true,
     },
     consumerVideo: {
         fullScreenButton: true,
