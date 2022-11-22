@@ -164,6 +164,7 @@ class RoomClient {
         this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
+        this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
         this.pinnedVideoPlayerId = null;
@@ -1081,6 +1082,7 @@ class RoomClient {
                 if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
+                if (isScreen) pn.click();
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'top-end');
@@ -1400,9 +1402,8 @@ class RoomClient {
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
-                if (!remoteIsScreen && remotePrivacyOn) {
-                    this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
-                }
+                if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
+                if (remoteIsScreen) pn.click();
                 this.sound('joined');
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -2370,7 +2371,7 @@ class RoomClient {
     }
 
     showMessage(data) {
-        if (!this.isChatOpen) this.toggleChat();
+        if (!this.isChatOpen && this.showChatOnMessage) this.toggleChat();
         this.setMsgAvatar('left', data.peer_name);
         this.appendMessage(
             'left',

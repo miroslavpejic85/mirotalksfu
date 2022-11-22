@@ -164,6 +164,7 @@ function initClient() {
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
+        setTippy('showChatOnMsg', "Show me when I'm receive a new message", 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -1050,7 +1051,10 @@ function handleSelects() {
     pinVideoPosition.onchange = () => {
         rc.togglePin(pinVideoPosition.value);
     };
-
+    // chat
+    showChatOnMsg.onchange = (e) => {
+        rc.showChatOnMessage = e.currentTarget.checked;
+    };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
