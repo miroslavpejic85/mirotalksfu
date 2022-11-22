@@ -1054,6 +1054,7 @@ function handleSelects() {
     // chat
     showChatOnMsg.onchange = (e) => {
         rc.showChatOnMessage = e.currentTarget.checked;
+        sound('click');
     };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
