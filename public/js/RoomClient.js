@@ -2382,6 +2382,9 @@ class RoomClient {
             data.to_peer_id,
             data.to_peer_name,
         );
+        if (!this.showChatOnMessage) {
+            this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
+        }
         this.sound('message');
     }
 
