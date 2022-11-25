@@ -1053,8 +1053,13 @@ function handleSelects() {
     };
     // chat
     showChatOnMsg.onchange = (e) => {
-        rc.showChatOnMessage = e.currentTarget.checked;
         sound('click');
+        rc.showChatOnMessage = e.currentTarget.checked;
+        if (rc.showChatOnMessage) {
+            userLog('info', "Chat will be shown, when I'm receive a new message", 'top-end');
+        } else {
+            userLog('info', "Chat not will be shown, when I'm receive a new message", 'top-end');
+        }
     };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
@@ -1295,6 +1300,7 @@ function userLog(icon, message, position, timer = 3000) {
         position: position,
         showConfirmButton: false,
         timer: timer,
+        timerProgressBar: true,
     });
     Toast.fire({
         icon: icon,
