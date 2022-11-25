@@ -34,6 +34,7 @@
 :root {
     --body-bg: radial-gradient(#393939, #000000);
     --border: 1px solid rgb(255 255 255 / 32%);
+    --border-radius: 1rem;
     --msger-top: 50%;
     --msger-left: 50%;
     --msger-height: 680px;
@@ -293,7 +294,7 @@ body {
 
 .tabcontent button i {
     border: var(--border);
-    border-radius: 5px;
+    border-radius: var(--border-radius);
 }
 
 /* on open display devices tab */
