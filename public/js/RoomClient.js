@@ -1857,6 +1857,7 @@ class RoomClient {
             position: position,
             showConfirmButton: false,
             timer: timer,
+            timerProgressBar: true,
         });
         Toast.fire({
             icon: icon,

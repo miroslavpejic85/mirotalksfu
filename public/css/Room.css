@@ -576,6 +576,10 @@ em-emoji-picker {
     border: 0.5px solid rgb(255 255 255 / 32%) !important;
 }
 
+.swal2-timer-progress-bar-container {
+    background: #376df9;
+}
+
 /*--------------------------------------------------------------
 # About
 --------------------------------------------------------------*/
