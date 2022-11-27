@@ -170,6 +170,7 @@ class RoomClient {
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
+        this.videoQualitySelectedIndex = 0;
 
         this.chatMessages = [];
         this.leftMsgAvatar = null;
@@ -717,6 +718,7 @@ class RoomClient {
                     mediaConstraints = this.getCameraConstraints();
                 } else {
                     mediaConstraints = this.getVideoConstraints(deviceId);
+                    this.videoQualitySelectedIndex = videoQuality.selectedIndex;
                 }
                 break;
             case mediaType.screen:
@@ -852,6 +854,16 @@ class RoomClient {
             }
         } catch (err) {
             console.error('Produce error:', err);
+
+            if (!audio && !screen && videoQuality.selectedIndex != 0) {
+                videoQuality.selectedIndex = this.videoQualitySelectedIndex;
+                this.sound('alert');
+                this.userLog(
+                    'error',
+                    `Your device doesn't support the selected video quality (${videoQuality.value}), please select the another one.`,
+                    'top-end',
+                );
+            }
         }
     }
 
@@ -946,8 +958,8 @@ class RoomClient {
         };
     }
 
-    getVideoConstraints(deviceId) {
-        return {
+    getVideoConstraints(deviceId, frameRate = 30) {
+        let videoConstraints = {
             audio: false,
             video: {
                 width: {
@@ -968,7 +980,89 @@ class RoomClient {
                     max: 30,
                 },
             },
-        };
+        }; // Init auto detect max cam resolution and fps
+
+        switch (videoQuality.value) {
+            case 'default':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                    },
+                };
+                break;
+            case 'qvga':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 320 },
+                        height: { exact: 240 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints low bandwidth
+                break;
+            case 'vga':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 640 },
+                        height: { exact: 480 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints medium bandwidth
+                break;
+            case 'hd':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 1280 },
+                        height: { exact: 720 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints high bandwidth
+                break;
+            case 'fhd':
+                videoConstraints = {
+                    width: { exact: 1920 },
+                    height: { exact: 1080 },
+                    deviceId: deviceId,
+                    aspectRatio: 1.777,
+                    frameRate: frameRate,
+                }; // video cam constraints very high bandwidth
+                break;
+            case '2k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 2560 },
+                        height: { exact: 1440 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints ultra high bandwidth
+                break;
+            case '4k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 3840 },
+                        height: { exact: 2160 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints ultra high bandwidth
+                break;
+        }
+        return videoConstraints;
     }
 
     getScreenConstraints() {
@@ -1005,7 +1099,9 @@ class RoomClient {
 
     closeThenProduce(type, deviceId, swapCamera = false) {
         this.closeProducer(type);
-        this.produce(type, deviceId, swapCamera);
+        setTimeout(function () {
+            rc.produce(type, deviceId, swapCamera);
+        }, 1000);
     }
 
     async handleProducer(id, type, stream) {

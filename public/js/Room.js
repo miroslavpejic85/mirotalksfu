@@ -1009,6 +1009,13 @@ function handleButtons() {
 
 function handleSelects() {
     // devices options
+    videoSelect.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+    };
+    videoQuality.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+    };
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
@@ -1016,10 +1023,6 @@ function handleSelects() {
     speakerSelect.onchange = () => {
         rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
-    };
-    videoSelect.onchange = () => {
-        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
     };
     // room
     switchSounds.onchange = (e) => {
