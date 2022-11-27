@@ -718,7 +718,6 @@ class RoomClient {
                     mediaConstraints = this.getCameraConstraints();
                 } else {
                     mediaConstraints = this.getVideoConstraints(deviceId);
-                    this.videoQualitySelectedIndex = videoQuality.selectedIndex;
                 }
                 break;
             case mediaType.screen:
@@ -958,7 +957,12 @@ class RoomClient {
         };
     }
 
-    getVideoConstraints(deviceId, frameRate = 30) {
+    getVideoConstraints(deviceId) {
+        const frameRate = {
+            min: 5,
+            ideal: 15,
+            max: 30,
+        };
         let videoConstraints = {
             audio: false,
             video: {
@@ -974,11 +978,7 @@ class RoomClient {
                 },
                 deviceId: deviceId,
                 aspectRatio: 1.777, // 16:9
-                frameRate: {
-                    min: 5,
-                    ideal: 15,
-                    max: 30,
-                },
+                frameRate: frameRate,
             },
         }; // Init auto detect max cam resolution and fps
 
@@ -989,6 +989,7 @@ class RoomClient {
                     video: {
                         deviceId: deviceId,
                         aspectRatio: 1.777,
+                        frameRate: frameRate,
                     },
                 };
                 break;
@@ -1062,6 +1063,7 @@ class RoomClient {
                 }; // video cam constraints ultra high bandwidth
                 break;
         }
+        this.videoQualitySelectedIndex = videoQuality.selectedIndex;
         return videoConstraints;
     }
 
