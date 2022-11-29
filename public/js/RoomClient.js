@@ -1031,11 +1031,14 @@ class RoomClient {
                 break;
             case 'fhd':
                 videoConstraints = {
-                    width: { exact: 1920 },
-                    height: { exact: 1080 },
-                    deviceId: deviceId,
-                    aspectRatio: 1.777,
-                    frameRate: frameRate,
+                    audio: false,
+                    video: {
+                        width: { exact: 1920 },
+                        height: { exact: 1080 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    }
                 }; // video cam constraints very high bandwidth
                 break;
             case '2k':
