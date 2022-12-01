@@ -1038,7 +1038,7 @@ class RoomClient {
                         deviceId: deviceId,
                         aspectRatio: 1.777,
                         frameRate: frameRate,
-                    }
+                    },
                 }; // video cam constraints very high bandwidth
                 break;
             case '2k':
