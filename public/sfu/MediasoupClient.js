@@ -5099,27 +5099,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -5669,27 +5675,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -6266,27 +6278,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -6891,27 +6909,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -8015,27 +8039,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async updateIceServers(iceServers) {
@@ -8678,27 +8708,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -9258,27 +9294,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -9918,27 +9960,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -10505,27 +10553,33 @@
                             },
                             proprietaryConstraints,
                         );
-                        // Handle RTCPeerConnection connection status.
-                        this._pc.addEventListener('iceconnectionstatechange', () => {
-                            switch (this._pc.iceConnectionState) {
-                                case 'checking':
-                                    this.emit('@connectionstatechange', 'connecting');
-                                    break;
-                                case 'connected':
-                                case 'completed':
-                                    this.emit('@connectionstatechange', 'connected');
-                                    break;
-                                case 'failed':
-                                    this.emit('@connectionstatechange', 'failed');
-                                    break;
-                                case 'disconnected':
-                                    this.emit('@connectionstatechange', 'disconnected');
-                                    break;
-                                case 'closed':
-                                    this.emit('@connectionstatechange', 'closed');
-                                    break;
-                            }
-                        });
+                        if (this._pc.connectionState) {
+                            this._pc.addEventListener('connectionstatechange', () => {
+                                this.emit('@connectionstatechange', this._pc.connectionState);
+                            });
+                        } else {
+                            this._pc.addEventListener('iceconnectionstatechange', () => {
+                                logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
+                                switch (this._pc.iceConnectionState) {
+                                    case 'checking':
+                                        this.emit('@connectionstatechange', 'connecting');
+                                        break;
+                                    case 'connected':
+                                    case 'completed':
+                                        this.emit('@connectionstatechange', 'connected');
+                                        break;
+                                    case 'failed':
+                                        this.emit('@connectionstatechange', 'failed');
+                                        break;
+                                    case 'disconnected':
+                                        this.emit('@connectionstatechange', 'disconnected');
+                                        break;
+                                    case 'closed':
+                                        this.emit('@connectionstatechange', 'closed');
+                                        break;
+                                }
+                            });
+                        }
                     }
                     async updateIceServers(iceServers) {
                         logger.debug('updateIceServers()');
@@ -12491,7 +12545,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.66';
+                exports.version = '3.6.67';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
