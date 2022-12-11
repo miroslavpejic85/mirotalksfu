@@ -1339,7 +1339,7 @@ class RoomClient {
             console.log('Update whiteboard canvas to the participants in the room');
             wbCanvasToJson();
         }
-        this.getConsumeStream(producer_id).then(
+        this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
             function ({ consumer, stream, kind }) {
                 console.log('CONSUMER', consumer);
 
@@ -1370,21 +1370,24 @@ class RoomClient {
         );
     }
 
-    async getConsumeStream(producerId) {
+    async getConsumeStream(producerId, peer_id, type) {
         const { rtpCapabilities } = this.device;
         const data = await this.socket.request('consume', {
             rtpCapabilities,
             consumerTransportId: this.consumerTransport.id,
             producerId,
         });
+        console.log('DATA', data);
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};
+        const streamId = peer_id + (type == mediaType.screen ? '-screensharing' : '-mic-webcam');
         const consumer = await this.consumerTransport.consume({
             id,
             producerId,
             kind,
             rtpParameters,
             codecOptions,
+            streamId,
         });
         const stream = new MediaStream();
         stream.addTrack(consumer.track);

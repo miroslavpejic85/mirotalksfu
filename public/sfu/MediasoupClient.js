@@ -4432,7 +4432,7 @@
                     /**
                      * Create a Consumer to consume a remote Producer.
                      */
-                    async consume({ id, producerId, kind, rtpParameters, appData = {} }) {
+                    async consume({ id, producerId, kind, rtpParameters, streamId, appData = {} }) {
                         logger.debug('consume()');
                         rtpParameters = utils.clone(rtpParameters, undefined);
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
@@ -4453,6 +4453,7 @@
                             producerId,
                             kind,
                             rtpParameters,
+                            streamId,
                             appData,
                         });
                         // Store the Consumer creation task.
@@ -4586,11 +4587,12 @@
                                 // Fill options list.
                                 const optionsList = [];
                                 for (const task of pendingConsumerTasks) {
-                                    const { id, kind, rtpParameters } = task.consumerOptions;
+                                    const { id, kind, rtpParameters, streamId } = task.consumerOptions;
                                     optionsList.push({
                                         trackId: id,
                                         kind: kind,
                                         rtpParameters,
+                                        streamId,
                                     });
                                 }
                                 try {
@@ -5342,15 +5344,14 @@
                         this._assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const mid = kind;
-                            const streamId = rtpParameters.rtcp.cname;
                             this._remoteSdp.receive({
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -5384,7 +5385,7 @@
                             const { kind, trackId, rtpParameters } = options;
                             const mid = kind;
                             const localId = trackId;
-                            const streamId = rtpParameters.rtcp.cname;
+                            const streamId = options.streamId || rtpParameters.rtcp.cname;
                             const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
                             const track = stream.getTrackById(localId);
                             if (!track) throw new Error('remote track not found');
@@ -5941,22 +5942,19 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        optionsList,
-                    ) {
+                    async receive(optionsList) {
                         var _a;
                         this._assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const mid = kind;
                             this._remoteSdp.receive({
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -6577,7 +6575,7 @@
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
@@ -6585,7 +6583,7 @@
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -7216,7 +7214,7 @@
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
@@ -7224,7 +7222,7 @@
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -8341,7 +8339,7 @@
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
@@ -8349,7 +8347,7 @@
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -8956,7 +8954,7 @@
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const mid = kind;
-                            let streamId = rtpParameters.rtcp.cname;
+                            let streamId = options.streamId || rtpParameters.rtcp.cname;
                             // NOTE: In React-Native we cannot reuse the same remote MediaStream for new
                             // remote tracks. This is because react-native-webrtc does not react on new
                             // tracks generated within already existing streams, so force the streamId
@@ -9601,7 +9599,7 @@
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
@@ -9609,7 +9607,7 @@
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -10228,14 +10226,14 @@
                         this._assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const mid = kind;
                             this._remoteSdp.receive({
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -10837,7 +10835,7 @@
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
-                            const { trackId, kind, rtpParameters } = options;
+                            const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
@@ -10845,7 +10843,7 @@
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: rtpParameters.rtcp.cname,
+                                streamId: streamId || rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -12545,7 +12543,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.67';
+                exports.version = '3.6.68';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
