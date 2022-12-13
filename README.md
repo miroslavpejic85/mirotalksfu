@@ -30,12 +30,13 @@
 -   Translated in 133 languages
 -   Optimized Room URL Sharing (share it to your participants, wait for them to join)
 -   Possibility to Password protect the Room for the meeting
+-   Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator.
 -   Webcam Streaming up to 4K quality (Front - Rear for mobile)
 -   Echo cancellation and noise suppression that makes your audio crystal clear
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing (with drag-and-drop), share any files to your participants in the room
 -   Take a snapshot from the video frame(screen/cam) to save it as an image on your device.
--   Chat with Emoji Picker to show you feeling and the possibility to Save the conversations
+-   Chat with Emoji Picker to show you feeling, private messages, Markdown support, possibility to Save the conversations, and many more.
 -   Speech recognition, execute the app features simply with your voice.
 -   Advance collaborative whiteboard for the teachers
 -   Select Microphone - Speaker and Video source
@@ -186,7 +187,7 @@ You can start videoconferencing directly from your Local PC, and be reachable fr
 
 <br/>
 
--   [How to Self-Hosting](docs/self-hosting.md)
+To `Self-Host MiroTalk SFU` on `Your` dedicated `Server`, read [this documentation](docs/self-hosting.md).
 
 </details>
 
@@ -222,9 +223,11 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotal
 
 <br/>
 
-[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
+[![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
+
+Use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 IN CLOUD CREDITS` on Hetzner.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
@@ -237,7 +240,7 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 [![DigitalOcean Referral Badge](https://web-platforms.sfo2.cdn.digitaloceanspaces.com/WWW/Badge%201.svg)](https://www.digitalocean.com/?refcode=1070207afbb1&utm_campaign=Referral_Invite&utm_medium=Referral_Program&utm_source=badge)
 
-For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use this [link](https://m.do.co/c/1070207afbb1) to get a $100 credit for the first 60 days.
+For personal use, you can start with a single $5 a month cloud server and scale up as needed. You can use [this link](https://m.do.co/c/1070207afbb1) to get a `$100 credit for the first 60 days`.
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
@@ -248,7 +251,7 @@ If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud serv
 
 <br/>
 
-<a target="_blank" href="https://p2p.mirotalk.com"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
+<a target="_blank" href="https://hetzner.cloud/?ref=XdRifCzCK3bn"><img src="public/sponsors/Hetzner.png" style="width: 220px;"></a>
 
 https://sfu.mirotalk.com
 
@@ -295,7 +298,7 @@ https://sfu.mirotalk.com
 
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
-For a MiroTalk license under conditions other than AGPLv3, please contact us at info.mirotalk@gmail.com.
+For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [buy directly via CodeCanyon](https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970).
 
 </details>
 
@@ -310,7 +313,9 @@ Support the project by [becoming a sponsor](https://github.com/sponsors/miroslav
 
 [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
 
-[![Hetzner](public/sponsors/Hetzner.png)](https://www.hetzner.com)
+[![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
+
+[![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)
 
 </details>
 

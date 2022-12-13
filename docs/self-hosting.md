@@ -2,9 +2,10 @@
 
 ## Requirments
 
--   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CPX11` it's enough, OS: `Ubuntu 20.04`)
--   [Node.js](https://nodejs.org/en/) at least 12x, better `16.15.1 LTS`
--   Your domain example: `your.domain.name` (Set a DNS A record for that domain that point to Your Server public IPv4)
+-   Recommended: [Hetzner](https://www.hetzner.com/cloud) (`CPX11` it's enough, OS: `Ubuntu 20.04`) use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 in cloud credits`.
+-   [Node.js](https://nodejs.org/en/) at least 12x, better `16.15.1 LTS` & npm
+-   Your domain name, example: `your.domain.name`
+    -   Set a DNS A record for that domain that point to Your Server public IPv4
 
 ---
 
@@ -53,7 +54,7 @@ Change the `announcedIp` with your `Server public IPv4` on `app/src/config.js`
 }
 ```
 
-Set the `inbound rules` if you have the Firewall enalbled
+Set the `inbound rules` if you have the Firewall enabled
 
 | Port range  | Protocol | Source    | Description         |
 | ----------- | -------- | --------- | ------------------- |
@@ -78,11 +79,13 @@ Check if is correctly installed: https://your.domain.name:3010
 
 ![pm2](../public/images/pm2.png)
 
-Using [PM2](https://pm2.keymetrics.io) to run it as deamon
+Using [PM2](https://pm2.keymetrics.io) to run it as daemon
 
 ```bash
 $ npm install -g pm2
 $ pm2 start app/src/Server.js
+$ pm2 save
+$ pm2 startup
 ```
 
 ---
@@ -125,6 +128,7 @@ In order to use it without the port number at the end, and to have encrypted com
 $ sudo apt-get install nginx
 
 # Install Certbot (SSL certificates)
+$ sudo apt install snapd
 $ sudo snap install core; sudo snap refresh core
 $ sudo snap install --classic certbot
 $ sudo ln -s /snap/bin/certbot /usr/bin/certbot
@@ -208,6 +212,7 @@ Check Your MiroTalk SFU instance: https://your.domain.name/
 In order to have always Your MiroTalk SFU updated to latest, we going to create a script
 
 ```bash
+cd
 # Create a file sfuUpdate.sh
 $ vim sfuUpdate.sh
 ```

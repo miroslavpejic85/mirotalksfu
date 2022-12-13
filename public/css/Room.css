@@ -34,6 +34,7 @@
 :root {
     --body-bg: radial-gradient(#393939, #000000);
     --border: 1px solid rgb(255 255 255 / 32%);
+    --border-radius: 1rem;
     --msger-top: 50%;
     --msger-left: 50%;
     --msger-height: 680px;
@@ -167,6 +168,19 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Init Audio/Video buttons
+--------------------------------------------------------------*/
+
+#initAudioButton,
+#initVideoButton,
+#initAudioVideoButton {
+    font-size: 1.2rem;
+    padding: 10px;
+    border: var(--border);
+    border-radius: 5px;
+}
+
+/*--------------------------------------------------------------
 # Room QR
 --------------------------------------------------------------*/
 
@@ -185,7 +199,7 @@ body {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 355px;
+    width: 365px;
     min-height: 480px;
     background: var(--settings-bg);
     box-shadow: var(--box-shadow);
@@ -213,17 +227,31 @@ body {
     color: #fff;
     background-color: transparent;
     border-radius: 5px;
+    cursor: pointer;
 }
 
-#mySettings button:hover {
-    background-color: rgb(42 42 42 / 70%);
+#mySettingsCloseBtn {
+    padding: 10px;
+}
+
+#mySettings button {
     border-radius: 5px;
 }
 
 #sessionTimeButton {
     cursor: default;
     position: absolute;
+    right: 15px;
     bottom: 15px;
+}
+
+.form-check-input {
+    cursor: pointer;
+}
+
+#soundsButton,
+#lobbyButton {
+    padding: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -262,6 +290,11 @@ body {
     display: none;
     padding: 6px 12px;
     border-top: none;
+}
+
+.tabcontent button i {
+    border: var(--border);
+    border-radius: var(--border-radius);
 }
 
 /* on open display devices tab */
@@ -518,15 +551,11 @@ body {
 # Chat room emoji picker
 --------------------------------------------------------------*/
 
-emoji-picker {
+em-emoji-picker {
     z-index: 0;
     position: absolute;
-    bottom: 100px;
-    width: 100%;
-    height: 50%;
-    --background: #16171b;
-    --num-columns: 8;
-    --emoji-size: 1.5rem;
+    bottom: 110px;
+    left: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -545,6 +574,15 @@ emoji-picker {
     text-align: center;
     color: #858585 !important;
     background-color: transparent !important;
+}
+
+.swal2-popup {
+    /* border: var(--border) !important; */
+    border: 0.5px solid rgb(255 255 255 / 32%) !important;
+}
+
+.swal2-timer-progress-bar-container {
+    background: #376df9;
 }
 
 /*--------------------------------------------------------------
@@ -860,15 +898,21 @@ progress {
     cursor: move;
 }
 
+.whiteboard-header button {
+    padding: 10px;
+    margin: 2px;
+    border-radius: 5px;
+    border: var(--border);
+}
+
 .whiteboardColorPicker {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
     padding: 0;
-    border: none;
     width: 20px;
     height: 15px;
-    margin-left: 5px;
+    margin: 2px;
     border-radius: 20px;
     border: solid 0.5px #afadad38;
 }

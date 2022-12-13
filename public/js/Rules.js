@@ -26,11 +26,13 @@ const BUTTONS = {
         unlockRoomButton: true,
         lobbyButton: true,
         participantsButton: true,
+        tabRecording: true,
     },
     producerVideo: {
         fullScreenButton: true,
         snapShotButton: true,
         muteAudioButton: true,
+        videoPrivacyButton: true,
     },
     consumerVideo: {
         fullScreenButton: true,
@@ -50,6 +52,13 @@ const BUTTONS = {
         muteAudioButton: true,
         audioVolumeInput: true,
         ejectButton: true,
+    },
+    chat: {
+        chatSaveButton: true,
+        chatEmojiButton: true,
+        chatMarkdownButton: true,
+        chatShareFileButton: true,
+        chatSpeechStartButton: true,
     },
     //...
 };

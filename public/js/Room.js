@@ -48,7 +48,7 @@ const isTabletDevice = isTablet(userAgent);
 const isIPadDevice = isIpad(userAgent);
 
 const wbImageInput = 'image/*';
-const wbWidth = 800;
+const wbWidth = 1200;
 const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
@@ -81,6 +81,7 @@ let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
+let isVideoPrivacyActive = false;
 let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
@@ -144,6 +145,7 @@ function initClient() {
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
             'right',
         );
+        setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -164,6 +166,7 @@ function initClient() {
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
+        setTippy('showChatOnMsg', "Show me when I'm receive a new message", 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -174,7 +177,7 @@ function initClient() {
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
-        setTippy('sessionTime', 'Session time', 'right');
+        setTippy('sessionTime', 'Session time', 'top');
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -357,8 +360,8 @@ function getRoomPassword() {
     let roomPassword = qs.get('password');
     if (roomPassword) {
         let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
-        if (queryNoRoomPassword != null) {
-            return false;
+        if (queryNoRoomPassword) {
+            roomPassword = false;
         }
         return roomPassword;
     }
@@ -386,6 +389,7 @@ function getPeerInfo() {
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
         peer_screen: isScreenAllowed,
+        peer_video_privacy: isVideoPrivacyActive,
         peer_hand: false,
     };
 }
@@ -428,7 +432,7 @@ function whoAreYou() {
         inputPlaceholder: 'Enter your name',
         inputValue: default_name,
         html: `<br />
-        <div style="overflow: hidden;">
+        <div style="padding: 10px;">
             <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
             <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
             <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
@@ -648,17 +652,24 @@ function roomIsReady() {
     setTheme('dark');
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
-    show(startRecButton);
+    if (BUTTONS.settings.tabRecording) {
+        show(startRecButton);
+    } else {
+        hide(tabRecordingBtn);
+    }
     BUTTONS.main.chatButton && show(chatButton);
+    !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
+    BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
+    BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
+    BUTTONS.chat.chatShareFileButton && show(chatShareFileButton);
+    if (isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton) {
+        show(chatSpeechStartButton);
+    } else {
+        BUTTONS.chat.chatSpeechStartButton = false;
+    }
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
-    show(chatEmojiButton);
-    show(chatMarkdownButton);
-    show(chatShareFileButton);
-    if (isWebkitSpeechRecognitionSupported) {
-        show(chatSpeechStartButton);
-    }
     if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
         show(swapCameraButton);
         setChatSize();
@@ -935,9 +946,6 @@ function handleButtons() {
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
     };
-    whiteboardGhostButton.onclick = (e) => {
-        wbToggleBg();
-    };
     whiteboardPencilBtn.onclick = () => {
         realWhiteBoard.whiteboardSetDrawingMode("draw");
     };
@@ -1005,6 +1013,13 @@ function handleButtons() {
 
 function handleSelects() {
     // devices options
+    videoSelect.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+    };
+    videoQuality.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+    };
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
@@ -1012,10 +1027,6 @@ function handleSelects() {
     speakerSelect.onchange = () => {
         rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
         rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
-    };
-    videoSelect.onchange = () => {
-        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
     };
     // room
     switchSounds.onchange = (e) => {
@@ -1047,7 +1058,16 @@ function handleSelects() {
     pinVideoPosition.onchange = () => {
         rc.togglePin(pinVideoPosition.value);
     };
-
+    // chat
+    showChatOnMsg.onchange = (e) => {
+        sound('click');
+        rc.showChatOnMessage = e.currentTarget.checked;
+        if (rc.showChatOnMessage) {
+            userLog('info', "Chat will be shown, when I'm receive a new message", 'top-end');
+        } else {
+            userLog('info', "Chat not will be shown, when I'm receive a new message", 'top-end');
+        }
+    };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         realWhiteBoard.wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
@@ -1068,6 +1088,17 @@ function handleSelects() {
             color: wbBackgroundColorEl.value,
         };
         whiteboardAction(data);
+        //setWhiteboardBgColor(wbBackgroundColorEl.value);
+    };
+    whiteboardGhostButton.onclick = (e) => {
+        wbIsBgTransparent = !wbIsBgTransparent;
+        realWhiteBoard.whiteboardSetDrawingMode("none");
+        let data = {
+            peer_name: peer_name,
+            action: 'bgcolor',
+            color: wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value,
+        };
+        //setWhiteboardBgColor(wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value);
     };
     wbFillColorEl.onchange = () => {
         realWhiteBoard.wbFillColor = wbDrawingColorEl.value;
@@ -1118,10 +1149,17 @@ function handleInputs() {
         rc.checkLineBreaks();
     };
 
-    rc.getId('chatEmoji').addEventListener('emoji-click', (e) => {
-        chatMessage.value += e.detail.emoji.unicode;
+    const pickerOptions = {
+        theme: 'dark',
+        onEmojiSelect: addEmojiToMsg,
+    };
+    const emojiPicker = new EmojiMart.Picker(pickerOptions);
+    rc.getId('chatEmoji').appendChild(emojiPicker);
+
+    function addEmojiToMsg(data) {
+        chatMessage.value += data.native;
         rc.toggleChatEmoji();
-    });
+    }
 }
 
 // ####################################################
@@ -1210,6 +1248,7 @@ function handleRoomClientEvents() {
         hide(stopVideoButton);
         show(startVideoButton);
         setVideoButtonsDisabled(false);
+        isVideoPrivacyActive = false;
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');
@@ -1299,6 +1338,7 @@ function userLog(icon, message, position, timer = 3000) {
         position: position,
         showConfirmButton: false,
         timer: timer,
+        timerProgressBar: true,
     });
     Toast.fire({
         icon: icon,
@@ -1436,8 +1476,74 @@ function wbCanvasToJson() {
 }
 
 function setupWhiteboard() {
-     realWhiteBoard = new WhiteBoard('image/*', 800, 600, wbCanvasToJson);
+    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson);
 }
+
+/*function setupWhiteboard() {
+    setupWhiteboardCanvas();
+    setupWhiteboardCanvasSize();
+    setupWhiteboardLocalListners();
+}
+
+function setupWhiteboardCanvas() {
+    wbCanvas = new fabric.Canvas('wbCanvas');
+    wbCanvas.freeDrawingBrush.color = '#FFFFFF';
+    wbCanvas.freeDrawingBrush.width = 3;
+    whiteboardIsDrawingMode(true);
+}
+
+function setupWhiteboardCanvasSize() {
+    let optimalSize = [wbWidth, wbHeight];
+    let scaleFactorX = window.innerWidth / optimalSize[0];
+    let scaleFactorY = window.innerHeight / optimalSize[1];
+    if (scaleFactorX < scaleFactorY && scaleFactorX < 1) {
+        wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
+        wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
+        wbCanvas.setZoom(scaleFactorX);
+        setWhiteboardSize(optimalSize[0] * scaleFactorX, optimalSize[1] * scaleFactorX);
+    } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
+        wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
+        wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
+        wbCanvas.setZoom(scaleFactorY);
+        setWhiteboardSize(optimalSize[0] * scaleFactorY, optimalSize[1] * scaleFactorY);
+    } else {
+        wbCanvas.setWidth(optimalSize[0]);
+        wbCanvas.setHeight(optimalSize[1]);
+        wbCanvas.setZoom(1);
+        setWhiteboardSize(optimalSize[0], optimalSize[1]);
+    }
+    wbCanvas.calcOffset();
+    wbCanvas.renderAll();
+}*/
+
+function setWhiteboardSize(w, h) {
+    document.documentElement.style.setProperty('--wb-width', w);
+    document.documentElement.style.setProperty('--wb-height', h);
+}
+
+function setWhiteboardBgColor(color) {
+    let data = {
+        peer_name: peer_name,
+        action: 'bgcolor',
+        color: color,
+    };
+    whiteboardAction(data);
+}
+
+function whiteboardIsDrawingMode(status) {
+    wbCanvas.isDrawingMode = status;
+    if (status) {
+        setColor(whiteboardPencilBtn, 'green');
+        setColor(whiteboardObjectBtn, 'white');
+        setColor(whiteboardEraserBtn, 'white');
+        wbIsEraser = false;
+    } else {
+        setColor(whiteboardPencilBtn, 'white');
+        setColor(whiteboardObjectBtn, 'green');
+    }
+}
+
+
 
 function whiteboardAddObj(type) {
     switch (type) {
@@ -1448,6 +1554,12 @@ function whiteboardAddObj(type) {
                 input: 'text',
                 showCancelButton: true,
                 confirmButtonText: 'OK',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     let wbCanvasImgURL = result.value;
@@ -1473,6 +1585,12 @@ function whiteboardAddObj(type) {
                 showDenyButton: true,
                 confirmButtonText: `OK`,
                 denyButtonText: `Cancel`,
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     realWhiteBoard.whiteboardSetDrawingMode("none"); 
@@ -1500,6 +1618,12 @@ function whiteboardAddObj(type) {
                 input: 'text',
                 showCancelButton: true,
                 confirmButtonText: 'OK',
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
             }).then((result) => {
                 if (result.isConfirmed) {
                     let wbCanvasText = result.value;
@@ -1627,15 +1751,6 @@ function whiteboardAction(data, emit = true) {
             if (wbIsOpen) toggleWhiteboard();
             break;
         //...
-    }
-}
-
-function wbToggleBg() {
-    wbIsBgTransparent = !wbIsBgTransparent;
-    if (wbIsBgTransparent) {
-        document.documentElement.style.setProperty('--wb-bg', 'rgba(0, 0, 0, 0.100)');
-    } else {
-        setTheme(currentTheme);
     }
 }
 

@@ -23,26 +23,26 @@
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "dependencies": {
-        "body-parser": "1.20.0",
+        "body-parser": "1.20.1",
         "compression": "1.7.4",
         "colors": "1.4.0",
         "cors": "2.8.5",
         "crypto-js": "4.1.1",
         "express": "4.18.2",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.10.8",
-        "mediasoup-client": "3.6.57",
+        "mediasoup": "3.11.4",
+        "mediasoup-client": "3.6.68",
         "ngrok": "4.3.3",
         "qs": "6.11.0",
-        "@sentry/node": "7.15.0",
-        "@sentry/integrations": "7.15.0",
-        "socket.io": "4.5.2",
-        "swagger-ui-express": "4.5.0",
+        "@sentry/node": "7.24.2",
+        "@sentry/integrations": "7.24.2",
+        "socket.io": "4.5.4",
+        "swagger-ui-express": "4.6.0",
         "uuid": "9.0.0",
         "yamljs": "0.3.0"
     },
     "devDependencies": {
         "node-fetch": "^2.6.7",
-        "prettier": "2.7.1"
+        "prettier": "2.8.1"
     }
 }

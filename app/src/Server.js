@@ -491,14 +491,48 @@ io.on('connection', (socket) => {
         }
     });
 
+    socket.on('getPeerCounts', async ({}, callback) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        let peerCounts = roomList.get(socket.room_id).getPeersCount();
+
+        log.debug('Peer counts', { peerCounts: peerCounts });
+
+        callback({ peerCounts: peerCounts });
+    });
+
+    socket.on('cmd', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        log.debug('Cmd', data);
+
+        // cmd|foo|bar|....
+        const words = data.split('|');
+        let cmd = words[0];
+        switch (cmd) {
+            case 'privacy':
+                roomList
+                    .get(socket.room_id)
+                    .getPeers()
+                    .get(socket.id)
+                    .updatePeerInfo({ type: cmd, status: words[2] == 'true' });
+                break;
+            //...
+        }
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'cmd', data);
+    });
+
     socket.on('roomAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
         log.debug('Room action:', data);
         switch (data.action) {
             case 'lock':
-                roomList.get(socket.room_id).setLocked(true, data.password);
-                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                if (!roomList.get(socket.room_id).isLocked()) {
+                    roomList.get(socket.room_id).setLocked(true, data.password);
+                    roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+                }
                 break;
             case 'checkPassword':
                 let roomData = {
@@ -863,17 +897,20 @@ io.on('connection', (socket) => {
 
     // common
     function getPeerName(json = true) {
-        if (json) {
-            return {
-                peer_name:
-                    (roomList.get(socket.room_id) &&
-                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name) ||
-                    undefined,
-            };
+        try {
+            let peer_name =
+                roomList.get(socket.room_id) &&
+                roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name;
+            if (json) {
+                return {
+                    peer_name: peer_name,
+                };
+            }
+            return peer_name;
+        } catch (err) {
+            log.error('getPeerName', err);
+            return json ? { peer_name: 'undefined' } : 'undefined';
         }
-        return (
-            roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().get(socket.id).peer_info.peer_name
-        );
     }
 
     function removeMeData() {

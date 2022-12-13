@@ -84,7 +84,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/fabric@5.2.4-browser/dist/fabric.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.30"></script>
-        <script defer src="https://unpkg.com/emoji-picker-element@1" type="module"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
         <script defer src="https://unpkg.com/@popperjs/core@2"></script>
         <script defer src="https://unpkg.com/tippy.js@6"></script>
     </head>
@@ -132,8 +132,20 @@
                 <div id="tabDevices" class="tabcontent">
                     <br />
                     <i class="fas fa-video"></i>
-                    <p>Video:</p>
+                    <p>Video Source:</p>
                     <select id="videoSelect" class="form-select text-light bg-dark"></select>
+                    <br />
+                    <i class="fas fa-palette"></i>
+                    <p>Video Quality:</p>
+                    <select id="videoQuality" class="form-select text-light bg-dark">
+                        <option value="default">Default</option>
+                        <option value="qvga">QVGA</option>
+                        <option value="vga">VGA</option>
+                        <option value="hd">HD</option>
+                        <option value="fhd">FULL HD</option>
+                        <option value="2k">2k</option>
+                        <option value="4k">4K</option>
+                    </select>
                     <br />
                     <i class="fas fa-microphone"></i>
                     <p>Microphone:</p>
@@ -185,9 +197,11 @@
                             <label class="form-check-label" style="color: #fff" for="switchLobby">&nbsp;Lobby</label>
                         </div>
                     </div>
-                    <div class="form-check form-switch form-switch-md">
-                        <input class="form-check-input" type="checkbox" id="switchSounds" checked />
-                        <label class="form-check-label" style="color: #fff" for="switchSounds">&nbsp;Sounds</label>
+                    <div id="soundsButton">
+                        <div class="form-check form-switch form-switch-md">
+                            <input class="form-check-input" type="checkbox" id="switchSounds" checked />
+                            <label class="form-check-label" style="color: #fff" for="switchSounds">&nbsp;Sounds</label>
+                        </div>
                     </div>
                     <button id="sessionTimeButton">
                         <i class="fas fa-clock"></i>
@@ -286,6 +300,7 @@
                         <select id="pinVideoPosition" class="form-select text-light bg-dark">
                             <option value="vertical">Vertical</option>
                             <option value="horizontal">Horizontal</option>
+                            <option value="top">Top</option>
                         </select>
                     </div>
                 </div>
@@ -389,7 +404,7 @@
                         cols="1"
                         id="chatMessage"
                         class="chat-msger-input"
-                        placeholder="💬 Enter your message..."
+                        placeholder="💬 Write a message..."
                     ></textarea>
                 </div>
                 <div class="chat-msger-buttons">
@@ -414,13 +429,15 @@
                     <button id="chatPasteButton" class="hidden">
                         <i class="fas fa-paste"></i>
                     </button>
+                    <div class="form-check form-switch form-switch-md">
+                        &nbsp;&nbsp;&nbsp;
+                        <input class="form-check-input" type="checkbox" id="showChatOnMsg" checked />
+                    </div>
                     <button id="chatSendButton" class="hidden">
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
-                <div id="chatEmoji" class="hidden fadein">
-                    <emoji-picker class="dark"></emoji-picker>
-                </div>
+                <div id="chatEmoji" class="hidden fadein"></div>
             </section>
         </section>
 
