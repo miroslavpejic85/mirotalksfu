@@ -2326,6 +2326,11 @@ class RoomClient {
                 dataURL = canvas.toDataURL('image/png');
                 // console.log(dataURL);
                 saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
+                let senddata = {
+                    action: 'screenshot',
+                    image: dataURL,
+                };
+                whiteboardAction(senddata, false);
             });
         }
     }

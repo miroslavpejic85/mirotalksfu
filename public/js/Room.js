@@ -1736,7 +1736,7 @@ function whiteboardAction(data, emit = true) {
             rc.socket.emit('whiteboardAction', data);
         }
     } else {
-        if(data.action != "pointer")
+        if(data.action != "pointer" && data.action != "screenshot")
             userLog(
                 'info',
                 `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
@@ -1768,6 +1768,10 @@ function whiteboardAction(data, emit = true) {
             break;
         case 'pointer':
             realWhiteBoard.movePointer(data.x,data.y);
+            break;
+        case 'screenshot':
+            realWhiteBoard.wbCanvas.clear();
+            realWhiteBoard.createImageFromURL(data.image);
             break;
     
         //...

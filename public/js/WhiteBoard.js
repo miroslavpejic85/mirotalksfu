@@ -39,7 +39,6 @@ class WhiteBoard {
         this.wbTransmitPointer = wbTransmitPointer;
 
         this.wbCanvas = null;
-        //this.wbPointerCanvas = null;
         this.wbIsDrawing = false;
         this.wbIsOpen = false;
         //this.wbIsRedoing = false;
@@ -161,15 +160,7 @@ class WhiteBoard {
         });
     }
 
-    /**
-     * Setup the fabricjs object and set the default tool
-     */
-    setupWhiteboardCanvas() {
-        this.wbCanvas = new fabric.Canvas('wbCanvas');
-        this.wbCanvas.freeDrawingBrush.color = '#FFFFFFFF';
-        this.wbCanvas.freeDrawingBrush.width = 3;
-
-
+    createPointerObject() {
         // make the pointer object
         this.pointerObject = new fabric.Ellipse({
             top: 30,
@@ -184,16 +175,17 @@ class WhiteBoard {
         this.pointerObject.hasBorders = false;
         this.pointerObject.hasControls = false;
         this.wbCanvas.add(this.pointerObject);
+    }
 
-
-
-
+    /**
+     * Setup the fabricjs object and set the default tool
+     */
+    setupWhiteboardCanvas() {
+        this.wbCanvas = new fabric.Canvas('wbCanvas');
+        this.wbCanvas.freeDrawingBrush.color = '#FFFFFFFF';
+        this.wbCanvas.freeDrawingBrush.width = 3;
+        this.createPointerObject();
         this.whiteboardSetDrawingMode("draw");
-
-        /*this.wbPointerCanvas = new fabric.Canvas('wbPointerCanvas');
-        this.wbPointerCanvas.freeDrawingBrush.color = '#FFFFFFFF';
-        this.wbPointerCanvas.freeDrawingBrush.width = 3;*/
-        
 
         var that = this;
 
@@ -569,8 +561,12 @@ class WhiteBoard {
     }
 
     createImageFromURL(wbCanvasImgURL) {
+        var that = this;
         fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
-            this.addWbCanvasObj(myImg);
+            let scale = Math.min(that.wbCanvas.width / myImg.width, that.wbCanvas.height / myImg.height);
+            let shift = (that.wbCanvas.width - (myImg.width * scale)) / 2             
+            myImg.set({ top: 0, left: shift }).scale(scale);
+            that.addWbCanvasObj(myImg);
         });
     }
 
