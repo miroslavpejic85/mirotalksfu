@@ -636,6 +636,21 @@ class RoomClient {
         );
 
         this.socket.on(
+            'wbPointer',
+            function (data) {
+                console.log(data);
+                var serialized = JSON.parse(data);
+                let senddata = {
+                    action: 'pointer',
+                    x: serialized.x,
+                    y: serialized.y,
+                };
+                whiteboardAction(senddata, false);
+                
+            }.bind(this),
+        )
+
+        this.socket.on(
             'audioVolume',
             function (data) {
                 this.handleAudioVolume(data);

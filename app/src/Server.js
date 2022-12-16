@@ -652,6 +652,12 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
     });
 
+    socket.on('wbPointer', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        roomList.get(socket.room_id).broadCast(socket.id, 'wbPointer', data);
+    });
+
     socket.on('whiteboardAction', (data) => {
         if (!roomList.has(socket.room_id)) return;
 

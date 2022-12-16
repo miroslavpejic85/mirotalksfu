@@ -31,18 +31,20 @@ class WhiteBoard {
      * @param {*} wbHeight height of initial canvas
      * @param {*} wbSocketFunction optional function to send data via socket
      */
-    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null) {
+    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null) {
         this.wbImageInput = wbImageInput;
         this.wbWidth = wbWidth;
         this.wbHeight = wbHeight;
         this.wbSocketFunction = wbSocketFunction;
+        this.wbTransmitPointer = wbTransmitPointer;
 
         this.wbCanvas = null;
+        //this.wbPointerCanvas = null;
         this.wbIsDrawing = false;
         this.wbIsOpen = false;
         //this.wbIsRedoing = false;
         //this.wbPop = [];
-        this.wbCurrentTool = "select";
+        this.wbCurrentTool = "pointer";
         this.wbCurrentPoint = null;
         this.wbFillColor = "#FFFFFF77";
         this.setupWhiteboardCanvas();
@@ -92,6 +94,28 @@ class WhiteBoard {
             render: this.renderIcon(imgClone),
             cornerSize: 24
         });
+
+      
+
+
+        this.sendRate = 3;
+        this.rateCounter = this.sendRate;
+    }
+
+    movePointer(px,py){
+        if(this.pointerObject){
+            this.pointerObject.set({
+                left: px-10,
+                top: py-10
+            }).setCoords();
+            
+            this.wbCanvas.renderAll();
+        }
+    }
+
+    revivePointer(){
+        this.wbCanvas.remove(this.pointerObject);
+        this.wbCanvas.add(this.pointerObject);
     }
 
     /**
@@ -144,7 +168,32 @@ class WhiteBoard {
         this.wbCanvas = new fabric.Canvas('wbCanvas');
         this.wbCanvas.freeDrawingBrush.color = '#FFFFFFFF';
         this.wbCanvas.freeDrawingBrush.width = 3;
+
+
+        // make the pointer object
+        this.pointerObject = new fabric.Ellipse({
+            top: 30,
+            left: 30,
+            rx: 10,
+            ry: 10,
+            fill: "#FF0000",
+            strokeWidth: this.wbCanvas.freeDrawingBrush.width,
+            stroke: "#FFFFFF",
+        });
+        this.pointerObject.selectable = false;
+        this.pointerObject.hasBorders = false;
+        this.pointerObject.hasControls = false;
+        this.wbCanvas.add(this.pointerObject);
+
+
+
+
         this.whiteboardSetDrawingMode("draw");
+
+        /*this.wbPointerCanvas = new fabric.Canvas('wbPointerCanvas');
+        this.wbPointerCanvas.freeDrawingBrush.color = '#FFFFFFFF';
+        this.wbPointerCanvas.freeDrawingBrush.width = 3;*/
+        
 
         var that = this;
 
@@ -202,40 +251,6 @@ class WhiteBoard {
     }
 
 
-    /**
-     * instruct the state machine on the current tool
-     * @param {*} status the actual tool
-     */
-    whiteboardSetDrawingMode(status) {
-        this.wbCanvas.isDrawingMode = false;
-        this.wbCanvas.selection = true;
-        this.wbCurrentTool = status;
-        this.wbCanvas.discardActiveObject();
-        this.whiteboardToolBoxReset();
-
-        if (status == "draw") {
-            wbCanvas.isDrawingMode = true;
-            setColor(whiteboardPencilBtn, 'green');
-        } else if (status == "line") {
-            setWhiteBoardObjectsSelectable(false);
-            wbCanvas.selection = false;
-            setColor(whiteboardLineBtn, 'green');
-        } else if (status == "circle") {
-            setWhiteBoardObjectsSelectable(false);
-            wbCanvas.selection = false;
-            setColor(whiteboardCircleBtn, 'green');
-        } else if (status == "rect") {
-            setWhiteBoardObjectsSelectable(false);
-            wbCanvas.selection = false;
-            setColor(whiteboardRectBtn, 'green');
-        } else if (status == "eraser") {
-            wbCanvas.selection = false;
-            setColor(whiteboardEraserBtn, 'green');
-        } else {
-            setWhiteBoardObjectsSelectable(true);
-            setColor(whiteboardObjectBtn, 'green');
-        }
-    }
 
     /**
      * setup the canvas size related to width , height and zoom factor
@@ -292,15 +307,22 @@ class WhiteBoard {
         setColor(whiteboardLineBtn, 'white');
         setColor(whiteboardCircleBtn, 'white');
         setColor(whiteboardRectBtn, 'white');
+        setColor(whiteboardPointerBtn, 'white');
     }
 
+    /**
+     * instruct the state machine on the current tool
+     * @param {*} status the actual tool
+     */
     whiteboardSetDrawingMode(status) {
         this.wbCanvas.isDrawingMode = false;
         this.wbCanvas.selection = true;
         this.wbCurrentTool = status;
         this.wbCanvas.discardActiveObject();
         this.whiteboardToolBoxReset();
-
+        this.wbCanvas.remove(this.pointerObject);
+        this.wbCanvas.add(this.pointerObject);
+        this.movePointer(3000,3000);
         if (status == "draw") {
             this.wbCanvas.isDrawingMode = true;
             setColor(whiteboardPencilBtn, 'green');
@@ -308,6 +330,11 @@ class WhiteBoard {
             this.setWhiteBoardObjectsSelectable(false);
             this.wbCanvas.selection = false;
             setColor(whiteboardLineBtn, 'green');
+        } else if (status == "pointer") {
+            
+            this.setWhiteBoardObjectsSelectable(false);
+            this.wbCanvas.selection = false;
+            setColor(whiteboardPointerBtn, 'green');
         } else if (status == "circle") {
             this.setWhiteBoardObjectsSelectable(false);
             this.wbCanvas.selection = false;
@@ -326,6 +353,9 @@ class WhiteBoard {
     }
 
     mouseDown(e) {
+        if(this.wbCurrentTool == "pointer")
+            return;
+
         if (this.wbCurrentTool == "line") {
             const pointer = this.wbCanvas.getPointer(e);
             var line = new fabric.Line([pointer.x, pointer.y, pointer.x + 1, pointer.y + 1], {
@@ -383,6 +413,9 @@ class WhiteBoard {
     }
 
     mouseUp() {
+        if(this.wbCurrentTool == "pointer")
+        return;
+
         if (this.wbCurrentTool == "rect" || this.wbCurrentTool == "circle" || this.wbCurrentTool == "line")
         {
             var wbCurrentObject = this.wbCanvas.getActiveObject();
@@ -393,11 +426,44 @@ class WhiteBoard {
         }
         this.wbIsDrawing = false;
         if (this.wbSocketFunction != null)
+        {
+            this.wbCanvas.remove(this.pointerObject);
             this.wbSocketFunction();
+        }
+            
     }
 
     mouseMove(e) {
         var wbCurrentObject = this.wbCanvas.getActiveObject();
+        
+        // in case of pointer tool we move the virtual
+        // cursor by using mouse pointer values
+        if (this.wbCurrentTool == "pointer"){
+            
+            // change the cursor to crosshair, but
+            // we should hide it instead.. TODO
+            this.wbCanvas.hoverCursor = 'crosshair';
+            
+            // read the cursor coordinates
+            const pointer = this.wbCanvas.getPointer(e);
+                
+            // move the cursor pointer object
+            this.movePointer(pointer.x,pointer.y)
+
+            // finallyt, if the export function exists 
+            // then send cursor data every sendRate times
+            if (this.wbTransmitPointer != null && this.rateCounter == 0)
+            {
+                this.rateCounter = this.sendRate;
+                this.wbTransmitPointer(pointer);
+            }                   
+            else{
+                this.rateCounter--;
+            }
+
+            return;
+        }
+        
         if (this.wbCurrentTool == "line") {
             this.wbCanvas.hoverCursor = 'crosshair';
             if (wbCurrentObject) {
