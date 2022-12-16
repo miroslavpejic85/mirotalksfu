@@ -980,6 +980,9 @@ function handleButtons() {
     whiteboardCircleBtn.onclick = () => {
         whiteboardAddObj('circle');
     };
+    whiteboardPointerBtn.onclick = () => {
+        realWhiteBoard.whiteboardSetDrawingMode("pointer");
+    }
     whiteboardEraserBtn.onclick = () => {
         realWhiteBoard.whiteboardSetDrawingMode("eraser");
     };
@@ -1098,6 +1101,7 @@ function handleSelects() {
             action: 'bgcolor',
             color: wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value,
         };
+        wbCanvasBackgroundColor(data.color);
         //setWhiteboardBgColor(wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value);
     };
     wbFillColorEl.onchange = () => {
@@ -1469,14 +1473,24 @@ function toggleWhiteboard() {
 }
 
 function wbCanvasToJson() {
-    if (this.wbRC.thereIsParticipants()) {
+    if (/*this.wbRC*/rc.thereIsParticipants()) {
         let wbCanvasJson = JSON.stringify(realWhiteBoard.wbCanvas.toJSON());
-        this.wbRC.socket.emit('wbCanvasToJson', wbCanvasJson);
+        /*this.wbRC*/rc.socket.emit('wbCanvasToJson', wbCanvasJson);
+        realWhiteBoard.revivePointer();
     }
 }
 
+function wbTransmitPointer(data) {
+    if (this.wbRC.thereIsParticipants()) {
+        let wbPointerData = JSON.stringify(data);
+        this.wbRC.socket.emit('wbPointer', wbPointerData);
+        console.log('wbPointer: ' + wbPointerData);
+    }
+}
+
+
 function setupWhiteboard() {
-    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson);
+    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer);
 }
 
 /*function setupWhiteboard() {
@@ -1682,6 +1696,7 @@ function JsonToWbCanvas(json) {
 
     realWhiteBoard.wbCanvas.loadFromJSON(json);
     realWhiteBoard.wbCanvas.renderAll();
+    realWhiteBoard.revivePointer();
 }
 
 function getWhiteboardAction(action) {
@@ -1721,11 +1736,12 @@ function whiteboardAction(data, emit = true) {
             rc.socket.emit('whiteboardAction', data);
         }
     } else {
-        userLog(
-            'info',
-            `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
-            'top-end',
-        );
+        if(data.action != "pointer")
+            userLog(
+                'info',
+                `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
+                'top-end',
+            );
     }
 
     switch (data.action) {
@@ -1750,6 +1766,10 @@ function whiteboardAction(data, emit = true) {
         case 'close':
             if (wbIsOpen) toggleWhiteboard();
             break;
+        case 'pointer':
+            realWhiteBoard.movePointer(data.x,data.y);
+            break;
+    
         //...
     }
 }
