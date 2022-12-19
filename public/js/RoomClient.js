@@ -273,7 +273,7 @@ class RoomClient {
                         this.event(_EVENTS.roomLock);
                         console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
                         return this.unlockTheRoom();
-                    }
+                    }  
                     if (room === 'isLobby') {
                         this.event(_EVENTS.lobbyOn);
                         console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
@@ -300,8 +300,11 @@ class RoomClient {
 
     async handleRoomInfo(room) {
         let peers = new Map(JSON.parse(room.peers));
+      
+        const presenterPeerId= Array.from(peers.keys()).find((id) => id === this.peer_id);
+        const presenterPeer =peers.get(presenterPeerId);
+        isPresenter = presenterPeer.peer_name === "nain";
         participantsCount = peers.size;
-        isPresenter = participantsCount > 1 ? false : true;
         handleRules(isPresenter);
         adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
@@ -322,6 +325,7 @@ class RoomClient {
             }
             sound('joined');
         }
+    
     }
 
     async loadDevice(routerRtpCapabilities) {
@@ -503,11 +507,6 @@ class RoomClient {
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants(true);
-                if (participantsCount == 1) {
-                    isPresenter = true;
-                    handleRules(isPresenter);
-                    console.log('I am alone in the room, got Presenter Rules');
-                }
             }.bind(this),
         );
 
@@ -3409,8 +3408,7 @@ class RoomClient {
                             .then(
                                 async function (data) {
                                     // Only the presenter can lock the room
-                                    if (isPresenter || data.peerCounts == 1) {
-                                        isPresenter = true;
+                                    if (isPresenter) {
                                         data.password = room_password;
                                         this.socket.emit('roomAction', data);
                                         this.roomStatus(action);
@@ -3481,7 +3479,7 @@ class RoomClient {
                 break;
             case 'lobbyOn':
                 this.event(_EVENTS.lobbyOn);
-                this.userLog('info', '⌛ Lobby is enabled', 'top-end');
+                this.userLog('info', '⌛ Meeting started', 'top-end');
                 break;
             case 'lobbyOff':
                 this.event(_EVENTS.lobbyOff);
@@ -3753,9 +3751,8 @@ class RoomClient {
             showDenyButton: true,
             showConfirmButton: false,
             background: swalBackground,
-            imageUrl: image.poster,
-            title: 'Room has lobby enabled',
-            text: 'Asking to join meeting...',
+            title: 'Asking to join meeting.',
+            text: 'Please waiting...',
             confirmButtonText: `Ok`,
             denyButtonText: `Leave room`,
             showClass: {

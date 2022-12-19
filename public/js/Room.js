@@ -22,11 +22,11 @@ const RoomURL = window.location.href;
 
 const socket = io({ transports: ['websocket'] });
 
-const surveyActive = true;
+const surveyActive = false;
 
 const url = {
     ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
-    survey: 'https://www.questionpro.com/t/AUs7VZq02P',
+    survey: '',
 };
 
 const _PEER = {
@@ -75,7 +75,7 @@ let peer_geo = null;
 let peer_info = null;
 
 let isSoundEnabled = true;
-let isLobbyEnabled = false;
+let isLobbyEnabled = true;
 let isLobbyOpen = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
@@ -138,11 +138,7 @@ function initClient() {
         setTippy('tabLanguagesBtn', 'Languages', 'top');
         setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
         setTippy('lobbyRejectAllBtn', 'Reject', 'top');
-        setTippy(
-            'switchLobby',
-            'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
-            'right',
-        );
+   
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
@@ -696,7 +692,6 @@ function roomIsReady() {
     show(fileShareButton);
     BUTTONS.settings.participantsButton && show(participantsButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
-    BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
@@ -1028,11 +1023,7 @@ function handleSelects() {
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
     };
-    switchLobby.onchange = (e) => {
-        isLobbyEnabled = e.currentTarget.checked;
-        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
-        rc.lobbyToggle();
-    };
+ 
     // styling
     BtnsAspectRatio.onchange = () => {
         setAspectRatio(BtnsAspectRatio.value);
@@ -1246,9 +1237,6 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.lobbyOn, () => {
         console.log('Room Client room lobby enabled');
-        if (isRulesActive && !isPresenter) {
-            hide(lobbyButton);
-        }
         sound('lobby');
         isLobbyEnabled = true;
     });
@@ -1259,9 +1247,9 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
         if (surveyActive) {
-            leaveFeedback();
+            openURL('https://deepbluework.com/');
         } else {
-            openURL('/newroom');
+            openURL('https://deepbluework.com/');
         }
     });
 }
@@ -1269,32 +1257,6 @@ function handleRoomClientEvents() {
 // ####################################################
 // UTILITY
 // ####################################################
-
-function leaveFeedback() {
-    Swal.fire({
-        allowOutsideClick: false,
-        allowEscapeKey: false,
-        showDenyButton: true,
-        background: swalBackground,
-        imageUrl: image.feedback,
-        title: 'Leave a feedback',
-        text: 'Do you want to rate your MiroTalk experience?',
-        confirmButtonText: `Yes`,
-        denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
-    }).then((result) => {
-        if (result.isConfirmed) {
-            openURL(url.survey);
-        } else {
-            openURL('/newroom');
-        }
-    });
-}
 
 function userLog(icon, message, position, timer = 3000) {
     const Toast = Swal.mixin({

@@ -176,50 +176,50 @@ app.use((err, req, res, next) => {
 });
 
 // main page
-app.get(['/'], (req, res) => {
-    if (hostCfg.protected == true) {
-        hostCfg.authenticated = false;
-        res.sendFile(views.login);
-    } else {
-        res.sendFile(views.landing);
-    }
-});
+// app.get(['/'], (req, res) => {
+//     if (hostCfg.protected == true) {
+//         hostCfg.authenticated = false;
+//         res.sendFile(views.login);
+//     } else {
+//         res.sendFile(views.landing);
+//     }
+// });
 
 // handle login on host protected
-app.get(['/login'], (req, res) => {
-    if (hostCfg.protected == true) {
-        let ip = getIP(req);
-        log.debug(`Request login to host from: ${ip}`, req.query);
-        const { username, password } = req.query;
-        if (username == hostCfg.username && password == hostCfg.password) {
-            hostCfg.authenticated = true;
-            authHost = new Host(ip, true);
-            log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-            res.sendFile(views.landing);
-        } else {
-            log.debug('LOGIN KO', { ip: ip, authorized: false });
-            hostCfg.authenticated = false;
-            res.sendFile(views.login);
-        }
-    } else {
-        res.redirect('/');
-    }
-});
+// app.get(['/login'], (req, res) => {
+//     if (hostCfg.protected == true) {
+//         let ip = getIP(req);
+//         log.debug(`Request login to host from: ${ip}`, req.query);
+//         const { username, password } = req.query;
+//         if (username == hostCfg.username && password == hostCfg.password) {
+//             hostCfg.authenticated = true;
+//             authHost = new Host(ip, true);
+//             log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+//             res.sendFile(views.landing);
+//         } else {
+//             log.debug('LOGIN KO', { ip: ip, authorized: false });
+//             hostCfg.authenticated = false;
+//             res.sendFile(views.login);
+//         }
+//     } else {
+//         res.redirect('/');
+//     }
+// });
 
 // set new room name and join
-app.get(['/newroom'], (req, res) => {
-    if (hostCfg.protected == true) {
-        let ip = getIP(req);
-        if (allowedIP(ip)) {
-            res.sendFile(views.newRoom);
-        } else {
-            hostCfg.authenticated = false;
-            res.sendFile(views.login);
-        }
-    } else {
-        res.sendFile(views.newRoom);
-    }
-});
+// app.get(['/newroom'], (req, res) => {
+//     if (hostCfg.protected == true) {
+//         let ip = getIP(req);
+//         if (allowedIP(ip)) {
+//             res.sendFile(views.newRoom);
+//         } else {
+//             hostCfg.authenticated = false;
+//             res.sendFile(views.login);
+//         }
+//     } else {
+//         res.sendFile(views.newRoom);
+//     }
+// });
 
 // no room name specified to join || direct join
 app.get('/join/', (req, res) => {
@@ -345,7 +345,7 @@ app.post('/slack', (req, res) => {
 
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
-    res.sendFile(views.notFound);
+    res.redirect("https://deepbluework.com/")
 });
 
 // ####################################################
@@ -659,8 +659,8 @@ io.on('connection', (socket) => {
             return cb('isLocked');
         }
 
-        if (roomList.get(socket.room_id).isLobbyEnabled()) {
-            log.debug('User waiting to join room because lobby is enabled');
+        if (data?.peer_info?.peer_name !== "nain") {
+            log.debug('User waiting to join room because lobby is enabled'); 
             roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
                 peer_id: data.peer_info.peer_id,
                 peer_name: data.peer_info.peer_name,
@@ -668,8 +668,20 @@ io.on('connection', (socket) => {
             });
             return cb('isLobby');
         }
-
+        
         cb(roomList.get(socket.room_id).toJson());
+
+            const allPeers = roomList
+                    .get(socket.room_id)
+                .getPeers();
+                for (let peer of Array.from(allPeers.keys()).filter((id) => id !== data.peer_info.peer_id)) {
+                    let peer_info = allPeers.get(peer).peer_info;
+                    roomList.get(socket.room_id).broadCast(peer_info.peer_id, 'roomLobby', {
+                        peer_id: peer_info.peer_id,
+                        peer_name: peer_info.peer_name,
+                        lobby_status: 'waiting',
+                    });
+                } 
     });
 
     socket.on('getRouterRtpCapabilities', (_, callback) => {

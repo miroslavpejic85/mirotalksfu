@@ -14,7 +14,7 @@ module.exports = class Room {
         this.audioLastUpdateTime = 0;
         this.io = io;
         this._isLocked = false;
-        this._isLobbyEnabled = false;
+        this._isLobbyEnabled = true;
         this._roomPassword = null;
         this.peers = new Map();
         this.createTheRouter();

@@ -24,7 +24,6 @@ const BUTTONS = {
     settings: {
         lockRoomButton: true,
         unlockRoomButton: true,
-        lobbyButton: true,
         participantsButton: true,
         tabRecording: true,
     },
@@ -69,7 +68,6 @@ function handleRules(isPresenter) {
     if (!isPresenter) {
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
-        BUTTONS.settings.lobbyButton = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
@@ -79,7 +77,6 @@ function handleRules(isPresenter) {
     } else {
         BUTTONS.settings.lockRoomButton = !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
-        BUTTONS.settings.lobbyButton = true;
         BUTTONS.videoOff.muteAudioButton = true;
         BUTTONS.videoOff.ejectButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
@@ -90,6 +87,5 @@ function handleRules(isPresenter) {
     // main. settings.
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
-    BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     //...
 }
