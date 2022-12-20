@@ -70,6 +70,8 @@ let room_id = getRoomId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let notify = getNotify();
+let user_name = getUserName();
+let token = getToken();
 
 let peer_geo = null;
 let peer_info = null;
@@ -348,6 +350,15 @@ function getPeerName() {
     let qs = new URLSearchParams(window.location.search);
     return qs.get('name');
 }
+function getToken() {
+    let qs = new URLSearchParams(window.location.search);
+    return qs.get('token');
+}
+
+function getUserName() {
+    let qs = new URLSearchParams(window.location.search);
+    return qs.get('username');
+}
 
 function getRoomPassword() {
     let qs = new URLSearchParams(window.location.search);
@@ -379,6 +390,8 @@ function getPeerInfo() {
         browser_name: DetectRTC.browser.name,
         browser_version: DetectRTC.browser.version,
         peer_id: socket.id,
+        token: token,
+        user_name: user_name,
         peer_name: peer_name,
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,

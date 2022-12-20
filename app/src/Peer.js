@@ -50,6 +50,11 @@ module.exports = class Peer {
                 this.peer_info.peer_video_privacy = data.status;
                 this.peer_video_privacy = data.status;
                 break;
+            case 'security':
+                this.peer_info.dbw_name = data.dbw_name;
+                this.peer_info.is_organizer = data.is_organizer;
+                this.peer_name = data.dbw_name ?? this.peer_name;
+                break;
         }
     }
 

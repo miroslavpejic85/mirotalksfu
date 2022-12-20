@@ -1,33 +1,5 @@
 'use strict';
 
-/*
-███████ ███████ ██████  ██    ██ ███████ ██████  
-██      ██      ██   ██ ██    ██ ██      ██   ██ 
-███████ █████   ██████  ██    ██ █████   ██████  
-     ██ ██      ██   ██  ██  ██  ██      ██   ██ 
-███████ ███████ ██   ██   ████   ███████ ██   ██                                           
-
-dependencies: {
-    body-parser             : https://www.npmjs.com/package/body-parser
-    compression             : https://www.npmjs.com/package/compression
-    colors                  : https://www.npmjs.com/package/colors
-    cors                    : https://www.npmjs.com/package/cors
-    crypto-js               : https://www.npmjs.com/package/crypto-js
-    express                 : https://www.npmjs.com/package/express
-    httpolyglot             : https://www.npmjs.com/package/httpolyglot
-    mediasoup               : https://www.npmjs.com/package/mediasoup
-    mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
-    ngrok                   : https://www.npmjs.com/package/ngrok
-    qs                      : https://www.npmjs.com/package/qs
-    @sentry/node            : https://www.npmjs.com/package/@sentry/node
-    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
-    socket.io               : https://www.npmjs.com/package/socket.io
-    swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
-    uuid                    : https://www.npmjs.com/package/uuid
-    yamljs                  : https://www.npmjs.com/package/yamljs
-}
-*/
-
 /**
  * MiroTalk SFU - Server component
  *
@@ -43,6 +15,7 @@ dependencies: {
 const express = require('express');
 const cors = require('cors');
 const compression = require('compression');
+const axios = require('axios');
 const https = require('httpolyglot');
 const mediasoup = require('mediasoup');
 const mediasoupClient = require('mediasoup-client');
@@ -226,8 +199,8 @@ app.get('/join/', (req, res) => {
     if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
         log.debug('Direct Join', req.query);
         // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-        const { room, password, name, audio, video, screen, notify } = req.query;
-        if (room && password && name && audio && video && screen && notify) {
+        const { room } = req.query;
+        if (!!room) {
             return res.sendFile(views.room);
         }
     }
@@ -235,28 +208,28 @@ app.get('/join/', (req, res) => {
 });
 
 // join room
-app.get('/join/*', (req, res) => {
-    if (hostCfg.authenticated) {
-        res.sendFile(views.room);
-    } else {
-        res.redirect('/');
-    }
-});
+// app.get('/join/*', (req, res) => {
+//     if (hostCfg.authenticated) {
+//         res.sendFile(views.room);
+//     } else {
+//         res.redirect('/');
+//     }
+// });
 
-// if not allow video/audio
-app.get(['/permission'], (req, res) => {
-    res.sendFile(views.permission);
-});
+// // if not allow video/audio
+// app.get(['/permission'], (req, res) => {
+//     res.sendFile(views.permission);
+// });
 
-// privacy policy
-app.get(['/privacy'], (req, res) => {
-    res.sendFile(views.privacy);
-});
+// // privacy policy
+// app.get(['/privacy'], (req, res) => {
+//     res.sendFile(views.privacy);
+// });
 
-// mirotalk about
-app.get(['/about'], (req, res) => {
-    res.sendFile(views.about);
-});
+// // mirotalk about
+// app.get(['/about'], (req, res) => {
+//     res.sendFile(views.about);
+// });
 
 // ####################################################
 // API
@@ -316,32 +289,32 @@ app.post(['/api/v1/join'], (req, res) => {
 // SLACK API
 // ####################################################
 
-app.post('/slack', (req, res) => {
-    if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
+// app.post('/slack', (req, res) => {
+//     if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
 
-    log.debug('Slack', req.headers);
+//     log.debug('Slack', req.headers);
 
-    if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
+//     if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
 
-    let slackSignature = req.headers['x-slack-signature'];
-    let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
-    let timeStamp = req.headers['x-slack-request-timestamp'];
-    let time = Math.floor(new Date().getTime() / 1000);
+//     let slackSignature = req.headers['x-slack-signature'];
+//     let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
+//     let timeStamp = req.headers['x-slack-request-timestamp'];
+//     let time = Math.floor(new Date().getTime() / 1000);
 
-    if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
+//     if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
 
-    let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
-    let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
+//     let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
+//     let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
 
-    if (mySignature == slackSignature) {
-        let host = req.headers.host;
-        let api = new ServerApi(host);
-        let meetingURL = api.getMeetingURL();
-        log.debug('Slack', { meeting: meetingURL });
-        return res.end(meetingURL);
-    }
-    return res.end('`Wrong signature` - Verification failed!');
-});
+//     if (mySignature == slackSignature) {
+//         let host = req.headers.host;
+//         let api = new ServerApi(host);
+//         let meetingURL = api.getMeetingURL();
+//         log.debug('Slack', { meeting: meetingURL });
+//         return res.end(meetingURL);
+//     }
+//     return res.end('`Wrong signature` - Verification failed!');
+// });
 
 // not match any of page before, so 404 not found
 app.get('*', function (req, res) {
@@ -444,6 +417,23 @@ async function createWorkers() {
         workers.push(worker);
     }
 }
+
+function sendWaitingApprovals(socket) {
+    const allPeers = roomList
+    .get(socket.room_id)
+    .getPeers();
+    for (let peer of Array.from(allPeers.keys())) {
+        let peer_info = allPeers.get(peer).peer_info;
+        sendWaitingApproval(socket, peer_info)
+   }}
+   function sendWaitingApproval(socket,peer_info) {
+ 
+        roomList.get(socket.room_id).broadCast(peer_info.peer_id, 'roomLobby', {
+            peer_id: peer_info.peer_id,
+            peer_name: peer_info.peer_name,
+            lobby_status: 'waiting',
+        });
+   }
 
 async function getMediasoupWorker() {
     const worker = workers[nextMediasoupWorkerIdx];
@@ -659,29 +649,38 @@ io.on('connection', (socket) => {
             return cb('isLocked');
         }
 
-        if (data?.peer_info?.peer_name !== "nain") {
-            log.debug('User waiting to join room because lobby is enabled'); 
-            roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
-                peer_id: data.peer_info.peer_id,
-                peer_name: data.peer_info.peer_name,
-                lobby_status: 'waiting',
-            });
+
+        if (!!data?.peer_info?.user_name && !!data?.peer_info?.token) {
+      
+                axios.get(`https://gateway.dev-stag.deepbluework.com/v1/user/${data?.peer_info?.user_name}`, {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Authorization': `Bearer ${data?.peer_info?.token}`
+                    }
+                }).then(({ data: dt }) => {
+                    const user = dt?.[0];
+                    if (!!user) {
+                           const isOrganizer = user.userName === "can@alxxas.com";
+                           roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer});
+                           cb(roomList.get(socket.room_id).toJson());
+                           isOrganizer && sendWaitingApprovals(socket);
+                           return;
+                    }
+                }).catch((err) => {
+                    log.debug('User waiting to join room because lobby is enabled');
+                    roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
+                        peer_id: data.peer_info.peer_id,
+                        peer_name: data.peer_info.peer_name,
+                        lobby_status: 'waiting',
+                    });
+                    sendWaitingApproval(socket,data.peer_info);
+                    return cb('isLobby');
+                })
+        } else {
+            sendWaitingApproval(socket,data.peer_info);
             return cb('isLobby');
         }
         
-        cb(roomList.get(socket.room_id).toJson());
-
-            const allPeers = roomList
-                    .get(socket.room_id)
-                .getPeers();
-                for (let peer of Array.from(allPeers.keys()).filter((id) => id !== data.peer_info.peer_id)) {
-                    let peer_info = allPeers.get(peer).peer_info;
-                    roomList.get(socket.room_id).broadCast(peer_info.peer_id, 'roomLobby', {
-                        peer_id: peer_info.peer_id,
-                        peer_name: peer_info.peer_name,
-                        lobby_status: 'waiting',
-                    });
-                } 
     });
 
     socket.on('getRouterRtpCapabilities', (_, callback) => {

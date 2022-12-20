@@ -301,9 +301,9 @@ class RoomClient {
     async handleRoomInfo(room) {
         let peers = new Map(JSON.parse(room.peers));
       
-        const presenterPeerId= Array.from(peers.keys()).find((id) => id === this.peer_id);
-        const presenterPeer =peers.get(presenterPeerId);
-        isPresenter = presenterPeer.peer_name === "nain";
+        const thisPeerId= Array.from(peers.keys()).find((id) => id === this.peer_id);
+        const thisPeer =peers.get(thisPeerId).peer_info;
+        isPresenter = !!thisPeer.is_organizer;
         participantsCount = peers.size;
         handleRules(isPresenter);
         adaptAspectRatio(participantsCount);
@@ -3262,7 +3262,7 @@ class RoomClient {
             }
         });
     }
-
+isPresenter
     getVideoType(url) {
         if (url.endsWith('.mp4')) return 'video/mp4';
         if (url.endsWith('.mp3')) return 'video/mp3';
@@ -3506,7 +3506,7 @@ class RoomClient {
     roomLobby(data) {
         switch (data.lobby_status) {
             case 'waiting':
-                if (!isRulesActive || isPresenter) {
+                if (isPresenter) {
                     let lobbyTr = '';
                     let peer_id = data.peer_id;
                     let peer_name = data.peer_name;
