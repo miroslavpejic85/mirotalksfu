@@ -391,6 +391,7 @@ function getPeerInfo() {
         browser_version: DetectRTC.browser.version,
         peer_id: socket.id,
         token: token,
+        is_waiting: true,
         user_name: user_name,
         peer_name: peer_name,
         peer_audio: isAudioAllowed,
@@ -1248,22 +1249,18 @@ function handleRoomClientEvents() {
         show(lockRoomButton);
         isRoomLocked = false;
     });
-    rc.on(RoomClient.EVENTS.lobbyOn, () => {
-        console.log('Room Client room lobby enabled');
-        sound('lobby');
-        isLobbyEnabled = true;
-    });
-    rc.on(RoomClient.EVENTS.lobbyOff, () => {
-        console.log('Room Client room lobby disabled');
-        isLobbyEnabled = false;
-    });
+    // rc.on(RoomClient.EVENTS.lobbyOn, () => {
+    //     console.log('Room Client room lobby enabled');
+    //     sound('lobby');
+    //     isLobbyEnabled = true;
+    // });
+    // rc.on(RoomClient.EVENTS.lobbyOff, () => {
+    //     console.log('Room Client room lobby disabled');
+    //     isLobbyEnabled = false;
+    // });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
-        if (surveyActive) {
             openURL('https://deepbluework.com/');
-        } else {
-            openURL('https://deepbluework.com/');
-        }
     });
 }
 

@@ -424,10 +424,13 @@ function sendWaitingApprovals(socket) {
     .getPeers();
     for (let peer of Array.from(allPeers.keys())) {
         let peer_info = allPeers.get(peer).peer_info;
-        sendWaitingApproval(socket, peer_info)
-   }}
+        if(peer_info.is_waiting){
+            sendWaitingApproval(socket, peer_info)
+        }
+    }
+}
+   
    function sendWaitingApproval(socket,peer_info) {
- 
         roomList.get(socket.room_id).broadCast(peer_info.peer_id, 'roomLobby', {
             peer_id: peer_info.peer_id,
             peer_name: peer_info.peer_name,
@@ -448,7 +451,6 @@ async function getMediasoupWorker() {
 io.on('connection', (socket) => {
     socket.on('createRoom', async ({ room_id }, callback) => {
         socket.room_id = room_id;
-
         if (roomList.has(socket.room_id)) {
             callback({ error: 'already exists' });
         } else {
@@ -517,14 +519,14 @@ io.on('connection', (socket) => {
                 roomList.get(socket.room_id).setLocked(false);
                 roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                 break;
-            case 'lobbyOn':
-                roomList.get(socket.room_id).setLobbyEnabled(true);
-                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
-                break;
-            case 'lobbyOff':
-                roomList.get(socket.room_id).setLobbyEnabled(false);
-                roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
-                break;
+            // case 'lobbyOn':
+            //     roomList.get(socket.room_id).setLobbyEnabled(true);
+            //     roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+            //     break;
+            // case 'lobbyOff':
+            //     roomList.get(socket.room_id).setLobbyEnabled(false);
+            //     roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
+            //     break;
         }
         log.debug('Room status', {
             locked: roomList.get(socket.room_id).isLocked(),
@@ -661,7 +663,7 @@ io.on('connection', (socket) => {
                     const user = dt?.[0];
                     if (!!user) {
                            const isOrganizer = user.userName === "can@alxxas.com";
-                           roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer});
+                           roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer, is_waiting: false});
                            cb(roomList.get(socket.room_id).toJson());
                            isOrganizer && sendWaitingApprovals(socket);
                            return;
@@ -702,7 +704,8 @@ io.on('connection', (socket) => {
         if (!roomList.has(socket.room_id)) return;
 
         log.debug('Get producers', getPeerName());
-
+        roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo({ type: 'waiting', is_waiting: false});
+                           
         // send all the current producer to newly joined member
         let producerList = roomList.get(socket.room_id).getProducerListForPeer();
 

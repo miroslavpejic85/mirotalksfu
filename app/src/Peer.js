@@ -54,6 +54,10 @@ module.exports = class Peer {
                 this.peer_info.dbw_name = data.dbw_name;
                 this.peer_info.is_organizer = data.is_organizer;
                 this.peer_name = data.dbw_name ?? this.peer_name;
+                this.peer_info.is_waiting = data.is_waiting;
+                break;
+            case 'waiting':
+                this.peer_info.is_waiting = data.is_waiting;
                 break;
         }
     }
