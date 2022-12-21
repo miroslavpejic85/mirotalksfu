@@ -1852,6 +1852,7 @@ async function getParticipantsTable(peers) {
 
     for (let peer of Array.from(peers.keys())) {
         let peer_info = peers.get(peer).peer_info;
+        if(peer_info.is_waiting === false){
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         let peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
@@ -1906,6 +1907,7 @@ async function getParticipantsTable(peers) {
                 `;
             }
         }
+    }
     }
     table += `</table>`;
     return table;

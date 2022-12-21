@@ -423,7 +423,7 @@ function sendWaitingApprovals(socket) {
     .get(socket.room_id)
     .getPeers();
     for (let peer of Array.from(allPeers.keys())) {
-        let peer_info = allPeers.get(peer).peer_info;
+        let peer_info = allPeers?.get(peer)?.peer_info;
         if(peer_info.is_waiting){
             sendWaitingApproval(socket, peer_info)
         }
@@ -663,7 +663,7 @@ io.on('connection', (socket) => {
                     const user = dt?.[0];
                     if (!!user) {
                            const isOrganizer = user.userName === "can@alxxas.com";
-                           roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer, is_waiting: false});
+                           roomList.get(socket.room_id)?.getPeers()?.get(socket.id)?.updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer, is_waiting: false});
                            cb(roomList.get(socket.room_id).toJson());
                            isOrganizer && sendWaitingApprovals(socket);
                            return;

@@ -299,6 +299,9 @@ module.exports = class Room {
     }
 
     send(socket_id, action, data) {
-        this.io.to(socket_id).emit(action, data);
+        const peer_info = this.peers.get(socket_id)?.peer_info;
+            if (peer_info?.is_waiting === false || action === "roomLobby") {
+                this.io.to(socket_id).emit(action, data);
+            }
     }
 };
