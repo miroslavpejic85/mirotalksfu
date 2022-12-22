@@ -1,5 +1,5 @@
 {
-    "name": "mirotalksfu",
+    "name": "meetblue",
     "version": "1.0.0",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",

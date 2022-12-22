@@ -128,7 +128,6 @@ function initClient() {
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
-        setTippy('aboutButton', 'About this project', 'right');
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('mySettingsCloseBtn', 'Close', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
@@ -535,7 +534,7 @@ function checkMedia() {
 async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
-            await navigator.share({ url: RoomURL });
+            await navigator.share({ url: (RoomURL.split('?')[0])+'?room='+ room_id });
             userLog('info', 'Room Shared successfully', 'top-end');
         } catch (err) {
             share();
@@ -559,7 +558,7 @@ async function shareRoom(useNavigator = false) {
             <br/><br/>
             <p style="background:transparent; color:white;">Invite others to join. Share this meeting link.</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">` +
-                RoomURL +
+                (RoomURL.split('?')[0]) +'?room='+ room_id +
                 `</p>`,
             showDenyButton: true,
             showCancelButton: true,
@@ -579,7 +578,7 @@ async function shareRoom(useNavigator = false) {
                 let message = {
                     email: '',
                     subject: 'Please join our MiroTalkSfu Video Chat Meeting',
-                    body: 'Click to join: ' + RoomURL,
+                    body: 'Click to join: ' + (RoomURL.split('?')[0]) +'?room='+ room_id ,
                 };
                 shareRoomByEmail(message);
             }
@@ -600,7 +599,7 @@ function makeRoomQR() {
     let qrSize = DetectRTC.isMobileDevice ? 128 : 256;
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
-        value: RoomURL,
+        value: (RoomURL.split('?')[0]) +'?room='+ room_id,
     });
     qr.set({
         size: qrSize,
@@ -610,7 +609,7 @@ function makeRoomQR() {
 function copyRoomURL() {
     let tmpInput = document.createElement('input');
     document.body.appendChild(tmpInput);
-    tmpInput.value = RoomURL;
+    tmpInput.value = (RoomURL.split('?')[0]) +'?room='+ room_id;
     tmpInput.select();
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
@@ -706,7 +705,6 @@ function roomIsReady() {
     show(fileShareButton);
     BUTTONS.settings.participantsButton && show(participantsButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
-    BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
     handleSelects();
@@ -1007,9 +1005,7 @@ function handleButtons() {
     unlockRoomButton.onclick = () => {
         rc.roomAction('unlock');
     };
-    aboutButton.onclick = () => {
-        showAbout();
-    };
+
 }
 
 // ####################################################

@@ -653,22 +653,30 @@ io.on('connection', (socket) => {
 
 
         if (!!data?.peer_info?.user_name && !!data?.peer_info?.token) {
-      
-                axios.get(`https://gateway.dev-stag.deepbluework.com/v1/user/${data?.peer_info?.user_name}`, {
+            axios.get(`https://gateway.dev-stag.deepbluework.com/v1/user/calendar/meeting/${socket.room_id}`, {
                     headers: {
                         'Accept': 'application/json',
                         'Authorization': `Bearer ${data?.peer_info?.token}`
                     }
-                }).then(({ data: dt }) => {
-                    const user = dt?.[0];
-                    if (!!user) {
-                           const isOrganizer = user.userName === "can@alxxas.com";
-                           roomList.get(socket.room_id)?.getPeers()?.get(socket.id)?.updatePeerInfo({ type: 'security', dbw_name: user.firstName, is_organizer:  isOrganizer, is_waiting: false});
-                           cb(roomList.get(socket.room_id).toJson());
-                           isOrganizer && sendWaitingApprovals(socket);
-                           return;
+                }).then(({ data: meeting }) => {
+                    if (!!meeting) {
+                                const isOrganizer = data?.peer_info?.user_name === meeting?.organizer;
+                                roomList.get(socket.room_id)?.getPeers()?.get(socket.id)?.updatePeerInfo({ type: 'security', dbw_name: "", is_organizer:  isOrganizer, is_waiting: false});
+                                cb(roomList.get(socket.room_id).toJson());
+                                isOrganizer && sendWaitingApprovals(socket);
+                                return;
+                            } else {
+                            log.debug('User waiting to join room because lobby is enabled');
+                            roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
+                                peer_id: data.peer_info.peer_id,
+                                peer_name: data.peer_info.peer_name,
+                                lobby_status: 'waiting',
+                            });
+                            sendWaitingApproval(socket,data.peer_info);
+                            return cb('isLobby');
+                        }
                     }
-                }).catch((err) => {
+                ).catch((err) => {
                     log.debug('User waiting to join room because lobby is enabled');
                     roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
                         peer_id: data.peer_info.peer_id,
