@@ -2,18 +2,6 @@
 
 if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
 
-/**
- * MiroTalk SFU - Room component
- *
- * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
- * @link    Live demo: https://sfu.mirotalk.com
- * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
- * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.0
- *
- */
-
 // ####################################################
 // STATIC SETTINGS
 // ####################################################
@@ -433,7 +421,7 @@ function whoAreYou() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
-        imageAlt: 'mirotalksfu-username',
+        imageAlt: 'meetblue-username',
         imageUrl: image.username,
         input: 'text',
         inputPlaceholder: 'Enter your name',
@@ -577,7 +565,7 @@ async function shareRoom(useNavigator = false) {
             } else if (result.isDenied) {
                 let message = {
                     email: '',
-                    subject: 'Please join our MiroTalkSfu Video Chat Meeting',
+                    subject: 'Please join our Meetblue Video Chat Meeting',
                     body: 'Click to join: ' + (RoomURL.split('?')[0]) +'?room='+ room_id ,
                 };
                 shareRoomByEmail(message);
@@ -2056,12 +2044,7 @@ function showAbout() {
         html: `
         <br/>
         <div id="about">
-            <b><a href="https://github.com/miroslavpejic85/mirotalksfu" class="umami--click--github" target="_blank">Open Source</a></b> project
-            <br/><br />
-            <button class="pulsate umami--click--sponsors" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
-            <br /><br />
-            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
-        </div>
+           </div>
         `,
         showClass: {
             popup: 'animate__animated animate__fadeInUp',

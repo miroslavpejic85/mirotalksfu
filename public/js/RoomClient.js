@@ -1,18 +1,5 @@
 'use strict';
 
-/**
- * MiroTalk SFU - Client component
- *
- * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
- * @link    Live demo: https://sfu.mirotalk.com
- * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or buy directly via CodeCanyon
- * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
- * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.0
- *
- */
-
 const cfg = {
     useAvatarApi: true,
     msgAvatar: 'https://eu.ui-avatars.com/api',
@@ -40,7 +27,7 @@ const html = {
 };
 
 const image = {
-    avatar: '../images/mirotalksfu-logo.png',
+    avatar: '../images/logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
     delete: '../images/delete.png',
@@ -2919,7 +2906,7 @@ class RoomClient {
         Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
-            imageAlt: 'mirotalksfu-file-sharing',
+            imageAlt: 'meetblue-file-sharing',
             imageUrl: image.share,
             position: 'center',
             title: 'Share file',
@@ -3133,7 +3120,7 @@ class RoomClient {
                     title: 'Received file',
                     text: this.incomingFileInfo.fileName + ' size ' + this.bytesToSize(this.incomingFileInfo.fileSize),
                     imageUrl: e.target.result,
-                    imageAlt: 'mirotalksfu-file-img-download',
+                    imageAlt: 'meetblue-file-img-download',
                     showDenyButton: true,
                     confirmButtonText: `Save`,
                     denyButtonText: `Cancel`,

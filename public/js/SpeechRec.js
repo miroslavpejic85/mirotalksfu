@@ -52,7 +52,6 @@ const commands = {
     linkedin: 'open linkedin',
     twitter: 'open twitter',
     tiktok: 'open tiktok',
-    github: 'open github',
     survey: 'open survey',
     stopRecognition: 'stop the voice recognition',
 };
@@ -67,7 +66,6 @@ const browser = {
     linkedin: 'https://www.linkedin.com',
     twitter: 'https://www.twitter.com',
     tiktok: 'https://www.tiktok.com',
-    github: 'https://github.com/miroslavpejic85',
 };
 
 if (speechRecognition) {
@@ -303,11 +301,7 @@ function execVoiceCommands(transcript) {
             openURL(browser.tiktok, true);
             sound('open');
             break;
-        case commands.github:
-            printCommand(commands.github);
-            openURL(browser.github, true);
-            sound('open');
-            break;
+
         case commands.survey:
             printCommand(commands.survey);
             openURL(url.survey, true);
