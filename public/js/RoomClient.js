@@ -3508,8 +3508,8 @@ isPresenter
                     <tr id='${peer_id}'>
                         <td><img src='${avatarImg}'></td>
                         <td>${peer_name}</td>
-                        <td><button id=${lobbyAcceptId} onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
-                        <td><button id=${lobbyRejectId} onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
+                        <td><button id=${lobbyAcceptId} onclick="rc.lobbyAction('${peer_id}', 'accept')">${lobbyAccept}</button></td>
+                        <td><button id=${lobbyRejectId} onclick="rc.lobbyAction('${peer_id}', 'reject')">${lobbyReject}</button></td>
                     </tr>
                     `;
 
