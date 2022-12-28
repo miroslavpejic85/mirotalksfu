@@ -3439,14 +3439,14 @@ isPresenter
                     this.socket.emit('roomAction', data);
                     this.roomStatus(action);
                     break;
-                case 'lobbyOn':
-                    this.socket.emit('roomAction', data);
-                    this.roomStatus(action);
-                    break;
-                case 'lobbyOff':
-                    this.socket.emit('roomAction', data);
-                    this.roomStatus(action);
-                    break;
+                // case 'lobbyOn':
+                //     this.socket.emit('roomAction', data);
+                //     this.roomStatus(action);
+                //     break;
+                // case 'lobbyOff':
+                //     this.socket.emit('roomAction', data);
+                //     this.roomStatus(action);
+                //     break;
             }
         } else {
             this.roomStatus(action);

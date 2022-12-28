@@ -51,20 +51,20 @@
     --btns-hover-scale: scale(1.1);
     --settings-bg: radial-gradient(#393939, #000000);
     /* buttons bar horizontal */
-    --btns-top: 50%;
+    /* --btns-top: 50%;
     --btns-right: 0%;
     --btns-left: 10px;
     --btns-margin-left: 0px;
     --btns-width: 60px;
-    --btns-flex-direction: column;
-    /* buttons bar horizontal
+    --btns-flex-direction: column; */
+     /* buttons bar horizontal */
     --btns-top: 95%;
     --btns-right: 25%;
     --btns-left: 50%;
     --btns-margin-left: -160px;
     --btns-width: 320px;
     --btns-flex-direction: row;
-    */
+ 
     --vmi-wh: 15vw;
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;

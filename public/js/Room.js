@@ -119,7 +119,7 @@ function initClient() {
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('mySettingsCloseBtn', 'Close', 'right');
         setTippy('tabDevicesBtn', 'Devices', 'top');
-        setTippy('tabRecordingBtn', 'Recording', 'top');
+        // setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabVideoShareBtn', 'Video share', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
@@ -502,7 +502,7 @@ function handleAudioVideo(e) {
 function checkMedia() {
     let qs = new URLSearchParams(window.location.search);
     let audio = qs.get('audio');
-    let video = qs.get('video');
+    let video = qs.get('video') || '0';
     if (audio) {
         audio = audio.toLowerCase();
         let queryPeerAudio = audio === '1' || audio === 'true';
@@ -646,11 +646,11 @@ function roomIsReady() {
     setTheme('dark');
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
-    if (BUTTONS.settings.tabRecording) {
-        show(startRecButton);
-    } else {
-        hide(tabRecordingBtn);
-    }
+    // if (BUTTONS.settings.tabRecording) {
+    //     show(startRecButton);
+    // } else {
+    //     hide(tabRecordingBtn);
+    // }
     BUTTONS.main.chatButton && show(chatButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
@@ -692,7 +692,7 @@ function roomIsReady() {
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
     BUTTONS.settings.participantsButton && show(participantsButton);
-    BUTTONS.settings.lockRoomButton && show(lockRoomButton);
+    // BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
     handleSelects();
@@ -703,7 +703,7 @@ function roomIsReady() {
     });
     checkButtonsBar();
     if (room_password) {
-        lockRoomButton.click();
+        // lockRoomButton.click();
     }
 }
 
@@ -808,9 +808,9 @@ function handleButtons() {
     tabDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabDevices');
     };
-    tabRecordingBtn.onclick = (e) => {
-        rc.openTab(e, 'tabRecording');
-    };
+    // tabRecordingBtn.onclick = (e) => {
+    //     rc.openTab(e, 'tabRecording');
+    // };
     tabRoomBtn.onclick = (e) => {
         rc.openTab(e, 'tabRoom');
     };
@@ -987,12 +987,12 @@ function handleButtons() {
     participantsCloseBtn.onclick = () => {
         toggleParticipants();
     };
-    lockRoomButton.onclick = () => {
-        rc.roomAction('lock');
-    };
-    unlockRoomButton.onclick = () => {
-        rc.roomAction('unlock');
-    };
+    // lockRoomButton.onclick = () => {
+    //     rc.roomAction('lock');
+    // };
+    // unlockRoomButton.onclick = () => {
+    //     rc.roomAction('unlock');
+    // };
 
 }
 
@@ -1220,19 +1220,19 @@ function handleRoomClientEvents() {
         hide(stopScreenButton);
         show(startScreenButton);
     });
-    rc.on(RoomClient.EVENTS.roomLock, () => {
-        console.log('Room Client lock room');
-        hide(lockRoomButton);
-        show(unlockRoomButton);
-        setColor(unlockRoomButton, 'red');
-        isRoomLocked = true;
-    });
-    rc.on(RoomClient.EVENTS.roomUnlock, () => {
-        console.log('Room Client unlock room');
-        hide(unlockRoomButton);
-        show(lockRoomButton);
-        isRoomLocked = false;
-    });
+    // rc.on(RoomClient.EVENTS.roomLock, () => {
+    //     console.log('Room Client lock room');
+    //     // hide(lockRoomButton);
+    //     // show(unlockRoomButton);
+    //     setColor(unlockRoomButton, 'red');
+    //     isRoomLocked = true;
+    // });
+    // rc.on(RoomClient.EVENTS.roomUnlock, () => {
+    //     console.log('Room Client unlock room');
+    //     // hide(unlockRoomButton);
+    //     // show(lockRoomButton);
+    //     isRoomLocked = false;
+    // });
     // rc.on(RoomClient.EVENTS.lobbyOn, () => {
     //     console.log('Room Client room lobby enabled');
     //     sound('lobby');
