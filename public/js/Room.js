@@ -869,18 +869,18 @@ function handleButtons() {
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
     };
-    startRecButton.onclick = () => {
-        rc.startRecording();
-    };
-    stopRecButton.onclick = () => {
-        rc.stopRecording();
-    };
-    pauseRecButton.onclick = () => {
-        rc.pauseRecording();
-    };
-    resumeRecButton.onclick = () => {
-        rc.resumeRecording();
-    };
+    // startRecButton.onclick = () => {
+    //     rc.startRecording();
+    // };
+    // stopRecButton.onclick = () => {
+    //     rc.stopRecording();
+    // };
+    // pauseRecButton.onclick = () => {
+    //     rc.pauseRecording();
+    // };
+    // resumeRecButton.onclick = () => {
+    //     rc.resumeRecording();
+    // };
     swapCameraButton.onclick = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
     };
@@ -1123,10 +1123,10 @@ function handleInputs() {
 function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.startRec, () => {
         console.log('Room Client start recoding');
-        hide(startRecButton);
-        show(stopRecButton);
-        show(pauseRecButton);
-        startRecordingTimer();
+        // hide(startRecButton);
+        // show(stopRecButton);
+        // show(pauseRecButton);
+        // startRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.pauseRec, () => {
         console.log('Room Client pause recoding');
@@ -1140,11 +1140,11 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.stopRec, () => {
         console.log('Room Client stop recoding');
-        hide(stopRecButton);
-        hide(pauseRecButton);
-        hide(resumeRecButton);
-        show(startRecButton);
-        stopRecordingTimer();
+        // hide(stopRecButton);
+        // hide(pauseRecButton);
+        // hide(resumeRecButton);
+        // show(startRecButton);
+        // stopRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.raiseHand, () => {
         console.log('Room Client raise hand');

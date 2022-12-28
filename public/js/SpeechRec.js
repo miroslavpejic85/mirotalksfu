@@ -253,14 +253,14 @@ function execVoiceCommands(transcript) {
             printCommand(commands.lowerHand);
             lowerHandButton.click();
             break;
-        case commands.roomLock:
-            printCommand(commands.roomLock);
-            lockRoomButton.click();
-            break;
-        case commands.roomUnlock:
-            printCommand(commands.roomUnlock);
-            unlockRoomButton.click();
-            break;
+        // case commands.roomLock:
+        //     printCommand(commands.roomLock);
+        //     lockRoomButton.click();
+        //     break;
+        // case commands.roomUnlock:
+        //     printCommand(commands.roomUnlock);
+        //     unlockRoomButton.click();
+        //     break;
         case commands.email:
             printCommand(commands.email);
             openURL(browser.email, true);

@@ -21,10 +21,10 @@ const BUTTONS = {
         exitButton: true,
     },
     settings: {
-        lockRoomButton: true,
-        unlockRoomButton: true,
+        // lockRoomButton: true,
+        // unlockRoomButton: true,
         participantsButton: true,
-        tabRecording: true,
+        // tabRecording: true,
     },
     producerVideo: {
         fullScreenButton: true,
@@ -65,8 +65,8 @@ function handleRules(isPresenter) {
     console.log('06.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
     if (!isPresenter) {
-        BUTTONS.settings.lockRoomButton = false;
-        BUTTONS.settings.unlockRoomButton = false;
+        // BUTTONS.settings.lockRoomButton = false;
+        // BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
@@ -74,8 +74,8 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = false;
         //...
     } else {
-        BUTTONS.settings.lockRoomButton = !isRoomLocked;
-        BUTTONS.settings.unlockRoomButton = isRoomLocked;
+        // BUTTONS.settings.lockRoomButton = !isRoomLocked;
+        // BUTTONS.settings.unlockRoomButton = isRoomLocked;
         BUTTONS.videoOff.muteAudioButton = true;
         BUTTONS.videoOff.ejectButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
@@ -84,7 +84,7 @@ function handleRules(isPresenter) {
         //...
     }
     // main. settings.
-    BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
-    BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
+    // BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
+    // BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     //...
 }
