@@ -35,163 +35,142 @@
         1: [
             function (require, module, exports) {
                 'use strict';
-                var __awaiter =
-                    (this && this.__awaiter) ||
-                    function (thisArg, _arguments, P, generator) {
-                        function adopt(value) {
-                            return value instanceof P
-                                ? value
-                                : new P(function (resolve) {
-                                      resolve(value);
-                                  });
-                        }
-                        return new (P || (P = Promise))(function (resolve, reject) {
-                            function fulfilled(value) {
-                                try {
-                                    step(generator.next(value));
-                                } catch (e) {
-                                    reject(e);
-                                }
-                            }
-                            function rejected(value) {
-                                try {
-                                    step(generator['throw'](value));
-                                } catch (e) {
-                                    reject(e);
-                                }
-                            }
-                            function step(result) {
-                                result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected);
-                            }
-                            step((generator = generator.apply(thisArg, _arguments || [])).next());
-                        });
-                    };
                 Object.defineProperty(exports, '__esModule', { value: true });
+                exports.AwaitQueue = exports.AwaitQueueRemovedTaskError = exports.AwaitQueueStoppedError = void 0;
+                /**
+                 * Custom Error derived class used to reject pending tasks once stop() method
+                 * has been called.
+                 */
+                class AwaitQueueStoppedError extends Error {
+                    constructor(message) {
+                        super(message !== null && message !== void 0 ? message : 'AwaitQueue stopped');
+                        this.name = 'AwaitQueueStoppedError';
+                        // @ts-ignore
+                        if (typeof Error.captureStackTrace === 'function') {
+                            // @ts-ignore
+                            Error.captureStackTrace(this, AwaitQueueStoppedError);
+                        }
+                    }
+                }
+                exports.AwaitQueueStoppedError = AwaitQueueStoppedError;
+                /**
+                 * Custom Error derived class used to reject pending tasks once removeTask()
+                 * method has been called.
+                 */
+                class AwaitQueueRemovedTaskError extends Error {
+                    constructor(message) {
+                        super(message !== null && message !== void 0 ? message : 'AwaitQueue task removed');
+                        this.name = 'AwaitQueueRemovedTaskError';
+                        // @ts-ignore
+                        if (typeof Error.captureStackTrace === 'function') {
+                            // @ts-ignore
+                            Error.captureStackTrace(this, AwaitQueueRemovedTaskError);
+                        }
+                    }
+                }
+                exports.AwaitQueueRemovedTaskError = AwaitQueueRemovedTaskError;
                 class AwaitQueue {
-                    constructor(
-                        { ClosedErrorClass = Error, StoppedErrorClass = Error, RemovedTaskErrorClass = Error } = {
-                            ClosedErrorClass: Error,
-                            StoppedErrorClass: Error,
-                            RemovedTaskErrorClass: Error,
-                        },
-                    ) {
-                        // Closed flag.
-                        this.closed = false;
+                    constructor() {
                         // Queue of pending tasks.
                         this.pendingTasks = [];
-                        // Error class used when rejecting a task due to AwaitQueue being closed.
-                        this.ClosedErrorClass = Error;
-                        // Error class used when rejecting a task due to AwaitQueue being stopped.
-                        this.StoppedErrorClass = Error;
-                        // Error class used when removing a pending task when calling removeTask().
-                        this.RemovedTaskErrorClass = Error;
-                        this.ClosedErrorClass = ClosedErrorClass;
-                        this.StoppedErrorClass = StoppedErrorClass;
-                        this.RemovedTaskErrorClass = RemovedTaskErrorClass;
                     }
                     get size() {
                         return this.pendingTasks.length;
                     }
-                    close() {
-                        if (this.closed) return;
-                        this.closed = true;
-                        for (const pendingTask of this.pendingTasks) {
-                            pendingTask.stopped = true;
-                            pendingTask.reject(new this.ClosedErrorClass('AwaitQueue closed'));
+                    async push(task, name) {
+                        if (typeof task !== 'function') {
+                            throw new TypeError('given task is not a function');
                         }
-                        // Enpty the pending tasks array.
-                        this.pendingTasks.length = 0;
-                    }
-                    push(task, name) {
-                        return __awaiter(this, void 0, void 0, function* () {
-                            if (this.closed) throw new this.ClosedErrorClass('AwaitQueue closed');
-                            if (typeof task !== 'function') throw new TypeError('given task is not a function');
-                            if (!task.name && name) {
-                                try {
-                                    Object.defineProperty(task, 'name', { value: name });
-                                } catch (error) {}
+                        if (!task.name && name) {
+                            try {
+                                Object.defineProperty(task, 'name', { value: name });
+                            } catch (error) {}
+                        }
+                        return new Promise((resolve, reject) => {
+                            const pendingTask = {
+                                task,
+                                name,
+                                stopped: false,
+                                enqueuedAt: Date.now(),
+                                executedAt: undefined,
+                                resolve,
+                                reject,
+                            };
+                            // Append task to the queue.
+                            this.pendingTasks.push(pendingTask);
+                            // And run it if this is the only task in the queue.
+                            if (this.pendingTasks.length === 1) {
+                                void this.next();
                             }
-                            return new Promise((resolve, reject) => {
-                                const pendingTask = {
-                                    task,
-                                    name,
-                                    resolve,
-                                    reject,
-                                    stopped: false,
-                                    enqueuedAt: new Date(),
-                                    executedAt: undefined,
-                                };
-                                // Append task to the queue.
-                                this.pendingTasks.push(pendingTask);
-                                // And run it if this is the only task in the queue.
-                                if (this.pendingTasks.length === 1) this.next();
-                            });
                         });
                     }
-                    removeTask(idx) {
-                        if (idx === 0) {
-                            throw new TypeError('cannot remove task with index 0');
-                        }
-                        const pendingTask = this.pendingTasks[idx];
-                        if (!pendingTask) return;
-                        this.pendingTasks.splice(idx, 1);
-                        pendingTask.reject(new this.RemovedTaskErrorClass('task removed from the queue'));
-                    }
                     stop() {
-                        if (this.closed) return;
                         for (const pendingTask of this.pendingTasks) {
                             pendingTask.stopped = true;
-                            pendingTask.reject(new this.StoppedErrorClass('AwaitQueue stopped'));
+                            pendingTask.reject(new AwaitQueueStoppedError());
                         }
                         // Enpty the pending tasks array.
                         this.pendingTasks.length = 0;
                     }
+                    remove(taskIdx) {
+                        const pendingTask = this.pendingTasks[taskIdx];
+                        if (!pendingTask) {
+                            return;
+                        }
+                        this.pendingTasks.splice(taskIdx, 1);
+                        pendingTask.reject(new AwaitQueueRemovedTaskError());
+                    }
                     dump() {
-                        const now = new Date();
+                        const now = Date.now();
                         let idx = 0;
                         return this.pendingTasks.map((pendingTask) => ({
                             idx: idx++,
                             task: pendingTask.task,
                             name: pendingTask.name,
                             enqueuedTime: pendingTask.executedAt
-                                ? pendingTask.executedAt.getTime() - pendingTask.enqueuedAt.getTime()
-                                : now.getTime() - pendingTask.enqueuedAt.getTime(),
-                            executingTime: pendingTask.executedAt
-                                ? now.getTime() - pendingTask.executedAt.getTime()
-                                : 0,
+                                ? pendingTask.executedAt - pendingTask.enqueuedAt
+                                : now - pendingTask.enqueuedAt,
+                            executionTime: pendingTask.executedAt ? now - pendingTask.executedAt : 0,
                         }));
                     }
-                    next() {
-                        return __awaiter(this, void 0, void 0, function* () {
-                            // Take the first pending task.
-                            const pendingTask = this.pendingTasks[0];
-                            if (!pendingTask) return;
-                            // Execute it.
-                            yield this.executeTask(pendingTask);
-                            // Remove the first pending task (the completed one) from the queue.
+                    async next() {
+                        // Take the first pending task.
+                        const pendingTask = this.pendingTasks[0];
+                        if (!pendingTask) {
+                            return;
+                        }
+                        // Execute it.
+                        await this.executeTask(pendingTask);
+                        // Remove the first pending task (the completed one) from the queue.
+                        // NOTE: Ensure it remains being the same.
+                        if (this.pendingTasks[0] === pendingTask) {
                             this.pendingTasks.shift();
-                            // And continue.
-                            this.next();
-                        });
+                        }
+                        // And continue.
+                        void this.next();
                     }
-                    executeTask(pendingTask) {
-                        return __awaiter(this, void 0, void 0, function* () {
+                    async executeTask(pendingTask) {
+                        // If the task is stopped, ignore it.
+                        if (pendingTask.stopped) {
+                            return;
+                        }
+                        pendingTask.executedAt = Date.now();
+                        try {
+                            const result = await pendingTask.task();
                             // If the task is stopped, ignore it.
-                            if (pendingTask.stopped) return;
-                            pendingTask.executedAt = new Date();
-                            try {
-                                const result = yield pendingTask.task();
-                                // If the task is stopped, ignore it.
-                                if (pendingTask.stopped) return;
-                                // Resolve the task with the returned result (if any).
-                                pendingTask.resolve(result);
-                            } catch (error) {
-                                // If the task is stopped, ignore it.
-                                if (pendingTask.stopped) return;
-                                // Reject the task with its own error.
-                                pendingTask.reject(error);
+                            if (pendingTask.stopped) {
+                                return;
                             }
-                        });
+                            // Resolve the task with the returned result (if any).
+                            pendingTask.resolve(result);
+                        } catch (error) {
+                            // If the task is stopped, ignore it.
+                            if (pendingTask.stopped) {
+                                return;
+                            }
+                            // Reject the task with its own error.
+                            pendingTask.reject(error);
+                        }
                     }
                 }
                 exports.AwaitQueue = AwaitQueue;
@@ -2674,8 +2653,8 @@
                         this._rtpParameters = rtpParameters;
                         this._paused = !track.enabled;
                         this._appData = appData || {};
-                        this._onTrackEnded = this._onTrackEnded.bind(this);
-                        this._handleTrack();
+                        this.onTrackEnded = this.onTrackEnded.bind(this);
+                        this.handleTrack();
                     }
                     /**
                      * Consumer id.
@@ -2754,7 +2733,7 @@
                         if (this._closed) return;
                         logger.debug('close()');
                         this._closed = true;
-                        this._destroyTrack();
+                        this.destroyTrack();
                         this.emit('@close');
                         // Emit observer event.
                         this._observer.safeEmit('close');
@@ -2766,7 +2745,7 @@
                         if (this._closed) return;
                         logger.debug('transportClosed()');
                         this._closed = true;
-                        this._destroyTrack();
+                        this.destroyTrack();
                         this.safeEmit('transportclose');
                         // Emit observer event.
                         this._observer.safeEmit('close');
@@ -2818,18 +2797,18 @@
                         // Emit observer event.
                         this._observer.safeEmit('resume');
                     }
-                    _onTrackEnded() {
+                    onTrackEnded() {
                         logger.debug('track "ended" event');
                         this.safeEmit('trackended');
                         // Emit observer event.
                         this._observer.safeEmit('trackended');
                     }
-                    _handleTrack() {
-                        this._track.addEventListener('ended', this._onTrackEnded);
+                    handleTrack() {
+                        this._track.addEventListener('ended', this.onTrackEnded);
                     }
-                    _destroyTrack() {
+                    destroyTrack() {
                         try {
-                            this._track.removeEventListener('ended', this._onTrackEnded);
+                            this._track.removeEventListener('ended', this.onTrackEnded);
                             this._track.stop();
                         } catch (error) {}
                     }
@@ -2859,7 +2838,7 @@
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
                         this._appData = appData || {};
-                        this._handleDataChannel();
+                        this.handleDataChannel();
                     }
                     /**
                      * DataConsumer id.
@@ -2955,7 +2934,7 @@
                         // Emit observer event.
                         this._observer.safeEmit('close');
                     }
-                    _handleDataChannel() {
+                    handleDataChannel() {
                         this._dataChannel.addEventListener('open', () => {
                             if (this._closed) return;
                             logger.debug('DataChannel "open" event');
@@ -3016,7 +2995,7 @@
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
                         this._appData = appData || {};
-                        this._handleDataChannel();
+                        this.handleDataChannel();
                     }
                     /**
                      * DataProducer id.
@@ -3122,7 +3101,7 @@
                         if (this._closed) throw new errors_1.InvalidStateError('closed');
                         this._dataChannel.send(data);
                     }
-                    _handleDataChannel() {
+                    handleDataChannel() {
                         this._dataChannel.addEventListener('open', () => {
                             if (this._closed) return;
                             logger.debug('DataChannel "open" event');
@@ -3169,7 +3148,6 @@
         9: [
             function (require, module, exports) {
                 'use strict';
-                /* global RTCRtpTransceiver */
                 var __createBinding =
                     (this && this.__createBinding) ||
                     (Object.create
@@ -3463,7 +3441,9 @@
                         // Temporal handler to get its capabilities.
                         let handler;
                         try {
-                            if (this._loaded) throw new errors_1.InvalidStateError('already loaded');
+                            if (this._loaded) {
+                                throw new errors_1.InvalidStateError('already loaded');
+                            }
                             // This may throw.
                             ortc.validateRtpCapabilities(routerRtpCapabilities);
                             handler = this._handlerFactory();
@@ -3528,7 +3508,7 @@
                         appData,
                     }) {
                         logger.debug('createSendTransport()');
-                        return this._createTransport({
+                        return this.createTransport({
                             direction: 'send',
                             id: id,
                             iceParameters: iceParameters,
@@ -3561,7 +3541,7 @@
                         appData,
                     }) {
                         logger.debug('createRecvTransport()');
-                        return this._createTransport({
+                        return this.createTransport({
                             direction: 'recv',
                             id: id,
                             iceParameters: iceParameters,
@@ -3575,7 +3555,7 @@
                             appData: appData,
                         });
                     }
-                    _createTransport({
+                    createTransport({
                         direction,
                         id,
                         iceParameters,
@@ -3801,10 +3781,10 @@
                         this._disableTrackOnPause = disableTrackOnPause;
                         this._zeroRtpOnPause = zeroRtpOnPause;
                         this._appData = appData || {};
-                        this._onTrackEnded = this._onTrackEnded.bind(this);
+                        this.onTrackEnded = this.onTrackEnded.bind(this);
                         // NOTE: Minor issue. If zeroRtpOnPause is true, we cannot emit the
                         // '@replacetrack' event here, so RTCRtpSender.track won't be null.
-                        this._handleTrack();
+                        this.handleTrack();
                     }
                     /**
                      * Producer id.
@@ -3885,7 +3865,7 @@
                         if (this._closed) return;
                         logger.debug('close()');
                         this._closed = true;
-                        this._destroyTrack();
+                        this.destroyTrack();
                         this.emit('@close');
                         // Emit observer event.
                         this._observer.safeEmit('close');
@@ -3897,7 +3877,7 @@
                         if (this._closed) return;
                         logger.debug('transportClosed()');
                         this._closed = true;
-                        this._destroyTrack();
+                        this.destroyTrack();
                         this.safeEmit('transportclose');
                         // Emit observer event.
                         this._observer.safeEmit('close');
@@ -3979,7 +3959,7 @@
                             this.safeEmit('@replacetrack', track, resolve, reject);
                         });
                         // Destroy the previous track.
-                        this._destroyTrack();
+                        this.destroyTrack();
                         // Set the new track.
                         this._track = track;
                         // If this Producer was paused/resumed and the state of the new
@@ -3989,7 +3969,7 @@
                             else if (this._paused) this._track.enabled = false;
                         }
                         // Handle the effective track.
-                        this._handleTrack();
+                        this.handleTrack();
                     }
                     /**
                      * Sets the video max spatial layer to be sent.
@@ -4011,20 +3991,20 @@
                             this.safeEmit('@setrtpencodingparameters', params, resolve, reject);
                         });
                     }
-                    _onTrackEnded() {
+                    onTrackEnded() {
                         logger.debug('track "ended" event');
                         this.safeEmit('trackended');
                         // Emit observer event.
                         this._observer.safeEmit('trackended');
                     }
-                    _handleTrack() {
+                    handleTrack() {
                         if (!this._track) return;
-                        this._track.addEventListener('ended', this._onTrackEnded);
+                        this._track.addEventListener('ended', this.onTrackEnded);
                     }
-                    _destroyTrack() {
+                    destroyTrack() {
                         if (!this._track) return;
                         try {
-                            this._track.removeEventListener('ended', this._onTrackEnded);
+                            this._track.removeEventListener('ended', this.onTrackEnded);
                             // Just stop the track unless the app set stopTracks: false.
                             if (this._stopTracks) this._track.stop();
                         } catch (error) {}
@@ -4151,9 +4131,7 @@
                         // Whether the Consumer for RTP probation has been created.
                         this._probatorConsumerCreated = false;
                         // AwaitQueue instance to make async tasks happen sequentially.
-                        this._awaitQueue = new awaitqueue_1.AwaitQueue({
-                            ClosedErrorClass: errors_1.InvalidStateError,
-                        });
+                        this._awaitQueue = new awaitqueue_1.AwaitQueue();
                         // Consumer creation tasks awaiting to be processed.
                         this._pendingConsumerTasks = [];
                         // Consumer creation in progress flag.
@@ -4199,7 +4177,7 @@
                             extendedRtpCapabilities,
                         });
                         this._appData = appData || {};
-                        this._handleHandler();
+                        this.handleHandler();
                     }
                     /**
                      * Transport id.
@@ -4254,8 +4232,8 @@
                         if (this._closed) return;
                         logger.debug('close()');
                         this._closed = true;
-                        // Close the AwaitQueue.
-                        this._awaitQueue.close();
+                        // Stop the AwaitQueue.
+                        this._awaitQueue.stop();
                         // Close the handler.
                         this._handler.close();
                         // Close all Producers.
@@ -4330,7 +4308,8 @@
                         appData = {},
                     } = {}) {
                         logger.debug('produce() [track:%o]', track);
-                        if (!track) throw new TypeError('missing track');
+                        if (this._closed) throw new errors_1.InvalidStateError('closed');
+                        else if (!track) throw new TypeError('missing track');
                         else if (this._direction !== 'send')
                             throw new errors_1.UnsupportedError('not a sending Transport');
                         else if (!this._canProduceByKind[track.kind])
@@ -4408,7 +4387,7 @@
                                             appData,
                                         });
                                         this._producers.set(producer.id, producer);
-                                        this._handleProducer(producer);
+                                        this.handleProducer(producer);
                                         // Emit observer event.
                                         this._observer.safeEmit('newproducer', producer);
                                         return producer;
@@ -4460,7 +4439,7 @@
                         this._pendingConsumerTasks.push(consumerCreationTask);
                         // There is no Consumer creation in progress, create it now.
                         if (this._consumerCreationInProgress === false) {
-                            this._createPendingConsumers();
+                            this.createPendingConsumers();
                         }
                         return consumerCreationTask.promise;
                     }
@@ -4476,7 +4455,9 @@
                         appData = {},
                     } = {}) {
                         logger.debug('produceData()');
-                        if (this._direction !== 'send') throw new errors_1.UnsupportedError('not a sending Transport');
+                        if (this._closed) throw new errors_1.InvalidStateError('closed');
+                        else if (this._direction !== 'send')
+                            throw new errors_1.UnsupportedError('not a sending Transport');
                         else if (!this._maxSctpMessageSize)
                             throw new errors_1.UnsupportedError('SCTP not enabled by remote Transport');
                         else if (this.listenerCount('connect') === 0 && this._connectionState === 'new')
@@ -4517,7 +4498,7 @@
                                 appData,
                             });
                             this._dataProducers.set(dataProducer.id, dataProducer);
-                            this._handleDataProducer(dataProducer);
+                            this.handleDataProducer(dataProducer);
                             // Emit observer event.
                             this._observer.safeEmit('newdataproducer', dataProducer);
                             return dataProducer;
@@ -4564,19 +4545,19 @@
                                 appData,
                             });
                             this._dataConsumers.set(dataConsumer.id, dataConsumer);
-                            this._handleDataConsumer(dataConsumer);
+                            this.handleDataConsumer(dataConsumer);
                             // Emit observer event.
                             this._observer.safeEmit('newdataconsumer', dataConsumer);
                             return dataConsumer;
                         }, 'transport.consumeData()');
                     }
                     // This method is guaranteed to never throw.
-                    async _createPendingConsumers() {
+                    async createPendingConsumers() {
                         this._consumerCreationInProgress = true;
                         this._awaitQueue
                             .push(async () => {
                                 if (this._pendingConsumerTasks.length === 0) {
-                                    logger.debug('_createPendingConsumers() | there is no Consumer to be created');
+                                    logger.debug('createPendingConsumers() | there is no Consumer to be created');
                                     return;
                                 }
                                 const pendingConsumerTasks = [...this._pendingConsumerTasks];
@@ -4612,7 +4593,7 @@
                                             appData,
                                         });
                                         this._consumers.set(consumer.id, consumer);
-                                        this._handleConsumer(consumer);
+                                        this.handleConsumer(consumer);
                                         // If this is the first video Consumer and the Consumer for RTP probation
                                         // has not yet been created, it's time to create it.
                                         if (
@@ -4644,32 +4625,32 @@
                                                 rtpParameters: probatorRtpParameters,
                                             },
                                         ]);
-                                        logger.debug('_createPendingConsumers() | Consumer for RTP probation created');
+                                        logger.debug('createPendingConsumers() | Consumer for RTP probation created');
                                         this._probatorConsumerCreated = true;
                                     } catch (error) {
                                         logger.error(
-                                            '_createPendingConsumers() | failed to create Consumer for RTP probation:%o',
+                                            'createPendingConsumers() | failed to create Consumer for RTP probation:%o',
                                             error,
                                         );
                                     }
                                 }
-                            }, 'transport._createPendingConsumers()')
+                            }, 'transport.createPendingConsumers()')
                             .then(() => {
                                 this._consumerCreationInProgress = false;
                                 // There are pending Consumer tasks, enqueue their creation.
                                 if (this._pendingConsumerTasks.length > 0) {
-                                    this._createPendingConsumers();
+                                    this.createPendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
                             .catch(() => {});
                     }
-                    _pausePendingConsumers() {
+                    pausePendingConsumers() {
                         this._consumerPauseInProgress = true;
                         this._awaitQueue
                             .push(async () => {
                                 if (this._pendingPauseConsumers.size === 0) {
-                                    logger.debug('_pausePendingConsumers() | there is no Consumer to be paused');
+                                    logger.debug('pausePendingConsumers() | there is no Consumer to be paused');
                                     return;
                                 }
                                 const pendingPauseConsumers = Array.from(this._pendingPauseConsumers.values());
@@ -4679,25 +4660,25 @@
                                     const localIds = pendingPauseConsumers.map((consumer) => consumer.localId);
                                     await this._handler.pauseReceiving(localIds);
                                 } catch (error) {
-                                    logger.error('_pausePendingConsumers() | failed to pause Consumers:', error);
+                                    logger.error('pausePendingConsumers() | failed to pause Consumers:', error);
                                 }
-                            }, 'transport._pausePendingConsumers')
+                            }, 'transport.pausePendingConsumers')
                             .then(() => {
                                 this._consumerPauseInProgress = false;
                                 // There are pending Consumers to be paused, do it.
                                 if (this._pendingPauseConsumers.size > 0) {
-                                    this._pausePendingConsumers();
+                                    this.pausePendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
                             .catch(() => {});
                     }
-                    _resumePendingConsumers() {
+                    resumePendingConsumers() {
                         this._consumerResumeInProgress = true;
                         this._awaitQueue
                             .push(async () => {
                                 if (this._pendingResumeConsumers.size === 0) {
-                                    logger.debug('_resumePendingConsumers() | there is no Consumer to be resumed');
+                                    logger.debug('resumePendingConsumers() | there is no Consumer to be resumed');
                                     return;
                                 }
                                 const pendingResumeConsumers = Array.from(this._pendingResumeConsumers.values());
@@ -4707,25 +4688,25 @@
                                     const localIds = pendingResumeConsumers.map((consumer) => consumer.localId);
                                     await this._handler.resumeReceiving(localIds);
                                 } catch (error) {
-                                    logger.error('_resumePendingConsumers() | failed to resume Consumers:', error);
+                                    logger.error('resumePendingConsumers() | failed to resume Consumers:', error);
                                 }
-                            }, 'transport._resumePendingConsumers')
+                            }, 'transport.resumePendingConsumers')
                             .then(() => {
                                 this._consumerResumeInProgress = false;
                                 // There are pending Consumer to be resumed, do it.
                                 if (this._pendingResumeConsumers.size > 0) {
-                                    this._resumePendingConsumers();
+                                    this.resumePendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
                             .catch(() => {});
                     }
-                    _closePendingConsumers() {
+                    closePendingConsumers() {
                         this._consumerCloseInProgress = true;
                         this._awaitQueue
                             .push(async () => {
                                 if (this._pendingCloseConsumers.size === 0) {
-                                    logger.debug('_closePendingConsumers() | there is no Consumer to be closed');
+                                    logger.debug('closePendingConsumers() | there is no Consumer to be closed');
                                     return;
                                 }
                                 const pendingCloseConsumers = Array.from(this._pendingCloseConsumers.values());
@@ -4736,20 +4717,20 @@
                                         pendingCloseConsumers.map((consumer) => consumer.localId),
                                     );
                                 } catch (error) {
-                                    logger.error('_closePendingConsumers() | failed to close Consumers:', error);
+                                    logger.error('closePendingConsumers() | failed to close Consumers:', error);
                                 }
-                            }, 'transport._closePendingConsumers')
+                            }, 'transport.closePendingConsumers')
                             .then(() => {
                                 this._consumerCloseInProgress = false;
                                 // There are pending Consumer to be resumed, do it.
                                 if (this._pendingCloseConsumers.size > 0) {
-                                    this._closePendingConsumers();
+                                    this.closePendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
                             .catch(() => {});
                     }
-                    _handleHandler() {
+                    handleHandler() {
                         const handler = this._handler;
                         handler.on('@connect', ({ dtlsParameters }, callback, errback) => {
                             if (this._closed) {
@@ -4765,7 +4746,7 @@
                             if (!this._closed) this.safeEmit('connectionstatechange', connectionState);
                         });
                     }
-                    _handleProducer(producer) {
+                    handleProducer(producer) {
                         producer.on('@close', () => {
                             this._producers.delete(producer.id);
                             if (this._closed) return;
@@ -4820,7 +4801,7 @@
                             this._handler.getSenderStats(producer.localId).then(callback).catch(errback);
                         });
                     }
-                    _handleConsumer(consumer) {
+                    handleConsumer(consumer) {
                         consumer.on('@close', () => {
                             this._consumers.delete(consumer.id);
                             this._pendingPauseConsumers.delete(consumer.id);
@@ -4830,7 +4811,7 @@
                             this._pendingCloseConsumers.set(consumer.id, consumer);
                             // There is no Consumer close in progress, do it now.
                             if (this._consumerCloseInProgress === false) {
-                                this._closePendingConsumers();
+                                this.closePendingConsumers();
                             }
                         });
                         consumer.on('@pause', () => {
@@ -4842,7 +4823,7 @@
                             this._pendingPauseConsumers.set(consumer.id, consumer);
                             // There is no Consumer pause in progress, do it now.
                             if (this._consumerPauseInProgress === false) {
-                                this._pausePendingConsumers();
+                                this.pausePendingConsumers();
                             }
                         });
                         consumer.on('@resume', () => {
@@ -4854,7 +4835,7 @@
                             this._pendingResumeConsumers.set(consumer.id, consumer);
                             // There is no Consumer resume in progress, do it now.
                             if (this._consumerResumeInProgress === false) {
-                                this._resumePendingConsumers();
+                                this.resumePendingConsumers();
                             }
                         });
                         consumer.on('@getstats', (callback, errback) => {
@@ -4862,12 +4843,12 @@
                             this._handler.getReceiverStats(consumer.localId).then(callback).catch(errback);
                         });
                     }
-                    _handleDataProducer(dataProducer) {
+                    handleDataProducer(dataProducer) {
                         dataProducer.on('@close', () => {
                             this._dataProducers.delete(dataProducer.id);
                         });
                     }
-                    _handleDataConsumer(dataConsumer) {
+                    handleDataConsumer(dataConsumer) {
                         dataConsumer.on('@close', () => {
                             this._dataConsumers.delete(dataConsumer.id);
                         });
@@ -5161,7 +5142,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
                             logger.warn('send() | codec selection is not available in %s handler', this.name);
@@ -5179,7 +5160,7 @@
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -5239,7 +5220,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const track = this._mapSendLocalIdTrack.get(localId);
                         if (!track) throw new Error('track not found');
@@ -5296,7 +5277,7 @@
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -5317,7 +5298,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -5341,7 +5322,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
@@ -5373,7 +5354,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -5396,7 +5377,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
@@ -5429,7 +5410,7 @@
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -5452,7 +5433,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -5467,7 +5448,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -5481,12 +5462,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -5736,7 +5717,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
                             logger.warn('send() | codec selection is not available in %s handler', this.name);
@@ -5754,7 +5735,7 @@
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -5816,7 +5797,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
@@ -5853,7 +5834,7 @@
                         // Unimplemented.
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -5869,7 +5850,7 @@
                         if (track) this._sendStream.addTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
@@ -5881,7 +5862,7 @@
                         await rtpSender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
@@ -5892,14 +5873,14 @@
                         await rtpSender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
                         return rtpSender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -5920,7 +5901,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -5944,7 +5925,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
@@ -5976,7 +5957,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -6001,7 +5982,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
@@ -6029,14 +6010,14 @@
                         // Unimplemented.
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) || {};
                         if (!rtpReceiver) throw new Error('associated RTCRtpReceiver not found');
                         return rtpReceiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -6059,7 +6040,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -6074,7 +6055,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -6088,12 +6069,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -6336,7 +6317,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
                         // This may throw.
@@ -6356,7 +6337,7 @@
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -6456,7 +6437,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -6485,7 +6466,7 @@
                         // Unimplemented.
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -6496,7 +6477,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -6508,7 +6489,7 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -6519,14 +6500,14 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -6547,7 +6528,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -6571,7 +6552,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
@@ -6605,7 +6586,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -6629,7 +6610,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -6659,14 +6640,14 @@
                         // Unimplemented.
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -6689,7 +6670,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -6704,7 +6685,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -6718,12 +6699,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -6967,7 +6948,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
                             encodings.forEach((encoding, idx) => {
@@ -6993,7 +6974,7 @@
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -7076,7 +7057,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -7097,7 +7078,7 @@
                         this._mapMidTransceiver.delete(localId);
                     }
                     async pauseSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -7111,7 +7092,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async resumeSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         this._remoteSdp.resumeSendingMediaSection(localId);
@@ -7125,7 +7106,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -7136,7 +7117,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -7148,7 +7129,7 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -7159,14 +7140,14 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -7186,7 +7167,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -7210,7 +7191,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
@@ -7244,7 +7225,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -7271,7 +7252,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -7289,7 +7270,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -7305,7 +7286,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -7321,14 +7302,14 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -7350,7 +7331,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -7365,7 +7346,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -7379,12 +7360,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -7538,9 +7519,9 @@
                         this._remoteIceCandidates = iceCandidates;
                         this._remoteDtlsParameters = dtlsParameters;
                         this._cname = `CNAME-${utils.generateRandomNumber()}`;
-                        this._setIceGatherer({ iceServers, iceTransportPolicy });
-                        this._setIceTransport();
-                        this._setDtlsTransport();
+                        this.setIceGatherer({ iceServers, iceTransportPolicy });
+                        this.setIceTransport();
+                        this.setDtlsTransport();
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async updateIceServers(iceServers) {
@@ -7566,7 +7547,7 @@
                         { track, encodings, codecOptions, codec },
                     ) {
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
-                        if (!this._transportReady) await this._setupTransport({ localDtlsRole: 'server' });
+                        if (!this._transportReady) await this.setupTransport({ localDtlsRole: 'server' });
                         logger.debug('send() | calling new RTCRtpSender()');
                         const rtpSender = new RTCRtpSender(track, this._dtlsTransport);
                         const rtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
@@ -7664,7 +7645,7 @@
                             const { trackId, kind } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                         }
-                        if (!this._transportReady) await this._setupTransport({ localDtlsRole: 'server' });
+                        if (!this._transportReady) await this.setupTransport({ localDtlsRole: 'server' });
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() | calling new RTCRtpReceiver()');
@@ -7725,7 +7706,7 @@
                     ) {
                         throw new errors_1.UnsupportedError('not implemented');
                     }
-                    _setIceGatherer({ iceServers, iceTransportPolicy }) {
+                    setIceGatherer({ iceServers, iceTransportPolicy }) {
                         // @ts-ignore
                         const iceGatherer = new RTCIceGatherer({
                             iceServers: iceServers || [],
@@ -7738,11 +7719,11 @@
                         try {
                             iceGatherer.gather();
                         } catch (error) {
-                            logger.debug('_setIceGatherer() | iceGatherer.gather() failed: %s', error.toString());
+                            logger.debug('setIceGatherer() | iceGatherer.gather() failed: %s', error.toString());
                         }
                         this._iceGatherer = iceGatherer;
                     }
-                    _setIceTransport() {
+                    setIceTransport() {
                         const iceTransport = new RTCIceTransport(this._iceGatherer);
                         // NOTE: Not yet implemented by Edge.
                         iceTransport.addEventListener('statechange', () => {
@@ -7791,7 +7772,7 @@
                         });
                         this._iceTransport = iceTransport;
                     }
-                    _setDtlsTransport() {
+                    setDtlsTransport() {
                         const dtlsTransport = new RTCDtlsTransport(this._iceTransport);
                         // NOTE: Not yet implemented by Edge.
                         dtlsTransport.addEventListener('statechange', () => {
@@ -7807,8 +7788,8 @@
                         });
                         this._dtlsTransport = dtlsTransport;
                     }
-                    async _setupTransport({ localDtlsRole }) {
-                        logger.debug('_setupTransport()');
+                    async setupTransport({ localDtlsRole }) {
+                        logger.debug('setupTransport()');
                         // Get our local DTLS parameters.
                         const dtlsParameters = this._dtlsTransport.getLocalParameters();
                         dtlsParameters.role = localDtlsRole;
@@ -8095,7 +8076,7 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings) {
                             encodings = utils.clone(encodings, []);
@@ -8138,7 +8119,7 @@
                         // In Firefox use DTLS role client even if we are the "offerer" since
                         // Firefox does not respect ICE-Lite.
                         if (!this._transportReady)
-                            await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
+                            await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                         logger.debug('send() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
                         // We can now get the transceiver.mid.
@@ -8222,7 +8203,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -8237,7 +8218,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -8251,7 +8232,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -8262,7 +8243,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated transceiver not found');
@@ -8277,7 +8258,7 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -8288,13 +8269,13 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -8314,7 +8295,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady)
-                                await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
+                                await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                             logger.debug('sendDataChannel() | calling pc.setLocalDescription() [offer:%o]', offer);
                             await this._pc.setLocalDescription(offer);
                             this._remoteSdp.sendSctpAssociation({ offerMediaObject });
@@ -8335,7 +8316,7 @@
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         optionsList,
                     ) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
@@ -8369,7 +8350,7 @@
                             answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         }
                         if (!this._transportReady)
-                            await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
+                            await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                         logger.debug('receive() | calling pc.setLocalDescription() [answer:%o]', answer);
                         await this._pc.setLocalDescription(answer);
                         for (const options of optionsList) {
@@ -8388,7 +8369,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -8406,7 +8387,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -8422,7 +8403,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -8438,13 +8419,13 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -8466,7 +8447,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({ localDtlsRole: 'client', localSdpObject });
+                                await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                             }
                             logger.debug(
                                 'receiveDataChannel() | calling pc.setRemoteDescription() [answer:%o]',
@@ -8477,7 +8458,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -8491,12 +8472,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -8766,7 +8747,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
                             logger.warn('send() | codec selection is not available in %s handler', this.name);
@@ -8784,7 +8765,7 @@
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -8845,7 +8826,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const track = this._mapSendLocalIdTrack.get(localId);
                         if (!track) throw new Error('track not found');
@@ -8902,7 +8883,7 @@
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -8923,7 +8904,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -8947,7 +8928,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapStreamId = new Map();
                         for (const options of optionsList) {
@@ -8991,7 +8972,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -9014,7 +8995,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
@@ -9047,7 +9028,7 @@
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -9070,7 +9051,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -9085,7 +9066,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -9099,12 +9080,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -9352,7 +9333,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
                             encodings.forEach((encoding, idx) => {
@@ -9378,7 +9359,7 @@
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -9461,7 +9442,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -9482,7 +9463,7 @@
                         this._mapMidTransceiver.delete(localId);
                     }
                     async pauseSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -9496,7 +9477,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async resumeSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         this._remoteSdp.resumeSendingMediaSection(localId);
@@ -9510,7 +9491,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -9521,7 +9502,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -9533,7 +9514,7 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -9544,14 +9525,14 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -9571,7 +9552,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -9595,7 +9576,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
@@ -9629,7 +9610,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -9656,7 +9637,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -9674,7 +9655,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -9690,7 +9671,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -9706,14 +9687,14 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -9735,7 +9716,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -9750,7 +9731,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -9764,12 +9745,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -10018,7 +9999,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
                             logger.warn('send() | codec selection is not available in %s handler', this.name);
@@ -10036,7 +10017,7 @@
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -10098,7 +10079,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
                         if (rtpSender.track) this._sendStream.removeTrack(rtpSender.track);
@@ -10133,7 +10114,7 @@
                         // Unimplemented.
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -10149,7 +10130,7 @@
                         if (track) this._sendStream.addTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
@@ -10161,7 +10142,7 @@
                         await rtpSender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
@@ -10172,14 +10153,14 @@
                         await rtpSender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const rtpSender = this._mapSendLocalIdRtpSender.get(localId);
                         if (!rtpSender) throw new Error('associated RTCRtpSender not found');
                         return rtpSender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -10199,7 +10180,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -10223,7 +10204,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
@@ -10255,7 +10236,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -10280,7 +10261,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
@@ -10296,7 +10277,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) || {};
                         if (!rtpReceiver) throw new Error('associated RTCRtpReceiver not found');
                         return rtpReceiver.getStats();
@@ -10315,7 +10296,7 @@
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -10337,7 +10318,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -10352,7 +10333,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -10366,12 +10347,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -10611,7 +10592,7 @@
                     }
                     async send({ track, encodings, codecOptions, codec }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
                         // This may throw.
@@ -10631,7 +10612,7 @@
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -10695,7 +10676,7 @@
                         };
                     }
                     async stopSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -10717,7 +10698,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -10732,7 +10713,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -10746,7 +10727,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
                         } else {
@@ -10757,7 +10738,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -10769,7 +10750,7 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async setRtpEncodingParameters(localId, params) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
@@ -10780,14 +10761,14 @@
                         await transceiver.sender.setParameters(parameters);
                     }
                     async getSenderStats(localId) {
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
                         var _a;
-                        this._assertSendDirection();
+                        this.assertSendDirection();
                         const options = {
                             negotiated: true,
                             id: this._nextSendSctpStreamId,
@@ -10807,7 +10788,7 @@
                             const localSdpObject = sdpTransform.parse(offer.sdp);
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -10831,7 +10812,7 @@
                     }
                     async receive(optionsList) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
                         for (const options of optionsList) {
@@ -10865,7 +10846,7 @@
                         }
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
-                            await this._setupTransport({
+                            await this.setupTransport({
                                 localDtlsRole:
                                     (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                 localSdpObject,
@@ -10889,7 +10870,7 @@
                         return results;
                     }
                     async stopReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -10907,7 +10888,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -10923,7 +10904,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -10939,14 +10920,14 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) throw new Error('associated RTCRtpTransceiver not found');
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
                         var _a;
-                        this._assertRecvDirection();
+                        this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
                             negotiated: true,
@@ -10968,7 +10949,7 @@
                             const answer = await this._pc.createAnswer();
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
-                                await this._setupTransport({
+                                await this.setupTransport({
                                     localDtlsRole:
                                         (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
                                     localSdpObject,
@@ -10983,7 +10964,7 @@
                         }
                         return { dataChannel };
                     }
-                    async _setupTransport({ localDtlsRole, localSdpObject }) {
+                    async setupTransport({ localDtlsRole, localSdpObject }) {
                         if (!localSdpObject) localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         // Get our local DTLS parameters.
                         const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
@@ -10997,12 +10978,12 @@
                         });
                         this._transportReady = true;
                     }
-                    _assertSendDirection() {
+                    assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
                         }
                     }
-                    _assertRecvDirection() {
+                    assertRecvDirection() {
                         if (this._direction !== 'recv') {
                             throw new Error('method can just be called for handlers with "recv" direction');
                         }
@@ -12543,7 +12524,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.68';
+                exports.version = '3.6.69';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
