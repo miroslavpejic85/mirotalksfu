@@ -129,7 +129,7 @@ module.exports = {
             listenIps: [
                 {
                     ip: '0.0.0.0',
-                    announcedIp: getLocalIp(), // replace by public static IP address https://api.ipify.org
+                    announcedIp: getLocalIp(), // replace by public static IP address https://api.ipify.org or put '' and will be auto-detected on server start
                 },
             ],
             initialAvailableOutgoingBitrate: 1000000,
