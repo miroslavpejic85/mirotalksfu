@@ -6,6 +6,7 @@
 -   [Node.js](https://nodejs.org/en/) at least 16x, better `16.15.1 LTS` & npm
 -   Your domain name, example: `your.domain.name`
     -   Set a DNS A record for that domain that point to Your Server public IPv4
+        > DNS A Record: The Address Mapping record (or DNS host record) stores a hostname and its corresponding IPv4 address. When users search for your website, the A record redirects this traffic from the web address (xxxxx.com – human-readable domain) to the IPv4 address.
 
 ---
 
