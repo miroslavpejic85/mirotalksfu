@@ -35,8 +35,53 @@
         1: [
             function (require, module, exports) {
                 'use strict';
+                var __importDefault =
+                    (this && this.__importDefault) ||
+                    function (mod) {
+                        return mod && mod.__esModule ? mod : { default: mod };
+                    };
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.Logger = void 0;
+                const debug_1 = __importDefault(require('debug'));
+                const LIB_NAME = 'awaitqueue';
+                class Logger {
+                    constructor(prefix) {
+                        if (prefix) {
+                            this._debug = (0, debug_1.default)(`${LIB_NAME}:${prefix}`);
+                            this._warn = (0, debug_1.default)(`${LIB_NAME}:WARN:${prefix}`);
+                            this._error = (0, debug_1.default)(`${LIB_NAME}:ERROR:${prefix}`);
+                        } else {
+                            this._debug = (0, debug_1.default)(LIB_NAME);
+                            this._warn = (0, debug_1.default)(`${LIB_NAME}:WARN`);
+                            this._error = (0, debug_1.default)(`${LIB_NAME}:ERROR`);
+                        }
+                        /* eslint-disable no-console */
+                        this._debug.log = console.info.bind(console);
+                        this._warn.log = console.warn.bind(console);
+                        this._error.log = console.error.bind(console);
+                        /* eslint-enable no-console */
+                    }
+                    get debug() {
+                        return this._debug;
+                    }
+                    get warn() {
+                        return this._warn;
+                    }
+                    get error() {
+                        return this._error;
+                    }
+                }
+                exports.Logger = Logger;
+            },
+            { debug: 4 },
+        ],
+        2: [
+            function (require, module, exports) {
+                'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.AwaitQueue = exports.AwaitQueueRemovedTaskError = exports.AwaitQueueStoppedError = void 0;
+                const Logger_1 = require('./Logger');
+                const logger = new Logger_1.Logger();
                 /**
                  * Custom Error derived class used to reject pending tasks once stop() method
                  * has been called.
@@ -71,59 +116,119 @@
                 exports.AwaitQueueRemovedTaskError = AwaitQueueRemovedTaskError;
                 class AwaitQueue {
                     constructor() {
-                        // Queue of pending tasks.
-                        this.pendingTasks = [];
+                        // Queue of pending tasks (map of PendingTasks indexed by id).
+                        this.pendingTasks = new Map();
+                        // Incrementing PendingTask id.
+                        this.nextTaskId = 0;
+                        // Whether stop() method is stopping all pending tasks.
+                        this.stopping = false;
                     }
                     get size() {
-                        return this.pendingTasks.length;
+                        return this.pendingTasks.size;
                     }
                     async push(task, name) {
+                        name = name !== null && name !== void 0 ? name : task.name;
+                        logger.debug(`push() [name:${name}]`);
                         if (typeof task !== 'function') {
                             throw new TypeError('given task is not a function');
                         }
-                        if (!task.name && name) {
+                        if (name) {
                             try {
                                 Object.defineProperty(task, 'name', { value: name });
                             } catch (error) {}
                         }
                         return new Promise((resolve, reject) => {
                             const pendingTask = {
-                                task,
-                                name,
-                                stopped: false,
+                                id: this.nextTaskId++,
+                                task: task,
+                                name: name,
                                 enqueuedAt: Date.now(),
                                 executedAt: undefined,
-                                resolve,
-                                reject,
+                                completed: false,
+                                resolve: (result) => {
+                                    // pendingTask.resolve() can only be called in execute() method. Since
+                                    // resolve() was called it means that the task successfully completed.
+                                    // However the task may have been stopped before it completed (via
+                                    // stop() or remove()) so its completed flag was already set. If this
+                                    // is the case, abort here since next task (if any) is already being
+                                    // executed.
+                                    if (pendingTask.completed) {
+                                        return;
+                                    }
+                                    pendingTask.completed = true;
+                                    // Remove the task from the queue.
+                                    this.pendingTasks.delete(pendingTask.id);
+                                    logger.debug(`resolving task [name:${pendingTask.name}]`);
+                                    // Resolve the task with the obtained result.
+                                    resolve(result);
+                                    // Execute the next pending task (if any).
+                                    const [nextPendingTask] = this.pendingTasks.values();
+                                    // NOTE: During the resolve() callback the user app may have interacted
+                                    // with the queue. For instance, the app may have pushed a task while
+                                    // the queue was empty so such a task is already being executed. If so,
+                                    // don't execute it twice.
+                                    if (nextPendingTask && !nextPendingTask.executedAt) {
+                                        void this.execute(nextPendingTask);
+                                    }
+                                },
+                                reject: (error) => {
+                                    // pendingTask.reject() can be called within execute() method if the
+                                    // task completed with error. However it may have also been called in
+                                    // stop() or remove() methods (before or while being executed) so its
+                                    // completed flag was already set. If so, abort here since next task
+                                    // (if any) is already being executed.
+                                    if (pendingTask.completed) {
+                                        return;
+                                    }
+                                    pendingTask.completed = true;
+                                    // Remove the task from the queue.
+                                    this.pendingTasks.delete(pendingTask.id);
+                                    logger.debug(`rejecting task [name:${pendingTask.name}]: %s`, String(error));
+                                    // Reject the task with the obtained error.
+                                    reject(error);
+                                    // Execute the next pending task (if any) unless stop() is running.
+                                    if (!this.stopping) {
+                                        const [nextPendingTask] = this.pendingTasks.values();
+                                        // NOTE: During the reject() callback the user app may have interacted
+                                        // with the queue. For instance, the app may have pushed a task while
+                                        // the queue was empty so such a task is already being executed. If so,
+                                        // don't execute it twice.
+                                        if (nextPendingTask && !nextPendingTask.executedAt) {
+                                            void this.execute(nextPendingTask);
+                                        }
+                                    }
+                                },
                             };
                             // Append task to the queue.
-                            this.pendingTasks.push(pendingTask);
-                            // And run it if this is the only task in the queue.
-                            if (this.pendingTasks.length === 1) {
-                                void this.next();
+                            this.pendingTasks.set(pendingTask.id, pendingTask);
+                            // And execute it if this is the only task in the queue.
+                            if (this.pendingTasks.size === 1) {
+                                void this.execute(pendingTask);
                             }
                         });
                     }
                     stop() {
-                        for (const pendingTask of this.pendingTasks) {
-                            pendingTask.stopped = true;
+                        logger.debug('stop()');
+                        this.stopping = true;
+                        for (const pendingTask of this.pendingTasks.values()) {
+                            logger.debug(`stop() | stopping task [name:${pendingTask.name}]`);
                             pendingTask.reject(new AwaitQueueStoppedError());
                         }
-                        // Enpty the pending tasks array.
-                        this.pendingTasks.length = 0;
+                        this.stopping = false;
                     }
                     remove(taskIdx) {
-                        const pendingTask = this.pendingTasks[taskIdx];
+                        logger.debug(`remove() [taskIdx:${taskIdx}]`);
+                        const pendingTask = Array.from(this.pendingTasks.values())[taskIdx];
                         if (!pendingTask) {
+                            logger.debug(`stop() | no task with given idx [taskIdx:${taskIdx}]`);
                             return;
                         }
-                        this.pendingTasks.splice(taskIdx, 1);
                         pendingTask.reject(new AwaitQueueRemovedTaskError());
                     }
                     dump() {
                         const now = Date.now();
                         let idx = 0;
-                        return this.pendingTasks.map((pendingTask) => ({
+                        return Array.from(this.pendingTasks.values()).map((pendingTask) => ({
                             idx: idx++,
                             task: pendingTask.task,
                             name: pendingTask.name,
@@ -133,51 +238,27 @@
                             executionTime: pendingTask.executedAt ? now - pendingTask.executedAt : 0,
                         }));
                     }
-                    async next() {
-                        // Take the first pending task.
-                        const pendingTask = this.pendingTasks[0];
-                        if (!pendingTask) {
-                            return;
-                        }
-                        // Execute it.
-                        await this.executeTask(pendingTask);
-                        // Remove the first pending task (the completed one) from the queue.
-                        // NOTE: Ensure it remains being the same.
-                        if (this.pendingTasks[0] === pendingTask) {
-                            this.pendingTasks.shift();
-                        }
-                        // And continue.
-                        void this.next();
-                    }
-                    async executeTask(pendingTask) {
-                        // If the task is stopped, ignore it.
-                        if (pendingTask.stopped) {
-                            return;
+                    async execute(pendingTask) {
+                        logger.debug(`execute() [name:${pendingTask.name}]`);
+                        if (pendingTask.executedAt) {
+                            throw new Error('task already being executed');
                         }
                         pendingTask.executedAt = Date.now();
                         try {
                             const result = await pendingTask.task();
-                            // If the task is stopped, ignore it.
-                            if (pendingTask.stopped) {
-                                return;
-                            }
-                            // Resolve the task with the returned result (if any).
+                            // Resolve the task with its resolved result (if any).
                             pendingTask.resolve(result);
                         } catch (error) {
-                            // If the task is stopped, ignore it.
-                            if (pendingTask.stopped) {
-                                return;
-                            }
-                            // Reject the task with its own error.
+                            // Reject the task with its rejected error.
                             pendingTask.reject(error);
                         }
                     }
                 }
                 exports.AwaitQueue = AwaitQueue;
             },
-            {},
+            { './Logger': 1 },
         ],
-        2: [
+        3: [
             function (require, module, exports) {
                 !(function (e, t) {
                     'object' == typeof exports && 'object' == typeof module
@@ -1638,7 +1719,7 @@
             },
             {},
         ],
-        3: [
+        4: [
             function (require, module, exports) {
                 (function (process) {
                     (function () {
@@ -1938,9 +2019,9 @@
                     }.call(this));
                 }.call(this, require('_process')));
             },
-            { './common': 4, _process: 46 },
+            { './common': 5, _process: 47 },
         ],
-        4: [
+        5: [
             function (require, module, exports) {
                 /**
                  * This is the common logic for both the Node.js and web browser
@@ -2221,9 +2302,9 @@
 
                 module.exports = setup;
             },
-            { ms: 39 },
+            { ms: 40 },
         ],
-        5: [
+        6: [
             function (require, module, exports) {
                 const debug = require('debug')('h264-profile-level-id');
 
@@ -2626,9 +2707,9 @@
                     return level_asymmetry_allowed === 1 || level_asymmetry_allowed === '1';
                 }
             },
-            { debug: 3 },
+            { debug: 4 },
         ],
-        6: [
+        7: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2815,9 +2896,9 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        7: [
+        8: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2972,9 +3053,9 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11 },
+            { './EnhancedEventEmitter': 11, './Logger': 12 },
         ],
-        8: [
+        9: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3143,9 +3224,9 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        9: [
+        10: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -3602,26 +3683,26 @@
                 exports.Device = Device;
             },
             {
-                './EnhancedEventEmitter': 10,
-                './Logger': 11,
-                './Transport': 15,
-                './errors': 16,
-                './handlers/Chrome55': 17,
-                './handlers/Chrome67': 18,
-                './handlers/Chrome70': 19,
-                './handlers/Chrome74': 20,
-                './handlers/Edge11': 21,
-                './handlers/Firefox60': 22,
-                './handlers/ReactNative': 24,
-                './handlers/ReactNativeUnifiedPlan': 25,
-                './handlers/Safari11': 26,
-                './handlers/Safari12': 27,
-                './ortc': 35,
-                './utils': 38,
-                bowser: 2,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/Chrome55': 18,
+                './handlers/Chrome67': 19,
+                './handlers/Chrome70': 20,
+                './handlers/Chrome74': 21,
+                './handlers/Edge11': 22,
+                './handlers/Firefox60': 23,
+                './handlers/ReactNative': 25,
+                './handlers/ReactNativeUnifiedPlan': 26,
+                './handlers/Safari11': 27,
+                './handlers/Safari12': 28,
+                './ortc': 36,
+                './utils': 39,
+                bowser: 3,
             },
         ],
-        10: [
+        11: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3697,9 +3778,9 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 11, events: 45 },
+            { './Logger': 12, events: 46 },
         ],
-        11: [
+        12: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -3740,9 +3821,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 3 },
+            { debug: 4 },
         ],
-        12: [
+        13: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4012,9 +4093,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        13: [
+        14: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -4025,14 +4106,14 @@
             },
             {},
         ],
-        14: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        15: [
+        16: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -4857,19 +4938,19 @@
                 exports.Transport = Transport;
             },
             {
-                './Consumer': 6,
-                './DataConsumer': 7,
-                './DataProducer': 8,
-                './EnhancedEventEmitter': 10,
-                './Logger': 11,
-                './Producer': 12,
-                './errors': 16,
-                './ortc': 35,
-                './utils': 38,
-                awaitqueue: 1,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Producer': 13,
+                './errors': 17,
+                './ortc': 36,
+                './utils': 39,
+                awaitqueue: 2,
             },
         ],
-        16: [
+        17: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4911,7 +4992,7 @@
             },
             {},
         ],
-        17: [
+        18: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5476,18 +5557,18 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/planBUtils': 32,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/planBUtils': 33,
+                'sdp-transform': 42,
             },
         ],
-        18: [
+        19: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6083,17 +6164,17 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/planBUtils': 32,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/planBUtils': 33,
+                'sdp-transform': 42,
             },
         ],
-        19: [
+        20: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6713,18 +6794,18 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../scalabilityModes': 36,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/unifiedPlanUtils': 33,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../scalabilityModes': 37,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/unifiedPlanUtils': 34,
+                'sdp-transform': 42,
             },
         ],
-        20: [
+        21: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7374,18 +7455,18 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../scalabilityModes': 36,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/unifiedPlanUtils': 33,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../scalabilityModes': 37,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/unifiedPlanUtils': 34,
+                'sdp-transform': 42,
             },
         ],
-        21: [
+        22: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7826,15 +7907,15 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './ortc/edgeUtils': 28,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './ortc/edgeUtils': 29,
             },
         ],
-        22: [
+        23: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8486,18 +8567,18 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/unifiedPlanUtils': 33,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/unifiedPlanUtils': 34,
+                'sdp-transform': 42,
             },
         ],
-        23: [
+        24: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -8510,9 +8591,9 @@
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../EnhancedEventEmitter': 10 },
+            { '../EnhancedEventEmitter': 11 },
         ],
-        24: [
+        25: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9094,18 +9175,18 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/planBUtils': 32,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/planBUtils': 33,
+                'sdp-transform': 42,
             },
         ],
-        25: [
+        26: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9759,18 +9840,18 @@
                 exports.ReactNativeUnifiedPlan = ReactNativeUnifiedPlan;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../scalabilityModes': 36,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/unifiedPlanUtils': 33,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../scalabilityModes': 37,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/unifiedPlanUtils': 34,
+                'sdp-transform': 42,
             },
         ],
-        26: [
+        27: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10361,17 +10442,17 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/planBUtils': 32,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/planBUtils': 33,
+                'sdp-transform': 42,
             },
         ],
-        27: [
+        28: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10992,17 +11073,17 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 11,
-                '../ortc': 35,
-                '../utils': 38,
-                './HandlerInterface': 23,
-                './sdp/RemoteSdp': 30,
-                './sdp/commonUtils': 31,
-                './sdp/unifiedPlanUtils': 33,
-                'sdp-transform': 41,
+                '../Logger': 12,
+                '../ortc': 36,
+                '../utils': 39,
+                './HandlerInterface': 24,
+                './sdp/RemoteSdp': 31,
+                './sdp/commonUtils': 32,
+                './sdp/unifiedPlanUtils': 34,
+                'sdp-transform': 42,
             },
         ],
-        28: [
+        29: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11102,9 +11183,9 @@
                 }
                 exports.mangleRtpParameters = mangleRtpParameters;
             },
-            { '../../utils': 38 },
+            { '../../utils': 39 },
         ],
-        29: [
+        30: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11660,9 +11741,9 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 38 },
+            { '../../utils': 39 },
         ],
-        30: [
+        31: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11990,9 +12071,9 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 11, './MediaSection': 29, 'sdp-transform': 41 },
+            { '../../Logger': 12, './MediaSection': 30, 'sdp-transform': 42 },
         ],
-        31: [
+        32: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12191,9 +12272,9 @@
                 }
                 exports.applyCodecParameters = applyCodecParameters;
             },
-            { 'sdp-transform': 41 },
+            { 'sdp-transform': 42 },
         ],
-        32: [
+        33: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12331,7 +12412,7 @@
             },
             {},
         ],
-        33: [
+        34: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12447,7 +12528,7 @@
             },
             {},
         ],
-        34: [
+        35: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12524,7 +12605,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.69';
+                exports.version = '3.6.70';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -12536,9 +12617,9 @@
                     },
                 });
             },
-            { './Device': 9, './scalabilityModes': 36, './types': 37, debug: 3 },
+            { './Device': 10, './scalabilityModes': 37, './types': 38, debug: 4 },
         ],
-        35: [
+        36: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13349,9 +13430,9 @@
                     return reducedRtcpFeedback;
                 }
             },
-            { './utils': 38, 'h264-profile-level-id': 5 },
+            { './utils': 39, 'h264-profile-level-id': 6 },
         ],
-        36: [
+        37: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -13375,7 +13456,7 @@
             },
             {},
         ],
-        37: [
+        38: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13418,19 +13499,19 @@
                 __exportStar(require('./errors'), exports);
             },
             {
-                './Consumer': 6,
-                './DataConsumer': 7,
-                './DataProducer': 8,
-                './Device': 9,
-                './Producer': 12,
-                './RtpParameters': 13,
-                './SctpParameters': 14,
-                './Transport': 15,
-                './errors': 16,
-                './handlers/HandlerInterface': 23,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './Device': 10,
+                './Producer': 13,
+                './RtpParameters': 14,
+                './SctpParameters': 15,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/HandlerInterface': 24,
             },
         ],
-        38: [
+        39: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -13453,7 +13534,7 @@
             },
             {},
         ],
-        39: [
+        40: [
             function (require, module, exports) {
                 /**
                  * Helpers.
@@ -13618,7 +13699,7 @@
             },
             {},
         ],
-        40: [
+        41: [
             function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
@@ -14131,7 +14212,7 @@
             },
             {},
         ],
-        41: [
+        42: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -14145,9 +14226,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './parser': 42, './writer': 43 },
+            { './parser': 43, './writer': 44 },
         ],
-        42: [
+        43: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -14280,9 +14361,9 @@
                     });
                 };
             },
-            { './grammar': 40 },
+            { './grammar': 41 },
         ],
-        43: [
+        44: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -14392,16 +14473,16 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 40 },
+            { './grammar': 41 },
         ],
-        44: [
+        45: [
             function (require, module, exports) {
                 const client = require('mediasoup-client');
                 window.mediasoupClient = client;
             },
-            { 'mediasoup-client': 34 },
+            { 'mediasoup-client': 35 },
         ],
-        45: [
+        46: [
             function (require, module, exports) {
                 // Copyright Joyent, Inc. and other Node contributors.
                 //
@@ -14890,7 +14971,7 @@
             },
             {},
         ],
-        46: [
+        47: [
             function (require, module, exports) {
                 // shim for using process in browser
                 var process = (module.exports = {});
@@ -15082,5 +15163,5 @@
         ],
     },
     {},
-    [44],
+    [45],
 );
