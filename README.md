@@ -317,6 +317,8 @@ Support the project by [becoming a sponsor](https://github.com/sponsors/miroslav
 
 [![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)
 
+[![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com)
+
 </details>
 
 <br/>
