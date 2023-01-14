@@ -254,7 +254,7 @@ Make the script executable
 $ chmod +x sfuUpdate.sh
 ```
 
-Follow the commits of the MiroTalk SFU project [here](https://github.com/miroslavpejic85/mirotalksfu/commits/master)
+Follow the commits of the MiroTalk SFU project [here](https://github.com/miroslavpejic85/mirotalksfu/commits/main)
 
 To update your instance of MiroTalk SFU at latest commit, execute:
 
