@@ -448,16 +448,18 @@ function startServer() {
     })();
 
     async function createWorkers() {
-        let { numWorkers } = config.mediasoup;
+        const { numWorkers } = config.mediasoup;
+
+        const { logLevel, logTags, rtcMinPort, rtcMaxPort } = config.mediasoup.worker;
 
         log.debug('WORKERS:', numWorkers);
 
         for (let i = 0; i < numWorkers; i++) {
             let worker = await mediasoup.createWorker({
-                logLevel: config.mediasoup.worker.logLevel,
-                logTags: config.mediasoup.worker.logTags,
-                rtcMinPort: config.mediasoup.worker.rtcMinPort,
-                rtcMaxPort: config.mediasoup.worker.rtcMaxPort,
+                logLevel: logLevel,
+                logTags: logTags,
+                rtcMinPort: rtcMinPort,
+                rtcMaxPort: rtcMaxPort,
             });
             worker.on('died', () => {
                 log.error('Mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid);
