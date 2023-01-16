@@ -830,11 +830,12 @@ button:hover {
 #receiveFileDiv {
     z-index: 8;
     display: none;
-    padding: 10px;
+    padding: 20px;
     margin: auto;
     min-width: 320px;
     background: var(--body-bg);
-    border-radius: 5px;
+    border: var(--border);
+    border-radius: var(--border-radius);
     color: #fff;
     overflow: hidden;
 }
