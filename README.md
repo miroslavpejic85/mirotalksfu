@@ -90,7 +90,7 @@ Embedding a meeting into a service or app using an iframe.
 
 ```html
 <iframe
-    allow="camera; microphone; fullscreen; display-capture; autoplay"
+    allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; autoplay"
     src="https://sfu.mirotalk.com/newroom"
     style="height: 100%; width: 100%; border: 0px;"
 ></iframe>
