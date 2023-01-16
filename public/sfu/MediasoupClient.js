@@ -2016,8 +2016,8 @@
                                 return '[UnexpectedJSONParseError]: ' + error.message;
                             }
                         };
-                    }.call(this));
-                }.call(this, require('_process')));
+                    }).call(this);
+                }).call(this, require('_process'));
             },
             { './common': 5, _process: 47 },
         ],
