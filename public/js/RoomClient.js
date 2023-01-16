@@ -2429,7 +2429,7 @@ class RoomClient {
         if (!this.thereIsParticipants()) {
             isChatPasteTxt = false;
             this.cleanMessage();
-            return this.userLog('info', 'No participants in the room expect you', 'top-end');
+            return this.userLog('info', 'No participants in the room except you', 'top-end');
         }
         Swal.fire({
             background: swalBackground,
