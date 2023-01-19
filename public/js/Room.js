@@ -587,13 +587,12 @@ async function shareRoom(useNavigator = false) {
 // ####################################################
 
 function makeRoomQR() {
-    let qrSize = DetectRTC.isMobileDevice ? 128 : 256;
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
         value: RoomURL,
     });
     qr.set({
-        size: qrSize,
+        size: 256,
     });
 }
 
