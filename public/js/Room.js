@@ -539,7 +539,7 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: '<strong>Welcome ' + peer_name + '</strong>',
+            title: 'Share your meeting room',
             html: `
             <br/>
             <div id="qrRoomContainer">
@@ -2090,7 +2090,7 @@ function showAbout() {
             <br/><br />
             <button class="pulsate umami--click--sponsors" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
-            Contact: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
+            Author: <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" class="umami--click--linkedin" target="_blank"> Miroslav Pejic</a>
         </div>
         `,
         showClass: {
