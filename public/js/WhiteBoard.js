@@ -567,6 +567,8 @@ class WhiteBoard {
             let shift = (that.wbCanvas.width - (myImg.width * scale)) / 2             
             myImg.set({ top: 0, left: shift }).scale(scale);
             that.addWbCanvasObj(myImg);
+            that.wbCanvas.discardActiveObject();
+            that.wbCanvas.requestRenderAll();
         });
     }
 

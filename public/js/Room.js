@@ -49,7 +49,7 @@ const isIPadDevice = isIpad(userAgent);
 
 const wbImageInput = 'image/*';
 const wbWidth = 1200;
-const wbHeight = 600;
+const wbHeight = 675;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
@@ -856,6 +856,7 @@ function handleButtons() {
         rc.pasteMessage();
     };
     chatSendButton.onclick = () => {
+        realWhiteBoard.whiteboardSetDrawingMode("draw"); // this is useful for univet, sometimes the laser pointer remaind active
         rc.sendMessage();
     };
     chatEmojiButton.onclick = () => {
