@@ -81,7 +81,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: url('../images/background.jpg');
+    /* background: url('../images/background.jpg'); */
+    background: var(--body-bg);
 }
 
 /*--------------------------------------------------------------
@@ -97,27 +98,22 @@ body {
 }
 
 /*--------------------------------------------------------------
-# Loading...
+# Init User
 --------------------------------------------------------------*/
 
-#loadingDiv {
-    color: #fff;
-    padding: 30px;
-    border-radius: 10px;
-    background: transparent;
+.init-user {
+    display: block;
+    padding: 5px;
 }
-#loadingDiv h1 {
+
+.init-user select {
+    margin-top: 15px;
     padding: 10px;
-    font-size: 60px;
-    font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 10px;
+    cursor: pointer;
 }
-#loadingDiv p {
-    padding: 10px;
-    font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
-    border-radius: 10px;
+
+.init-user button {
+    margin-top: 15px;
 }
 
 /*--------------------------------------------------------------

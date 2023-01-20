@@ -8,9 +8,10 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
  * @link    Live demo: https://sfu.mirotalk.com
  * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at info.mirotalk@gmail.com
+ * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or buy directly via CodeCanyon
+ * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.0
+ * @version 1.0.1
  *
  */
 
@@ -52,6 +53,8 @@ const wbWidth = 1200;
 const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
+
+const lS = new LocalStorage();
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -108,6 +111,8 @@ let isButtonsVisible = false;
 let isButtonsBarOver = false;
 
 let isRoomLocked = false;
+
+let initStream = null;
 
 // ####################################################
 // INIT ROOM
@@ -223,29 +228,25 @@ function makeId(length) {
 
 async function initEnumerateDevices() {
     console.log('01 ----> init Enumerate Devices');
-    await initEnumerateAudioDevices();
+    whoAreYou();
     await initEnumerateVideoDevices();
+    await initEnumerateAudioDevices();
+    if (!isVideoAllowed) {
+        hide(initVideo);
+        hide(initVideoSelect);
+    }
+    if (!isAudioAllowed) {
+        hide(initMicrophoneSelect);
+        hide(initSpeakerSelect);
+    }
     if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
         openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
-        hide(loadingDiv);
+        setButtonsInit();
+        setSelectsInit();
+        handleSelectsInit();
         getPeerGeoLocation();
-        whoAreYou();
     }
-}
-
-async function initEnumerateAudioDevices() {
-    if (isEnumerateAudioDevices) return;
-    // allow the audio
-    await navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then((stream) => {
-            enumerateAudioDevices(stream);
-            isAudioAllowed = true;
-        })
-        .catch(() => {
-            isAudioAllowed = false;
-        });
 }
 
 async function initEnumerateVideoDevices() {
@@ -262,31 +263,6 @@ async function initEnumerateVideoDevices() {
         });
 }
 
-function enumerateAudioDevices(stream) {
-    console.log('02 ----> Get Audio Devices');
-    navigator.mediaDevices
-        .enumerateDevices()
-        .then((devices) =>
-            devices.forEach((device) => {
-                let el = null;
-                if ('audioinput' === device.kind) {
-                    el = microphoneSelect;
-                    RoomClient.DEVICES_COUNT.audio++;
-                } else if ('audiooutput' === device.kind) {
-                    el = speakerSelect;
-                    RoomClient.DEVICES_COUNT.speaker++;
-                }
-                if (!el) return;
-                addChild(device, el);
-            }),
-        )
-        .then(() => {
-            stopTracks(stream);
-            isEnumerateAudioDevices = true;
-            speakerSelect.disabled = !('sinkId' in HTMLMediaElement.prototype);
-        });
-}
-
 function enumerateVideoDevices(stream) {
     console.log('03 ----> Get Video Devices');
     navigator.mediaDevices
@@ -294,17 +270,63 @@ function enumerateVideoDevices(stream) {
         .then((devices) =>
             devices.forEach((device) => {
                 let el = null;
+                let eli = null;
                 if ('videoinput' === device.kind) {
                     el = videoSelect;
-                    RoomClient.DEVICES_COUNT.video++;
+                    eli = initVideoSelect;
+                    lS.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
-                addChild(device, el);
+                addChild(device, [el, eli]);
             }),
         )
         .then(() => {
             stopTracks(stream);
             isEnumerateVideoDevices = true;
+        });
+}
+
+async function initEnumerateAudioDevices() {
+    if (isEnumerateAudioDevices) return;
+    // allow the audio
+    await navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+            enumerateAudioDevices(stream);
+            isAudioAllowed = true;
+        })
+        .catch(() => {
+            isAudioAllowed = false;
+        });
+}
+
+function enumerateAudioDevices(stream) {
+    console.log('02 ----> Get Audio Devices');
+    navigator.mediaDevices
+        .enumerateDevices()
+        .then((devices) =>
+            devices.forEach((device) => {
+                let el = null;
+                let eli = null;
+                if ('audioinput' === device.kind) {
+                    el = microphoneSelect;
+                    eli = initMicrophoneSelect;
+                    lS.DEVICES_COUNT.audio++;
+                } else if ('audiooutput' === device.kind) {
+                    el = speakerSelect;
+                    eli = initSpeakerSelect;
+                    lS.DEVICES_COUNT.speaker++;
+                }
+                if (!el) return;
+                addChild(device, [el, eli]);
+            }),
+        )
+        .then(() => {
+            stopTracks(stream);
+            isEnumerateAudioDevices = true;
+            const sinkId = 'sinkId' in HTMLMediaElement.prototype;
+            speakerSelect.disabled = !sinkId;
+            if (!sinkId) hide(initSpeakerSelect);
         });
 }
 
@@ -314,11 +336,26 @@ function stopTracks(stream) {
     });
 }
 
-function addChild(device, el) {
-    let option = document.createElement('option');
-    option.value = device.deviceId;
-    option.innerText = device.label;
-    el.appendChild(option);
+function addChild(device, els) {
+    let kind = device.kind;
+    els.forEach((el) => {
+        let option = document.createElement('option');
+        option.value = device.deviceId;
+        switch (kind) {
+            case 'videoinput':
+                option.innerHTML = `📹 ` + device.label || `📹 camera ${el.length + 1}`;
+                break;
+            case 'audioinput':
+                option.innerHTML = `🎤 ` + device.label || `🎤 microphone ${el.length + 1}`;
+                break;
+            case 'audiooutput':
+                option.innerHTML = `🔈 ` + device.label || `🔈 speaker ${el.length + 1}`;
+                break;
+            default:
+                break;
+        }
+        el.appendChild(option);
+    });
 }
 
 // ####################################################
@@ -407,6 +444,7 @@ function getPeerGeoLocation() {
 
 function whoAreYou() {
     console.log('04 ----> Who are you');
+    sound('open');
 
     if (peer_name) {
         checkMedia();
@@ -420,21 +458,18 @@ function whoAreYou() {
         default_name = getCookie(room_id + '_name');
     }
 
+    const initUser = document.getElementById('initUser');
+    initUser.classList.toggle('hidden');
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
-        imageAlt: 'mirotalksfu-username',
-        imageUrl: image.username,
+        title: 'MiroTalk SFU',
         input: 'text',
         inputPlaceholder: 'Enter your name',
         inputValue: default_name,
-        html: `<br />
-        <div style="padding: 10px;">
-            <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-            <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
-            <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
-        </div>`,
+        html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
         showClass: {
             popup: 'animate__animated animate__fadeInDown',
@@ -451,23 +486,13 @@ function whoAreYou() {
             peer_name = name;
         },
     }).then(() => {
+        if (initStream) {
+            stopTracks(initStream);
+            hide(initVideo);
+        }
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
-
-    if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Toggle the audio', 'left');
-        setTippy('initVideoButton', 'Toggle the video', 'right');
-        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'right');
-    }
-
-    initAudioButton = document.getElementById('initAudioButton');
-    initVideoButton = document.getElementById('initVideoButton');
-    initAudioVideoButton = document.getElementById('initAudioVideoButton');
-    if (!isAudioAllowed) hide(initAudioButton);
-    if (!isVideoAllowed) hide(initVideoButton);
-    if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
-    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
 function handleAudio(e) {
@@ -475,6 +500,7 @@ function handleAudio(e) {
     e.target.className = 'fas fa-microphone' + (isAudioAllowed ? '' : '-slash');
     setColor(e.target, isAudioAllowed ? 'white' : 'red');
     setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
+    checkInitAudio(isAudioAllowed);
 }
 
 function handleVideo(e) {
@@ -482,6 +508,7 @@ function handleVideo(e) {
     e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
     setColor(e.target, isVideoAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
+    checkInitVideo(isVideoAllowed);
 }
 
 function handleAudioVideo(e) {
@@ -500,6 +527,28 @@ function handleAudioVideo(e) {
     setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
     setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
+    checkInitVideo(isVideoAllowed);
+    checkInitAudio(isAudioAllowed);
+}
+
+function checkInitVideo(isVideoAllowed) {
+    if (isVideoAllowed) {
+        if (initVideoSelect.value) changeCamera(initVideoSelect.value);
+        sound('joined');
+    } else {
+        if (initStream) {
+            stopTracks(initStream);
+            hide(initVideo);
+            sound('left');
+        }
+    }
+    initVideoSelect.disabled = !isVideoAllowed;
+}
+
+function checkInitAudio(isAudioAllowed) {
+    initMicrophoneSelect.disabled = !isAudioAllowed;
+    initSpeakerSelect.disabled = !isAudioAllowed;
+    isAudioAllowed ? sound('joined') : sound('left');
 }
 
 function checkMedia() {
@@ -557,7 +606,7 @@ async function shareRoom(useNavigator = false) {
             denyButtonText: `Email invite`,
             cancelButtonText: `Close`,
             showClass: {
-                popup: 'animate__animated animate__fadeInUp',
+                popup: 'animate__animated animate__fadeInDown',
             },
             hideClass: {
                 popup: 'animate__animated animate__fadeOutUp',
@@ -1003,25 +1052,119 @@ function handleButtons() {
 }
 
 // ####################################################
-// HTML SELECTS
+// HANDLE INIT USER
 // ####################################################
+
+function setButtonsInit() {
+    if (!DetectRTC.isMobileDevice) {
+        setTippy('initAudioButton', 'Toggle the audio', 'left');
+        setTippy('initVideoButton', 'Toggle the video', 'right');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'right');
+    }
+    initAudioButton = document.getElementById('initAudioButton');
+    initVideoButton = document.getElementById('initVideoButton');
+    initAudioVideoButton = document.getElementById('initAudioVideoButton');
+    if (!isAudioAllowed) hide(initAudioButton);
+    if (!isVideoAllowed) hide(initVideoButton);
+    if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
+    isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
+}
+
+function handleSelectsInit() {
+    // devices init options
+    initVideoSelect.onchange = () => {
+        changeCamera(initVideoSelect.value);
+        videoSelect.selectedIndex = initVideoSelect.selectedIndex;
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
+    };
+    initMicrophoneSelect.onchange = () => {
+        microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+    };
+    initSpeakerSelect.onchange = () => {
+        speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+    };
+}
+
+function setSelectsInit() {
+    const localStorageDevices = lS.getLocalStorageDevices();
+    console.log('04 ----> Get Local Storage Devices before', localStorageDevices);
+    if (localStorageDevices) {
+        initMicrophoneSelect.selectedIndex = localStorageDevices.audio.index;
+        initSpeakerSelect.selectedIndex = localStorageDevices.speaker.index;
+        initVideoSelect.selectedIndex = localStorageDevices.video.index;
+        //
+        microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
+        speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
+        videoSelect.selectedIndex = initVideoSelect.selectedIndex;
+        //
+        if (lS.DEVICES_COUNT.audio != localStorageDevices.audio.count) {
+            console.log('04.1 ----> Audio devices seems changed, use default index 0');
+            initMicrophoneSelect.selectedIndex = 0;
+            microphoneSelect.selectedIndex = 0;
+            lS.setLocalStorageDevices(
+                lS.MEDIA_TYPE.audio,
+                initMicrophoneSelect.selectedIndex,
+                initMicrophoneSelect.value,
+            );
+        }
+        if (lS.DEVICES_COUNT.speaker != localStorageDevices.speaker.count) {
+            console.log('04.2 ----> Speaker devices seems changed, use default index 0');
+            initSpeakerSelect.selectedIndex = 0;
+            speakerSelect.selectedIndex = 0;
+            lS.setLocalStorageDevices(
+                lS.MEDIA_TYPE.speaker,
+                initSpeakerSelect.selectedIndexIndex,
+                initSpeakerSelect.value,
+            );
+        }
+        if (lS.DEVICES_COUNT.video != localStorageDevices.video.count) {
+            console.log('04.3 ----> Video devices seems changed, use default index 0');
+            initVideoSelect.selectedIndex = 0;
+            videoSelect.selectedIndex = 0;
+            lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, initVideoSelect.selectedIndex, initVideoSelect.value);
+        }
+        //
+        console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
+    }
+    if (initVideoSelect.value) changeCamera(initVideoSelect.value);
+}
+
+function changeCamera(deviceId) {
+    if (initStream) {
+        stopTracks(initStream);
+        show(initVideo);
+    }
+    navigator.mediaDevices
+        .getUserMedia({ video: { deviceId: deviceId } })
+        .then((camStream) => {
+            initVideo.srcObject = camStream;
+            initStream = camStream;
+            console.log('04.5 ----> Success attached init video stream');
+        })
+        .catch((err) => {
+            console.error('[Error] changeCamera', err);
+            userLog('error', 'Error while swapping camera' + err.tostring(), 'top-end');
+        });
+}
 
 function handleSelects() {
     // devices options
     videoSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        rc.setLocalStorageDevices(RoomClient.mediaType.video, videoSelect.selectedIndex, videoSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
     };
     videoQuality.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
     };
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
-        rc.setLocalStorageDevices(RoomClient.mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
-    speakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
-        rc.setLocalStorageDevices(RoomClient.mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
+    initSpeakerSelect.onchange = () => {
+        rc.attachSinkId(rc.myAudioEl, initSpeakerSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
     };
     // room
     switchSounds.onchange = (e) => {
@@ -2093,7 +2236,7 @@ function showAbout() {
         </div>
         `,
         showClass: {
-            popup: 'animate__animated animate__fadeInUp',
+            popup: 'animate__animated animate__fadeInDown',
         },
         hideClass: {
             popup: 'animate__animated animate__fadeOutUp',
