@@ -1140,6 +1140,7 @@ function changeCamera(deviceId) {
     navigator.mediaDevices
         .getUserMedia({ video: { deviceId: deviceId } })
         .then((camStream) => {
+            initVideo.className = 'mirror';
             initVideo.srcObject = camStream;
             initStream = camStream;
             console.log('04.5 ----> Success attached init video stream');
