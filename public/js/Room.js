@@ -242,6 +242,7 @@ async function initEnumerateDevices() {
     if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
         openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
+        hide(loadingDiv);
         setButtonsInit();
         setSelectsInit();
         handleSelectsInit();
@@ -464,7 +465,7 @@ function whoAreYou() {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        background: swalBackground,
+        background: 'rgba(0, 0, 0, 0.7)', //swalBackground,
         title: 'MiroTalk SFU',
         input: 'text',
         inputPlaceholder: 'Enter your name',

@@ -81,8 +81,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    /* background: url('../images/background.jpg'); */
-    background: var(--body-bg);
+    background: url('../images/background.jpg');
+    /* background: var(--body-bg); */
 }
 
 /*--------------------------------------------------------------
@@ -95,6 +95,30 @@ body {
 
 #google_translate_element select {
     background: #2c2c2c !important;
+}
+
+/*--------------------------------------------------------------
+# Loading...
+--------------------------------------------------------------*/
+
+#loadingDiv {
+    color: #fff;
+    padding: 30px;
+    border-radius: 10px;
+    background: transparent;
+}
+#loadingDiv h1 {
+    padding: 10px;
+    font-size: 60px;
+    font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+}
+#loadingDiv p {
+    padding: 10px;
+    font-family: 'Comfortaa';
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------
