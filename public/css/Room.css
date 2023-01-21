@@ -81,8 +81,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: url('../images/background.jpg');
     /* background: var(--body-bg); */
+    background: url('../images/background.jpg');
 }
 
 /*--------------------------------------------------------------
@@ -131,14 +131,20 @@ body {
 }
 
 .init-user select {
+    width: 100%;
     margin-top: 15px;
     padding: 10px;
+    background: #2c2c2c;
+    color: white;
+    border: var(--border);
+    border-radius: 5px;
     cursor: pointer;
 }
 
 .init-user button {
     margin-top: 20px;
     margin-bottom: 10px;
+    width: 50px;
 }
 
 /*--------------------------------------------------------------
@@ -591,6 +597,10 @@ em-emoji-picker {
     text-align: center;
     color: #858585 !important;
     background-color: transparent !important;
+}
+
+.swal2-input {
+    border: var(--border) !important;
 }
 
 .swal2-popup {

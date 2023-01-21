@@ -230,7 +230,6 @@ async function initEnumerateDevices() {
     console.log('01 ----> init Enumerate Devices');
     await initEnumerateVideoDevices();
     await initEnumerateAudioDevices();
-    hide(loadingDiv);
     whoAreYou();
     if (!isVideoAllowed) {
         hide(initVideo);
@@ -447,6 +446,9 @@ function whoAreYou() {
     console.log('04 ----> Who are you');
     sound('open');
 
+    hide(loadingDiv);
+    document.body.style.background = 'var(--body-bg)';
+
     if (peer_name) {
         checkMedia();
         getPeerInfo();
@@ -465,7 +467,7 @@ function whoAreYou() {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
-        background: 'rgba(0, 0, 0, 0.7)', //swalBackground,
+        background: swalBackground,
         title: 'MiroTalk SFU',
         input: 'text',
         inputPlaceholder: 'Enter your name',
