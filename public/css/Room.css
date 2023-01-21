@@ -253,6 +253,7 @@ body {
     height: 40px;
     color: #fff;
     background-color: transparent;
+    border: var(--border);
     border-radius: 5px;
     cursor: pointer;
 }
@@ -320,8 +321,26 @@ body {
 }
 
 .tabcontent button i {
+    padding: 10px;
     border: var(--border);
-    border-radius: var(--border-radius);
+    border-radius: 5px;
+}
+
+.tabcontent button {
+    margin-top: 5px;
+    width: 100%;
+    text-align: left;
+}
+
+.tabcontent button:hover {
+    background-color: #121212;
+    transform: scale(1);
+}
+
+#sessionTimeButton {
+    width: auto;
+    margin-top: 10px;
+    text-align: right;
 }
 
 /* on open display devices tab */
