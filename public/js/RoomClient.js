@@ -937,9 +937,12 @@ class RoomClient {
 
         switch (videoQuality.value) {
             case 'default':
+                // This will make the browser use HD Video and 30fps as default.
                 videoConstraints = {
                     audio: false,
                     video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
                         deviceId: deviceId,
                         aspectRatio: 1.777,
                         frameRate: frameRate,
