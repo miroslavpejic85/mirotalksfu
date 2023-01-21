@@ -145,6 +145,13 @@ body {
     margin-top: 20px;
     margin-bottom: 10px;
     width: 50px;
+    background-color: transparent;
+}
+
+.init-user button:hover {
+    color: white;
+    background-color: rgb(35, 35, 35);
+    transform: scale(1);
 }
 
 /*--------------------------------------------------------------
