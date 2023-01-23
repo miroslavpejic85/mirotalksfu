@@ -2226,10 +2226,9 @@ function showAbout() {
 
     Swal.fire({
         background: swalBackground,
-        imageUrl: swalImageUrl,
-        imageWidth: 300,
-        imageHeight: 150,
+        imageUrl: image.about,
         position: 'center',
+        title: 'WebRTC SFU',
         html: `
         <br/>
         <div id="about">
