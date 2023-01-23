@@ -105,19 +105,22 @@ body {
     color: #fff;
     padding: 30px;
     border-radius: 10px;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.7);
 }
 #loadingDiv h1 {
     padding: 10px;
     font-size: 60px;
     font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
 }
-#loadingDiv p {
+#loadingDiv img {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+#loadingDiv pre {
     padding: 10px;
     font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
 }
 
