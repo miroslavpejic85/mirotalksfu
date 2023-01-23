@@ -689,6 +689,11 @@ em-emoji-picker {
 # Common
 --------------------------------------------------------------*/
 
+select {
+    height: 40px;
+    line-height: 40px;
+}
+
 .hidden {
     display: none;
 }
