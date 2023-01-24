@@ -10,7 +10,7 @@ module.exports = class Room {
         this.worker = worker;
         this.router = null;
         this.audioLevelObserver = null;
-        this.audioLevelObserverEnabled = false;
+        this.audioLevelObserverEnabled = true;
         this.audioLastUpdateTime = 0;
         this.io = io;
         this._isLocked = false;
@@ -49,8 +49,8 @@ module.exports = class Room {
 
         this.audioLevelObserver = await router.createAudioLevelObserver({
             maxEntries: 1,
-            threshold: -80,
-            interval: 800,
+            threshold: -70,
+            interval: 1000,
         });
 
         this.audioLevelObserver.on('volumes', (volumes) => {
@@ -66,7 +66,7 @@ module.exports = class Room {
         if (Date.now() > this.audioLastUpdateTime + 1000) {
             this.audioLastUpdateTime = Date.now();
             const { producer, volume } = volumes[0];
-            let audioVolume = Math.round(Math.pow(10, volume / 80) * 10); // 1-10
+            let audioVolume = Math.round(Math.pow(10, volume / 70) * 10); // 1-10
             if (audioVolume > 2) {
                 // log.debug('PEERS', this.peers);
                 this.peers.forEach((peer) => {
@@ -77,7 +77,7 @@ module.exports = class Room {
                             peer.peer_audio === true
                         ) {
                             let data = { peer_name: peer.peer_name, peer_id: peer.id, audioVolume: audioVolume };
-                            // log.debug('audioLevelObserver id [' + this.id + ']', data);
+                            //log.debug('audioLevelObserver id [' + this.id + ']', data);
                             this.broadCast(0, 'audioVolume', data);
                         }
                     });
