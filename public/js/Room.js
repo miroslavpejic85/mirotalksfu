@@ -598,9 +598,7 @@ async function shareRoom(useNavigator = false) {
             </div>
             <br/>
             <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:white;">No need for apps, simply capture the QR code with your mobile camera</p>
-            <p style="background:transparent; color:white;">Or</p>
-            <p style="background:transparent; color:white;">Invite someone else to join by sending them the following URL</p>
+            <p style="background:transparent; color:white;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
             showDenyButton: true,
             showCancelButton: true,
