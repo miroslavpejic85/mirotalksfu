@@ -7115,7 +7115,7 @@
                                 sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264')
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
-                                encoding.scalabilityMode = 'S1T3';
+                                encoding.scalabilityMode = 'S1T2';
                             }
                         }
                         this._remoteSdp.send({
@@ -8235,7 +8235,7 @@
                                 sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264')
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
-                                encoding.scalabilityMode = 'S1T3';
+                                encoding.scalabilityMode = 'S1T2';
                             }
                         }
                         this._remoteSdp.send({
@@ -12622,7 +12622,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.71';
+                exports.version = '3.6.72';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
