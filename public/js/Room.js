@@ -705,6 +705,7 @@ function roomIsReady() {
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
+    BUTTONS.main.participantsButton && show(participantsButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
@@ -744,7 +745,6 @@ function roomIsReady() {
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
-    BUTTONS.settings.participantsButton && show(participantsButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.main.aboutButton && show(aboutButton);
@@ -1036,7 +1036,6 @@ function handleButtons() {
         whiteboardAction(getWhiteboardAction('close'));
     };
     participantsButton.onclick = () => {
-        rc.toggleMySettings();
         getRoomParticipants();
     };
     participantsCloseBtn.onclick = () => {
