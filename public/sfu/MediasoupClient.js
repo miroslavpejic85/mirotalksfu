@@ -12622,7 +12622,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.72';
+                exports.version = '3.6.73';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
