@@ -31,7 +31,7 @@
         "express": "4.18.2",
         "httpolyglot": "0.1.2",
         "mediasoup": "3.11.8",
-        "mediasoup-client": "3.6.76",
+        "mediasoup-client": "3.6.77",
         "ngrok": "4.3.3",
         "qs": "6.11.0",
         "@sentry/node": "7.36.0",

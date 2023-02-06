@@ -7188,7 +7188,13 @@
                                 sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264')
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
-                                encoding.scalabilityMode = 'S1T2';
+                                if (encoding.scalabilityMode) {
+                                    encoding.scalabilityMode = `S1T${layers.temporalLayers}`;
+                                } else {
+                                    // By default Chrome enables 2 temporal layers (not in all OS but
+                                    // anyway).
+                                    encoding.scalabilityMode = 'S1T2';
+                                }
                             }
                         }
                         this._remoteSdp.send({
@@ -8043,6 +8049,7 @@
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
+                const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Firefox60');
                 const SCTP_NUM_STREAMS = { OS: 16, MIS: 2048 };
                 class Firefox60 extends HandlerInterface_1.HandlerInterface {
@@ -8274,6 +8281,7 @@
                         // Firefox does not respect ICE-Lite.
                         if (!this._transportReady)
                             await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
+                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
                         logger.debug('send() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
                         // We can now get the transceiver.mid.
@@ -8308,7 +8316,12 @@
                                 sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264')
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
-                                encoding.scalabilityMode = 'S1T2';
+                                if (encoding.scalabilityMode) {
+                                    encoding.scalabilityMode = `S1T${layers.temporalLayers}`;
+                                } else {
+                                    // By default Firefox enables 2 temporal layers.
+                                    encoding.scalabilityMode = 'S1T2';
+                                }
                             }
                         }
                         this._remoteSdp.send({
@@ -8643,6 +8656,7 @@
                 '../Logger': 12,
                 '../errors': 17,
                 '../ortc': 36,
+                '../scalabilityModes': 37,
                 '../utils': 39,
                 './HandlerInterface': 24,
                 './sdp/RemoteSdp': 31,
@@ -10579,6 +10593,7 @@
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
+                const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Safari12');
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Safari12 extends HandlerInterface_1.HandlerInterface {
@@ -10772,6 +10787,7 @@
                                 localSdpObject,
                             });
                         }
+                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
                         if (encodings && encodings.length > 1) {
                             logger.debug('send() | enabling legacy simulcast');
                             localSdpObject = sdpTransform.parse(offer.sdp);
@@ -10808,7 +10824,12 @@
                                 sendingRtpParameters.codecs[0].mimeType.toLowerCase() === 'video/h264')
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
-                                encoding.scalabilityMode = 'S1T3';
+                                if (encoding.scalabilityMode) {
+                                    encoding.scalabilityMode = `S1T${layers.temporalLayers}`;
+                                } else {
+                                    // By default Safari enables 3 temporal layers.
+                                    encoding.scalabilityMode = 'S1T3';
+                                }
                             }
                         }
                         this._remoteSdp.send({
@@ -11148,6 +11169,7 @@
             {
                 '../Logger': 12,
                 '../ortc': 36,
+                '../scalabilityModes': 37,
                 '../utils': 39,
                 './HandlerInterface': 24,
                 './sdp/RemoteSdp': 31,
@@ -12695,7 +12717,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.76';
+                exports.version = '3.6.77';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
