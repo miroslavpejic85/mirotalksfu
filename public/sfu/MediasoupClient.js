@@ -2019,7 +2019,7 @@
                     }).call(this);
                 }).call(this, require('_process'));
             },
-            { './common': 5, _process: 47 },
+            { './common': 5, _process: 48 },
         ],
         5: [
             function (require, module, exports) {
@@ -3778,7 +3778,7 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 12, events: 46 },
+            { './Logger': 12, events: 47 },
         ],
         12: [
             function (require, module, exports) {
@@ -4157,9 +4157,15 @@
                         __setModuleDefault(result, mod);
                         return result;
                     };
+                var __importDefault =
+                    (this && this.__importDefault) ||
+                    function (mod) {
+                        return mod && mod.__esModule ? mod : { default: mod };
+                    };
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Transport = void 0;
                 const awaitqueue_1 = require('awaitqueue');
+                const queue_microtask_1 = __importDefault(require('queue-microtask'));
                 const Logger_1 = require('./Logger');
                 const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
                 const errors_1 = require('./errors');
@@ -4310,7 +4316,9 @@
                      * Close the Transport.
                      */
                     close() {
-                        if (this._closed) return;
+                        if (this._closed) {
+                            return;
+                        }
                         logger.debug('close()');
                         this._closed = true;
                         // Stop the AwaitQueue.
@@ -4346,7 +4354,9 @@
                      * @returns {RTCStatsReport}
                      */
                     async getStats() {
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        }
                         return this._handler.getTransportStats();
                     }
                     /**
@@ -4354,8 +4364,11 @@
                      */
                     async restartIce({ iceParameters }) {
                         logger.debug('restartIce()');
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (!iceParameters) throw new TypeError('missing iceParameters');
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (!iceParameters) {
+                            throw new TypeError('missing iceParameters');
+                        }
                         // Enqueue command.
                         return this._awaitQueue.push(
                             async () => this._handler.restartIce(iceParameters),
@@ -4367,8 +4380,11 @@
                      */
                     async updateIceServers({ iceServers } = {}) {
                         logger.debug('updateIceServers()');
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (!Array.isArray(iceServers)) throw new TypeError('missing iceServers');
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (!Array.isArray(iceServers)) {
+                            throw new TypeError('missing iceServers');
+                        }
                         // Enqueue command.
                         return this._awaitQueue.push(
                             async () => this._handler.updateIceServers(iceServers),
@@ -4389,19 +4405,23 @@
                         appData = {},
                     } = {}) {
                         logger.debug('produce() [track:%o]', track);
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (!track) throw new TypeError('missing track');
-                        else if (this._direction !== 'send')
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (!track) {
+                            throw new TypeError('missing track');
+                        } else if (this._direction !== 'send') {
                             throw new errors_1.UnsupportedError('not a sending Transport');
-                        else if (!this._canProduceByKind[track.kind])
+                        } else if (!this._canProduceByKind[track.kind]) {
                             throw new errors_1.UnsupportedError(`cannot produce ${track.kind}`);
-                        else if (track.readyState === 'ended') throw new errors_1.InvalidStateError('track ended');
-                        else if (this.listenerCount('connect') === 0 && this._connectionState === 'new')
+                        } else if (track.readyState === 'ended') {
+                            throw new errors_1.InvalidStateError('track ended');
+                        } else if (this.listenerCount('connect') === 0 && this._connectionState === 'new') {
                             throw new TypeError('no "connect" listener set into this transport');
-                        else if (this.listenerCount('produce') === 0)
+                        } else if (this.listenerCount('produce') === 0) {
                             throw new TypeError('no "produce" listener set into this transport');
-                        else if (appData && typeof appData !== 'object')
+                        } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
+                        }
                         // Enqueue command.
                         return (
                             this._awaitQueue
@@ -4414,24 +4434,34 @@
                                     } else if (encodings) {
                                         normalizedEncodings = encodings.map((encoding) => {
                                             const normalizedEncoding = { active: true };
-                                            if (encoding.active === false) normalizedEncoding.active = false;
-                                            if (typeof encoding.dtx === 'boolean')
+                                            if (encoding.active === false) {
+                                                normalizedEncoding.active = false;
+                                            }
+                                            if (typeof encoding.dtx === 'boolean') {
                                                 normalizedEncoding.dtx = encoding.dtx;
-                                            if (typeof encoding.scalabilityMode === 'string')
+                                            }
+                                            if (typeof encoding.scalabilityMode === 'string') {
                                                 normalizedEncoding.scalabilityMode = encoding.scalabilityMode;
-                                            if (typeof encoding.scaleResolutionDownBy === 'number')
+                                            }
+                                            if (typeof encoding.scaleResolutionDownBy === 'number') {
                                                 normalizedEncoding.scaleResolutionDownBy =
                                                     encoding.scaleResolutionDownBy;
-                                            if (typeof encoding.maxBitrate === 'number')
+                                            }
+                                            if (typeof encoding.maxBitrate === 'number') {
                                                 normalizedEncoding.maxBitrate = encoding.maxBitrate;
-                                            if (typeof encoding.maxFramerate === 'number')
+                                            }
+                                            if (typeof encoding.maxFramerate === 'number') {
                                                 normalizedEncoding.maxFramerate = encoding.maxFramerate;
-                                            if (typeof encoding.adaptivePtime === 'boolean')
+                                            }
+                                            if (typeof encoding.adaptivePtime === 'boolean') {
                                                 normalizedEncoding.adaptivePtime = encoding.adaptivePtime;
-                                            if (typeof encoding.priority === 'string')
+                                            }
+                                            if (typeof encoding.priority === 'string') {
                                                 normalizedEncoding.priority = encoding.priority;
-                                            if (typeof encoding.networkPriority === 'string')
+                                            }
+                                            if (typeof encoding.networkPriority === 'string') {
                                                 normalizedEncoding.networkPriority = encoding.networkPriority;
+                                            }
                                             return normalizedEncoding;
                                         });
                                     }
@@ -4495,19 +4525,26 @@
                     async consume({ id, producerId, kind, rtpParameters, streamId, appData = {} }) {
                         logger.debug('consume()');
                         rtpParameters = utils.clone(rtpParameters, undefined);
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (this._direction !== 'recv')
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (this._direction !== 'recv') {
                             throw new errors_1.UnsupportedError('not a receiving Transport');
-                        else if (typeof id !== 'string') throw new TypeError('missing id');
-                        else if (typeof producerId !== 'string') throw new TypeError('missing producerId');
-                        else if (kind !== 'audio' && kind !== 'video') throw new TypeError(`invalid kind '${kind}'`);
-                        else if (this.listenerCount('connect') === 0 && this._connectionState === 'new')
+                        } else if (typeof id !== 'string') {
+                            throw new TypeError('missing id');
+                        } else if (typeof producerId !== 'string') {
+                            throw new TypeError('missing producerId');
+                        } else if (kind !== 'audio' && kind !== 'video') {
+                            throw new TypeError(`invalid kind '${kind}'`);
+                        } else if (this.listenerCount('connect') === 0 && this._connectionState === 'new') {
                             throw new TypeError('no "connect" listener set into this transport');
-                        else if (appData && typeof appData !== 'object')
+                        } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
+                        }
                         // Ensure the device can consume it.
                         const canConsume = ortc.canReceive(rtpParameters, this._extendedRtpCapabilities);
-                        if (!canConsume) throw new errors_1.UnsupportedError('cannot consume this Producer');
+                        if (!canConsume) {
+                            throw new errors_1.UnsupportedError('cannot consume this Producer');
+                        }
                         const consumerCreationTask = new ConsumerCreationTask({
                             id,
                             producerId,
@@ -4519,9 +4556,14 @@
                         // Store the Consumer creation task.
                         this._pendingConsumerTasks.push(consumerCreationTask);
                         // There is no Consumer creation in progress, create it now.
-                        if (this._consumerCreationInProgress === false) {
-                            this.createPendingConsumers();
-                        }
+                        (0, queue_microtask_1.default)(() => {
+                            if (this._closed) {
+                                throw new errors_1.InvalidStateError('closed');
+                            }
+                            if (this._consumerCreationInProgress === false) {
+                                this.createPendingConsumers();
+                            }
+                        });
                         return consumerCreationTask.promise;
                     }
                     /**
@@ -4536,18 +4578,22 @@
                         appData = {},
                     } = {}) {
                         logger.debug('produceData()');
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (this._direction !== 'send')
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (this._direction !== 'send') {
                             throw new errors_1.UnsupportedError('not a sending Transport');
-                        else if (!this._maxSctpMessageSize)
+                        } else if (!this._maxSctpMessageSize) {
                             throw new errors_1.UnsupportedError('SCTP not enabled by remote Transport');
-                        else if (this.listenerCount('connect') === 0 && this._connectionState === 'new')
+                        } else if (this.listenerCount('connect') === 0 && this._connectionState === 'new') {
                             throw new TypeError('no "connect" listener set into this transport');
-                        else if (this.listenerCount('producedata') === 0)
+                        } else if (this.listenerCount('producedata') === 0) {
                             throw new TypeError('no "producedata" listener set into this transport');
-                        else if (appData && typeof appData !== 'object')
+                        } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
-                        if (maxPacketLifeTime || maxRetransmits) ordered = false;
+                        }
+                        if (maxPacketLifeTime || maxRetransmits) {
+                            ordered = false;
+                        }
                         // Enqueue command.
                         return this._awaitQueue.push(async () => {
                             const { dataChannel, sctpStreamParameters } = await this._handler.sendDataChannel({
@@ -4598,17 +4644,21 @@
                     }) {
                         logger.debug('consumeData()');
                         sctpStreamParameters = utils.clone(sctpStreamParameters, undefined);
-                        if (this._closed) throw new errors_1.InvalidStateError('closed');
-                        else if (this._direction !== 'recv')
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('closed');
+                        } else if (this._direction !== 'recv') {
                             throw new errors_1.UnsupportedError('not a receiving Transport');
-                        else if (!this._maxSctpMessageSize)
+                        } else if (!this._maxSctpMessageSize) {
                             throw new errors_1.UnsupportedError('SCTP not enabled by remote Transport');
-                        else if (typeof id !== 'string') throw new TypeError('missing id');
-                        else if (typeof dataProducerId !== 'string') throw new TypeError('missing dataProducerId');
-                        else if (this.listenerCount('connect') === 0 && this._connectionState === 'new')
+                        } else if (typeof id !== 'string') {
+                            throw new TypeError('missing id');
+                        } else if (typeof dataProducerId !== 'string') {
+                            throw new TypeError('missing dataProducerId');
+                        } else if (this.listenerCount('connect') === 0 && this._connectionState === 'new') {
                             throw new TypeError('no "connect" listener set into this transport');
-                        else if (appData && typeof appData !== 'object')
+                        } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
+                        }
                         // This may throw.
                         ortc.validateSctpStreamParameters(sctpStreamParameters);
                         // Enqueue command.
@@ -4821,16 +4871,22 @@
                             this.safeEmit('connect', { dtlsParameters }, callback, errback);
                         });
                         handler.on('@connectionstatechange', (connectionState) => {
-                            if (connectionState === this._connectionState) return;
+                            if (connectionState === this._connectionState) {
+                                return;
+                            }
                             logger.debug('connection state changed to %s', connectionState);
                             this._connectionState = connectionState;
-                            if (!this._closed) this.safeEmit('connectionstatechange', connectionState);
+                            if (!this._closed) {
+                                this.safeEmit('connectionstatechange', connectionState);
+                            }
                         });
                     }
                     handleProducer(producer) {
                         producer.on('@close', () => {
                             this._producers.delete(producer.id);
-                            if (this._closed) return;
+                            if (this._closed) {
+                                return;
+                            }
                             this._awaitQueue
                                 .push(async () => this._handler.stopSending(producer.localId), 'producer @close event')
                                 .catch((error) => logger.warn('producer.close() failed:%o', error));
@@ -4878,7 +4934,9 @@
                                 .catch(errback);
                         });
                         producer.on('@getstats', (callback, errback) => {
-                            if (this._closed) return errback(new errors_1.InvalidStateError('closed'));
+                            if (this._closed) {
+                                return errback(new errors_1.InvalidStateError('closed'));
+                            }
                             this._handler.getSenderStats(producer.localId).then(callback).catch(errback);
                         });
                     }
@@ -4887,7 +4945,9 @@
                             this._consumers.delete(consumer.id);
                             this._pendingPauseConsumers.delete(consumer.id);
                             this._pendingResumeConsumers.delete(consumer.id);
-                            if (this._closed) return;
+                            if (this._closed) {
+                                return;
+                            }
                             // Store the Consumer into the close list.
                             this._pendingCloseConsumers.set(consumer.id, consumer);
                             // There is no Consumer close in progress, do it now.
@@ -4903,9 +4963,14 @@
                             // Store the Consumer into the pending list.
                             this._pendingPauseConsumers.set(consumer.id, consumer);
                             // There is no Consumer pause in progress, do it now.
-                            if (this._consumerPauseInProgress === false) {
-                                this.pausePendingConsumers();
-                            }
+                            (0, queue_microtask_1.default)(() => {
+                                if (this._closed) {
+                                    return;
+                                }
+                                if (this._consumerPauseInProgress === false) {
+                                    this.pausePendingConsumers();
+                                }
+                            });
                         });
                         consumer.on('@resume', () => {
                             // If Consumer is pending to be paused, remove from pending pause list.
@@ -4915,12 +4980,19 @@
                             // Store the Consumer into the pending list.
                             this._pendingResumeConsumers.set(consumer.id, consumer);
                             // There is no Consumer resume in progress, do it now.
-                            if (this._consumerResumeInProgress === false) {
-                                this.resumePendingConsumers();
-                            }
+                            (0, queue_microtask_1.default)(() => {
+                                if (this._closed) {
+                                    return;
+                                }
+                                if (this._consumerResumeInProgress === false) {
+                                    this.resumePendingConsumers();
+                                }
+                            });
                         });
                         consumer.on('@getstats', (callback, errback) => {
-                            if (this._closed) return errback(new errors_1.InvalidStateError('closed'));
+                            if (this._closed) {
+                                return errback(new errors_1.InvalidStateError('closed'));
+                            }
                             this._handler.getReceiverStats(consumer.localId).then(callback).catch(errback);
                         });
                     }
@@ -4948,6 +5020,7 @@
                 './ortc': 36,
                 './utils': 39,
                 awaitqueue: 2,
+                'queue-microtask': 41,
             },
         ],
         17: [
@@ -5565,7 +5638,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/planBUtils': 33,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         19: [
@@ -6171,7 +6244,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/planBUtils': 33,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         20: [
@@ -6802,7 +6875,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         21: [
@@ -7463,7 +7536,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         22: [
@@ -8575,7 +8648,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         24: [
@@ -9183,7 +9256,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/planBUtils': 33,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         26: [
@@ -9848,7 +9921,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         27: [
@@ -10449,7 +10522,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/planBUtils': 33,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         28: [
@@ -11080,7 +11153,7 @@
                 './sdp/RemoteSdp': 31,
                 './sdp/commonUtils': 32,
                 './sdp/unifiedPlanUtils': 34,
-                'sdp-transform': 42,
+                'sdp-transform': 43,
             },
         ],
         29: [
@@ -12071,7 +12144,7 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 12, './MediaSection': 30, 'sdp-transform': 42 },
+            { '../../Logger': 12, './MediaSection': 30, 'sdp-transform': 43 },
         ],
         32: [
             function (require, module, exports) {
@@ -12289,7 +12362,7 @@
                 }
                 exports.applyCodecParameters = applyCodecParameters;
             },
-            { 'sdp-transform': 42 },
+            { 'sdp-transform': 43 },
         ],
         33: [
             function (require, module, exports) {
@@ -12622,7 +12695,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.75';
+                exports.version = '3.6.76';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13718,6 +13791,37 @@
         ],
         41: [
             function (require, module, exports) {
+                (function (global) {
+                    (function () {
+                        /*! queue-microtask. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
+                        let promise;
+
+                        module.exports =
+                            typeof queueMicrotask === 'function'
+                                ? queueMicrotask.bind(typeof window !== 'undefined' ? window : global)
+                                : // reuse resolved promise, and allocate it lazily
+                                  (cb) =>
+                                      (promise || (promise = Promise.resolve())).then(cb).catch((err) =>
+                                          setTimeout(() => {
+                                              throw err;
+                                          }, 0),
+                                      );
+                    }).call(this);
+                }).call(
+                    this,
+                    typeof global !== 'undefined'
+                        ? global
+                        : typeof self !== 'undefined'
+                        ? self
+                        : typeof window !== 'undefined'
+                        ? window
+                        : {},
+                );
+            },
+            {},
+        ],
+        42: [
+            function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
                         {
@@ -14229,7 +14333,7 @@
             },
             {},
         ],
-        42: [
+        43: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -14243,9 +14347,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './parser': 43, './writer': 44 },
+            { './parser': 44, './writer': 45 },
         ],
-        43: [
+        44: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -14378,9 +14482,9 @@
                     });
                 };
             },
-            { './grammar': 41 },
+            { './grammar': 42 },
         ],
-        44: [
+        45: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -14490,16 +14594,16 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 41 },
+            { './grammar': 42 },
         ],
-        45: [
+        46: [
             function (require, module, exports) {
                 const client = require('mediasoup-client');
                 window.mediasoupClient = client;
             },
             { 'mediasoup-client': 35 },
         ],
-        46: [
+        47: [
             function (require, module, exports) {
                 // Copyright Joyent, Inc. and other Node contributors.
                 //
@@ -14988,7 +15092,7 @@
             },
             {},
         ],
-        47: [
+        48: [
             function (require, module, exports) {
                 // shim for using process in browser
                 var process = (module.exports = {});
@@ -15180,5 +15284,5 @@
         ],
     },
     {},
-    [45],
+    [46],
 );
