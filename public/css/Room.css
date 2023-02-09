@@ -89,7 +89,7 @@ body {
 # Google Translate
 --------------------------------------------------------------*/
 
-.skiptranslate,
+.skiptranslate iframe,
 .goog-te-banner-frame.skiptranslate {
     display: none !important;
 }
