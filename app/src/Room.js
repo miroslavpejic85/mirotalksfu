@@ -140,6 +140,7 @@ module.exports = class Room {
     }
 
     async removePeer(socket_id) {
+        if (!this.peers.has(socket_id)) return;
         this.peers.get(socket_id).close();
         this.peers.delete(socket_id);
     }
