@@ -6641,6 +6641,13 @@
                             else encoding.active = false;
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setMaxSpatialLayer() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('setMaxSpatialLayer() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
                         this.assertSendDirection();
@@ -6652,6 +6659,16 @@
                             parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setRtpEncodingParameters() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug(
+                            'setRtpEncodingParameters() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer,
+                        );
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
                         this.assertSendDirection();
@@ -7287,6 +7304,13 @@
                             else encoding.active = false;
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setMaxSpatialLayer() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('setMaxSpatialLayer() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
                         this.assertSendDirection();
@@ -7298,6 +7322,16 @@
                             parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setRtpEncodingParameters() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug(
+                            'setRtpEncodingParameters() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer,
+                        );
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
                         this.assertSendDirection();
@@ -8423,6 +8457,13 @@
                             else encoding.active = false;
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setMaxSpatialLayer() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('setMaxSpatialLayer() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
                         this.assertSendDirection();
@@ -8434,6 +8475,16 @@
                             parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setRtpEncodingParameters() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug(
+                            'setRtpEncodingParameters() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer,
+                        );
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
                         this.assertSendDirection();
@@ -9680,6 +9731,13 @@
                             else encoding.active = false;
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setMaxSpatialLayer() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('setMaxSpatialLayer() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
                         this.assertSendDirection();
@@ -9691,6 +9749,16 @@
                             parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setRtpEncodingParameters() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug(
+                            'setRtpEncodingParameters() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer,
+                        );
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
                         this.assertSendDirection();
@@ -10923,6 +10991,13 @@
                             else encoding.active = false;
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setMaxSpatialLayer() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug('setMaxSpatialLayer() | calling pc.setRemoteDescription() [answer:%o]', answer);
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
                         this.assertSendDirection();
@@ -10934,6 +11009,16 @@
                             parameters.encodings[idx] = { ...encoding, ...params };
                         });
                         await transceiver.sender.setParameters(parameters);
+                        this._remoteSdp.muxMediaSectionSimulcast(localId, parameters.encodings);
+                        const offer = await this._pc.createOffer();
+                        logger.debug('setRtpEncodingParameters() | calling pc.setLocalDescription() [offer:%o]', offer);
+                        await this._pc.setLocalDescription(offer);
+                        const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
+                        logger.debug(
+                            'setRtpEncodingParameters() | calling pc.setRemoteDescription() [answer:%o]',
+                            answer,
+                        );
+                        await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
                         this.assertSendDirection();
@@ -11326,6 +11411,7 @@
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.OfferMediaSection = exports.AnswerMediaSection = exports.MediaSection = void 0;
+                const sdpTransform = __importStar(require('sdp-transform'));
                 const utils = __importStar(require('../../utils'));
                 class MediaSection {
                     constructor({ iceParameters, iceCandidates, dtlsParameters, planB = false }) {
@@ -11596,6 +11682,35 @@
                     resume() {
                         this._mediaObject.direction = 'recvonly';
                     }
+                    muxSimulcastStreams(encodings) {
+                        var _a;
+                        if (!this._mediaObject.simulcast || !this._mediaObject.simulcast.list1) {
+                            return;
+                        }
+                        const layers = {};
+                        for (const encoding of encodings) {
+                            if (encoding.rid) {
+                                layers[encoding.rid] = encoding;
+                            }
+                        }
+                        const raw = this._mediaObject.simulcast.list1;
+                        // NOTE: Ignore bug in @types/sdp-transform.
+                        // Ongoing PR: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64119
+                        // @ts-ignore
+                        const simulcastStreams = sdpTransform.parseSimulcastStreamList(raw);
+                        for (const simulcastStream of simulcastStreams) {
+                            for (const simulcastFormat of simulcastStream) {
+                                simulcastFormat.paused = !((_a = layers[simulcastFormat.scid]) === null || _a === void 0
+                                    ? void 0
+                                    : _a.active);
+                            }
+                        }
+                        this._mediaObject.simulcast.list1 = simulcastStreams
+                            .map((simulcastFormats) =>
+                                simulcastFormats.map((f) => `${f.paused ? '~' : ''}${f.scid}`).join(','),
+                            )
+                            .join(';');
+                    }
                 }
                 exports.AnswerMediaSection = AnswerMediaSection;
                 class OfferMediaSection extends MediaSection {
@@ -11836,7 +11951,7 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 39 },
+            { '../../utils': 39, 'sdp-transform': 43 },
         ],
         31: [
             function (require, module, exports) {
@@ -12072,12 +12187,13 @@
                         this._regenerateBundleMids();
                         return true;
                     }
+                    muxMediaSectionSimulcast(mid, encodings) {
+                        const mediaSection = this._findMediaSection(mid);
+                        mediaSection.muxSimulcastStreams(encodings);
+                        this._replaceMediaSection(mediaSection);
+                    }
                     planBStopReceiving({ mid, offerRtpParameters }) {
-                        const idx = this._midToIndex.get(mid);
-                        if (idx === undefined) {
-                            throw new Error(`no media section found with mid '${mid}'`);
-                        }
-                        const mediaSection = this._mediaSections[idx];
+                        const mediaSection = this._findMediaSection(mid);
                         mediaSection.planBStopReceiving({ offerRtpParameters });
                         this._replaceMediaSection(mediaSection);
                     }
@@ -12544,16 +12660,16 @@
                         ssrc = Number(ssrc);
                         rtxSsrc = Number(rtxSsrc);
                         if (ssrcs.has(ssrc)) {
-                            // Remove both the SSRC and RTX SSRC from the set so later we know that they
-                            // are already handled.
+                            // Remove both the SSRC and RTX SSRC from the set so later we know
+                            // that they are already handled.
                             ssrcs.delete(ssrc);
                             ssrcs.delete(rtxSsrc);
                             // Add to the map.
                             ssrcToRtxSsrc.set(ssrc, rtxSsrc);
                         }
                     }
-                    // If the set of SSRCs is not empty it means that RTX is not being used, so take
-                    // media SSRCs from there.
+                    // If the set of SSRCs is not empty it means that RTX is not being used, so
+                    // take media SSRCs from there.
                     for (const ssrc of ssrcs) {
                         // Add to the map.
                         ssrcToRtxSsrc.set(ssrc, null);
@@ -12717,7 +12833,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.77';
+                exports.version = '3.6.78';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
