@@ -1041,21 +1041,9 @@ class RoomClient {
 
     getEncoding() {
         return [
-            {
-                rid: 'r0',
-                maxBitrate: 100000,
-                scalabilityMode: 'L1T3',
-            },
-            {
-                rid: 'r1',
-                maxBitrate: 300000,
-                scalabilityMode: 'L1T3',
-            },
-            {
-                rid: 'r2',
-                maxBitrate: 900000,
-                scalabilityMode: 'L1T3',
-            },
+            { scaleResolutionDownBy: 4, maxBitrate: 500000, scalabilityMode: 'L1T3' },
+            { scaleResolutionDownBy: 2, maxBitrate: 1000000, scalabilityMode: 'L1T3' },
+            { scaleResolutionDownBy: 1, maxBitrate: 5000000, scalabilityMode: 'L1T3' },
         ];
     }
 
