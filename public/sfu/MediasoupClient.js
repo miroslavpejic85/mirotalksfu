@@ -7206,11 +7206,11 @@
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
                                 if (encoding.scalabilityMode) {
-                                    encoding.scalabilityMode = `S1T${layers.temporalLayers}`;
+                                    encoding.scalabilityMode = `L1T${layers.temporalLayers}`;
                                 } else {
                                     // By default Chrome enables 2 temporal layers (not in all OS but
                                     // anyway).
-                                    encoding.scalabilityMode = 'S1T2';
+                                    encoding.scalabilityMode = 'L1T2';
                                 }
                             }
                         }
@@ -8351,10 +8351,10 @@
                         ) {
                             for (const encoding of sendingRtpParameters.encodings) {
                                 if (encoding.scalabilityMode) {
-                                    encoding.scalabilityMode = `S1T${layers.temporalLayers}`;
+                                    encoding.scalabilityMode = `L1T${layers.temporalLayers}`;
                                 } else {
                                     // By default Firefox enables 2 temporal layers.
-                                    encoding.scalabilityMode = 'S1T2';
+                                    encoding.scalabilityMode = 'L1T2';
                                 }
                             }
                         }
@@ -12833,7 +12833,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.78';
+                exports.version = '3.6.79';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
