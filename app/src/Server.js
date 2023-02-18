@@ -24,6 +24,7 @@ dependencies: {
     socket.io               : https://www.npmjs.com/package/socket.io
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
+    xss                     : https://www.npmjs.com/package/xss
     yamljs                  : https://www.npmjs.com/package/yamljs
 }
 */
@@ -37,7 +38,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.2
+ * @version 1.0.3
  *
  */
 
@@ -52,6 +53,7 @@ const config = require('./config');
 const path = require('path');
 const ngrok = require('ngrok');
 const fs = require('fs');
+const checkXSS = require('./XSS.js');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
@@ -505,8 +507,10 @@ function startServer() {
             callback({ peerCounts: peerCounts });
         });
 
-        socket.on('cmd', (data) => {
+        socket.on('cmd', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Cmd', data);
 
@@ -527,8 +531,10 @@ function startServer() {
             roomList.get(socket.room_id).broadCast(socket.id, 'cmd', data);
         });
 
-        socket.on('roomAction', (data) => {
+        socket.on('roomAction', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Room action:', data);
             switch (data.action) {
@@ -568,8 +574,10 @@ function startServer() {
             });
         });
 
-        socket.on('roomLobby', (data) => {
+        socket.on('roomLobby', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             data.room = roomList.get(socket.room_id).toJson();
 
@@ -590,8 +598,10 @@ function startServer() {
             }
         });
 
-        socket.on('peerAction', (data) => {
+        socket.on('peerAction', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Peer action', data);
 
@@ -602,16 +612,20 @@ function startServer() {
             }
         });
 
-        socket.on('updatePeerInfo', (data) => {
+        socket.on('updatePeerInfo', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             // update my peer_info status to all in the room
             roomList.get(socket.room_id).getPeers().get(socket.id).updatePeerInfo(data);
             roomList.get(socket.room_id).broadCast(socket.id, 'updatePeerInfo', data);
         });
 
-        socket.on('fileInfo', (data) => {
+        socket.on('fileInfo', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Send File Info', data);
             if (data.broadcast) {
@@ -631,14 +645,18 @@ function startServer() {
             }
         });
 
-        socket.on('fileAbort', (data) => {
+        socket.on('fileAbort', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
         });
 
-        socket.on('shareVideoAction', (data) => {
+        socket.on('shareVideoAction', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Share video: ', data);
             if (data.peer_id == 'all') {
@@ -648,34 +666,42 @@ function startServer() {
             }
         });
 
-        socket.on('wbCanvasToJson', (data) => {
+        socket.on('wbCanvasToJson', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             // let objLength = bytesToSize(Object.keys(data).length);
             // log.debug('Send Whiteboard canvas JSON', { length: objLength });
             roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
         });
 
-        socket.on('whiteboardAction', (data) => {
+        socket.on('whiteboardAction', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Whiteboard', data);
             roomList.get(socket.room_id).broadCast(socket.id, 'whiteboardAction', data);
         });
 
-        socket.on('setVideoOff', (data) => {
+        socket.on('setVideoOff', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('Video off', getPeerName());
             roomList.get(socket.room_id).broadCast(socket.id, 'setVideoOff', data);
         });
 
-        socket.on('join', (data, cb) => {
+        socket.on('join', (dataObject, cb) => {
             if (!roomList.has(socket.room_id)) {
                 return cb({
                     error: 'Room does not exist',
                 });
             }
+
+            const data = checkXSS(dataObject);
 
             log.debug('User joined', data);
             roomList.get(socket.room_id).addPeer(new Peer(socket.id, data));
@@ -843,8 +869,10 @@ function startServer() {
             roomList.get(socket.room_id).broadCast(socket.id, 'refreshParticipantsCount', data);
         });
 
-        socket.on('message', (data) => {
+        socket.on('message', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
 
             log.debug('message', data);
             if (data.to_peer_id == 'all') {

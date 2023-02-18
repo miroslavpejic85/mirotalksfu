@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -39,6 +39,7 @@
         "socket.io": "4.6.0",
         "swagger-ui-express": "4.6.0",
         "uuid": "9.0.0",
+        "xss": "^1.0.14",
         "yamljs": "0.3.0"
     },
     "devDependencies": {
