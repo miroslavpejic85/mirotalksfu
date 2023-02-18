@@ -2897,7 +2897,10 @@ class RoomClient {
             if (!this.thereIsParticipants()) {
                 return userLog('info', 'No participants detected', 'top-end');
             }
-            let fileInfo = {
+            // prevent XSS injection
+            if (this.isHtml(this.fileToSend.name)) return userLog('warning', 'Invalid file name!', 'top-end', 5000);
+
+            const fileInfo = {
                 peer_id: peer_id,
                 broadcast: broadcast,
                 peer_name: this.peer_name,
