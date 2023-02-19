@@ -259,13 +259,18 @@ function startServer() {
         res.redirect('/');
     });
 
-    // join room
-    app.get('/join/*', (req, res) => {
+    // join room by id
+    app.get('/join/:roomId', (req, res) => {
         if (hostCfg.authenticated) {
             res.sendFile(views.room);
         } else {
             res.redirect('/');
         }
+    });
+
+    // not specified correctly the room id
+    app.get('/join/*', (req, res) => {
+        res.redirect('/');
     });
 
     // if not allow video/audio
@@ -872,7 +877,8 @@ function startServer() {
         socket.on('message', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
-            const data = checkXSS(dataObject);
+            // const data = checkXSS(dataObject);
+            const data = dataObject;
 
             log.debug('message', data);
             if (data.to_peer_id == 'all') {

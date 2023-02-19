@@ -2357,6 +2357,7 @@ class RoomClient {
         if (!peer_msg) {
             return this.cleanMessage();
         }
+        this.peer_name = filterXSS(this.peer_name);
         let data = {
             peer_name: this.peer_name,
             peer_id: this.peer_id,
@@ -2396,11 +2397,13 @@ class RoomClient {
                 if (!peer_msg) {
                     return this.cleanMessage();
                 }
+                this.peer_name = filterXSS(this.peer_name);
+                const toPeerName = filterXSS(to_peer_name);
                 let data = {
                     peer_name: this.peer_name,
                     peer_id: this.peer_id,
                     to_peer_id: to_peer_id,
-                    to_peer_name: to_peer_name,
+                    to_peer_name: toPeerName,
                     peer_msg: peer_msg,
                 };
                 console.log('Send message:', data);
@@ -2413,7 +2416,7 @@ class RoomClient {
                     this.peer_id,
                     peer_msg,
                     to_peer_id,
-                    to_peer_name,
+                    toPeerName,
                 );
                 if (!this.isChatOpen) this.toggleChat();
             }

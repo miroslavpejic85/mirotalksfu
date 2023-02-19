@@ -204,7 +204,7 @@ function setTippy(elem, content, placement, allowHTML = false) {
 
 function getRoomId() {
     let qs = new URLSearchParams(window.location.search);
-    let queryRoomId = qs.get('room');
+    let queryRoomId = filterXSS(qs.get('room'));
     let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
     if (roomId == '') {
         roomId = makeId(12);
@@ -364,7 +364,7 @@ function addChild(device, els) {
 
 function getScreen() {
     let qs = new URLSearchParams(window.location.search);
-    let screen = qs.get('screen');
+    let screen = filterXSS(qs.get('screen'));
     if (screen) {
         screen = screen.toLowerCase();
         let queryScreen = screen === '1' || screen === 'true';
@@ -376,7 +376,7 @@ function getScreen() {
 
 function getNotify() {
     let qs = new URLSearchParams(window.location.search);
-    let notify = qs.get('notify');
+    let notify = filterXSS(qs.get('notify'));
     if (notify) {
         notify = notify.toLowerCase();
         let queryNotify = notify === '1' || notify === 'true';
@@ -386,13 +386,17 @@ function getNotify() {
 }
 
 function getPeerName() {
-    let qs = new URLSearchParams(window.location.search);
-    return qs.get('name');
+    const qs = new URLSearchParams(window.location.search);
+    const name = filterXSS(qs.get('name'));
+    if (isHtml(name)) {
+        return 'Invalid name';
+    }
+    return name;
 }
 
 function getRoomPassword() {
     let qs = new URLSearchParams(window.location.search);
-    let roomPassword = qs.get('password');
+    let roomPassword = filterXSS(qs.get('password'));
     if (roomPassword) {
         let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
         if (queryNoRoomPassword) {
@@ -482,6 +486,8 @@ function whoAreYou() {
         },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
+            name = filterXSS(name);
+            if (isHtml(name)) return 'Invalid name!';
             if (!getCookie(room_id + '_name')) {
                 window.localStorage.peer_name = name;
             }
@@ -556,8 +562,8 @@ function checkInitAudio(isAudioAllowed) {
 
 function checkMedia() {
     let qs = new URLSearchParams(window.location.search);
-    let audio = qs.get('audio');
-    let video = qs.get('video');
+    let audio = filterXSS(qs.get('audio'));
+    let video = filterXSS(qs.get('video'));
     if (audio) {
         audio = audio.toLowerCase();
         let queryPeerAudio = audio === '1' || audio === 'true';
@@ -1562,6 +1568,15 @@ function getCookie(cName) {
         if (val.indexOf(name) === 0) res = val.substring(name.length);
     });
     return res;
+}
+
+function isHtml(str) {
+    var a = document.createElement('div');
+    a.innerHTML = str;
+    for (var c = a.childNodes, i = c.length; i--; ) {
+        if (c[i].nodeType == 1) return true;
+    }
+    return false;
 }
 
 // ####################################################
