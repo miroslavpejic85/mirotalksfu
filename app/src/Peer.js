@@ -89,10 +89,10 @@ module.exports = class Peer {
 
         producer.appData.mediaType = type;
 
-        //log.debug('Producer type ----->', producer.type);
-
         this.producers.set(producer.id, producer);
 
+        //log.debug('Producer type ----->', producer.type);
+        
         producer.on(
             'transportclose',
             function () {
@@ -109,6 +109,7 @@ module.exports = class Peer {
     }
 
     closeProducer(producer_id) {
+        if (!this.producers.has(producer_id)) return;
         try {
             this.producers.get(producer_id).close();
         } catch (ex) {
@@ -153,7 +154,7 @@ module.exports = class Peer {
                     peer_name: this.peer_info.peer_name,
                     consumer_id: consumer.id,
                 });
-                this.consumers.delete(consumer.id);
+                this.removeConsumer(consumer.id);
             }.bind(this),
         );
 
@@ -171,6 +172,8 @@ module.exports = class Peer {
     }
 
     removeConsumer(consumer_id) {
-        this.consumers.delete(consumer_id);
+        if (this.consumers.has(consumer_id)) {
+            this.consumers.delete(consumer_id);
+        }
     }
 };
