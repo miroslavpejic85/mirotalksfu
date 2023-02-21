@@ -30,13 +30,17 @@ class WhiteBoard {
      * @param {*} wbWidth   width of initial canvas
      * @param {*} wbHeight height of initial canvas
      * @param {*} wbSocketFunction optional function to send data via socket
+     * @param {*} wbTransmitModify optional function to send object mods via socket
+     * @param {*} wbTransmitDelete optional function to send object deletions via socket
      */
-    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null) {
+    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null, wbTransmitModify = null, wbTransmitDelete = null) {
         this.wbImageInput = wbImageInput;
         this.wbWidth = wbWidth;
         this.wbHeight = wbHeight;
         this.wbSocketFunction = wbSocketFunction;
         this.wbTransmitPointer = wbTransmitPointer;
+        this.wbTransmitModify = wbTransmitModify;
+        this.wbTransmitDelete = wbTransmitDelete;
 
         this.wbCanvas = null;
         this.wbIsDrawing = false;
@@ -45,7 +49,7 @@ class WhiteBoard {
         //this.wbPop = [];
         this.wbCurrentTool = "pointer";
         this.wbCurrentPoint = null;
-        this.wbFillColor = "#FFFFFF77";
+        this.wbFillColor = "#FFFFFF33";
         this.setupWhiteboardCanvas();
         this.setupWhiteboardCanvasSize();
         this.setupWhiteboardLocalListners();
@@ -72,7 +76,7 @@ class WhiteBoard {
         fabric.Object.prototype.cornerColor = 'blue';
         fabric.Object.prototype.cornerStyle = 'circle';
 
-        fabric.Object.prototype.controls.deleteControl = new fabric.Control({
+       /* fabric.Object.prototype.controls.deleteControl = new fabric.Control({
             x: 0.5,
             y: -0.5,
             offsetY: -16,
@@ -92,13 +96,14 @@ class WhiteBoard {
             mouseUpHandler: this.cloneObject,
             render: this.renderIcon(imgClone),
             cornerSize: 24
-        });
+        });*/
 
       
 
 
-        this.sendRate = 3;
+        this.sendRate = 5;
         this.rateCounter = this.sendRate;
+        this.lastObj = null;
     }
 
     movePointer(px,py){
@@ -140,7 +145,7 @@ class WhiteBoard {
      */
     deleteObject(eventData, transform) {
         var target = transform.target;
-        var canvas = target.canvas;
+        var canvas = target.canvas;       
         canvas.remove(target);
         canvas.requestRenderAll();
     }
@@ -182,8 +187,8 @@ class WhiteBoard {
      */
     setupWhiteboardCanvas() {
         this.wbCanvas = new fabric.Canvas('wbCanvas');
-        this.wbCanvas.freeDrawingBrush.color = '#FFFFFFFF';
-        this.wbCanvas.freeDrawingBrush.width = 3;
+        this.wbCanvas.freeDrawingBrush.color = '#FF0000FF';
+        this.wbCanvas.freeDrawingBrush.width = 5;
         this.createPointerObject();
         this.whiteboardSetDrawingMode("draw");
 
@@ -191,16 +196,39 @@ class WhiteBoard {
 
         // undo helpers
         this.wbCanvas.on(
-            'object:modified', function () {
+            'object:modified', function (evt) {
+                console.log("object modified!");
+                //console.log(evt.target.type);
+                if(wbTransmitModify != null)
+                {
+                    // add the elementID
+                    evt.elementID = that.wbCanvas.getActiveObject().elementID;
+                    wbTransmitModify(evt);
+                }
                 that.updateCanvasState();
             }
         );
 
         this.wbCanvas.on(
-            'object:added', function () {
+            'object:added', function (evt) {
+                console.log("object added!");
+                console.log(evt);
+                that.lastObj = evt.target;
+
+              
+
                 that.updateCanvasState();
             }
         );
+
+        this.wbCanvas.on(
+            'path:created', function (evt) {
+                console.log("path created!");
+                //that.lastObj = evt.target;
+            }
+        );
+
+
 
         // Zoom management
         this.wbCanvas.on('mouse:wheel', function (opt) {
@@ -359,6 +387,8 @@ class WhiteBoard {
             line.selectable = false;
             line.hasBorders = false;
             line.hasControls = false;
+            //let myid='line'+ Math.round(Math.random() * 10000);
+            //line.set({'elementID': myid});
             this.addWbCanvasObj(line);
             return;
         }
@@ -376,6 +406,8 @@ class WhiteBoard {
             ellipse.selectable = false;
             ellipse.hasBorders = false;
             ellipse.hasControls = false;
+            //let myid='ellipse'+ Math.round(Math.random() * 10000);
+            //ellipse.set({'elementID': myid});
             this.addWbCanvasObj(ellipse);
             return;
         }
@@ -393,20 +425,26 @@ class WhiteBoard {
             rect.selectable = false;
             rect.hasBorders = false;
             rect.hasControls = false;
+            //let myid='rect'+ Math.round(Math.random() * 10000);
+            //rect.set({'elementID': myid});
             this.addWbCanvasObj(rect);
             return;
         }
 
         this.wbIsDrawing = true;
         if (this.wbCurrentTool == "eraser" && e.target) {
+            // send the delete command also via socket
+            // to pair the other partecipants
+            this.wbTransmitDelete(e.target.elementID);
             this.wbCanvas.remove(e.target);
             return;
         }
     }
 
     mouseUp() {
-        if(this.wbCurrentTool == "pointer")
-        return;
+        //console.log(this.wbCurrentTool);
+        if(this.wbCurrentTool == "none" || this.wbCurrentTool == "pointer")
+            return;
 
         if (this.wbCurrentTool == "rect" || this.wbCurrentTool == "circle" || this.wbCurrentTool == "line")
         {
@@ -533,10 +571,11 @@ class WhiteBoard {
         });
     }
 
-    addWbCanvasObj(obj) {
+    addWbCanvasObj(obj, transmit = false) {
         if (obj) {
+            //this.lastObj = obj;
             this.wbCanvas.add(obj).setActiveObject(obj);;
-            if (this.wbSocketFunction != null)
+            if (transmit && this.wbSocketFunction != null)
                 this.wbSocketFunction();
         }
     }
@@ -551,22 +590,34 @@ class WhiteBoard {
             strokeWidth: this.wbCanvas.freeDrawingBrush.width,
             stroke: this.wbCanvas.freeDrawingBrush.color,
         });
-        this.addWbCanvasObj(text);
+        //let myid='text'+ Math.round(Math.random() * 10000);
+        //text.set({'elementID':myid});
+        this.addWbCanvasObj(text, true);
     }
 
     createImage(imgObj) {
         let image = new fabric.Image(imgObj);
+        //let myid='image'+ Math.round(Math.random() * 10000);  
         image.set({ top: 0, left: 0 }).scale(0.3);
-        this.addWbCanvasObj(image);
+        this.addWbCanvasObj(image, true);
+    }
+
+    createDecal(wbCanvasImgURL) {
+        var that = this;
+        fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
+            myImg.set({ top: 50, left: 50 }).scale(0.5);
+            that.addWbCanvasObj(myImg, true);
+            that.wbCanvas.requestRenderAll();
+        });
     }
 
     createImageFromURL(wbCanvasImgURL) {
         var that = this;
         fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
             let scale = Math.min(that.wbCanvas.width / myImg.width, that.wbCanvas.height / myImg.height);
-            let shift = (that.wbCanvas.width - (myImg.width * scale)) / 2             
+            let shift = (that.wbCanvas.width - (myImg.width * scale)) / 2   
             myImg.set({ top: 0, left: shift }).scale(scale);
-            that.addWbCanvasObj(myImg);
+            that.addWbCanvasObj(myImg, true);
             that.wbCanvas.discardActiveObject();
             that.wbCanvas.requestRenderAll();
         });
@@ -606,6 +657,55 @@ class WhiteBoard {
         }
     }
 
+    loadFromSingleJSON(data){
+
+        console.log("loadfromsingleJSON"); 
+        //console.log(data);
+        if(data.includes("image"))
+        {
+            console.log("image case");
+            var imageObject = JSON.parse(data);
+            var that = this;
+            fabric.Image.fromURL(imageObject.src, function(img) {
+                img.set({ left: imageObject.left, top: imageObject.top, scaleX: imageObject.scaleX, scaleY: imageObject.scaleY, elementID: imageObject.elementID});
+                that.wbCanvas.add(img);       
+            });
+
+            
+        }
+        else{
+            console.log("the rest case");
+            var canvasString = "{\"version\":\"5.2.4\",\"objects\":[";        
+            canvasString += data;        
+            canvasString += "]}";
+            var tmpCanvas = new fabric.Canvas();
+            tmpCanvas.loadFromJSON(canvasString);
+            for(var k in tmpCanvas.getObjects()) {
+                //console.log(tmpCanvas._objects[k]);
+                this.wbCanvas.add(tmpCanvas._objects[k]);
+            }    
+        }
+        
+        this.wbCanvas.renderAll();
+
+        // this is a better way, but it is not tested yet:
+        /*var that = this;
+        fabric.util.enlivenObjects([data], function(objects) {
+            var origRenderOnAddRemove = that.wbCanvas.renderOnAddRemove;
+            that.wbCanvas.renderOnAddRemove = false;
+          
+            objects.forEach(function(o) {
+                that.wbCanvas.add(o);
+            });
+          
+            that.wbCanvas.renderOnAddRemove = origRenderOnAddRemove;
+            that.wbCanvas.renderAll();
+          });
+          */
+
+
+
+    }
 
     undo() {
         if (this.wbUndoFinishedStatus) {

@@ -628,9 +628,37 @@ class RoomClient {
         );
 
         this.socket.on(
+            'wbSingleToJson',
+            function(data) {
+                console.log('received whiteboard single JSON command');
+                //console.log(data);
+                SingleJsonToWbCanvas(data);
+            }
+        )
+
+        this.socket.on(
+            'wbModify',
+            function(data) {
+                console.log('received whiteboard modify command');
+                //console.log(data);
+                ModifyCommand(data);
+            }
+        )
+
+        this.socket.on(
+            'wbDeleteObject',
+            function(data) {
+                console.log('received whiteboard delete command');
+                //console.log(data);
+                DeleteCommand(data);
+            }
+        )
+
+
+        this.socket.on(
             'whiteboardAction',
             function (data) {
-                console.log('Whiteboard action', data);
+                //console.log('Whiteboard action', data);
                 whiteboardAction(data, false);
             }.bind(this),
         );
@@ -638,7 +666,7 @@ class RoomClient {
         this.socket.on(
             'wbPointer',
             function (data) {
-                console.log(data);
+                //console.log(data);
                 var serialized = JSON.parse(data);
                 let senddata = {
                     action: 'pointer',
@@ -1089,7 +1117,7 @@ class RoomClient {
 
     getScreenConstraints() {
         return {
-            audio: true,
+            audio: false,
             video: {
                 frameRate: {
                     ideal: 15,
@@ -2323,9 +2351,9 @@ class RoomClient {
                 canvas.height = height;
                 context = canvas.getContext('2d');
                 context.drawImage(videoPlayer, 0, 0, width, height);
-                dataURL = canvas.toDataURL('image/png');
+                dataURL = canvas.toDataURL('image/jpeg', 0.5);
                 // console.log(dataURL);
-                saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
+                saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.jpeg');
                 let senddata = {
                     action: 'screenshot',
                     image: dataURL,

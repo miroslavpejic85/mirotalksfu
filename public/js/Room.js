@@ -162,6 +162,8 @@ function initClient() {
         setTippy('whiteboardSaveBtn', 'Save', 'bottom');
         setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
         setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
+        setTippy('whiteboardDecalBtn', 'Decals', 'bottom');
+        setTippy('whiteboardPointerBtn', 'Laser Pointer', 'bottom');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
@@ -993,6 +995,10 @@ function handleButtons() {
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
     };
+
+    whiteboardDecalBtn.onclick = () => {
+        whiteboardAddObj('decal');
+    };
     participantsButton.onclick = () => {
         rc.toggleMySettings();
         getRoomParticipants();
@@ -1475,8 +1481,25 @@ function toggleWhiteboard() {
 
 function wbCanvasToJson() {
     if (/*this.wbRC*/rc.thereIsParticipants()) {
-        let wbCanvasJson = JSON.stringify(realWhiteBoard.wbCanvas.toJSON());
-        /*this.wbRC*/rc.socket.emit('wbCanvasToJson', wbCanvasJson);
+        let restrictCanvas = true // this parameter tell to send one stroke at a time
+        if(restrictCanvas == false)
+        {
+            let wbCanvasJson = JSON.stringify(realWhiteBoard.wbCanvas.toJSON());
+            /*this.wbRC*/rc.socket.emit('wbCanvasToJson', wbCanvasJson);
+        }
+        else if(realWhiteBoard.lastObj)
+        {
+            //console.log(realWhiteBoard.lastObj);
+            //console.log(realWhiteBoard.lastObj.toJSON());
+            //console.log(JSON.stringify(realWhiteBoard.lastObj.toJSON()));
+
+            // this is the last chance to add the element id for the objects
+            let myid = realWhiteBoard.lastObj.type + Math.round(Math.random() * 10000);
+            realWhiteBoard.lastObj.set({'elementID': myid});    
+
+            let wbCanvasJson = JSON.stringify(realWhiteBoard.lastObj.toJSON(['elementID']));
+            /*this.wbRC*/rc.socket.emit('wbSingleToJson', wbCanvasJson);
+        }
         realWhiteBoard.revivePointer();
     }
 }
@@ -1485,13 +1508,33 @@ function wbTransmitPointer(data) {
     if (this.wbRC.thereIsParticipants()) {
         let wbPointerData = JSON.stringify(data);
         this.wbRC.socket.emit('wbPointer', wbPointerData);
-        console.log('wbPointer: ' + wbPointerData);
+        //console.log('wbPointer: ' + wbPointerData);
+    }
+}
+
+function wbTransmitModify(data){
+    console.log("transmit modify");
+    //console.log( JSON.stringify(realWhiteBoard.wbCanvas.toJSON()))
+    if (rc.thereIsParticipants()) {
+        let wbModData = JSON.stringify(data);
+        rc.socket.emit('wbModify', wbModData);
+        //console.log('wbModify: ' + wbModData);
+    }
+}
+
+function wbTransmitDelete(data){
+    console.log("transmit delete");
+    //console.log( JSON.stringify(realWhiteBoard.wbCanvas.toJSON()))
+    if (rc.thereIsParticipants()) {
+        //let wbModData = JSON.stringify(data);
+        rc.socket.emit('wbDeleteObject', data);
+        //console.log('wbModify: ' + wbModData);
     }
 }
 
 
 function setupWhiteboard() {
-    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer);
+    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer, wbTransmitModify, wbTransmitDelete);
 }
 
 /*function setupWhiteboard() {
@@ -1560,7 +1603,7 @@ function whiteboardIsDrawingMode(status) {
 
 
 
-function whiteboardAddObj(type) {
+async function whiteboardAddObj(type) {
     switch (type) {
         case 'imgUrl':
             Swal.fire({
@@ -1655,7 +1698,55 @@ function whiteboardAddObj(type) {
             realWhiteBoard.whiteboardSetDrawingMode("circle");
             break;
         case 'rect':
-            realWhiteBoard.whiteboardSetDrawingMode("rect")
+            realWhiteBoard.whiteboardSetDrawingMode("rect");
+            break;
+
+        case 'decal':
+            realWhiteBoard.whiteboardSetDrawingMode("none");
+            const { value: decal } = await Swal.fire({
+                allowOutsideClick: false,
+                background: swalBackground,
+                position: 'center',
+                title: 'Select the decal',
+                input: 'select',
+                inputOptions: {                   
+                    'warning': 'Warning',
+                    'atom': 'Atom',
+                    'crush': 'Crush',
+                    'death': 'Death',
+                    'dpiwhite': 'DPI',
+                    'explode': 'Explode',
+                    'fire': 'Fire',
+                    'hightemp': 'Temperature',
+                    'moving': 'Moving',
+                    'radiation': 'Radioactivity',
+                    'readmanual': 'Manual',
+                    'toxic': 'Toxic',
+                    'voltage': 'Voltage',
+                  },
+                  inputPlaceholder: 'Select a decal',
+                  inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                      if (value != 'oranges') {
+                        resolve()
+                      } else {
+                        resolve('You need to select a decal! :)')
+                      }
+                    })
+                  },
+                showClass: {
+                    popup: 'animate__animated animate__fadeInDown',
+                },
+                hideClass: {
+                    popup: 'animate__animated animate__fadeOutUp',
+                },
+            })
+
+            if(decal){
+                console.log(decal);
+                realWhiteBoard.createDecal("/images/decals/" + decal + ".png");
+            }
+
             break;
     }
 }
@@ -1691,6 +1782,73 @@ function wbCanvasSaveImg() {
     const fileName = `whiteboard-${dataNow}.png`;
     saveDataToFile(dataURL, fileName);
 }
+
+function SingleJsonToWbCanvas(json) {
+    if (!wbIsOpen) toggleWhiteboard();
+
+    realWhiteBoard.loadFromSingleJSON(json);
+    realWhiteBoard.wbCanvas.renderAll();
+    realWhiteBoard.revivePointer();
+}
+
+function ModifyCommand(jsontext) {
+
+    //console.log("we are moving object!");
+    
+
+    // convert the text to a json object for easy of use
+    var jsonCommand = JSON.parse(jsontext);
+
+    //console.log(jsonCommand);
+
+    // cycle all objects
+    for(var k in realWhiteBoard.wbCanvas.getObjects()) {
+        //console.log(realWhiteBoard.wbCanvas._objects[k]);
+
+
+        if( realWhiteBoard.wbCanvas._objects[k].type == "image" ||
+            realWhiteBoard.wbCanvas._objects[k].type == "rect" ||
+            realWhiteBoard.wbCanvas._objects[k].type == "line" ||
+            realWhiteBoard.wbCanvas._objects[k].type == "ellipse" ||
+            realWhiteBoard.wbCanvas._objects[k].type == "text" ||
+            realWhiteBoard.wbCanvas._objects[k].type == "path" 
+            )
+        {
+            
+            // check if it is the right object
+            if(jsonCommand.elementID == realWhiteBoard.wbCanvas._objects[k].elementID)
+            {
+                //console.log("is it!");
+                realWhiteBoard.wbCanvas._objects[k].set({ 
+                    left: jsonCommand.target.left, 
+                    top: jsonCommand.target.top,
+                    scaleX: jsonCommand.target.scaleX,
+                    scaleY: jsonCommand.target.scaleY,
+                    angle: jsonCommand.target.angle
+                });
+                realWhiteBoard.wbCanvas.renderAll();
+            }
+        }
+
+        
+    }   
+}
+
+// delete the object, the command comes from remote partecipants
+function DeleteCommand(elementID){
+    // cycle all objects
+    for(var k in realWhiteBoard.wbCanvas.getObjects()) {
+        //console.log(realWhiteBoard.wbCanvas._objects[k]);
+            // check if it is the right object
+            if(elementID == realWhiteBoard.wbCanvas._objects[k].elementID)
+            {
+                //console.log("is it!");
+                realWhiteBoard.wbCanvas.remove(realWhiteBoard.wbCanvas._objects[k]);
+                realWhiteBoard.wbCanvas.renderAll();
+            }
+    }   
+}
+
 
 function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();

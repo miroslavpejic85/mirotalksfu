@@ -652,6 +652,30 @@ io.on('connection', (socket) => {
         roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
     });
 
+    socket.on('wbSingleToJson', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        // let objLength = bytesToSize(Object.keys(data).length);
+        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+        roomList.get(socket.room_id).broadCast(socket.id, 'wbSingleToJson', data);
+    });
+
+    socket.on('wbModify', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        // let objLength = bytesToSize(Object.keys(data).length);
+        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+        roomList.get(socket.room_id).broadCast(socket.id, 'wbModify', data);
+    });
+
+    socket.on('wbDeleteObject', (data) => {
+        if (!roomList.has(socket.room_id)) return;
+
+        // let objLength = bytesToSize(Object.keys(data).length);
+        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+        roomList.get(socket.room_id).broadCast(socket.id, 'wbDeleteObject', data);
+    });
+
     socket.on('wbPointer', (data) => {
         if (!roomList.has(socket.room_id)) return;
 
