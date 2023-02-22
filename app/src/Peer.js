@@ -92,7 +92,7 @@ module.exports = class Peer {
         this.producers.set(producer.id, producer);
 
         //log.debug('Producer type ----->', producer.type);
-        
+
         producer.on(
             'transportclose',
             function () {
