@@ -1489,9 +1489,9 @@ function wbCanvasToJson() {
         }
         else if(realWhiteBoard.lastObj)
         {
-            //console.log(realWhiteBoard.lastObj);
-            //console.log(realWhiteBoard.lastObj.toJSON());
-            //console.log(JSON.stringify(realWhiteBoard.lastObj.toJSON()));
+            console.log(realWhiteBoard.lastObj);
+            console.log(realWhiteBoard.lastObj.toJSON());
+            console.log(JSON.stringify(realWhiteBoard.lastObj.toJSON()));
 
             // this is the last chance to add the element id for the objects
             let myid = realWhiteBoard.lastObj.type + Math.round(Math.random() * 10000);
@@ -1836,11 +1836,12 @@ function ModifyCommand(jsontext) {
 
 // delete the object, the command comes from remote partecipants
 function DeleteCommand(elementID){
+    //console.log(elementID);
     // cycle all objects
     for(var k in realWhiteBoard.wbCanvas.getObjects()) {
         //console.log(realWhiteBoard.wbCanvas._objects[k]);
             // check if it is the right object
-            if(elementID == realWhiteBoard.wbCanvas._objects[k].elementID)
+            if( (typeof realWhiteBoard.wbCanvas._objects[k] !== "undefined") && (elementID == realWhiteBoard.wbCanvas._objects[k].elementID))
             {
                 //console.log("is it!");
                 realWhiteBoard.wbCanvas.remove(realWhiteBoard.wbCanvas._objects[k]);
@@ -1930,6 +1931,7 @@ function whiteboardAction(data, emit = true) {
             break;
         case 'screenshot':
             realWhiteBoard.wbCanvas.clear();
+            realWhiteBoard.whiteboardSetDrawingMode("draw");
             realWhiteBoard.createImageFromURL(data.image);
             break;
     

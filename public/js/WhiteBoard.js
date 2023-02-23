@@ -604,12 +604,29 @@ class WhiteBoard {
 
     createDecal(wbCanvasImgURL) {
         var that = this;
-        fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
-            myImg.set({ top: 50, left: 50 }).scale(0.5);
-            that.addWbCanvasObj(myImg, true);
-            that.wbCanvas.requestRenderAll();
-        });
+        var img = new Image();
+        var dataURL;
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+          var canvas = document.createElement('CANVAS');
+          var ctx = canvas.getContext('2d');
+         
+          canvas.height = this.naturalHeight;
+          canvas.width = this.naturalWidth;
+          ctx.drawImage(this, 0, 0);
+          dataURL = canvas.toDataURL("image/png");
+          fabric.Image.fromURL(dataURL, function (myImg) {
+                myImg.set({ top: 50, left: 50}).scale(0.55);
+
+                that.addWbCanvasObj(myImg, true);
+                that.wbCanvas.requestRenderAll();
+            });
+
+
+        };
+        img.src = wbCanvasImgURL;
     }
+
 
     createImageFromURL(wbCanvasImgURL) {
         var that = this;
