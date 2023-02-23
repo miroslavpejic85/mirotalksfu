@@ -30,3 +30,4 @@ modifiche su un branch nuovo a questo punto si possono editare i conflitti con v
 tutto di nuovo e pushare sul server una volta terminato
 - sul server R&D bisognerà fare un pull delle modifihe e lanciare un PYTHON=python3.7 npm install  
 per installare e compilare tutto, avendo l'accortezza di stoppare il servizio PM2
+
