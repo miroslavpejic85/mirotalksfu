@@ -278,13 +278,6 @@ body {
     border-radius: 5px;
 }
 
-#sessionTimeButton {
-    cursor: default;
-    position: absolute;
-    right: 15px;
-    bottom: 15px;
-}
-
 .form-check-input {
     cursor: pointer;
 }
@@ -350,9 +343,11 @@ body {
 }
 
 #sessionTimeButton {
+    cursor: default;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
     width: auto;
-    margin-top: 10px;
-    text-align: right;
 }
 
 /* on open display devices tab */
