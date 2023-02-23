@@ -54,6 +54,9 @@ class WhiteBoard {
         this.setupWhiteboardCanvasSize();
         this.setupWhiteboardLocalListners();
 
+        this.lastLeft;
+        this.lastTop;
+
 
         // undo section
         this.wbCanvasState = [];
@@ -194,16 +197,51 @@ class WhiteBoard {
 
         var that = this;
 
+        this.wbCanvas.on(
+            'selection:created', function (evt) {
+                console.log("selection created!");
+                console.log(evt);
+                that.lastLeft = evt.selected[0].left;
+                that.lastTop = evt.selected[0].top;
+            }
+        );
+
+        this.wbCanvas.on(
+            'selection:updated', function (evt) {
+                console.log("selection created!");
+                that.lastLeft = evt.selected[0].left;
+                that.lastTop = evt.selected[0].top;
+            }
+        );
+
         // undo helpers
         this.wbCanvas.on(
             'object:modified', function (evt) {
                 console.log("object modified!");
+                console.log(that.wbCanvas.getActiveObject());
+                console.log(evt);
+                var eid = that.wbCanvas.getActiveObject().elementID;
+                var epath = that.wbCanvas.getActiveObject().path;
                 //console.log(evt.target.type);
                 if(wbTransmitModify != null)
                 {
-                    // add the elementID
-                    evt.elementID = that.wbCanvas.getActiveObject().elementID;
-                    wbTransmitModify(evt);
+                    if(/*evt.target.type == "path"*/false) // this does not work!
+                    {
+                        // build a fake evt because of a bug of fabricjs
+                        // the modify event does not report the new path
+                        var fakeobject={"elementID":eid,"target":{"path":epath, "type":"path"}};
+                        console.log(fakeobject);
+                        wbTransmitModify(fakeobject);
+                    }
+                    else
+                    {    
+                        // add the elementID
+                        evt.elementID = eid;
+                        evt.lastleft = that.lastLeft;
+                        evt.lasttop = that.lastTop; 
+                        wbTransmitModify(evt);
+                    }
+                    
                 }
                 that.updateCanvasState();
             }
@@ -232,14 +270,14 @@ class WhiteBoard {
 
         // Zoom management
         this.wbCanvas.on('mouse:wheel', function (opt) {
-            var delta = opt.e.deltaY;
-            var zoom = that.wbCanvas.getZoom();
-            zoom *= 0.999 ** delta;
-            if (zoom > 20) zoom = 20;
-            if (zoom < 0.01) zoom = 0.01;
-            that.wbCanvas.setZoom(zoom);
-            opt.e.preventDefault();
-            opt.e.stopPropagation();
+            // var delta = opt.e.deltaY;
+            // var zoom = that.wbCanvas.getZoom();
+            // zoom *= 0.999 ** delta;
+            // if (zoom > 20) zoom = 20;
+            // if (zoom < 0.01) zoom = 0.01;
+            // that.wbCanvas.setZoom(zoom);
+            // opt.e.preventDefault();
+            // opt.e.stopPropagation();
         })
         this.wbCanvas.on('mouse:down', function (opt) {
             var evt = opt.e;
