@@ -162,7 +162,7 @@ class RoomClient {
 
         this.RoomPassword = null;
 
-        // file transfer settings
+        // File transfer settings
         this.fileToSend = null;
         this.fileReader = null;
         this.receiveBuffer = [];
@@ -173,6 +173,16 @@ class RoomClient {
         this.receiveInProgress = false;
         this.fileSharingInput = '*';
         this.chunkSize = 1024 * 16; // 16kb/s
+
+        // Encodings
+        this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
+        this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
+        this.forceH264 = true; // Force H264 codec for webcam and screen sharing
+        this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
+        this.enableSharingLayers = true; //Enable simulcast or SVC for screen sharing
+        this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
+        this.webcamScalabilityMode = ''; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
+        this.sharingScalabilityMode = ''; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
 
         this.myVideoEl = null;
         this.myAudioEl = null;
@@ -711,8 +721,31 @@ class RoomClient {
                 },
             };
 
+            if (audio) {
+                console.log('AUDIO ENABLE OPUS');
+                params.codecOptions = {
+                    opusStereo: true,
+                    opusDtx: true,
+                    opusFec: true,
+                    opusNack: true,
+                };
+            }
+
             if (!audio && !screen) {
-                params.encodings = this.getEncoding();
+                console.log('GET WEBCAM ENCODING');
+                const { encodings, codec } = this.getWebCamEncoding();
+                params.encodings = encodings;
+                params.codec = codec;
+                params.codecOptions = {
+                    videoGoogleStartBitrate: 1000,
+                };
+            }
+
+            if (!audio && screen) {
+                console.log('GET SCREEN ENCODING');
+                const { encodings, codec } = this.getScreenEncoding();
+                params.encodings = encodings;
+                params.codec = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
@@ -1039,12 +1072,142 @@ class RoomClient {
         };
     }
 
-    getEncoding() {
-        return [
-            { scaleResolutionDownBy: 4, maxBitrate: 500000, scalabilityMode: 'L1T3' },
-            { scaleResolutionDownBy: 2, maxBitrate: 1000000, scalabilityMode: 'L1T3' },
-            { scaleResolutionDownBy: 1, maxBitrate: 5000000, scalabilityMode: 'L1T3' },
-        ];
+    getWebCamEncoding() {
+        let encodings;
+        let codec;
+
+        console.log('WEBCAM ENCODING', {
+            forceVP8: this.forceVP8,
+            forceVP9: this.forceVP9,
+            forceH264: this.forceH264,
+            numSimulcastStreams: this.numSimulcastStreams,
+            enableWebcamLayers: this.enableWebcamLayers,
+            webcamScalabilityMode: this.webcamScalabilityMode,
+        });
+
+        if (this.forceVP8) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp8');
+            if (!codec) throw new Error('Desired VP8 codec+configuration is not supported');
+        } else if (this.forceH264) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/h264');
+            if (!codec) throw new Error('Desired H264 codec+configuration is not supported');
+        } else if (this.forceVP9) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
+            if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        }
+
+        if (this.enableWebcamLayers) {
+            console.log('WEBCAM SIMULCAST/SVC ENABLED');
+
+            const firstVideoCodec = this.device.rtpCapabilities.codecs.find((c) => c.kind === 'video');
+            console.log('WEBCAM ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
+
+            // If VP9 is the only available video codec then use SVC.
+            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
+                console.log('WEBCAM ENCODING: VP9 with SVC');
+                encodings = [
+                    {
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L3T3_KEY',
+                    },
+                ];
+            } else {
+                console.log('WEBCAM ENCODING: VP8 or H264 with simulcast.');
+                encodings = [
+                    {
+                        scaleResolutionDownBy: 1,
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    },
+                ];
+                if (this.numSimulcastStreams > 1) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 2,
+                        maxBitrate: 1000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    });
+                }
+                if (this.numSimulcastStreams > 2) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 4,
+                        maxBitrate: 500000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    });
+                }
+            }
+        }
+        return [encodings, codec];
+    }
+
+    getScreenEncoding() {
+        let encodings;
+        let codec;
+
+        console.log('SCREEN ENCODING', {
+            forceVP8: this.forceVP8,
+            forceVP9: this.forceVP9,
+            forceH264: this.forceH264,
+            numSimulcastStreams: this.numSimulcastStreams,
+            enableSharingLayers: this.enableSharingLayers,
+            sharingScalabilityMode: this.sharingScalabilityMode,
+        });
+
+        if (this.forceVP8) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp8');
+            if (!codec) throw new Error('Desired VP8 codec+configuration is not supported');
+        } else if (this.forceH264) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/h264');
+            if (!codec) throw new Error('Desired H264 codec+configuration is not supported');
+        } else if (this.forceVP9) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
+            if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        }
+
+        if (this.enableSharingLayers) {
+            console.log('SCREEN SIMULCAST/SVC ENABLED');
+
+            const firstVideoCodec = this.device.rtpCapabilities.codecs.find((c) => c.kind === 'video');
+            console.log('SCREEN ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
+
+            // If VP9 is the only available video codec then use SVC.
+            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
+                console.log('SCREEN ENCODING: VP9 with SVC');
+                encodings = [
+                    {
+                        maxBitrate: 5000000,
+                        scalabilityMode: 'L3T3',
+                        dtx: true,
+                    },
+                ];
+            } else {
+                console.log('SCREEN ENCODING: VP8 or H264 with simulcast.');
+                encodings = [
+                    {
+                        scaleResolutionDownBy: 1,
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    },
+                ];
+                if (this.numSimulcastStreams > 1) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 2,
+                        maxBitrate: 1000000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    });
+                }
+                if (this.numSimulcastStreams > 2) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 4,
+                        maxBitrate: 500000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    });
+                }
+            }
+        }
+        return [encodings, codec];
     }
 
     closeThenProduce(type, deviceId, swapCamera = false) {
