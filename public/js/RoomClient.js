@@ -177,7 +177,7 @@ class RoomClient {
         // Encodings
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
-        this.forceH264 = true; // Force H264 codec for webcam and screen sharing
+        this.forceH264 = false; // Force H264 codec for webcam and screen sharing
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
         this.enableSharingLayers = true; //Enable simulcast or SVC for screen sharing
         this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
@@ -732,8 +732,11 @@ class RoomClient {
             }
 
             if (!audio && !screen) {
-                console.log('GET WEBCAM ENCODING');
                 const { encodings, codec } = this.getWebCamEncoding();
+                console.log('GET WEBCAM ENCODING', {
+                    encodings: encodings,
+                    codec: codec,
+                });
                 params.encodings = encodings;
                 params.codec = codec;
                 params.codecOptions = {
@@ -742,8 +745,11 @@ class RoomClient {
             }
 
             if (!audio && screen) {
-                console.log('GET SCREEN ENCODING');
                 const { encodings, codec } = this.getScreenEncoding();
+                console.log('GET SCREEN ENCODING', {
+                    encodings: encodings,
+                    codec: codec,
+                });
                 params.encodings = encodings;
                 params.codec = codec;
                 params.codecOptions = {
@@ -1136,7 +1142,7 @@ class RoomClient {
                 }
             }
         }
-        return [encodings, codec];
+        return { encodings, codec };
     }
 
     getScreenEncoding() {
@@ -1207,7 +1213,7 @@ class RoomClient {
                 }
             }
         }
-        return [encodings, codec];
+        return { encodings, codec };
     }
 
     closeThenProduce(type, deviceId, swapCamera = false) {
