@@ -180,7 +180,7 @@ class RoomClient {
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
         this.enableSharingLayers = false; // Enable simulcast or SVC for screen sharing
-        this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
+        this.numSimulcastStreams = 1; // Number of streams for simulcast in webcam and screen sharing
         this.webcamScalabilityMode = ''; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
         this.sharingScalabilityMode = ''; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
 
