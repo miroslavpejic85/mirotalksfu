@@ -91,7 +91,7 @@ module.exports = class Peer {
 
         this.producers.set(producer.id, producer);
 
-        //log.debug('Producer type ----->', producer.type);
+        log.debug('Producer ----->', { type: producer.type });
 
         producer.on(
             'transportclose',
@@ -136,7 +136,7 @@ module.exports = class Peer {
             return console.error('Consume failed', error);
         }
 
-        //console.log('Consumer type ----->', consumer.type);
+        console.log('Consumer ----->', { type: consumer.type });
 
         if (consumer.type === 'simulcast') {
             await consumer.setPreferredLayers({

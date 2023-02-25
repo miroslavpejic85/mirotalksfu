@@ -179,7 +179,7 @@ class RoomClient {
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
-        this.enableSharingLayers = true; //Enable simulcast or SVC for screen sharing
+        this.enableSharingLayers = false; // Enable simulcast or SVC for screen sharing
         this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
         this.webcamScalabilityMode = ''; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
         this.sharingScalabilityMode = ''; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
@@ -1494,7 +1494,7 @@ class RoomClient {
         console.log('DATA', data);
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};
-        const streamId = peer_id + (type == mediaType.screen ? '-screensharing' : '-mic-webcam');
+        const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
         const consumer = await this.consumerTransport.consume({
             id,
             producerId,
