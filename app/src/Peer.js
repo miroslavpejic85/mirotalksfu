@@ -138,10 +138,11 @@ module.exports = class Peer {
 
         console.log('Consumer ----->', { type: consumer.type });
 
+        // https://www.w3.org/TR/webrtc-svc/
         if (consumer.type === 'simulcast') {
             await consumer.setPreferredLayers({
-                spatialLayer: 2,
-                temporalLayer: 2,
+                spatialLayer: 1,
+                temporalLayer: 3,
             });
         }
 
