@@ -1070,10 +1070,9 @@ class RoomClient {
         return {
             audio: true,
             video: {
-                frameRate: {
-                    ideal: 15,
-                    max: 30,
-                },
+                width: { max: 1920 },
+                height: { max: 1080 },
+                frameRate: { max: 30 },
             },
         };
     }
