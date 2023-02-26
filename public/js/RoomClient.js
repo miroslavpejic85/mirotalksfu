@@ -1454,6 +1454,7 @@ class RoomClient {
         }
         this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
             function ({ consumer, stream, kind }) {
+                console.log('CONSUMER MEDIA TYPE ----> ' + type);
                 console.log('CONSUMER', consumer);
 
                 this.consumers.set(consumer.id, consumer);
@@ -1461,8 +1462,6 @@ class RoomClient {
                 if (kind === 'video') {
                     if (isParticipantsListOpen) getRoomParticipants(true);
                 }
-
-                console.log('CONSUMER MEDIA TYPE ----> ' + type);
 
                 this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
 

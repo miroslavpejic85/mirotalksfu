@@ -136,13 +136,17 @@ module.exports = class Peer {
             return console.error('Consume failed', error);
         }
 
-        console.log('Consumer ----->', { type: consumer.type });
+        log.debug('Consumer ----->', { type: consumer.type });
 
         // https://www.w3.org/TR/webrtc-svc/
+
         if (consumer.type === 'simulcast') {
             await consumer.setPreferredLayers({
                 spatialLayer: 1,
                 temporalLayer: 3,
+            });
+            log.debug('Consumer scalabilityMode ----->', {
+                scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
             });
         }
 
