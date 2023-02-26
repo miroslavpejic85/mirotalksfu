@@ -142,7 +142,7 @@ module.exports = class Peer {
 
         if (consumer.type === 'simulcast') {
             await consumer.setPreferredLayers({
-                spatialLayer: 1,
+                spatialLayer: 3,
                 temporalLayer: 3,
             });
             log.debug('Consumer scalabilityMode ----->', {

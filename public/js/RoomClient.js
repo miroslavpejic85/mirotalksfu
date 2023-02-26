@@ -181,8 +181,8 @@ class RoomClient {
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
         this.enableSharingLayers = false; // Enable simulcast or SVC for screen sharing
         this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
-        this.webcamScalabilityMode = ''; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
-        this.sharingScalabilityMode = ''; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
+        this.webcamScalabilityMode = 'L3T3'; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
+        this.sharingScalabilityMode = 'L3T3'; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
 
         this.myVideoEl = null;
         this.myAudioEl = null;
@@ -756,6 +756,8 @@ class RoomClient {
                     videoGoogleStartBitrate: 1000,
                 };
             }
+
+            console.log('PARAMS', params);
 
             producer = await this.producerTransport.produce(params);
 
