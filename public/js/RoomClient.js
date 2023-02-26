@@ -197,6 +197,9 @@ class RoomClient {
         this.producerLabel = new Map();
         this.eventListeners = new Map();
 
+        this.debug = false;
+        this.debug ? window.localStorage.setItem('debug', 'mediasoup*') : window.localStorage.removeItem('debug');
+
         console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
 
@@ -701,7 +704,8 @@ class RoomClient {
         let videoPrivacyBtn = this.getId(this.peer_id + '__vp');
         if (videoPrivacyBtn) videoPrivacyBtn.style.display = screen ? 'none' : 'inline';
 
-        console.log(`Media contraints ${type}:`, mediaConstraints);
+        console.log(`Media constraints ${type}:`, mediaConstraints);
+
         let stream;
         try {
             stream = screen
@@ -735,10 +739,10 @@ class RoomClient {
                 const { encodings, codec } = this.getWebCamEncoding();
                 console.log('GET WEBCAM ENCODING', {
                     encodings: encodings,
-                    codec: codec,
+                    codecs: codec,
                 });
                 params.encodings = encodings;
-                params.codec = codec;
+                params.codecs = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
@@ -748,16 +752,16 @@ class RoomClient {
                 const { encodings, codec } = this.getScreenEncoding();
                 console.log('GET SCREEN ENCODING', {
                     encodings: encodings,
-                    codec: codec,
+                    codecs: codec,
                 });
                 params.encodings = encodings;
-                params.codec = codec;
+                params.codecs = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
             }
 
-            console.log('PARAMS', params);
+            console.log('PRODUCER PARAMS', params);
 
             producer = await this.producerTransport.produce(params);
 
@@ -1119,7 +1123,7 @@ class RoomClient {
                     },
                 ];
             } else {
-                console.log('WEBCAM ENCODING: VP8 or H264 with simulcast.');
+                console.log('WEBCAM ENCODING: VP8 or H264 with simulcast');
                 encodings = [
                     {
                         scaleResolutionDownBy: 1,

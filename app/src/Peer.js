@@ -93,6 +93,12 @@ module.exports = class Peer {
 
         log.debug('Producer ----->', { type: producer.type });
 
+        if (['simulcast', 'svc'].includes(producer.type)) {
+            log.debug('Producer scalabilityMode ----->', {
+                scalabilityMode: producer.rtpParameters.encodings[0].scalabilityMode,
+            });
+        }
+
         producer.on(
             'transportclose',
             function () {
@@ -140,14 +146,29 @@ module.exports = class Peer {
 
         // https://www.w3.org/TR/webrtc-svc/
 
-        if (consumer.type === 'simulcast') {
-            await consumer.setPreferredLayers({
-                spatialLayer: 3,
-                temporalLayer: 3,
-            });
-            log.debug('Consumer scalabilityMode ----->', {
-                scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
-            });
+        switch (consumer.type) {
+            case 'simulcast':
+                // L1T3/L2T3/L3T3
+                await consumer.setPreferredLayers({
+                    spatialLayer: 3, // 1 2 3
+                    temporalLayer: 3,
+                });
+                log.debug('Consumer scalabilityMode ----->', {
+                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+                });
+                break;
+            case 'svc':
+                // L3T3
+                await consumer.setPreferredLayers({
+                    spatialLayer: 3,
+                    temporalLayer: 3,
+                });
+                log.debug('Consumer scalabilityMode ----->', {
+                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+                });
+                break;
+            default:
+                break;
         }
 
         this.consumers.set(consumer.id, consumer);

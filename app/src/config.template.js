@@ -72,7 +72,7 @@ module.exports = {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
             logLevel: 'error',
-            logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
+            logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
         },
         // Router settings
         router: {
