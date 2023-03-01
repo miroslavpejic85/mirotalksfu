@@ -1737,7 +1737,6 @@ function whiteboardAddObj(type) {
                 top: 0,
                 left: 0,
                 fontFamily: 'Comfortaa',
-                fontSize: 32,
                 fill: wbCanvas.freeDrawingBrush.color,
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
                 stroke: wbCanvas.freeDrawingBrush.color,
