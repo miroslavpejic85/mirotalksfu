@@ -1,5 +1,7 @@
 ## Self-signed certificate
 
+[What is self-signed-certificate](https://en.wikipedia.org/wiki/Self-signed_certificate)
+
 ![mirotalksfu-https](https.png)
 
 ```bash
