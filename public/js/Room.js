@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.3
+ * @version 1.0.4
  *
  */
 
@@ -92,6 +92,7 @@ let isVideoControlsOn = false;
 let isChatPasteTxt = false;
 let isChatMarkdownOn = false;
 let joinRoomWithoutAudioVideo = true;
+let joinRoomWithScreen = false;
 let initAudioButton = null;
 let initVideoButton = null;
 let initAudioVideoButton = null;
@@ -231,6 +232,9 @@ async function initEnumerateDevices() {
     console.log('01 ----> init Enumerate Devices');
     await initEnumerateVideoDevices();
     await initEnumerateAudioDevices();
+    if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
+        BUTTONS.main.startScreenButton && show(initStartScreenButton);
+    }
     whoAreYou();
     if (!isVideoAllowed) {
         hide(initVideo);
@@ -496,7 +500,7 @@ function whoAreYou() {
             peer_name = name;
         },
     }).then(() => {
-        if (initStream) {
+        if (initStream && !joinRoomWithScreen) {
             stopTracks(initStream);
             hide(initVideo);
         }
@@ -695,6 +699,7 @@ function joinRoom(peer_name, room_id) {
             isAudioAllowed,
             isVideoAllowed,
             isScreenAllowed,
+            joinRoomWithScreen,
             roomIsReady,
         );
         handleRoomClientEvents();
@@ -775,6 +780,10 @@ function hide(elem) {
 
 function show(elem) {
     elem.className = '';
+}
+
+function disable(elem, disabled) {
+    elem.disabled = disabled;
 }
 
 function setColor(elem, color) {
@@ -1065,9 +1074,11 @@ function handleButtons() {
 
 function setButtonsInit() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Toggle the audio', 'left');
-        setTippy('initVideoButton', 'Toggle the video', 'right');
-        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'right');
+        setTippy('initAudioButton', 'Toggle the audio', 'top');
+        setTippy('initVideoButton', 'Toggle the video', 'top');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top');
+        setTippy('initStartScreenButton', 'Toggle screen sharing', 'top');
+        setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
     }
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
@@ -1139,7 +1150,7 @@ function setSelectsInit() {
     if (initVideoSelect.value) changeCamera(initVideoSelect.value);
 }
 
-function changeCamera(deviceId) {
+async function changeCamera(deviceId) {
     if (initStream) {
         stopTracks(initStream);
         show(initVideo);
@@ -1150,12 +1161,45 @@ function changeCamera(deviceId) {
             initVideo.className = 'mirror';
             initVideo.srcObject = camStream;
             initStream = camStream;
-            console.log('04.5 ----> Success attached init video stream');
+            console.log('04.5 ----> Success attached init cam video stream', initStream);
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
             userLog('error', 'Error while swapping camera' + err.tostring(), 'top-end');
         });
+}
+
+async function toggleScreenSharing() {
+    if (initStream) {
+        stopTracks(initStream);
+        show(initVideo);
+    }
+    joinRoomWithScreen = !joinRoomWithScreen;
+    if (joinRoomWithScreen) {
+        navigator.mediaDevices
+            .getDisplayMedia({ audio: true, video: true })
+            .then((screenStream) => {
+                initVideo.srcObject = screenStream;
+                initStream = screenStream;
+                console.log('04.6 ----> Success attached init screen video stream', initStream);
+                show(initStopScreenButton);
+                hide(initStartScreenButton);
+                disable(initVideoSelect, true);
+                disable(initVideoButton, true);
+                disable(initAudioVideoButton, true);
+            })
+            .catch((err) => {
+                console.error('[Error] toggleScreenSharing', err);
+                userLog('error', 'Error while toggleScreenSharing' + err.tostring(), 'top-end');
+            });
+    } else {
+        checkInitVideo(isVideoAllowed);
+        hide(initStopScreenButton);
+        show(initStartScreenButton);
+        disable(initVideoSelect, false);
+        disable(initVideoButton, false);
+        disable(initAudioVideoButton, false);
+    }
 }
 
 function handleSelects() {
@@ -1381,6 +1425,10 @@ function handleRoomClientEvents() {
         console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
+        if (initStream) {
+            stopTracks(initStream);
+            hide(initVideo);
+        }
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room Client lock room');

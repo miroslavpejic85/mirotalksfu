@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.3
+ * @version 1.0.4
  *
  */
 
@@ -110,6 +110,7 @@ class RoomClient {
         isAudioAllowed,
         isVideoAllowed,
         isScreenAllowed,
+        joinRoomWithScreen,
         successCallback,
     ) {
         this.localAudioEl = localAudioEl;
@@ -128,6 +129,7 @@ class RoomClient {
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
         this.isScreenAllowed = isScreenAllowed;
+        this.joinRoomWithScreen = joinRoomWithScreen;
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
@@ -284,7 +286,7 @@ class RoomClient {
         this.device = await this.loadDevice(data);
         console.log('07.1 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
-        this.startLocalMedia();
+        await this.startLocalMedia();
         this.socket.emit('getProducers');
     }
 
@@ -642,7 +644,7 @@ class RoomClient {
     // START LOCAL AUDIO VIDEO MEDIA
     // ####################################################
 
-    startLocalMedia() {
+    async startLocalMedia() {
         console.log('08 ----> Start local media');
         if (this.isAudioAllowed) {
             console.log('09 ----> Start audio media');
@@ -660,6 +662,10 @@ class RoomClient {
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
+        if (this.joinRoomWithScreen) {
+            console.log('08 ----> Start Screen media');
+            this.produce(mediaType.screen, null, false, true);
+        }
         // if (this.isScreenAllowed) {
         //     this.shareScreen();
         // }
@@ -669,7 +675,7 @@ class RoomClient {
     // PRODUCER
     // ####################################################
 
-    async produce(type, deviceId = null, swapCamera = false) {
+    async produce(type, deviceId = null, swapCamera = false, init = false) {
         let mediaConstraints = {};
         let audio = false;
         let screen = false;
@@ -708,9 +714,13 @@ class RoomClient {
 
         let stream;
         try {
-            stream = screen
-                ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
-                : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            if (init) {
+                stream = initStream;
+            } else {
+                stream = screen
+                    ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
+                    : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            }
 
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
 
