@@ -9,10 +9,10 @@ services:
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
-        # These volumes are not mandatory, uncomment if you want to use it
-        # volumes:
-        #     - ./app/:/src/app/:ro
-        #     - ./public/:/src/public/:ro
+        # These volumes are not mandatory, coment if you want to use it
+        volumes:
+            - ./app/:/src/app/:ro
+            - ./public/:/src/public/:ro
         ports:
             - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'
