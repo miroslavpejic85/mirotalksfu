@@ -136,6 +136,8 @@ class RoomClient {
         isVideoAllowed,
         isScreenAllowed,
         successCallback,
+        updateSession,
+        isPro,
     ) {
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
@@ -211,6 +213,9 @@ class RoomClient {
         this.producers = new Map();
         this.producerLabel = new Map();
         this.eventListeners = new Map();
+
+        this.isPro = isPro;
+        this.currentSessionID = "-"; // safe mechanism
 
         console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);

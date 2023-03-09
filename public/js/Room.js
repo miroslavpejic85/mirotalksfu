@@ -53,6 +53,8 @@ const wbHeight = 675;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
+const APIPath = "https://roomxr.eu:5002"
+
 // ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
@@ -70,6 +72,9 @@ let room_id = getRoomId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let notify = getNotify();
+let is_pro =  getIsPro();
+let loginParametersMail = getParMail();
+let loginParametersCompany = getParCompany();
 
 let peer_geo = null;
 let peer_info = null;
@@ -110,6 +115,11 @@ let isButtonsVisible = false;
 let isButtonsBarOver = false;
 
 let isRoomLocked = false;
+
+// sessions
+let currentSessionID = null;
+let imageSessionCounter = 0;
+let sessionTimer = null;
 
 // ####################################################
 // INIT ROOM
@@ -196,6 +206,37 @@ function setTippy(elem, content, placement, allowHTML = false) {
         allowHTML: allowHTML,
     });
 }
+
+// ####################################################
+// GET IS PRO
+// ####################################################
+
+function getIsPro() {
+    let qs = new URLSearchParams(window.location.search);
+    let queryRoomId = qs.get('pro');
+    let isPro = queryRoomId ? true : false;
+    console.log(isPro);
+    return isPro;
+}
+
+function getParMail() {
+    let qs = new URLSearchParams(window.location.search);
+    let queryMail = qs.get('mail');
+    let mail = queryMail ? queryMail : "";
+    console.log("mail: " + mail);
+    return mail;
+
+}
+
+function getParCompany() {
+    let qs = new URLSearchParams(window.location.search);
+    let queryCompany = qs.get('company');
+    let company = queryCompany ? queryCompany : "";
+    console.log("company: " + company);
+    return company;
+}
+
+
 
 // ####################################################
 // GET ROOM ID
@@ -643,6 +684,8 @@ function joinRoom(peer_name, room_id) {
             isVideoAllowed,
             isScreenAllowed,
             roomIsReady,
+            updateSession,
+            is_pro,
         );
         realWhiteBoard.wbRC = rc;
         handleRoomClientEvents();
@@ -714,6 +757,11 @@ function roomIsReady() {
     checkButtonsBar();
     if (room_password) {
         lockRoomButton.click();
+    }
+
+    if(is_pro)
+    {
+        show(startProRecButton);
     }
 }
 
@@ -1015,11 +1063,266 @@ function handleButtons() {
     aboutButton.onclick = () => {
         showAbout();
     };
+    startProRecButton.onclick = () => {
+        console.log("start pressed!");
+        hide(startProRecButton);
+        show(stopProRecButton);
+        createNewSession();
+    };
+    stopProRecButton.onclick = () => {
+        console.log("stop pressed!");
+        show(startProRecButton);
+        hide(stopProRecButton);
+        stopSessionTimer();
+
+    };
+
+
 }
+
+
+// ####################################################
+// SESSIONS
+// ####################################################
+
+function saveImageLog(){
+    // this is a good place to save the image logs on the server for the pro version.
+    if(getIsPro() && currentSessionID != "-") // check if we ar in pro and if there is a session
+    {
+        // take image from canvas
+        var dataurl = realWhiteBoard.wbCanvas.toDataURL({
+            format: 'jpeg',
+            quality: 0.8
+            });
+
+        // convert to blob in order to send via web api
+        var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        var blob =  new Blob([u8arr], { type: mime });
+
+        // now, this must be sent as a file
+        filesHandlerCloud(blob, false); // this function is
+
+    }
+}
+function createNewSession() {
+
+	// safe mechanism to avoid update before creating a new session
+	currentSessionID = "-";
+
+	// Sending and receiving data in JSON format using POST method
+	var xhr = new XMLHttpRequest();
+	var url = APIPath + "/posts/createsessionv2";
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			var json = JSON.parse(xhr.responseText);
+			currentSessionID = json._id;
+            RoomClient.currentSessionID = currentSessionID; // this passes the info to the RC
+			imageSessionCounter = 0;
+			console.log(currentSessionID);
+		}
+	};
+	var data = JSON.stringify({
+		device: "TESTTEST",
+		datestart: Date.now(),
+		dateend: Date.now(),
+		email: loginParametersMail,
+		company: loginParametersCompany
+	});
+	xhr.send(data);
+}
+
+function updateSession(actiontype, event) {
+	// safe mechanism number one
+	if (currentSessionID === "-")
+		return;
+	// safe mechanism number two
+	//let status = easyrtc.getConnectStatus(otherEasyrtcid);
+	//if (status === easyrtc.NOT_CONNECTED)
+	//	return;
+
+	// Sending and receiving data in JSON format using POST method
+	//
+	var xhr = new XMLHttpRequest();
+	//var url = "https://holomask.site:5000/posts/updatesession";
+	var url = APIPath + "/posts/updatesessionv2";
+	xhr.open("POST", url, true);
+	xhr.setRequestHeader("Content-Type", "application/json");
+	xhr.onreadystatechange = function () {
+		if (xhr.readyState === 4 && xhr.status === 200) {
+			var json = JSON.parse(xhr.responseText);
+			//currentSessionID = json._id;
+			console.log(json);
+		}
+	};
+
+	var realAction = "";
+	var realImage = "";
+	var realEvent = "";
+
+	if (actiontype === "date") {
+		realAction = "date";
+	}
+	if (actiontype === "image") {
+		realAction = "image";
+		realImage = event;
+	}
+	if (actiontype === "clearing") {
+		realAction = "clearing";
+	}
+	if (actiontype === "drawLine") {
+		realAction = "line";
+		realEvent = event;
+	}
+	if (actiontype === "drawArrow") {
+		realAction = "arrow";
+		realEvent = event;
+	}
+	if (actiontype === "drawRect") {
+		realAction = "rect";
+		realEvent = event;
+	}
+	if (actiontype === "drawCircle") {
+		realAction = "circle";
+		realEvent = event;
+	}
+	if (actiontype === "drawPoint") {
+		realAction = "point";
+		realEvent = event;
+	}
+	if (actiontype === "drawStroke") {
+		realAction = "stroke";
+		realEvent = event;
+	}
+	if (actiontype === "drawBufferPoints") {
+		realAction = "buffer";
+		realEvent = event;
+	}
+	if (actiontype === "chat") {
+		realAction = "chat";
+		realEvent = event;
+	}
+	if (actiontype === "note") {
+		realAction = "note";
+		realEvent = event;
+	}
+	if (actiontype === "drawText") {
+		realAction = "text";
+		realEvent = event;
+	}
+	if (actiontype === "drawDecal") {
+		realAction = "decal";
+		realEvent = event;
+	}
+
+	var data = JSON.stringify({
+		action: realAction,
+		image: realImage,
+		event: realEvent,
+		_id: currentSessionID,
+		mail: loginParametersMail,
+		company: loginParametersCompany,
+		dateend: Date.now(),
+	});
+
+	xhr.send(data);
+}
+
+function startSessionTimer() {
+    //recElapsedTime = 0;
+    sessionTimer = setInterval(function printTime() {
+        /*if (rc.isRecording()) {
+            recElapsedTime++;
+            recordingStatus.innerHTML = '🔴 REC ' + secondsToHms(recElapsedTime);
+        }*/
+        updateSession("date");
+    }, 5000);
+}
+function stopSessionTimer() {
+    clearInterval(sessionTimer);
+}
+
+function filesHandlerCloud(files, user) {
+
+	var data = new FormData();
+	var requestString = APIPath + "/posts/upload?company=" + loginParametersCompany;
+
+	if (user == true) {
+		// file selected by the user
+		// check extension
+		//if (!myutils.isValidFile(files[0].name)) {
+		//	alert('this kind of file is not permitted')
+		//	return;
+		//}
+		// check size
+		//var FileSize = files[0].size / 1024 / 1024; // in MB
+		//if (FileSize > 10) {
+		//	alert('File size exceeds 10 MB');
+		//	return;
+		//}
+		// in case of multiple files append each of them
+		//data.append("file", files[0]);
+		// we have to change also the request in order to pass right arguments to server
+		//requestString = requestString + "&session=no";
+	}
+	else {
+		//let status = easyrtc.getConnectStatus(otherEasyrtcid);
+		//if (status === easyrtc.NOT_CONNECTED)
+		//	return;
+		imageSessionCounter = imageSessionCounter + 1;
+		var imageFileName = currentSessionID + "." + imageSessionCounter + ".jpg";
+		// file automatically pushed to server
+		data.append("file", files, imageFileName);
+		// we have to change also the request in order to pass right arguments to server
+		requestString = requestString + "&session=yes&filename=" + imageFileName;
+
+		// write also in the session in order to save the log
+		updateSession("image", imageFileName);
+		//lastImageSavedAddress = imageFileName;
+		//$$("magnifyimageiconmain").show();
+	}
+
+	var request = new XMLHttpRequest();
+	request.open("post", requestString);
+
+	// upload progress event
+	//request.upload.addEventListener("progress", function (e) {
+	//	var percent_complete = (e.loaded / e.total) * 100;
+
+		// Percentage of upload completed
+		//console.log(percent_complete);
+		//if (user == true)
+			//fileStatus.innerHTML = "progress: " + Math.round(percent_complete);
+	//});
+
+	// AJAX request finished event
+	request.addEventListener("load", function (e) {
+		// HTTP status message
+		console.log(request.status);
+		//if (user == true) {
+			// notify the good response to HTML
+			//fileStatus.innerHTML = request.response;
+			// refresh filelist
+			//filesListHandler();
+		//}
+		// request.response will hold the response from the server
+		console.log(request.response);
+	});
+
+	// send POST request to server side script
+	request.send(data);
+}
+
 
 // ####################################################
 // HTML SELECTS
 // ####################################################
+
 
 function handleSelects() {
     // devices options
@@ -1921,6 +2224,7 @@ function whiteboardAction(data, emit = true) {
             realWhiteBoard.redo();
             break;
         case 'clear':
+            saveImageLog(); // save log moment on cloud
             realWhiteBoard.wbCanvas.clear();
             break;
         case 'close':
@@ -1930,9 +2234,10 @@ function whiteboardAction(data, emit = true) {
             realWhiteBoard.movePointer(data.x,data.y);
             break;
         case 'screenshot':
+            saveImageLog(); // save log moment on cloud
             realWhiteBoard.wbCanvas.clear();
             realWhiteBoard.whiteboardSetDrawingMode("draw");
-            realWhiteBoard.createImageFromURL(data.image);
+            realWhiteBoard.createImageFromURL(data.image);            
             break;
     
         //...
