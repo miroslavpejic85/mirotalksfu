@@ -14,7 +14,7 @@
         "docker-push": "docker push mirotalk/sfu:latest",
         "docker-pull": "docker pull mirotalk/sfu:latest",
         "docker-rmc": "docker container rm mirotalksfu --force",
-        "docker-run": "docker run -d -p 40000-40100:40000-40100 -p 3010:3010 --name mirotalksfu mirotalk/sfu:latest",
+        "docker-run": "docker run -d -p 40000-40100:40000-40100 -p 3010:3010 ./app/src/config.js:/src/app/src/config.js:ro --name mirotalksfu mirotalk/sfu:latest",
         "docker-run-vm": "docker run -d -p 40000-40100:40000-40100 -p 3010:3010 -v ./app/:/src/app/:ro -v ./public/:/src/public/:ro --name mirotalksfu mirotalk/sfu:latest",
         "docker-start": "docker start mirotalksfu",
         "docker-stop": "docker stop mirotalksfu"
