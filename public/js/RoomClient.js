@@ -1760,7 +1760,7 @@ class RoomClient {
             ko.className = html.kickOut;
         }
         i = document.createElement('img');
-        i.className = 'center pulsate';
+        i.className = 'center'; // pulsate
         i.id = peer_id + '__img';
         p = document.createElement('p');
         p.id = peer_id + '__name';
