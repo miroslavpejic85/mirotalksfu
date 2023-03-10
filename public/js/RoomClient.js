@@ -2511,12 +2511,53 @@ class RoomClient {
             to_peer_id: 'all',
             peer_msg: peer_msg,
         };
-        console.log('Send message:', data);
+      
         this.socket.emit('message', data);
         this.setMsgAvatar('right', this.peer_name);
         this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all', 'all');
+
+
+        if(this.isPro)
+        {
+            // sanify the string chat
+            var realstuff = this.peer_name + "§" + this.safeString(peer_msg) + "§" + this.safeString(this.dateFormat(Date.now()));
+            // save it to log...
+            updateSession("chat",realstuff); // update the current session with chat message
+        }
+
+
         this.cleanMessage();
+
+
+        
     }
+
+    safeString(unsafestring){
+        var safestring;
+        safestring = unsafestring.replace(/:/g, "sEmIcOlUmN17");
+        safestring = safestring.replace(/,/g, "cOmMa17");
+        return safestring;
+    }
+
+    dateFormat(date) {
+        var d = new Date(date),
+            month = '' + (d.getMonth() + 1),
+            day = '' + d.getDate(),
+            year = d.getFullYear(),
+            hour = '' + d.getHours(),
+            minute = '' + d.getMinutes();
+    
+        if (month.length < 2) month = '0' + month;
+        if (day.length < 2) day = '0' + day;
+        if (hour.length < 2) hour = '0' + hour;
+        if (minute.length < 2) minute = '0' + minute;
+    
+    
+        return [day, month, year].join('/') + " - " + [hour, minute].join(':');
+    }
+
+
+
 
     sendMessageTo(to_peer_id, to_peer_name) {
         if (!this.thereIsParticipants()) {

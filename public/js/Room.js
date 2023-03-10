@@ -53,7 +53,8 @@ const wbHeight = 675;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
-const APIPath = "https://roomxr.eu:5002"
+const APIPath = "https://roomxr.eu:5002";
+//const APIPath = "https://holomask.site"
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -1108,17 +1109,57 @@ function saveImageLog(){
 
     }
 }
+
 function createNewSession() {
 
 	// safe mechanism to avoid update before creating a new session
 	currentSessionID = "-";
 
-	// Sending and receiving data in JSON format using POST method
+	var url = APIPath + "/posts/createsessionv2";
+    var rheaders = new Headers({
+        'Content-Type': 'application/json',
+    });
+    
+    var data = JSON.stringify({
+		device: "TESTTEST",
+		datestart: Date.now(),
+		dateend: Date.now(),
+		email: loginParametersMail,
+		company: loginParametersCompany
+	});
+
+    let initObject = {
+        method:'POST', headers:rheaders,body:data
+    };
+
+    
+    
+    fetch(url, initObject)
+    .then((response) => response.json())    
+    .then((data) => {
+        //console.log("success", data);
+        currentSessionID = data._id;
+            RoomClient.currentSessionID = currentSessionID; // this passes the info to the RC
+			imageSessionCounter = 0;
+			console.log(currentSessionID);
+    })
+    .catch(function (err) {
+        console.log("[CreateSessionV2] Something went wrong!", err);
+    });
+    
+    
+    /*
+    // safe mechanism to avoid update before creating a new session
+    currentSessionID = "-";
+
+
+    // Sending and receiving data in JSON format using POST method
 	var xhr = new XMLHttpRequest();
 	var url = APIPath + "/posts/createsessionv2";
 	xhr.open("POST", url, true);
 	xhr.setRequestHeader("Content-Type", "application/json");
 	xhr.onreadystatechange = function () {
+        console.log(xhr);
 		if (xhr.readyState === 4 && xhr.status === 200) {
 			var json = JSON.parse(xhr.responseText);
 			currentSessionID = json._id;
@@ -1127,6 +1168,7 @@ function createNewSession() {
 			console.log(currentSessionID);
 		}
 	};
+    console.log("cicciolo frollo");
 	var data = JSON.stringify({
 		device: "TESTTEST",
 		datestart: Date.now(),
@@ -1135,10 +1177,113 @@ function createNewSession() {
 		company: loginParametersCompany
 	});
 	xhr.send(data);
+    console.log("cicciolo frollo 2");
+    */
 }
 
 function updateSession(actiontype, event) {
-	// safe mechanism number one
+	
+    
+    // safe mechanism to avoid update before creating a new session
+	if (currentSessionID === "-")
+		return;
+	
+    var url = APIPath + "/posts/updatesessionv2";
+    var rheaders = new Headers({
+        'Content-Type': 'application/json',
+    });
+
+
+    var realAction = "";
+	var realImage = "";
+	var realEvent = "";
+
+	if (actiontype === "date") {
+		realAction = "date";
+	}
+	if (actiontype === "image") {
+		realAction = "image";
+		realImage = event;
+	}
+	if (actiontype === "clearing") {
+		realAction = "clearing";
+	}
+	if (actiontype === "drawLine") {
+		realAction = "line";
+		realEvent = event;
+	}
+	if (actiontype === "drawArrow") {
+		realAction = "arrow";
+		realEvent = event;
+	}
+	if (actiontype === "drawRect") {
+		realAction = "rect";
+		realEvent = event;
+	}
+	if (actiontype === "drawCircle") {
+		realAction = "circle";
+		realEvent = event;
+	}
+	if (actiontype === "drawPoint") {
+		realAction = "point";
+		realEvent = event;
+	}
+	if (actiontype === "drawStroke") {
+		realAction = "stroke";
+		realEvent = event;
+	}
+	if (actiontype === "drawBufferPoints") {
+		realAction = "buffer";
+		realEvent = event;
+	}
+	if (actiontype === "chat") {
+		realAction = "chat";
+		realEvent = event;
+	}
+	if (actiontype === "note") {
+		realAction = "note";
+		realEvent = event;
+	}
+	if (actiontype === "drawText") {
+		realAction = "text";
+		realEvent = event;
+	}
+	if (actiontype === "drawDecal") {
+		realAction = "decal";
+		realEvent = event;
+	}
+
+	var data = JSON.stringify({
+		action: realAction,
+		image: realImage,
+		event: realEvent,
+		_id: currentSessionID,
+		mail: loginParametersMail,
+		company: loginParametersCompany,
+		dateend: Date.now(),
+	});
+    
+
+    let initObject = {
+        method:'POST', headers:rheaders,body:data
+    };
+
+    
+    
+    fetch(url, initObject)
+    .then((response) => response.json())    
+    .then((data) => {
+        console.log("success", data);       
+    })
+    .catch(function (err) {
+        console.log("[UpdateSessionV2] Something went wrong!", err);
+    });
+    
+    
+    
+    
+    /*
+    // safe mechanism number one
 	if (currentSessionID === "-")
 		return;
 	// safe mechanism number two
@@ -1230,18 +1375,14 @@ function updateSession(actiontype, event) {
 		dateend: Date.now(),
 	});
 
-	xhr.send(data);
+	xhr.send(data);*/
 }
 
 function startSessionTimer() {
-    //recElapsedTime = 0;
-    sessionTimer = setInterval(function printTime() {
-        /*if (rc.isRecording()) {
-            recElapsedTime++;
-            recordingStatus.innerHTML = '🔴 REC ' + secondsToHms(recElapsedTime);
-        }*/
+    /*
+    sessionTimer = setInterval(function printTime() {      
         updateSession("date");
-    }, 5000);
+    }, 5000);*/
 }
 function stopSessionTimer() {
     clearInterval(sessionTimer);
@@ -1792,9 +1933,9 @@ function wbCanvasToJson() {
         }
         else if(realWhiteBoard.lastObj)
         {
-            console.log(realWhiteBoard.lastObj);
-            console.log(realWhiteBoard.lastObj.toJSON());
-            console.log(JSON.stringify(realWhiteBoard.lastObj.toJSON()));
+            //console.log(realWhiteBoard.lastObj);
+            //console.log(realWhiteBoard.lastObj.toJSON());
+            //console.log(JSON.stringify(realWhiteBoard.lastObj.toJSON()));
 
             // this is the last chance to add the element id for the objects
             let myid = realWhiteBoard.lastObj.type + Math.round(Math.random() * 10000);
