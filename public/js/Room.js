@@ -1165,7 +1165,7 @@ async function changeCamera(deviceId) {
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
-            userLog('error', 'Error while swapping camera' + err.tostring(), 'top-end');
+            userLog('error', 'Error while swapping camera' + err, 'top-end');
         });
 }
 
@@ -1190,7 +1190,8 @@ async function toggleScreenSharing() {
             })
             .catch((err) => {
                 console.error('[Error] toggleScreenSharing', err);
-                userLog('error', 'Error while toggleScreenSharing' + err.tostring(), 'top-end');
+                joinRoomWithScreen = false;
+                return checkInitVideo(isVideoAllowed);
             });
     } else {
         checkInitVideo(isVideoAllowed);
