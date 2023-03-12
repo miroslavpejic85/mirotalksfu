@@ -1309,6 +1309,7 @@ class RoomClient {
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
+                this.handleZV(elem.id);
                 if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
@@ -1632,6 +1633,7 @@ class RoomClient {
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
+                this.handleZV(elem.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
@@ -2353,6 +2355,24 @@ class RoomClient {
                 break;
         }
         resizeVideoMedia();
+    }
+
+    // ####################################################
+    // HANDLE VIDEO ZOOM-IN/OUT
+    // ####################################################
+
+    handleZV(elemId) {
+        let videoPlayer = this.getId(elemId);
+        let zoom = 1;
+        if (videoPlayer) {
+            videoPlayer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
+                delta > 0 ? (zoom *= 1.2) : (zoom /= 1.2);
+                if (zoom < 1) zoom = 1;
+                videoPlayer.style.scale = zoom;
+            });
+        }
     }
 
     // ####################################################

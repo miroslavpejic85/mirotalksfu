@@ -24,31 +24,31 @@
 <br/>
 
 -   Is `100% Free` - `Open Source` - `Self Hosted` and [PWA](https://en.wikipedia.org/wiki/Progressive_web_application)!
--   No download, plug-in or login required, entirely browser-based
--   Unlimited number of conference rooms, without call time limitation
--   Desktop and Mobile compatible
--   Translated in 133 languages
--   Optimized Room URL Sharing (share it to your participants, wait for them to join)
--   Possibility to Password protect the Room for the meeting
+-   No download, plug-in or login required, entirely browser-based.
+-   Unlimited number of conference rooms, without call time limitation.
+-   Desktop and Mobile compatible.
+-   Translated in 133 languages.
+-   Optimized Room URL Sharing for mobile.
+-   Possibility to Password protect the Room for the meeting.
 -   Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator.
--   Webcam Streaming up to 4K quality (Front - Rear for mobile)
--   Echo cancellation and noise suppression that makes your audio crystal clear
+-   Webcam Streaming up to 4K quality (Front - Rear for mobile).
+-   Echo cancellation and noise suppression that makes your audio crystal clear.
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing (with drag-and-drop), share any files to your participants in the room
 -   Take a snapshot from the video frame(screen/cam) to save it as an image on your device.
 -   Chat with Emoji Picker to show you feeling, private messages, Markdown support, possibility to Save the conversations, and many more.
 -   Speech recognition, execute the app features simply with your voice.
--   Advance collaborative whiteboard for the teachers
--   Select Microphone - Speaker and Video source
--   Recording your Screen, Audio, or Video
--   Share any YouTube video in real-time to your participants
--   Share any mp4, webm, ogg video in real-time to your participants with possibility to download it
--   Full-Screen Mode on mouse click on the Video element
--   Possibility to Change UI Themes
--   Possibility to protect your Host with username and password (default disabled)
--   Supports [REST API](app/api/README.md) (Application Programming Interface)
--   [Slack](https://api.slack.com/apps/) API integration
--   [Sentry](https://sentry.io/) error reporting
+-   Advance collaborative whiteboard for the teachers.
+-   Select Microphone - Speaker and Video source.
+-   Recording your Screen, Audio, or Video.
+-   Share any YouTube video in real-time to your participants.
+-   Share any mp4, webm, ogg video in real-time to your participants with possibility to download it.
+-   Full-Screen Mode on mouse click on the Video element, Zoom In/Out on video mouse wheel.
+-   Possibility to Change UI Themes.
+-   Possibility to protect your Host with username and password (default disabled).
+-   Supports [REST API](app/api/README.md) (Application Programming Interface).
+-   [Slack](https://api.slack.com/apps/) API integration.
+-   [Sentry](https://sentry.io/) error reporting.
 
 </details>
 
