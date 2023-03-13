@@ -937,8 +937,9 @@ function startServer() {
         function getPeerName(json = true) {
             try {
                 let peer_name =
-                    roomList.get(socket.room_id) &&
-                    roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name;
+                    (roomList.get(socket.room_id) &&
+                        roomList.get(socket.room_id).getPeers().get(socket.id).peer_info?.peer_name) ||
+                    'undefined';
                 if (json) {
                     return {
                         peer_name: peer_name,
