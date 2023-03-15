@@ -687,6 +687,7 @@ function joinRoom(peer_name, room_id) {
             roomIsReady,
             updateSession,
             is_pro,
+            APIPath,
         );
         realWhiteBoard.wbRC = rc;
         handleRoomClientEvents();
@@ -1110,75 +1111,26 @@ function saveImageLog(){
     }
 }
 
-function createNewSession() {
-
+async function createNewSession() {
 	// safe mechanism to avoid update before creating a new session
 	currentSessionID = "-";
 
 	var url = APIPath + "/posts/createsessionv2";
-    var rheaders = new Headers({
-        'Content-Type': 'application/json',
-    });
+   
     
     var data = JSON.stringify({
-		device: "TESTTEST",
+		device: "Glasses00",
 		datestart: Date.now(),
 		dateend: Date.now(),
 		email: loginParametersMail,
-		company: loginParametersCompany
+		company: loginParametersCompany,
+        url:url
 	});
 
-    let initObject = {
-        method:'POST', headers:rheaders,body:data
-    };
-
-    
-    
-    fetch(url, initObject)
-    .then((response) => response.json())    
-    .then((data) => {
-        //console.log("success", data);
-        currentSessionID = data._id;
-            RoomClient.currentSessionID = currentSessionID; // this passes the info to the RC
-			imageSessionCounter = 0;
-			console.log(currentSessionID);
-    })
-    .catch(function (err) {
-        console.log("[CreateSessionV2] Something went wrong!", err);
-    });
-    
-    
-    /*
-    // safe mechanism to avoid update before creating a new session
-    currentSessionID = "-";
-
-
-    // Sending and receiving data in JSON format using POST method
-	var xhr = new XMLHttpRequest();
-	var url = APIPath + "/posts/createsessionv2";
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.onreadystatechange = function () {
-        console.log(xhr);
-		if (xhr.readyState === 4 && xhr.status === 200) {
-			var json = JSON.parse(xhr.responseText);
-			currentSessionID = json._id;
-            RoomClient.currentSessionID = currentSessionID; // this passes the info to the RC
-			imageSessionCounter = 0;
-			console.log(currentSessionID);
-		}
-	};
-    console.log("cicciolo frollo");
-	var data = JSON.stringify({
-		device: "TESTTEST",
-		datestart: Date.now(),
-		dateend: Date.now(),
-		email: loginParametersMail,
-		company: loginParametersCompany
-	});
-	xhr.send(data);
-    console.log("cicciolo frollo 2");
-    */
+    var resp = await rc.getNewSessionID(data);
+    currentSessionID = resp;
+    RoomClient.currentSessionID = currentSessionID; // this passes the info to the RC
+    imageSessionCounter = 0;
 }
 
 function updateSession(actiontype, event) {
@@ -1282,100 +1234,7 @@ function updateSession(actiontype, event) {
     
     
     
-    /*
-    // safe mechanism number one
-	if (currentSessionID === "-")
-		return;
-	// safe mechanism number two
-	//let status = easyrtc.getConnectStatus(otherEasyrtcid);
-	//if (status === easyrtc.NOT_CONNECTED)
-	//	return;
 
-	// Sending and receiving data in JSON format using POST method
-	//
-	var xhr = new XMLHttpRequest();
-	//var url = "https://holomask.site:5000/posts/updatesession";
-	var url = APIPath + "/posts/updatesessionv2";
-	xhr.open("POST", url, true);
-	xhr.setRequestHeader("Content-Type", "application/json");
-	xhr.onreadystatechange = function () {
-		if (xhr.readyState === 4 && xhr.status === 200) {
-			var json = JSON.parse(xhr.responseText);
-			//currentSessionID = json._id;
-			console.log(json);
-		}
-	};
-
-	var realAction = "";
-	var realImage = "";
-	var realEvent = "";
-
-	if (actiontype === "date") {
-		realAction = "date";
-	}
-	if (actiontype === "image") {
-		realAction = "image";
-		realImage = event;
-	}
-	if (actiontype === "clearing") {
-		realAction = "clearing";
-	}
-	if (actiontype === "drawLine") {
-		realAction = "line";
-		realEvent = event;
-	}
-	if (actiontype === "drawArrow") {
-		realAction = "arrow";
-		realEvent = event;
-	}
-	if (actiontype === "drawRect") {
-		realAction = "rect";
-		realEvent = event;
-	}
-	if (actiontype === "drawCircle") {
-		realAction = "circle";
-		realEvent = event;
-	}
-	if (actiontype === "drawPoint") {
-		realAction = "point";
-		realEvent = event;
-	}
-	if (actiontype === "drawStroke") {
-		realAction = "stroke";
-		realEvent = event;
-	}
-	if (actiontype === "drawBufferPoints") {
-		realAction = "buffer";
-		realEvent = event;
-	}
-	if (actiontype === "chat") {
-		realAction = "chat";
-		realEvent = event;
-	}
-	if (actiontype === "note") {
-		realAction = "note";
-		realEvent = event;
-	}
-	if (actiontype === "drawText") {
-		realAction = "text";
-		realEvent = event;
-	}
-	if (actiontype === "drawDecal") {
-		realAction = "decal";
-		realEvent = event;
-	}
-
-	var data = JSON.stringify({
-		action: realAction,
-		image: realImage,
-		event: realEvent,
-		_id: currentSessionID,
-		mail: loginParametersMail,
-		company: loginParametersCompany,
-		dateend: Date.now(),
-	});
-
-	xhr.send(data);*/
 }
 
 function startSessionTimer() {

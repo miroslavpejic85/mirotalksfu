@@ -138,6 +138,7 @@ class RoomClient {
         successCallback,
         updateSession,
         isPro,
+        APIPath,
     ) {
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
@@ -216,6 +217,7 @@ class RoomClient {
 
         this.isPro = isPro;
         this.currentSessionID = "-"; // safe mechanism
+        this.APIPath = APIPath;
 
         console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
@@ -1970,6 +1972,13 @@ class RoomClient {
         return room_info;
     }
 
+    async getNewSessionID(data) {
+        console.log("we are in getnewsessionid");
+        let sessionid = await this.socket.request('createnewsession',data);
+        console.log(sessionid);
+        return sessionid;
+    }
+
     refreshParticipantsCount() {
         this.socket.emit('refreshParticipantsCount');
     }
@@ -2495,7 +2504,7 @@ class RoomClient {
             });
     }
 
-    sendMessage() {
+    async sendMessage() {
         if (!this.thereIsParticipants()) {
             this.cleanMessage();
             isChatPasteTxt = false;
@@ -2505,11 +2514,24 @@ class RoomClient {
         if (!peer_msg) {
             return this.cleanMessage();
         }
+
+        
+        
+        
+       
+        
+        
+        // this is a good point to translate the message
+        peer_msg = await this.translateMsg(peer_msg);
+        console.log(peer_msg);
+
+
         let data = {
             peer_name: this.peer_name,
             peer_id: this.peer_id,
             to_peer_id: 'all',
             peer_msg: peer_msg,
+            //peer_msg: translatedmes,
         };
       
         this.socket.emit('message', data);
@@ -2713,6 +2735,158 @@ class RoomClient {
             .catch((err) => {
                 this.userLog('error', err, 'top-end', 2000);
             });
+    }
+
+    async translateMsg(message) {
+
+/*
+        const res = await fetch("https://libretranslate.com/translate", {
+            method: "POST",
+            body: JSON.stringify({
+                q: message,
+                source: "auto",
+                target: "en"
+            }),
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log(await res.json());
+
+
+        return res.json().translatedText;
+*/
+
+
+        var retval = message;
+        var str = message;
+        var idiom = "nothing";
+
+        console.log(this.getId('langselect').value);
+
+        idiom = this.getId('langselect').value;
+
+
+/*
+        // check if we must translate
+        var exp = new RegExp(':EN:', 'g')
+        if(exp.test(str))
+            idiom = "EN";
+        
+        exp = new RegExp(':BG:', 'g')
+        if(exp.test(str))
+            idiom = "BG";
+        exp = new RegExp(':CS:', 'g')
+        if(exp.test(str))
+            idiom = "CS";
+        exp = new RegExp(':DA:', 'g')
+        if(exp.test(str))
+            idiom = "DA";
+        exp = new RegExp(':DE:', 'g')
+        if(exp.test(str))
+            idiom = "DE";
+        exp = new RegExp(':EL:', 'g')
+        if(exp.test(str))
+            idiom = "EL";
+        exp = new RegExp(':ES:', 'g')
+        if(exp.test(str))
+            idiom = "ES";
+        exp = new RegExp(':ET:', 'g')
+        if(exp.test(str))
+            idiom = "ET";
+        exp = new RegExp(':FI:', 'g')
+        if(exp.test(str))
+            idiom = "FI";
+                    
+                    
+        exp = new RegExp(':FR:', 'g')
+        if(exp.test(str))
+            idiom = "FR";
+        exp = new RegExp(':HU:', 'g')
+        if(exp.test(str))
+            idiom = "HU";
+        exp = new RegExp(':ID:', 'g')
+        if(exp.test(str))
+            idiom = "ID";
+        exp = new RegExp(':IT:', 'g')
+        if(exp.test(str))
+            idiom = "IT";
+        exp = new RegExp(':JA:', 'g')
+        if(exp.test(str))
+            idiom = "JA";
+        exp = new RegExp(':KO:', 'g')
+        if(exp.test(str))
+            idiom = "KO";
+        exp = new RegExp(':LT:', 'g')
+        if(exp.test(str))
+            idiom = "LT";
+        exp = new RegExp(':LV:', 'g')
+        if(exp.test(str))
+            idiom = "LV";
+                        
+        exp = new RegExp(':NB:', 'g')
+        if(exp.test(str))
+            idiom = "NB";
+        exp = new RegExp(':NL:', 'g')
+        if(exp.test(str))
+            idiom = "NL";
+        exp = new RegExp(':pl:', 'g')
+        if(exp.test(str))
+            idiom = "PL";
+        exp = new RegExp(':PT:', 'g')
+        if(exp.test(str))
+            idiom = "PT";
+        exp = new RegExp(':RO:', 'g')
+        if(exp.test(str))
+            idiom = "RO";
+        exp = new RegExp(':RU:', 'g')
+        if(exp.test(str))
+            idiom = "RU";
+        exp = new RegExp(':SK:', 'g')
+        if(exp.test(str))
+            idiom = "SK";
+        exp = new RegExp(':SL:', 'g')
+        if(exp.test(str))
+            idiom = "SL";
+
+
+        exp = new RegExp(':SV:', 'g')
+        if(exp.test(str))
+            idiom = "SV";
+        exp = new RegExp(':TR:', 'g')
+        if(exp.test(str))
+            idiom = "TR";
+        exp = new RegExp(':UK:', 'g')
+        if(exp.test(str))
+            idiom = "UK";
+        exp = new RegExp(':ZH:', 'g')
+        if(exp.test(str))
+            idiom = "ZH";
+            */
+    
+        if(idiom == "--")
+            return message;
+
+
+        
+        await fetch(this.APIPath + "/gets/translate?originstring=" + message + "&targetlanguage=" + idiom, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" }
+        })
+        .then((response) => response.json())
+        .then((data) => {
+            retval = data[0].text;
+            retval = JSON.stringify(retval);
+            console.log(retval);
+            
+        })
+        
+        return retval;
+
+        //console.log(await res.json());
+
+     
+
+        //return "test";
     }
 
     formatMsg(message) {

@@ -62,6 +62,8 @@ const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'
 //const Sentry = require('@sentry/node');
 //const { CaptureConsole } = require('@sentry/integrations');
 
+const fetch = require('node-fetch');
+
 // Slack API
 const CryptoJS = require('crypto-js');
 const qS = require('qs');
@@ -857,6 +859,22 @@ io.on('connection', (socket) => {
         log.debug('Send Room Info to', getPeerName());
         cb(roomList.get(socket.room_id).toJson());
     });
+
+    socket.on('createnewsession', (data, cb) => {
+        var myurl = JSON.parse(data).url;
+        
+        fetch(myurl, {
+            method: 'POST',
+            body: data,
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(res => res.json())
+        .then(json => cb( json._id))
+        .catch (err => cb("error!"))
+    });
+    
 
     socket.on('refreshParticipantsCount', () => {
         if (!roomList.has(socket.room_id)) return;
