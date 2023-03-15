@@ -72,7 +72,7 @@ module.exports = {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
             logLevel: 'error',
-            logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp'],
+            logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
         },
         // Router settings
         router: {
@@ -129,8 +129,8 @@ module.exports = {
             listenIps: [
                 {
                     ip: '0.0.0.0',
-                    announcedIp: getLocalIp(), // replace by public static IP address https://api.ipify.org
-                },
+                    announcedIp: getLocalIp(), // replace by public static IPV4 address https://api.ipify.org
+                }, //announcedIp: '' will be auto-detected on server start, for docker localPC set '127.0.0.1'
             ],
             initialAvailableOutgoingBitrate: 1000000,
             minimumAvailableOutgoingBitrate: 600000,

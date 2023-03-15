@@ -25,7 +25,7 @@ module.exports = class Room {
     // ####################################################
 
     createTheRouter() {
-        const mediaCodecs = config.mediasoup.router.mediaCodecs;
+        const { mediaCodecs } = config.mediasoup.router;
         this.worker
             .createRouter({
                 mediaCodecs,
@@ -49,8 +49,8 @@ module.exports = class Room {
 
         this.audioLevelObserver = await router.createAudioLevelObserver({
             maxEntries: 1,
-            threshold: -80,
-            interval: 800,
+            threshold: -70,
+            interval: 1000,
         });
 
         this.audioLevelObserver.on('volumes', (volumes) => {
@@ -66,7 +66,7 @@ module.exports = class Room {
         if (Date.now() > this.audioLastUpdateTime + 1000) {
             this.audioLastUpdateTime = Date.now();
             const { producer, volume } = volumes[0];
-            let audioVolume = Math.round(Math.pow(10, volume / 80) * 10); // 1-10
+            let audioVolume = Math.round(Math.pow(10, volume / 70) * 10); // 1-10
             if (audioVolume > 2) {
                 // log.debug('PEERS', this.peers);
                 this.peers.forEach((peer) => {
@@ -77,7 +77,7 @@ module.exports = class Room {
                             peer.peer_audio === true
                         ) {
                             let data = { peer_name: peer.peer_name, peer_id: peer.id, audioVolume: audioVolume };
-                            // log.debug('audioLevelObserver id [' + this.id + ']', data);
+                            //log.debug('audioLevelObserver id [' + this.id + ']', data);
                             this.broadCast(0, 'audioVolume', data);
                         }
                     });
@@ -140,6 +140,7 @@ module.exports = class Room {
     }
 
     async removePeer(socket_id) {
+        if (!this.peers.has(socket_id)) return;
         this.peers.get(socket_id).close();
         this.peers.delete(socket_id);
     }
@@ -149,10 +150,10 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-        const { maxIncomingBitrate, initialAvailableOutgoingBitrate } = config.mediasoup.webRtcTransport;
+        const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenIps } = config.mediasoup.webRtcTransport;
 
         const transport = await this.router.createWebRtcTransport({
-            listenIps: config.mediasoup.webRtcTransport.listenIps,
+            listenIps: listenIps,
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,
@@ -226,7 +227,7 @@ module.exports = class Room {
                 rtpCapabilities,
             })
         ) {
-            return log.error('Can not consume', {
+            return log.warn('Can not consume', {
                 socket_id: socket_id,
                 consumer_transport_id: consumer_transport_id,
                 producer_id: producer_id,

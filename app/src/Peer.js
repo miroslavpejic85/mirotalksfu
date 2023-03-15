@@ -91,6 +91,14 @@ module.exports = class Peer {
 
         this.producers.set(producer.id, producer);
 
+        log.debug('Producer ----->', { type: producer.type });
+
+        if (['simulcast', 'svc'].includes(producer.type)) {
+            log.debug('Producer scalabilityMode ----->', {
+                scalabilityMode: producer.rtpParameters.encodings[0].scalabilityMode,
+            });
+        }
+
         producer.on(
             'transportclose',
             function () {
@@ -107,6 +115,7 @@ module.exports = class Peer {
     }
 
     closeProducer(producer_id) {
+        if (!this.producers.has(producer_id)) return;
         try {
             this.producers.get(producer_id).close();
         } catch (ex) {
@@ -133,11 +142,33 @@ module.exports = class Peer {
             return console.error('Consume failed', error);
         }
 
-        if (consumer.type === 'simulcast') {
-            await consumer.setPreferredLayers({
-                spatialLayer: 2,
-                temporalLayer: 2,
-            });
+        log.debug('Consumer ----->', { type: consumer.type });
+
+        // https://www.w3.org/TR/webrtc-svc/
+
+        switch (consumer.type) {
+            case 'simulcast':
+                // L1T3/L2T3/L3T3
+                await consumer.setPreferredLayers({
+                    spatialLayer: 3, // 1 2 3
+                    temporalLayer: 3,
+                });
+                log.debug('Consumer scalabilityMode ----->', {
+                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+                });
+                break;
+            case 'svc':
+                // L3T3
+                await consumer.setPreferredLayers({
+                    spatialLayer: 3,
+                    temporalLayer: 3,
+                });
+                log.debug('Consumer scalabilityMode ----->', {
+                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+                });
+                break;
+            default:
+                break;
         }
 
         this.consumers.set(consumer.id, consumer);
@@ -149,7 +180,7 @@ module.exports = class Peer {
                     peer_name: this.peer_info.peer_name,
                     consumer_id: consumer.id,
                 });
-                this.consumers.delete(consumer.id);
+                this.removeConsumer(consumer.id);
             }.bind(this),
         );
 
@@ -167,6 +198,8 @@ module.exports = class Peer {
     }
 
     removeConsumer(consumer_id) {
-        this.consumers.delete(consumer_id);
+        if (this.consumers.has(consumer_id)) {
+            this.consumers.delete(consumer_id);
+        }
     }
 };

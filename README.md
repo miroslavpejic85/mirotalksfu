@@ -24,31 +24,31 @@
 <br/>
 
 -   Is `100% Free` - `Open Source` - `Self Hosted` and [PWA](https://en.wikipedia.org/wiki/Progressive_web_application)!
--   No download, plug-in or login required, entirely browser-based
--   Unlimited number of conference rooms, without call time limitation
--   Desktop and Mobile compatible
--   Translated in 133 languages
--   Optimized Room URL Sharing (share it to your participants, wait for them to join)
--   Possibility to Password protect the Room for the meeting
+-   No download, plug-in or login required, entirely browser-based.
+-   Unlimited number of conference rooms, without call time limitation.
+-   Desktop and Mobile compatible.
+-   Translated in 133 languages.
+-   Optimized Room URL Sharing for mobile.
+-   Possibility to Password protect the Room for the meeting.
 -   Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator.
--   Webcam Streaming up to 4K quality (Front - Rear for mobile)
--   Echo cancellation and noise suppression that makes your audio crystal clear
+-   Webcam Streaming up to 4K quality (Front - Rear for mobile).
+-   Echo cancellation and noise suppression that makes your audio crystal clear.
 -   Screen Sharing to present documents, slides, and more ...
 -   File Sharing (with drag-and-drop), share any files to your participants in the room
 -   Take a snapshot from the video frame(screen/cam) to save it as an image on your device.
 -   Chat with Emoji Picker to show you feeling, private messages, Markdown support, possibility to Save the conversations, and many more.
 -   Speech recognition, execute the app features simply with your voice.
--   Advance collaborative whiteboard for the teachers
--   Select Microphone - Speaker and Video source
--   Recording your Screen, Audio, or Video
--   Share any YouTube video in real-time to your participants
--   Share any mp4, webm, ogg video in real-time to your participants with possibility to download it
--   Full-Screen Mode on mouse click on the Video element
--   Possibility to Change UI Themes
--   Possibility to protect your Host with username and password (default disabled)
--   Supports [REST API](app/api/README.md) (Application Programming Interface)
--   [Slack](https://api.slack.com/apps/) API integration
--   [Sentry](https://sentry.io/) error reporting
+-   Advance collaborative whiteboard for the teachers.
+-   Select Microphone - Speaker and Video source.
+-   Recording your Screen, Audio, or Video.
+-   Share any YouTube video in real-time to your participants.
+-   Share any mp4, webm, ogg video in real-time to your participants with possibility to download it.
+-   Full-Screen Mode on mouse click on the Video element, Zoom In/Out on video mouse wheel.
+-   Possibility to Change UI Themes.
+-   Possibility to protect your Host with username and password (default disabled).
+-   Supports [REST API](app/api/README.md) (Application Programming Interface).
+-   [Slack](https://api.slack.com/apps/) API integration.
+-   [Sentry](https://sentry.io/) error reporting.
 
 </details>
 
@@ -90,7 +90,7 @@ Embedding a meeting into a service or app using an iframe.
 
 ```html
 <iframe
-    allow="camera; microphone; fullscreen; display-capture; autoplay"
+    allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; autoplay"
     src="https://sfu.mirotalk.com/newroom"
     style="height: 100%; width: 100%; border: 0px;"
 ></iframe>
@@ -103,7 +103,7 @@ Embedding a meeting into a service or app using an iframe.
 
 <br/>
 
--   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node versions [12.X](https://nodejs.org/en/blog/release/v12.22.1/) - [14.X](https://nodejs.org/en/blog/release/v14.17.5/) - [16.X](https://nodejs.org/en/blog/release/v16.15.0/).
+-   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [16.X](https://nodejs.org/en/blog/release/v16.15.0/).
 
 -   Requirements install example for `Ubuntu 20.04`
 
@@ -227,7 +227,11 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotal
 
 This application is running for `demonstration purposes` on [Hetzner](https://www.hetzner.com/), one of `the best` [cloud providers](https://www.hetzner.com/cloud) and [dedicated root servers](https://www.hetzner.com/dedicated-rootserver).
 
-Use [this link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 IN CLOUD CREDITS` on Hetzner.
+---
+
+Use [my personal link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€⁠20 IN CLOUD CREDITS`.
+
+---
 
 If you need help to deploy `MiroTalk SFU` instance on `your dedicated cloud server`, or for other needs, don't hesitate to contact us at sfu.mirotalk@gmail.com
 
@@ -298,7 +302,7 @@ https://sfu.mirotalk.com
 
 MiroTalk is free and can be modified and forked. But the conditions of the AGPLv3 (GNU Affero General Public License v3.0) need to be respected. In particular modifications need to be free as well and made available to the public. Get a quick overview of the license at [Choose an open source license](https://choosealicense.com/licenses/agpl-3.0/).
 
-For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [buy directly via CodeCanyon](https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970).
+For a MiroTalk license under conditions other than AGPLv3, please contact us at license.mirotalk@gmail.com or [purchase directly from CodeCanyon](https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970).
 
 </details>
 
@@ -309,13 +313,13 @@ For a MiroTalk license under conditions other than AGPLv3, please contact us at 
 
 Do you find MiroTalk useful?
 
-Support the project by [becoming a sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
+Support the project by [becoming a backer or sponsor](https://github.com/sponsors/miroslavpejic85). Your logo will show up here with a link to your website.
 
-[![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)
-
-[![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn)
-
-[![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)
+|                                                                                   |                                                                                    |
+| --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/)           | [![Hetzner](public/sponsors/Hetzner.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn) |
+| [![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)               | [![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com)     |
+| [![BrowserStack](public/sponsors/BrowserStack.png)](https://www.browserstack.com) |
 
 </details>
 
@@ -329,3 +333,5 @@ Support the project by [becoming a sponsor](https://github.com/sponsors/miroslav
 Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
 
 </details>
+
+This project is tested with [BrowserStack](https://www.browserstack.com).

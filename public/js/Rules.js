@@ -16,6 +16,7 @@ const BUTTONS = {
         startScreenButton: true,
         swapCameraButton: true,
         chatButton: true,
+        participantsButton: true,
         whiteboardButton: true,
         settingsButton: true,
         aboutButton: true, // Please keep me always visible, thank you!
@@ -25,7 +26,6 @@ const BUTTONS = {
         lockRoomButton: true,
         unlockRoomButton: true,
         lobbyButton: true,
-        participantsButton: true,
         tabRecording: true,
     },
     producerVideo: {

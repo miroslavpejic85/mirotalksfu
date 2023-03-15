@@ -81,6 +81,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
+    /* background: var(--body-bg); */
     background: url('../images/background.jpg');
 }
 
@@ -88,6 +89,7 @@ body {
 # Google Translate
 --------------------------------------------------------------*/
 
+.skiptranslate iframe,
 .goog-te-banner-frame.skiptranslate {
     display: none !important;
 }
@@ -103,21 +105,58 @@ body {
 #loadingDiv {
     color: #fff;
     padding: 30px;
+    text-align: center;
     border-radius: 10px;
-    background: transparent;
+    background: rgba(0, 0, 0, 0.7);
 }
 #loadingDiv h1 {
     padding: 10px;
     font-size: 60px;
     font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
 }
-#loadingDiv p {
+#loadingDiv img {
+    margin-top: 5px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+}
+#loadingDiv pre {
     padding: 10px;
     font-family: 'Comfortaa';
-    background: rgba(0, 0, 0, 0.7);
     border-radius: 10px;
+}
+
+/*--------------------------------------------------------------
+# Init User
+--------------------------------------------------------------*/
+
+.init-user {
+    display: block;
+    padding: 5px;
+}
+
+.init-user select {
+    width: 100%;
+    margin-top: 15px;
+    padding: 10px;
+    background: #2c2c2c;
+    color: white;
+    border: var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.init-user button {
+    margin-top: 20px;
+    margin-bottom: 10px;
+    width: 50px;
+    background-color: transparent;
+}
+
+.init-user button:hover {
+    color: white;
+    background-color: rgb(35, 35, 35);
+    transform: scale(1);
 }
 
 /*--------------------------------------------------------------
@@ -177,7 +216,9 @@ body {
 
 #initAudioButton,
 #initVideoButton,
-#initAudioVideoButton {
+#initAudioVideoButton,
+#initStartScreenButton,
+#initStopScreenButton {
     font-size: 1.2rem;
     padding: 10px;
     border: var(--border);
@@ -230,6 +271,7 @@ body {
     height: 40px;
     color: #fff;
     background-color: transparent;
+    border: var(--border);
     border-radius: 5px;
     cursor: pointer;
 }
@@ -240,13 +282,6 @@ body {
 
 #mySettings button {
     border-radius: 5px;
-}
-
-#sessionTimeButton {
-    cursor: default;
-    position: absolute;
-    right: 15px;
-    bottom: 15px;
 }
 
 .form-check-input {
@@ -297,8 +332,28 @@ body {
 }
 
 .tabcontent button i {
+    padding: 10px;
     border: var(--border);
-    border-radius: var(--border-radius);
+    border-radius: 5px;
+}
+
+.tabcontent button {
+    margin-top: 5px;
+    width: 100%;
+    text-align: left;
+}
+
+.tabcontent button:hover {
+    background-color: #121212;
+    transform: scale(1);
+}
+
+#sessionTimeButton {
+    cursor: default;
+    position: absolute;
+    right: 15px;
+    bottom: 15px;
+    width: auto;
 }
 
 /* on open display devices tab */
@@ -580,6 +635,10 @@ em-emoji-picker {
     background-color: transparent !important;
 }
 
+.swal2-input {
+    border: var(--border) !important;
+}
+
 .swal2-popup {
     /* border: var(--border) !important; */
     border: 0.5px solid rgb(255 255 255 / 32%) !important;
@@ -636,6 +695,11 @@ em-emoji-picker {
 /*--------------------------------------------------------------
 # Common
 --------------------------------------------------------------*/
+
+select {
+    height: 40px;
+    line-height: 40px;
+}
 
 .hidden {
     display: none;
@@ -840,11 +904,12 @@ button:hover {
 #receiveFileDiv {
     z-index: 8;
     display: none;
-    padding: 10px;
+    padding: 20px;
     margin: auto;
     min-width: 320px;
     background: var(--body-bg);
-    border-radius: 5px;
+    border: var(--border);
+    border-radius: var(--border-radius);
     color: #fff;
     overflow: hidden;
 }

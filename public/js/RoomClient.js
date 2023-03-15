@@ -5,12 +5,12 @@
  * MiroTalk SFU - Client component
  *
  * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
- * @link    Live demo: https://sfu.mirotalk.com
+ * @link    Official Live demo: https://sfu.mirotalk.com
  * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or buy directly via CodeCanyon
+ * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.0
+ * @version 1.0.4
  *
  */
 
@@ -42,6 +42,7 @@ const html = {
 };
 
 const image = {
+    about: '../images/mirotalksfu-logo.png',
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
@@ -66,30 +67,6 @@ const mediaType = {
     camera: 'cameraType',
     screen: 'screenType',
     speaker: 'speakerType',
-};
-
-const LOCAL_STORAGE_DEVICES = {
-    audio: {
-        count: 0,
-        index: 0,
-        select: null,
-    },
-    speaker: {
-        count: 0,
-        index: 0,
-        select: null,
-    },
-    video: {
-        count: 0,
-        index: 0,
-        select: null,
-    },
-};
-
-const DEVICES_COUNT = {
-    audio: 0,
-    speaker: 0,
-    video: 0,
 };
 
 const _EVENTS = {
@@ -135,6 +112,7 @@ class RoomClient {
         isAudioAllowed,
         isVideoAllowed,
         isScreenAllowed,
+        joinRoomWithScreen,
         successCallback,
         updateSession,
         isPro,
@@ -156,6 +134,7 @@ class RoomClient {
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
         this.isScreenAllowed = isScreenAllowed;
+        this.joinRoomWithScreen = joinRoomWithScreen;
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
@@ -190,7 +169,7 @@ class RoomClient {
 
         this.RoomPassword = null;
 
-        // file transfer settings
+        // File transfer settings
         this.fileToSend = null;
         this.fileReader = null;
         this.receiveBuffer = [];
@@ -201,6 +180,16 @@ class RoomClient {
         this.receiveInProgress = false;
         this.fileSharingInput = '*';
         this.chunkSize = 1024 * 16; // 16kb/s
+
+        // Encodings
+        this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
+        this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
+        this.forceH264 = false; // Force H264 codec for webcam and screen sharing
+        this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
+        this.enableSharingLayers = false; // Enable simulcast or SVC for screen sharing
+        this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
+        this.webcamScalabilityMode = 'L3T3'; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
+        this.sharingScalabilityMode = 'L3T3'; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
 
         this.myVideoEl = null;
         this.myAudioEl = null;
@@ -218,6 +207,8 @@ class RoomClient {
         this.isPro = isPro;
         this.currentSessionID = "-"; // safe mechanism
         this.APIPath = APIPath;
+        this.debug = false;
+        this.debug ? window.localStorage.setItem('debug', 'mediasoup*') : window.localStorage.removeItem('debug');
 
         console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
@@ -303,7 +294,7 @@ class RoomClient {
         this.device = await this.loadDevice(data);
         console.log('07.1 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
-        this.startLocalMedia();
+        await this.startLocalMedia();
         this.socket.emit('getProducers');
     }
 
@@ -704,31 +695,8 @@ class RoomClient {
     // START LOCAL AUDIO VIDEO MEDIA
     // ####################################################
 
-    startLocalMedia() {
-        let localStorageDevices = this.getLocalStorageDevices();
-        console.log('08 ----> Get Local Storage Devices before', localStorageDevices);
-        if (localStorageDevices) {
-            microphoneSelect.selectedIndex = localStorageDevices.audio.index;
-            speakerSelect.selectedIndex = localStorageDevices.speaker.index;
-            videoSelect.selectedIndex = localStorageDevices.video.index;
-            //
-            if (DEVICES_COUNT.audio != localStorageDevices.audio.count) {
-                console.log('08.1 ----> Audio devices seems changed, use default index 0');
-                microphoneSelect.selectedIndex = 0;
-                this.setLocalStorageDevices(mediaType.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
-            }
-            if (DEVICES_COUNT.speaker != localStorageDevices.speaker.count) {
-                console.log('08.2 ----> Speaker devices seems changed, use default index 0');
-                speakerSelect.selectedIndex = 0;
-                this.setLocalStorageDevices(mediaType.speaker, speakerSelect.selectedIndex, speakerSelect.value);
-            }
-            if (DEVICES_COUNT.video != localStorageDevices.video.count) {
-                console.log('08.3 ----> Video devices seems changed, use default index 0');
-                videoSelect.selectedIndex = 0;
-                this.setLocalStorageDevices(mediaType.video, videoSelect.selectedIndex, videoSelect.value);
-            }
-            console.log('08.4 ----> Get Local Storage Devices after', this.getLocalStorageDevices());
-        }
+    async startLocalMedia() {
+        console.log('08 ----> Start local media');
         if (this.isAudioAllowed) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
@@ -745,6 +713,10 @@ class RoomClient {
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
         }
+        if (this.joinRoomWithScreen) {
+            console.log('08 ----> Start Screen media');
+            this.produce(mediaType.screen, null, false, true);
+        }
         // if (this.isScreenAllowed) {
         //     this.shareScreen();
         // }
@@ -754,7 +726,7 @@ class RoomClient {
     // PRODUCER
     // ####################################################
 
-    async produce(type, deviceId = null, swapCamera = false) {
+    async produce(type, deviceId = null, swapCamera = false, init = false) {
         let mediaConstraints = {};
         let audio = false;
         let screen = false;
@@ -789,12 +761,17 @@ class RoomClient {
         let videoPrivacyBtn = this.getId(this.peer_id + '__vp');
         if (videoPrivacyBtn) videoPrivacyBtn.style.display = screen ? 'none' : 'inline';
 
-        console.log(`Media contraints ${type}:`, mediaConstraints);
+        console.log(`Media constraints ${type}:`, mediaConstraints);
+
         let stream;
         try {
-            stream = screen
-                ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
-                : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            if (init) {
+                stream = initStream;
+            } else {
+                stream = screen
+                    ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
+                    : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+            }
 
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
 
@@ -809,12 +786,43 @@ class RoomClient {
                 },
             };
 
+            if (audio) {
+                console.log('AUDIO ENABLE OPUS');
+                params.codecOptions = {
+                    opusStereo: true,
+                    opusDtx: true,
+                    opusFec: true,
+                    opusNack: true,
+                };
+            }
+
             if (!audio && !screen) {
-                params.encodings = this.getEncoding();
+                const { encodings, codec } = this.getWebCamEncoding();
+                console.log('GET WEBCAM ENCODING', {
+                    encodings: encodings,
+                    codecs: codec,
+                });
+                params.encodings = encodings;
+                params.codecs = codec;
                 params.codecOptions = {
                     videoGoogleStartBitrate: 1000,
                 };
             }
+
+            if (!audio && screen) {
+                const { encodings, codec } = this.getScreenEncoding();
+                console.log('GET SCREEN ENCODING', {
+                    encodings: encodings,
+                    codecs: codec,
+                });
+                params.encodings = encodings;
+                params.codecs = codec;
+                params.codecOptions = {
+                    videoGoogleStartBitrate: 1000,
+                };
+            }
+
+            console.log('PRODUCER PARAMS', params);
 
             producer = await this.producerTransport.produce(params);
 
@@ -1036,9 +1044,12 @@ class RoomClient {
 
         switch (videoQuality.value) {
             case 'default':
+                // This will make the browser use HD Video and 30fps as default.
                 videoConstraints = {
                     audio: false,
                     video: {
+                        width: { ideal: 1280 },
+                        height: { ideal: 720 },
                         deviceId: deviceId,
                         aspectRatio: 1.777,
                         frameRate: frameRate,
@@ -1126,32 +1137,149 @@ class RoomClient {
         return {
             audio: false,
             video: {
-                frameRate: {
-                    ideal: 15,
-                    max: 30,
-                },
+                width: { max: 1920 },
+                height: { max: 1080 },
+                frameRate: { max: 30 },
             },
         };
     }
 
-    getEncoding() {
-        return [
-            {
-                rid: 'r0',
-                maxBitrate: 100000,
-                scalabilityMode: 'S1T3',
-            },
-            {
-                rid: 'r1',
-                maxBitrate: 300000,
-                scalabilityMode: 'S1T3',
-            },
-            {
-                rid: 'r2',
-                maxBitrate: 900000,
-                scalabilityMode: 'S1T3',
-            },
-        ];
+    getWebCamEncoding() {
+        let encodings;
+        let codec;
+
+        console.log('WEBCAM ENCODING', {
+            forceVP8: this.forceVP8,
+            forceVP9: this.forceVP9,
+            forceH264: this.forceH264,
+            numSimulcastStreams: this.numSimulcastStreams,
+            enableWebcamLayers: this.enableWebcamLayers,
+            webcamScalabilityMode: this.webcamScalabilityMode,
+        });
+
+        if (this.forceVP8) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp8');
+            if (!codec) throw new Error('Desired VP8 codec+configuration is not supported');
+        } else if (this.forceH264) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/h264');
+            if (!codec) throw new Error('Desired H264 codec+configuration is not supported');
+        } else if (this.forceVP9) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
+            if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        }
+
+        if (this.enableWebcamLayers) {
+            console.log('WEBCAM SIMULCAST/SVC ENABLED');
+
+            const firstVideoCodec = this.device.rtpCapabilities.codecs.find((c) => c.kind === 'video');
+            console.log('WEBCAM ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
+
+            // If VP9 is the only available video codec then use SVC.
+            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
+                console.log('WEBCAM ENCODING: VP9 with SVC');
+                encodings = [
+                    {
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L3T3_KEY',
+                    },
+                ];
+            } else {
+                console.log('WEBCAM ENCODING: VP8 or H264 with simulcast');
+                encodings = [
+                    {
+                        scaleResolutionDownBy: 1,
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    },
+                ];
+                if (this.numSimulcastStreams > 1) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 2,
+                        maxBitrate: 1000000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    });
+                }
+                if (this.numSimulcastStreams > 2) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 4,
+                        maxBitrate: 500000,
+                        scalabilityMode: this.webcamScalabilityMode || 'L1T3',
+                    });
+                }
+            }
+        }
+        return { encodings, codec };
+    }
+
+    getScreenEncoding() {
+        let encodings;
+        let codec;
+
+        console.log('SCREEN ENCODING', {
+            forceVP8: this.forceVP8,
+            forceVP9: this.forceVP9,
+            forceH264: this.forceH264,
+            numSimulcastStreams: this.numSimulcastStreams,
+            enableSharingLayers: this.enableSharingLayers,
+            sharingScalabilityMode: this.sharingScalabilityMode,
+        });
+
+        if (this.forceVP8) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp8');
+            if (!codec) throw new Error('Desired VP8 codec+configuration is not supported');
+        } else if (this.forceH264) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/h264');
+            if (!codec) throw new Error('Desired H264 codec+configuration is not supported');
+        } else if (this.forceVP9) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
+            if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        }
+
+        if (this.enableSharingLayers) {
+            console.log('SCREEN SIMULCAST/SVC ENABLED');
+
+            const firstVideoCodec = this.device.rtpCapabilities.codecs.find((c) => c.kind === 'video');
+            console.log('SCREEN ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
+
+            // If VP9 is the only available video codec then use SVC.
+            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
+                console.log('SCREEN ENCODING: VP9 with SVC');
+                encodings = [
+                    {
+                        maxBitrate: 5000000,
+                        scalabilityMode: 'L3T3',
+                        dtx: true,
+                    },
+                ];
+            } else {
+                console.log('SCREEN ENCODING: VP8 or H264 with simulcast.');
+                encodings = [
+                    {
+                        scaleResolutionDownBy: 1,
+                        maxBitrate: 5000000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    },
+                ];
+                if (this.numSimulcastStreams > 1) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 2,
+                        maxBitrate: 1000000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    });
+                }
+                if (this.numSimulcastStreams > 2) {
+                    encodings.unshift({
+                        scaleResolutionDownBy: 4,
+                        maxBitrate: 500000,
+                        scalabilityMode: this.sharingScalabilityMode || 'L1T3',
+                        dtx: true,
+                    });
+                }
+            }
+        }
+        return { encodings, codec };
     }
 
     closeThenProduce(type, deviceId, swapCamera = false) {
@@ -1232,6 +1360,7 @@ class RoomClient {
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
+                this.handleZV(elem.id);
                 if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
@@ -1393,6 +1522,7 @@ class RoomClient {
         }
         this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
             function ({ consumer, stream, kind }) {
+                console.log('CONSUMER MEDIA TYPE ----> ' + type);
                 console.log('CONSUMER', consumer);
 
                 this.consumers.set(consumer.id, consumer);
@@ -1400,8 +1530,6 @@ class RoomClient {
                 if (kind === 'video') {
                     if (isParticipantsListOpen) getRoomParticipants(true);
                 }
-
-                console.log('CONSUMER MEDIA TYPE ----> ' + type);
 
                 this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
 
@@ -1432,7 +1560,7 @@ class RoomClient {
         console.log('DATA', data);
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};
-        const streamId = peer_id + (type == mediaType.screen ? '-screensharing' : '-mic-webcam');
+        const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
         const consumer = await this.consumerTransport.consume({
             id,
             producerId,
@@ -1556,6 +1684,7 @@ class RoomClient {
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
+                this.handleZV(elem.id);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
@@ -1684,7 +1813,7 @@ class RoomClient {
             ko.className = html.kickOut;
         }
         i = document.createElement('img');
-        i.className = 'center pulsate';
+        i.className = 'center'; // pulsate
         i.id = peer_id + '__img';
         p = document.createElement('p');
         p.id = peer_id + '__name';
@@ -1856,7 +1985,7 @@ class RoomClient {
                     console.error('Attach SinkId error: ', errorMessage);
                     this.userLog('error', errorMessage, 'top-end');
                     speakerSelect.selectedIndex = 0;
-                    this.setLocalStorageDevices(mediaType.speaker, 0, speakerSelect.value);
+                    lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, 0, speakerSelect.value);
                 });
         } else {
             let error = `Browser seems doesn't support output device selection.`;
@@ -2325,6 +2454,24 @@ class RoomClient {
     }
 
     // ####################################################
+    // HANDLE VIDEO ZOOM-IN/OUT
+    // ####################################################
+
+    handleZV(elemId) {
+        let videoPlayer = this.getId(elemId);
+        let zoom = 1;
+        if (videoPlayer) {
+            videoPlayer.addEventListener('wheel', (e) => {
+                e.preventDefault();
+                let delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
+                delta > 0 ? (zoom *= 1.2) : (zoom /= 1.2);
+                if (zoom < 1) zoom = 1;
+                videoPlayer.style.scale = zoom;
+            });
+        }
+    }
+
+    // ####################################################
     // REMOVE VIDEO PIN MEDIA CONTAINER
     // ####################################################
 
@@ -2526,6 +2673,7 @@ class RoomClient {
         console.log(peer_msg);
 
 
+        this.peer_name = filterXSS(this.peer_name);
         let data = {
             peer_name: this.peer_name,
             peer_id: this.peer_id,
@@ -2585,7 +2733,7 @@ class RoomClient {
         if (!this.thereIsParticipants()) {
             isChatPasteTxt = false;
             this.cleanMessage();
-            return this.userLog('info', 'No participants in the room expect you', 'top-end');
+            return this.userLog('info', 'No participants in the room except you', 'top-end');
         }
         Swal.fire({
             background: swalBackground,
@@ -2607,11 +2755,13 @@ class RoomClient {
                 if (!peer_msg) {
                     return this.cleanMessage();
                 }
+                this.peer_name = filterXSS(this.peer_name);
+                const toPeerName = filterXSS(to_peer_name);
                 let data = {
                     peer_name: this.peer_name,
                     peer_id: this.peer_id,
                     to_peer_id: to_peer_id,
-                    to_peer_name: to_peer_name,
+                    to_peer_name: toPeerName,
                     peer_msg: peer_msg,
                 };
                 console.log('Send message:', data);
@@ -2624,7 +2774,7 @@ class RoomClient {
                     this.peer_id,
                     peer_msg,
                     to_peer_id,
-                    to_peer_name,
+                    toPeerName,
                 );
                 if (!this.isChatOpen) this.toggleChat();
             }
@@ -3260,7 +3410,10 @@ class RoomClient {
             if (!this.thereIsParticipants()) {
                 return userLog('info', 'No participants detected', 'top-end');
             }
-            let fileInfo = {
+            // prevent XSS injection
+            if (this.isHtml(this.fileToSend.name)) return userLog('warning', 'Invalid file name!', 'top-end', 5000);
+
+            const fileInfo = {
                 peer_id: peer_id,
                 broadcast: broadcast,
                 peer_name: this.peer_name,
@@ -4498,34 +4651,5 @@ class RoomClient {
                 true,
             );
         }
-    }
-
-    // ####################################################
-    // LOCAL STORAGE DEVICES
-    // ####################################################
-
-    setLocalStorageDevices(type, index, select) {
-        switch (type) {
-            case RoomClient.mediaType.audio:
-                LOCAL_STORAGE_DEVICES.audio.count = DEVICES_COUNT.audio;
-                LOCAL_STORAGE_DEVICES.audio.index = index;
-                LOCAL_STORAGE_DEVICES.audio.select = select;
-                break;
-            case RoomClient.mediaType.video:
-                LOCAL_STORAGE_DEVICES.video.count = DEVICES_COUNT.video;
-                LOCAL_STORAGE_DEVICES.video.index = index;
-                LOCAL_STORAGE_DEVICES.video.select = select;
-                break;
-            case RoomClient.mediaType.speaker:
-                LOCAL_STORAGE_DEVICES.speaker.count = DEVICES_COUNT.speaker;
-                LOCAL_STORAGE_DEVICES.speaker.index = index;
-                LOCAL_STORAGE_DEVICES.speaker.select = select;
-                break;
-        }
-        localStorage.setItem('LOCAL_STORAGE_DEVICES', JSON.stringify(LOCAL_STORAGE_DEVICES));
-    }
-
-    getLocalStorageDevices() {
-        return JSON.parse(localStorage.getItem('LOCAL_STORAGE_DEVICES'));
     }
 }
