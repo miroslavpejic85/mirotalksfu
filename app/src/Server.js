@@ -692,54 +692,13 @@ function startServer() {
             }
         });
 
-       
-
-
-            socket.on('wbCanvasToJson', (data) => {
-                if (!roomList.has(socket.room_id)) return;
-        
-                // let objLength = bytesToSize(Object.keys(data).length);
-                // log.debug('Send Whiteboard canvas JSON', { length: objLength });
-                roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
-            });
-
-    socket.on('wbSingleToJson', (data) => {
-        if (!roomList.has(socket.room_id)) return;
-
-        // let objLength = bytesToSize(Object.keys(data).length);
-        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
-        roomList.get(socket.room_id).broadCast(socket.id, 'wbSingleToJson', data);
-    });
-
-    socket.on('wbModify', (data) => {
-        if (!roomList.has(socket.room_id)) return;
-
-        // let objLength = bytesToSize(Object.keys(data).length);
-        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
-        roomList.get(socket.room_id).broadCast(socket.id, 'wbModify', data);
-    });
-
-    socket.on('wbDeleteObject', (data) => {
-        if (!roomList.has(socket.room_id)) return;
-
-        // let objLength = bytesToSize(Object.keys(data).length);
-        // log.debug('Send Whiteboard canvas JSON', { length: objLength });
-        roomList.get(socket.room_id).broadCast(socket.id, 'wbDeleteObject', data);
-    });
-
-    socket.on('wbPointer', (data) => {
-        if (!roomList.has(socket.room_id)) return;
-
-        roomList.get(socket.room_id).broadCast(socket.id, 'wbPointer', data);
-    });
-
-    // socket.on('whiteboardAction', (data) => {
-    //     if (!roomList.has(socket.room_id)) return;
-
-    //         // let objLength = bytesToSize(Object.keys(data).length);
-    //         // log.debug('Send Whiteboard canvas JSON', { length: objLength });
-    //         roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
-    //     });
+        socket.on('wbCanvasToJson', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+    
+            // let objLength = bytesToSize(Object.keys(data).length);
+            // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+            roomList.get(socket.room_id).broadCast(socket.id, 'wbCanvasToJson', data);
+        });
 
         socket.on('whiteboardAction', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
@@ -911,22 +870,6 @@ function startServer() {
             roomList.get(socket.room_id).closeProducer(socket.id, data.producer_id);
         });
 
-    socket.on('createnewsession', (data, cb) => {
-        var myurl = JSON.parse(data).url;
-        
-        fetch(myurl, {
-            method: 'POST',
-            body: data,
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(res => res.json())
-        .then(json => cb( json._id))
-        .catch (err => cb("error!"))
-    });
-    
-
         socket.on('resume', async (_, callback) => {
             await consumer.resume();
             callback();
@@ -1007,6 +950,54 @@ function startServer() {
             removeIP(socket);
 
             callback('Successfully exited room');
+        });
+
+        //////////////////
+        // ROOMXR PRO
+        /////////////////
+        socket.on('createnewsession', (data, cb) => {
+            var myurl = JSON.parse(data).url;
+            
+            fetch(myurl, {
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(res => res.json())
+            .then(json => cb( json._id))
+            .catch (err => cb("error!"))
+        });
+
+        socket.on('wbSingleToJson', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+    
+            // let objLength = bytesToSize(Object.keys(data).length);
+            // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+            roomList.get(socket.room_id).broadCast(socket.id, 'wbSingleToJson', data);
+        });
+    
+        socket.on('wbModify', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+    
+            // let objLength = bytesToSize(Object.keys(data).length);
+            // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+            roomList.get(socket.room_id).broadCast(socket.id, 'wbModify', data);
+        });
+    
+        socket.on('wbDeleteObject', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+    
+            // let objLength = bytesToSize(Object.keys(data).length);
+            // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+            roomList.get(socket.room_id).broadCast(socket.id, 'wbDeleteObject', data);
+        });
+    
+        socket.on('wbPointer', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+    
+            roomList.get(socket.room_id).broadCast(socket.id, 'wbPointer', data);
         });
 
         // common

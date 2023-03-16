@@ -503,26 +503,38 @@ function whoAreYou() {
     hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
 
+    /*
     if (peer_name) {
+        
+        
+        
         checkMedia();
+       
         getPeerInfo();
         joinRoom(peer_name, room_id);
         return;
-    }
+    }*/
 
     let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : '';
     if (getCookie(room_id + '_name')) {
         default_name = getCookie(room_id + '_name');
     }
 
+    if(peer_name)
+    {
+        default_name = peer_name;
+    }
+
     const initUser = document.getElementById('initUser');
     initUser.classList.toggle('hidden');
+
+    
 
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
-        title: 'MiroTalk SFU',
+        title: 'RoomXR SFU',
         input: 'text',
         inputPlaceholder: 'Enter your name',
         inputValue: default_name,
@@ -1825,7 +1837,7 @@ function leaveFeedback() {
         background: swalBackground,
         imageUrl: image.feedback,
         title: 'Leave a feedback',
-        text: 'Do you want to rate your MiroTalk experience?',
+        text: 'Do you want to rate your RoomXR experience?',
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
         showClass: {
