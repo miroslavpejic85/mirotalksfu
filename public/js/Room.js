@@ -166,6 +166,8 @@ function initClient() {
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
+        setTippy('wbFillColorEl', 'Fill color', 'bottom');
+        setTippy('whiteboardAlpha', 'Fill opacity', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
@@ -197,6 +199,9 @@ function initClient() {
         setTippy('chatCloseButton', 'Close', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
         setTippy('sessionTime', 'Session time', 'top');
+        setTippy('startProRecButton', 'Start saving session', 'right');
+        setTippy('stopProRecButton', 'Stop saving session', 'right');
+        setTippy('participantsButton', 'Open partecipants view', 'right');
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -1153,6 +1158,9 @@ function handleButtons() {
         hide(stopProRecButton);
         stopSessionTimer();
 
+    };
+    whiteboardAlpha.onclick = () => {        
+        whiteboardAddObj('opacity');
     };
 
 
@@ -2212,7 +2220,7 @@ async function whiteboardAddObj(type) {
                     }
                 }
             });
-            addWbCanvasObj(text);
+            //addWbCanvasObj(text);
             break;
         case 'line':
             realWhiteBoard.whiteboardSetDrawingMode("line");            
@@ -2274,6 +2282,115 @@ async function whiteboardAddObj(type) {
             }
 
             break;
+
+        case 'opacity':
+
+
+            const inputValue = 0;
+            const inputStep = 1;
+            const inputMin = 0;
+            const inputMax = 255;
+
+            Swal.fire({
+                background: swalBackground,
+                title: 'Choose fill opacity [0...255]',
+                html: `
+                    <input
+                    type="number"
+                    value="${inputValue}"
+                    step="${inputStep}"
+                    min="${inputMin}"
+                    max="${inputMax}"
+                    class="swal2-input"
+                    id="range-value">`,
+                input: 'range',
+                inputValue,
+                inputAttributes: {
+                    min: 0,
+                    max: 255,
+                    step: inputStep
+                },
+                didOpen: () => {
+                    const inputRange = Swal.getInput()
+                    const inputNumber = Swal.getHtmlContainer().querySelector('#range-value')
+
+                    // remove default output
+                    inputRange.nextElementSibling.style.display = 'none'
+                    inputRange.style.width = '100%'
+
+                    // sync input[type=number] with input[type=range]
+                    inputRange.addEventListener('input', () => {
+                    inputNumber.value = inputRange.value
+                    })
+
+                    // sync input[type=range] with input[type=number]
+                    inputNumber.addEventListener('change', () => {
+                    inputRange.value = inputNumber.value
+                    })
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let wbalpha = result.value;
+                    if (wbalpha) {
+                        //console.log(wbalpha);
+                        // we must convert the wbfillcolor to an alpha value
+                        var decimal = parseInt(wbalpha);
+                        
+                        var myhex = decimal.toString(16).toUpperCase();
+                        if(decimal < 16)
+                            myhex = '0' + myhex;
+                        //console.log(myhex);
+                        //console.log(realWhiteBoard.wbFillColor.length);
+                        //console.log(realWhiteBoard.wbFillColor);
+                        if(realWhiteBoard.wbFillColor.length == 7)
+                        {
+                            realWhiteBoard.wbFillColor = realWhiteBoard.wbFillColor + myhex;
+                        }
+                        else
+                        {
+                            realWhiteBoard.wbFillColor = realWhiteBoard.wbFillColor.slice(0, realWhiteBoard.wbFillColor.length - 2) + myhex;
+                        }
+                        //console.log(realWhiteBoard.wbFillColor);
+                        
+                    }
+                }
+            });
+
+      
+
+            /*    Swal.fire({
+                    background: swalBackground,
+                    title: 'Choose fill opacity',
+                    input: 'range',
+                    inputLabel: 'alpha',
+                    inputAttributes: {
+                        min: 0,
+                        max: 255,
+                        step: 1
+                    },
+                    inputValue: 0,
+                    showCancelButton: false,
+                    confirmButtonText: 'OK',
+                    showClass: {
+                        popup: 'animate__animated animate__fadeInDown',
+                    },
+                    hideClass: {
+                        popup: 'animate__animated animate__fadeOutUp',
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        let wbalpha = result.value;
+                        if (wbalpha) {
+                            //realWhiteBoard.createText(wbCanvasText);
+                        }
+                    }
+                });*/
+
+
+
+
+            break;
+
     }
 }
 

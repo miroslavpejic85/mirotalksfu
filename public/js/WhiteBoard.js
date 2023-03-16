@@ -49,7 +49,7 @@ class WhiteBoard {
         //this.wbPop = [];
         this.wbCurrentTool = "pointer";
         this.wbCurrentPoint = null;
-        this.wbFillColor = "#FFFFFF33";
+        this.wbFillColor = "#FFFFFF00";
         this.setupWhiteboardCanvas();
         this.setupWhiteboardCanvasSize();
         this.setupWhiteboardLocalListners();
@@ -624,6 +624,8 @@ class WhiteBoard {
             top: 100,
             left: 100,
             fontFamily: 'Comfortaa',
+            fontWeight: 50,
+            fontSize: 100,
             fill: this.wbCanvas.freeDrawingBrush.color,
             strokeWidth: this.wbCanvas.freeDrawingBrush.width,
             stroke: this.wbCanvas.freeDrawingBrush.color,

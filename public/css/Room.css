@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Comfortaa:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css?family=Roboto:wght@100&display=swap');
 
 /*--------------------------------------------------------------
 # Keyframes
@@ -972,6 +973,10 @@ progress {
     margin: 2px;
     border-radius: 5px;
     border: var(--border);
+}
+
+.whiteboardAlpha {
+    width: 60px,
 }
 
 .whiteboardColorPicker {
