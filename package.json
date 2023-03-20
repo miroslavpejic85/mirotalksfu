@@ -33,8 +33,8 @@
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "dependencies": {
-        "@sentry/integrations": "7.43.0",
-        "@sentry/node": "7.43.0",
+        "@sentry/integrations": "7.44.0",
+        "@sentry/node": "7.44.0",
         "body-parser": "1.20.2",
         "colors": "1.4.0",
         "compression": "1.7.4",
@@ -42,7 +42,7 @@
         "crypto-js": "4.1.1",
         "express": "4.18.2",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.11.13",
+        "mediasoup": "3.11.14",
         "mediasoup-client": "3.6.82",
         "ngrok": "^4.3.3",
         "qs": "6.11.1",
@@ -54,6 +54,6 @@
     },
     "devDependencies": {
         "node-fetch": "^2.6.7",
-        "prettier": "2.8.4"
+        "prettier": "2.8.5"
     }
 }

@@ -202,7 +202,7 @@ class RoomClient {
         this.debug = false;
         this.debug ? window.localStorage.setItem('debug', 'mediasoup*') : window.localStorage.removeItem('debug');
 
-        console.log('06 ----> Load Mediasoup Client v', mediasoupClient.version);
+        console.log('06 ----> Load MediaSoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
 
         Object.keys(_EVENTS).forEach(
@@ -1196,7 +1196,7 @@ class RoomClient {
                 encodings = [
                     {
                         maxBitrate: 5000000,
-                        scalabilityMode: 'L3T3',
+                        scalabilityMode: this.sharingScalabilityMode || 'L3T3',
                         dtx: true,
                     },
                 ];
