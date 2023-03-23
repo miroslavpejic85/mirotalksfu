@@ -1155,13 +1155,30 @@ async function changeCamera(deviceId) {
         stopTracks(initStream);
         show(initVideo);
     }
+    const videoConstraints = {
+        audio: false,
+        video: {
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+            deviceId: deviceId,
+            aspectRatio: 1.777,
+            frameRate: {
+                min: 5,
+                ideal: 15,
+                max: 30,
+            },
+        },
+    };
     navigator.mediaDevices
-        .getUserMedia({ video: { deviceId: deviceId } })
+        .getUserMedia(videoConstraints)
         .then((camStream) => {
             initVideo.className = 'mirror';
             initVideo.srcObject = camStream;
             initStream = camStream;
-            console.log('04.5 ----> Success attached init cam video stream', initStream);
+            console.log(
+                '04.5 ----> Success attached init cam video stream',
+                initStream.getVideoTracks()[0].getSettings(),
+            );
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
