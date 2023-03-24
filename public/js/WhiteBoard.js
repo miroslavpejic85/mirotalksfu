@@ -33,7 +33,7 @@ class WhiteBoard {
      * @param {*} wbTransmitModify optional function to send object mods via socket
      * @param {*} wbTransmitDelete optional function to send object deletions via socket
      */
-    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null, wbTransmitModify = null, wbTransmitDelete = null) {
+    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null, wbTransmitModify = null, wbTransmitDelete = null, is_pro = false) {
         this.wbImageInput = wbImageInput;
         this.wbWidth = wbWidth;
         this.wbHeight = wbHeight;
@@ -80,6 +80,14 @@ class WhiteBoard {
         fabric.Object.prototype.transparentCorners = false;
         fabric.Object.prototype.cornerColor = 'blue';
         fabric.Object.prototype.cornerStyle = 'circle';
+
+        // disable rotation...
+        if(is_pro)
+        {
+            fabric.Object.prototype.controls.mtr = new fabric.Control({
+                visible:false,
+              });    
+        }
 
        /* fabric.Object.prototype.controls.deleteControl = new fabric.Control({
             x: 0.5,
@@ -170,6 +178,78 @@ class WhiteBoard {
         });
     }
 
+
+    recreateControls() {
+        var text = this.wbCanvas.getActiveObject();
+        text.controls = {
+            ...fabric.Text.prototype.controls,
+            mtr: new fabric.Control({ visible: false })
+        }
+/*
+        text.controls.ml = new fabric.Control({
+            x: -0.5,
+            y: 0,
+            cursorStyleHandler: fabric.scaleSkewCursorStyleHandler,
+            actionHandler: fabric.scalingXOrSkewingY,
+            getActionName: fabric.scaleOrSkewActionName,
+          });
+        
+          text.controls.mr = new fabric.Control({
+            x: 0.5,
+            y: 0,
+            cursorStyleHandler: fabric.scaleSkewCursorStyleHandler,
+            actionHandler: fabric.scalingXOrSkewingY,
+            getActionName: fabric.scaleOrSkewActionName,
+          });
+        
+          text.controls.mb = new fabric.Control({
+            x: 0,
+            y: 0.5,
+            cursorStyleHandler: fabric.scaleSkewCursorStyleHandler,
+            actionHandler: fabric.scalingYOrSkewingX,
+            getActionName: fabric.scaleOrSkewActionName,
+          });
+        
+          text.controls.mt = new fabric.Control({
+            x: 0,
+            y: -0.5,
+            cursorStyleHandler: fabric.scaleSkewCursorStyleHandler,
+            actionHandler: fabric.scalingYOrSkewingX,
+            getActionName: fabric.scaleOrSkewActionName,
+          });
+        
+          text.controls.tl = new fabric.Control({
+            x: -0.5,
+            y: -0.5,
+            cursorStyleHandler: fabric.scaleCursorStyleHandler,
+            actionHandler: fabric.scalingEqually,
+          });
+        
+          text.controls.tr = new fabric.Control({
+            x: 0.5,
+            y: -0.5,
+            cursorStyleHandler: fabric.scaleCursorStyleHandler,
+            actionHandler: fabric.scalingEqually,
+          });
+        
+          text.controls.bl = new fabric.Control({
+            x: -0.5,
+            y: 0.5,
+            cursorStyleHandler: fabric.scaleCursorStyleHandler,
+            actionHandler: fabric.scalingEqually,
+          });
+        
+          text.controls.br = new fabric.Control({
+            x: 0.5,
+            y: 0.5,
+            cursorStyleHandler: fabric.scaleCursorStyleHandler,
+            actionHandler: fabric.scalingEqually,
+          });*/
+    }
+
+
+
+
     createPointerObject() {
         // make the pointer object
         this.pointerObject = new fabric.Ellipse({
@@ -205,14 +285,27 @@ class WhiteBoard {
                 console.log(evt);
                 that.lastLeft = evt.selected[0].left;
                 that.lastTop = evt.selected[0].top;
+
+                if(is_pro)
+                {
+                    that.recreateControls();
+                }
+
+
             }
         );
 
         this.wbCanvas.on(
             'selection:updated', function (evt) {
-                console.log("selection created!");
+                console.log("selection updated!");
                 that.lastLeft = evt.selected[0].left;
                 that.lastTop = evt.selected[0].top;
+
+                if(is_pro)
+                {
+                    that.recreateControls();
+                }
+
             }
         );
 
@@ -222,8 +315,9 @@ class WhiteBoard {
                 console.log("object modified!");
                 console.log(that.wbCanvas.getActiveObject());
                 console.log(evt);
-                var eid = that.wbCanvas.getActiveObject().elementID;
-                var epath = that.wbCanvas.getActiveObject().path;
+                var orob = that.wbCanvas.getActiveObject(); 
+                var eid = orob.elementID;
+                var epath = orob.path;
                 //console.log(evt.target.type);
                 if(wbTransmitModify != null)
                 {
@@ -240,7 +334,8 @@ class WhiteBoard {
                         // add the elementID
                         evt.elementID = eid;
                         evt.lastleft = that.lastLeft;
-                        evt.lasttop = that.lastTop; 
+                        evt.lasttop = that.lastTop;
+                        evt.origobj = orob;
                         wbTransmitModify(evt);
                     }
                     
@@ -439,6 +534,7 @@ class WhiteBoard {
             line.selectable = false;
             line.hasBorders = false;
             line.hasControls = false;
+            
             //let myid='line'+ Math.round(Math.random() * 10000);
             //line.set({'elementID': myid});
             this.addWbCanvasObj(line);
@@ -647,6 +743,43 @@ class WhiteBoard {
             strokeWidth: this.wbCanvas.freeDrawingBrush.width,
             stroke: this.wbCanvas.freeDrawingBrush.color,
         });
+
+        if(is_pro)
+        {
+
+            text.controls = {
+                ...fabric.Rect.prototype.controls,
+                mtr: new fabric.Control({ visible: false }),
+                mr: new fabric.Control({ visible: false }),
+            }
+            // text.controls.tl = new fabric.Control({
+            //     visible:false,
+            // });   
+            // text.controls.mt =  new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.tr =  new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.mr = new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.br = new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.mb = new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.bl = new fabric.Control({
+            // visible:false,
+            // });   
+            // text.controls.ml = new fabric.Control({
+            // visible:false,
+            // });   
+        }
+        
+
+
         //let myid='text'+ Math.round(Math.random() * 10000);
         //text.set({'elementID':myid});
         this.addWbCanvasObj(text, true);

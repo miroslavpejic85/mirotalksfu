@@ -2082,7 +2082,7 @@ function wbTransmitDelete(data){
 
 
 function setupWhiteboard() {
-    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer, wbTransmitModify, wbTransmitDelete);
+    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer, wbTransmitModify, wbTransmitDelete, is_pro);
 }
 
 /*function setupWhiteboard() {
