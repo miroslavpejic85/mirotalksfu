@@ -952,9 +952,9 @@ function startServer() {
             callback('Successfully exited room');
         });
 
-        //////////////////
-        // ROOMXR PRO
-        /////////////////
+        /////////////////////////////////////
+        // ROOMXR PRO - CREATE NEW SESSION //
+        /////////////////////////////////////
         socket.on('createnewsession', (data, cb) => {
             var myurl = JSON.parse(data).url;
             
@@ -968,6 +968,39 @@ function startServer() {
             .then(res => res.json())
             .then(json => cb( json._id))
             .catch (err => cb("error!"))
+        });
+
+        socket.on('translate', (data, cb) => {
+            var myurl = JSON.parse(data).url;
+            console.log(myurl);
+            fetch(myurl, {
+                method: 'POST',
+                body: data,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(res => res.json())
+            .then(json => cb( json.text))
+            .catch (err => cb("error!"))
+
+
+            // await fetch(this.APIPath + "/gets/translate?originstring=" + message + "&targetlanguage=" + idiom, {
+            //     method: "GET",
+            //     headers: { "Content-Type": "application/json" }
+            // })
+            // .then((response) => response.json())
+            // .then((data) => {
+            //     retval = data.text;
+            //     retval = JSON.stringify(retval);
+            //     console.log(retval);
+                
+            // })
+
+
+
+
+
         });
 
         socket.on('wbSingleToJson', (data) => {

@@ -1309,7 +1309,7 @@ class RoomClient {
                 elem.volume = 0;
                 elem.poster = image.poster;
                 elem.style.objectFit = isScreen ? 'contain' : 'var(--videoObjFit)';
-                elem.className = this.isMobileDevice || isScreen ? '' : 'mirror';
+                elem.className = this.isMobileDevice || isScreen ? '' : '' /*'mirror'*/;
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
                 vb.className = 'videoMenuBar fadein';
@@ -1328,6 +1328,7 @@ class RoomClient {
                 au = document.createElement('button');
                 au.id = this.peer_id + '__audio';
                 au.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
+                au.style.cursor = "default";
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
@@ -1638,6 +1639,7 @@ class RoomClient {
                 au = document.createElement('button');
                 au.id = remotePeerId + '__audio';
                 au.className = remotePeerAudio ? html.audioOn : html.audioOff;
+                au.style.cursor="default";
                 ko = document.createElement('button');
                 ko.id = id + '___' + remotePeerId + '___kickOut';
                 ko.className = html.kickOut;
@@ -2106,6 +2108,12 @@ class RoomClient {
         let sessionid = await this.socket.request('createnewsession',data);
         console.log(sessionid);
         return sessionid;
+    }
+    async getTranslation(data) {
+        console.log("we are in getTranslation");
+        let tran = await this.socket.request('translate',data);
+        console.log(tran);
+        return tran;
     }
 
     refreshParticipantsCount() {
@@ -3016,19 +3024,24 @@ class RoomClient {
         if(idiom == "--")
             return message;
 
+        var url = this.APIPath + "/posts/translatev2?originstring=" + message + "&targetlanguage=" + idiom;
+        var data = JSON.stringify({           
+            url:url
+        });
 
+        var retval = await this.getTranslation(data);
         
-        await fetch(this.APIPath + "/gets/translate?originstring=" + message + "&targetlanguage=" + idiom, {
+        /*await fetch(url, {
             method: "GET",
             headers: { "Content-Type": "application/json" }
         })
         .then((response) => response.json())
         .then((data) => {
-            retval = data[0].text;
+            retval = data.text;
             retval = JSON.stringify(retval);
             console.log(retval);
             
-        })
+        })*/
         
         return retval;
 
@@ -3049,6 +3062,12 @@ class RoomClient {
         }
         if (isChatMarkdownOn) return marked.parse(message);
         let pre = '<pre>' + message + '</pre>';
+
+        if(this.isPro) // glasses does not support tags!
+        {
+            pre = message;
+        }
+
         if (isChatPasteTxt) {
             isChatPasteTxt = false;
             return pre;
@@ -3154,6 +3173,12 @@ class RoomClient {
                 }
                 this.chatMessages = [];
                 this.sound('delete');
+                if(this.isPro)
+                {
+                    // send a message to glasses in orded to clean also
+                    // their local messages
+                    this.emitCmd(`chat|clear`);
+                }
             }
         });
     }
@@ -4455,6 +4480,7 @@ class RoomClient {
                         if (result.isConfirmed) {
                             ejectConfirmed = true;
                             if (!data.broadcast) {
+                                console.log("ejection first case");
                                 this.socket.emit('peerAction', data);
                                 let peer = this.getId(data.peer_id);
                                 if (peer) {
@@ -4463,6 +4489,7 @@ class RoomClient {
                                     refreshParticipantsCount(participantsCount);
                                 }
                             } else {
+                                console.log("ejection second case");
                                 this.socket.emit('peerAction', data);
                                 let actionButton = this.getId(action + 'AllButton');
                                 if (actionButton) actionButton.style.display = 'none';

@@ -201,7 +201,7 @@ function initClient() {
         setTippy('sessionTime', 'Session time', 'top');
         setTippy('startProRecButton', 'Start saving session', 'right');
         setTippy('stopProRecButton', 'Stop saving session', 'right');
-        setTippy('participantsButton', 'Open partecipants view', 'right');
+        setTippy('participantsButton', 'Open participants view', 'right');
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -842,6 +842,12 @@ function roomIsReady() {
     if(is_pro)
     {
         show(startProRecButton);
+        hide(exitButton);
+        hide(aboutButton);
+        hide(chatMarkdownButton);
+        hide(chatEmojiButton);
+        hide(chatShareFileButton);
+        hide(wbBackgroundColorEl);
     }
 }
 
@@ -1200,10 +1206,13 @@ async function createNewSession() {
 	currentSessionID = "-";
 
 	var url = APIPath + "/posts/createsessionv2";
+
+    // collect the partecipant name... we take the first one
+    var remName = await getFirstPartecipantName();
    
     
     var data = JSON.stringify({
-		device: "Glasses00",
+		device: remName,
 		datestart: Date.now(),
 		dateend: Date.now(),
 		email: loginParametersMail,
@@ -1493,7 +1502,7 @@ async function changeCamera(deviceId) {
     navigator.mediaDevices
         .getUserMedia({ video: { deviceId: deviceId } })
         .then((camStream) => {
-            initVideo.className = 'mirror';
+            //initVideo.className = 'mirror';
             initVideo.srcObject = camStream;
             initStream = camStream;
             console.log('04.5 ----> Success attached init cam video stream', initStream);
@@ -1628,13 +1637,22 @@ function handleSelects() {
         wbCanvasBackgroundColor(data.color);
         //setWhiteboardBgColor(wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value);
     };
-    wbFillColorEl.onchange = () => {
-        realWhiteBoard.wbFillColor = wbDrawingColorEl.value;
+    wbFillColorEl.onclick = (e) => {
         realWhiteBoard.whiteboardSetDrawingMode("none");
+    };
+
+    wbDrawingColorEl.onclick = (e) => {
+        realWhiteBoard.whiteboardSetDrawingMode("none");
+    };
+
+    wbFillColorEl.onchange = () => {
+        realWhiteBoard.wbFillColor = wbFillColorEl.value + realWhiteBoard.wbOpacityHex;
+        realWhiteBoard.whiteboardSetDrawingMode("none");
+        realWhiteBoard.set
         let data = {
             peer_name: peer_name,
             action: 'flcolor',
-            color: wbFillColorEl.value,
+            color: wbFillColorEl.value + realWhiteBoard.wbOpacityHex,
         };
         whiteboardAction(data);
 
@@ -2286,7 +2304,7 @@ async function whiteboardAddObj(type) {
         case 'opacity':
 
 
-            const inputValue = 0;
+            const inputValue = realWhiteBoard.wbOpacity;
             const inputStep = 1;
             const inputMin = 0;
             const inputMax = 255;
@@ -2332,16 +2350,23 @@ async function whiteboardAddObj(type) {
                 if (result.isConfirmed) {
                     let wbalpha = result.value;
                     if (wbalpha) {
-                        //console.log(wbalpha);
+                        
+                        realWhiteBoard.wbOpacity = wbalpha;
+                        
                         // we must convert the wbfillcolor to an alpha value
                         var decimal = parseInt(wbalpha);
-                        
+                        // convert to hex
                         var myhex = decimal.toString(16).toUpperCase();
+                        
+                        // take in account the fact that we need always a two digit string
                         if(decimal < 16)
                             myhex = '0' + myhex;
-                        //console.log(myhex);
-                        //console.log(realWhiteBoard.wbFillColor.length);
-                        //console.log(realWhiteBoard.wbFillColor);
+
+                        realWhiteBoard.wbOpacityHex = myhex;
+
+                        // we can have two different format:
+                        // 1) #ffffffff
+                        // 2) #ffffff
                         if(realWhiteBoard.wbFillColor.length == 7)
                         {
                             realWhiteBoard.wbFillColor = realWhiteBoard.wbFillColor + myhex;
@@ -2350,8 +2375,6 @@ async function whiteboardAddObj(type) {
                         {
                             realWhiteBoard.wbFillColor = realWhiteBoard.wbFillColor.slice(0, realWhiteBoard.wbFillColor.length - 2) + myhex;
                         }
-                        //console.log(realWhiteBoard.wbFillColor);
-                        
                     }
                 }
             });
@@ -2623,6 +2646,21 @@ function toggleParticipants() {
     }
     isParticipantsListOpen = !isParticipantsListOpen;
 }
+
+async function getFirstPartecipantName(){
+    var partName = "---";
+    let room_info = await rc.getRoomInfo();
+    let peers = new Map(JSON.parse(room_info.peers));
+    if (peers.size == 1)
+        return partName;
+
+    for (let peer of Array.from(peers.keys())) {
+        let peer_info = peers.get(peer).peer_info;
+        partName = peer_info.peer_name;
+    }
+    return partName;
+}
+
 
 async function getRoomParticipants(refresh = false) {
     let room_info = await rc.getRoomInfo();

@@ -50,6 +50,8 @@ class WhiteBoard {
         this.wbCurrentTool = "pointer";
         this.wbCurrentPoint = null;
         this.wbFillColor = "#FFFFFF00";
+        this.wbOpacity = 0;
+        this.wbOpacityHex = "00";
         this.setupWhiteboardCanvas();
         this.setupWhiteboardCanvasSize();
         this.setupWhiteboardLocalListners();
@@ -321,17 +323,26 @@ class WhiteBoard {
             this.wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
             this.wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
             this.wbCanvas.setZoom(scaleFactorX);
-            this.setWhiteboardSize(optimalSize[0] * scaleFactorX, optimalSize[1] * scaleFactorX);
+            var reswx = optimalSize[0] * scaleFactorX;
+            if (reswx < 1200)
+                reswx = 1200
+            this.setWhiteboardSize(reswx, optimalSize[1] * scaleFactorX);
         } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
             this.wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
             this.wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
             this.wbCanvas.setZoom(scaleFactorY);
-            this.setWhiteboardSize(optimalSize[0] * scaleFactorY, optimalSize[1] * scaleFactorY);
+            var reswx = optimalSize[0] * scaleFactorY;
+            if (reswx < 1200)
+                reswx = 1200
+            this.setWhiteboardSize(reswx, optimalSize[1] * scaleFactorY);
         } else {
             this.wbCanvas.setWidth(optimalSize[0]);
             this.wbCanvas.setHeight(optimalSize[1]);
             this.wbCanvas.setZoom(1);
-            this.setWhiteboardSize(optimalSize[0], optimalSize[1]);
+            var reswx = optimalSize[0];
+            if (reswx < 1200)
+                reswx = 1200
+            this.setWhiteboardSize(reswx, optimalSize[1]);
         }
         this.wbCanvas.calcOffset();
         this.wbCanvas.renderAll();
@@ -406,6 +417,9 @@ class WhiteBoard {
             setColor(whiteboardEraserBtn, 'green');
         } else {
             this.setWhiteBoardObjectsSelectable(true);
+            this.wbCanvas.selection = false;
+            this.wbCanvas.isDrawingMode = false;
+            this.wbIsDrawing = false;
             setColor(whiteboardObjectBtn, 'green');
         }
     }
@@ -469,7 +483,10 @@ class WhiteBoard {
             return;
         }
 
-        this.wbIsDrawing = true;
+        if(this.wbCurrentTool != "none")
+            this.wbIsDrawing = true;
+        
+        
         if (this.wbCurrentTool == "eraser" && e.target) {
             // send the delete command also via socket
             // to pair the other partecipants
@@ -674,10 +691,23 @@ class WhiteBoard {
             let scale = Math.min(that.wbCanvas.width / myImg.width, that.wbCanvas.height / myImg.height);
             let shift = (that.wbCanvas.width - (myImg.width * scale)) / 2   
             myImg.set({ top: 0, left: shift }).scale(scale);
+
+            // in order to avoid the "tainted canvas" problem due to cORS policy
+            // we should export the image and reimport...
+            /*let data = myImg.toDataURL('image/jpeg', 0.5);
+            var imageObject = JSON.parse(data);
+            
+            fabric.Image.fromURL(data, function(img) {
+                img.set({ left: 50, top: 50});
+                that.addWbCanvasObj(myImg, true);   
+            });*/
+
+
             that.addWbCanvasObj(myImg, true);
             that.wbCanvas.discardActiveObject();
             that.wbCanvas.requestRenderAll();
         });
+
     }
 
     /* wbCanvasUndo() {
