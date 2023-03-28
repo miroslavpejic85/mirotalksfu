@@ -648,9 +648,34 @@ function checkMedia() {
 // ####################################################
 
 async function shareRoom(useNavigator = false) {
+
+    var finurl = RoomURL;
+
+    // if we are pro then the share button must share the right parameters
+    if(getIsPro()){
+
+        // https://roomxr.eu/join/pippo@formaggio.eu?audio=1&video=1&notify=0&pro=true&name=Pippo&mail=pippo.formaggio@formaggio.eu&company=asiago
+        const url_base = finurl.split('?')[0];
+        const params = new URLSearchParams(finurl);
+        const url_name = params.get("name");
+        const url_audio = params.get("audio");
+        const url_video = params.get("video");
+        const url_notify = params.get("notify");
+        const url_pro = params.get("pro");
+        const url_mail = params.get("mail");
+        const url_company = params.get("company");
+
+        // rebuild the string
+        finurl = url_base + "?audio=" + url_audio + "&video=" + url_video + "&notify=" + url_notify + "&name=Guest" /*+ "&date=" + ""*/;
+        
+
+    }
+
+
+
     if (navigator.share && useNavigator) {
         try {
-            await navigator.share({ url: RoomURL });
+            await navigator.share({ url: finurl });
             userLog('info', 'Room Shared successfully', 'top-end');
         } catch (err) {
             share();
@@ -671,8 +696,7 @@ async function shareRoom(useNavigator = false) {
             </div>
             <br/>
             <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:white;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
-            <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
+            <p style="background:transparent; color:white;">Simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the URL pressing Copy URL</p>`,
             showDenyButton: true,
             showCancelButton: true,
             cancelButtonColor: 'red',
@@ -688,12 +712,12 @@ async function shareRoom(useNavigator = false) {
             },
         }).then((result) => {
             if (result.isConfirmed) {
-                copyRoomURL();
+                copyRoomURL(finurl);
             } else if (result.isDenied) {
                 let message = {
                     email: '',
                     subject: 'Please join our RoomXR Video Chat Meeting',
-                    body: 'Click to join: ' + RoomURL,
+                    body: 'Click to join: ' + finurl,
                 };
                 shareRoomByEmail(message);
             }
@@ -702,7 +726,7 @@ async function shareRoom(useNavigator = false) {
                 rc.shareScreen();
             }
         });
-        makeRoomQR();
+        makeRoomQR(finurl);
     }
 }
 
@@ -710,20 +734,20 @@ async function shareRoom(useNavigator = false) {
 // ROOM UTILITY
 // ####################################################
 
-function makeRoomQR() {
+function makeRoomQR(urlp) {
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
-        value: RoomURL,
+        value: getIsPro() ? urlp : RoomURL,
     });
     qr.set({
         size: 256,
     });
 }
 
-function copyRoomURL() {
+function copyRoomURL(urlp) {
     let tmpInput = document.createElement('input');
     document.body.appendChild(tmpInput);
-    tmpInput.value = RoomURL;
+    tmpInput.value = getIsPro() ? urlp : RoomURL;
     tmpInput.select();
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
@@ -1647,12 +1671,13 @@ function handleSelects() {
 
     wbFillColorEl.onchange = () => {
         realWhiteBoard.wbFillColor = wbFillColorEl.value + realWhiteBoard.wbOpacityHex;
+        console.log(realWhiteBoard.wbFillColor);
         realWhiteBoard.whiteboardSetDrawingMode("none");
         realWhiteBoard.set
         let data = {
             peer_name: peer_name,
             action: 'flcolor',
-            color: wbFillColorEl.value + realWhiteBoard.wbOpacityHex,
+            color: wbFillColorEl.value/* + realWhiteBoard.wbOpacityHex*/,
         };
         whiteboardAction(data);
 
@@ -2456,7 +2481,8 @@ function wbCanvasForegroundColor(color) {
 
 function wbCanvasFillColor(color) {
     wbFillColorEl.value = color;
-    realWhiteBoard.wbFillColor = color;
+    realWhiteBoard.wbFillColor = color + realWhiteBoard.wbOpacityHex;
+    //realWhiteBoard.wbFillColor = color;
     realWhiteBoard.wbCanvas.renderAll();
 }
 
