@@ -183,6 +183,8 @@ function initClient() {
         setTippy('chatCloseButton', 'Close', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
         setTippy('sessionTime', 'Session time', 'top');
+    } else {
+        setupInitVideoSize();
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -1644,6 +1646,15 @@ function isHtml(str) {
         if (c[i].nodeType == 1) return true;
     }
     return false;
+}
+
+// ####################################################
+// INIT VIDEO SIZE
+// ####################################################
+
+function setupInitVideoSize() {
+    initVideo.style.width = '100%';
+    initVideo.style.height = '240px';
 }
 
 // ####################################################
