@@ -1654,7 +1654,7 @@ function isHtml(str) {
 
 function setupInitVideoSize() {
     initVideo.style.width = '100%';
-    initVideo.style.height = '240px';
+    initVideo.style.height = '25%';
 }
 
 // ####################################################
