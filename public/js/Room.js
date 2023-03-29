@@ -72,6 +72,7 @@ let chatMessagesId = 0;
 let room_id = getRoomId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
+let isScreenAllowed = getScreen();
 let notify = getNotify();
 
 let peer_geo = null;
@@ -85,7 +86,6 @@ let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isVideoPrivacyActive = false;
-let isScreenAllowed = getScreen();
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
@@ -187,11 +187,7 @@ function initClient() {
         setupInitVideoSize();
     }
     setupWhiteboard();
-    if (peer_name) {
-        whoAreYou();
-    } else {
-        initEnumerateDevices();
-    }
+    initEnumerateDevices();
 }
 
 // ####################################################
