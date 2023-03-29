@@ -187,7 +187,11 @@ function initClient() {
         setupInitVideoSize();
     }
     setupWhiteboard();
-    initEnumerateDevices();
+    if (peer_name) {
+        whoAreYou();
+    } else {
+        initEnumerateDevices();
+    }
 }
 
 // ####################################################
@@ -213,6 +217,7 @@ function getRoomId() {
     if (roomId == '') {
         roomId = makeId(12);
     }
+    console.log('Direct join', { room: roomId });
     return roomId;
 }
 
@@ -375,9 +380,12 @@ function getScreen() {
     if (screen) {
         screen = screen.toLowerCase();
         let queryScreen = screen === '1' || screen === 'true';
-        if (queryScreen != null && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia))
+        if (queryScreen != null && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia)) {
+            console.log('Direct join', { screen: queryScreen });
             return queryScreen;
+        }
     }
+    console.log('Direct join', { screen: false });
     return false;
 }
 
@@ -387,8 +395,12 @@ function getNotify() {
     if (notify) {
         notify = notify.toLowerCase();
         let queryNotify = notify === '1' || notify === 'true';
-        if (queryNotify != null) return queryNotify;
+        if (queryNotify != null) {
+            console.log('Direct join', { notify: queryNotify });
+            return queryNotify;
+        }
     }
+    console.log('Direct join', { notify: true });
     return true;
 }
 
@@ -396,8 +408,10 @@ function getPeerName() {
     const qs = new URLSearchParams(window.location.search);
     const name = filterXSS(qs.get('name'));
     if (isHtml(name)) {
+        console.log('Direct join', { name: 'Invalid name' });
         return 'Invalid name';
     }
+    console.log('Direct join', { name: name });
     return name;
 }
 
@@ -409,6 +423,7 @@ function getRoomPassword() {
         if (queryNoRoomPassword) {
             roomPassword = false;
         }
+        console.log('Direct join', { password: roomPassword });
         return roomPassword;
     }
 }
@@ -581,6 +596,10 @@ function checkMedia() {
         let queryPeerVideo = video === '1' || video === 'true';
         if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
     }
+    console.log('Direct join', {
+        audio: isAudioAllowed,
+        video: isVideoAllowed,
+    });
 }
 
 // ####################################################
