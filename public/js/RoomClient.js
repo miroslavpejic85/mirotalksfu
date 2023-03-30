@@ -3932,6 +3932,7 @@ class RoomClient {
     // ####################################################
 
     handleAudioVolume(data) {
+        if (!isPitchBarEnabled) return;
         let peerId = data.peer_id;
         let peerName = data.peer_name;
         let producerAudioBtn = this.getId(peerId + '_audio');

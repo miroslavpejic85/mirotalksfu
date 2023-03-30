@@ -284,6 +284,7 @@ body {
     cursor: pointer;
 }
 
+#pitchBarButton,
 #soundsButton,
 #lobbyButton {
     padding: 10px;

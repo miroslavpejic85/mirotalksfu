@@ -78,6 +78,7 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
+let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isLobbyEnabled = false;
 let isLobbyOpen = false;
@@ -150,7 +151,9 @@ function initClient() {
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
             'right',
         );
+        setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
+        setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -1253,6 +1256,9 @@ function handleSelects() {
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
     };
     // room
+    switchPitchBar.onchange = (e) => {
+        isPitchBarEnabled = e.currentTarget.checked;
+    };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
     };
