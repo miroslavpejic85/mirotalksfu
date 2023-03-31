@@ -2307,7 +2307,9 @@ class RoomClient {
                 } else {
                     if (this.pinnedVideoPlayerId != videoPlayer.id) {
                         this.isVideoPinned = true;
-                        return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
+                        if (!this.isScreenAllowed)
+                            return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
+                        return;
                     }
                     if (!isScreen) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
