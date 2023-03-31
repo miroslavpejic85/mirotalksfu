@@ -14054,7 +14054,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.82';
+                exports.version = '3.6.83';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
