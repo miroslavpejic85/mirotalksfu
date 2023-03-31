@@ -10,6 +10,8 @@ const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 
 const commands = {
     shareRoom: 'room',
+    hideMe: 'hide me',
+    showMe: 'show me',
     newRoom: 'new room',
     leaveRoom: 'exit the room',
     audioOn: 'start the audio',
@@ -130,6 +132,14 @@ function execVoiceCommands(transcript) {
         case commands.shareRoom:
             printCommand(commands.shareRoom);
             shareButton.click();
+            break;
+        case commands.hideMe:
+            printCommand(commands.hideMe);
+            hideMeButton.click();
+            break;
+        case commands.showMe:
+            printCommand(commands.showMe);
+            hideMeButton.click();
             break;
         case commands.newRoom:
             printCommand(commands.newRoom);

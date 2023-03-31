@@ -44,10 +44,13 @@ function resizeVideoMedia() {
     let Width = videoMediaContainer.offsetWidth - Margin * 2;
     let Height = videoMediaContainer.offsetHeight - Margin * 2;
     let max = 0;
+    let optional = isHideMeActive ? 1 : 0;
+    let isOneVideoElement = videoMediaContainer.childElementCount - optional == 1 ? true : false;
+    console.log('videoMediaContainer.childElementCount: ', videoMediaContainer.childElementCount - optional);
 
     // full screen mode
     let bigWidth = Width * 4;
-    if (videoMediaContainer.childElementCount == 1) {
+    if (videoMediaContainer.childElementCount - optional == 1) {
         Width = Width - bigWidth;
     }
 
@@ -63,13 +66,12 @@ function resizeVideoMedia() {
     }
 
     max = max - Margin * 2;
-    setWidth(videoMediaContainer, Cameras, max, bigWidth, Margin, Height);
+    setWidth(Cameras, max, bigWidth, Margin, Height, isOneVideoElement);
     document.documentElement.style.setProperty('--vmi-wh', max / 3 + 'px');
 }
 
-function setWidth(videoMediaContainer, Cameras, width, bigWidth, margin, maxHeight) {
+function setWidth(Cameras, width, bigWidth, margin, maxHeight, isOneVideoElement) {
     ratio = customRatio ? 0.68 : ratio;
-    let isOneVideoElement = videoMediaContainer.childElementCount == 1 ? true : false;
     for (let s = 0; s < Cameras.length; s++) {
         Cameras[s].style.width = width + 'px';
         Cameras[s].style.margin = margin + 'px';

@@ -78,6 +78,7 @@ let notify = getNotify();
 let peer_geo = null;
 let peer_info = null;
 
+let isHideMeActive = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isLobbyEnabled = false;
@@ -124,6 +125,7 @@ let initStream = null;
 function initClient() {
     if (!DetectRTC.isMobileDevice) {
         setTippy('shareButton', 'Share room', 'right');
+        setTippy('hideMeButton', 'Toggle hide me', 'right');
         setTippy('startAudioButton', 'Start the audio', 'right');
         setTippy('stopAudioButton', 'Stop the audio', 'right');
         setTippy('startVideoButton', 'Start the video', 'right');
@@ -729,6 +731,7 @@ function roomIsReady() {
     setTheme('dark');
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
+    BUTTONS.main.hideMeButton && show(hideMeButton);
     if (BUTTONS.settings.tabRecording) {
         show(startRecButton);
     } else {
@@ -888,6 +891,9 @@ function handleButtons() {
     shareButton.onclick = () => {
         shareRoom(true);
     };
+    hideMeButton.onclick = (e) => {
+        rc.handleHideMe();
+    };
     settingsButton.onclick = () => {
         rc.toggleMySettings();
     };
@@ -995,11 +1001,13 @@ function handleButtons() {
     startVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
+        if (isHideMeActive) rc.handleHideMe();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
+        if (isHideMeActive) rc.handleHideMe();
         rc.closeProducer(RoomClient.mediaType.video);
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
@@ -1464,10 +1472,6 @@ function handleRoomClientEvents() {
         console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
-        if (initStream) {
-            stopTracks(initStream);
-            hide(initVideo);
-        }
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room Client lock room');

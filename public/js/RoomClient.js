@@ -20,6 +20,8 @@ const cfg = {
 
 const html = {
     newline: '<br />',
+    hideMeOn: 'fas fa-user-slash',
+    hideMeOff: 'fas fa-user',
     audioOn: 'fas fa-microphone',
     audioOff: 'fas fa-microphone-slash',
     videoOn: 'fas fa-video',
@@ -191,6 +193,7 @@ class RoomClient {
         this.showPeerInfo = false;
 
         this.videoProducerId = null;
+        this.screenProducerId = null;
         this.audioProducerId = null;
         this.audioConsumers = new Map();
 
@@ -782,7 +785,8 @@ class RoomClient {
             let elem, au;
             if (!audio) {
                 this.localVideoStream = stream;
-                this.videoProducerId = producer.id;
+                if (type == mediaType.video) this.videoProducerId = producer.id;
+                if (type == mediaType.screen) this.screenProducerId = producer.id;
                 elem = await this.handleProducer(producer.id, type, stream);
                 //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
@@ -875,74 +879,9 @@ class RoomClient {
         }
     }
 
-    async produceScreenAudio(stream) {
-        try {
-            this.stopMyAudio();
-
-            if (this.producerLabel.has(mediaType.audio)) {
-                return console.log('Producer already exists for this type ' + mediaType.audio);
-            }
-
-            const track = stream.getAudioTracks()[0];
-            const params = {
-                track,
-                appData: {
-                    mediaType: mediaType.audio,
-                },
-            };
-
-            const producerSa = await this.producerTransport.produce(params);
-
-            console.log('PRODUCER SCREEN AUDIO', producerSa);
-
-            this.producers.set(producerSa.id, producerSa);
-
-            const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
-
-            producerSa.on('trackended', () => {
-                this.closeProducer(mediaType.audio);
-                this.startMyAudio();
-            });
-
-            producerSa.on('transportclose', () => {
-                console.log('Producer Screen audio transport close');
-                sa.srcObject.getTracks().forEach(function (track) {
-                    track.stop();
-                });
-                sa.parentNode.removeChild(sa);
-                console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
-                this.producers.delete(producerSa.id);
-            });
-
-            producerSa.on('close', () => {
-                console.log('Closing Screen audio producer');
-                sa.srcObject.getTracks().forEach(function (track) {
-                    track.stop();
-                });
-                sa.parentNode.removeChild(sa);
-                console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
-                this.producers.delete(producerSa.id);
-            });
-
-            this.producerLabel.set(mediaType.audio, producerSa.id);
-        } catch (err) {
-            console.error('Produce error:', err);
-        }
-    }
-
-    startMyAudio() {
-        startAudioButton.click();
-        this.setIsAudio(this.peer_id, true);
-        this.event(_EVENTS.startAudio);
-        setAudioButtonsDisabled(false);
-    }
-
-    stopMyAudio() {
-        stopAudioButton.click();
-        this.setIsAudio(this.peer_id, false);
-        this.event(_EVENTS.stopAudio);
-        setAudioButtonsDisabled(true);
-    }
+    // ####################################################
+    // AUDIO/VIDEO CONSTRAINTS
+    // ####################################################
 
     getAudioConstraints(deviceId) {
         return {
@@ -1093,6 +1032,10 @@ class RoomClient {
         };
     }
 
+    // ####################################################
+    // WEBCAM ENCODING
+    // ####################################################
+
     getWebCamEncoding() {
         let encodings;
         let codec;
@@ -1159,6 +1102,10 @@ class RoomClient {
         }
         return { encodings, codec };
     }
+
+    // ####################################################
+    // SCREEN ENCODING
+    // ####################################################
 
     getScreenEncoding() {
         let encodings;
@@ -1229,6 +1176,36 @@ class RoomClient {
             }
         }
         return { encodings, codec };
+    }
+
+    // ####################################################
+    // PRODUCER
+    // ####################################################
+
+    handleHideMe() {
+        isHideMeActive = !isHideMeActive;
+        //const myScreenWrap = this.getId(this.screenProducerId + '__video');
+        const myVideoWrap = this.getId(this.videoProducerId + '__video');
+        const myVideoWrapOff = this.getId(this.peer_id + '__videoOff');
+        const myVideoPinBtn = this.getId(this.videoProducerId + '__pin');
+        const myScreenPinBtn = this.getId(this.screenProducerId + '__pin');
+        console.log('handleHideMe', {
+            isHideMeActive: isHideMeActive,
+            //myScreenWrap: myScreenWrap ? myScreenWrap.id : null,
+            myVideoWrap: myVideoWrap ? myVideoWrap.id : null,
+            myVideoWrapOff: myVideoWrapOff ? myVideoWrapOff.id : null,
+            myVideoPinBtn: myVideoPinBtn ? myVideoPinBtn.id : null,
+            myScreenPinBtn: myScreenPinBtn ? myScreenPinBtn.id : null,
+        });
+        //if (myScreenWrap) myScreenWrap.style.display = isHideMeActive ? 'none' : 'block';
+        if (isHideMeActive && this.isVideoPinned && myVideoPinBtn) myVideoPinBtn.click();
+        if (isHideMeActive && this.isVideoPinned && myScreenPinBtn) myScreenPinBtn.click();
+        if (myVideoWrap) myVideoWrap.style.display = isHideMeActive ? 'none' : 'block';
+        if (myVideoWrapOff) myVideoWrapOff.style.display = isHideMeActive ? 'none' : 'block';
+        hideMeIcon.className = isHideMeActive ? html.hideMeOn : html.hideMeOff;
+        hideMeIcon.style.color = isHideMeActive ? 'red' : 'white';
+        isHideMeActive ? this.sound('left') : this.sound('joined');
+        resizeVideoMedia();
     }
 
     closeThenProduce(type, deviceId, swapCamera = false) {
@@ -1457,6 +1434,75 @@ class RoomClient {
         }
 
         this.sound('left');
+    }
+
+    async produceScreenAudio(stream) {
+        try {
+            this.stopMyAudio();
+
+            if (this.producerLabel.has(mediaType.audio)) {
+                return console.log('Producer already exists for this type ' + mediaType.audio);
+            }
+
+            const track = stream.getAudioTracks()[0];
+            const params = {
+                track,
+                appData: {
+                    mediaType: mediaType.audio,
+                },
+            };
+
+            const producerSa = await this.producerTransport.produce(params);
+
+            console.log('PRODUCER SCREEN AUDIO', producerSa);
+
+            this.producers.set(producerSa.id, producerSa);
+
+            const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
+
+            producerSa.on('trackended', () => {
+                this.closeProducer(mediaType.audio);
+                this.startMyAudio();
+            });
+
+            producerSa.on('transportclose', () => {
+                console.log('Producer Screen audio transport close');
+                sa.srcObject.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                sa.parentNode.removeChild(sa);
+                console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
+                this.producers.delete(producerSa.id);
+            });
+
+            producerSa.on('close', () => {
+                console.log('Closing Screen audio producer');
+                sa.srcObject.getTracks().forEach(function (track) {
+                    track.stop();
+                });
+                sa.parentNode.removeChild(sa);
+                console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
+                this.producers.delete(producerSa.id);
+            });
+
+            this.producerLabel.set(mediaType.audio, producerSa.id);
+        } catch (err) {
+            console.error('Produce error:', err);
+        }
+    }
+
+    startMyAudio() {
+        startAudioButton.click();
+        this.setIsAudio(this.peer_id, true);
+        this.event(_EVENTS.startAudio);
+        setAudioButtonsDisabled(false);
+    }
+
+    stopMyAudio() {
+        stopAudioButton.click();
+        this.setIsAudio(this.peer_id, false);
+        this.event(_EVENTS.stopAudio);
+        setAudioButtonsDisabled(true);
     }
 
     // ####################################################
@@ -2128,6 +2174,21 @@ class RoomClient {
                     },
                 });
                 break;
+            case 'toast':
+                const Toast = Swal.mixin({
+                    background: swalBackground,
+                    position: 'top-end',
+                    icon: 'info',
+                    showConfirmButton: false,
+                    timerProgressBar: true,
+                    toast: true,
+                    timer: 3000,
+                });
+                Toast.fire({
+                    icon: 'info',
+                    title: message,
+                });
+                break;
             // ......
             default:
                 alert(message);
@@ -2290,6 +2351,7 @@ class RoomClient {
         let cam = this.getId(camId);
         if (btnPn && videoPlayer && cam) {
             btnPn.addEventListener('click', () => {
+                if (this.isMobileDevice) return;
                 this.sound('click');
                 this.isVideoPinned = !this.isVideoPinned;
                 if (this.isVideoPinned) {
@@ -2308,7 +2370,7 @@ class RoomClient {
                     if (this.pinnedVideoPlayerId != videoPlayer.id) {
                         this.isVideoPinned = true;
                         if (this.isScreenAllowed) return;
-                        return this.msgPopup('info', 'Another video seems pinned, unpin it before to pin this one');
+                        return this.msgPopup('toast', 'Another video seems pinned, unpin it before to pin this one');
                     }
                     if (!isScreen) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
