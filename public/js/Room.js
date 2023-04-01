@@ -977,6 +977,7 @@ function handleButtons() {
         rc.resumeRecording();
     };
     swapCameraButton.onclick = () => {
+        if (isHideMeActive) rc.handleHideMe();
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
     };
     raiseHandButton.onclick = () => {
