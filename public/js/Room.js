@@ -167,6 +167,7 @@ function initClient() {
         setTippy('whiteboardTextBtn', 'Add text', 'bottom');
         setTippy('whiteboardLineBtn', 'Add line', 'bottom');
         setTippy('whiteboardRectBtn', 'Add rectangle', 'bottom');
+        setTippy('whiteboardTriangleBtn', 'Add triangle', 'bottom');
         setTippy('whiteboardCircleBtn', 'Add circle', 'bottom');
         setTippy('whiteboardSaveBtn', 'Save', 'bottom');
         setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
@@ -1065,6 +1066,9 @@ function handleButtons() {
     whiteboardRectBtn.onclick = () => {
         whiteboardAddObj('rect');
     };
+    whiteboardTriangleBtn.onclick = () => {
+        whiteboardAddObj('triangle');
+    };
     whiteboardCircleBtn.onclick = () => {
         whiteboardAddObj('circle');
     };
@@ -1864,6 +1868,20 @@ function whiteboardAddObj(type) {
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
             });
             addWbCanvasObj(rect);
+            break;
+        case 'triangle':
+            const triangle = new fabric.Triangle({
+                top: 0,
+                left: 0,
+                width: 150,
+                height: 100,
+                fill: 'transparent',
+                stroke: wbCanvas.freeDrawingBrush.color,
+                strokeWidth: wbCanvas.freeDrawingBrush.width,
+            });
+            addWbCanvasObj(triangle);
+            break;
+        default:
             break;
     }
 }
