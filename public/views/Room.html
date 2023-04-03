@@ -219,30 +219,40 @@ access to use this app.
                         <i class="fas fa-lock"></i>
                         <p>Unlock room</p>
                     </button>
-                    <div id="lobbyButton" class="hidden">
-                        <div class="form-check form-switch form-switch-md">
-                            <input class="form-check-input" type="checkbox" id="switchLobby" />
-                            <label class="form-check-label" style="color: #fff" for="switchLobby">&nbsp;Lobby</label>
-                        </div>
-                    </div>
-                    <div id="pitchBarButton">
-                        <div class="form-check form-switch form-switch-md">
-                            <input class="form-check-input" type="checkbox" id="switchPitchBar" checked />
-                            <label class="form-check-label" style="color: #fff" for="switchPitchBar"
-                                >&nbsp;Audio pitch bar</label
-                            >
-                        </div>
-                    </div>
-                    <div id="soundsButton">
-                        <div class="form-check form-switch form-switch-md">
-                            <input class="form-check-input" type="checkbox" id="switchSounds" checked />
-                            <label class="form-check-label" style="color: #fff" for="switchSounds">&nbsp;Sounds</label>
-                        </div>
-                    </div>
-                    <button id="sessionTimeButton">
-                        <i class="fas fa-clock"></i>
-                        <p id="sessionTime"></p>
-                    </button>
+                    <table>
+                        <tr id="lobbyButton" class="hidden">
+                            <td>
+                                <label for="switchLobby"><i class="fas fa-shield-halved"></i>&nbsp;Lobby</label>
+                            </td>
+                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                <input id="switchLobby" class="form-check-input" type="checkbox" />
+                            </td>
+                        </tr>
+                        <tr id="pitchBarButton">
+                            <td>
+                                <label for="switchPitchBar"
+                                    ><i class="fas fa-microphone-lines"></i>&nbsp;Pitch bar</label
+                                >
+                            </td>
+                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                <input id="switchPitchBar" class="form-check-input" type="checkbox" checked />
+                            </td>
+                        </tr>
+                        <tr id="soundsButton">
+                            <td>
+                                <label for="switchSounds"><i class="fas fa-music"></i>&nbsp;Sounds</label>
+                            </td>
+                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                <input id="switchSounds" class="form-check-input" type="checkbox" checked />
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>
+                                <label for="sessionTime"><i class="fas fa-clock"></i>&nbsp;Session time</label>
+                            </td>
+                            <td><label id="sessionTime">00:00:00</label></td>
+                        </tr>
+                    </table>
                 </div>
 
                 <div id="tabRecording" class="tabcontent">

@@ -187,7 +187,6 @@ function initClient() {
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
-        setTippy('sessionTime', 'Session time', 'top');
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -829,7 +828,7 @@ function startSessionTimer() {
     let callStartTime = Date.now();
     setInterval(function printTime() {
         let callElapsedTime = Date.now() - callStartTime;
-        sessionTime.innerHTML = ' ' + getTimeToString(callElapsedTime);
+        sessionTime.innerHTML = getTimeToString(callElapsedTime);
     }, 1000);
 }
 

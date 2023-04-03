@@ -345,14 +345,6 @@ body {
     transform: scale(1);
 }
 
-#sessionTimeButton {
-    cursor: default;
-    position: absolute;
-    right: 15px;
-    bottom: 15px;
-    width: auto;
-}
-
 /* on open display devices tab */
 #tabDevices {
     display: block;
@@ -1017,7 +1009,9 @@ progress {
 --------------------------------------------------------------*/
 
 table {
+    width: 320px;
     color: #fff;
+    table-layout: fixed;
     border-collapse: collapse;
     border-radius: 5px;
     border-style: hidden;
