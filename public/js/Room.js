@@ -1013,9 +1013,11 @@ function handleButtons() {
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
     startScreenButton.onclick = () => {
+        if (isHideMeActive) rc.handleHideMe();
         rc.produce(RoomClient.mediaType.screen);
     };
     stopScreenButton.onclick = () => {
+        if (isHideMeActive) rc.handleHideMe();
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     fileShareButton.onclick = () => {
