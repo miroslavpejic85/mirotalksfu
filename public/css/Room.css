@@ -284,12 +284,6 @@ body {
     cursor: pointer;
 }
 
-#pitchBarButton,
-#soundsButton,
-#lobbyButton {
-    padding: 10px;
-}
-
 /*--------------------------------------------------------------
 # Settings Table
 --------------------------------------------------------------*/
@@ -311,6 +305,10 @@ th {
 }
 .settingsTable tr:nth-child(even) {
     background-color: #2b2b2b;
+}
+
+#sessionTime {
+    float: right;
 }
 
 /*--------------------------------------------------------------
