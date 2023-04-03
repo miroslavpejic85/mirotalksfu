@@ -3076,7 +3076,7 @@ class RoomClient {
             });
         }
         if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
-        this.getId('recordingStatus').innerHTML = '🔴 REC 0s';
+        this.getId('recordingStatus').innerHTML = '0s';
         this.event(_EVENTS.stopRec);
         this.sound('recStop');
     }

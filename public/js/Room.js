@@ -866,7 +866,7 @@ function startRecordingTimer() {
     recTimer = setInterval(function printTime() {
         if (rc.isRecording()) {
             recElapsedTime++;
-            recordingStatus.innerHTML = '🔴 REC ' + secondsToHms(recElapsedTime);
+            recordingStatus.innerHTML = secondsToHms(recElapsedTime);
         }
     }, 1000);
 }
