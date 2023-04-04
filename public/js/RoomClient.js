@@ -41,6 +41,14 @@ const html = {
     videoPrivacy: 'far fa-circle',
 };
 
+const icons = {
+    lobby: '<i class="fas fa-shield-halved"></i>',
+    lock: '<i class="fa-solid fa-lock"></i>',
+    unlock: '<i class="fa-solid fa-lock-open"></i>',
+    pitchBar: '<i class="fas fa-microphone-lines"></i>',
+    sounds: '<i class="fas fa-music"></i>',
+};
+
 const image = {
     about: '../images/mirotalksfu-logo.png',
     avatar: '../images/mirotalksfu-logo.png',
@@ -3690,19 +3698,37 @@ class RoomClient {
             case 'lock':
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
-                this.userLog('info', '🔒 LOCKED the room by the password', 'top-end');
+                this.userLog('info', `${icons.lock} LOCKED the room by the password`, 'top-end');
                 break;
             case 'unlock':
                 this.event(_EVENTS.roomUnlock);
-                this.userLog('info', '🔓 UNLOCKED the room', 'top-end');
+                this.userLog('info', `${icons.unlock} UNLOCKED the room`, 'top-end');
                 break;
             case 'lobbyOn':
                 this.event(_EVENTS.lobbyOn);
-                this.userLog('info', '⌛ Lobby is enabled', 'top-end');
+                this.userLog('info', `${icons.lobby} Lobby is enabled`, 'top-end');
                 break;
             case 'lobbyOff':
                 this.event(_EVENTS.lobbyOff);
-                this.userLog('info', '⌛ Lobby is disabled', 'top-end');
+                this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end');
+                break;
+            default:
+                break;
+        }
+    }
+
+    roomMessage(action, active = false) {
+        const status = active ? 'ON' : 'OFF';
+        switch (action) {
+            case 'pitchBar':
+                this.sound('switch');
+                this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
+                break;
+            case 'sounds':
+                this.sound('switch');
+                this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top-end');
+                break;
+            default:
                 break;
         }
     }

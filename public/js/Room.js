@@ -1271,9 +1271,11 @@ function handleSelects() {
     // room
     switchPitchBar.onchange = (e) => {
         isPitchBarEnabled = e.currentTarget.checked;
+        rc.roomMessage('pitchBar', isPitchBarEnabled);
     };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
+        rc.roomMessage('sounds', isSoundEnabled);
     };
     switchLobby.onchange = (e) => {
         isLobbyEnabled = e.currentTarget.checked;
