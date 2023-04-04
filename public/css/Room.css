@@ -300,6 +300,13 @@ th {
     text-align: left;
     padding: 10px;
 }
+.settingsTable tr:nth-child(even) {
+    /* background-color: #121212; */
+}
+.settingsTable i {
+    border: var(--border);
+    border-radius: 5px;
+}
 
 #sessionTime {
     float: right;
