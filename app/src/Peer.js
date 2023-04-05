@@ -150,7 +150,7 @@ module.exports = class Peer {
             case 'simulcast':
                 // L1T3/L2T3/L3T3
                 await consumer.setPreferredLayers({
-                    spatialLayer: 3, // 1 2 3
+                    spatialLayer: 1, // 1/2/3
                     temporalLayer: 3,
                 });
                 log.debug('Consumer scalabilityMode ----->', {
