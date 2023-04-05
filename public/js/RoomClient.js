@@ -4045,7 +4045,7 @@ class RoomClient {
             if (consumerAudioBtn) consumerAudioBtn.style.color = audioColor;
             if (pbProducer) pbProducer.style.height = '0%';
             if (pbConsumer) pbConsumer.style.height = '0%';
-        }, 2000);
+        }, 200);
     }
 
     // ####################################################

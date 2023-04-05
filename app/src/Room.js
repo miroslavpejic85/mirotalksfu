@@ -50,7 +50,7 @@ module.exports = class Room {
         this.audioLevelObserver = await router.createAudioLevelObserver({
             maxEntries: 1,
             threshold: -70,
-            interval: 1000,
+            interval: 100,
         });
 
         this.audioLevelObserver.on('volumes', (volumes) => {
@@ -58,16 +58,15 @@ module.exports = class Room {
         });
         this.audioLevelObserver.on('silence', () => {
             //log.debug('audioLevelObserver', { volume: 'silence' });
-            return;
         });
     }
 
     sendActiveSpeakerVolume(volumes) {
-        if (Date.now() > this.audioLastUpdateTime + 1000) {
+        if (Date.now() > this.audioLastUpdateTime + 100) {
             this.audioLastUpdateTime = Date.now();
             const { producer, volume } = volumes[0];
             let audioVolume = Math.round(Math.pow(10, volume / 70) * 10); // 1-10
-            if (audioVolume > 2) {
+            if (audioVolume > 1) {
                 // log.debug('PEERS', this.peers);
                 this.peers.forEach((peer) => {
                     peer.producers.forEach((peerProducer) => {
