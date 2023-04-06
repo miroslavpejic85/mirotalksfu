@@ -3236,6 +3236,7 @@ class RoomClient {
             `${icons.fileReceive} File receive: 
             <br/> 
             <ul>
+                <li>From: ${this.incomingFileInfo.peer_name}</li>
                 <li>Name: ${this.incomingFileInfo.fileName}</li>
                 <li>Size: ${this.bytesToSize(this.incomingFileInfo.fileSize)}</li>
             </ul>`,
