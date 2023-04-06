@@ -47,6 +47,8 @@ const icons = {
     unlock: '<i class="fa-solid fa-lock-open"></i>',
     pitchBar: '<i class="fas fa-microphone-lines"></i>',
     sounds: '<i class="fas fa-music"></i>',
+    fileSend: '<i class="fa-solid fa-file-export"></i>',
+    fileReceive: '<i class="fa-solid fa-file-import"></i>',
 };
 
 const image = {
@@ -3190,7 +3192,12 @@ class RoomClient {
                 this.rightMsgAvatar,
                 this.peer_name,
                 this.peer_id,
-                'Send File: \n' + this.toHtmlJson(fileInfo),
+                `${icons.fileSend} File send: 
+                <br/> 
+                <ul>
+                    <li>Name: ${this.fileToSend.name}</li>
+                    <li>Size: ${this.bytesToSize(this.fileToSend.size)}</li>
+                </ul>`,
                 'all',
                 'all',
             );
@@ -3226,7 +3233,12 @@ class RoomClient {
             this.leftMsgAvatar,
             this.incomingFileInfo.peer_name,
             this.incomingFileInfo.peer_id,
-            'Receive File: \n' + this.toHtmlJson(this.incomingFileInfo),
+            `${icons.fileReceive} File receive: 
+            <br/> 
+            <ul>
+                <li>Name: ${this.incomingFileInfo.fileName}</li>
+                <li>Size: ${this.bytesToSize(this.incomingFileInfo.fileSize)}</li>
+            </ul>`,
             'all',
             'all',
         );
