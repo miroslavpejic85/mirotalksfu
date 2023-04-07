@@ -61,6 +61,9 @@ const BUTTONS = {
         chatShareFileButton: true,
         chatSpeechStartButton: true,
     },
+    participantsList: {
+        saveInfoButton: true,
+    },
     //...
 };
 
@@ -68,6 +71,7 @@ function handleRules(isPresenter) {
     console.log('06.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
     if (!isPresenter) {
+        BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.lobbyButton = false;
@@ -78,6 +82,7 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = false;
         //...
     } else {
+        BUTTONS.participantsList.saveInfoButton = true;
         BUTTONS.settings.lockRoomButton = !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
         BUTTONS.settings.lobbyButton = true;
@@ -88,9 +93,10 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = true;
         //...
     }
-    // main. settings.
+    // main. settings...
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
+    BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     //...
 }

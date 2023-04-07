@@ -200,7 +200,7 @@ class RoomClient {
 
         this.myVideoEl = null;
         this.myAudioEl = null;
-        this.showPeerInfo = false;
+        this.showPeerInfo = false; // on peerName mouse hover
 
         this.videoProducerId = null;
         this.screenProducerId = null;
@@ -2928,22 +2928,7 @@ class RoomClient {
         if (this.chatMessages.length === 0) {
             return userLog('info', 'No chat messages to save', 'top-end');
         }
-
-        const newDate = new Date();
-        const date = newDate.toISOString().split('T')[0];
-        const time = newDate.toTimeString().split(' ')[0];
-
-        let a = document.createElement('a');
-        a.href = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(this.chatMessages, null, 1));
-        a.download = `${date}-${time}` + '-CHAT.txt';
-        document.body.appendChild(a);
-        a.click();
-        setTimeout(() => {
-            document.body.removeChild(a);
-            window.URL.revokeObjectURL(url);
-        }, 100);
-
-        this.sound('download');
+        saveObjToJsonFile(this.chatMessages, 'CHAT');
     }
 
     // ####################################################
@@ -3039,13 +3024,11 @@ class RoomClient {
             console.log('MediaRecorder stopped: ', evt);
             console.log('MediaRecorder Blobs: ', recordedBlobs);
 
-            const newDate = new Date();
-            const date = newDate.toISOString().split('T')[0];
-            const time = newDate.toTimeString().split(' ')[0];
+            const dateTime = getDataTimeString();
 
             const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
             const blob = new Blob(recordedBlobs, { type: 'video/' + type });
-            const recFileName = `${date}-${time}` + '-REC.' + type;
+            const recFileName = `${dateTime}-REC.${type}`;
 
             console.log('MediaRecorder Download Blobs');
             const url = window.URL.createObjectURL(blob);
@@ -4425,14 +4408,17 @@ class RoomClient {
                     JSON.stringify(
                         peer_info,
                         [
+                            'join_data_time',
                             'peer_id',
                             'peer_name',
                             'peer_audio',
                             'peer_video',
+                            'peer_video_privacy',
                             'peer_screen',
                             'peer_hand',
                             'is_desktop_device',
                             'is_mobile_device',
+                            'is_tablet_device',
                             'is_ipad_pro_device',
                             'os_name',
                             'os_version',
