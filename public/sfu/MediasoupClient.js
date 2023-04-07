@@ -2798,11 +2798,10 @@
                         return this._appData;
                     }
                     /**
-                     * Invalid setter.
+                     * App custom data setter.
                      */
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
-                        throw new Error('cannot override appData object');
+                        this._appData = appData;
                     }
                     get observer() {
                         return this._observer;
@@ -2988,11 +2987,10 @@
                         return this._appData;
                     }
                     /**
-                     * Invalid setter.
+                     * App custom data setter.
                      */
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
-                        throw new Error('cannot override appData object');
+                        this._appData = appData;
                     }
                     get observer() {
                         return this._observer;
@@ -3159,11 +3157,10 @@
                         return this._appData;
                     }
                     /**
-                     * Invalid setter.
+                     * App custom data setter.
                      */
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
-                        throw new Error('cannot override appData object');
+                        this._appData = appData;
                     }
                     get observer() {
                         return this._observer;
@@ -3992,11 +3989,10 @@
                         return this._appData;
                     }
                     /**
-                     * Invalid setter.
+                     * App custom data setter.
                      */
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
-                        throw new Error('cannot override appData object');
+                        this._appData = appData;
                     }
                     get observer() {
                         return this._observer;
@@ -4389,11 +4385,10 @@
                         return this._appData;
                     }
                     /**
-                     * Invalid setter.
+                     * App custom data setter.
                      */
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     set appData(appData) {
-                        throw new Error('cannot override appData object');
+                        this._appData = appData;
                     }
                     get observer() {
                         return this._observer;
@@ -4644,7 +4639,7 @@
                         // There is no Consumer creation in progress, create it now.
                         (0, queue_microtask_1.default)(() => {
                             if (this._closed) {
-                                throw new errors_1.InvalidStateError('closed');
+                                return;
                             }
                             if (this._consumerCreationInProgress === false) {
                                 this.createPendingConsumers();
@@ -4795,7 +4790,7 @@
                                 }
                                 try {
                                     const results = await this._handler.receive(optionsList);
-                                    for (let idx = 0; idx < results.length; idx++) {
+                                    for (let idx = 0; idx < results.length; ++idx) {
                                         const task = pendingConsumerTasks[idx];
                                         const result = results[idx];
                                         const { id, producerId, kind, rtpParameters, appData } = task.consumerOptions;
@@ -4807,7 +4802,7 @@
                                             rtpReceiver,
                                             track,
                                             rtpParameters,
-                                            appData,
+                                            appData: appData,
                                         });
                                         this._consumers.set(consumer.id, consumer);
                                         this.handleConsumer(consumer);
@@ -14054,7 +14049,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.83';
+                exports.version = '3.6.84';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
