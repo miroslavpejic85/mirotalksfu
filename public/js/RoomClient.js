@@ -265,7 +265,7 @@ class RoomClient {
                 room_id,
             })
             .catch((err) => {
-                console.log('Create room error:', err);
+                console.log('Create room:', err);
             });
     }
 
@@ -283,6 +283,14 @@ class RoomClient {
                         this.event(_EVENTS.lobbyOn);
                         console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
                         return this.waitJoinConfirm();
+                    }
+                    const peers = new Map(JSON.parse(room.peers));
+                    for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
+                        let peer_info = peers.get(peer).peer_info;
+                        if (peer_info.peer_name == this.peer_name) {
+                            console.log('00-WARNING ----> Username already in use');
+                            return this.userNameAlreadyInRoom();
+                        }
                     }
                     await this.joinAllowed(room);
                 }.bind(this),
@@ -651,6 +659,35 @@ class RoomClient {
                 this.exit(true);
             }.bind(this),
         );
+    }
+
+    // ####################################################
+    // CHECK USER
+    // ####################################################
+
+    async userNameAlreadyInRoom() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.user,
+            position: 'center',
+            title: 'Username',
+            html: `The Username is already in use. <br/> Please try with another one`,
+            showDenyButton: false,
+            confirmButtonText: `OK`,
+            showClass: {
+                popup: 'animate__animated animate__fadeInDown',
+            },
+            hideClass: {
+                popup: 'animate__animated animate__fadeOutUp',
+            },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                openURL((window.location.href = '/join/' + this.room_id));
+            }
+        });
     }
 
     // ####################################################

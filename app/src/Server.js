@@ -530,6 +530,8 @@ function startServer() {
                         .get(socket.id)
                         .updatePeerInfo({ type: cmd, status: words[2] == 'true' });
                     break;
+                default:
+                    break;
                 //...
             }
 
