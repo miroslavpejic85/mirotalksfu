@@ -434,8 +434,10 @@ function getRoomPassword() {
 function getPeerInfo() {
     peer_info = {
         join_data_time: getDataTimeString(),
+        peer_uuid: getUUID(),
         peer_id: socket.id,
         peer_name: peer_name,
+        peer_presenter: isPresenter,
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
         peer_screen: isScreenAllowed,
@@ -1600,6 +1602,17 @@ function getDataTimeString() {
     const date = d.toISOString().split('T')[0];
     const time = d.toTimeString().split(' ')[0];
     return `${date}-${time}`;
+}
+
+function getUUID() {
+    const uuid4 = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+    );
+    if (window.localStorage.uuid) {
+        return window.localStorage.uuid;
+    }
+    window.localStorage.uuid = uuid4;
+    return uuid4;
 }
 
 function showButtons() {

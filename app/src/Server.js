@@ -144,6 +144,8 @@ let authHost; // Authenticated IP by Login
 
 let roomList = new Map();
 
+let presenters = {}; // collect presenters grp by roomId
+
 // All mediasoup workers
 let workers = [];
 let nextMediasoupWorkerIdx = 0;
@@ -728,6 +730,38 @@ function startServer() {
                 return cb('isLobby');
             }
 
+            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
+
+            const peer_name = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
+            const peer_uuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+
+            if (Object.keys(presenters[socket.room_id]).length === 0) {
+                presenters[socket.room_id] = {
+                    peer_name: peer_name,
+                    peer_uuid: peer_uuid,
+                    is_presenter: true,
+                };
+            }
+
+            log.debug('[Join] - Connected presenters grp by roomId', presenters);
+
+            const isPresenter =
+                Object.keys(presenters[socket.room_id]).length > 1 &&
+                presenters[socket.room_id]['peer_name'] == peer_name &&
+                presenters[socket.room_id]['peer_uuid'] == peer_uuid;
+
+            roomList
+                .get(socket.room_id)
+                .getPeers()
+                .get(socket.id)
+                .updatePeerInfo({ type: 'presenter', status: isPresenter });
+
+            log.debug('[Join] - Is presenter', {
+                roomId: socket.room_id,
+                peer_name: peer_name,
+                peer_presenter: isPresenter,
+            });
+
             cb(roomList.get(socket.room_id).toJson());
         });
 
@@ -904,6 +938,8 @@ function startServer() {
                 if (roomList.get(socket.room_id).isLobbyEnabled()) {
                     roomList.get(socket.room_id).setLobbyEnabled(false);
                 }
+                delete presenters[socket.room_id];
+                log.debug('Disconnect - current presenters grouped by roomId', presenters);
             }
 
             roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());

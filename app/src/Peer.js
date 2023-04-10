@@ -8,6 +8,7 @@ module.exports = class Peer {
         this.id = socket_id;
         this.peer_info = data.peer_info;
         this.peer_name = data.peer_info.peer_name;
+        this.peer_presenter = data.peer_info.peer_presenter;
         this.peer_audio = data.peer_info.peer_audio;
         this.peer_video = data.peer_info.peer_video;
         this.peer_video_privacy = data.peer_video_privacy;
@@ -49,6 +50,12 @@ module.exports = class Peer {
             case 'privacy':
                 this.peer_info.peer_video_privacy = data.status;
                 this.peer_video_privacy = data.status;
+                break;
+            case 'presenter':
+                this.peer_info.peer_presenter = data.status;
+                this.peer_presenter = data.status;
+                break;
+            default:
                 break;
         }
     }

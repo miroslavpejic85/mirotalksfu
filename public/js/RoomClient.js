@@ -305,7 +305,7 @@ class RoomClient {
         await this.handleRoomInfo(room);
         const data = await this.socket.request('getRouterRtpCapabilities');
         this.device = await this.loadDevice(data);
-        console.log('07.1 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
+        console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
         await this.startLocalMedia();
         this.socket.emit('getProducers');
@@ -314,18 +314,22 @@ class RoomClient {
     async handleRoomInfo(room) {
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
-        isPresenter = participantsCount > 1 ? false : true;
-        handleRules(isPresenter);
+        for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {
+            let my_peer_info = peers.get(peer).peer_info;
+            console.log('07.1 ----> My Peer info', my_peer_info);
+            isPresenter = my_peer_info.peer_presenter;
+            handleRules(isPresenter);
+        }
         adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
-            // console.log('07 ----> Remote Peer info', peer_info);
+            // console.log('07.1 ----> Remote Peer info', peer_info);
             if (!peer_info.peer_video) {
                 await this.setVideoOff(peer_info, true);
             }
         }
         this.refreshParticipantsCount();
-        console.log('06.2 Participants Count ---->', participantsCount);
+        console.log('07.2 Participants Count ---->', participantsCount);
         // notify && participantsCount == 1 ? shareRoom() : sound('joined');
         if (notify && participantsCount == 1) {
             shareRoom();
