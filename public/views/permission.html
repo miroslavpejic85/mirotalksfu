@@ -42,6 +42,9 @@
 
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+
+        <!-- xss -->
+        <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
     </head>
     <body class="is-boxed has-animations">
         <div class="body-wrap">
@@ -72,8 +75,8 @@
                                 </p>
                                 <script>
                                     let qs = new URLSearchParams(window.location.search);
-                                    let room_id = qs.get('room_id');
-                                    let message = qs.get('message');
+                                    let room_id = filterXSS(qs.get('room_id'));
+                                    let message = filterXSS(qs.get('message'));
                                     console.log('Allow Camera or Audio', {
                                         room_id: room_id,
                                         message: message,

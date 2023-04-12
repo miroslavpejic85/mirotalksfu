@@ -217,7 +217,7 @@ function startServer() {
         if (hostCfg.protected == true) {
             let ip = getIP(req);
             log.debug(`Request login to host from: ${ip}`, req.query);
-            const { username, password } = req.query;
+            const { username, password } = checkXSS(req.query);
             if (username == hostCfg.username && password == hostCfg.password) {
                 hostCfg.authenticated = true;
                 authHost = new Host(ip, true);
@@ -253,7 +253,7 @@ function startServer() {
         if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
             // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-            const { room, password, name, audio, video, screen, notify } = req.query;
+            const { room, password, name, audio, video, screen, notify } = checkXSS(req.query);
             if (room && password && name && audio && video && screen && notify) {
                 return res.sendFile(views.room);
             }
