@@ -2193,7 +2193,7 @@ async function getParticipantsTable(peers) {
         if (rc.peer_id === peer_id) {
             table += `
             <tr id='${peer_name}'>
-                <td><img src='${avatarImg}'></td>
+                <td><img src="${avatarImg}"></td>
                 <td>${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
@@ -2208,7 +2208,7 @@ async function getParticipantsTable(peers) {
             if (isRulesActive && isPresenter) {
                 table += `
                 <tr id='${peer_id}'>
-                    <td><img src='${avatarImg}'></td>
+                    <td><img src="${avatarImg}"></td>
                     <td>${peer_name}</td>
                     <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                     <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
@@ -2222,7 +2222,7 @@ async function getParticipantsTable(peers) {
             } else {
                 table += `
                 <tr id='${peer_id}'>
-                    <td><img src='${avatarImg}'></td>
+                    <td><img src="${avatarImg}"></td>
                     <td>${peer_name}</td>
                     <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
                     <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
@@ -2269,7 +2269,7 @@ function refreshParticipantsCount(count, adapt = true) {
 }
 
 function getParticipantAvatar(peerName) {
-    return cfg.msgAvatar + '?name=' + peerName + '&size=32' + '&background=random&rounded=true';
+    return rc.genAvatarSvg(peerName, 32);
 }
 
 // ####################################################
