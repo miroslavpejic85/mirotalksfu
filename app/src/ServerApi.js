@@ -7,7 +7,7 @@ module.exports = class ServerApi {
     constructor(host = null, authorization = null) {
         this._host = host;
         this._authorization = authorization;
-        this._api_key_secret = config.apiKeySecret;
+        this._api_key_secret = config.api.keySecret;
     }
 
     isAuthorized() {

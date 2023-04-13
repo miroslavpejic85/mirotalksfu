@@ -46,7 +46,7 @@ function resizeVideoMedia() {
     let max = 0;
     let optional = isHideMeActive ? 1 : 0;
     let isOneVideoElement = videoMediaContainer.childElementCount - optional == 1 ? true : false;
-    console.log('videoMediaContainer.childElementCount: ', videoMediaContainer.childElementCount - optional);
+    //console.log('videoMediaContainer.childElementCount: ', videoMediaContainer.childElementCount - optional);
 
     // full screen mode
     let bigWidth = Width * 4;

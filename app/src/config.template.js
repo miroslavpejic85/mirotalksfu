@@ -22,28 +22,41 @@ const getLocalIp = () => {
 // https://api.ipify.org
 
 module.exports = {
-    /*
-        Host Protection (default False)
-        In order to protect your host set 
-        hostProtected to true and set your own Username and Password
-    */
-    hostProtected: false,
-    hostUsername: 'username',
-    hostPassword: 'password',
-    // app listen on
-    listenIp: '0.0.0.0',
-    listenPort: process.env.PORT || 3010,
-    // ssl/README.md
-    sslCrt: '../ssl/cert.pem',
-    sslKey: '../ssl/key.pem',
-    /* 
-    Ngrok
-        1. Goto https://ngrok.com
-        2. Get started for free 
-        3. Copy YourNgrokAuthToken: https://dashboard.ngrok.com/get-started/your-authtoken
-    */
-    ngrokAuthToken: '',
-    apiKeySecret: 'mirotalksfu_default_secret',
+    server: {
+        listen: {
+            // app listen on
+            ip: '0.0.0.0',
+            port: process.env.PORT || 3010,
+        },
+        ssl: {
+            // ssl/README.md
+            cert: '../ssl/cert.pem',
+            key: '../ssl/key.pem',
+        },
+    },
+    host: {
+        /*
+            Host Protection (default False)
+            In order to protect your host set 
+            hostProtected to true and set your own Username and Password
+        */
+        protected: false,
+        username: 'username',
+        password: 'password',
+    },
+    ngrok: {
+        /* 
+        Ngrok
+            1. Goto https://ngrok.com
+            2. Get started for free 
+            3. Copy YourNgrokAuthToken: https://dashboard.ngrok.com/get-started/your-authtoken
+        */
+        authToken: '',
+    },
+    api: {
+        // app/api
+        keySecret: 'mirotalksfu_default_secret',
+    },
     sentry: {
         /*
         Sentry
@@ -129,7 +142,7 @@ module.exports = {
             listenIps: [
                 {
                     ip: '0.0.0.0',
-                    announcedIp: getLocalIp(), // replace by public static IPV4 address https://api.ipify.org
+                    announcedIp: getLocalIp(), // replace by 'public static IPV4 address' https://api.ipify.org (type string --> 'xx.xxx.xxx.xx' not xx.xxx.xxx.xx)
                 }, //announcedIp: '' will be auto-detected on server start, for docker localPC set '127.0.0.1'
             ],
             initialAvailableOutgoingBitrate: 1000000,

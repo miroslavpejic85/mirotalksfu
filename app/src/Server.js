@@ -76,8 +76,8 @@ const bodyParser = require('body-parser');
 const app = express();
 
 const options = {
-    key: fs.readFileSync(path.join(__dirname, config.sslKey), 'utf-8'),
-    cert: fs.readFileSync(path.join(__dirname, config.sslCrt), 'utf-8'),
+    cert: fs.readFileSync(path.join(__dirname, config.server.ssl.cert), 'utf-8'),
+    key: fs.readFileSync(path.join(__dirname, config.server.ssl.key), 'utf-8'),
 };
 
 const httpsServer = https.createServer(options, app);
@@ -85,13 +85,13 @@ const io = require('socket.io')(httpsServer, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
 });
-const host = 'https://' + 'localhost' + ':' + config.listenPort; // config.listenIp
+const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
 
 const hostCfg = {
-    protected: config.hostProtected,
-    username: config.hostUsername,
-    password: config.hostPassword,
-    authenticated: !config.hostProtected,
+    protected: config.host.protected,
+    username: config.host.username,
+    password: config.host.password,
+    authenticated: !config.host.protected,
 };
 
 const apiBasePath = '/api/v1'; // api endpoint path
@@ -386,8 +386,8 @@ function startServer() {
 
     async function ngrokStart() {
         try {
-            await ngrok.authtoken(config.ngrokAuthToken);
-            await ngrok.connect(config.listenPort);
+            await ngrok.authtoken(config.ngrok.authToken);
+            await ngrok.connect(config.server.listen.port);
             const api = ngrok.getApi();
             // const data = JSON.parse(await api.get('api/tunnels')); // v3
             const data = await api.listTunnels(); // v4
@@ -415,7 +415,7 @@ function startServer() {
     // START SERVER
     // ####################################################
 
-    httpsServer.listen(config.listenPort, () => {
+    httpsServer.listen(config.server.listen.port, () => {
         log.log(
             `%c
     
@@ -430,7 +430,7 @@ function startServer() {
             'font-family:monospace',
         );
 
-        if (config.ngrokAuthToken !== '') {
+        if (config.ngrok.authToken !== '') {
             return ngrokStart();
         }
         log.debug('Settings', {
