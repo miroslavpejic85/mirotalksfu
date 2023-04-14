@@ -23,6 +23,8 @@ const commands = {
     chatOn: 'open the chat',
     chatSend: 'send',
     chatOff: 'close the chat',
+    chatGPTOn: 'open chatGPT',
+    chatGPTOff: 'close chatGPT',
     whiteboardOn: 'open the whiteboard',
     whiteboardOff: 'close the whiteboard',
     recordingOn: 'start the recording',
@@ -188,6 +190,14 @@ function execVoiceCommands(transcript) {
         case commands.whiteboardOn:
             printCommand(commands.whiteboardOn);
             whiteboardButton.click();
+            break;
+        case commands.chatGPTOn:
+            printCommand(commands.chatGPTOn);
+            chatGPTButton.click();
+            break;
+        case commands.chatGPTOff:
+            printCommand(commands.chatGPTOff);
+            chatGPTButton.click();
             break;
         case commands.whiteboardOff:
             printCommand(commands.whiteboardOff);

@@ -58,6 +58,7 @@ const BUTTONS = {
         chatSaveButton: true,
         chatEmojiButton: true,
         chatMarkdownButton: true,
+        chatGPTButton: true,
         chatShareFileButton: true,
         chatSpeechStartButton: true,
     },

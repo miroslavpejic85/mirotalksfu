@@ -70,6 +70,7 @@ module.exports = {
     },
     slack: {
         /*
+        Slack
             1. Goto https://api.slack.com/apps/
             2. Create your app
             3. On Settings - Basic Information - App Credentials, chose your Signing Secret
@@ -77,6 +78,19 @@ module.exports = {
         */
         enabled: false,
         signingSecret: '',
+    },
+    chatGPT: {
+        /**
+        ChatGPT
+            1. Goto https://platform.openai.com/
+            2. Create your account
+            3. Generate your APIKey https://platform.openai.com/account/api-keys
+        */
+        enabled: false,
+        apiKey: '',
+        model: 'text-davinci-003',
+        max_tokens: 1000,
+        temperature: 0,
     },
     mediasoup: {
         // Worker settings

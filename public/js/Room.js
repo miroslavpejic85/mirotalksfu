@@ -93,6 +93,7 @@ let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
 let isChatPasteTxt = false;
 let isChatMarkdownOn = false;
+let isChatGPTOn = false;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
 let initAudioButton = null;
@@ -181,6 +182,7 @@ function initClient() {
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
+        setTippy('chatGPTButton', 'ChatGPT', 'top');
         setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
@@ -743,6 +745,7 @@ function roomIsReady() {
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
+    BUTTONS.chat.chatGPTButton && show(chatGPTButton);
     BUTTONS.chat.chatShareFileButton && show(chatShareFileButton);
     if (isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton) {
         show(chatSpeechStartButton);
@@ -952,6 +955,10 @@ function handleButtons() {
     chatMarkdownButton.onclick = () => {
         isChatMarkdownOn = !isChatMarkdownOn;
         setColor(chatMarkdownButton, isChatMarkdownOn ? 'lime' : 'white');
+    };
+    chatGPTButton.onclick = () => {
+        isChatGPTOn = !isChatGPTOn;
+        setColor(chatGPTButton, isChatGPTOn ? 'lime' : 'white');
     };
     chatShareFileButton.onclick = () => {
         fileShareButton.click();

@@ -121,6 +121,20 @@ if (sentryEnabled) {
     */
 }
 
+// OpenAI/ChatGPT
+let chatGPT;
+if (config.chatGPT.enabled) {
+    if (config.chatGPT.apiKey) {
+        const { Configuration, OpenAIApi } = require('openai');
+        const configuration = new Configuration({
+            apiKey: config.chatGPT.apiKey,
+        });
+        chatGPT = new OpenAIApi(configuration);
+    } else {
+        log.warning('ChatGPT seems enabled, but you missing the apiKey!');
+    }
+}
+
 // directory
 const dir = {
     public: path.join(__dirname, '../../', 'public'),
@@ -404,6 +418,8 @@ function startServer() {
                 mediasoup_server_version: mediasoup.version,
                 mediasoup_client_version: mediasoupClient.version,
                 sentry_enabled: sentryEnabled,
+                slack_enabled: slackEnabled,
+                chatGPT_enabled: config.chatGPT.enabled,
             });
         } catch (err) {
             log.error('Ngrok Start error: ', err.body);
@@ -442,6 +458,8 @@ function startServer() {
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,
             sentry_enabled: sentryEnabled,
+            slack_enabled: slackEnabled,
+            chatGPT_enabled: config.chatGPT.enabled,
         });
     });
 
@@ -921,6 +939,34 @@ function startServer() {
                 roomList.get(socket.room_id).broadCast(socket.id, 'message', data);
             } else {
                 roomList.get(socket.room_id).sendTo(data.to_peer_id, 'message', data);
+            }
+        });
+
+        socket.on('getChatGPT', async ({ prompt }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.chatGPT.enabled) return cb('ChatGPT seems disabled, try later!');
+            try {
+                // https://platform.openai.com/docs/api-reference/completions/create
+                const completion = await chatGPT.createCompletion({
+                    model: config.chatGPT.model || 'text-davinci-003',
+                    prompt: prompt,
+                    max_tokens: config.chatGPT.max_tokens,
+                    temperature: config.chatGPT.temperature,
+                });
+                const response = completion.data.choices[0].text;
+                log.debug('ChatGPT', {
+                    prompt: prompt,
+                    response: response,
+                });
+                cb(response);
+            } catch (error) {
+                if (error.response) {
+                    log.error('ChatGPT', error.response);
+                    cb(error.response.data.error.message);
+                } else {
+                    log.error('ChatGPT', error.message);
+                    cb(error.message);
+                }
             }
         });
 

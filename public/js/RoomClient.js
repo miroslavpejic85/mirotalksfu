@@ -2701,7 +2701,7 @@ class RoomClient {
     }
 
     sendMessage() {
-        if (!this.thereIsParticipants()) {
+        if (!this.thereIsParticipants() && !isChatGPTOn) {
             this.cleanMessage();
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
@@ -2711,14 +2711,39 @@ class RoomClient {
             return this.cleanMessage();
         }
         this.peer_name = filterXSS(this.peer_name);
-        let data = {
-            peer_name: this.peer_name,
-            peer_id: this.peer_id,
-            to_peer_id: 'all',
-            peer_msg: peer_msg,
-        };
-        console.log('Send message:', data);
-        this.socket.emit('message', data);
+        if (isChatGPTOn) {
+            this.socket
+                .request('getChatGPT', { prompt: peer_msg })
+                .then(
+                    function (completion) {
+                        console.log('Receive message:', completion);
+                        this.setMsgAvatar('left', 'ChatGPT');
+                        this.appendMessage(
+                            'left',
+                            this.leftMsgAvatar,
+                            'ChatGPT',
+                            this.peer_id,
+                            completion,
+                            this.peer_id,
+                            this.peer_name,
+                        );
+                        this.cleanMessage();
+                        this.sound('message');
+                    }.bind(this),
+                )
+                .catch((err) => {
+                    console.log('ChatGPT error:', err);
+                });
+        } else {
+            let data = {
+                peer_name: this.peer_name,
+                peer_id: this.peer_id,
+                to_peer_id: 'all',
+                peer_msg: peer_msg,
+            };
+            console.log('Send message:', data);
+            this.socket.emit('message', data);
+        }
         this.setMsgAvatar('right', this.peer_name);
         this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all', 'all');
         this.cleanMessage();
