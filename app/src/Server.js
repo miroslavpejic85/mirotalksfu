@@ -942,7 +942,7 @@ function startServer() {
             }
         });
 
-        socket.on('getChatGPT', async ({ prompt }, cb) => {
+        socket.on('getChatGPT', async ({ time, room, name, prompt }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.chatGPT.enabled) return cb('ChatGPT seems disabled, try later!');
             try {
@@ -955,6 +955,9 @@ function startServer() {
                 });
                 const response = completion.data.choices[0].text;
                 log.debug('ChatGPT', {
+                    time: time,
+                    room: room,
+                    name: name,
                     prompt: prompt,
                     response: response,
                 });

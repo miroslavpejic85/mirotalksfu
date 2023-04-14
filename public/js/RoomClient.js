@@ -2713,7 +2713,12 @@ class RoomClient {
         this.peer_name = filterXSS(this.peer_name);
         if (isChatGPTOn) {
             this.socket
-                .request('getChatGPT', { prompt: peer_msg })
+                .request('getChatGPT', {
+                    time: getDataTimeString(),
+                    room: this.room_id,
+                    name: this.peer_name,
+                    prompt: peer_msg,
+                })
                 .then(
                     function (completion) {
                         console.log('Receive message:', completion);
