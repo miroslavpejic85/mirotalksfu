@@ -2721,6 +2721,7 @@ class RoomClient {
                 })
                 .then(
                     function (completion) {
+                        if (!completion) return;
                         console.log('Receive message:', completion);
                         this.setMsgAvatar('left', 'ChatGPT');
                         this.appendMessage(

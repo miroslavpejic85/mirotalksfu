@@ -18,6 +18,7 @@ dependencies: {
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
     ngrok                   : https://www.npmjs.com/package/ngrok
+    openai                  : https://www.npmjs.com/package/openai
     qs                      : https://www.npmjs.com/package/qs
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
