@@ -188,6 +188,8 @@ function initClient() {
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'right');
+        setTippy('chatMaxButton', 'Maximize', 'right');
+        setTippy('chatMinButton', 'Minimize', 'right');
         setTippy('participantsCloseBtn', 'Close', 'left');
         setTippy('participantsSaveBtn', 'Save participants info', 'right');
     }
@@ -755,9 +757,10 @@ function roomIsReady() {
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
-    if (DetectRTC.isMobileDevice && BUTTONS.main.swapCameraButton) {
-        show(swapCameraButton);
-        setChatSize();
+    if (DetectRTC.isMobileDevice) {
+        BUTTONS.main.swapCameraButton && show(swapCameraButton);
+        rc.chatMaximize();
+        hide(chatMaxButton);
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
@@ -769,6 +772,7 @@ function roomIsReady() {
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             BUTTONS.main.startScreenButton && show(startScreenButton);
         }
+        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
     }
     if (DetectRTC.browser.name != 'Safari') {
         document.onfullscreenchange = () => {
@@ -813,15 +817,6 @@ function disable(elem, disabled) {
 
 function setColor(elem, color) {
     elem.style.color = color;
-}
-
-// ####################################################
-// SET CHAT MOBILE
-// ####################################################
-
-function setChatSize() {
-    document.documentElement.style.setProperty('--msger-width', '99%');
-    document.documentElement.style.setProperty('--msger-height', '99%');
 }
 
 // ####################################################
@@ -939,6 +934,12 @@ function handleButtons() {
     };
     chatCloseButton.onclick = () => {
         rc.toggleChat();
+    };
+    chatMaxButton.onclick = () => {
+        rc.chatMaximize();
+    };
+    chatMinButton.onclick = () => {
+        rc.chatMinimize();
     };
     chatCleanTextButton.onclick = () => {
         rc.cleanMessage();

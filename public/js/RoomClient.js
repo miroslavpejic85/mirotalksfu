@@ -2661,14 +2661,34 @@ class RoomClient {
         let chatRoom = this.getId('chatRoom');
         if (this.isChatOpen == false) {
             chatRoom.style.display = 'block';
-            chatRoom.style.top = '50%';
-            chatRoom.style.left = '50%';
+            this.chatCenter();
             this.sound('open');
             this.isChatOpen = true;
         } else {
             chatRoom.style.display = 'none';
             this.isChatOpen = false;
         }
+    }
+
+    chatMaximize() {
+        show(chatMinButton);
+        hide(chatMaxButton);
+        this.chatCenter();
+        document.documentElement.style.setProperty('--msger-width', '99%');
+        document.documentElement.style.setProperty('--msger-height', '99%');
+    }
+
+    chatMinimize() {
+        hide(chatMinButton);
+        show(chatMaxButton);
+        this.chatCenter();
+        document.documentElement.style.setProperty('--msger-width', '420px');
+        document.documentElement.style.setProperty('--msger-height', '680px');
+    }
+
+    chatCenter() {
+        chatRoom.style.top = '50%';
+        chatRoom.style.left = '50%';
     }
 
     toggleChatEmoji() {
