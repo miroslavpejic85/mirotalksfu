@@ -761,6 +761,7 @@ function roomIsReady() {
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
         rc.chatMaximize();
         hide(chatMaxButton);
+        hide(chatMinButton);
     } else {
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
