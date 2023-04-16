@@ -2671,11 +2671,11 @@ class RoomClient {
     }
 
     chatMaximize() {
-        show(chatMinButton);
         hide(chatMaxButton);
+        show(chatMinButton);
         this.chatCenter();
-        document.documentElement.style.setProperty('--msger-width', '99%');
-        document.documentElement.style.setProperty('--msger-height', '99%');
+        document.documentElement.style.setProperty('--msger-width', '100%');
+        document.documentElement.style.setProperty('--msger-height', '100%');
     }
 
     chatMinimize() {
