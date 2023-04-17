@@ -26,7 +26,6 @@ const socket = io({ transports: ['websocket'] });
 const surveyActive = true;
 
 const url = {
-    ipLookup: 'https://extreme-ip-lookup.com/json/?key=demo2',
     survey: 'https://www.questionpro.com/t/AUs7VZq02P',
 };
 
@@ -75,7 +74,6 @@ let peer_name = getPeerName();
 let isScreenAllowed = getScreen();
 let notify = getNotify();
 
-let peer_geo = null;
 let peer_info = null;
 
 let isHideMeActive = false;
@@ -260,7 +258,6 @@ async function initEnumerateDevices() {
         setButtonsInit();
         setSelectsInit();
         handleSelectsInit();
-        getPeerGeoLocation();
     }
 }
 
@@ -457,15 +454,6 @@ function getPeerInfo() {
         browser_version: DetectRTC.browser.version,
         user_agent: userAgent,
     };
-}
-
-function getPeerGeoLocation() {
-    fetch(url.ipLookup)
-        .then((res) => res.json())
-        .then((outJson) => {
-            peer_geo = outJson;
-        })
-        .catch((ex) => console.warn('IP Lookup', ex));
 }
 
 // ####################################################
@@ -719,7 +707,6 @@ function joinRoom(peer_name, room_id) {
             socket,
             room_id,
             peer_name,
-            peer_geo,
             peer_info,
             isAudioAllowed,
             isVideoAllowed,

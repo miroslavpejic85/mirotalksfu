@@ -729,6 +729,9 @@ function startServer() {
                 });
             }
 
+            // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
+            const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
+
             const data = checkXSS(dataObject);
 
             log.debug('User joined', data);
@@ -756,6 +759,7 @@ function startServer() {
 
             if (Object.keys(presenters[socket.room_id]).length === 0) {
                 presenters[socket.room_id] = {
+                    peer_ip: peer_ip,
                     peer_name: peer_name,
                     peer_uuid: peer_uuid,
                     is_presenter: true,
