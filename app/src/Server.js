@@ -8,6 +8,9 @@
 ███████ ███████ ██   ██   ████   ███████ ██   ██                                           
 
 dependencies: {
+    @sentry/node            : https://www.npmjs.com/package/@sentry/node
+    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
+    axios                   : https://www.npmjs.com/package/axios
     body-parser             : https://www.npmjs.com/package/body-parser
     compression             : https://www.npmjs.com/package/compression
     colors                  : https://www.npmjs.com/package/colors
@@ -20,8 +23,6 @@ dependencies: {
     ngrok                   : https://www.npmjs.com/package/ngrok
     openai                  : https://www.npmjs.com/package/openai
     qs                      : https://www.npmjs.com/package/qs
-    @sentry/node            : https://www.npmjs.com/package/@sentry/node
-    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
     socket.io               : https://www.npmjs.com/package/socket.io
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
@@ -50,10 +51,11 @@ const https = require('httpolyglot');
 const mediasoup = require('mediasoup');
 const mediasoupClient = require('mediasoup-client');
 const http = require('http');
-const config = require('./config');
 const path = require('path');
+const axios = require('axios');
 const ngrok = require('ngrok');
 const fs = require('fs');
+const config = require('./config');
 const checkXSS = require('./XSS.js');
 const Host = require('./Host');
 const Room = require('./Room');
@@ -722,7 +724,7 @@ function startServer() {
             roomList.get(socket.room_id).broadCast(socket.id, 'setVideoOff', data);
         });
 
-        socket.on('join', (dataObject, cb) => {
+        socket.on('join', async (dataObject, cb) => {
             if (!roomList.has(socket.room_id)) {
                 return cb({
                     error: 'Room does not exist',
@@ -731,6 +733,11 @@ function startServer() {
 
             // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
             const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
+
+            // Get peer Geo Location
+            if (config.IPLookup.enabled && (peer_ip != '::1' || peer_ip != '127.0.0.1')) {
+                dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
+            }
 
             const data = checkXSS(dataObject);
 
@@ -1059,6 +1066,15 @@ function startServer() {
             return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
         }
     });
+
+    async function getPeerGeoLocation(ip) {
+        const endpoint = config.IPLookup.getEndpoint(ip);
+        log.debug('Get peer geo', { ip: ip, endpoint: endpoint });
+        return axios
+            .get(endpoint)
+            .then((response) => response.data)
+            .catch((error) => log.error(error));
+    }
 
     function getIP(req) {
         return req.headers['x-forwarded-for'] || req.socket.remoteAddress;

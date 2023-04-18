@@ -80,7 +80,7 @@ module.exports = {
         signingSecret: '',
     },
     chatGPT: {
-        /**
+        /*
         ChatGPT
             1. Goto https://platform.openai.com/
             2. Create your account
@@ -91,6 +91,16 @@ module.exports = {
         model: 'text-davinci-003',
         max_tokens: 1000,
         temperature: 0,
+    },
+    IPLookup: {
+        /*
+        GeoJS
+            https://www.geojs.io/docs/v1/endpoints/geo/
+        */
+        enabled: false,
+        getEndpoint(ip) {
+            return `https://get.geojs.io/v1/ip/geo/${ip}.json`;
+        },
     },
     mediasoup: {
         // Worker settings
