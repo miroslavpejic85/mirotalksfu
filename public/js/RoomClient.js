@@ -2996,7 +2996,7 @@ class RoomClient {
 
     checkLineBreaks() {
         chatMessage.style.height = '';
-        if (this.getLineBreaks(chatMessage.value) > 0) {
+        if (this.getLineBreaks(chatMessage.value) > 0 || chatMessage.value.length > 50) {
             chatMessage.style.height = '200px';
         }
     }
