@@ -175,7 +175,7 @@ function initClient() {
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
-        setTippy('showChatOnMsg', "Show me when I'm receive a new message", 'top');
+        setTippy('showChatOnMsg', "Toggle show me when I'm receive a new message", 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -1306,7 +1306,7 @@ function handleSelects() {
     };
     // chat
     showChatOnMsg.onchange = (e) => {
-        sound('click');
+        sound('switch');
         rc.showChatOnMessage = e.currentTarget.checked;
         if (rc.showChatOnMessage) {
             userLog('info', "Chat will be shown, when I'm receive a new message", 'top-end');
