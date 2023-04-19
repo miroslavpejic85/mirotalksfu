@@ -335,4 +335,22 @@ Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the differ
 
 </details>
 
+<details>
+<summary>MiroTalk C2C</summary>
+
+<br>
+
+Try also [MiroTalk C2C](https://github.com/miroslavpejic85/mirotalkc2c) cam 2 cam.
+
+</details>
+
+<details>
+<summary>MiroTalk WEB</summary>
+
+<br>
+
+Try also [MiroTalk WEB](https://github.com/miroslavpejic85/mirotalkwebrtc) rooms scheduler.
+
+</details>
+
 This project is tested with [BrowserStack](https://www.browserstack.com).
