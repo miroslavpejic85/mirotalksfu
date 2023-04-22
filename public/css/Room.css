@@ -553,15 +553,12 @@ th {
     width: 100%;
 }
 
-.msg-a {
-    color: #fff;
+a {
+    color: #fff !important;
 }
-.msg-a:hover {
-    color: grey;
+a:hover {
+    color: grey !important;
     transition: all 0.3s ease-in-out;
-}
-#chat-msg-a {
-    color: #fff;
 }
 
 /*--------------------------------------------------------------

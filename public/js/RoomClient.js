@@ -2723,7 +2723,8 @@ class RoomClient {
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
         }
-        let peer_msg = this.formatMsg(chatMessage.value.trim());
+        chatMessage.value = filterXSS(chatMessage.value.trim());
+        let peer_msg = this.formatMsg(chatMessage.value);
         if (!peer_msg) {
             return this.cleanMessage();
         }
@@ -2794,7 +2795,8 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.value) {
-                let peer_msg = this.formatMsg(result.value.trim());
+                result.value = filterXSS(result.value.trim());
+                let peer_msg = this.formatMsg(result.value);
                 if (!peer_msg) {
                     return this.cleanMessage();
                 }
@@ -2848,27 +2850,37 @@ class RoomClient {
     }
 
     appendMessage(side, img, fromName, fromId, msg, toId, toName) {
-        let time = this.getTimeNow();
-        let msgBubble = toId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
-        let replyMsg = fromId === this.peer_id ? `<hr/>Private message to ${toName}` : '';
-        let message = toId == 'all' ? msg : msg + replyMsg;
+        //
+        const getSide = filterXSS(side);
+        const getImg = filterXSS(img);
+        const getFromName = filterXSS(fromName);
+        const getFromId = filterXSS(fromId);
+        const getMsg = filterXSS(msg);
+        const getToId = filterXSS(toId);
+        const getToName = filterXSS(toName);
+        const time = this.getTimeNow();
+
+        const msgBubble = getToId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
+        const replyMsg = getFromId === this.peer_id ? `<hr/>Private message to ${getToName}` : '';
+        const message = getToId == 'all' ? getMsg : getMsg + replyMsg;
+
         let msgHTML = `
-        <div id="msg-${chatMessagesId}" class="msg ${side}-msg">
-            <img class="msg-img" src="${img}" />
+        <div id="msg-${chatMessagesId}" class="msg ${getSide}-msg">
+            <img class="msg-img" src="${getImg}" />
             <div class=${msgBubble}>
                 <div class="msg-info">
-                    <div class="msg-info-name">${fromName}</div>
+                    <div class="msg-info-name">${getFromName}</div>
                     <div class="msg-info-time">${time}</div>
                 </div>
                 <div id="${chatMessagesId}" class="msg-text">${message}
                     <hr/>`;
         // add btn direct reply to private message
-        if (fromId != this.peer_id) {
+        if (getFromId != this.peer_id) {
             msgHTML += `
                     <button 
                         class="fas fa-paper-plane"
                         id="msg-private-reply-${chatMessagesId}"
-                        onclick="rc.sendMessageTo('${fromId}','${fromName}')"
+                        onclick="rc.sendMessageTo('${getFromId}','${getFromName}')"
                     ></button>`;
         }
         msgHTML += `                    
@@ -2886,7 +2898,7 @@ class RoomClient {
             </div>
         </div>
         `;
-        this.collectMessages(time, fromName, msg);
+        this.collectMessages(time, getFromName, getMsg);
         chatMsger.insertAdjacentHTML('beforeend', msgHTML);
         chatMsger.scrollTop += 500;
         this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
@@ -2930,31 +2942,35 @@ class RoomClient {
             });
     }
 
-    formatMsg(message) {
+    formatMsg(msg) {
+        const message = filterXSS(msg);
         if (message.trim().length == 0) return;
         if (this.isHtml(message)) return this.sanitizeHtml(message);
         if (this.isValidHttpURL(message)) {
-            if (isImageURL(message)) return '<img src="' + message + '" alt="img" width="180" height="auto"/>';
-            if (this.isVideoTypeSupported(message)) return this.getIframe(message);
-            return '<a href="' + message + '" target="_blank" class="msg-a">' + message + '</a>';
+            if (this.isImageURL(message)) return this.getImage(message);
+            //if (this.isVideoTypeSupported(message)) return this.getIframe(message);
+            return this.getLink(message);
         }
         if (isChatMarkdownOn) return marked.parse(message);
-        let pre = '<pre>' + message + '</pre>';
-        if (isChatPasteTxt) {
+        if (isChatPasteTxt && this.getLineBreaks(message) > 1) {
             isChatPasteTxt = false;
-            return pre;
+            return this.getPre(message);
         }
-        if (this.getLineBreaks(message) > 1) {
-            return pre;
-        }
+        if (this.getLineBreaks(message) > 1) return this.getPre(message);
+        console.log('FormatMsg', message);
         return message;
     }
 
-    sanitizeHtml(str) {
-        const tagsToReplace = { '&': '&amp;', '<': '&lt;', '>': '&gt;' };
-        const replaceTag = (tag) => tagsToReplace[tag] || tag;
-        const safe_tags_replace = (str) => str.replace(/[&<>]/g, replaceTag);
-        return safe_tags_replace(str);
+    sanitizeHtml(input) {
+        const map = {
+            '&': '&amp;',
+            '<': '&lt;',
+            '>': '&gt;',
+            '"': '&quot;',
+            "'": '&#039;',
+            '/': '&#x2F;',
+        };
+        return input.replace(/[&<>"'/]/g, (m) => map[m]);
     }
 
     isHtml(str) {
@@ -2966,28 +2982,76 @@ class RoomClient {
         return false;
     }
 
-    isValidHttpURL(str) {
-        let url;
-        try {
-            url = new URL(str);
-        } catch (_) {
-            return false;
-        }
-        return url.protocol === 'http:' || url.protocol === 'https:';
+    isValidHttpURL(input) {
+        const pattern = new RegExp(
+            '^(https?:\\/\\/)?' + // protocol
+                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                '(\\#[-a-z\\d_]*)?$',
+            'i',
+        ); // fragment locator
+        return pattern.test(input);
     }
 
-    getIframe(url) {
-        let is_youtube = this.getVideoType(url) == 'na' ? true : false;
-        let video_audio_url = is_youtube ? this.getYoutubeEmbed(url) : url;
-        return `
-        <iframe
-            title="Chat-IFrame"
-            src="${video_audio_url}"
-            width="auto"
-            frameborder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowfullscreen
-        ></iframe>`;
+    isImageURL(input) {
+        return input.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
+    }
+
+    getImage(input) {
+        const url = filterXSS(input);
+        const div = document.createElement('div');
+        const img = document.createElement('img');
+        img.setAttribute('src', url);
+        img.setAttribute('width', '200px');
+        img.setAttribute('height', 'auto');
+        div.appendChild(img);
+        console.log('GetImg', div.firstChild.outerHTML);
+        return div.firstChild.outerHTML;
+    }
+
+    getLink(input) {
+        const url = filterXSS(input);
+        const a = document.createElement('a');
+        const div = document.createElement('div');
+        const linkText = document.createTextNode(url);
+        a.setAttribute('href', url);
+        a.setAttribute('target', '_blank');
+        a.appendChild(linkText);
+        div.appendChild(a);
+        console.log('GetLink', div.firstChild.outerHTML);
+        return div.firstChild.outerHTML;
+    }
+
+    getPre(input) {
+        const text = filterXSS(input);
+        const pre = document.createElement('pre');
+        const div = document.createElement('div');
+        pre.textContent = text;
+        div.appendChild(pre);
+        console.log('GetPre', div.firstChild.outerHTML);
+        return div.firstChild.outerHTML;
+    }
+
+    getIframe(input) {
+        const url = filterXSS(input);
+        const iframe = document.createElement('iframe');
+        const div = document.createElement('div');
+        const is_youtube = this.getVideoType(url) == 'na' ? true : false;
+        const video_audio_url = is_youtube ? this.getYoutubeEmbed(url) : url;
+        iframe.setAttribute('title', 'Chat-IFrame');
+        iframe.setAttribute('src', video_audio_url);
+        iframe.setAttribute('width', 'auto');
+        iframe.setAttribute('frameborder', '0');
+        iframe.setAttribute(
+            'allow',
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+        );
+        iframe.setAttribute('allowfullscreen', 'allowfullscreen');
+        div.appendChild(iframe);
+        console.log('GetIFrame', div.firstChild.outerHTML);
+        return div.firstChild.outerHTML;
     }
 
     getLineBreaks(message) {

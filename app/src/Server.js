@@ -777,10 +777,7 @@ function startServer() {
 
             log.debug('[Join] - Connected presenters grp by roomId', presenters);
 
-            const isPresenter =
-                Object.keys(presenters[socket.room_id]).length > 1 &&
-                presenters[socket.room_id]['peer_name'] == peer_name &&
-                presenters[socket.room_id]['peer_uuid'] == peer_uuid;
+            const isPresenter = await isPeerPresenter(socket.room_id, peer_name, peer_uuid);
 
             roomList
                 .get(socket.room_id)
@@ -1068,6 +1065,15 @@ function startServer() {
             return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
         }
     });
+
+    async function isPeerPresenter(room_id, peer_name, peer_uuid) {
+        const isPresenter =
+            Object.keys(presenters[room_id]).length > 1 &&
+            presenters[room_id]['peer_name'] === peer_name &&
+            presenters[room_id]['peer_uuid'] === peer_uuid;
+        log.debug(peer_name, { isPresenter: isPresenter });
+        return isPresenter;
+    }
 
     async function getPeerGeoLocation(ip) {
         const endpoint = config.IPLookup.getEndpoint(ip);
