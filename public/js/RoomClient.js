@@ -3645,6 +3645,7 @@ class RoomClient {
             },
         }).then((result) => {
             if (result.value) {
+                result.value = filterXSS(result.value);
                 if (!this.thereIsParticipants()) {
                     return userLog('info', 'No participants detected', 'top-end');
                 }
