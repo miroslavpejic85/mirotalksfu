@@ -18,7 +18,7 @@ const cfg = {
 };
 
 const html = {
-    newline: '<br />',
+    newline: '\n', //'<br />',
     hideMeOn: 'fas fa-user-slash',
     hideMeOff: 'fas fa-user',
     audioOn: 'fas fa-microphone',
@@ -1304,7 +1304,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
-                p.innerHTML = this.peer_name + ' (me)';
+                p.innerText = this.peer_name + ' (me)';
                 i = document.createElement('i');
                 i.id = this.peer_id + '__hand';
                 i.className = html.userHand;
@@ -1689,7 +1689,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                p.innerHTML = peer_name;
+                p.innerText = peer_name;
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', remotePeerId + '__pitchMeter');
@@ -1860,7 +1860,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
-        p.innerHTML = peer_name + (remotePeer ? '' : ' (me) ');
+        p.innerText = peer_name + (remotePeer ? '' : ' (me) ');
         h = document.createElement('i');
         h.id = peer_id + '__hand';
         h.className = html.userHand;
@@ -3258,7 +3258,7 @@ class RoomClient {
             });
         }
         if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
-        this.getId('recordingStatus').innerHTML = '0s';
+        this.getId('recordingStatus').innerText = '0s';
         this.event(_EVENTS.stopRec);
         this.sound('recStop');
     }
@@ -3359,6 +3359,7 @@ class RoomClient {
                 fileSize: this.fileToSend.size,
                 fileType: this.fileToSend.type,
             };
+            this.setMsgAvatar('right', this.peer_name);
             this.appendMessage(
                 'right',
                 this.rightMsgAvatar,
@@ -3400,6 +3401,7 @@ class RoomClient {
             html.newline +
             ' File size: ' +
             this.bytesToSize(this.incomingFileInfo.fileSize);
+        this.setMsgAvatar('left', this.incomingFileInfo.peer_name);
         this.appendMessage(
             'left',
             this.leftMsgAvatar,
@@ -3415,7 +3417,7 @@ class RoomClient {
             'all',
             'all',
         );
-        receiveFileInfo.innerHTML = fileToReceiveInfo;
+        receiveFileInfo.innerText = fileToReceiveInfo;
         receiveFileDiv.style.display = 'inline';
         receiveProgress.max = this.incomingFileInfo.fileSize;
         this.userLog('info', fileToReceiveInfo, 'top-end');
@@ -3431,7 +3433,7 @@ class RoomClient {
 
         this.sendInProgress = true;
 
-        sendFileInfo.innerHTML =
+        sendFileInfo.innerText =
             'File name: ' +
             this.fileToSend.name +
             html.newline +
@@ -3462,7 +3464,7 @@ class RoomClient {
             offset += data.fileData.byteLength;
 
             sendProgress.value = offset;
-            sendFilePercentage.innerHTML = 'Send progress: ' + ((offset / this.fileToSend.size) * 100).toFixed(2) + '%';
+            sendFilePercentage.innerText = 'Send progress: ' + ((offset / this.fileToSend.size) * 100).toFixed(2) + '%';
 
             // send file completed
             if (offset === this.fileToSend.size) {
@@ -3514,7 +3516,7 @@ class RoomClient {
         this.receiveBuffer.push(data.fileData);
         this.receivedSize += data.fileData.byteLength;
         receiveProgress.value = this.receivedSize;
-        receiveFilePercentage.innerHTML =
+        receiveFilePercentage.innerText =
             'Receive progress: ' + ((this.receivedSize / this.incomingFileInfo.fileSize) * 100).toFixed(2) + '%';
         if (this.receivedSize === this.incomingFileInfo.fileSize) {
             receiveFileDiv.style.display = 'none';

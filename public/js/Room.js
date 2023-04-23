@@ -355,13 +355,13 @@ function addChild(device, els) {
         option.value = device.deviceId;
         switch (kind) {
             case 'videoinput':
-                option.innerHTML = `📹 ` + device.label || `📹 camera ${el.length + 1}`;
+                option.innerText = `📹 ` + device.label || `📹 camera ${el.length + 1}`;
                 break;
             case 'audioinput':
-                option.innerHTML = `🎤 ` + device.label || `🎤 microphone ${el.length + 1}`;
+                option.innerText = `🎤 ` + device.label || `🎤 microphone ${el.length + 1}`;
                 break;
             case 'audiooutput':
-                option.innerHTML = `🔈 ` + device.label || `🔈 speaker ${el.length + 1}`;
+                option.innerText = `🔈 ` + device.label || `🔈 speaker ${el.length + 1}`;
                 break;
             default:
                 break;
@@ -816,7 +816,7 @@ function startSessionTimer() {
     let callStartTime = Date.now();
     setInterval(function printTime() {
         let callElapsedTime = Date.now() - callStartTime;
-        sessionTime.innerHTML = getTimeToString(callElapsedTime);
+        sessionTime.innerText = getTimeToString(callElapsedTime);
     }, 1000);
 }
 
@@ -853,7 +853,7 @@ function startRecordingTimer() {
     recTimer = setInterval(function printTime() {
         if (rc.isRecording()) {
             recElapsedTime++;
-            recordingStatus.innerHTML = secondsToHms(recElapsedTime);
+            recordingStatus.innerText = secondsToHms(recElapsedTime);
         }
     }, 1000);
 }
@@ -1508,7 +1508,7 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room Client leave room');
-        if (rc.isRecording() || recordingStatus.innerHTML != '0s') {
+        if (rc.isRecording() || recordingStatus.innerText != '0s') {
             console.log('Room Client save recording before to exit');
             rc.stopRecording();
         }
