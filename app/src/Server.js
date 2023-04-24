@@ -749,7 +749,7 @@ function startServer() {
             const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
 
             // Get peer Geo Location
-            if (config.IPLookup.enabled && (peer_ip != '::1' || peer_ip != '127.0.0.1')) {
+            if (config.IPLookup.enabled && peer_ip != '::1') {
                 dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
             }
 
