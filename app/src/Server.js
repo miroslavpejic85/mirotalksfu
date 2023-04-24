@@ -563,14 +563,17 @@ function startServer() {
             roomList.get(socket.room_id).broadCast(socket.id, 'cmd', data);
         });
 
-        socket.on('roomAction', (dataObject) => {
+        socket.on('roomAction', async (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
             const data = checkXSS(dataObject);
 
+            const isPresenter = await isPeerPresenter(socket.room_id, data.peer_name, data.peer_uuid);
+
             log.debug('Room action:', data);
             switch (data.action) {
                 case 'lock':
+                    if (!isPresenter) return;
                     if (!roomList.get(socket.room_id).isLocked()) {
                         roomList.get(socket.room_id).setLocked(true, data.password);
                         roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
@@ -588,14 +591,17 @@ function startServer() {
                     roomList.get(socket.room_id).sendTo(socket.id, 'roomPassword', roomData);
                     break;
                 case 'unlock':
+                    if (!isPresenter) return;
                     roomList.get(socket.room_id).setLocked(false);
                     roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                     break;
                 case 'lobbyOn':
+                    if (!isPresenter) return;
                     roomList.get(socket.room_id).setLobbyEnabled(true);
                     roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                     break;
                 case 'lobbyOff':
+                    if (!isPresenter) return;
                     roomList.get(socket.room_id).setLobbyEnabled(false);
                     roomList.get(socket.room_id).broadCast(socket.id, 'roomAction', data.action);
                     break;
@@ -630,12 +636,18 @@ function startServer() {
             }
         });
 
-        socket.on('peerAction', (dataObject) => {
+        socket.on('peerAction', async (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
             const data = checkXSS(dataObject);
 
             log.debug('Peer action', data);
+
+            const presenterActions = ['mute', 'hide', 'eject'];
+            if (presenterActions.some((v) => data.action === v)) {
+                const isPresenter = await isPeerPresenter(socket.room_id, data.from_peer_name, data.from_peer_uuid);
+                if (!isPresenter) return;
+            }
 
             if (data.broadcast) {
                 roomList.get(socket.room_id).broadCast(data.peer_id, 'peerAction', data);
@@ -1067,11 +1079,23 @@ function startServer() {
     });
 
     async function isPeerPresenter(room_id, peer_name, peer_uuid) {
-        const isPresenter =
-            Object.keys(presenters[room_id]).length > 1 &&
-            presenters[room_id]['peer_name'] === peer_name &&
-            presenters[room_id]['peer_uuid'] === peer_uuid;
-        log.debug(peer_name, { isPresenter: isPresenter });
+        let isPresenter = false;
+        try {
+            isPresenter =
+                typeof presenters === 'object' &&
+                Object.keys(presenters[room_id]).length > 1 &&
+                presenters[room_id]['peer_name'] === peer_name &&
+                presenters[room_id]['peer_uuid'] === peer_uuid;
+        } catch (err) {
+            log.error('isPeerPresenter', err);
+            return false;
+        }
+        log.debug('isPeerPresenter', {
+            room_id: room_id,
+            peer_name: peer_name,
+            peer_uuid: peer_uuid,
+            isPresenter: isPresenter,
+        });
         return isPresenter;
     }
 

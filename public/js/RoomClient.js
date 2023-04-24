@@ -116,6 +116,7 @@ class RoomClient {
         socket,
         room_id,
         peer_name,
+        peer_uuid,
         peer_info,
         isAudioAllowed,
         isVideoAllowed,
@@ -133,6 +134,7 @@ class RoomClient {
         this.room_id = room_id;
         this.peer_id = socket.id;
         this.peer_name = peer_name;
+        this.peer_uuid = peer_uuid;
         this.peer_info = peer_info;
 
         this.isAudioAllowed = isAudioAllowed;
@@ -3810,6 +3812,10 @@ class RoomClient {
 
     roomAction(action, emit = true) {
         let data = {
+            room_id: this.room_id,
+            peer_id: this.peer_id,
+            peer_name: this.peer_name,
+            peer_uuid: this.peer_uuid,
             action: action,
             password: null,
         };
@@ -3943,7 +3949,7 @@ class RoomClient {
                     let lobbyTr = '';
                     let peer_id = data.peer_id;
                     let peer_name = data.peer_name;
-                    let avatarImg = getParticipantAvatar(peer_name);
+                    let avatarImg = this.genAvatarSvg(peer_name, 32);
                     let lobbyTb = this.getId('lobbyTb');
                     let lobbyAccept = _PEER.acceptPeer;
                     let lobbyReject = _PEER.ejectPeer;
@@ -3952,7 +3958,7 @@ class RoomClient {
 
                     lobbyTr += `
                     <tr id='${peer_id}'>
-                        <td><img src='${avatarImg}'></td>
+                        <td><img src="${avatarImg}" /></td>
                         <td>${peer_name}</td>
                         <td><button id=${lobbyAcceptId} onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
                         <td><button id=${lobbyRejectId} onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
@@ -4333,6 +4339,8 @@ class RoomClient {
         if (emit) {
             let data = {
                 from_peer_name: this.peer_name,
+                from_peer_id: this.peer_id,
+                from_peer_uuid: this.peer_uuid,
                 peer_id: peer_id,
                 action: action,
                 broadcast: broadcast,
@@ -4346,6 +4354,7 @@ class RoomClient {
             switch (action) {
                 case 'eject':
                     if (peer_id === this.peer_id || broadcast) {
+                        this.exit(true);
                         this.sound(action);
                         this.peerActionProgress(from_peer_name, 'Will eject you from the room', 5000, action);
                     }

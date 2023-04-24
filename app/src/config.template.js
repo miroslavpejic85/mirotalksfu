@@ -44,6 +44,9 @@ module.exports = {
         username: 'username',
         password: 'password',
     },
+    console: {
+        debug: true,
+    },
     ngrok: {
         /* 
         Ngrok

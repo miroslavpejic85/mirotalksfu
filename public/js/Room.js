@@ -71,6 +71,7 @@ let chatMessagesId = 0;
 let room_id = getRoomId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
+let peer_uuid = getPeerUUID();
 let isScreenAllowed = getScreen();
 let notify = getNotify();
 
@@ -415,6 +416,15 @@ function getPeerName() {
     return name;
 }
 
+function getPeerUUID() {
+    if (lS.getItemLocalStorage('peer_uuid')) {
+        return lS.getItemLocalStorage('peer_uuid');
+    }
+    const peer_uuid = getUUID();
+    lS.setItemLocalStorage('peer_uuid', peer_uuid);
+    return peer_uuid;
+}
+
 function getRoomPassword() {
     let qs = new URLSearchParams(window.location.search);
     let roomPassword = filterXSS(qs.get('password'));
@@ -435,7 +445,7 @@ function getRoomPassword() {
 function getPeerInfo() {
     peer_info = {
         join_data_time: getDataTimeString(),
-        peer_uuid: getUUID(),
+        peer_uuid: peer_uuid,
         peer_id: socket.id,
         peer_name: peer_name,
         peer_presenter: isPresenter,
@@ -707,6 +717,7 @@ function joinRoom(peer_name, room_id) {
             socket,
             room_id,
             peer_name,
+            peer_uuid,
             peer_info,
             isAudioAllowed,
             isVideoAllowed,
