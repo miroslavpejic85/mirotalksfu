@@ -6,7 +6,7 @@ const colors = require('colors');
 
 const config = require('./config');
 
-colors.enable(); //colors.disable();
+config.console.colors ? colors.enable() : colors.disable();
 
 const options = {
     depth: null,

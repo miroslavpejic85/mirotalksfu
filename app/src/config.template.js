@@ -46,6 +46,7 @@ module.exports = {
     },
     console: {
         debug: true,
+        colors: true,
     },
     ngrok: {
         /* 
