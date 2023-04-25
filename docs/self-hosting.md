@@ -25,9 +25,9 @@ $ add-apt-repository ppa:deadsnakes/ppa
 $ apt update
 $ apt install -y python3.8 python3-pip
 
-# NodeJS 16.X and npm
+# NodeJS 18.X and npm
 $ apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
-$ curl -sL https://deb.nodesource.com/setup_16.x | bash -
+$ curl -sL https://deb.nodesource.com/setup_18.x | bash -
 $ apt-get install -y nodejs
 $ npm install -g npm@latest
 ```

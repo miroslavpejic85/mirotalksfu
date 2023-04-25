@@ -104,7 +104,7 @@ Embedding a meeting into a service or app using an iframe.
 
 <br/>
 
--   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [16.X](https://nodejs.org/en/blog/release/v16.15.0/).
+-   You will need to have `NodeJS` and all [requirements](https://mediasoup.org/documentation/v3/mediasoup/installation/#requirements) installed, this project has been tested with Node version [16.X](https://nodejs.org/en/blog/release/v16.15.1/) and [18.X](https://nodejs.org/en/blog/release/v18.16.0).
 
 -   Requirements install example for `Ubuntu 20.04`
 
