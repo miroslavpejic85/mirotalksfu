@@ -954,8 +954,15 @@ function startServer() {
         socket.on('message', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
-            // const data = checkXSS(dataObject);
-            const data = dataObject;
+            const data = checkXSS(dataObject);
+
+            // check if the message coming from real peer
+            const realPeer = isRealPeer(data.peer_name, data.peer_id);
+            if (!realPeer) {
+                const peer_name = getPeerName(false);
+                log.debug('Fake message detected', { realFrom: peer_name, fakeFrom: data.peer_name, msg: data.msg });
+                return;
+            }
 
             log.debug('message', data);
             if (data.to_peer_id == 'all') {
@@ -1060,6 +1067,15 @@ function startServer() {
                 log.error('getPeerName', err);
                 return json ? { peer_name: 'undefined' } : 'undefined';
             }
+        }
+
+        function isRealPeer(name, id) {
+            let peerName =
+                (roomList.get(socket.room_id) &&
+                    roomList.get(socket.room_id).getPeers()?.get(id)?.peer_info?.peer_name) ||
+                'undefined';
+            if (peerName == name) return true;
+            return false;
         }
 
         function removeMeData() {
