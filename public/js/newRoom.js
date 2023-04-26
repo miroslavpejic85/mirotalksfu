@@ -1,6 +1,6 @@
 'use strict';
 
-let adjectives = [
+const adjectives = [
     'small',
     'big',
     'large',
@@ -54,7 +54,7 @@ let adjectives = [
     'smart',
 ];
 
-let nouns = [
+const nouns = [
     'dog',
     'bat',
     'wrench',
