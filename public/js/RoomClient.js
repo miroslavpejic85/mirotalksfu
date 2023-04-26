@@ -192,10 +192,11 @@ class RoomClient {
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
-        this.enableSharingLayers = false; // Enable simulcast or SVC for screen sharing
-        this.numSimulcastStreams = 3; // Number of streams for simulcast in webcam and screen sharing
+        this.enableSharingLayers = true; // Enable simulcast or SVC for screen sharing
+        this.numSimulcastStreamsWebcam = 3; // Number of streams for simulcast in webcam
+        this.numSimulcastStreamsSharing = 1; // Number of streams for simulcast in screen sharing
         this.webcamScalabilityMode = 'L3T3'; // Scalability Mode for webcam | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3_KEY' for VP9
-        this.sharingScalabilityMode = 'L3T3'; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
+        this.sharingScalabilityMode = 'L1T3'; // Scalability Mode for screen sharing | 'L1T3' for VP8/H264 (in each simulcast encoding), 'L3T3' for VP9
 
         this.myVideoEl = null;
         this.myAudioEl = null;
@@ -1093,7 +1094,7 @@ class RoomClient {
             forceVP8: this.forceVP8,
             forceVP9: this.forceVP9,
             forceH264: this.forceH264,
-            numSimulcastStreams: this.numSimulcastStreams,
+            numSimulcastStreamsWebcam: this.numSimulcastStreamsWebcam,
             enableWebcamLayers: this.enableWebcamLayers,
             webcamScalabilityMode: this.webcamScalabilityMode,
         });
@@ -1133,14 +1134,14 @@ class RoomClient {
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     },
                 ];
-                if (this.numSimulcastStreams > 1) {
+                if (this.numSimulcastStreamsWebcam > 1) {
                     encodings.unshift({
                         scaleResolutionDownBy: 2,
                         maxBitrate: 1000000,
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     });
                 }
-                if (this.numSimulcastStreams > 2) {
+                if (this.numSimulcastStreamsWebcam > 2) {
                     encodings.unshift({
                         scaleResolutionDownBy: 4,
                         maxBitrate: 500000,
@@ -1164,7 +1165,7 @@ class RoomClient {
             forceVP8: this.forceVP8,
             forceVP9: this.forceVP9,
             forceH264: this.forceH264,
-            numSimulcastStreams: this.numSimulcastStreams,
+            numSimulcastStreamsSharing: this.numSimulcastStreamsSharing,
             enableSharingLayers: this.enableSharingLayers,
             sharingScalabilityMode: this.sharingScalabilityMode,
         });
@@ -1206,7 +1207,7 @@ class RoomClient {
                         dtx: true,
                     },
                 ];
-                if (this.numSimulcastStreams > 1) {
+                if (this.numSimulcastStreamsSharing > 1) {
                     encodings.unshift({
                         scaleResolutionDownBy: 2,
                         maxBitrate: 1000000,
@@ -1214,7 +1215,7 @@ class RoomClient {
                         dtx: true,
                     });
                 }
-                if (this.numSimulcastStreams > 2) {
+                if (this.numSimulcastStreamsSharing > 2) {
                     encodings.unshift({
                         scaleResolutionDownBy: 4,
                         maxBitrate: 500000,

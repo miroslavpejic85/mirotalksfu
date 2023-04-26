@@ -149,19 +149,21 @@ module.exports = class Peer {
             return console.error('Consume failed', error);
         }
 
-        log.debug('Consumer ----->', { type: consumer.type });
-
-        // https://www.w3.org/TR/webrtc-svc/
+        // https://www.w3.org/TR/webrtc-svc/#scalabilitymodes*
+        let scalabilityMode = 'L3T3';
+        let spatialLayer = 3;
+        let temporalLayer = 3;
 
         switch (consumer.type) {
             case 'simulcast':
                 // L1T3/L2T3/L3T3
+                scalabilityMode = consumer.rtpParameters.encodings[0].scalabilityMode;
+                spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
+                temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+
                 await consumer.setPreferredLayers({
-                    spatialLayer: 3, // 1/2/3
-                    temporalLayer: 3,
-                });
-                log.debug('Consumer scalabilityMode ----->', {
-                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+                    spatialLayer: spatialLayer,
+                    temporalLayer: temporalLayer,
                 });
                 break;
             case 'svc':
@@ -170,13 +172,16 @@ module.exports = class Peer {
                     spatialLayer: 3,
                     temporalLayer: 3,
                 });
-                log.debug('Consumer scalabilityMode ----->', {
-                    scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
-                });
                 break;
             default:
                 break;
         }
+
+        log.debug(`Consumer type [${consumer.type}] scalabilityMode ----->`, {
+            scalabilityMode: consumer.rtpParameters.encodings[0].scalabilityMode,
+            spatialLayer: spatialLayer,
+            temporalLayer: temporalLayer,
+        });
 
         this.consumers.set(consumer.id, consumer);
 
