@@ -3351,7 +3351,8 @@ class RoomClient {
                 return userLog('info', 'No participants detected', 'top-end');
             }
             // prevent XSS injection
-            if (this.isHtml(this.fileToSend.name)) return userLog('warning', 'Invalid file name!', 'top-end', 5000);
+            if (this.isHtml(this.fileToSend.name) || !this.isValidFileName(this.fileToSend.name))
+                return userLog('warning', 'Invalid file name!', 'top-end', 5000);
 
             const fileInfo = {
                 peer_id: peer_id,
@@ -3610,6 +3611,11 @@ class RoomClient {
 
     toHtmlJson(obj) {
         return '<pre>' + JSON.stringify(obj, null, 4) + '</pre>';
+    }
+
+    isValidFileName(fileName) {
+        const invalidChars = /[\\\/\?\*\|:"<>]/;
+        return !invalidChars.test(fileName);
     }
 
     // ####################################################

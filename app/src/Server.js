@@ -671,6 +671,11 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!isValidFileName(data.fileName)) {
+                log.debug('File name not valid', data);
+                return;
+            }
+
             log.debug('Send File Info', data);
             if (data.broadcast) {
                 roomList.get(socket.room_id).broadCast(socket.id, 'fileInfo', data);
@@ -701,6 +706,11 @@ function startServer() {
             if (!roomList.has(socket.room_id)) return;
 
             const data = checkXSS(dataObject);
+
+            if (data.action == 'open' && !isValidHttpURL(data.video_url)) {
+                log.debug('Video src not valid', data);
+                return;
+            }
 
             log.debug('Share video: ', data);
             if (data.peer_id == 'all') {
@@ -1076,6 +1086,24 @@ function startServer() {
                 'undefined';
             if (peerName == name) return true;
             return false;
+        }
+
+        function isValidFileName(fileName) {
+            const invalidChars = /[\\\/\?\*\|:"<>]/;
+            return !invalidChars.test(fileName);
+        }
+
+        function isValidHttpURL(input) {
+            const pattern = new RegExp(
+                '^(https?:\\/\\/)?' + // protocol
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                    '(\\#[-a-z\\d_]*)?$',
+                'i',
+            ); // fragment locator
+            return pattern.test(input);
         }
 
         function removeMeData() {
