@@ -98,12 +98,19 @@ module.exports = class Peer {
 
         this.producers.set(producer.id, producer);
 
-        log.debug('Producer ----->', { type: producer.type });
+        const producerType = producer.type;
 
-        if (['simulcast', 'svc'].includes(producer.type)) {
-            log.debug('Producer scalabilityMode ----->', {
-                scalabilityMode: producer.rtpParameters.encodings[0].scalabilityMode,
+        if (['simulcast', 'svc'].includes(producerType)) {
+            const scalabilityMode = producer.rtpParameters.encodings[0].scalabilityMode;
+            const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
+            const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+            log.debug(`Producer  [${producerType}] ----->`, {
+                scalabilityMode: scalabilityMode,
+                spatialLayer: spatialLayer,
+                temporalLayer: temporalLayer,
             });
+        } else {
+            log.debug('Producer ----->', { producerType: producerType });
         }
 
         producer.on(
@@ -149,11 +156,11 @@ module.exports = class Peer {
             return console.error('Consume failed', error);
         }
 
-        log.debug('Consumer ----->', { type: consumer.type });
+        const consumerType = consumer.type;
 
         // https://www.w3.org/TR/webrtc-svc/#scalabilitymodes*
 
-        if (['simulcast', 'svc'].includes(consumer.type)) {
+        if (['simulcast', 'svc'].includes(consumerType)) {
             // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
             const scalabilityMode = consumer.rtpParameters.encodings[0].scalabilityMode;
             const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
@@ -162,11 +169,13 @@ module.exports = class Peer {
                 spatialLayer: spatialLayer,
                 temporalLayer: temporalLayer,
             });
-            log.debug(`Consumer ----->`, {
+            log.debug(`Consumer [${consumerType}] ----->`, {
                 scalabilityMode: scalabilityMode,
                 spatialLayer: spatialLayer,
                 temporalLayer: temporalLayer,
             });
+        } else {
+            log.debug('Consumer ----->', { consumerType: consumerType });
         }
 
         this.consumers.set(consumer.id, consumer);
