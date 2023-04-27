@@ -946,7 +946,7 @@ function startServer() {
         socket.on('getRoomInfo', async (dataObject, cb) => {
             if (!roomList.has(socket.room_id)) return;
 
-            log.debug('Send Room Info to', data.peer_name);
+            log.debug('Send Room Info to', getPeerName());
             cb(roomList.get(socket.room_id).toJson());
         });
 
