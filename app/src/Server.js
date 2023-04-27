@@ -943,7 +943,7 @@ function startServer() {
             callback();
         });
 
-        socket.on('getRoomInfo', async (dataObject, cb) => {
+        socket.on('getRoomInfo', async (_, cb) => {
             if (!roomList.has(socket.room_id)) return;
 
             log.debug('Send Room Info to', getPeerName());
