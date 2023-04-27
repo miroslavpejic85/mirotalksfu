@@ -2179,7 +2179,13 @@ class RoomClient {
     }
 
     async getRoomInfo() {
-        let room_info = await this.socket.request('getRoomInfo');
+        const data = {
+            room_id: this.room_id,
+            peer_name: this.peer_name,
+            peer_id: this.peer_id,
+            peer_uuid: this.peer_uuid,
+        };
+        let room_info = await this.socket.request('getRoomInfo', data);
         return room_info;
     }
 

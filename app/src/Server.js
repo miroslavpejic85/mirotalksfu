@@ -943,10 +943,18 @@ function startServer() {
             callback();
         });
 
-        socket.on('getRoomInfo', (_, cb) => {
+        socket.on('getRoomInfo', async (dataObject, cb) => {
             if (!roomList.has(socket.room_id)) return;
 
-            log.debug('Send Room Info to', getPeerName());
+            const data = checkXSS(dataObject);
+
+            const isPresenter = await isPeerPresenter(socket.room_id, data.peer_name, data.peer_uuid);
+            if (!isPresenter) {
+                log.debug('Get Room Info not allowed', data);
+                return;
+            }
+
+            log.debug('Send Room Info to', data.peer_name);
             cb(roomList.get(socket.room_id).toJson());
         });
 
