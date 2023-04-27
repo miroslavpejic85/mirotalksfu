@@ -453,7 +453,7 @@ function startServer() {
         if (config.ngrok.authToken !== '') {
             return ngrokStart();
         }
-        log.debug('Settings', {
+        log.info('Settings', {
             node_version: process.versions.node,
             hostConfig: hostCfg,
             announced_ip: announcedIP,
