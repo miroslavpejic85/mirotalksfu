@@ -134,6 +134,7 @@ function initClient() {
         setTippy('stopScreenButton', 'Stop screen share', 'right');
         setTippy('swapCameraButton', 'Swap the camera', 'right');
         setTippy('chatButton', 'Toggle the chat', 'right');
+        setTippy('participantsButton', 'Toggle participants', 'right');
         setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
         setTippy('settingsButton', 'Toggle the settings', 'right');
         setTippy('aboutButton', 'About this project', 'right');
