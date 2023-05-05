@@ -1991,7 +1991,7 @@ class RoomClient {
     }
 
     exitRoom() {
-        this.sound('eject');
+        //...
         this.exit();
     }
 
