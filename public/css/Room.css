@@ -984,11 +984,14 @@ progress {
     -moz-appearance: none;
     appearance: none;
     padding: 0;
-    width: 20px;
-    height: 15px;
+    width: 130px;
+    padding-top: 3px;
+    height: 32px;
     margin: 2px;
-    border-radius: 20px;
-    border: solid 0.5px #afadad38;
+    border-radius: 6px;
+    border: solid 0.5px #afadad9e;
+    background: black;
+    color:white
 }
 .whiteboardColorPicker:hover {
     transform: var(--btns-hover-scale);

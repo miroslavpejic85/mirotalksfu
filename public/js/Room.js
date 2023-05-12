@@ -167,7 +167,7 @@ function initClient() {
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
         setTippy('wbFillColorEl', 'Fill color', 'bottom');
-        setTippy('whiteboardAlpha', 'Fill opacity', 'bottom');
+        //setTippy('whiteboardAlpha', 'Fill opacity', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
@@ -205,6 +205,14 @@ function initClient() {
     }
     setupWhiteboard();
     initEnumerateDevices();
+
+    // if is RoomXR PRO then disable fadeout
+    if (getIsPro())
+    {
+        //var mycontrols = document.getElementById("control");
+        control.style.display = 'flex';
+
+    }
 }
 
 // ####################################################
@@ -1189,9 +1197,9 @@ function handleButtons() {
         stopSessionTimer();
 
     };
-    whiteboardAlpha.onclick = () => {        
+    /*whiteboardAlpha.onclick = () => {        
         whiteboardAddObj('opacity');
-    };
+    };*/
 
 
 }
@@ -1670,7 +1678,8 @@ function handleSelects() {
     };
 
     wbFillColorEl.onchange = () => {
-        realWhiteBoard.wbFillColor = wbFillColorEl.value + realWhiteBoard.wbOpacityHex;
+        //console.log(wbFillColorEl.value);
+        realWhiteBoard.wbFillColor = wbFillColorEl.value/* + realWhiteBoard.wbOpacityHex*/;
         console.log(realWhiteBoard.wbFillColor);
         realWhiteBoard.whiteboardSetDrawingMode("none");
         realWhiteBoard.set
@@ -1956,8 +1965,13 @@ function showButtons() {
 
 function checkButtonsBar() {
     if (!isButtonsBarOver) {
-        toggleClassElements('videoMenuBar', 'none');
-        control.style.display = 'none';
+        
+        if(!getIsPro())
+        {
+            toggleClassElements('videoMenuBar', 'none');
+            control.style.display = 'none';
+        }
+            
         isButtonsVisible = false;
     }
     setTimeout(() => {
@@ -2373,6 +2387,9 @@ async function whiteboardAddObj(type) {
                 }
             }).then((result) => {
                 if (result.isConfirmed) {
+
+                    //console.log(realWhiteBoard.wbFillColor);
+
                     let wbalpha = result.value;
                     if (wbalpha) {
                         
@@ -2481,7 +2498,7 @@ function wbCanvasForegroundColor(color) {
 
 function wbCanvasFillColor(color) {
     wbFillColorEl.value = color;
-    realWhiteBoard.wbFillColor = color + realWhiteBoard.wbOpacityHex;
+    realWhiteBoard.wbFillColor = color /*+ realWhiteBoard.wbOpacityHex*/;
     //realWhiteBoard.wbFillColor = color;
     realWhiteBoard.wbCanvas.renderAll();
 }

@@ -2293,37 +2293,50 @@ class RoomClient {
         let btnFs = this.getId(fsId);
         if (btnFs) {
             this.setTippy(fsId, 'Full screen', 'top');
+
             btnFs.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
                     return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
                 }
-                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                if(!this.isPro)   
+                    videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
                 this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
-            });
+            });    
+
         }
         if (videoPlayer) {
-            videoPlayer.addEventListener('click', () => {
-                if (videoPlayer.classList.contains('videoCircle')) {
-                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
-                }
-                if (!videoPlayer.hasAttribute('controls')) {
-                    if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
-                        videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-                        this.toggleFullScreen(videoPlayer);
-                        this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+             // if is pro then disable click to fullscreen
+             if(this.isPro)
+             {
+                 videoPlayer.style.pointerEvents = 'none'
+             }
+             else
+             {
+                videoPlayer.addEventListener('click', () => {
+                    if (videoPlayer.classList.contains('videoCircle')) {
+                        return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
                     }
-                }
-            });
+                    if (!videoPlayer.hasAttribute('controls')) {
+                        if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
+                            videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
+                            this.toggleFullScreen(videoPlayer);
+                            this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
+                        }
+                    }
+                });
+            }
             videoPlayer.addEventListener('fullscreenchange', (e) => {
                 if (!document.fullscreenElement) {
-                    videoPlayer.style.pointerEvents = 'auto';
+                    if(!this.isPro)
+                        videoPlayer.style.pointerEvents = 'auto';
                     this.isVideoOnFullScreen = false;
                 }
             });
             videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
                 if (!document.webkitIsFullScreen) {
-                    videoPlayer.style.pointerEvents = 'auto';
+                    if(!this.isPro)
+                        videoPlayer.style.pointerEvents = 'auto';
                     this.isVideoOnFullScreen = false;
                 }
             });

@@ -538,6 +538,7 @@ class WhiteBoard {
             //let myid='line'+ Math.round(Math.random() * 10000);
             //line.set({'elementID': myid});
             this.addWbCanvasObj(line);
+            this.setWhiteBoardObjectsSelectable(false);
             return;
         }
         if (this.wbCurrentTool == "circle") {
@@ -600,9 +601,9 @@ class WhiteBoard {
         if (this.wbCurrentTool == "rect" || this.wbCurrentTool == "circle" || this.wbCurrentTool == "line")
         {
             var wbCurrentObject = this.wbCanvas.getActiveObject();
-            wbCurrentObject.selectable = true;
-            wbCurrentObject.hasBorders = true;
-            wbCurrentObject.hasControls = true;
+            //wbCurrentObject.selectable = true;
+            //wbCurrentObject.hasBorders = true;
+            //wbCurrentObject.hasControls = true;
             this.wbCanvas.discardActiveObject();
         }
         this.wbIsDrawing = false;
