@@ -311,6 +311,8 @@ class RoomClient {
     }
 
     async handleRoomInfo(room) {
+        console.log('07.0 ----> Room Survey', room.survey);
+        survey = room.survey;
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
         for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {

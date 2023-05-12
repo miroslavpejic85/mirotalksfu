@@ -334,7 +334,7 @@ function execVoiceCommands(transcript) {
             break;
         case commands.survey:
             printCommand(commands.survey);
-            openURL(url.survey, true);
+            survey.enabled && openURL(survey.url, true);
             sound('open');
             break;
         case commands.stopRecognition:

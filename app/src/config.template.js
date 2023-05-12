@@ -106,6 +106,16 @@ module.exports = {
             return `https://get.geojs.io/v1/ip/geo/${ip}.json`;
         },
     },
+    survey: {
+        /*
+        QuestionPro
+            1. GoTo https://www.questionpro.com/
+            2. Create your account
+            3. Create your custom survey
+        */
+        enabled: false,
+        url: '',
+    },
     mediasoup: {
         // Worker settings
         numWorkers: Object.keys(os.cpus()).length,

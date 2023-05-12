@@ -7,6 +7,7 @@ const log = new Logger('Room');
 module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
+        this.survey = config.survey;
         this.worker = worker;
         this.router = null;
         this.audioLevelObserver = null;
@@ -114,6 +115,7 @@ module.exports = class Room {
     toJson() {
         return {
             id: this.id,
+            survey: this.survey,
             peers: JSON.stringify([...this.peers]),
         };
     }

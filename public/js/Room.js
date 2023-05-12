@@ -23,10 +23,9 @@ const RoomURL = window.location.href;
 
 const socket = io({ transports: ['websocket'] });
 
-const surveyActive = true;
-
-const url = {
-    survey: 'https://www.questionpro.com/t/AUs7VZq02P',
+let survey = {
+    enabled: true,
+    url: 'https://www.questionpro.com/t/AUs7VZq02P',
 };
 
 const _PEER = {
@@ -1524,7 +1523,7 @@ function handleRoomClientEvents() {
             console.log('Room Client save recording before to exit');
             rc.stopRecording();
         }
-        if (surveyActive) {
+        if (survey.enabled) {
             leaveFeedback();
         } else {
             openURL('/newroom');
@@ -1555,7 +1554,7 @@ function leaveFeedback() {
         },
     }).then((result) => {
         if (result.isConfirmed) {
-            openURL(url.survey);
+            openURL(survey.url);
         } else {
             openURL('/newroom');
         }
