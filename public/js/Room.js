@@ -176,6 +176,7 @@ function initClient() {
         setTippy('whiteboardImgUrlBtn', 'Add image url', 'bottom');
         setTippy('whiteboardTextBtn', 'Add text', 'bottom');
         setTippy('whiteboardLineBtn', 'Add line', 'bottom');
+        setTippy('whiteboardArrowBtn', 'Add arrow', 'bottom')
         setTippy('whiteboardRectBtn', 'Add rectangle', 'bottom');
         setTippy('whiteboardCircleBtn', 'Add circle', 'bottom');
         setTippy('whiteboardSaveBtn', 'Save', 'bottom');
@@ -1146,6 +1147,9 @@ function handleButtons() {
     };
     whiteboardLineBtn.onclick = () => {
         whiteboardAddObj('line');
+    };
+    whiteboardArrowBtn.onclick = () => {
+        whiteboardAddObj('arrow');
     };
     whiteboardRectBtn.onclick = () => {
         whiteboardAddObj('rect');
@@ -2288,10 +2292,9 @@ async function whiteboardAddObj(type) {
         case 'rect':
             realWhiteBoard.whiteboardSetDrawingMode("rect");
             break;
-    
-
-
-
+        case 'arrow':
+            realWhiteBoard.whiteboardSetDrawingMode("arrow");
+            break;
         case 'decal':
             realWhiteBoard.whiteboardSetDrawingMode("none");
             const { value: decal } = await Swal.fire({

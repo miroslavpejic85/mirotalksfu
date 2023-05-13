@@ -70,6 +70,10 @@ class WhiteBoard {
         //this.undoButton = document.getElementById('whiteboardUndoBtn');
         //this.redoButton = document.getElementById('whiteboardRedoBtn');
         
+        // test arrow
+        this.wbArrowStartX = 0;
+        this.wbArrowStartY = 0;
+
 
         imgDelete = document.createElement('img');
         imgDelete.src = deleteIcon;
@@ -472,6 +476,7 @@ class WhiteBoard {
         setColor(whiteboardCircleBtn, 'white');
         setColor(whiteboardRectBtn, 'white');
         setColor(whiteboardPointerBtn, 'white');
+        setColor(whiteboardArrowBtn, 'white');
     }
 
     /**
@@ -494,6 +499,10 @@ class WhiteBoard {
             this.setWhiteBoardObjectsSelectable(false);
             this.wbCanvas.selection = false;
             setColor(whiteboardLineBtn, 'green');
+        } else if (status == "arrow") {
+            this.setWhiteBoardObjectsSelectable(false);
+            this.wbCanvas.selection = false;
+            setColor(whiteboardArrowBtn, 'green');
         } else if (status == "pointer") {
             
             this.setWhiteBoardObjectsSelectable(false);
@@ -523,6 +532,77 @@ class WhiteBoard {
         if(this.wbCurrentTool == "pointer")
             return;
 
+        if(this.wbCurrentTool == "arrow"){
+            const pointer = this.wbCanvas.getPointer(e);
+            // TEST ARROW
+            var fromx, fromy, tox, toy;
+            fromx = pointer.x;
+            fromy = pointer.y;
+            tox = fromx + 50;
+            toy = fromy + 50;
+
+            this.wbArrowStartX = fromx;
+            this.wbArrowStartY = fromy;
+
+
+            var angle = Math.atan2(toy - fromy, tox - fromx);
+
+            var headlen = 15;  // arrow head size
+
+            // bring the line end back some to account for arrow head.
+            tox = tox - (headlen) * Math.cos(angle);
+            toy = toy - (headlen) * Math.sin(angle);
+
+            // calculate the points.
+            var points = [
+                {
+                    x: fromx,  // start point
+                    y: fromy
+                }, {
+                    x: fromx - (headlen / 4) * Math.cos(angle - Math.PI / 2), 
+                    y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+                },{
+                    x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2), 
+                    y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+                }, {
+                    x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
+                    y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
+                },{
+                    x: tox + (headlen) * Math.cos(angle),  // tip
+                    y: toy + (headlen) * Math.sin(angle)
+                }, {
+                    x: tox - (headlen) * Math.cos(angle + Math.PI / 2),
+                    y: toy - (headlen) * Math.sin(angle + Math.PI / 2)
+                }, {
+                    x: tox - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+                    y: toy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+                }, {
+                    x: fromx - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+                    y: fromy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+                },{
+                    x: fromx,
+                    y: fromy
+                }
+            ];
+
+            var pline = new fabric.Polyline(points, {
+                fill: this.wbCanvas.freeDrawingBrush.color,
+                stroke: this.wbCanvas.freeDrawingBrush.color,
+                opacity: 1,
+                strokeWidth: 2,
+                originX: 'left',
+                originY: 'top',
+                selectable: true
+            });
+
+            pline.selectable = false;
+            pline.hasBorders = false;
+            pline.hasControls = false;
+
+            
+            this.addWbCanvasObj(pline);
+        }
+
         if (this.wbCurrentTool == "line") {
             const pointer = this.wbCanvas.getPointer(e);
             var line = new fabric.Line([pointer.x, pointer.y, pointer.x + 1, pointer.y + 1], {
@@ -537,7 +617,7 @@ class WhiteBoard {
             
             //let myid='line'+ Math.round(Math.random() * 10000);
             //line.set({'elementID': myid});
-            this.addWbCanvasObj(line);
+            this.addWbCanvasObj(line);            
             this.setWhiteBoardObjectsSelectable(false);
             return;
         }
@@ -598,9 +678,9 @@ class WhiteBoard {
         if(this.wbCurrentTool == "none" || this.wbCurrentTool == "pointer")
             return;
 
-        if (this.wbCurrentTool == "rect" || this.wbCurrentTool == "circle" || this.wbCurrentTool == "line")
+        if (this.wbCurrentTool == "rect" || this.wbCurrentTool == "circle" || this.wbCurrentTool == "line" || this.wbCurrentTool == "arrow")
         {
-            var wbCurrentObject = this.wbCanvas.getActiveObject();
+            //var wbCurrentObject = this.wbCanvas.getActiveObject();
             //wbCurrentObject.selectable = true;
             //wbCurrentObject.hasBorders = true;
             //wbCurrentObject.hasControls = true;
@@ -644,6 +724,82 @@ class WhiteBoard {
             }
 
             return;
+        }
+
+        if (this.wbCurrentTool == "arrow") {
+            const pointer = this.wbCanvas.getPointer(e);
+            // test arrow
+            console.log(wbCurrentObject.points);
+            // save origin point
+            var myorx = this.wbArrowStartX;
+            var myory = this.wbArrowStartY;
+
+            // delete current object                
+            this.wbCanvas.remove(wbCurrentObject);
+
+            // rebuild object
+            var fromx, fromy, tox, toy;
+            fromx = myorx;
+            fromy = myory;
+            tox = pointer.x;
+            toy = pointer.y;
+
+            var angle = Math.atan2(toy - fromy, tox - fromx);
+
+            var headlen = 15;  // arrow head size
+        
+            // bring the line end back some to account for arrow head.
+            tox = tox - (headlen) * Math.cos(angle);
+            toy = toy - (headlen) * Math.sin(angle);
+        
+            // calculate the points.
+            var points = [
+                {
+                    x: fromx,  // start point
+                    y: fromy
+                }, {
+                    x: fromx - (headlen / 4) * Math.cos(angle - Math.PI / 2), 
+                    y: fromy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+                },{
+                    x: tox - (headlen / 4) * Math.cos(angle - Math.PI / 2), 
+                    y: toy - (headlen / 4) * Math.sin(angle - Math.PI / 2)
+                }, {
+                    x: tox - (headlen) * Math.cos(angle - Math.PI / 2),
+                    y: toy - (headlen) * Math.sin(angle - Math.PI / 2)
+                },{
+                    x: tox + (headlen) * Math.cos(angle),  // tip
+                    y: toy + (headlen) * Math.sin(angle)
+                }, {
+                    x: tox - (headlen) * Math.cos(angle + Math.PI / 2),
+                    y: toy - (headlen) * Math.sin(angle + Math.PI / 2)
+                }, {
+                    x: tox - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+                    y: toy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+                }, {
+                    x: fromx - (headlen / 4) * Math.cos(angle + Math.PI / 2),
+                    y: fromy - (headlen / 4) * Math.sin(angle + Math.PI / 2)
+                },{
+                    x: fromx,
+                    y: fromy
+                }
+            ];
+        
+            var pline = new fabric.Polyline(points, {
+                fill: this.wbCanvas.freeDrawingBrush.color,
+                stroke: this.wbCanvas.freeDrawingBrush.color,
+                opacity: 1,
+                strokeWidth: 2,
+                originX: 'left',
+                originY: 'top',
+                selectable: true
+            });
+
+            pline.selectable = false;
+            pline.hasBorders = false;
+            pline.hasControls = false;
+        
+            //canvas.add(pline);
+            this.addWbCanvasObj(pline);
         }
         
         if (this.wbCurrentTool == "line") {
