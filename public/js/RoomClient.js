@@ -2535,7 +2535,12 @@ class RoomClient {
                 context.drawImage(videoPlayer, 0, 0, width, height);
                 dataURL = canvas.toDataURL('image/jpeg', 0.5);
                 // console.log(dataURL);
-                saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.jpeg');
+                
+                if(!this.isPro)
+                {
+                    saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.jpeg');
+                }                
+                
                 let senddata = {
                     action: 'screenshot',
                     image: dataURL,
