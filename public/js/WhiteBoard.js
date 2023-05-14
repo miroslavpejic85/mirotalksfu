@@ -585,11 +585,23 @@ class WhiteBoard {
                 }
             ];
 
-            var pline = new fabric.Polyline(points, {
+              // alternative using path in order to be compatible with Android Client
+            // without changing code, using path that is already used
+            var arrowString = 'M ' + points[0].x + ' ' + points[0].y;
+            arrowString += ' L ' + points[1].x + ' ' + points[1].y;
+            arrowString += ' L ' + points[2].x + ' ' + points[2].y;
+            arrowString += ' L ' + points[3].x + ' ' + points[3].y;
+            arrowString += ' L ' + points[4].x + ' ' + points[4].y;
+            arrowString += ' L ' + points[5].x + ' ' + points[5].y;
+            arrowString += ' L ' + points[6].x + ' ' + points[6].y;
+            arrowString += ' L ' + points[7].x + ' ' + points[7].y;
+            arrowString += ' L ' + points[8].x + ' ' + points[8].y;
+
+            var pline = new fabric.Path(arrowString,{
                 fill: this.wbCanvas.freeDrawingBrush.color,
                 stroke: this.wbCanvas.freeDrawingBrush.color,
                 opacity: 1,
-                strokeWidth: 2,
+                strokeWidth: 10,
                 originX: 'left',
                 originY: 'top',
                 selectable: true
@@ -727,6 +739,7 @@ class WhiteBoard {
         }
 
         if (this.wbCurrentTool == "arrow") {
+            if (wbCurrentObject) {
             const pointer = this.wbCanvas.getPointer(e);
             // test arrow
             console.log(wbCurrentObject.points);
@@ -783,23 +796,35 @@ class WhiteBoard {
                     y: fromy
                 }
             ];
-        
-            var pline = new fabric.Polyline(points, {
+
+            // alternative using path in order to be compatible with Android Client
+            // without changing code, using path that is already used
+            var arrowString = 'M ' + points[0].x + ' ' + points[0].y;
+            arrowString += ' L ' + points[1].x + ' ' + points[1].y;
+            arrowString += ' L ' + points[2].x + ' ' + points[2].y;
+            arrowString += ' L ' + points[3].x + ' ' + points[3].y;
+            arrowString += ' L ' + points[4].x + ' ' + points[4].y;
+            arrowString += ' L ' + points[5].x + ' ' + points[5].y;
+            arrowString += ' L ' + points[6].x + ' ' + points[6].y;
+            arrowString += ' L ' + points[7].x + ' ' + points[7].y;
+            arrowString += ' L ' + points[8].x + ' ' + points[8].y;
+
+            var pline = new fabric.Path(arrowString,{
                 fill: this.wbCanvas.freeDrawingBrush.color,
                 stroke: this.wbCanvas.freeDrawingBrush.color,
                 opacity: 1,
-                strokeWidth: 2,
+                strokeWidth: 10,
                 originX: 'left',
                 originY: 'top',
                 selectable: true
             });
-
+       
             pline.selectable = false;
             pline.hasBorders = false;
             pline.hasControls = false;
-        
-            //canvas.add(pline);
+            
             this.addWbCanvasObj(pline);
+        }
         }
         
         if (this.wbCurrentTool == "line") {
