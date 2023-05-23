@@ -150,6 +150,7 @@ module.exports = class Peer {
             consumer = await consumerTransport.consume({
                 producerId: producer_id,
                 rtpCapabilities,
+                enableRtx: true, // Enable NACK for OPUS.
                 paused: false,
             });
         } catch (error) {

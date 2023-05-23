@@ -989,22 +989,22 @@ function handleButtons() {
         rc.closeThenProduce(RoomClient.mediaType.video, null, true);
     };
     raiseHandButton.onclick = () => {
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', true);
+        rc.updatePeerInfo(peer_name, socket.id, 'hand', true);
     };
     lowerHandButton.onclick = () => {
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'hand', false);
+        rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
     startAudioButton.onclick = () => {
         setAudioButtonsDisabled(true);
         if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', true);
+        rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
         setAudioButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.audio);
-        rc.updatePeerInfo(peer_name, rc.peer_id, 'audio', false);
+        rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
@@ -1029,7 +1029,7 @@ function handleButtons() {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     fileShareButton.onclick = () => {
-        rc.selectFileToShare(rc.peer_id, true);
+        rc.selectFileToShare(socket.id, true);
     };
     videoShareButton.onclick = () => {
         rc.shareVideo('all');
@@ -2175,13 +2175,13 @@ async function getParticipantsTable(peers) {
     <tr>
         <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
         <td>all</td>
-        <td><button id="muteAllButton" onclick="rc.peerAction('me','${rc.peer_id}','mute',true,true)">${_PEER.audioOff}</button></td>
-        <td><button id="hideAllButton" onclick="rc.peerAction('me','${rc.peer_id}','hide',true,true)">${_PEER.videoOff}</button></td>
+        <td><button id="muteAllButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff}</button></td>
+        <td><button id="hideAllButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff}</button></td>
         <td></td>
-        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${rc.peer_id}', true)">${_PEER.sendFile}</button></td>
+        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all','all')">${_PEER.sendMsg}</button></td>
         <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
-        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${rc.peer_id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
+        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
     </tr>
     `;
     }
@@ -2197,7 +2197,7 @@ async function getParticipantsTable(peers) {
         let peer_sendMsg = _PEER.sendMsg;
         let peer_id = peer_info.peer_id;
         let avatarImg = getParticipantAvatar(peer_name);
-        if (rc.peer_id === peer_id) {
+        if (socket.id === peer_id) {
             table += `
             <tr id='${peer_name}'>
                 <td><img src="${avatarImg}"></td>

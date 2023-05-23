@@ -940,7 +940,6 @@ class RoomClient {
             audio: {
                 echoCancellation: true,
                 noiseSuppression: true,
-                sampleRate: 44100,
                 deviceId: deviceId,
             },
             video: false,
