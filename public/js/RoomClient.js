@@ -659,11 +659,46 @@ class RoomClient {
         );
 
         this.socket.on(
+            'connect',
+            function () {
+                console.log('Connected to signaling server!');
+                this._isConnected = true;
+                location.reload();
+            }.bind(this),
+        );
+
+        this.socket.on(
             'disconnect',
             function () {
                 this.exit(true);
+                this.ServerAway();
             }.bind(this),
         );
+    }
+
+    // ####################################################
+    // SERVER AWAY/MAINTENANCE
+    // ####################################################
+
+    ServerAway() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: true,
+            showConfirmButton: false,
+            background: swalBackground,
+            imageUrl: image.poster,
+            title: 'Server away',
+            text: 'The server seems away or in maintenance, please wait until it come back up.',
+            denyButtonText: `Leave room`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                this.exit();
+            }
+        });
     }
 
     // ####################################################
@@ -1985,10 +2020,10 @@ class RoomClient {
                         clean();
                     }.bind(this),
                 );
+            this.event(_EVENTS.exitRoom);
         } else {
             clean();
         }
-        this.event(_EVENTS.exitRoom);
     }
 
     exitRoom() {
