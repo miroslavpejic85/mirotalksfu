@@ -8,6 +8,9 @@ RUN \
 
 COPY package.json .
 
+# https://mediasoup.org/documentation/v3/mediasoup/installation/
+ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD="true"
+
 RUN npm install
 
 COPY app app
