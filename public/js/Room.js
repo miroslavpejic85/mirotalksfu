@@ -1546,12 +1546,8 @@ function leaveFeedback() {
         text: 'Do you want to rate your MiroTalk experience?',
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             openURL(survey.url);
@@ -1812,12 +1808,8 @@ function whiteboardAddObj(type) {
                 input: 'text',
                 showCancelButton: true,
                 confirmButtonText: 'OK',
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
                 if (result.isConfirmed) {
                     let wbCanvasImgURL = result.value;
@@ -1845,12 +1837,8 @@ function whiteboardAddObj(type) {
                 showDenyButton: true,
                 confirmButtonText: `OK`,
                 denyButtonText: `Cancel`,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
                 if (result.isConfirmed) {
                     let wbCanvasImg = result.value;
@@ -2047,12 +2035,8 @@ function confirmClearBoard() {
         showDenyButton: true,
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
             whiteboardAction(getWhiteboardAction('clear'));
@@ -2400,11 +2384,7 @@ function showAbout() {
             Author: <a id="linkedin-button" data-umami-event="Linkedin button" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> Miroslav Pejic</a>
         </div>
         `,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
 }

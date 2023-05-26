@@ -717,12 +717,8 @@ class RoomClient {
             html: `The Username is already in use. <br/> Please try with another one`,
             showDenyButton: false,
             confirmButtonText: `OK`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 openURL((window.location.href = '/join/' + this.room_id));
@@ -1977,12 +1973,8 @@ class RoomClient {
                 showDenyButton: true,
                 confirmButtonText: `Yes`,
                 denyButtonText: `No`,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
                 if (result.isConfirmed) {
                     startScreenButton.click();
@@ -2018,9 +2010,9 @@ class RoomClient {
                 .finally(
                     function () {
                         clean();
+                        this.event(_EVENTS.exitRoom);
                     }.bind(this),
                 );
-            this.event(_EVENTS.exitRoom);
         } else {
             clean();
         }
@@ -2289,12 +2281,8 @@ class RoomClient {
                     icon: type,
                     title: type,
                     text: message,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown',
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp',
-                    },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
                 break;
             case 'toast':
@@ -2826,12 +2814,8 @@ class RoomClient {
             inputPlaceholder: '💬 Enter your message...',
             showCancelButton: true,
             confirmButtonText: `Send`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.value) {
                 result.value = filterXSS(result.value.trim());
@@ -2955,12 +2939,8 @@ class RoomClient {
             showDenyButton: true,
             confirmButtonText: `Yes`,
             denyButtonText: `No`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 this.getId(id).remove();
@@ -3133,12 +3113,8 @@ class RoomClient {
             showDenyButton: true,
             confirmButtonText: `Yes`,
             denyButtonText: `No`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 let msgs = chatMsger.firstChild;
@@ -3367,12 +3343,8 @@ class RoomClient {
             showDenyButton: true,
             confirmButtonText: `Send`,
             denyButtonText: `Cancel`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 this.sendFileInformations(result.value, peer_id, broadcast);
@@ -3590,12 +3562,8 @@ class RoomClient {
                     showDenyButton: true,
                     confirmButtonText: `Save`,
                     denyButtonText: `Cancel`,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown',
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp',
-                    },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 }).then((result) => {
                     if (result.isConfirmed) this.saveBlobToFile(blob, file);
                 });
@@ -3613,12 +3581,8 @@ class RoomClient {
                 showDenyButton: true,
                 confirmButtonText: `Save`,
                 denyButtonText: `Cancel`,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
                 if (result.isConfirmed) this.saveBlobToFile(blob, file);
             });
@@ -3682,12 +3646,8 @@ class RoomClient {
             input: 'text',
             showCancelButton: true,
             confirmButtonText: `Share`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.value) {
                 result.value = filterXSS(result.value);
@@ -3893,12 +3853,8 @@ class RoomClient {
                             inputPlaceholder: 'Set Room password',
                             confirmButtonText: `OK`,
                             denyButtonText: `Cancel`,
-                            showClass: {
-                                popup: 'animate__animated animate__fadeInDown',
-                            },
-                            hideClass: {
-                                popup: 'animate__animated animate__fadeOutUp',
-                            },
+                            showClass: { popup: 'animate__animated animate__fadeInDown' },
+                            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                             inputValidator: (pwd) => {
                                 if (!pwd) return 'Please enter the Room password';
                                 this.RoomPassword = pwd;
@@ -4036,12 +3992,8 @@ class RoomClient {
                     title: 'Rejected',
                     text: 'Your join meeting was be rejected by moderator',
                     confirmButtonText: `Ok`,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown',
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp',
-                    },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 }).then((result) => {
                     if (result.isConfirmed) {
                         this.exit();
@@ -4181,12 +4133,8 @@ class RoomClient {
                 input: 'text',
                 inputPlaceholder: 'Enter the Room password',
                 confirmButtonText: `OK`,
-                showClass: {
-                    popup: 'animate__animated animate__fadeInDown',
-                },
-                hideClass: {
-                    popup: 'animate__animated animate__fadeOutUp',
-                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 inputValidator: (pwd) => {
                     if (!pwd) return 'Please enter the Room password';
                     this.RoomPassword = pwd;
@@ -4214,12 +4162,8 @@ class RoomClient {
             text: 'The room is locked, try with another one.',
             showDenyButton: false,
             confirmButtonText: `Ok`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) this.exit();
         });
@@ -4238,12 +4182,8 @@ class RoomClient {
             text: 'Asking to join meeting...',
             confirmButtonText: `Ok`,
             denyButtonText: `Leave room`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 control.style.display = 'none';
@@ -4467,12 +4407,8 @@ class RoomClient {
                     showDenyButton: true,
                     confirmButtonText: `Yes`,
                     denyButtonText: `No`,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown',
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp',
-                    },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 })
                     .then((result) => {
                         if (result.isConfirmed) {
@@ -4514,12 +4450,8 @@ class RoomClient {
                     showDenyButton: true,
                     confirmButtonText: `Yes`,
                     denyButtonText: `No`,
-                    showClass: {
-                        popup: 'animate__animated animate__fadeInDown',
-                    },
-                    hideClass: {
-                        popup: 'animate__animated animate__fadeOutUp',
-                    },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 })
                     .then((result) => {
                         if (result.isConfirmed) {
