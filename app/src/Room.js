@@ -208,8 +208,8 @@ module.exports = class Room {
                     {
                         producer_id: producer.id,
                         producer_socket_id: socket_id,
-                        peer_name: this.peers.get(socket_id).peer_name,
-                        peer_info: this.peers.get(socket_id).peer_info,
+                        peer_name: this.peers.get(socket_id)?.peer_name,
+                        peer_info: this.peers.get(socket_id)?.peer_info,
                         type: type,
                     },
                 ]);
@@ -243,7 +243,7 @@ module.exports = class Room {
             'producerclose',
             function () {
                 log.debug('Consumer closed due to producerclose event', {
-                    peer_name: this.peers.get(socket_id).peer_name,
+                    peer_name: this.peers.get(socket_id)?.peer_name,
                     consumer_id: consumer.id,
                 });
                 this.peers.get(socket_id).removeConsumer(consumer.id);
