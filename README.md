@@ -18,6 +18,12 @@
 
 <hr />
 
+<p align="center">
+    For questions, discussions, help & support, join with us on <a href="https://discord.gg/rgGYfeYW3N">discord</a>
+</p>
+
+<hr />
+
 <details>
 <summary>Features</summary>
 
@@ -282,15 +288,6 @@ https://sfu.mirotalk.com
 
 -   Contributions are welcome and greatly appreciated!
 -   Just run before `npm run lint`
-
-</details>
-
-<details>
-<summary>Questions, Discussions and support</summary>
-
-<br/>
-
--   For questions, discussions, help & support, join with us on [Discord](https://discord.gg/rgGYfeYW3N)
 
 </details>
 
