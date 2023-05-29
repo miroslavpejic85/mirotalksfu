@@ -7,27 +7,42 @@ const log = new Logger('Xss');
 const checkXSS = (dataObject) => {
     try {
         if (typeof dataObject === 'object' && Object.keys(dataObject).length > 0) {
-            const escapedObj = escapeObject(dataObject);
-            const data = xss(JSON.stringify(escapedObj));
-            log.debug('Check XSS done');
-            return JSON.parse(data);
+            let objectJson = objectToJSONString(dataObject);
+            if (objectJson) {
+                let jsonString = xss(objectJson);
+                let jsonObject = JSONStringToObject(jsonString);
+                if (jsonObject) {
+                    log.debug('XSS Object sanitization done');
+                    return jsonObject;
+                }
+            }
         }
-        return xss(dataObject);
+        if (typeof dataObject === 'string' || dataObject instanceof String) {
+            log.debug('XSS String sanitization done');
+            return xss(dataObject);
+        }
+        log.warn('XSS not sanitized', dataObject);
+        return dataObject;
     } catch (error) {
-        log.error('Check XSS error', { error: error, data: dataObject });
+        log.error('XSS error', { data: dataObject, error: error });
         return dataObject;
     }
 };
 
-function escapeObject(obj) {
-    const escapedObj = {};
-    for (const key in obj) {
-        if (obj.hasOwnProperty(key)) {
-            const escapedKey = key.replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
-            escapedObj[escapedKey] = obj[key];
-        }
+function objectToJSONString(dataObject) {
+    try {
+        return JSON.stringify(dataObject);
+    } catch (error) {
+        return false;
     }
-    return escapedObj;
+}
+
+function JSONStringToObject(jsonString) {
+    try {
+        return JSON.parse(jsonString);
+    } catch (error) {
+        return false;
+    }
 }
 
 module.exports = checkXSS;
