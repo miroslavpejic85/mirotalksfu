@@ -173,7 +173,7 @@ class RoomClient {
         this.recScreenStream = null;
         this._isRecording = false;
 
-        this.RoomPassword = null;
+        this.RoomPassword = false;
 
         // File transfer settings
         this.fileToSend = null;
