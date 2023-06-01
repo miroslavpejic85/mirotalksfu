@@ -514,6 +514,11 @@ function startServer() {
     // ####################################################
 
     io.on('connection', (socket) => {
+        socket.on('clientError', (error) => {
+            log.error('Client error', error);
+            socket.destroy();
+        });
+
         socket.on('createRoom', async ({ room_id }, callback) => {
             socket.room_id = room_id;
 

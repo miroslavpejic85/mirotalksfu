@@ -663,7 +663,8 @@ class RoomClient {
             function () {
                 console.log('Connected to signaling server!');
                 this._isConnected = true;
-                location.reload();
+                // location.reload();
+                getPeerName() ? location.reload() : openURL(this.getDirectJoinURL());
             }.bind(this),
         );
 
@@ -699,6 +700,10 @@ class RoomClient {
                 this.exit();
             }
         });
+    }
+
+    getDirectJoinURL() {
+        return `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0`;
     }
 
     // ####################################################

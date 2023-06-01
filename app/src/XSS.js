@@ -39,7 +39,7 @@ const checkXSS = (dataObject) => {
             log.debug('XSS String sanitization done');
             return xss(dataObject);
         }
-        log.warn('XSS not sanitized', dataObject);
+        log.debug('XSS not sanitized', dataObject);
         return dataObject;
     } catch (error) {
         log.error('XSS error', { data: dataObject, error: error });
