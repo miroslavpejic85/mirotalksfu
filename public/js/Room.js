@@ -53,12 +53,18 @@ const wbHeight = 600;
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const lS = new LocalStorage();
+const localStorageSettings = lS.getObjectLocalStorage('MIROTALK_SFU_SETTINGS');
+const lsSettings = localStorageSettings
+    ? localStorageSettings
+    : {
+          theme: 'dark',
+          //...
+      };
 
 // ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
 
-let currentTheme = 'dark';
 let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
 let rc = null;
@@ -122,6 +128,7 @@ let initStream = null;
 // ####################################################
 
 function initClient() {
+    setTheme(lsSettings.theme);
     if (!DetectRTC.isMobileDevice) {
         setTippy('shareButton', 'Share room', 'right');
         setTippy('hideMeButton', 'Toggle hide me', 'right');
@@ -731,7 +738,6 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
-    setTheme('dark');
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
@@ -2273,23 +2279,44 @@ function setTheme(theme) {
             swalBackground = 'radial-gradient(#393939, #000000)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
+            document.documentElement.style.setProperty('--right-msg-bg', '#056162');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
             document.body.style.background = 'radial-gradient(#393939, #000000)';
+            selectTheme.selectedIndex = 0;
             break;
         case 'grey':
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
+            document.documentElement.style.setProperty('--right-msg-bg', '#056162');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
             document.body.style.background = 'radial-gradient(#666, #333)';
+            selectTheme.selectedIndex = 1;
+            break;
+        case 'green':
+            swalBackground = 'radial-gradient(#003934, #001E1A)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#003934');
+            document.documentElement.style.setProperty('--right-msg-bg', '#001E1A');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--btns-bg-color', '#001E1A');
+            document.body.style.background = 'radial-gradient(#003934, #001E1A)';
+            selectTheme.selectedIndex = 2;
             break;
         //...
     }
-    currentTheme = theme;
+    lsSettings.theme = theme;
+    lS.setObjectLocalStorage('MIROTALK_SFU_SETTINGS', lsSettings);
     wbIsBgTransparent = false;
-    rc.isChatBgTransparent = false;
+    if (rc) rc.isChatBgTransparent = false;
 }
 
 // ####################################################

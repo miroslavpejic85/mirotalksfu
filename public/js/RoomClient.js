@@ -3102,7 +3102,7 @@ class RoomClient {
         if (this.isChatBgTransparent) {
             document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.100)');
         } else {
-            setTheme(currentTheme);
+            setTheme(lsSettings.theme);
         }
     }
 
