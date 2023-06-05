@@ -96,7 +96,7 @@ body {
 }
 
 #google_translate_element select {
-    background: #2c2c2c !important;
+    background-color: #2c2c2c !important;
 }
 
 /*--------------------------------------------------------------
@@ -140,7 +140,7 @@ body {
     width: 100%;
     margin-top: 15px;
     padding: 10px;
-    background: #2c2c2c;
+    background-color: #2c2c2c !important;
     color: white;
     border: var(--border);
     border-radius: 5px;
@@ -256,18 +256,20 @@ body {
 
 #mySettings i,
 #mySettings p {
-    display: inline-block;
+    display: inline-flex;
+    margin: auto;
     color: #fff;
     padding: 5px;
     background: transparent;
 }
 
 #mySettings select {
+    margin-top: 1rem;
     width: auto;
     max-width: 310px;
     height: 40px;
     color: #fff;
-    background-color: transparent;
+    background-color: #2c2c2c !important;
     border: var(--border);
     border-radius: 5px;
     cursor: pointer;
@@ -318,19 +320,22 @@ th {
 --------------------------------------------------------------*/
 .tab {
     overflow: hidden;
-    background-color: #000000;
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
 }
 
 /* Style the buttons inside the tab */
 .tab button {
-    background-color: inherit;
+    margin: 2px;
+    padding: 14px 16px;
     float: left;
+    font-size: 0.8rem;
+    color: #fff;
     border: none;
+    background-color: inherit;
     outline: none;
     cursor: pointer;
-    padding: 14px 16px;
     transition: 0.3s;
-    color: #fff;
 }
 
 /* Change background color of buttons on hover */
@@ -364,7 +369,7 @@ th {
 }
 
 .tabcontent button:hover {
-    background-color: #121212;
+    background-color: rgba(0, 0, 0, 0.2);
     transform: scale(1);
 }
 
@@ -410,7 +415,7 @@ th {
     display: flex;
     justify-content: space-between;
     padding: 10px;
-    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.2);
     color: #666;
     cursor: move;
 }
@@ -419,7 +424,7 @@ th {
 .chat-header-options button {
     border: none;
     transition: all 0.3s ease-in-out;
-    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.2);
     color: #fff;
     border-radius: 5px;
     transition: background 0.23s;
@@ -580,7 +585,7 @@ a:hover {
     border: none;
     border: var(--border);
     border-top-left-radius: 10px;
-    background: rgb(7 7 7);
+    background: rgba(0, 0, 0, 0.2);
     transition: height 1s;
     resize: none;
 }
@@ -771,7 +776,7 @@ button:hover {
 .participants-header {
     display: flex;
     justify-content: space-between;
-    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 10px;
     color: #fff;
@@ -859,7 +864,7 @@ button:hover {
 .lobby-header {
     display: flex;
     justify-content: space-between;
-    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 10px;
     color: #fff;
@@ -963,7 +968,7 @@ progress {
 .whiteboard-header {
     display: flex;
     justify-content: space-between;
-    background: rgb(0, 0, 0);
+    background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 10px;
     color: #fff;
