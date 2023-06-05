@@ -325,12 +325,11 @@ th {
 
 /* Style the buttons inside the tab */
 .tab button {
-    margin: 2px;
-    padding: 14px 16px;
+    margin: 3px;
+    padding: 12px;
     float: left;
-    font-size: 0.8rem;
     color: #fff;
-    border: none;
+    border: var(--border);
     background-color: rgba(0, 0, 0, 0.2);
     outline: none;
     cursor: pointer;

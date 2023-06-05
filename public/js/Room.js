@@ -2308,7 +2308,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--right-msg-bg', '#001E1A');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--btns-bg-color', '#001E1A');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#003934, #001E1A)');
             document.body.style.background = 'radial-gradient(#003934, #001E1A)';
             selectTheme.selectedIndex = 2;
             break;
@@ -2320,7 +2320,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--right-msg-bg', '#141B41');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--btns-bg-color', '#141B41');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#306bac, #141B41)');
             document.body.style.background = 'radial-gradient(#306bac, #141B41)';
             selectTheme.selectedIndex = 3;
             break;
@@ -2332,7 +2332,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--btns-bg-color', '#3C1518');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#69140E, #3C1518)');
             document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
             selectTheme.selectedIndex = 4;
             break;
