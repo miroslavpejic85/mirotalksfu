@@ -2324,6 +2324,18 @@ function setTheme(theme) {
             document.body.style.background = 'radial-gradient(#306bac, #141B41)';
             selectTheme.selectedIndex = 3;
             break;
+        case 'red':
+            swalBackground = 'radial-gradient(#69140E, #3C1518)';
+            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
+            document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
+            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--btns-bg-color', '#3C1518');
+            document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
+            selectTheme.selectedIndex = 4;
+            break;
         //...
     }
     lsSettings.theme = theme;
