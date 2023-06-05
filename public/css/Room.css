@@ -320,7 +320,6 @@ th {
 --------------------------------------------------------------*/
 .tab {
     overflow: hidden;
-    background-color: rgba(0, 0, 0, 0.2);
     border-radius: 5px;
 }
 
@@ -332,7 +331,7 @@ th {
     font-size: 0.8rem;
     color: #fff;
     border: none;
-    background-color: inherit;
+    background-color: rgba(0, 0, 0, 0.2);
     outline: none;
     cursor: pointer;
     transition: 0.3s;
@@ -641,7 +640,7 @@ em-emoji-picker {
 }
 .swal2-html-container {
     text-align: center;
-    color: #858585 !important;
+    color: whitesmoke !important;
     background-color: transparent !important;
 }
 
