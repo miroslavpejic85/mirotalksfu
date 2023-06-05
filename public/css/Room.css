@@ -301,13 +301,13 @@ body {
 .settingsTable td,
 th {
     text-align: left;
-    padding: 10px;
+    padding: 5px;
 }
 .settingsTable tr:nth-child(even) {
     /* background-color: #121212; */
 }
 .settingsTable i {
-    border: var(--border);
+    border: none;
     border-radius: 5px;
 }
 
@@ -363,7 +363,7 @@ th {
 }
 
 .tabcontent button {
-    margin-top: 5px;
+    margin-top: 10px;
     width: 100%;
     text-align: left;
 }
