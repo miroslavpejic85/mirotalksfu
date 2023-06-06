@@ -97,6 +97,7 @@ body {
 
 #google_translate_element select {
     background-color: #2c2c2c !important;
+    box-shadow: none !important;
 }
 
 /*--------------------------------------------------------------
@@ -144,6 +145,7 @@ body {
     color: white;
     border: var(--border);
     border-radius: 5px;
+    box-shadow: none;
     cursor: pointer;
 }
 
@@ -272,6 +274,7 @@ body {
     background-color: #2c2c2c !important;
     border: var(--border);
     border-radius: 5px;
+    box-shadow: none;
     cursor: pointer;
 }
 
@@ -646,11 +649,16 @@ em-emoji-picker {
 
 .swal2-input {
     border: var(--border) !important;
+    box-shadow: none !important;
 }
 
 .swal2-popup {
     /* border: var(--border) !important; */
     border: 0.5px solid rgb(255 255 255 / 32%) !important;
+}
+
+.swal2-popup .swal2-styled:focus {
+    box-shadow: none !important;
 }
 
 .swal2-timer-progress-bar-container {
@@ -707,6 +715,7 @@ em-emoji-picker {
 select {
     height: 40px;
     line-height: 40px;
+    box-shadow: none;
 }
 
 .hidden {
