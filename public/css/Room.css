@@ -319,6 +319,7 @@ th {
 # Style the tab
 --------------------------------------------------------------*/
 .tab {
+    padding: 10px;
     overflow: hidden;
     border-radius: 5px;
 }
@@ -326,7 +327,7 @@ th {
 /* Style the buttons inside the tab */
 .tab button {
     margin: 3px;
-    padding: 12px;
+    padding: 11px;
     float: left;
     color: #fff;
     border: var(--border);

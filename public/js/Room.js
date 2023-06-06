@@ -2320,7 +2320,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--right-msg-bg', '#141B41');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#306bac, #141B41)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#141B41, #306bac)');
             document.body.style.background = 'radial-gradient(#306bac, #141B41)';
             selectTheme.selectedIndex = 3;
             break;
