@@ -3947,6 +3947,7 @@ class RoomClient {
     // ####################################################
 
     roomLobby(data) {
+        console.log('LOBBY--->', data);
         switch (data.lobby_status) {
             case 'waiting':
                 if (!isRulesActive || isPresenter) {
@@ -3964,8 +3965,8 @@ class RoomClient {
                     <tr id='${peer_id}'>
                         <td><img src="${avatarImg}" /></td>
                         <td>${peer_name}</td>
-                        <td><button id=${lobbyAcceptId} onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
-                        <td><button id=${lobbyRejectId} onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
+                        <td><button id='${lobbyAcceptId}' onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
+                        <td><button id='${lobbyRejectId}' onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
                     </tr>
                     `;
 
