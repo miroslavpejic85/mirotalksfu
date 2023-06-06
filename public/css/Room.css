@@ -279,7 +279,9 @@ body {
 }
 
 #mySettingsCloseBtn {
-    padding: 10px;
+    /* top right bottom left */
+    margin: 10px 0px 0px 10px;
+    font-size: 1.4rem;
 }
 
 #mySettings button {
