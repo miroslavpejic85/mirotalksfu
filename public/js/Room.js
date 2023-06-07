@@ -2299,6 +2299,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--right-msg-bg', '#056162');
             document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
+            document.documentElement.style.setProperty('--tab-btn-active', '#393939');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
@@ -2312,6 +2313,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--right-msg-bg', '#056162');
             document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
+            document.documentElement.style.setProperty('--tab-btn-active', '#666');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
@@ -2325,6 +2327,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--left-msg-bg', '#003934');
             document.documentElement.style.setProperty('--right-msg-bg', '#001E1A');
             document.documentElement.style.setProperty('--select-bg', '#001E1A');
+            document.documentElement.style.setProperty('--tab-btn-active', '#003934');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#003934, #001E1A)');
@@ -2338,6 +2341,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--left-msg-bg', '#306bac');
             document.documentElement.style.setProperty('--right-msg-bg', '#141B41');
             document.documentElement.style.setProperty('--select-bg', '#141B41');
+            document.documentElement.style.setProperty('--tab-btn-active', '#306bac');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#141B41, #306bac)');
@@ -2351,6 +2355,7 @@ function setTheme(theme) {
             document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
             document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
             document.documentElement.style.setProperty('--select-bg', '#3C1518');
+            document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#69140E, #3C1518)');

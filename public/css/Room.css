@@ -51,6 +51,7 @@
     --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
     --settings-bg: radial-gradient(#393939, #000000);
+    --tab-btn-active: rgb(42 42 42 / 70%);
     --btns-bg-color: rgba(0, 0, 0, 0.7);
     /* buttons bar horizontal */
     --btns-top: 50%;
@@ -351,7 +352,7 @@ th {
 
 /* Create an active/current tablink class */
 .tab button.active {
-    background-color: rgb(42 42 42 / 70%);
+    background-color: var(--tab-btn-active);
 }
 
 /* Style the tab content */
