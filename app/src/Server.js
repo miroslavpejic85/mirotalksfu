@@ -270,7 +270,7 @@ function startServer() {
         if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
             // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-            const { room, password, name, audio, video, screen, notify } = checkXSS(req.query);
+            const { room, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
             if (room && password && name && audio && video && screen && notify) {
                 return res.sendFile(views.room);
             }
@@ -1018,10 +1018,14 @@ function startServer() {
             }
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', async () => {
             if (!roomList.has(socket.room_id)) return;
 
-            log.debug('Disconnect', getPeerName());
+            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
+            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
+
+            log.debug('Disconnect', peerName);
 
             roomList.get(socket.room_id).removePeer(socket.id);
 
@@ -1036,7 +1040,7 @@ function startServer() {
                 log.debug('Disconnect - current presenters grouped by roomId', presenters);
             }
 
-            roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
+            roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData(peerName, isPresenter));
 
             removeIP(socket);
         });
@@ -1047,12 +1051,17 @@ function startServer() {
                     error: 'Not currently in a room',
                 });
             }
-            log.debug('Exit room', getPeerName());
+
+            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
+            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
+
+            log.debug('Exit room', peerName);
 
             // close transports
             await roomList.get(socket.room_id).removePeer(socket.id);
 
-            roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData());
+            roomList.get(socket.room_id).broadCast(socket.id, 'removeMe', removeMeData(peerName, isPresenter));
 
             if (roomList.get(socket.room_id).getPeers().size === 0) {
                 roomList.delete(socket.room_id);
@@ -1111,11 +1120,20 @@ function startServer() {
             return pattern.test(input);
         }
 
-        function removeMeData() {
+        function removeMeData(peerName, isPresenter) {
+            const roomId = roomList.get(socket.room_id) && socket.room_id;
+            const peerCounts = roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().size;
+            log.debug('REMOVE ME DATA', {
+                roomId: roomId,
+                name: peerName,
+                isPresenter: isPresenter,
+                count: peerCounts,
+            });
             return {
-                room_id: roomList.get(socket.room_id) && socket.room_id,
+                room_id: roomId,
                 peer_id: socket.id,
-                peer_counts: roomList.get(socket.room_id) && roomList.get(socket.room_id).getPeers().size,
+                peer_counts: peerCounts,
+                isPresenter: isPresenter,
             };
         }
 

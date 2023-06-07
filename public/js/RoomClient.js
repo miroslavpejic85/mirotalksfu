@@ -318,7 +318,8 @@ class RoomClient {
         for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {
             let my_peer_info = peers.get(peer).peer_info;
             console.log('07.1 ----> My Peer info', my_peer_info);
-            isPresenter = my_peer_info.peer_presenter;
+            isPresenter = window.localStorage.isReconnected === 'true' ? isPresenter : my_peer_info.peer_presenter;
+            window.localStorage.isReconnected = false;
             handleRules(isPresenter);
         }
         adaptAspectRatio(participantsCount);
@@ -521,11 +522,6 @@ class RoomClient {
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants(true);
-                if (participantsCount == 1) {
-                    isPresenter = true;
-                    handleRules(isPresenter);
-                    console.log('I am alone in the room, got Presenter Rules');
-                }
             }.bind(this),
         );
 
@@ -664,7 +660,7 @@ class RoomClient {
                 console.log('Connected to signaling server!');
                 this._isConnected = true;
                 // location.reload();
-                getPeerName() ? location.reload() : openURL(this.getDirectJoinURL());
+                getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
             }.bind(this),
         );
 
@@ -683,6 +679,7 @@ class RoomClient {
 
     ServerAway() {
         this.sound('alert');
+        window.localStorage.isReconnected = true;
         Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
@@ -702,8 +699,8 @@ class RoomClient {
         });
     }
 
-    getDirectJoinURL() {
-        return `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0`;
+    getReconnectDirectJoinURL() {
+        return `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0&isPresenter=${isPresenter}`;
     }
 
     // ####################################################

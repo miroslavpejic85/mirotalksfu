@@ -79,6 +79,7 @@ let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
 let isScreenAllowed = getScreen();
 let notify = getNotify();
+isPresenter = isPeerPresenter();
 
 let peer_info = null;
 
@@ -409,6 +410,21 @@ function getNotify() {
         }
     }
     console.log('Direct join', { notify: true });
+    return true;
+}
+
+function isPeerPresenter() {
+    let qs = new URLSearchParams(window.location.search);
+    let presenter = filterXSS(qs.get('isPresenter'));
+    if (presenter) {
+        presenter = presenter.toLowerCase();
+        let queryPresenter = presenter === '1' || presenter === 'true';
+        if (queryPresenter != null) {
+            console.log('Direct join Reconnect', { isPresenter: queryPresenter });
+            return queryPresenter;
+        }
+    }
+    console.log('Direct join Reconnect', { presenter: true });
     return true;
 }
 
