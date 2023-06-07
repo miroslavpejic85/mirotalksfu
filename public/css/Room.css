@@ -44,6 +44,7 @@
     --wb-width: 800px;
     --wb-height: 600px;
     --wb-bg: radial-gradient(#393939, #000000);
+    --select-bg: #2c2c2c;
     --left-msg-bg: #252d31;
     --right-msg-bg: #056162;
     --private-msg-bg: #6b1226;
@@ -96,7 +97,7 @@ body {
 }
 
 #google_translate_element select {
-    background-color: #2c2c2c !important;
+    background-color: var(--select-bg) !important;
     box-shadow: none !important;
 }
 
@@ -141,7 +142,7 @@ body {
     width: 100%;
     margin-top: 15px;
     padding: 10px;
-    background-color: #2c2c2c !important;
+    background-color: var(--select-bg) !important;
     color: white;
     border: var(--border);
     border-radius: 5px;
@@ -271,7 +272,7 @@ body {
     max-width: 310px;
     height: 40px;
     color: #fff;
-    background-color: #2c2c2c !important;
+    background-color: var(--select-bg) !important;
     border: var(--border);
     border-radius: 5px;
     box-shadow: none;
