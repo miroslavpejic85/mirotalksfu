@@ -3235,6 +3235,29 @@ class RoomClient {
             const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
             const blob = new Blob(recordedBlobs, { type: 'video/' + type });
             const recFileName = `${dateTime}-REC.${type}`;
+            const currentDevice = DetectRTC.isMobileDevice ? 'MOBILE' : 'PC';
+            const blobFileSize = bytesToSize(blob.size);
+            const recTime = document.getElementById('recordingStatus').innerText;
+
+            Swal.fire({
+                background: swalBackground,
+                position: 'center',
+                icon: 'success',
+                title: 'Recording',
+                html: `
+                <div style="text-align: left;">
+                    🔴 &nbsp; Recording Info: <br/><br/>
+                    <ul>
+                        <li>Time: ${recTime}</li>
+                        <li>File: ${recFileName}</li>
+                        <li>Size: ${blobFileSize}</li>
+                    </ul>
+                    <br/>
+                    Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+                </div>`,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
 
             console.log('MediaRecorder Download Blobs');
             const url = window.URL.createObjectURL(blob);
