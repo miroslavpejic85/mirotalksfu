@@ -110,7 +110,7 @@ if (sentryEnabled) {
         integrations: [
             new CaptureConsole({
                 // ['log', 'info', 'warn', 'error', 'debug', 'assert']
-                levels: ['warn', 'error'],
+                levels: ['error'],
             }),
         ],
         tracesSampleRate: sentryTracesSampleRate,
@@ -1009,7 +1009,7 @@ function startServer() {
                 cb(response);
             } catch (error) {
                 if (error.response) {
-                    log.error('ChatGPT', error.response);
+                    log.error('ChatGPT', error.response.data);
                     cb(error.response.data.error.message);
                 } else {
                     log.error('ChatGPT', error.message);
