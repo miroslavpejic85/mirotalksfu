@@ -3237,7 +3237,7 @@ class RoomClient {
             const recFileName = `${dateTime}-REC.${type}`;
             const currentDevice = DetectRTC.isMobileDevice ? 'MOBILE' : 'PC';
             const blobFileSize = bytesToSize(blob.size);
-            const recTime = document.getElementById('recordingStatus').innerText;
+            const recTime = document.getElementById('recordingStatus');
 
             Swal.fire({
                 background: swalBackground,
@@ -3248,7 +3248,7 @@ class RoomClient {
                 <div style="text-align: left;">
                     🔴 &nbsp; Recording Info: <br/><br/>
                     <ul>
-                        <li>Time: ${recTime}</li>
+                        <li>Time: ${recTime.innerText}</li>
                         <li>File: ${recFileName}</li>
                         <li>Size: ${blobFileSize}</li>
                     </ul>
@@ -3272,6 +3272,8 @@ class RoomClient {
                 window.URL.revokeObjectURL(url);
             }, 100);
             console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
+
+            recTime.innerText = '0s';
         } catch (ex) {
             console.warn('Recording save failed', ex);
         }
@@ -3298,7 +3300,6 @@ class RoomClient {
             });
         }
         if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
-        this.getId('recordingStatus').innerText = '0s';
         this.event(_EVENTS.stopRec);
         this.sound('recStop');
     }
