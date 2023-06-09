@@ -3246,7 +3246,7 @@ class RoomClient {
                 title: 'Recording',
                 html: `
                 <div style="text-align: left;">
-                    🔴 &nbsp; Recording Info: <br/><br/>
+                    🔴 Recording Info: <br/><br/>
                     <ul>
                         <li>Time: ${recTime.innerText}</li>
                         <li>File: ${recFileName}</li>
