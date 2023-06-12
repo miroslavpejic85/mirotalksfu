@@ -694,7 +694,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (!result.isConfirmed) {
-                this.exit();
+                this.event(_EVENTS.exitRoom);
             }
         });
     }
