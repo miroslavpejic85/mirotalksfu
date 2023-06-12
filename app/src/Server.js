@@ -1021,8 +1021,8 @@ function startServer() {
         socket.on('disconnect', async () => {
             if (!roomList.has(socket.room_id)) return;
 
-            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
-            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
+            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
             const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
 
             log.debug('Disconnect', peerName);
@@ -1052,8 +1052,8 @@ function startServer() {
                 });
             }
 
-            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
-            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const peerName = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
+            const peerUuid = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
             const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
 
             log.debug('Exit room', peerName);
