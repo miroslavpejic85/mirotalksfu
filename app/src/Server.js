@@ -1147,9 +1147,12 @@ function startServer() {
 
     async function isPeerPresenter(room_id, peer_name, peer_uuid) {
         let isPresenter = false;
+
+        if (typeof presenters[room_id] === 'undefined' || presenters[room_id] === null) return false;
+
         try {
             isPresenter =
-                typeof presenters === 'object' &&
+                typeof presenters[room_id] === 'object' &&
                 Object.keys(presenters[room_id]).length > 1 &&
                 presenters[room_id]['peer_name'] === peer_name &&
                 presenters[room_id]['peer_uuid'] === peer_uuid;
@@ -1157,12 +1160,14 @@ function startServer() {
             log.error('isPeerPresenter', err);
             return false;
         }
+
         log.debug('isPeerPresenter', {
             room_id: room_id,
             peer_name: peer_name,
             peer_uuid: peer_uuid,
             isPresenter: isPresenter,
         });
+
         return isPresenter;
     }
 
