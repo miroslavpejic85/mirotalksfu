@@ -931,6 +931,9 @@ label {
 .br-24 {
     border-radius: 24px;
 }
+.w-150 {
+    width: 150px;
+}
 .sr .has-animations .is-revealing {
     visibility: hidden;
 }
