@@ -27,6 +27,7 @@ const html = {
     videoOff: 'fas fa-video-slash',
     userName: 'username',
     userHand: 'fas fa-hand-paper pulsate',
+    pip: 'fas fa-images',
     fullScreen: 'fas fa-expand',
     snapshot: 'fas fa-camera-retro',
     sendFile: 'fas fa-upload',
@@ -152,6 +153,7 @@ class RoomClient {
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
         this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
+        this.isVideoPictureInPictureSupported = document.pictureInPictureEnabled;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
         this.showChatOnMessage = true;
@@ -1300,7 +1302,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, fs, pm, pb, pn;
+        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -1323,6 +1325,9 @@ class RoomClient {
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
                 vb.className = 'videoMenuBar fadein';
+                pip = document.createElement('button');
+                pip.id = id + '__pictureInPicture';
+                pip.className = html.pip;
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
@@ -1356,6 +1361,9 @@ class RoomClient {
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
+                BUTTONS.producerVideo.videoPictureInPicture &&
+                    this.isVideoPictureInPictureSupported &&
+                    vb.appendChild(pip);
                 BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
@@ -1366,6 +1374,7 @@ class RoomClient {
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Producer');
                 this.myVideoEl = elem;
+                this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
@@ -1378,6 +1387,7 @@ class RoomClient {
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'top-end');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(vp.id, 'Toggle video privacy', 'top-end');
                     this.setTippy(au.id, 'Audio status', 'top-end');
@@ -1659,7 +1669,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
 
         console.log('PEER-INFO', peer_info);
 
@@ -1693,6 +1703,9 @@ class RoomClient {
                 pv.min = 0;
                 pv.max = 100;
                 pv.value = 100;
+                pip = document.createElement('button');
+                pip.id = id + '__pictureInPicture';
+                pip.className = html.pip;
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
@@ -1743,6 +1756,9 @@ class RoomClient {
                 BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
                 BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
+                BUTTONS.consumerVideo.videoPictureInPicture &&
+                    this.isVideoPictureInPictureSupported &&
+                    vb.appendChild(pip);
                 BUTTONS.consumerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
@@ -1752,6 +1768,7 @@ class RoomClient {
                 d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
                 this.attachMediaStream(elem, stream, type, 'Consumer');
+                this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
@@ -1773,6 +1790,7 @@ class RoomClient {
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'top-end');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
                     this.setTippy(ts.id, 'Snapshot', 'top-end');
                     this.setTippy(sf.id, 'Send file', 'top-end');
                     this.setTippy(sm.id, 'Send message', 'top-end');
@@ -2364,6 +2382,26 @@ class RoomClient {
                 document.documentElement.style.setProperty('--btns-width', '320px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'row');
                 break;
+        }
+    }
+
+    // ####################################################
+    // PICTURE IN PICTURE
+    // ####################################################
+
+    handlePIP(elemId, pipId) {
+        let videoPlayer = this.getId(elemId);
+        let btnPIP = this.getId(pipId);
+        if (btnPIP) {
+            btnPIP.addEventListener('click', () => {
+                if (videoPlayer.pictureInPictureElement) {
+                    videoPlayer.exitPictureInPicture();
+                } else if (document.pictureInPictureEnabled) {
+                    videoPlayer.requestPictureInPicture().catch((error) => {
+                        console.error('Failed to enter Picture-in-Picture mode:', error);
+                    });
+                }
+            });
         }
     }
 

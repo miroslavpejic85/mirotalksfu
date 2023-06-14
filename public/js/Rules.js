@@ -30,12 +30,14 @@ const BUTTONS = {
         tabRecording: true,
     },
     producerVideo: {
+        videoPictureInPicture: true,
         fullScreenButton: true,
         snapShotButton: true,
         muteAudioButton: true,
         videoPrivacyButton: true,
     },
     consumerVideo: {
+        videoPictureInPicture: true,
         fullScreenButton: true,
         snapShotButton: true,
         sendMessageButton: true,
