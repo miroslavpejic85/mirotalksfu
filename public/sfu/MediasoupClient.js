@@ -12823,9 +12823,6 @@
                             }
                         }
                         const raw = this._mediaObject.simulcast.list1;
-                        // NOTE: Ignore bug in @types/sdp-transform.
-                        // Ongoing PR: https://github.com/DefinitelyTyped/DefinitelyTyped/pull/64119
-                        // @ts-ignore
                         const simulcastStreams = sdpTransform.parseSimulcastStreamList(raw);
                         for (const simulcastStream of simulcastStreams) {
                             for (const simulcastFormat of simulcastStream) {
@@ -14049,7 +14046,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.84';
+                exports.version = '3.6.85';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
