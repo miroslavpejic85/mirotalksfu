@@ -1911,32 +1911,43 @@
                                 ? _g
                                 : '';
                         const osVersion = parseFloat((_h = os.version) !== null && _h !== void 0 ? _h : '0');
+                        const isIOS = osName === 'ios';
+                        const isChrome = [
+                            'chrome',
+                            'chromium',
+                            'mobile chrome',
+                            'chrome webview',
+                            'chrome headless',
+                        ].includes(browserName);
+                        const isFirefox = ['firefox', 'mobile firefox', 'mobile focus'].includes(browserName);
+                        const isSafari = ['safari', 'mobile safari'].includes(browserName);
+                        const isEdge = ['edge'].includes(browserName);
                         // Chrome, Chromium, and Edge.
-                        if (['chrome', 'chromium', 'edge'].includes(browserName) && browserVersion >= 111) {
+                        if ((isChrome || isEdge) && !isIOS && browserVersion >= 111) {
                             return 'Chrome111';
                         } else if (
-                            (['chrome', 'chromium'].includes(browserName) && browserVersion >= 74) ||
-                            (browserName === 'edge' && browserVersion >= 88)
+                            (isChrome && !isIOS && browserVersion >= 74) ||
+                            (isEdge && !isIOS && browserVersion >= 88)
                         ) {
                             return 'Chrome74';
-                        } else if (['chrome', 'chromium'].includes(browserName) && browserVersion >= 70) {
+                        } else if (isChrome && !isIOS && browserVersion >= 70) {
                             return 'Chrome70';
-                        } else if (['chrome', 'chromium'].includes(browserName) && browserVersion >= 67) {
+                        } else if (isChrome && !isIOS && browserVersion >= 67) {
                             return 'Chrome67';
-                        } else if (['chrome', 'chromium'].includes(browserName) && browserVersion >= 55) {
+                        } else if (isChrome && !isIOS && browserVersion >= 55) {
                             return 'Chrome55';
                         }
                         // Firefox.
-                        else if (browserName === 'firefox' && osName !== 'ios' && browserVersion >= 60) {
+                        else if (isFirefox && !isIOS && browserVersion >= 60) {
                             return 'Firefox60';
                         }
                         // Firefox on iOS (so Safari).
-                        else if (browserName === 'firefox' && osName === 'ios' && osVersion >= 14.3) {
+                        else if (isFirefox && isIOS && osVersion >= 14.3) {
                             return 'Safari12';
                         }
                         // Safari with Unified-Plan support enabled.
                         else if (
-                            browserName === 'safari' &&
+                            isSafari &&
                             browserVersion >= 12 &&
                             typeof RTCRtpTransceiver !== 'undefined' &&
                             RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
@@ -1944,12 +1955,22 @@
                             return 'Safari12';
                         }
                         // Safari with Plab-B support.
-                        else if (browserName === 'safari' && browserVersion >= 11) {
+                        else if (isSafari && browserVersion >= 11) {
                             return 'Safari11';
                         }
                         // Old Edge with ORTC support.
-                        else if (browserName === 'edge' && browserVersion >= 11 && browserVersion <= 18) {
+                        else if (isEdge && !isIOS && browserVersion >= 11 && browserVersion <= 18) {
                             return 'Edge11';
+                        }
+                        // Best effort for WebKit based browsers in iOS.
+                        else if (
+                            engineName === 'webkit' &&
+                            isIOS &&
+                            osVersion >= 14.3 &&
+                            typeof RTCRtpTransceiver !== 'undefined' &&
+                            RTCRtpTransceiver.prototype.hasOwnProperty('currentDirection')
+                        ) {
+                            return 'Safari12';
                         }
                         // Best effort for Chromium based browsers.
                         else if (engineName === 'blink') {
@@ -12603,7 +12624,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.86';
+                exports.version = '3.6.87';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
