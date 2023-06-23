@@ -9089,7 +9089,7 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
+                        var _a, _b;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -9144,8 +9144,19 @@
                         logger.debug('send() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
                         // We can now get the transceiver.mid.
-                        const localId = transceiver.mid;
+                        // NOTE: We cannot read generated MID on iOS react-native-webrtc 111.0.0
+                        // because transceiver.mid is not available until setRemoteDescription()
+                        // is called, so this is best effort.
+                        // Issue: https://github.com/react-native-webrtc/react-native-webrtc/issues/1404
+                        // NOTE: So let's fill MID in sendingRtpParameters later.
+                        let localId = (_b = transceiver.mid) !== null && _b !== void 0 ? _b : undefined;
+                        if (!localId) {
+                            logger.warn(
+                                'send() | missing transceiver.mid (bug in react-native-webrtc, using a workaround',
+                            );
+                        }
                         // Set MID.
+                        // NOTE: As per above, it could be unset yet.
                         sendingRtpParameters.mid = localId;
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
@@ -9196,6 +9207,12 @@
                         const answer = { type: 'answer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('send() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
+                        // Follow up of iOS react-native-webrtc 111.0.0 issue told above. Now yes,
+                        // we can read generated MID (if not done above) and fill sendingRtpParameters.
+                        if (!localId) {
+                            localId = transceiver.mid;
+                            sendingRtpParameters.mid = localId;
+                        }
                         // Store in the map.
                         this._mapMidTransceiver.set(localId, transceiver);
                         return {
@@ -12624,7 +12641,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.87';
+                exports.version = '3.6.89';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
