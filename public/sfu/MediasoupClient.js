@@ -1866,7 +1866,6 @@
                 const ReactNative_1 = require('./handlers/ReactNative');
                 const logger = new Logger_1.Logger('Device');
                 function detectDevice() {
-                    var _a, _b, _c, _d, _e, _f, _g, _h;
                     // React-Native.
                     // NOTE: react-native-webrtc >= 1.75.0 is required.
                     // NOTE: react-native-webrtc with Unified Plan requires version >= 106.0.0.
@@ -1892,25 +1891,13 @@
                         const uaParser = new ua_parser_js_1.UAParser(ua);
                         logger.debug('detectDevice() | browser detected [ua:%s, parsed:%o]', ua, uaParser.getResult());
                         const browser = uaParser.getBrowser();
-                        const browserName =
-                            (_b = (_a = browser.name) === null || _a === void 0 ? void 0 : _a.toLowerCase()) !== null &&
-                            _b !== void 0
-                                ? _b
-                                : '';
-                        const browserVersion = parseInt((_c = browser.major) !== null && _c !== void 0 ? _c : '0');
+                        const browserName = browser.name?.toLowerCase() ?? '';
+                        const browserVersion = parseInt(browser.major ?? '0');
                         const engine = uaParser.getEngine();
-                        const engineName =
-                            (_e = (_d = engine.name) === null || _d === void 0 ? void 0 : _d.toLowerCase()) !== null &&
-                            _e !== void 0
-                                ? _e
-                                : '';
+                        const engineName = engine.name?.toLowerCase() ?? '';
                         const os = uaParser.getOS();
-                        const osName =
-                            (_g = (_f = os.name) === null || _f === void 0 ? void 0 : _f.toLowerCase()) !== null &&
-                            _g !== void 0
-                                ? _g
-                                : '';
-                        const osVersion = parseFloat((_h = os.version) !== null && _h !== void 0 ? _h : '0');
+                        const osName = os.name?.toLowerCase() ?? '';
+                        const osVersion = parseFloat(os.version ?? '0');
                         const isIOS = osName === 'ios';
                         const isChrome = [
                             'chrome',
@@ -3952,7 +3939,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -3998,8 +3984,7 @@
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -4171,7 +4156,6 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -4193,8 +4177,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -4215,7 +4198,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -4251,8 +4233,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -4341,7 +4322,6 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -4365,8 +4345,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -4653,7 +4632,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
@@ -4673,8 +4651,7 @@
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -4794,7 +4771,6 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -4817,8 +4793,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -4839,7 +4814,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
@@ -4873,8 +4847,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -4929,7 +4902,6 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -4954,8 +4926,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -5240,7 +5211,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
@@ -5260,8 +5230,7 @@
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -5426,7 +5395,6 @@
                         return rtpSender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -5449,8 +5417,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -5471,7 +5438,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
@@ -5505,8 +5471,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -5567,7 +5532,6 @@
                         return rtpReceiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -5592,8 +5556,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -5871,7 +5834,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
@@ -5893,8 +5855,7 @@
                         let offerMediaObject;
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -6095,7 +6056,6 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -6118,8 +6078,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -6140,7 +6099,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -6176,8 +6134,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -6241,7 +6198,6 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -6266,8 +6222,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -6549,7 +6504,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -6577,8 +6531,7 @@
                         let offerMediaObject;
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -6788,7 +6741,6 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -6810,8 +6762,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -6832,7 +6783,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -6868,8 +6818,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -6958,7 +6907,6 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -6982,8 +6930,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -8488,7 +8435,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
@@ -8508,8 +8454,7 @@
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -8630,7 +8575,6 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -8653,8 +8597,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -8675,7 +8618,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapStreamId = new Map();
@@ -8721,8 +8663,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -8777,7 +8718,6 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -8802,8 +8742,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -9089,7 +9028,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a, _b;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -9117,8 +9055,7 @@
                         let offerMediaObject;
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -9149,7 +9086,8 @@
                         // is called, so this is best effort.
                         // Issue: https://github.com/react-native-webrtc/react-native-webrtc/issues/1404
                         // NOTE: So let's fill MID in sendingRtpParameters later.
-                        let localId = (_b = transceiver.mid) !== null && _b !== void 0 ? _b : undefined;
+                        // NOTE: This is fixed in react-native-webrtc 111.0.3.
+                        let localId = transceiver.mid ?? undefined;
                         if (!localId) {
                             logger.warn(
                                 'send() | missing transceiver.mid (bug in react-native-webrtc, using a workaround',
@@ -9209,6 +9147,8 @@
                         await this._pc.setRemoteDescription(answer);
                         // Follow up of iOS react-native-webrtc 111.0.0 issue told above. Now yes,
                         // we can read generated MID (if not done above) and fill sendingRtpParameters.
+                        // NOTE: This is fixed in react-native-webrtc 111.0.3 so this block isn't
+                        // needed starting from that version.
                         if (!localId) {
                             localId = transceiver.mid;
                             sendingRtpParameters.mid = localId;
@@ -9345,7 +9285,6 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -9367,8 +9306,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -9389,7 +9327,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -9425,8 +9362,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -9515,7 +9451,6 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -9539,8 +9474,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -9825,7 +9759,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (codec) {
@@ -9845,8 +9778,7 @@
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -10009,7 +9941,6 @@
                         return rtpSender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -10031,8 +9962,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -10053,7 +9983,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         for (const options of optionsList) {
@@ -10087,8 +10016,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -10149,7 +10077,6 @@
                         // Unimplemented.
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -10173,8 +10100,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -10453,7 +10379,6 @@
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
-                        var _a;
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
@@ -10475,8 +10400,7 @@
                         let offerMediaObject;
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -10670,7 +10594,6 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
-                        var _a;
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -10692,8 +10615,7 @@
                             const offerMediaObject = localSdpObject.media.find((m) => m.type === 'application');
                             if (!this._transportReady) {
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -10714,7 +10636,6 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
-                        var _a;
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -10750,8 +10671,7 @@
                         answer = { type: 'answer', sdp: sdpTransform.write(localSdpObject) };
                         if (!this._transportReady) {
                             await this.setupTransport({
-                                localDtlsRole:
-                                    (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                 localSdpObject,
                             });
                         }
@@ -10839,7 +10759,6 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
-                        var _a;
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -10863,8 +10782,7 @@
                             if (!this._transportReady) {
                                 const localSdpObject = sdpTransform.parse(answer.sdp);
                                 await this.setupTransport({
-                                    localDtlsRole:
-                                        (_a = this._forcedLocalDtlsRole) !== null && _a !== void 0 ? _a : 'client',
+                                    localDtlsRole: this._forcedLocalDtlsRole ?? 'client',
                                     localSdpObject,
                                 });
                             }
@@ -11037,14 +10955,11 @@
                  * This function adds RTCP NACK support for OPUS codec in given capabilities.
                  */
                 function addNackSuppportForOpus(rtpCapabilities) {
-                    var _a;
                     for (const codec of rtpCapabilities.codecs || []) {
                         if (
                             (codec.mimeType.toLowerCase() === 'audio/opus' ||
                                 codec.mimeType.toLowerCase() === 'audio/multiopus') &&
-                            !((_a = codec.rtcpFeedback) === null || _a === void 0
-                                ? void 0
-                                : _a.some((fb) => fb.type === 'nack' && !fb.parameter))
+                            !codec.rtcpFeedback?.some((fb) => fb.type === 'nack' && !fb.parameter)
                         ) {
                             if (!codec.rtcpFeedback) {
                                 codec.rtcpFeedback = [];
@@ -11407,7 +11322,6 @@
                         this._mediaObject.direction = 'recvonly';
                     }
                     muxSimulcastStreams(encodings) {
-                        var _a;
                         if (!this._mediaObject.simulcast || !this._mediaObject.simulcast.list1) {
                             return;
                         }
@@ -11421,9 +11335,7 @@
                         const simulcastStreams = sdpTransform.parseSimulcastStreamList(raw);
                         for (const simulcastStream of simulcastStreams) {
                             for (const simulcastFormat of simulcastStream) {
-                                simulcastFormat.paused = !((_a = layers[simulcastFormat.scid]) === null || _a === void 0
-                                    ? void 0
-                                    : _a.active);
+                                simulcastFormat.paused = !layers[simulcastFormat.scid]?.active;
                             }
                         }
                         this._mediaObject.simulcast.list1 = simulcastStreams
@@ -12641,7 +12553,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.89';
+                exports.version = '3.6.93';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
