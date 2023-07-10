@@ -43,19 +43,19 @@
         "crypto-js": "4.1.1",
         "express": "4.18.2",
         "httpolyglot": "0.1.2",
-        "mediasoup": "3.12.4",
+        "mediasoup": "3.12.5",
         "mediasoup-client": "3.6.93",
         "ngrok": "^4.3.3",
         "openai": "^3.3.0",
         "qs": "6.11.2",
         "socket.io": "4.7.1",
-        "swagger-ui-express": "4.6.3",
+        "swagger-ui-express": "5.0.0",
         "uuid": "9.0.0",
         "xss": "^1.0.14",
         "yamljs": "0.3.0"
     },
     "devDependencies": {
         "node-fetch": "^2.6.7",
-        "prettier": "2.8.8"
+        "prettier": "3.0.0"
     }
 }
