@@ -121,7 +121,7 @@ $ apt-get install -y build-essential
 # Python 3.8 and pip
 $ DEBIAN_FRONTEND=noninteractive apt-get install -y tzdata
 $ apt install -y software-properties-common
-$ add-apt-repository ppa:deadsnakes/ppa
+$ add-apt-repository -y ppa:deadsnakes/ppa
 $ apt update
 $ apt install -y python3.8 python3-pip
 # NodeJS 18.X and npm
