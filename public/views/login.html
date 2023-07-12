@@ -45,7 +45,12 @@
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
 
         <!-- xss -->
+
         <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
+
+        <!-- axios -->
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     </head>
     <body class="is-boxed has-animations">
         <div class="body-wrap">
@@ -124,7 +129,19 @@
                                         const password = filterXSS(document.getElementById('password').value);
 
                                         if (username && password) {
-                                            window.location.href = `/login?username=${username}&password=${password}`;
+                                            axios
+                                                .post('/login', {
+                                                    username: username,
+                                                    password: password,
+                                                })
+                                                .then(function (response) {
+                                                    console.log(response);
+                                                    window.location.href = '/';
+                                                })
+                                                .catch(function (error) {
+                                                    console.error(error);
+                                                    alert('Unauthorized');
+                                                });
                                             return;
                                         }
                                         if (!username && !password) {
