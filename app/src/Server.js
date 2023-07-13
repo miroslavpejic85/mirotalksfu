@@ -222,15 +222,21 @@ function startServer() {
     // main page
     app.get(['/'], (req, res) => {
         if (hostCfg.protected == true) {
-            const ip = getIP(req);
-            if (allowedIP(ip)) {
-                res.sendFile(views.landing);
-            } else {
-                hostCfg.authenticated = false;
-                res.sendFile(views.login);
-            }
+            hostCfg.authenticated = false;
+            res.sendFile(views.login);
         } else {
             res.sendFile(views.landing);
+        }
+    });
+
+    // handle logged on host protected
+    app.get(['/logged'], (req, res) => {
+        const ip = getIP(req);
+        if (allowedIP(ip)) {
+            res.sendFile(views.landing);
+        } else {
+            hostCfg.authenticated = false;
+            res.sendFile(views.login);
         }
     });
 

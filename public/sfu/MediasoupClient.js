@@ -3017,7 +3017,7 @@
                         }
                         // Enqueue command.
                         return this._awaitQueue.push(
-                            async () => this._handler.restartIce(iceParameters),
+                            async () => await this._handler.restartIce(iceParameters),
                             'transport.restartIce()',
                         );
                     }
@@ -3534,19 +3534,25 @@
                                 return;
                             }
                             this._awaitQueue
-                                .push(async () => this._handler.stopSending(producer.localId), 'producer @close event')
+                                .push(
+                                    async () => await this._handler.stopSending(producer.localId),
+                                    'producer @close event',
+                                )
                                 .catch((error) => logger.warn('producer.close() failed:%o', error));
                         });
                         producer.on('@pause', (callback, errback) => {
                             this._awaitQueue
-                                .push(async () => this._handler.pauseSending(producer.localId), 'producer @pause event')
+                                .push(
+                                    async () => await this._handler.pauseSending(producer.localId),
+                                    'producer @pause event',
+                                )
                                 .then(callback)
                                 .catch(errback);
                         });
                         producer.on('@resume', (callback, errback) => {
                             this._awaitQueue
                                 .push(
-                                    async () => this._handler.resumeSending(producer.localId),
+                                    async () => await this._handler.resumeSending(producer.localId),
                                     'producer @resume event',
                                 )
                                 .then(callback)
@@ -3555,7 +3561,7 @@
                         producer.on('@replacetrack', (track, callback, errback) => {
                             this._awaitQueue
                                 .push(
-                                    async () => this._handler.replaceTrack(producer.localId, track),
+                                    async () => await this._handler.replaceTrack(producer.localId, track),
                                     'producer @replacetrack event',
                                 )
                                 .then(callback)
@@ -3564,7 +3570,7 @@
                         producer.on('@setmaxspatiallayer', (spatialLayer, callback, errback) => {
                             this._awaitQueue
                                 .push(
-                                    async () => this._handler.setMaxSpatialLayer(producer.localId, spatialLayer),
+                                    async () => await this._handler.setMaxSpatialLayer(producer.localId, spatialLayer),
                                     'producer @setmaxspatiallayer event',
                                 )
                                 .then(callback)
@@ -3573,7 +3579,7 @@
                         producer.on('@setrtpencodingparameters', (params, callback, errback) => {
                             this._awaitQueue
                                 .push(
-                                    async () => this._handler.setRtpEncodingParameters(producer.localId, params),
+                                    async () => await this._handler.setRtpEncodingParameters(producer.localId, params),
                                     'producer @setrtpencodingparameters event',
                                 )
                                 .then(callback)
@@ -3764,6 +3770,7 @@
                 const sdpCommonUtils = __importStar(require('./sdp/commonUtils'));
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const ortcUtils = __importStar(require('./ortc/utils'));
+                const errors_1 = require('../errors');
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
@@ -3778,6 +3785,8 @@
                     }
                     constructor() {
                         super();
+                        // Closed flag.
+                        this._closed = false;
                         // Map of RTCTransceivers indexed by MID.
                         this._mapMidTransceiver = new Map();
                         // Local stream for sending.
@@ -3794,6 +3803,10 @@
                     }
                     close() {
                         logger.debug('close()');
+                        if (this._closed) {
+                            return;
+                        }
+                        this._closed = true;
                         // Close RTCPeerConnection.
                         if (this._pc) {
                             try {
@@ -3848,6 +3861,7 @@
                         proprietaryConstraints,
                         extendedRtpCapabilities,
                     }) {
+                        this.assertNotClosed();
                         logger.debug('run()');
                         this._direction = direction;
                         this._remoteSdp = new RemoteSdp_1.RemoteSdp({
@@ -3907,12 +3921,14 @@
                         }
                     }
                     async updateIceServers(iceServers) {
+                        this.assertNotClosed();
                         logger.debug('updateIceServers()');
                         const configuration = this._pc.getConfiguration();
                         configuration.iceServers = iceServers;
                         this._pc.setConfiguration(configuration);
                     }
                     async restartIce(iceParameters) {
+                        this.assertNotClosed();
                         logger.debug('restartIce()');
                         // Provide the remote SDP handler with new remote ICE parameters.
                         this._remoteSdp.updateIceParameters(iceParameters);
@@ -3936,9 +3952,11 @@
                         }
                     }
                     async getTransportStats() {
+                        this.assertNotClosed();
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -4035,6 +4053,9 @@
                     async stopSending(localId) {
                         this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
+                        if (this._closed) {
+                            return;
+                        }
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
@@ -4056,6 +4077,7 @@
                         this._mapMidTransceiver.delete(localId);
                     }
                     async pauseSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -4072,6 +4094,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async resumeSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -4088,6 +4111,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -4101,6 +4125,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -4125,6 +4150,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -4148,6 +4174,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -4156,6 +4183,7 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -4198,6 +4226,7 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -4259,6 +4288,9 @@
                     }
                     async stopReceiving(localIds) {
                         this.assertRecvDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -4278,6 +4310,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
@@ -4296,6 +4329,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
@@ -4314,6 +4348,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -4322,6 +4357,7 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -4374,6 +4410,11 @@
                         });
                         this._transportReady = true;
                     }
+                    assertNotClosed() {
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('method called in a closed handler');
+                        }
+                    }
                     assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
@@ -4389,6 +4430,7 @@
             },
             {
                 '../Logger': 11,
+                '../errors': 16,
                 '../ortc': 37,
                 '../scalabilityModes': 38,
                 '../utils': 40,
@@ -6329,6 +6371,7 @@
                 const sdpCommonUtils = __importStar(require('./sdp/commonUtils'));
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const ortcUtils = __importStar(require('./ortc/utils'));
+                const errors_1 = require('../errors');
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
@@ -6343,6 +6386,8 @@
                     }
                     constructor() {
                         super();
+                        // Closed flag.
+                        this._closed = false;
                         // Map of RTCTransceivers indexed by MID.
                         this._mapMidTransceiver = new Map();
                         // Local stream for sending.
@@ -6359,6 +6404,10 @@
                     }
                     close() {
                         logger.debug('close()');
+                        if (this._closed) {
+                            return;
+                        }
+                        this._closed = true;
                         // Close RTCPeerConnection.
                         if (this._pc) {
                             try {
@@ -6472,12 +6521,14 @@
                         }
                     }
                     async updateIceServers(iceServers) {
+                        this.assertNotClosed();
                         logger.debug('updateIceServers()');
                         const configuration = this._pc.getConfiguration();
                         configuration.iceServers = iceServers;
                         this._pc.setConfiguration(configuration);
                     }
                     async restartIce(iceParameters) {
+                        this.assertNotClosed();
                         logger.debug('restartIce()');
                         // Provide the remote SDP handler with new remote ICE parameters.
                         this._remoteSdp.updateIceParameters(iceParameters);
@@ -6501,9 +6552,11 @@
                         }
                     }
                     async getTransportStats() {
+                        this.assertNotClosed();
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -6620,6 +6673,9 @@
                     async stopSending(localId) {
                         this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
+                        if (this._closed) {
+                            return;
+                        }
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
@@ -6641,6 +6697,7 @@
                         this._mapMidTransceiver.delete(localId);
                     }
                     async pauseSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6657,6 +6714,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async resumeSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6673,6 +6731,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -6686,6 +6745,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6710,6 +6770,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -6733,6 +6794,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -6741,6 +6803,7 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -6783,6 +6846,7 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -6844,6 +6908,9 @@
                     }
                     async stopReceiving(localIds) {
                         this.assertRecvDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -6863,6 +6930,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
@@ -6881,6 +6949,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
@@ -6899,6 +6968,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -6907,6 +6977,7 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -6959,6 +7030,11 @@
                         });
                         this._transportReady = true;
                     }
+                    assertNotClosed() {
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('method called in a closed handler');
+                        }
+                    }
                     assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
@@ -6974,6 +7050,7 @@
             },
             {
                 '../Logger': 11,
+                '../errors': 16,
                 '../ortc': 37,
                 '../scalabilityModes': 38,
                 '../utils': 40,
@@ -7530,6 +7607,8 @@
                     }
                     constructor() {
                         super();
+                        // Closed flag.
+                        this._closed = false;
                         // Map of RTCTransceivers indexed by MID.
                         this._mapMidTransceiver = new Map();
                         // Local stream for sending.
@@ -7546,6 +7625,10 @@
                     }
                     close() {
                         logger.debug('close()');
+                        if (this._closed) {
+                            return;
+                        }
+                        this._closed = true;
                         // Close RTCPeerConnection.
                         if (this._pc) {
                             try {
@@ -7622,6 +7705,7 @@
                         proprietaryConstraints,
                         extendedRtpCapabilities,
                     }) {
+                        this.assertNotClosed();
                         logger.debug('run()');
                         this._direction = direction;
                         this._remoteSdp = new RemoteSdp_1.RemoteSdp({
@@ -7678,10 +7762,12 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async updateIceServers(iceServers) {
+                        this.assertNotClosed();
                         // NOTE: Firefox does not implement pc.setConfiguration().
                         throw new errors_1.UnsupportedError('not supported');
                     }
                     async restartIce(iceParameters) {
+                        this.assertNotClosed();
                         logger.debug('restartIce()');
                         // Provide the remote SDP handler with new remote ICE parameters.
                         this._remoteSdp.updateIceParameters(iceParameters);
@@ -7705,9 +7791,11 @@
                         }
                     }
                     async getTransportStats() {
+                        this.assertNotClosed();
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings) {
@@ -7814,7 +7902,11 @@
                         };
                     }
                     async stopSending(localId) {
+                        this.assertSendDirection();
                         logger.debug('stopSending() [localId:%s]', localId);
+                        if (this._closed) {
+                            return;
+                        }
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
                             throw new Error('associated transceiver not found');
@@ -7843,6 +7935,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -7860,6 +7953,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -7876,6 +7970,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -7889,6 +7984,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -7916,6 +8012,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -7939,6 +8036,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -7947,6 +8045,7 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -7989,6 +8088,7 @@
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         optionsList,
                     ) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -8046,6 +8146,9 @@
                     }
                     async stopReceiving(localIds) {
                         this.assertRecvDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -8065,6 +8168,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
@@ -8083,6 +8187,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
@@ -8109,6 +8214,7 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -8157,6 +8263,11 @@
                             this.safeEmit('@connect', { dtlsParameters }, resolve, reject);
                         });
                         this._transportReady = true;
+                    }
+                    assertNotClosed() {
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('method called in a closed handler');
+                        }
                     }
                     assertSendDirection() {
                         if (this._direction !== 'send') {
@@ -8849,6 +8960,7 @@
                 const sdpCommonUtils = __importStar(require('./sdp/commonUtils'));
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const ortcUtils = __importStar(require('./ortc/utils'));
+                const errors_1 = require('../errors');
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
@@ -8863,6 +8975,8 @@
                     }
                     constructor() {
                         super();
+                        // Closed flag.
+                        this._closed = false;
                         // Map of RTCTransceivers indexed by MID.
                         this._mapMidTransceiver = new Map();
                         // Local stream for sending.
@@ -8879,6 +8993,10 @@
                     }
                     close() {
                         logger.debug('close()');
+                        if (this._closed) {
+                            return;
+                        }
+                        this._closed = true;
                         // Free/dispose native MediaStream but DO NOT free/dispose native
                         // MediaStreamTracks (that is parent's business).
                         // @ts-ignore (proprietary API in react-native-webrtc).
@@ -8937,6 +9055,7 @@
                         proprietaryConstraints,
                         extendedRtpCapabilities,
                     }) {
+                        this.assertNotClosed();
                         logger.debug('run()');
                         this._direction = direction;
                         this._remoteSdp = new RemoteSdp_1.RemoteSdp({
@@ -8996,12 +9115,14 @@
                         }
                     }
                     async updateIceServers(iceServers) {
+                        this.assertNotClosed();
                         logger.debug('updateIceServers()');
                         const configuration = this._pc.getConfiguration();
                         configuration.iceServers = iceServers;
                         this._pc.setConfiguration(configuration);
                     }
                     async restartIce(iceParameters) {
+                        this.assertNotClosed();
                         logger.debug('restartIce()');
                         // Provide the remote SDP handler with new remote ICE parameters.
                         this._remoteSdp.updateIceParameters(iceParameters);
@@ -9025,9 +9146,11 @@
                         }
                     }
                     async getTransportStats() {
+                        this.assertNotClosed();
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings && encodings.length > 1) {
@@ -9163,6 +9286,9 @@
                     }
                     async stopSending(localId) {
                         this.assertSendDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -9185,6 +9311,7 @@
                         this._mapMidTransceiver.delete(localId);
                     }
                     async pauseSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -9201,6 +9328,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async resumeSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -9217,6 +9345,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -9230,6 +9359,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -9254,6 +9384,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -9277,6 +9408,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -9285,6 +9417,7 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -9327,6 +9460,7 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -9388,6 +9522,9 @@
                     }
                     async stopReceiving(localIds) {
                         this.assertRecvDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -9407,6 +9544,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
@@ -9425,6 +9563,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
@@ -9443,6 +9582,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -9451,6 +9591,7 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -9503,6 +9644,11 @@
                         });
                         this._transportReady = true;
                     }
+                    assertNotClosed() {
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('method called in a closed handler');
+                        }
+                    }
                     assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
@@ -9518,6 +9664,7 @@
             },
             {
                 '../Logger': 11,
+                '../errors': 16,
                 '../ortc': 37,
                 '../scalabilityModes': 38,
                 '../utils': 40,
@@ -10206,6 +10353,7 @@
                 const sdpCommonUtils = __importStar(require('./sdp/commonUtils'));
                 const sdpUnifiedPlanUtils = __importStar(require('./sdp/unifiedPlanUtils'));
                 const ortcUtils = __importStar(require('./ortc/utils'));
+                const errors_1 = require('../errors');
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
@@ -10220,6 +10368,8 @@
                     }
                     constructor() {
                         super();
+                        // Closed flag.
+                        this._closed = false;
                         // Map of RTCTransceivers indexed by MID.
                         this._mapMidTransceiver = new Map();
                         // Local stream for sending.
@@ -10236,6 +10386,10 @@
                     }
                     close() {
                         logger.debug('close()');
+                        if (this._closed) {
+                            return;
+                        }
+                        this._closed = true;
                         // Close RTCPeerConnection.
                         if (this._pc) {
                             try {
@@ -10289,6 +10443,7 @@
                         proprietaryConstraints,
                         extendedRtpCapabilities,
                     }) {
+                        this.assertNotClosed();
                         logger.debug('run()');
                         this._direction = direction;
                         this._remoteSdp = new RemoteSdp_1.RemoteSdp({
@@ -10347,12 +10502,14 @@
                         }
                     }
                     async updateIceServers(iceServers) {
+                        this.assertNotClosed();
                         logger.debug('updateIceServers()');
                         const configuration = this._pc.getConfiguration();
                         configuration.iceServers = iceServers;
                         this._pc.setConfiguration(configuration);
                     }
                     async restartIce(iceParameters) {
+                        this.assertNotClosed();
                         logger.debug('restartIce()');
                         // Provide the remote SDP handler with new remote ICE parameters.
                         this._remoteSdp.updateIceParameters(iceParameters);
@@ -10376,9 +10533,11 @@
                         }
                     }
                     async getTransportStats() {
+                        this.assertNotClosed();
                         return this._pc.getStats();
                     }
                     async send({ track, encodings, codecOptions, codec }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
@@ -10470,6 +10629,9 @@
                     }
                     async stopSending(localId) {
                         this.assertSendDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         logger.debug('stopSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -10493,6 +10655,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('pauseSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -10510,6 +10673,7 @@
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('resumeSending() [localId:%s]', localId);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -10526,6 +10690,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async replaceTrack(localId, track) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         if (track) {
                             logger.debug('replaceTrack() [localId:%s, track.id:%s]', localId, track.id);
@@ -10539,6 +10704,7 @@
                         await transceiver.sender.replaceTrack(track);
                     }
                     async setMaxSpatialLayer(localId, spatialLayer) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setMaxSpatialLayer() [localId:%s, spatialLayer:%s]', localId, spatialLayer);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -10563,6 +10729,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async setRtpEncodingParameters(localId, params) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('setRtpEncodingParameters() [localId:%s, params:%o]', localId, params);
                         const transceiver = this._mapMidTransceiver.get(localId);
@@ -10586,6 +10753,7 @@
                         await this._pc.setRemoteDescription(answer);
                     }
                     async getSenderStats(localId) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -10594,6 +10762,7 @@
                         return transceiver.sender.getStats();
                     }
                     async sendDataChannel({ ordered, maxPacketLifeTime, maxRetransmits, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertSendDirection();
                         const options = {
                             negotiated: true,
@@ -10636,6 +10805,7 @@
                         return { dataChannel, sctpStreamParameters };
                     }
                     async receive(optionsList) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
                         const mapLocalId = new Map();
@@ -10696,6 +10866,9 @@
                     }
                     async stopReceiving(localIds) {
                         this.assertRecvDirection();
+                        if (this._closed) {
+                            return;
+                        }
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
                             const transceiver = this._mapMidTransceiver.get(localId);
@@ -10715,6 +10888,7 @@
                         }
                     }
                     async pauseReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('pauseReceiving() [localId:%s]', localId);
@@ -10733,6 +10907,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async resumeReceiving(localIds) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('resumeReceiving() [localId:%s]', localId);
@@ -10751,6 +10926,7 @@
                         await this._pc.setLocalDescription(answer);
                     }
                     async getReceiverStats(localId) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const transceiver = this._mapMidTransceiver.get(localId);
                         if (!transceiver) {
@@ -10759,6 +10935,7 @@
                         return transceiver.receiver.getStats();
                     }
                     async receiveDataChannel({ sctpStreamParameters, label, protocol }) {
+                        this.assertNotClosed();
                         this.assertRecvDirection();
                         const { streamId, ordered, maxPacketLifeTime, maxRetransmits } = sctpStreamParameters;
                         const options = {
@@ -10811,6 +10988,11 @@
                         });
                         this._transportReady = true;
                     }
+                    assertNotClosed() {
+                        if (this._closed) {
+                            throw new errors_1.InvalidStateError('method called in a closed handler');
+                        }
+                    }
                     assertSendDirection() {
                         if (this._direction !== 'send') {
                             throw new Error('method can just be called for handlers with "send" direction');
@@ -10826,6 +11008,7 @@
             },
             {
                 '../Logger': 11,
+                '../errors': 16,
                 '../ortc': 37,
                 '../scalabilityModes': 38,
                 '../utils': 40,
@@ -12553,7 +12736,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.93';
+                exports.version = '3.6.95';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13614,6 +13797,7 @@
                 __exportStar(require('./RtpParameters'), exports);
                 __exportStar(require('./SctpParameters'), exports);
                 __exportStar(require('./handlers/HandlerInterface'), exports);
+                // We cannot export only the type of error classes because those are useless.
                 __exportStar(require('./errors'), exports);
             },
             {
