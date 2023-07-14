@@ -12736,7 +12736,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.95';
+                exports.version = '3.6.97';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13797,7 +13797,6 @@
                 __exportStar(require('./RtpParameters'), exports);
                 __exportStar(require('./SctpParameters'), exports);
                 __exportStar(require('./handlers/HandlerInterface'), exports);
-                // We cannot export only the type of error classes because those are useless.
                 __exportStar(require('./errors'), exports);
             },
             {
