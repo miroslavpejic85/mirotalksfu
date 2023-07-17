@@ -421,6 +421,7 @@ class RoomClient {
                 function (state) {
                     switch (state) {
                         case 'connecting':
+                            console.log('Producer Transport connecting...');
                             break;
 
                         case 'connected':
@@ -435,6 +436,13 @@ class RoomClient {
                         default:
                             break;
                     }
+                }.bind(this),
+            );
+
+            this.producerTransport.on(
+                'icegatheringstatechange',
+                function (state) {
+                    console.log('Producer icegatheringstatechange', state);
                 }.bind(this),
             );
         }
@@ -471,6 +479,7 @@ class RoomClient {
                 async function (state) {
                     switch (state) {
                         case 'connecting':
+                            console.log('Consumer Transport connecting...');
                             break;
 
                         case 'connected':
@@ -485,6 +494,13 @@ class RoomClient {
                         default:
                             break;
                     }
+                }.bind(this),
+            );
+
+            this.consumerTransport.on(
+                'icegatheringstatechange',
+                function (state) {
+                    console.log('Consumer icegatheringstatechange', state);
                 }.bind(this),
             );
         }
