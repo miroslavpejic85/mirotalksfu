@@ -64,6 +64,19 @@ Set the `inbound rules` if you have the Firewall enabled
 | 40000-40100 | TCP      | 0.0.0.0/0 | RTC port ranges tcp |
 | 40000-40100 | UDP      | 0.0.0.0/0 | RTC port ranges udp |
 
+```bash
+# Check the firewall Status: (active/inactive)
+ufw status
+# If active then allow traffic
+ufw allow 3010/tcp
+ufw allow 40000:40100/tcp
+ufw allow 40000:40100/udp
+# ssh, http, https, nginx...
+ufw allow 22/tcp
+ufw allow 80/tcp
+ufw allow 443/tcp
+```
+
 ---
 
 ```bash
