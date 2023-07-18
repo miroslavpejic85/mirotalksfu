@@ -522,6 +522,7 @@ function whoAreYou() {
         title: 'MiroTalk SFU',
         input: 'text',
         inputPlaceholder: 'Enter your name',
+        inputAttributes: { maxlength: 32 },
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
@@ -2174,6 +2175,7 @@ async function getParticipantsTable(peers) {
             type="text"
             placeholder=" 🔍 Search participants ..."
             name="search"
+            maxlength="36"
             onkeyup="rc.searchPeer();"
         />
     </div>
