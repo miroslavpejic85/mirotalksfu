@@ -7,5 +7,5 @@ MIROTALK_URL="https://sfu.mirotalk.com/api/v1/join"
 curl $MIROTALK_URL \
     --header "authorization: $API_KEY" \
     --header "Content-Type: application/json" \
-    --data '{"room":"test","password":"0","name":"mirotalksfu","audio":"1","video":"1","screen":"1","notify":"1"}' \
+    --data '{"room":"test","password":"false","name":"mirotalksfu","audio":"true","video":"true","screen":"false","notify":"true"}' \
     --request POST
