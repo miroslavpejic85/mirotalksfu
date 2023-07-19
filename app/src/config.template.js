@@ -91,6 +91,7 @@ module.exports = {
             3. Generate your APIKey https://platform.openai.com/account/api-keys
         */
         enabled: false,
+        basePath: 'https://api.openai.com/v1/',
         apiKey: '',
         model: 'text-davinci-003',
         max_tokens: 1000,

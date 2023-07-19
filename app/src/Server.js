@@ -130,6 +130,7 @@ if (config.chatGPT.enabled) {
     if (config.chatGPT.apiKey) {
         const { Configuration, OpenAIApi } = require('openai');
         const configuration = new Configuration({
+            basePath: config.chatGPT.basePath,
             apiKey: config.chatGPT.apiKey,
         });
         chatGPT = new OpenAIApi(configuration);
