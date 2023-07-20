@@ -60,6 +60,7 @@ const image = {
     locked: '../images/locked.png',
     mute: '../images/mute.png',
     hide: '../images/hide.png',
+    stop: '../images/stop.png',
     users: '../images/participants.png',
     user: '../images/participant.png',
     username: '../images/user.png',
@@ -4446,6 +4447,17 @@ class RoomClient {
                         );
                     }
                     break;
+                case 'stop':
+                    if (peer_id === this.peer_id || broadcast) {
+                        this.closeProducer(mediaType.screen);
+                        this.userLog(
+                            'warning',
+                            from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
+                            'top-end',
+                            10000,
+                        );
+                    }
+                    break;
                 //...
             }
         }
@@ -4517,17 +4529,35 @@ class RoomClient {
                 break;
             case 'mute':
             case 'hide':
-                let muteHideConfirmed = false;
-                let whoMuteHide = data.broadcast ? 'everyone except yourself?' : 'current participant?';
+            case 'stop':
+                let muteHideStopConfirmed = false;
+                let whoMuteHideStop = data.broadcast ? 'everyone except yourself?' : 'current participant?';
+                let imageUrl, title, text;
+                switch (action) {
+                    case 'mute':
+                        imageUrl = image.mute;
+                        title = 'Mute ' + whoMuteHideStop;
+                        text =
+                            "Once muted, you won't be able to unmute them, but they can unmute themselves at any time.";
+                        break;
+                    case 'hide':
+                        title = 'Hide ' + whoMuteHideStop;
+                        imageUrl = image.hide;
+                        text =
+                            "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.";
+                        break;
+                    case 'stop':
+                        imageUrl = image.stop;
+                        title = 'Stop screen share to the ' + whoMuteHideStop;
+                        text = "Once stop, you won't be able to start them, but they can start themselves at any time.";
+                        break;
+                }
                 Swal.fire({
                     background: swalBackground,
                     position: 'center',
-                    imageUrl: action == 'mute' ? image.mute : image.hide,
-                    title: action == 'mute' ? 'Mute ' + whoMuteHide : 'Hide ' + whoMuteHide,
-                    text:
-                        action == 'mute'
-                            ? "Once muted, you won't be able to unmute them, but they can unmute themselves at any time."
-                            : "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.",
+                    imageUrl: imageUrl,
+                    title: title,
+                    text: text,
                     showDenyButton: true,
                     confirmButtonText: `Yes`,
                     denyButtonText: `No`,
@@ -4536,7 +4566,7 @@ class RoomClient {
                 })
                     .then((result) => {
                         if (result.isConfirmed) {
-                            muteHideConfirmed = true;
+                            muteHideStopConfirmed = true;
                             if (!data.broadcast) {
                                 this.socket.emit('peerAction', data);
                                 switch (action) {
@@ -4547,6 +4577,9 @@ class RoomClient {
                                     case 'hide':
                                         let peerVideoButton = this.getId(data.peer_id + '___pVideo');
                                         if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                                    case 'stop':
+                                        let peerScreenButton = this.getId(data.peer_id + '___pScreen');
+                                        if (peerScreenButton) peerScreenButton.innerHTML = _PEER.screenOff;
                                 }
                             } else {
                                 this.socket.emit('peerAction', data);
@@ -4556,7 +4589,8 @@ class RoomClient {
                         }
                     })
                     .then(() => {
-                        if (muteHideConfirmed) this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
+                        if (muteHideStopConfirmed)
+                            this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
                 break;
             //...
@@ -4599,6 +4633,9 @@ class RoomClient {
                 case 'video':
                     this.setIsVideo(status);
                     break;
+                case 'screen':
+                    this.setIsScreen(status);
+                    break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
                     let peer_hand = this.getPeerHandBtn(peer_id);
@@ -4626,6 +4663,9 @@ class RoomClient {
                     break;
                 case 'video':
                     this.setIsVideo(status);
+                    break;
+                case 'screen':
+                    this.setIsScreen(status);
                     break;
                 case 'hand':
                     let peer_hand = this.getPeerHandBtn(peer_id);

@@ -33,6 +33,8 @@ const _PEER = {
     audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
     videoOn: '<i class="fas fa-video"></i>',
     videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
+    screenOn: '<i class="fas fa-desktop"></i>',
+    screenOff: '<i style="color: red;" class="fas fa-desktop"></i>',
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
@@ -1484,6 +1486,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
+        if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room Client pause video');
@@ -1501,11 +1504,13 @@ function handleRoomClientEvents() {
         show(startVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
+        if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
+        if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room Client pause screen');
@@ -1517,6 +1522,7 @@ function handleRoomClientEvents() {
         console.log('Room Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
+        if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room Client lock room');
@@ -2190,6 +2196,7 @@ async function getParticipantsTable(peers) {
         <th></th>
         <th></th>
         <th></th>
+        <th></th>
     </tr>`;
 
     if (!isRulesActive || isPresenter) {
@@ -2199,6 +2206,7 @@ async function getParticipantsTable(peers) {
         <td>all</td>
         <td><button id="muteAllButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff}</button></td>
         <td><button id="hideAllButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff}</button></td>
+        <td><button id="stopAllButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff}</button></td>
         <td></td>
         <td><button id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile}</button></td>
         <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all','all')">${_PEER.sendMsg}</button></td>
@@ -2213,6 +2221,7 @@ async function getParticipantsTable(peers) {
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         let peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
+        let peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
         let peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
         let peer_eject = _PEER.ejectPeer;
         let peer_sendFile = _PEER.sendFile;
@@ -2226,6 +2235,7 @@ async function getParticipantsTable(peers) {
                 <td>${peer_name} (me)</td>
                 <td><button>${peer_audio}</button></td>
                 <td><button>${peer_video}</button></td>
+                <td><button>${peer_screen}</button></td>
                 <td><button>${peer_hand}</button></td>
                 <td></td>
                 <td></td>
@@ -2241,6 +2251,7 @@ async function getParticipantsTable(peers) {
                     <td>${peer_name}</td>
                     <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
                     <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
+                    <td><button id='${peer_id}___pScreen' onclick="rc.peerAction('me',this.id,'stop')">${peer_screen}</button></td>
                     <td><button>${peer_hand}</button></td>
                     <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile}</button></td>
                     <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
@@ -2255,6 +2266,7 @@ async function getParticipantsTable(peers) {
                     <td>${peer_name}</td>
                     <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
                     <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
+                    <td><button id='${peer_id}___pScreen'>${peer_screen}</button></td>
                     <td><button>${peer_hand}</button></td>
                     <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile}</button></td>
                     <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
@@ -2274,6 +2286,7 @@ function setParticipantsTippy(peers) {
     if (!DetectRTC.isMobileDevice) {
         setTippy('muteAllButton', 'Mute all participants', 'top');
         setTippy('hideAllButton', 'Hide all participants', 'top');
+        setTippy('stopAllButton', 'Stop screen share to all participants', 'top');
         setTippy('sendAllButton', 'Share file to all', 'top');
         setTippy('sendMessageToAll', 'Send message to all', 'top');
         setTippy('sendVideoToAll', 'Share video to all', 'top');
@@ -2284,6 +2297,7 @@ function setParticipantsTippy(peers) {
             let peer_id = peer_info.peer_id;
             setTippy(peer_id + '___pAudio', 'Mute', 'top');
             setTippy(peer_id + '___pVideo', 'Hide', 'top');
+            setTippy(peer_id + '___pScreen', 'Stop', 'top');
             setTippy(peer_id + '___shareFile', 'Share file', 'top');
             setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
             setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
