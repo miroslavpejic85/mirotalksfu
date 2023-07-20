@@ -148,6 +148,8 @@ class RoomClient {
         this.device = null;
 
         this.isMobileDevice = DetectRTC.isMobileDevice;
+        this.isScreenShareSupported =
+            navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia ? true : false;
 
         this.isMySettingsOpen = false;
 
@@ -4448,14 +4450,16 @@ class RoomClient {
                     }
                     break;
                 case 'stop':
-                    if (peer_id === this.peer_id || broadcast) {
-                        this.closeProducer(mediaType.screen);
-                        this.userLog(
-                            'warning',
-                            from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
-                            'top-end',
-                            10000,
-                        );
+                    if (this.isScreenShareSupported) {
+                        if (peer_id === this.peer_id || broadcast) {
+                            this.closeProducer(mediaType.screen);
+                            this.userLog(
+                                'warning',
+                                from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
+                                'top-end',
+                                10000,
+                            );
+                        }
                     }
                     break;
                 //...
