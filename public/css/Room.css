@@ -813,9 +813,9 @@ button:hover {
     padding: 8px;
 }
 
-#roomParticipants tr {
+/* #roomParticipants tr {
     border-bottom: 1px solid #444444;
-}
+} */
 /* #roomParticipants tr:nth-child(even) {
     background-color: #0c0b0b;
 } */
