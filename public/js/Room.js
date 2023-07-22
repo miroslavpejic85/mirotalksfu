@@ -254,18 +254,10 @@ async function initEnumerateDevices() {
     if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
         BUTTONS.main.startScreenButton && show(initStartScreenButton);
     }
-    whoAreYou();
-    if (!isVideoAllowed) {
-        hide(initVideo);
-        hide(initVideoSelect);
-    }
-    if (!isAudioAllowed) {
-        hide(initMicrophoneSelect);
-        hide(initSpeakerSelect);
-    }
     if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
         openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
+        whoAreYou();
         setButtonsInit();
         setSelectsInit();
         handleSelectsInit();
@@ -464,6 +456,23 @@ function getRoomPassword() {
 }
 
 // ####################################################
+// INIT CONFIG
+// ####################################################
+
+function checkInitConfig() {
+    const initConfig = lS.getInitConfig();
+    console.log('04.5 ----> Get init config', initConfig);
+    if (initConfig) {
+        if (isAudioVideoAllowed && !initConfig.audioVideo) {
+            handleAudioVideo();
+        } else {
+            if (isAudioAllowed && !initConfig.audio) handleAudio();
+            if (isVideoAllowed && !initConfig.video) handleVideo();
+        }
+    }
+}
+
+// ####################################################
 // SOME PEER INFO
 // ####################################################
 
@@ -552,36 +561,50 @@ function whoAreYou() {
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
+
+    if (!isVideoAllowed) {
+        hide(initVideo);
+        hide(initVideoSelect);
+    }
+    if (!isAudioAllowed) {
+        hide(initMicrophoneSelect);
+        hide(initSpeakerSelect);
+    }
 }
 
-function handleAudio(e) {
+function handleAudio() {
     isAudioAllowed = isAudioAllowed ? false : true;
-    e.target.className = 'fas fa-microphone' + (isAudioAllowed ? '' : '-slash');
-    setColor(e.target, isAudioAllowed ? 'white' : 'red');
+    initAudioButton.className = 'fas fa-microphone' + (isAudioAllowed ? '' : '-slash');
+    setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
     checkInitAudio(isAudioAllowed);
+    lS.setInitConfig(lS.MEDIA_TYPE.audio, isAudioAllowed);
 }
 
-function handleVideo(e) {
+function handleVideo() {
     isVideoAllowed = isVideoAllowed ? false : true;
-    e.target.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
-    setColor(e.target, isVideoAllowed ? 'white' : 'red');
+    initVideoButton.className = 'fas fa-video' + (isVideoAllowed ? '' : '-slash');
+    setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
     checkInitVideo(isVideoAllowed);
+    lS.setInitConfig(lS.MEDIA_TYPE.video, isVideoAllowed);
 }
 
-function handleAudioVideo(e) {
+function handleAudioVideo() {
     isAudioVideoAllowed = isAudioVideoAllowed ? false : true;
     isAudioAllowed = isAudioVideoAllowed;
     isVideoAllowed = isAudioVideoAllowed;
+    lS.setInitConfig(lS.MEDIA_TYPE.audio, isAudioVideoAllowed);
+    lS.setInitConfig(lS.MEDIA_TYPE.video, isAudioVideoAllowed);
+    lS.setInitConfig(lS.MEDIA_TYPE.audioVideo, isAudioVideoAllowed);
     initAudioButton.className = 'fas fa-microphone' + (isAudioVideoAllowed ? '' : '-slash');
     initVideoButton.className = 'fas fa-video' + (isAudioVideoAllowed ? '' : '-slash');
+    initAudioVideoButton.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
     if (!isAudioVideoAllowed) {
         hide(initAudioButton);
         hide(initVideoButton);
     }
-    e.target.className = 'fas fa-eye' + (isAudioVideoAllowed ? '' : '-slash');
-    setColor(e.target, isAudioVideoAllowed ? 'white' : 'red');
+    setColor(initAudioVideoButton, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
     setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
@@ -1247,6 +1270,7 @@ async function changeCamera(deviceId) {
                 '04.5 ----> Success attached init cam video stream',
                 initStream.getVideoTracks()[0].getSettings(),
             );
+            checkInitConfig();
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
