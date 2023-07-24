@@ -3267,10 +3267,12 @@ class RoomClient {
     }
 
     handleMediaRecorder() {
-        this.mediaRecorder.start();
-        this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
-        this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
-        this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
+        if (this.mediaRecorder) {
+            this.mediaRecorder.start();
+            this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
+            this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
+            this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
+        }
     }
 
     handleMediaRecorderStart(evt) {
@@ -3337,28 +3339,34 @@ class RoomClient {
     }
 
     pauseRecording() {
-        this._isRecording = false;
-        this.mediaRecorder.pause();
-        this.event(_EVENTS.pauseRec);
+        if (this.mediaRecorder) {
+            this._isRecording = false;
+            this.mediaRecorder.pause();
+            this.event(_EVENTS.pauseRec);
+        }
     }
 
     resumeRecording() {
-        this._isRecording = true;
-        this.mediaRecorder.resume();
-        this.event(_EVENTS.resumeRec);
+        if (this.mediaRecorder) {
+            this._isRecording = true;
+            this.mediaRecorder.resume();
+            this.event(_EVENTS.resumeRec);
+        }
     }
 
     stopRecording() {
-        this._isRecording = false;
-        this.mediaRecorder.stop();
-        if (this.recScreenStream) {
-            this.recScreenStream.getTracks().forEach((track) => {
-                if (track.kind === 'video') track.stop();
-            });
+        if (this.mediaRecorder) {
+            this._isRecording = false;
+            this.mediaRecorder.stop();
+            if (this.recScreenStream) {
+                this.recScreenStream.getTracks().forEach((track) => {
+                    if (track.kind === 'video') track.stop();
+                });
+            }
+            if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
+            this.event(_EVENTS.stopRec);
+            this.sound('recStop');
         }
-        if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
-        this.event(_EVENTS.stopRec);
-        this.sound('recStop');
     }
 
     // ####################################################
