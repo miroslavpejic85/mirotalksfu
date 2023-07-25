@@ -15,17 +15,17 @@ If you want to expose MiroTalk SFU from your `Local PC` to outside in `HTTPS`, y
     */
     ngrokAuthToken: 'YourNgrokAuthToken', <--- put it here
 
-    announcedIp: 'Your-Public-Static-IP-here' <--- take it from https://api.ipify.org
+    announcedIp: 'Your-Public-Static-IPv4-here' <--- take it from https://api.ipify.org If empty '' will be auto detected.
 ```
 
 ---
 
 2. You need to do a `port forwarding` on your router, something like this:
 
-| Name          | Protocol  | Port Wan    | Port Lan    | IP Destination  |
-| ------------- | --------- | ----------- | ----------- | --------------- |
-| `MiroTalkSfu` | `TCP/UDP` | 40000:40100 | 40000:40100 | `Your Local IP` |
-| `MiroTalkSfu` | `TCP`     | 3010        | 3010        | `Your Local IP` |
+| Name          | Protocol  | Port Wan    | Port Lan    | IP Destination    |
+| ------------- | --------- | ----------- | ----------- | ----------------- |
+| `MiroTalkSfu` | `TCP/UDP` | 40000:40100 | 40000:40100 | `Your Local IPv4` |
+| `MiroTalkSfu` | `TCP`     | 3010        | 3010        | `Your Local IPv4` |
 
 Make sure your firewall not blocking rtcPorts `range: 40000:40100`
 
