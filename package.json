@@ -55,7 +55,7 @@
         "yamljs": "0.3.0"
     },
     "devDependencies": {
-        "node-fetch": "^2.6.7",
+        "node-fetch": "^3.3.2",
         "prettier": "3.0.0"
     }
 }
