@@ -4,6 +4,17 @@
 
 Create a meeting with a `HTTP request` containing the `API_KEY` sent to MiroTalk’s server. The response contains a `meeting` URL that can be `embedded` in your client within an `iframe`.
 
+The `API_KEY` is defined in the `app/src/config.js`, change it with your own.
+
+```js
+api: {
+    // app/api
+    keySecret: 'mirotalksfu_default_secret',
+}
+```
+
+Some examples demonstrating how to call the API:
+
 ```bash
 # js
 node meeting.js
@@ -29,7 +40,7 @@ Embedding a meeting into a `service` or `app` requires using an `iframe` with th
 ```html
 <iframe
     allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; autoplay"
-    src="https://sfu.mirotalk.com/join/room_name"
+    src="https://sfu.mirotalk.com/join/your_room_name"
     style="height: 100vh; width: 100vw; border: 0px;"
 ></iframe>
 ```

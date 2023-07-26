@@ -55,7 +55,7 @@
 -   Possibility to protect your Host with username and password (default disabled).
 -   Supports [REST API](app/api/README.md) (Application Programming Interface).
 -   [Slack](https://api.slack.com/apps/) API integration.
--   [Sentry](https://sentry.io/) error reporting.
+-   [Sentry](https://sentry.io/) for error reporting.
 
 </details>
 
