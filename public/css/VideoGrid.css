@@ -172,6 +172,15 @@
     border-radius: '10px';
 }
 
+.container {
+    position: relative;
+}
+.container video {
+    z-index: 0;
+    position: relative;
+    height: 240px;
+}
+
 video {
     width: 100%;
     height: 100%;

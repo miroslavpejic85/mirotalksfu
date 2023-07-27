@@ -97,14 +97,16 @@ access to use this app.
         <section>
             <div id="initUser" class="init-user hidden">
                 <!-- <p>Please allow the camera & microphone access to use this app.</p> -->
-                <video
-                    id="initVideo"
-                    playsinline="true"
-                    autoplay=""
-                    class="mirror"
-                    poster="../images/loader.gif"
-                    style="object-fit: var(--videoObjFit)"
-                ></video>
+                <div class="container">
+                    <video
+                        id="initVideo"
+                        playsinline="true"
+                        autoplay=""
+                        class="mirror"
+                        poster="../images/loader.gif"
+                        style="object-fit: var(--videoObjFit)"
+                    ></video>
+                </div>
                 <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
                 <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
                 <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>

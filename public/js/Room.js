@@ -1245,6 +1245,9 @@ async function changeCamera(deviceId) {
     if (initStream) {
         stopTracks(initStream);
         show(initVideo);
+        if (!initVideo.classList.contains('mirror')) {
+            initVideo.classList.toggle('mirror');
+        }
     }
     const videoConstraints = {
         audio: false,
