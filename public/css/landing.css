@@ -1910,3 +1910,8 @@ main {
         flex-direction: row;
     }
 }
+@media (max-width: 641px) {
+    .w-150 {
+        width: 300px;
+    }
+}
