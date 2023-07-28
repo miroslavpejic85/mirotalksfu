@@ -55,12 +55,16 @@ const wbHeight = 600;
 const swalImageUrl = '../images/pricing-illustration.svg';
 
 const lS = new LocalStorage();
-const localStorageSettings = lS.getObjectLocalStorage('MIROTALK_SFU_SETTINGS');
+// Get Settings from localStorage
+const localStorageSettings = lS.getObjectLocalStorage('SFU_SETTINGS');
 const lsSettings = localStorageSettings
     ? localStorageSettings
     : {
-          theme: 'dark',
-          //...
+          video_obj_fit: 2, // cover
+          video_controls: BtnVideoControls.selectedIndex,
+          theme: selectTheme.selectedIndex,
+          buttons_bar: BtnsBarPosition.selectedIndex,
+          pin_grid: pinVideoPosition.selectedIndex,
       };
 
 // ####################################################
@@ -131,7 +135,7 @@ let initStream = null;
 // ####################################################
 
 function initClient() {
-    setTheme(lsSettings.theme);
+    setTheme();
     if (!DetectRTC.isMobileDevice) {
         setTippy('shareButton', 'Share room', 'right');
         setTippy('hideMeButton', 'Toggle hide me', 'right');
@@ -837,6 +841,7 @@ function roomIsReady() {
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
+    loadSettings();
     handleButtons();
     handleSelects();
     handleInputs();
@@ -918,6 +923,21 @@ function startRecordingTimer() {
 }
 function stopRecordingTimer() {
     clearInterval(recTimer);
+}
+
+// ####################################################
+// LOAD SETTINGS
+// ####################################################
+
+function loadSettings() {
+    BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
+    BtnVideoControls.selectedIndex = lsSettings.video_controls;
+    BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;
+    pinVideoPosition.selectedIndex = lsSettings.pin_grid;
+    rc.handleVideoObjectFit(BtnVideoObjectFit.value);
+    rc.handleVideoControls(BtnVideoControls.value);
+    rc.changeBtnsBarPosition(BtnsBarPosition.value);
+    rc.togglePin(pinVideoPosition.value);
 }
 
 // ####################################################
@@ -1347,25 +1367,33 @@ function handleSelects() {
         rc.lobbyToggle();
     };
     // styling
-    BtnsAspectRatio.onchange = () => {
-        setAspectRatio(BtnsAspectRatio.value);
+    BtnAspectRatio.onchange = () => {
+        setAspectRatio(BtnAspectRatio.value);
     };
     BtnVideoObjectFit.onchange = () => {
         rc.handleVideoObjectFit(BtnVideoObjectFit.value);
+        lsSettings.video_obj_fit = BtnVideoObjectFit.selectedIndex;
+        lS.setSettings(lsSettings);
     }; // cover
-    BtnVideoObjectFit.selectedIndex = 2;
-
     BtnVideoControls.onchange = () => {
         rc.handleVideoControls(BtnVideoControls.value);
+        lsSettings.video_controls = BtnVideoControls.selectedIndex;
+        lS.setSettings(lsSettings);
     };
     selectTheme.onchange = () => {
-        setTheme(selectTheme.value);
+        lsSettings.theme = selectTheme.selectedIndex;
+        lS.setSettings(lsSettings);
+        setTheme();
     };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
+        lsSettings.buttons_bar = BtnsBarPosition.selectedIndex;
+        lS.setSettings(lsSettings);
     };
     pinVideoPosition.onchange = () => {
         rc.togglePin(pinVideoPosition.value);
+        lsSettings.pin_grid = pinVideoPosition.selectedIndex;
+        lS.setSettings(lsSettings);
     };
     // chat
     showChatOnMsg.onchange = (e) => {
@@ -1387,8 +1415,7 @@ function handleSelects() {
     };
     whiteboardGhostButton.onclick = (e) => {
         wbIsBgTransparent = !wbIsBgTransparent;
-        //setWhiteboardBgColor(wbIsBgTransparent ? 'rgba(0, 0, 0, 0.100)' : wbBackgroundColorEl.value);
-        wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme(lsSettings.theme);
+        wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
     };
 }
 
@@ -2346,7 +2373,9 @@ function getParticipantAvatar(peerName) {
 // SET THEME
 // ####################################################
 
-function setTheme(theme) {
+function setTheme() {
+    selectTheme.selectedIndex = lsSettings.theme;
+    const theme = selectTheme.value;
     switch (theme) {
         case 'dark':
             swalBackground = 'radial-gradient(#393939, #000000)';
@@ -2420,8 +2449,6 @@ function setTheme(theme) {
             break;
         //...
     }
-    lsSettings.theme = theme;
-    lS.setObjectLocalStorage('MIROTALK_SFU_SETTINGS', lsSettings);
     wbIsBgTransparent = false;
     if (rc) rc.isChatBgTransparent = false;
 }
@@ -2492,8 +2519,8 @@ function adaptAspectRatio(participantsCount) {
         desktop = 1; // (4:3)
         mobile = 3; // (1:1)
     }
-    BtnsAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? mobile : desktop;
-    setAspectRatio(BtnsAspectRatio.selectedIndex);
+    BtnAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? mobile : desktop;
+    setAspectRatio(BtnAspectRatio.selectedIndex);
 }
 
 // ####################################################

@@ -2504,7 +2504,7 @@ class RoomClient {
     }
 
     handleVideoControls(value) {
-        isVideoControlsOn = value == 'On' ? true : false;
+        isVideoControlsOn = value == 'on' ? true : false;
         let cameras = this.getEcN('Camera');
         for (let i = 0; i < cameras.length; i++) {
             let cameraId = cameras[i].id.replace('__video', '');
@@ -3153,11 +3153,9 @@ class RoomClient {
 
     chatToggleBg() {
         this.isChatBgTransparent = !this.isChatBgTransparent;
-        if (this.isChatBgTransparent) {
-            document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.100)');
-        } else {
-            setTheme(lsSettings.theme);
-        }
+        this.isChatBgTransparent
+            ? document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.100)')
+            : setTheme();
     }
 
     chatClean() {

@@ -15,6 +15,14 @@ class LocalStorage {
             audioVideo: true,
         };
 
+        this.SFU_SETTINGS = {
+            video_obj_fit: 'cover',
+            video_controls: 'off',
+            theme: 'dark',
+            buttons_bar: 'vertical',
+            pin_grid: 'vertical',
+        };
+
         this.DEVICES_COUNT = {
             audio: 0,
             speaker: 0,
@@ -50,6 +58,11 @@ class LocalStorage {
 
     setObjectLocalStorage(name, object) {
         localStorage.setItem(name, JSON.stringify(object));
+    }
+
+    setSettings(settings) {
+        this.SFU_SETTINGS = settings;
+        this.setObjectLocalStorage('SFU_SETTINGS', this.SFU_SETTINGS);
     }
 
     setInitConfig(type, status) {
@@ -93,6 +106,10 @@ class LocalStorage {
     // ####################################################
     // GET LOCAL STORAGE
     // ####################################################
+
+    getSettings() {
+        return this.getObjectLocalStorage('SFU_SETTINGS');
+    }
 
     getInitConfig() {
         return this.getObjectLocalStorage('INIT_CONFIG');
