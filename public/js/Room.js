@@ -833,10 +833,10 @@ function roomIsReady() {
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
-    loadSettings();
     handleButtons();
     handleSelects();
     handleInputs();
+    loadSettingsFromLocalStorage();
     startSessionTimer();
     document.body.addEventListener('mousemove', (e) => {
         showButtons();
@@ -915,21 +915,6 @@ function startRecordingTimer() {
 }
 function stopRecordingTimer() {
     clearInterval(recTimer);
-}
-
-// ####################################################
-// LOAD SETTINGS
-// ####################################################
-
-function loadSettings() {
-    BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
-    BtnVideoControls.selectedIndex = lsSettings.video_controls;
-    BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;
-    pinVideoPosition.selectedIndex = lsSettings.pin_grid;
-    rc.handleVideoObjectFit(BtnVideoObjectFit.value);
-    rc.handleVideoControls(BtnVideoControls.value);
-    rc.changeBtnsBarPosition(BtnsBarPosition.value);
-    rc.togglePin(pinVideoPosition.value);
 }
 
 // ####################################################
@@ -1458,6 +1443,21 @@ function handleInputs() {
         chatMessage.value += data.native;
         rc.toggleChatEmoji();
     }
+}
+
+// ####################################################
+// LOAD SETTINGS FROM LOCAL STORAGE
+// ####################################################
+
+function loadSettingsFromLocalStorage() {
+    BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
+    BtnVideoControls.selectedIndex = lsSettings.video_controls;
+    BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;
+    pinVideoPosition.selectedIndex = lsSettings.pin_grid;
+    rc.handleVideoObjectFit(BtnVideoObjectFit.value);
+    rc.handleVideoControls(BtnVideoControls.value);
+    rc.changeBtnsBarPosition(BtnsBarPosition.value);
+    rc.togglePin(pinVideoPosition.value);
 }
 
 // ####################################################
