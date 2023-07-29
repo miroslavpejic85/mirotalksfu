@@ -16,11 +16,11 @@ class LocalStorage {
         };
 
         this.SFU_SETTINGS = {
-            video_obj_fit: 'cover',
-            video_controls: 'off',
-            theme: 'dark',
-            buttons_bar: 'vertical',
-            pin_grid: 'vertical',
+            video_obj_fit: 2,
+            video_controls: 0,
+            theme: 0,
+            buttons_bar: 0,
+            pin_grid: 0,
         };
 
         this.DEVICES_COUNT = {
