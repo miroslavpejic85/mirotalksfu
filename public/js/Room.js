@@ -57,15 +57,7 @@ const swalImageUrl = '../images/pricing-illustration.svg';
 const lS = new LocalStorage();
 // Get Settings from localStorage
 const localStorageSettings = lS.getObjectLocalStorage('SFU_SETTINGS');
-const lsSettings = localStorageSettings
-    ? localStorageSettings
-    : {
-          video_obj_fit: 2, // cover
-          video_controls: BtnVideoControls.selectedIndex,
-          theme: selectTheme.selectedIndex,
-          buttons_bar: BtnsBarPosition.selectedIndex,
-          pin_grid: pinVideoPosition.selectedIndex,
-      };
+const lsSettings = localStorageSettings ? localStorageSettings : lS.SFU_SETTINGS;
 
 // ####################################################
 // DYNAMIC SETTINGS
