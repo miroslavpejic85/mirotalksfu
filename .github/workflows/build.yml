@@ -28,4 +28,4 @@ jobs:
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mirotalksfu:multi-arch
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/mirotalksfu
