@@ -1,9 +1,26 @@
 'use strict';
 
-// https://github.com/mikecao/umami
+// const url = 'https://localhost:3010/stats';
+const url = 'https://sfu.mirotalk.com/stats';
 
-const script = document.createElement('script');
-script.setAttribute('async', '');
-script.setAttribute('src', 'https://stats.mirotalk.com/script.js');
-script.setAttribute('data-website-id', '41d26670-f275-45bb-af82-3ce91fe57756');
-document.head.appendChild(script);
+fetch(url)
+    .then((response) => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
+    .then((data) => {
+        // console.log('STATS', data);
+        const { enabled, src, id } = data;
+        if (enabled) {
+            const script = document.createElement('script');
+            script.setAttribute('async', '');
+            script.setAttribute('src', src);
+            script.setAttribute('data-website-id', id);
+            document.head.appendChild(script);
+        }
+    })
+    .catch((error) => {
+        console.error('Stats fetch error:', error);
+    });

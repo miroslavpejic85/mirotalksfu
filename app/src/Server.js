@@ -124,6 +124,13 @@ if (sentryEnabled) {
     */
 }
 
+// Stats
+const defaultStats = {
+    enabled: true,
+    src: 'https://stats.mirotalk.com/script.js',
+    id: '41d26670-f275-45bb-af82-3ce91fe57756',
+};
+
 // OpenAI/ChatGPT
 let chatGPT;
 if (config.chatGPT.enabled) {
@@ -317,6 +324,13 @@ function startServer() {
     // mirotalk about
     app.get(['/about'], (req, res) => {
         res.sendFile(views.about);
+    });
+
+    // Get stats endpoint
+    app.get(['/stats'], (req, res) => {
+        const stats = config.stats ? config.stats : defaultStats;
+        // log.debug('Send stats', stats);
+        res.send(stats);
     });
 
     // ####################################################
