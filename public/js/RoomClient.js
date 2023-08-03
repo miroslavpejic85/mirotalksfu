@@ -52,7 +52,7 @@ const icons = {
 };
 
 const image = {
-    about: '../images/mirotalksfu-logo.png',
+    about: '../images/mirotalk-logo.gif',
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
