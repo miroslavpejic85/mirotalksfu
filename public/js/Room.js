@@ -182,7 +182,7 @@ function initClient() {
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
-        setTippy('showChatOnMsg', "Toggle show me when I'm receive a new message", 'top');
+        setTippy('showChatOnMsg', 'Show chat on new message comes', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -1377,9 +1377,9 @@ function handleSelects() {
         sound('switch');
         rc.showChatOnMessage = e.currentTarget.checked;
         if (rc.showChatOnMessage) {
-            userLog('info', "Chat will be shown, when I'm receive a new message", 'top-end');
+            userLog('info', 'Chat will be shown, when you receive a message', 'top-end');
         } else {
-            userLog('info', "Chat not will be shown, when I'm receive a new message", 'top-end');
+            userLog('info', 'Chat not will be shown, when you receive a message', 'top-end');
         }
     };
     // whiteboard options
