@@ -1188,10 +1188,16 @@ function handleSelectsInit() {
         microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
-    initSpeakerSelect.onchange = () => {
-        speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
-    };
+    // Check if there is speakers
+    if (initSpeakerSelect.options.length === 0) {
+        hide(initSpeakerSelect);
+        hide(speakerSelectDiv);
+    } else {
+        initSpeakerSelect.onchange = () => {
+            speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
+            lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+        };
+    }
 }
 
 function setSelectsInit() {
