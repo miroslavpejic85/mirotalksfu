@@ -337,7 +337,11 @@ function enumerateAudioDevices(stream) {
             isEnumerateAudioDevices = true;
             const sinkId = 'sinkId' in HTMLMediaElement.prototype;
             speakerSelect.disabled = !sinkId;
-            if (!sinkId) hide(initSpeakerSelect);
+            // Check if there is speakers
+            if (!sinkId || initSpeakerSelect.options.length === 0) {
+                hide(initSpeakerSelect);
+                hide(speakerSelectDiv);
+            }
         });
 }
 
@@ -1188,16 +1192,10 @@ function handleSelectsInit() {
         microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
-    // Check if there is speakers
-    if (initSpeakerSelect.options.length === 0) {
-        hide(initSpeakerSelect);
-        hide(speakerSelectDiv);
-    } else {
-        initSpeakerSelect.onchange = () => {
-            speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
-            lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
-        };
-    }
+    initSpeakerSelect.onchange = () => {
+        speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+    };
 }
 
 function setSelectsInit() {
