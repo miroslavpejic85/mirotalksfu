@@ -68,6 +68,9 @@ const BUTTONS = {
     participantsList: {
         saveInfoButton: true,
     },
+    whiteboard: {
+        whiteboardLockButton: false,
+    },
     //...
 };
 
@@ -84,6 +87,7 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.ejectButton = false;
         BUTTONS.consumerVideo.muteAudioButton = false;
         BUTTONS.consumerVideo.muteVideoButton = false;
+        BUTTONS.whiteboard.whiteboardLockButton = false;
         //...
     } else {
         BUTTONS.participantsList.saveInfoButton = true;
@@ -95,6 +99,7 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.ejectButton = true;
         BUTTONS.consumerVideo.muteAudioButton = true;
         BUTTONS.consumerVideo.muteVideoButton = true;
+        BUTTONS.whiteboard.whiteboardLockButton = true;
         //...
     }
     // main. settings...
@@ -102,5 +107,8 @@ function handleRules(isPresenter) {
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
+    BUTTONS.whiteboard.whiteboardLockButton
+        ? elemDisplay(whiteboardLockButton, true)
+        : elemDisplay(whiteboardLockButton, false, 'flex');
     //...
 }

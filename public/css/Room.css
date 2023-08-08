@@ -987,6 +987,11 @@ progress {
     cursor: move;
 }
 
+.whiteboard-header-title {
+    display: flex;
+    align-items: center;
+}
+
 .whiteboard-header button {
     padding: 10px;
     margin: 2px;

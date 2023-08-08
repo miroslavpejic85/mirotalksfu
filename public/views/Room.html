@@ -412,8 +412,11 @@ access to use this app.
             <header id="whiteboardHeader" class="whiteboard-header">
                 <div id="whiteboardTitle" class="whiteboard-header-title">
                     <button id="whiteboardCloseBtn" class="fas fa-times"></button>
+                    <div class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                        <input id="whiteboardLockButton" class="form-check-input" type="checkbox" />
+                    </div>
                 </div>
-                <div class="whiteboard-header-options">
+                <div id="whiteboardOptions" class="whiteboard-header-options">
                     <button id="whiteboardGhostButton" class="fas fa-circle-half-stroke"></button>
                     <input id="wbBackgroundColorEl" class="whiteboardColorPicker" type="color" value="#000000" />
                     <input id="wbDrawingColorEl" class="whiteboardColorPicker" type="color" value="#FFFFFF" />

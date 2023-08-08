@@ -107,6 +107,7 @@ let recTimer = null;
 let recElapsedTime = null;
 
 let wbCanvas = null;
+let wbIsLock = false;
 let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
@@ -178,6 +179,7 @@ function initClient() {
         setTippy('whiteboardSaveBtn', 'Save', 'bottom');
         setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
         setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
+        setTippy('whiteboardLockButton', 'If enabled, participants cannot interact', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
@@ -851,6 +853,10 @@ function roomIsReady() {
     }
 }
 
+function elemDisplay(element, display, mode = 'block') {
+    element.style.display = display ? mode : 'none';
+}
+
 function hide(elem) {
     elem.className = 'hidden';
 }
@@ -1136,6 +1142,10 @@ function handleButtons() {
     };
     whiteboardCleanBtn.onclick = () => {
         confirmClearBoard();
+    };
+    whiteboardLockButton.onchange = () => {
+        wbIsLock = !wbIsLock;
+        whiteboardAction(getWhiteboardAction(wbIsLock ? 'lock' : 'unlock'));
     };
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
@@ -2097,7 +2107,16 @@ function wbCanvasSaveImg() {
     saveDataToFile(dataURL, fileName);
 }
 
+function wbUpdate() {
+    if (wbIsOpen && (!isRulesActive || isPresenter)) {
+        console.log('IsPresenter: update whiteboard canvas to the participants in the room');
+        wbCanvasToJson();
+        whiteboardAction(getWhiteboardAction(wbIsLock ? 'lock' : 'unlock'));
+    }
+}
+
 function wbCanvasToJson() {
+    if (!isPresenter && wbIsLock) return;
     if (rc.thereIsParticipants()) {
         let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
         rc.socket.emit('wbCanvasToJson', wbCanvasJson);
@@ -2106,9 +2125,11 @@ function wbCanvasToJson() {
 
 function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
-
     wbCanvas.loadFromJSON(json);
     wbCanvas.renderAll();
+    if (!isPresenter && !wbCanvas.isDrawingMode && wbIsLock) {
+        wbDrawing(false);
+    }
 }
 
 function getWhiteboardAction(action) {
@@ -2164,11 +2185,37 @@ function whiteboardAction(data, emit = true) {
         case 'clear':
             wbCanvas.clear();
             break;
+        case 'lock':
+            if (!isPresenter) {
+                elemDisplay(whiteboardTitle, false);
+                elemDisplay(whiteboardOptions, false);
+                elemDisplay(whiteboardButton, false);
+                wbDrawing(false);
+                wbIsLock = true;
+            }
+            break;
+        case 'unlock':
+            if (!isPresenter) {
+                elemDisplay(whiteboardTitle, true, 'flex');
+                elemDisplay(whiteboardOptions, true, 'inline');
+                elemDisplay(whiteboardButton, true);
+                wbDrawing(true);
+                wbIsLock = false;
+            }
+            break;
         case 'close':
             if (wbIsOpen) toggleWhiteboard();
             break;
         //...
     }
+}
+
+function wbDrawing(status) {
+    wbCanvas.isDrawingMode = status; // Disable free drawing
+    wbCanvas.selection = status; // Disable object selection
+    wbCanvas.forEachObject(function (obj) {
+        obj.selectable = status; // Make all objects unselectable
+    });
 }
 
 // ####################################################

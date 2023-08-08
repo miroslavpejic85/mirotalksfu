@@ -1624,10 +1624,8 @@ class RoomClient {
 
     async consume(producer_id, peer_name, peer_info, type) {
         //
-        if (wbIsOpen && (!isRulesActive || isPresenter)) {
-            console.log('Update whiteboard canvas to the participants in the room');
-            wbCanvasToJson();
-        }
+        wbUpdate();
+
         this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
             function ({ consumer, stream, kind }) {
                 console.log('CONSUMER MEDIA TYPE ----> ' + type);
@@ -1983,6 +1981,8 @@ class RoomClient {
             this.setTippy(ko.id, 'Eject', 'top-end');
         }
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
+        //
+        wbUpdate();
     }
 
     removeVideoOff(peer_id) {
