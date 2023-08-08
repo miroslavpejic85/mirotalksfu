@@ -150,6 +150,11 @@ $ PORT=3011 npm start
 
 -   Open in browser https://localhost:3010 or `:3011` if default port changed.
 
+<br/>
+
+> **Note**
+> To run `MiroTalk SFU` on a `Windows operating system`, you can follow the instructions provided in [this documentation](https://github.com/miroslavpejic85/mirotalksfu/issues/99#issuecomment-1586073853).
+
 </details>
 
 <details open>
