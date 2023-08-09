@@ -8,8 +8,8 @@ ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD="true"
 COPY package.json .
 
 RUN \
-    DEBIAN_FRONTEND=noninteractive apt update && \
-    apt install -y --no-install-recommends build-essential python3-pip && \
+    DEBIAN_FRONTEND=noninteractive apt-get update && \
+    apt-get install -y --no-install-recommends build-essential python3-pip && \
     npm install && \
     apt-get -y purge --auto-remove build-essential python3-pip && \
     apt-get install -y --no-install-recommends python3 && \
