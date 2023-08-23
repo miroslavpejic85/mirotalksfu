@@ -801,21 +801,6 @@ function startServer() {
             log.debug('User joined', data);
             roomList.get(socket.room_id).addPeer(new Peer(socket.id, data));
 
-            if (roomList.get(socket.room_id).isLocked()) {
-                log.debug('User rejected because room is locked');
-                return cb('isLocked');
-            }
-
-            if (roomList.get(socket.room_id).isLobbyEnabled()) {
-                log.debug('User waiting to join room because lobby is enabled');
-                roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
-                    peer_id: data.peer_info.peer_id,
-                    peer_name: data.peer_info.peer_name,
-                    lobby_status: 'waiting',
-                });
-                return cb('isLobby');
-            }
-
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
             const peer_name = roomList.get(socket.room_id).getPeers()?.get(socket.id)?.peer_info?.peer_name;
@@ -845,6 +830,21 @@ function startServer() {
                 peer_name: peer_name,
                 peer_presenter: isPresenter,
             });
+
+            if (roomList.get(socket.room_id).isLocked()) {
+                log.debug('User rejected because room is locked');
+                return cb('isLocked');
+            }
+
+            if (roomList.get(socket.room_id).isLobbyEnabled()) {
+                log.debug('User waiting to join room because lobby is enabled');
+                roomList.get(socket.room_id).broadCast(socket.id, 'roomLobby', {
+                    peer_id: data.peer_info.peer_id,
+                    peer_name: data.peer_info.peer_name,
+                    lobby_status: 'waiting',
+                });
+                return cb('isLobby');
+            }
 
             cb(roomList.get(socket.room_id).toJson());
         });

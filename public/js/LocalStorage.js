@@ -16,6 +16,9 @@ class LocalStorage {
         };
 
         this.SFU_SETTINGS = {
+            lobby: false,
+            pitch_bar: true,
+            sounds: true,
             video_obj_fit: 2, // cover
             video_controls: 0, // off
             theme: 0, // dark

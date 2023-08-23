@@ -2034,8 +2034,8 @@ class RoomClient {
     exit(offline = false) {
         let clean = function () {
             this._isConnected = false;
-            this.consumerTransport.close();
-            this.producerTransport.close();
+            if (this.consumerTransport) this.consumerTransport.close();
+            if (this.producerTransport) this.producerTransport.close();
             this.socket.off('disconnect');
             this.socket.off('newProducers');
             this.socket.off('consumerClosed');

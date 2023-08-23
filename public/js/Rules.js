@@ -101,6 +101,10 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = true;
         BUTTONS.whiteboard.whiteboardLockButton = true;
         //...
+        isLobbyEnabled = lsSettings.lobby;
+        switchLobby.checked = isLobbyEnabled;
+        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
+        //...
     }
     // main. settings...
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);

@@ -1344,18 +1344,24 @@ function handleSelects() {
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
     };
     // room
-    switchPitchBar.onchange = (e) => {
-        isPitchBarEnabled = e.currentTarget.checked;
-        rc.roomMessage('pitchBar', isPitchBarEnabled);
-    };
-    switchSounds.onchange = (e) => {
-        isSoundEnabled = e.currentTarget.checked;
-        rc.roomMessage('sounds', isSoundEnabled);
-    };
     switchLobby.onchange = (e) => {
         isLobbyEnabled = e.currentTarget.checked;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
         rc.lobbyToggle();
+        lsSettings.lobby = isLobbyEnabled;
+        lS.setSettings(lsSettings);
+    };
+    switchPitchBar.onchange = (e) => {
+        isPitchBarEnabled = e.currentTarget.checked;
+        rc.roomMessage('pitchBar', isPitchBarEnabled);
+        lsSettings.pitch_bar = isPitchBarEnabled;
+        lS.setSettings(lsSettings);
+    };
+    switchSounds.onchange = (e) => {
+        isSoundEnabled = e.currentTarget.checked;
+        rc.roomMessage('sounds', isSoundEnabled);
+        lsSettings.sounds = isSoundEnabled;
+        lS.setSettings(lsSettings);
     };
     // styling
     BtnAspectRatio.onchange = () => {
@@ -1464,6 +1470,10 @@ function handleInputs() {
 // ####################################################
 
 function loadSettingsFromLocalStorage() {
+    isPitchBarEnabled = lsSettings.pitch_bar;
+    isSoundEnabled = lsSettings.sounds;
+    switchPitchBar.checked = isPitchBarEnabled;
+    switchSounds.checked = isSoundEnabled;
     BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
     BtnVideoControls.selectedIndex = lsSettings.video_controls;
     BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;
