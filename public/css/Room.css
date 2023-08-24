@@ -322,6 +322,12 @@ body {
     cursor: pointer;
 }
 
+.title {
+    display: inline-flex;
+    text-align: left;
+    color: white;
+}
+
 /*--------------------------------------------------------------
 # Settings Table
 --------------------------------------------------------------*/
