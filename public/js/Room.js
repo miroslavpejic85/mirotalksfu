@@ -146,7 +146,8 @@ function initClient() {
         setTippy('aboutButton', 'About this project', 'right');
         setTippy('exitButton', 'Leave room', 'right');
         setTippy('mySettingsCloseBtn', 'Close', 'right');
-        setTippy('tabDevicesBtn', 'Devices', 'top');
+        setTippy('tabVideoDevicesBtn', 'Video devices', 'top');
+        setTippy('tabAudioDevicesBtn', 'Audio devices', 'top');
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabVideoShareBtn', 'Video share', 'top');
@@ -953,8 +954,11 @@ function handleButtons() {
     mySettingsCloseBtn.onclick = () => {
         rc.toggleMySettings();
     };
-    tabDevicesBtn.onclick = (e) => {
-        rc.openTab(e, 'tabDevices');
+    tabVideoDevicesBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVideoDevices');
+    };
+    tabAudioDevicesBtn.onclick = (e) => {
+        rc.openTab(e, 'tabAudioDevices');
     };
     tabRecordingBtn.onclick = (e) => {
         rc.openTab(e, 'tabRecording');

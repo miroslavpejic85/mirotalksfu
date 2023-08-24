@@ -146,8 +146,11 @@ access to use this app.
             </header>
             <main class="mySettingsMain">
                 <div class="tab">
-                    <button id="tabDevicesBtn" class="fas fa-cog tablinks">
-                        <p class="tabButtonText">Device</p>
+                    <button id="tabVideoDevicesBtn" class="fas fa-video tablinks">
+                        <p class="tabButtonText">Video</p>
+                    </button>
+                    <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
+                        <p class="tabButtonText">Audio</p>
                     </button>
                     <button id="tabRoomBtn" class="fas fa-home tablinks">
                         <p class="tabButtonText">Room</p>
@@ -170,7 +173,7 @@ access to use this app.
                 </div>
 
                 <div class="tabActions">
-                    <div id="tabDevices" class="tabcontent">
+                    <div id="tabVideoDevices" class="tabcontent">
                         <br />
                         <i class="fas fa-video"></i>
                         <p>Video Source:</p>
@@ -188,6 +191,10 @@ access to use this app.
                             <option value="4k">🎥&nbsp;4K</option>
                         </select>
                         <br />
+                    </div>
+
+                    <div id="tabAudioDevices" class="tabcontent">
+                        <br />
                         <i class="fas fa-microphone"></i>
                         <p>Microphone:</p>
                         <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
@@ -198,6 +205,7 @@ access to use this app.
                             <select id="speakerSelect" class="form-select text-light bg-dark"></select>
                             <br />
                         </div>
+                        <br />
                     </div>
 
                     <div id="tabRoom" class="tabcontent">
