@@ -2586,6 +2586,7 @@ function showAbout() {
     Swal.fire({
         background: swalBackground,
         imageUrl: image.about,
+        customClass: { image: 'img-about' },
         position: 'center',
         title: 'WebRTC SFU',
         html: `
