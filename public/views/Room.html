@@ -144,225 +144,245 @@ access to use this app.
             <header id="mySettingsHeader">
                 <button id="mySettingsCloseBtn" class="fas fa-times"></button>
             </header>
-            <main>
-                <br />
-
+            <main class="mySettingsMain">
                 <div class="tab">
-                    <button id="tabDevicesBtn" class="fas fa-cog tablinks"></button>
-                    <button id="tabRoomBtn" class="fas fa-home tablinks"></button>
-                    <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks"></button>
-                    <button id="tabVideoShareBtn" class="fab fa-youtube tablinks"></button>
-                    <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks"></button>
-                    <button id="tabStylingBtn" class="fas fa-palette tablinks"></button>
-                    <button id="tabLanguagesBtn" class="fas fa-globe tablinks"></button>
+                    <button id="tabDevicesBtn" class="fas fa-cog tablinks">
+                        <p class="tabButtonText">Device</p>
+                    </button>
+                    <button id="tabRoomBtn" class="fas fa-home tablinks">
+                        <p class="tabButtonText">Room</p>
+                    </button>
+                    <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks">
+                        <p class="tabButtonText">Recording</p>
+                    </button>
+                    <button id="tabVideoShareBtn" class="fab fa-youtube tablinks">
+                        <p class="tabButtonText">Media</p>
+                    </button>
+                    <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks">
+                        <p class="tabButtonText">Aspect</p>
+                    </button>
+                    <button id="tabStylingBtn" class="fas fa-palette tablinks">
+                        <p class="tabButtonText">Style</p>
+                    </button>
+                    <button id="tabLanguagesBtn" class="fas fa-globe tablinks">
+                        <p class="tabButtonText">Language</p>
+                    </button>
                 </div>
 
-                <div id="tabDevices" class="tabcontent">
-                    <br />
-                    <i class="fas fa-video"></i>
-                    <p>Video Source:</p>
-                    <select id="videoSelect" class="form-select text-light bg-dark"></select>
-                    <br />
-                    <i class="fas fa-palette"></i>
-                    <p>Video Quality:</p>
-                    <select id="videoQuality" class="form-select text-light bg-dark">
-                        <option value="default">🎥&nbsp;Default</option>
-                        <option value="qvga">🎥&nbsp;QVGA</option>
-                        <option value="vga">🎥&nbsp;VGA</option>
-                        <option value="hd">🎥&nbsp;HD</option>
-                        <option value="fhd">🎥&nbsp;FULL HD</option>
-                        <option value="2k">🎥&nbsp;2k</option>
-                        <option value="4k">🎥&nbsp;4K</option>
-                    </select>
-                    <br />
-                    <i class="fas fa-microphone"></i>
-                    <p>Microphone:</p>
-                    <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
-                    <br />
-                    <div id="speakerSelectDiv">
-                        <i class="fas fa-headphones"></i>
-                        <p>Speaker:</p>
-                        <select id="speakerSelect" class="form-select text-light bg-dark"></select>
+                <div class="tabActions">
+                    <div id="tabDevices" class="tabcontent">
                         <br />
+                        <i class="fas fa-video"></i>
+                        <p>Video Source:</p>
+                        <select id="videoSelect" class="form-select text-light bg-dark"></select>
+                        <br />
+                        <i class="fas fa-palette"></i>
+                        <p>Video Quality:</p>
+                        <select id="videoQuality" class="form-select text-light bg-dark">
+                            <option value="default">🎥&nbsp;Default</option>
+                            <option value="qvga">🎥&nbsp;QVGA</option>
+                            <option value="vga">🎥&nbsp;VGA</option>
+                            <option value="hd">🎥&nbsp;HD</option>
+                            <option value="fhd">🎥&nbsp;FULL HD</option>
+                            <option value="2k">🎥&nbsp;2k</option>
+                            <option value="4k">🎥&nbsp;4K</option>
+                        </select>
+                        <br />
+                        <i class="fas fa-microphone"></i>
+                        <p>Microphone:</p>
+                        <select id="microphoneSelect" class="form-select text-light bg-dark"></select>
+                        <br />
+                        <div id="speakerSelectDiv">
+                            <i class="fas fa-headphones"></i>
+                            <p>Speaker:</p>
+                            <select id="speakerSelect" class="form-select text-light bg-dark"></select>
+                            <br />
+                        </div>
                     </div>
-                </div>
 
-                <div id="tabRoom" class="tabcontent">
-                    <button id="fullScreenButton" class="hidden">
-                        <i class="fas fa-expand-alt"></i>
-                        <p>Full screen mode</p>
-                    </button>
-                    <br />
-                    <button id="raiseHandButton" class="hidden">
-                        <i class="fas fa-hand-paper"></i>
-                        <p>Raise hand</p>
-                    </button>
-                    <button id="lowerHandButton" class="hidden">
-                        <i class="fas fa-hand-paper"></i>
-                        <p>Lower hand</p>
-                    </button>
-                    <br />
-                    <button id="fileShareButton" class="hidden">
-                        <i class="fas fa-folder-open"></i>
-                        <p>File sharing</p>
-                    </button>
-                    <br />
-                    <button id="lockRoomButton" class="hidden">
-                        <i class="fas fa-lock-open"></i>
-                        <p>Lock room</p>
-                    </button>
-                    <button id="unlockRoomButton" class="hidden">
-                        <i class="fas fa-lock"></i>
-                        <p>Unlock room</p>
-                    </button>
-                    <hr style="border: 1px solid grey" />
-                    <table class="settingsTable">
-                        <tr id="lobbyButton" class="hidden">
-                            <td>
-                                <label for="switchLobby"><i class="fas fa-shield-halved"></i>&nbsp;&nbsp;Lobby</label>
-                            </td>
-                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
-                                <input id="switchLobby" class="form-check-input" type="checkbox" />
-                            </td>
-                        </tr>
-                        <tr id="pitchBarButton">
-                            <td>
-                                <label for="switchPitchBar"
-                                    ><i class="fas fa-microphone-lines"></i>&nbsp;&nbsp;Pitch bar</label
-                                >
-                            </td>
-                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
-                                <input id="switchPitchBar" class="form-check-input" type="checkbox" checked />
-                            </td>
-                        </tr>
-                        <tr id="soundsButton">
-                            <td>
-                                <label for="switchSounds"><i class="fas fa-music"></i>&nbsp;&nbsp;Sounds</label>
-                            </td>
-                            <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
-                                <input id="switchSounds" class="form-check-input" type="checkbox" checked />
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>
-                                <label for="sessionTime"><i class="fas fa-clock"></i>&nbsp;&nbsp;Session time</label>
-                            </td>
-                            <td><label id="sessionTime">00:00:00</label></td>
-                        </tr>
-                    </table>
-                </div>
-
-                <div id="tabRecording" class="tabcontent">
-                    <button id="startRecButton" class="hidden">
-                        <i class="fas fa-record-vinyl"></i>
-                        <p>Start recording</p>
-                    </button>
-                    <button id="stopRecButton" class="hidden">
-                        <i class="fas fa-stop-circle"></i>
-                        <p>Stop recording</p>
-                    </button>
-                    <br />
-                    <button id="pauseRecButton" class="hidden">
-                        <i class="far fa-pause-circle"></i>
-                        <p>Pause recording</p>
-                    </button>
-                    <button id="resumeRecButton" class="hidden">
-                        <i class="far fa-play-circle"></i>
-                        <p>Resume recording</p>
-                    </button>
-                    <div id="recordingTime" class="hidden">
+                    <div id="tabRoom" class="tabcontent">
+                        <button id="fullScreenButton" class="hidden">
+                            <i class="fas fa-expand-alt"></i>
+                            <p>Full screen mode</p>
+                        </button>
+                        <br />
+                        <button id="raiseHandButton" class="hidden">
+                            <i class="fas fa-hand-paper"></i>
+                            <p>Raise hand</p>
+                        </button>
+                        <button id="lowerHandButton" class="hidden">
+                            <i class="fas fa-hand-paper"></i>
+                            <p>Lower hand</p>
+                        </button>
+                        <br />
+                        <button id="fileShareButton" class="hidden">
+                            <i class="fas fa-folder-open"></i>
+                            <p>File sharing</p>
+                        </button>
+                        <br />
+                        <button id="lockRoomButton" class="hidden">
+                            <i class="fas fa-lock-open"></i>
+                            <p>Lock room</p>
+                        </button>
+                        <button id="unlockRoomButton" class="hidden">
+                            <i class="fas fa-lock"></i>
+                            <p>Unlock room</p>
+                        </button>
                         <hr style="border: 1px solid grey" />
                         <table class="settingsTable">
+                            <tr id="lobbyButton" class="hidden">
+                                <td>
+                                    <label for="switchLobby"
+                                        ><i class="fas fa-shield-halved"></i>&nbsp;&nbsp;Lobby</label
+                                    >
+                                </td>
+                                <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                    <input id="switchLobby" class="form-check-input" type="checkbox" />
+                                </td>
+                            </tr>
+                            <tr id="pitchBarButton">
+                                <td>
+                                    <label for="switchPitchBar"
+                                        ><i class="fas fa-microphone-lines"></i>&nbsp;&nbsp;Pitch bar</label
+                                    >
+                                </td>
+                                <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                    <input id="switchPitchBar" class="form-check-input" type="checkbox" checked />
+                                </td>
+                            </tr>
+                            <tr id="soundsButton">
+                                <td>
+                                    <label for="switchSounds"><i class="fas fa-music"></i>&nbsp;&nbsp;Sounds</label>
+                                </td>
+                                <td class="form-check form-switch form-switch-md" style="margin-left: 10px">
+                                    <input id="switchSounds" class="form-check-input" type="checkbox" checked />
+                                </td>
+                            </tr>
                             <tr>
                                 <td>
-                                    <i style="color: red" class="fa-solid fa-circle pulsate"></i>&nbsp;&nbsp;REC time:
+                                    <label for="sessionTime"
+                                        ><i class="fas fa-clock"></i>&nbsp;&nbsp;Session time</label
+                                    >
                                 </td>
-                                <td id="recordingStatus">0s</td>
+                                <td><label id="sessionTime">00:00:00</label></td>
                             </tr>
                         </table>
                     </div>
-                </div>
 
-                <div id="tabVideoShare" class="tabcontent">
-                    <button id="videoShareButton">
-                        <i class="fab fa-youtube"></i>
-                        <p>Share a Video or Audio</p>
-                    </button>
-                    <br />
-                    <button id="videoCloseBtn" class="hidden">
-                        <i class="fas fa-times"></i>
-                        <p>Close Video or Audio</p>
-                    </button>
-                    <br />
-                </div>
-
-                <div id="tabAspect" class="tabcontent">
-                    <br />
-                    <p>Aspect ratio:</p>
-                    <br />
-                    <select id="BtnAspectRatio" class="form-select text-light bg-dark">
-                        <option value="0">default</option>
-                        <option value="1">4:3</option>
-                        <option value="2">16:9</option>
-                        <option value="3">1:1</option>
-                        <option value="4">1:2</option>
-                    </select>
-                    <br />
-                    <p>Video Object fit:</p>
-                    <br />
-                    <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
-                        <option value="fill">fill</option>
-                        <option value="contain">contain</option>
-                        <option value="cover">cover</option>
-                        <option value="scale-down">scale-down</option>
-                        <option value="none">none</option>
-                    </select>
-                    <br />
-                    <p>Video Controls:</p>
-                    <br />
-                    <select id="BtnVideoControls" class="form-select text-light bg-dark">
-                        <option value="off">off</option>
-                        <option value="on">on</option>
-                    </select>
-                    <br />
-                </div>
-
-                <div id="tabStyling" class="tabcontent">
-                    <br />
-                    <p>Theme:</p>
-                    <br />
-                    <select id="selectTheme" class="form-select text-light bg-dark">
-                        <option value="dark">⚫ &nbsp;Dark</option>
-                        <option value="grey">⚪ &nbsp;Grey</option>
-                        <option value="green">🟢 &nbsp;Green</option>
-                        <option value="blue">🔵 &nbsp;Blue</option>
-                        <option value="red">🔴 &nbsp;Red</option>
-                    </select>
-                    <br />
-                    <p>Buttons bar:</p>
-                    <br />
-                    <select id="BtnsBarPosition" class="form-select text-light bg-dark">
-                        <option value="vertical">Vertical</option>
-                        <option value="horizontal">Horizontal</option>
-                    </select>
-                    <br />
-                    <div id="pinUnpinGridDiv" class="hidden">
-                        <p>Pin grid:</p>
+                    <div id="tabRecording" class="tabcontent">
+                        <button id="startRecButton" class="hidden">
+                            <i class="fas fa-record-vinyl"></i>
+                            <p>Start recording</p>
+                        </button>
+                        <button id="stopRecButton" class="hidden">
+                            <i class="fas fa-stop-circle"></i>
+                            <p>Stop recording</p>
+                        </button>
                         <br />
-                        <select id="pinVideoPosition" class="form-select text-light bg-dark">
+                        <button id="pauseRecButton" class="hidden">
+                            <i class="far fa-pause-circle"></i>
+                            <p>Pause recording</p>
+                        </button>
+                        <button id="resumeRecButton" class="hidden">
+                            <i class="far fa-play-circle"></i>
+                            <p>Resume recording</p>
+                        </button>
+                        <div id="recordingTime" class="hidden">
+                            <hr style="border: 1px solid grey" />
+                            <table class="settingsTable">
+                                <tr>
+                                    <td>
+                                        <i style="color: red" class="fa-solid fa-circle pulsate"></i>&nbsp;&nbsp;REC
+                                        time:
+                                    </td>
+                                    <td id="recordingStatus">0s</td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div id="tabVideoShare" class="tabcontent">
+                        <button id="videoShareButton">
+                            <i class="fab fa-youtube"></i>
+                            <p>Share a Video or Audio</p>
+                        </button>
+                        <br />
+                        <button id="videoCloseBtn" class="hidden">
+                            <i class="fas fa-times"></i>
+                            <p>Close Video or Audio</p>
+                        </button>
+                        <br />
+                    </div>
+
+                    <div id="tabAspect" class="tabcontent">
+                        <br />
+                        <p>Aspect ratio:</p>
+                        <br />
+                        <select id="BtnAspectRatio" class="form-select text-light bg-dark">
+                            <option value="0">default</option>
+                            <option value="1">4:3</option>
+                            <option value="2">16:9</option>
+                            <option value="3">1:1</option>
+                            <option value="4">1:2</option>
+                        </select>
+                        <br />
+                        <p>Video Object fit:</p>
+                        <br />
+                        <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
+                            <option value="fill">fill</option>
+                            <option value="contain">contain</option>
+                            <option value="cover">cover</option>
+                            <option value="scale-down">scale-down</option>
+                            <option value="none">none</option>
+                        </select>
+                        <br />
+                        <p>Video Controls:</p>
+                        <br />
+                        <select id="BtnVideoControls" class="form-select text-light bg-dark">
+                            <option value="off">off</option>
+                            <option value="on">on</option>
+                        </select>
+                        <br />
+                    </div>
+
+                    <div id="tabStyling" class="tabcontent">
+                        <br />
+                        <p>Theme:</p>
+                        <br />
+                        <select id="selectTheme" class="form-select text-light bg-dark">
+                            <option value="dark">⚫ &nbsp;Dark</option>
+                            <option value="grey">⚪ &nbsp;Grey</option>
+                            <option value="green">🟢 &nbsp;Green</option>
+                            <option value="blue">🔵 &nbsp;Blue</option>
+                            <option value="red">🔴 &nbsp;Red</option>
+                        </select>
+                        <br />
+                        <p>Buttons bar:</p>
+                        <br />
+                        <select id="BtnsBarPosition" class="form-select text-light bg-dark">
                             <option value="vertical">Vertical</option>
                             <option value="horizontal">Horizontal</option>
-                            <option value="top">Top</option>
                         </select>
+                        <br />
+                        <div id="pinUnpinGridDiv" class="hidden">
+                            <p>Pin grid:</p>
+                            <br />
+                            <select id="pinVideoPosition" class="form-select text-light bg-dark">
+                                <option value="vertical">Vertical</option>
+                                <option value="horizontal">Horizontal</option>
+                                <option value="top">Top</option>
+                            </select>
+                        </div>
+                        <br />
                     </div>
-                    <br />
-                </div>
 
-                <div id="tabLanguages" class="tabcontent">
-                    <br />
-                    <p>Language:</p>
-                    <br />
-                    <div id="google_translate_element"></div>
+                    <div id="tabLanguages" class="tabcontent">
+                        <br />
+                        <p>Language:</p>
+                        <br />
+                        <div id="google_translate_element"></div>
+                        <br />
+                    </div>
                 </div>
             </main>
         </section>

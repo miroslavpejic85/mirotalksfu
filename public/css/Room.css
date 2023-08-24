@@ -245,7 +245,7 @@ body {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 365px;
+    width: 50%;
     min-height: 480px;
     background: var(--settings-bg);
     box-shadow: var(--box-shadow);
@@ -254,7 +254,34 @@ body {
     overflow: hidden;
 }
 
+.mySettingsMain {
+    display: flex;
+}
+
+@media screen and (max-width: 1030px) {
+    #mySettings {
+        width: 75%;
+    }
+}
+
+@media screen and (max-width: 830px) {
+    #mySettings {
+        width: 80%;
+        min-height: auto;
+    }
+    .mySettingsMain {
+        flex-direction: column;
+    }
+}
+
+@media screen and (max-width: 500px) {
+    #mySettings {
+        width: 90%;
+    }
+}
+
 #mySettingsHeader {
+    height: 25px;
     cursor: move;
 }
 
@@ -282,8 +309,9 @@ body {
 
 #mySettingsCloseBtn {
     /* top right bottom left */
-    margin: 10px 0px 0px 10px;
+    /* margin: 10px 0px 0px 10px; */
     font-size: 1.4rem;
+    float: right;
 }
 
 #mySettings button {
@@ -325,10 +353,41 @@ th {
 /*--------------------------------------------------------------
 # Style the tab
 --------------------------------------------------------------*/
+
 .tab {
     padding: 10px;
     overflow: hidden;
     border-radius: 5px;
+    width: 35%;
+    background-color: var(--body-bg);
+    min-height: 480px;
+    display: flex;
+    flex-direction: column;
+    border-right: var(--border);
+}
+
+.tabActions {
+    position: relative;
+    width: 65%;
+    background-color: var(--body-bg);
+    min-height: 480px;
+}
+
+@media screen and (max-width: 830px) {
+    .tab {
+        width: 100%;
+        min-height: auto;
+        flex-direction: row;
+        border-right: none;
+    }
+    .tabActions {
+        width: 100%;
+        min-height: 100px;
+        border-radius: 10px;
+    }
+    .tabButtonText {
+        display: none !important;
+    }
 }
 
 /* Style the buttons inside the tab */
@@ -336,6 +395,7 @@ th {
     margin: 3px;
     padding: 11px;
     float: left;
+    text-align: left;
     color: #fff;
     border: var(--border);
     background-color: rgba(0, 0, 0, 0.2);
@@ -347,7 +407,7 @@ th {
 /* Change background color of buttons on hover */
 .tab button:hover {
     background-color: transparent;
-    color: grey;
+    transform: scale(0.95);
 }
 
 /* Create an active/current tablink class */
