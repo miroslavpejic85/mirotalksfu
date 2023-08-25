@@ -820,8 +820,10 @@ function roomIsReady() {
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
         rc.makeDraggable(lobby, lobbyHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-            BUTTONS.main.startScreenButton && show(startScreenButton);
-            show(ScreenFpsDiv);
+            if (BUTTONS.main.startScreenButton) {
+                show(startScreenButton);
+                show(ScreenFpsDiv);
+            }
         }
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
     }
