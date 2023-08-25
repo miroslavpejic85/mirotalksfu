@@ -1339,6 +1339,16 @@ function handleSelects() {
     videoQuality.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
     };
+    videoFps.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        lsSettings.video_fps = videoFps.selectedIndex;
+        lS.setSettings(lsSettings);
+    };
+    screenFps.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.screen);
+        lsSettings.screen_fps = screenFps.selectedIndex;
+        lS.setSettings(lsSettings);
+    };
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
@@ -1478,6 +1488,8 @@ function loadSettingsFromLocalStorage() {
     isSoundEnabled = lsSettings.sounds;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
+    videoFps.selectedIndex = lsSettings.video_fps;
+    screenFps.selectedIndex = lsSettings.screen_fps;
     BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
     BtnVideoControls.selectedIndex = lsSettings.video_controls;
     BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;

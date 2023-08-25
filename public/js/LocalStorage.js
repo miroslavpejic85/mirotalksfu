@@ -16,6 +16,8 @@ class LocalStorage {
         };
 
         this.SFU_SETTINGS = {
+            video_fps: 0, // default 1280x768 30fps
+            screen_fps: 0, // max 30fps
             lobby: false,
             pitch_bar: true,
             sounds: true,

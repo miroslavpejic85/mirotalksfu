@@ -1011,11 +1011,15 @@ class RoomClient {
     }
 
     getVideoConstraints(deviceId) {
-        const frameRate = {
+        const defaultFrameRate = {
             min: 5,
             ideal: 15,
             max: 30,
         };
+        const selectedIndex = videoFps.selectedIndex;
+        const selectedValue = videoFps.options[selectedIndex].value;
+        const customFrameRate = { max: parseInt(selectedValue) };
+        const frameRate = selectedValue == 'max' ? defaultFrameRate : customFrameRate;
         let videoConstraints = {
             audio: false,
             video: {
@@ -1127,12 +1131,15 @@ class RoomClient {
     }
 
     getScreenConstraints() {
+        const selectedIndex = screenFps.selectedIndex;
+        const selectedValue = screenFps.options[selectedIndex].value;
+        const frameRate = selectedValue == 'max' ? 30 : parseInt(selectedValue);
         return {
             audio: true,
             video: {
                 width: { max: 1920 },
                 height: { max: 1080 },
-                frameRate: { max: 30 },
+                frameRate: { max: frameRate },
             },
         };
     }
@@ -1313,7 +1320,7 @@ class RoomClient {
         resizeVideoMedia();
     }
 
-    closeThenProduce(type, deviceId, swapCamera = false) {
+    closeThenProduce(type, deviceId = null, swapCamera = false) {
         this.closeProducer(type);
         setTimeout(function () {
             rc.produce(type, deviceId, swapCamera);
