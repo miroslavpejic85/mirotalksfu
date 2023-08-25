@@ -207,17 +207,19 @@ access to use this app.
                             <option value="5">5 -frame-per-second</option>
                         </select>
                         <br />
-                        <div class="title">
-                            <i class="fa-solid fa-desktop"></i>
-                            <p>Screen FPS:</p>
+                        <div id="ScreenFpsDiv" class="hidden">
+                            <div class="title">
+                                <i class="fa-solid fa-desktop"></i>
+                                <p>Screen FPS:</p>
+                            </div>
+                            <br />
+                            <select id="screenFps" class="form-select text-light bg-dark">
+                                <option value="max">max frame-per-second</option>
+                                <option value="30">30 - frame-per-second</option>
+                                <option value="15">15 - frame-per-second</option>
+                                <option value="5">5 -frame-per-second</option>
+                            </select>
                         </div>
-                        <br />
-                        <select id="screenFps" class="form-select text-light bg-dark">
-                            <option value="max">max frame-per-second</option>
-                            <option value="30">30 - frame-per-second</option>
-                            <option value="15">15 - frame-per-second</option>
-                            <option value="5">5 -frame-per-second</option>
-                        </select>
                     </div>
 
                     <div id="tabAudioDevices" class="tabcontent">

@@ -821,6 +821,7 @@ function roomIsReady() {
         rc.makeDraggable(lobby, lobbyHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             BUTTONS.main.startScreenButton && show(startScreenButton);
+            show(ScreenFpsDiv);
         }
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
     }
