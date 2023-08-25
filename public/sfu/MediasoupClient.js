@@ -2852,6 +2852,8 @@
                         super();
                         // Closed flag.
                         this._closed = false;
+                        // Transport ICE gathering state.
+                        this._iceGatheringState = 'new';
                         // Transport connection state.
                         this._connectionState = 'new';
                         // Map of Producers indexed by id.
@@ -2938,6 +2940,12 @@
                         return this._handler;
                     }
                     /**
+                     * ICE gathering state.
+                     */
+                    get iceGatheringState() {
+                        return this._iceGatheringState;
+                    }
+                    /**
                      * Connection state.
                      */
                     get connectionState() {
@@ -2971,6 +2979,9 @@
                         this._awaitQueue.stop();
                         // Close the handler.
                         this._handler.close();
+                        // Change connection state to 'closed' since the handler may not emit
+                        // '@connectionstatechange' event.
+                        this._connectionState = 'closed';
                         // Close all Producers.
                         for (const producer of this._producers.values()) {
                             producer.transportClosed();
@@ -3516,6 +3527,16 @@
                             }
                             this.safeEmit('connect', { dtlsParameters }, callback, errback);
                         });
+                        handler.on('@icegatheringstatechange', (iceGatheringState) => {
+                            if (iceGatheringState === this._iceGatheringState) {
+                                return;
+                            }
+                            logger.debug('ICE gathering state changed to %s', iceGatheringState);
+                            this._iceGatheringState = iceGatheringState;
+                            if (!this._closed) {
+                                this.safeEmit('icegatheringstatechange', iceGatheringState);
+                            }
+                        });
                         handler.on('@connectionstatechange', (connectionState) => {
                             if (connectionState === this._connectionState) {
                                 return;
@@ -3892,6 +3913,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -4613,6 +4637,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -5192,6 +5219,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -5815,6 +5845,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -6492,6 +6525,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -7732,6 +7768,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -8485,6 +8524,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -9086,6 +9128,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -9845,6 +9890,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -10473,6 +10521,9 @@
                             },
                             proprietaryConstraints,
                         );
+                        this._pc.addEventListener('icegatheringstatechange', () => {
+                            this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -12287,9 +12338,9 @@
                 }
                 exports.extractRtpCapabilities = extractRtpCapabilities;
                 function extractDtlsParameters({ sdpObject }) {
-                    const mediaObject = (sdpObject.media || []).find((m) => m.iceUfrag && m.port !== 0);
+                    const mediaObject = (sdpObject.media || []).find((m) => m.port !== 0 && m.setup);
                     if (!mediaObject) {
-                        throw new Error('no active media section found');
+                        throw new Error('no active media section with DTLS role found');
                     }
                     const fingerprint = mediaObject.fingerprint || sdpObject.fingerprint;
                     let role;
@@ -12736,7 +12787,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.97';
+                exports.version = '3.6.99';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
