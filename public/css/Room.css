@@ -324,6 +324,7 @@ body {
 
 .title {
     display: inline-flex;
+    align-items: center;
     text-align: left;
     color: white;
 }
@@ -352,7 +353,7 @@ th {
     border-radius: 5px;
 }
 .custom-width {
-    width: 160px;
+    width: 130px;
 }
 
 /*--------------------------------------------------------------
