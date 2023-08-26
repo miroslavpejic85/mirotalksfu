@@ -3927,9 +3927,9 @@ class RoomClient {
                         this.socket
                             .request('getPeerCounts')
                             .then(
-                                async function (data) {
+                                async function (res) {
                                     // Only the presenter can lock the room
-                                    if (isPresenter || data.peerCounts == 1) {
+                                    if (isPresenter || res.peerCounts == 1) {
                                         isPresenter = true;
                                         data.password = room_password;
                                         this.socket.emit('roomAction', data);
