@@ -131,7 +131,7 @@ function initClient() {
     setTheme();
     if (!DetectRTC.isMobileDevice) {
         setTippy('shareButton', 'Share room', 'right');
-        setTippy('hideMeButton', 'Toggle hide me', 'right');
+        setTippy('hideMeButton', 'Toggle hide self view', 'right');
         setTippy('startAudioButton', 'Start the audio', 'right');
         setTippy('stopAudioButton', 'Stop the audio', 'right');
         setTippy('startVideoButton', 'Start the video', 'right');
@@ -760,6 +760,7 @@ function joinRoom(peer_name, room_id) {
         console.log('Already connected to a room');
     } else {
         console.log('05 ----> join Room ' + room_id);
+        roomId.innerText = room_id;
         rc = new RoomClient(
             localAudio,
             remoteAudios,

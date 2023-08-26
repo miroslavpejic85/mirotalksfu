@@ -333,7 +333,7 @@ body {
 --------------------------------------------------------------*/
 
 .settingsTable {
-    width: 320px;
+    width: 100%;
     color: #fff;
     table-layout: fixed;
     border-collapse: collapse;
@@ -351,9 +351,8 @@ th {
     border: none;
     border-radius: 5px;
 }
-
-#sessionTime {
-    float: right;
+.custom-width {
+    width: 160px;
 }
 
 /*--------------------------------------------------------------
@@ -446,7 +445,7 @@ th {
 }
 
 /* on open display devices tab */
-#tabVideoDevices {
+#tabRoom {
     display: block;
 }
 

@@ -2273,7 +2273,7 @@ class RoomClient {
         }
     }
 
-    getSelectedIndexValue(elem){
+    getSelectedIndexValue(elem) {
         return elem.options[elem.selectedIndex].value;
     }
 
