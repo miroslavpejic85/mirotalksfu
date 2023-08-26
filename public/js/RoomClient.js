@@ -1016,8 +1016,7 @@ class RoomClient {
             ideal: 15,
             max: 30,
         };
-        const selectedIndex = videoFps.selectedIndex;
-        const selectedValue = videoFps.options[selectedIndex].value;
+        const selectedValue = this.getSelectedIndexValue(videoFps);
         const customFrameRate = { max: parseInt(selectedValue) };
         const frameRate = selectedValue == 'max' ? defaultFrameRate : customFrameRate;
         let videoConstraints = {
@@ -1131,8 +1130,7 @@ class RoomClient {
     }
 
     getScreenConstraints() {
-        const selectedIndex = screenFps.selectedIndex;
-        const selectedValue = screenFps.options[selectedIndex].value;
+        const selectedValue = this.getSelectedIndexValue(screenFps);
         const frameRate = selectedValue == 'max' ? 30 : parseInt(selectedValue);
         return {
             audio: true,
@@ -2273,6 +2271,10 @@ class RoomClient {
         for (let [key, value] of map.entries()) {
             if (value === searchValue) return key;
         }
+    }
+
+    getSelectedIndexValue(elem){
+        return elem.options[elem.selectedIndex].value;
     }
 
     // ####################################################

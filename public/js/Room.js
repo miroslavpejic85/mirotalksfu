@@ -1539,12 +1539,13 @@ function handleRoomClientEvents() {
         console.log('Room Client raise hand');
         hide(raiseHandButton);
         show(lowerHandButton);
-        setColor(lowerHandButton, 'green');
+        setColor(lowerHandIcon, 'lime');
     });
     rc.on(RoomClient.EVENTS.lowerHand, () => {
         console.log('Room Client lower hand');
         hide(lowerHandButton);
         show(raiseHandButton);
+        setColor(lowerHandIcon, 'white');
     });
     rc.on(RoomClient.EVENTS.startAudio, () => {
         console.log('Room Client start audio');
