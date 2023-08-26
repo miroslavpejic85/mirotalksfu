@@ -2281,8 +2281,8 @@ class RoomClient {
     // UTILITY
     // ####################################################
 
-    async sound(name) {
-        if (!isSoundEnabled) return;
+    async sound(name, force = false) {
+        if (!isSoundEnabled && !force) return;
         let sound = '../sounds/' + name + '.wav';
         let audio = new Audio(sound);
         try {

@@ -982,6 +982,9 @@ function handleButtons() {
     tabLanguagesBtn.onclick = (e) => {
         rc.openTab(e, 'tabLanguages');
     };
+    speakerTestBtn.onclick = () => {
+        sound('ring', true);
+    };
     chatButton.onclick = () => {
         rc.toggleChat();
     };
@@ -1782,8 +1785,8 @@ function setVideoButtonsDisabled(disabled) {
     stopVideoButton.disabled = disabled;
 }
 
-async function sound(name) {
-    if (!isSoundEnabled) return;
+async function sound(name, force = false) {
+    if (!isSoundEnabled && !force) return;
     let sound = '../sounds/' + name + '.wav';
     let audio = new Audio(sound);
     try {
