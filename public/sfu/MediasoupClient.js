@@ -12338,13 +12338,22 @@
                 }
                 exports.extractRtpCapabilities = extractRtpCapabilities;
                 function extractDtlsParameters({ sdpObject }) {
-                    const mediaObject = (sdpObject.media || []).find((m) => m.port !== 0 && m.setup);
-                    if (!mediaObject) {
-                        throw new Error('no active media section with DTLS role found');
+                    let setup = sdpObject.setup;
+                    let fingerprint = sdpObject.fingerprint;
+                    if (!setup || !fingerprint) {
+                        const mediaObject = (sdpObject.media || []).find((m) => m.port !== 0);
+                        if (mediaObject) {
+                            setup ?? (setup = mediaObject.setup);
+                            fingerprint ?? (fingerprint = mediaObject.fingerprint);
+                        }
                     }
-                    const fingerprint = mediaObject.fingerprint || sdpObject.fingerprint;
+                    if (!setup) {
+                        throw new Error('no a=setup found at SDP session or media level');
+                    } else if (!fingerprint) {
+                        throw new Error('no a=fingerprint found at SDP session or media level');
+                    }
                     let role;
-                    switch (mediaObject.setup) {
+                    switch (setup) {
                         case 'active':
                             role = 'client';
                             break;
@@ -12787,7 +12796,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.99';
+                exports.version = '3.6.100';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
