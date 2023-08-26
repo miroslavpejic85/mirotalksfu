@@ -307,6 +307,7 @@ async function initEnumerateAudioDevices() {
         .getUserMedia({ audio: true })
         .then((stream) => {
             enumerateAudioDevices(stream);
+            getMicrophoneVolumeIndicator(stream);
             isAudioAllowed = true;
         })
         .catch(() => {
@@ -374,6 +375,37 @@ function addChild(device, els) {
         }
         el.appendChild(option);
     });
+}
+
+// ####################################################
+// MICROPHONE VOLUME INDICATOR
+// ####################################################
+
+function getMicrophoneVolumeIndicator(stream) {
+    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    const microphone = audioContext.createMediaStreamSource(stream);
+    const scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
+    scriptProcessor.onaudioprocess = function (event) {
+        const inputBuffer = event.inputBuffer.getChannelData(0);
+        let sum = 0;
+        for (let i = 0; i < inputBuffer.length; i++) {
+            sum += inputBuffer[i] * inputBuffer[i];
+        }
+        const rms = Math.sqrt(sum / inputBuffer.length);
+        const volume = Math.max(0, Math.min(1, rms * 10)) * 100;
+        if (volume > 1) updateVolumeIndicator(volume);
+    };
+    microphone.connect(scriptProcessor);
+    scriptProcessor.connect(audioContext.destination);
+}
+
+function updateVolumeIndicator(volume) {
+    const MIN_VOLUME = 0;
+    const MAX_VOLUME = 100;
+    const clampedVolume = Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, volume));
+    const volumePercentage = ((clampedVolume - MIN_VOLUME) / (MAX_VOLUME - MIN_VOLUME)) * 100;
+    volumeLevel.style.width = `${volumePercentage}%`;
+    //volumeText.textContent = `${clampedVolume.toFixed(0)}%`;
 }
 
 // ####################################################

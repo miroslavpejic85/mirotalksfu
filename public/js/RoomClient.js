@@ -900,6 +900,7 @@ class RoomClient {
                 this.audioProducerId = producer.id;
                 au = await this.handleProducer(producer.id, type, stream);
                 //if (!isEnumerateDevices) enumerateAudioDevices(stream);
+                getMicrophoneVolumeIndicator(stream);
             }
 
             producer.on('trackended', () => {

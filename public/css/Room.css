@@ -451,6 +451,39 @@ th {
 }
 
 /*--------------------------------------------------------------
+# Settings - microphone volume indicator
+--------------------------------------------------------------*/
+
+#volumeContainer {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background-color: var(--body-bg);
+    border-radius: 10px;
+}
+
+#volumeBar {
+    flex: 1;
+    height: 5px;
+    background-color: #000000;
+    position: relative;
+    border-radius: 5px;
+}
+
+#volumeLevel {
+    height: 100%;
+    background-color: #007bff;
+    border-radius: 5px;
+    transition: width 100ms ease-in-out;
+}
+
+#volumeText {
+    margin-left: 10px;
+    font-weight: bold;
+    color: #333;
+}
+
+/*--------------------------------------------------------------
 # Chat Room
 --------------------------------------------------------------*/
 
