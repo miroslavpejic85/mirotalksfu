@@ -46,7 +46,7 @@
         "mediasoup": "3.12.10",
         "mediasoup-client": "3.6.100",
         "ngrok": "^4.3.3",
-        "openai": "^4.2.0",
+        "openai": "^4.3.0",
         "qs": "6.11.2",
         "socket.io": "4.7.2",
         "swagger-ui-express": "5.0.0",
