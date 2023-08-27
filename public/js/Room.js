@@ -123,6 +123,8 @@ let isRoomLocked = false;
 
 let initStream = null;
 
+let scriptProcessor = null;
+
 // ####################################################
 // INIT ROOM
 // ####################################################
@@ -384,9 +386,10 @@ function addChild(device, els) {
 // ####################################################
 
 function getMicrophoneVolumeIndicator(stream) {
+    stopMicrophoneProcessing();
     const audioContext = new (window.AudioContext || window.webkitAudioContext)();
     const microphone = audioContext.createMediaStreamSource(stream);
-    const scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
+    scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
     scriptProcessor.onaudioprocess = function (event) {
         const inputBuffer = event.inputBuffer.getChannelData(0);
         let sum = 0;
@@ -399,6 +402,14 @@ function getMicrophoneVolumeIndicator(stream) {
     };
     microphone.connect(scriptProcessor);
     scriptProcessor.connect(audioContext.destination);
+}
+
+function stopMicrophoneProcessing() {
+    if (scriptProcessor) {
+        scriptProcessor.disconnect();
+        scriptProcessor = null;
+    }
+    volumeLevel.style.width = '0%';
 }
 
 function updateVolumeIndicator(volume) {
@@ -1607,6 +1618,7 @@ function handleRoomClientEvents() {
         hide(stopAudioButton);
         show(startAudioButton);
         setAudioButtonsDisabled(false);
+        stopMicrophoneProcessing();
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room Client start video');
