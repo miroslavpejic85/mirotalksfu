@@ -410,6 +410,7 @@ function stopMicrophoneProcessing() {
         scriptProcessor = null;
     }
     volumeLevel.style.width = '0%';
+    //volumeText.textContent = '0%';
 }
 
 function updateVolumeIndicator(volume) {
