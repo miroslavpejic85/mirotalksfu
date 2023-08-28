@@ -1427,7 +1427,10 @@ function handleSelects() {
             setAudioButtonsDisabled(true);
             if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
             rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
-            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+            setTimeout(function () {
+                rc.pauseProducer(RoomClient.mediaType.audio);
+                rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
+            }, 1000);
         }
         isPushToTalkActive = !isPushToTalkActive;
         if (producerExist && !isPushToTalkActive) {
