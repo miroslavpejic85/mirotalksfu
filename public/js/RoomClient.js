@@ -1319,6 +1319,10 @@ class RoomClient {
         resizeVideoMedia();
     }
 
+    producerExist(type) {
+        return this.producerLabel.has(type);
+    }
+
     closeThenProduce(type, deviceId = null, swapCamera = false) {
         this.closeProducer(type);
         setTimeout(function () {

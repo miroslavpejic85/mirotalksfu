@@ -82,6 +82,8 @@ isPresenter = isPeerPresenter();
 let peer_info = null;
 
 let isHideMeActive = false;
+let isPushToTalkActive = false;
+let isSpaceDown = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isLobbyEnabled = false;
@@ -156,6 +158,11 @@ function initClient() {
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('tabLanguagesBtn', 'Languages', 'top');
+        setTippy(
+            'switchPushToTalk',
+            'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
+            'right',
+        );
         setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
         setTippy('lobbyRejectAllBtn', 'Reject', 'top');
         setTippy(
@@ -873,6 +880,7 @@ function roomIsReady() {
             }
         }
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
     }
     if (DetectRTC.browser.name != 'Safari') {
         document.onfullscreenchange = () => {
@@ -1107,6 +1115,7 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
     startAudioButton.onclick = () => {
+        if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
         if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
@@ -1114,6 +1123,7 @@ function handleButtons() {
         // rc.resumeProducer(RoomClient.mediaType.audio);
     };
     stopAudioButton.onclick = () => {
+        if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.audio);
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
@@ -1410,6 +1420,43 @@ function handleSelects() {
         rc.attachSinkId(rc.myAudioEl, initSpeakerSelect.value);
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
     };
+    switchPushToTalk.onchange = (e) => {
+        const producerExist = rc.producerExist(RoomClient.mediaType.audio);
+        if (!producerExist && !isPushToTalkActive) {
+            console.log('Push-to-talk: start audio producer');
+            setAudioButtonsDisabled(true);
+            if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
+            rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+        }
+        isPushToTalkActive = !isPushToTalkActive;
+        if (producerExist && !isPushToTalkActive) {
+            console.log('Push-to-talk: resume audio producer');
+            rc.resumeProducer(RoomClient.mediaType.audio);
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+        }
+        e.target.blur(); // Removes focus from the element
+        console.log(`Push-to-talk enabled: ${isPushToTalkActive}`);
+    };
+    document.addEventListener('keydown', (e) => {
+        if (!isPushToTalkActive) return;
+        if (e.code === 'Space') {
+            if (isSpaceDown) return;
+            rc.resumeProducer(RoomClient.mediaType.audio);
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+            isSpaceDown = true;
+            console.log('Push-to-talk: audio resumed');
+        }
+    });
+    document.addEventListener('keyup', (e) => {
+        if (!isPushToTalkActive) return;
+        if (e.code === 'Space') {
+            rc.pauseProducer(RoomClient.mediaType.audio);
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
+            isSpaceDown = false;
+            console.log('Push-to-talk: audio paused');
+        }
+    });
     // room
     switchLobby.onchange = (e) => {
         isLobbyEnabled = e.currentTarget.checked;
@@ -1417,18 +1464,21 @@ function handleSelects() {
         rc.lobbyToggle();
         lsSettings.lobby = isLobbyEnabled;
         lS.setSettings(lsSettings);
+        e.target.blur();
     };
     switchPitchBar.onchange = (e) => {
         isPitchBarEnabled = e.currentTarget.checked;
         rc.roomMessage('pitchBar', isPitchBarEnabled);
         lsSettings.pitch_bar = isPitchBarEnabled;
         lS.setSettings(lsSettings);
+        e.target.blur();
     };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
         rc.roomMessage('sounds', isSoundEnabled);
         lsSettings.sounds = isSoundEnabled;
         lS.setSettings(lsSettings);
+        e.target.blur();
     };
     // styling
     BtnAspectRatio.onchange = () => {
@@ -1468,6 +1518,7 @@ function handleSelects() {
         } else {
             userLog('info', 'Chat not will be shown, when you receive a message', 'top-end');
         }
+        e.target.blur();
     };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {

@@ -45,6 +45,7 @@
 -   Chat with Emoji Picker to show you feeling, private messages, Markdown support, possibility to Save the conversations, and many more.
 -   ChatGPT (openAI), designed to answer users' questions, provide relevant information, and connect them with relevant resources.
 -   Speech recognition, execute the app features simply with your voice.
+-   Push to talk, like a walkie-talkie.
 -   Advance collaborative whiteboard for the teachers.
 -   Select Microphone - Speaker and Video source.
 -   Recording your Screen, Audio, or Video.

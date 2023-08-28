@@ -28,6 +28,7 @@ const BUTTONS = {
         unlockRoomButton: true,
         lobbyButton: true,
         tabRecording: true,
+        pushToTalk: true,
     },
     producerVideo: {
         videoPictureInPicture: true,
