@@ -42,6 +42,7 @@ const html = {
 };
 
 const icons = {
+    ptt: '<i class="fa-solid fa-hand-pointer"></i>',
     lobby: '<i class="fas fa-shield-halved"></i>',
     lock: '<i class="fa-solid fa-lock"></i>',
     unlock: '<i class="fa-solid fa-lock-open"></i>',
@@ -4023,6 +4024,10 @@ class RoomClient {
             case 'sounds':
                 this.sound('switch');
                 this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top-end');
+                break;
+            case 'ptt':
+                this.sound('switch');
+                this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top-end');
                 break;
             default:
                 break;

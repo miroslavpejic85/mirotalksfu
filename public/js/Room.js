@@ -1439,6 +1439,7 @@ function handleSelects() {
             rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
         }
         e.target.blur(); // Removes focus from the element
+        rc.roomMessage('ptt', isPushToTalkActive);
         console.log(`Push-to-talk enabled: ${isPushToTalkActive}`);
     };
     document.addEventListener('keydown', (e) => {
