@@ -1523,6 +1523,8 @@ function handleSelects() {
         } else {
             userLog('info', 'Chat not will be shown, when you receive a message', 'top-end');
         }
+        lsSettings.show_chat_on_msg = rc.showChatOnMessage;
+        lS.setSettings(lsSettings);
         e.target.blur();
     };
     // whiteboard options
@@ -1593,8 +1595,10 @@ function handleInputs() {
 // ####################################################
 
 function loadSettingsFromLocalStorage() {
+    rc.showChatOnMessage = lsSettings.show_chat_on_msg;
     isPitchBarEnabled = lsSettings.pitch_bar;
     isSoundEnabled = lsSettings.sounds;
+    showChatOnMsg.checked = rc.showChatOnMessage;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
     videoFps.selectedIndex = lsSettings.video_fps;

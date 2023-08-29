@@ -16,6 +16,7 @@ class LocalStorage {
         };
 
         this.SFU_SETTINGS = {
+            show_chat_on_msg: true,
             video_fps: 0, // default 1280x768 30fps
             screen_fps: 0, // max 30fps
             lobby: false,
