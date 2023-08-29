@@ -44,6 +44,8 @@ const _PEER = {
     sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
+const bars = document.querySelectorAll('.volume-bar');
+
 const userAgent = navigator.userAgent.toLowerCase();
 const isTabletDevice = isTablet(userAgent);
 const isIPadDevice = isIpad(userAgent);
@@ -404,8 +406,8 @@ function getMicrophoneVolumeIndicator(stream) {
             sum += inputBuffer[i] * inputBuffer[i];
         }
         const rms = Math.sqrt(sum / inputBuffer.length);
-        const volume = Math.max(0, Math.min(1, rms * 10)) * 100;
-        if (volume > 1) updateVolumeIndicator(volume);
+        const volume = Math.max(0, Math.min(1, rms * 10));
+        updateVolumeIndicator(volume);
     };
     microphone.connect(scriptProcessor);
     scriptProcessor.connect(audioContext.destination);
@@ -416,17 +418,16 @@ function stopMicrophoneProcessing() {
         scriptProcessor.disconnect();
         scriptProcessor = null;
     }
-    volumeLevel.style.width = '0%';
-    //volumeText.textContent = '0%';
+    bars.forEach((bar) => {
+        bar.classList.toggle('inactive');
+    });
 }
 
 function updateVolumeIndicator(volume) {
-    const MIN_VOLUME = 0;
-    const MAX_VOLUME = 100;
-    const clampedVolume = Math.min(MAX_VOLUME, Math.max(MIN_VOLUME, volume));
-    const volumePercentage = ((clampedVolume - MIN_VOLUME) / (MAX_VOLUME - MIN_VOLUME)) * 100;
-    volumeLevel.style.width = `${volumePercentage}%`;
-    //volumeText.textContent = `${clampedVolume.toFixed(0)}%`;
+    const activeBars = Math.ceil(volume * bars.length);
+    bars.forEach((bar, index) => {
+        bar.classList.toggle('active', index < activeBars);
+    });
 }
 
 // ####################################################
