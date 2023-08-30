@@ -84,8 +84,8 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    /* background: var(--body-bg); */
-    background: url('../images/background.jpg');
+    background: var(--body-bg);
+    /*background: url('../images/background.jpg');*/
 }
 
 /*--------------------------------------------------------------
