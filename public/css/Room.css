@@ -318,6 +318,12 @@ body {
     border-radius: 5px;
 }
 
+#myProfileAvatar {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 5px;
+}
+
 .form-check-input {
     cursor: pointer;
 }

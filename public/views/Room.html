@@ -161,6 +161,9 @@ access to use this app.
                     <button id="tabVideoShareBtn" class="fab fa-youtube tablinks">
                         <p class="tabButtonText">Media</p>
                     </button>
+                    <button id="tabProfileBtn" class="fas fa-user">
+                        <p class="tabButtonText">Profile</p>
+                    </button>
                     <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks">
                         <p class="tabButtonText">Aspect</p>
                     </button>
@@ -413,6 +416,32 @@ access to use this app.
                             <p>Close Video or Audio</p>
                         </button>
                         <br />
+                    </div>
+
+                    <div id="tabProfile" class="tabcontent">
+                        <div>
+                            <img id="myProfileAvatar" />
+                        </div>
+                        <table class="settingsTable">
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-user"></i>
+                                        <p>Username:</p>
+                                        <p id="userName">UserName</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-user-shield"></i>
+                                        <p>Presenter:</p>
+                                        <p id="isUserPresenter">true</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
 
                     <div id="tabAspect" class="tabcontent">

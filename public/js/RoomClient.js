@@ -325,6 +325,7 @@ class RoomClient {
             let my_peer_info = peers.get(peer).peer_info;
             console.log('07.1 ----> My Peer info', my_peer_info);
             isPresenter = window.localStorage.isReconnected === 'true' ? isPresenter : my_peer_info.peer_presenter;
+            this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
             handleRules(isPresenter);
         }
@@ -3937,6 +3938,7 @@ class RoomClient {
                                     // Only the presenter can lock the room
                                     if (isPresenter || res.peerCounts == 1) {
                                         isPresenter = true;
+                                        this.getId('isUserPresenter').innerText = isPresenter;
                                         data.password = room_password;
                                         this.socket.emit('roomAction', data);
                                         this.roomStatus(action);

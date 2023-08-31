@@ -157,6 +157,7 @@ function initClient() {
         setTippy('tabRecordingBtn', 'Recording', 'top');
         setTippy('tabRoomBtn', 'Room', 'top');
         setTippy('tabVideoShareBtn', 'Video share', 'top');
+        setTippy('tabProfileBtn', 'Profile', 'top');
         setTippy('tabAspectBtn', 'Aspect', 'top');
         setTippy('tabStylingBtn', 'Styling', 'top');
         setTippy('tabLanguagesBtn', 'Languages', 'top');
@@ -815,6 +816,8 @@ function joinRoom(peer_name, room_id) {
     } else {
         console.log('05 ----> join Room ' + room_id);
         roomId.innerText = room_id;
+        userName.innerText = peer_name;
+        isUserPresenter.innerText = isPresenter;
         rc = new RoomClient(
             localAudio,
             remoteAudios,
@@ -838,6 +841,7 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
+    myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
@@ -1030,6 +1034,9 @@ function handleButtons() {
     };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
+    };
+    tabProfileBtn.onclick = (e) => {
+        rc.openTab(e, 'tabProfile');
     };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
