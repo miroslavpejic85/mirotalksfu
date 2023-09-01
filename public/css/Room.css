@@ -405,6 +405,12 @@ th {
     }
 }
 
+@media screen and (max-width: 500px) {
+    .tab {
+        font-size: 0.5rem;
+    }
+}
+
 /* Style the buttons inside the tab */
 .tab button {
     margin: 3px;
