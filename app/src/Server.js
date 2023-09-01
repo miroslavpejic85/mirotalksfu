@@ -1113,7 +1113,7 @@ function startServer() {
                 log.debug('Disconnect - current presenters grouped by roomId', presenters);
             }
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(peerName, isPresenter));
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
             removeIP(socket);
         });
@@ -1136,7 +1136,7 @@ function startServer() {
             // close transports
             await room.removePeer(socket.id);
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(peerName, isPresenter));
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
             if (room.getPeers().size === 0) {
                 roomList.delete(socket.room_id);
@@ -1192,8 +1192,7 @@ function startServer() {
             return pattern.test(input);
         }
 
-        function removeMeData(peerName, isPresenter) {
-            const room = roomList.get(socket.room_id);
+        function removeMeData(room, peerName, isPresenter) {
             const roomId = room && socket.room_id;
             const peerCounts = room && room.getPeers().size;
             log.debug('REMOVE ME DATA', {
