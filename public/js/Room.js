@@ -60,6 +60,7 @@ const lS = new LocalStorage();
 // Get Settings from localStorage
 const localStorageSettings = lS.getObjectLocalStorage('SFU_SETTINGS');
 const lsSettings = localStorageSettings ? localStorageSettings : lS.SFU_SETTINGS;
+console.log('LS_SETTINGS', lsSettings);
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -175,6 +176,7 @@ function initClient() {
         );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
+        setTippy('switchShare', "Show 'Share Room' popup on join.", 'right');
         setTippy('roomId', 'Room name', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
@@ -461,8 +463,9 @@ function getNotify() {
             return queryNotify;
         }
     }
-    console.log('Direct join', { notify: true });
-    return true;
+    notify = lsSettings.share_on_join;
+    console.log('Direct join', { notify: notify });
+    return notify;
 }
 
 function isPeerPresenter() {
@@ -1492,6 +1495,13 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    switchShare.onchange = (e) => {
+        notify = e.currentTarget.checked;
+        rc.roomMessage('notify', notify);
+        lsSettings.share_on_join = notify;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
     // styling
     BtnAspectRatio.onchange = () => {
         setAspectRatio(BtnAspectRatio.value);
@@ -1608,6 +1618,7 @@ function loadSettingsFromLocalStorage() {
     showChatOnMsg.checked = rc.showChatOnMessage;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
+    switchShare.checked = notify;
     videoFps.selectedIndex = lsSettings.video_fps;
     screenFps.selectedIndex = lsSettings.screen_fps;
     BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;

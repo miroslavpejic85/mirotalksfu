@@ -42,6 +42,7 @@ const html = {
 };
 
 const icons = {
+    share: '<i class="fas fa-share-alt"></i>',
     ptt: '<i class="fa-solid fa-hand-pointer"></i>',
     lobby: '<i class="fas fa-shield-halved"></i>',
     lock: '<i class="fa-solid fa-lock"></i>',
@@ -4030,6 +4031,10 @@ class RoomClient {
             case 'ptt':
                 this.sound('switch');
                 this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top-end');
+                break;
+            case 'notify':
+                this.sound('switch');
+                this.userLog('info', `${icons.share} Share room on join enabled ${status}`, 'top-end');
                 break;
             default:
                 break;
