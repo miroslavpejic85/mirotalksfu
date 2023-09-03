@@ -2328,6 +2328,8 @@ class RoomClient {
                     icon: type,
                     title: type,
                     text: message,
+                    showClass: { popup: 'animate__animated animate__rubberBand' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
                 this.sound('alert');
                 break;
@@ -2356,6 +2358,8 @@ class RoomClient {
                 Toast.fire({
                     icon: 'info',
                     title: message,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
                 break;
             // ......
