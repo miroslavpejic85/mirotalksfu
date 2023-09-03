@@ -2313,6 +2313,8 @@ class RoomClient {
         Toast.fire({
             icon: icon,
             title: message,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         });
     }
 
