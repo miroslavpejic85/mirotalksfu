@@ -479,8 +479,8 @@ function isPeerPresenter() {
             return queryPresenter;
         }
     }
-    console.log('Direct join Reconnect', { presenter: true });
-    return true;
+    console.log('Direct join Reconnect', { presenter: false });
+    return false;
 }
 
 function getPeerName() {
