@@ -855,7 +855,7 @@ function startServer() {
 
             if (room.isLobbyEnabled() && !isPresenter) {
                 log.debug(
-                    '"The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
+                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
                 );
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: data.peer_info.peer_id,
