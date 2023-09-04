@@ -1924,8 +1924,11 @@ main {
 
 .last-room {
     display: none;
-    /*inline-flex*/
+    flex-wrap: nowrap;
+    justify-content: center;
+    align-items: center;
 }
+
 .last-room a {
     font-size: 16px;
     line-height: 24px;
@@ -1940,4 +1943,10 @@ main {
 .last-room a:hover {
     color: #097dea;
     transition: all 0.3s ease-in-out;
+}
+
+@media (max-width: 768px) {
+    .last-room {
+        flex-wrap: wrap;
+    }
 }
