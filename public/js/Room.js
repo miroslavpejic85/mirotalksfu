@@ -245,6 +245,7 @@ function getRoomId() {
         roomId = makeId(12);
     }
     console.log('Direct join', { room: roomId });
+    window.localStorage.lastRoom = roomId;
     return roomId;
 }
 
