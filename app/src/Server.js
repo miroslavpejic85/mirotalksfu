@@ -579,23 +579,19 @@ function startServer() {
 
             log.debug('Cmd', data);
 
+            const room = roomList.get(socket.room_id);
+
             // cmd|foo|bar|....
             const words = data.split('|');
             let cmd = words[0];
             switch (cmd) {
                 case 'privacy':
-                    roomList
-                        .get(socket.room_id)
-                        .getPeers()
-                        .get(socket.id)
-                        .updatePeerInfo({ type: cmd, status: words[2] == 'true' });
+                    room.getPeers().get(socket.id).updatePeerInfo({ type: cmd, status: words[2] == 'true' });
                     break;
                 default:
                     break;
                 //...
             }
-
-            const room = roomList.get(socket.room_id);
 
             room.broadCast(socket.id, 'cmd', data);
         });
@@ -836,11 +832,7 @@ function startServer() {
 
             const isPresenter = await isPeerPresenter(socket.room_id, peer_name, peer_uuid);
 
-            roomList
-                .get(socket.room_id)
-                .getPeers()
-                .get(socket.id)
-                .updatePeerInfo({ type: 'presenter', status: isPresenter });
+            room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
 
             log.debug('[Join] - Is presenter', {
                 roomId: socket.room_id,
@@ -951,9 +943,7 @@ function startServer() {
 
             await room.getPeers().get(socket.id).updatePeerInfo(data);
 
-            let producer_id = await roomList
-                .get(socket.room_id)
-                .produce(socket.id, producerTransportId, rtpParameters, kind, appData.mediaType);
+            let producer_id = await room.produce(socket.id, producerTransportId, rtpParameters, kind, appData.mediaType);
 
             log.debug('Produce', {
                 kind: kind,
@@ -980,9 +970,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            let params = await roomList
-                .get(socket.room_id)
-                .consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
+            let params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
 
             log.debug('Consuming', {
                 peer_name: getPeerName(room, false),
