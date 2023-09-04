@@ -1929,6 +1929,15 @@ main {
     align-items: center;
 }
 
+.last-room span {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.1px;
+    font-weight: 600;
+    color: #8a94a7;
+    line-height: 16px;
+}
+
 .last-room a {
     font-size: 16px;
     line-height: 24px;
@@ -1937,7 +1946,7 @@ main {
     color: #8a94a7;
     text-decoration: none;
     line-height: 16px;
-    padding: 8px 24px;
+    padding: 8px 8px;
 }
 
 .last-room a:hover {
