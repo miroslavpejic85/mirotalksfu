@@ -1921,3 +1921,23 @@ main {
         width: 300px;
     }
 }
+
+.last-room {
+    display: none;
+    /*inline-flex*/
+}
+.last-room a {
+    font-size: 16px;
+    line-height: 24px;
+    letter-spacing: -0.1px;
+    font-weight: 600;
+    color: #8a94a7;
+    text-decoration: none;
+    line-height: 16px;
+    padding: 8px 24px;
+}
+
+.last-room a:hover {
+    color: #097dea;
+    transition: all 0.3s ease-in-out;
+}

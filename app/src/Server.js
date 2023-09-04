@@ -586,7 +586,9 @@ function startServer() {
             let cmd = words[0];
             switch (cmd) {
                 case 'privacy':
-                    room.getPeers().get(socket.id).updatePeerInfo({ type: cmd, status: words[2] == 'true' });
+                    room.getPeers()
+                        .get(socket.id)
+                        .updatePeerInfo({ type: cmd, status: words[2] == 'true' });
                     break;
                 default:
                     break;
@@ -943,7 +945,13 @@ function startServer() {
 
             await room.getPeers().get(socket.id).updatePeerInfo(data);
 
-            let producer_id = await room.produce(socket.id, producerTransportId, rtpParameters, kind, appData.mediaType);
+            let producer_id = await room.produce(
+                socket.id,
+                producerTransportId,
+                rtpParameters,
+                kind,
+                appData.mediaType,
+            );
 
             log.debug('Produce', {
                 kind: kind,
