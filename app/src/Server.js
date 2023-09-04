@@ -848,13 +848,15 @@ function startServer() {
                 peer_presenter: isPresenter,
             });
 
-            if (room.isLocked()) {
-                log.debug('User rejected because room is locked');
+            if (room.isLocked() && !isPresenter) {
+                log.debug('The user was rejected because the room is locked, and they are not a presenter');
                 return cb('isLocked');
             }
 
-            if (room.isLobbyEnabled()) {
-                log.debug('User waiting to join room because lobby is enabled');
+            if (room.isLobbyEnabled() && !isPresenter) {
+                log.debug(
+                    '"The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
+                );
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: data.peer_info.peer_id,
                     peer_name: data.peer_info.peer_name,
