@@ -3925,7 +3925,7 @@ class RoomClient {
     // ROOM ACTION
     // ####################################################
 
-    roomAction(action, emit = true) {
+    roomAction(action, emit = true, popup = true) {
         let data = {
             room_id: this.room_id,
             peer_id: this.peer_id,
@@ -3987,11 +3987,11 @@ class RoomClient {
                     break;
                 case 'lobbyOn':
                     this.socket.emit('roomAction', data);
-                    this.roomStatus(action);
+                    if (popup) this.roomStatus(action);
                     break;
                 case 'lobbyOff':
                     this.socket.emit('roomAction', data);
-                    this.roomStatus(action);
+                    if (popup) this.roomStatus(action);
                     break;
             }
         } else {
