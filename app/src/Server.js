@@ -241,6 +241,14 @@ function startServer() {
     app.get(['/logged'], (req, res) => {
         const ip = getIP(req);
         if (allowedIP(ip)) {
+            if (Object.keys(req.query).length > 0) {
+                log.debug('Logged: Direct Join', req.query);
+                // http://localhost:3010/?room=test or http://localhost:3010/join?room=test
+                const { room } = checkXSS(req.query);
+                if (room) {
+                    return res.sendFile(views.room);
+                }
+            }
             res.sendFile(views.landing);
         } else {
             hostCfg.authenticated = false;
