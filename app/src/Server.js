@@ -279,6 +279,9 @@ function startServer() {
                 return res.sendFile(views.room);
             }
         }
+        if (hostCfg.protected) {
+            return res.sendFile(views.login);
+        }
         res.redirect('/');
     });
 
@@ -287,6 +290,9 @@ function startServer() {
         if (hostCfg.authenticated) {
             res.sendFile(views.room);
         } else {
+            if (hostCfg.protected) {
+                return res.sendFile(views.login);
+            }
             res.redirect('/');
         }
     });

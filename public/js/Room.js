@@ -515,6 +515,7 @@ function getRoomPassword() {
         console.log('Direct join', { password: roomPassword });
         return roomPassword;
     }
+    return false;
 }
 
 // ####################################################
