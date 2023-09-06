@@ -97,7 +97,7 @@ After host authentication, participants can join the room using any of the follo
 
 -   https://sfu.mirotalk.com/join/test
 -   https://sfu.mirotalk.com/join/?room=test
--   https://sfu.mirotalk.com/join/?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=0
+-   https://sfu.mirotalk.com/join/?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
 
 </details>
 
