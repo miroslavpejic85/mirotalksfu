@@ -87,6 +87,18 @@
     | screen   | boolean        | screen stream   |
     | notify   | boolean        | welcome message |
 
+> **Note**
+
+When [host protection is enabled](https://github.com/miroslavpejic85/mirotalksfu/commit/ab21686e9ad4b75e14c3ee020141d61b33111dde#commitcomment-62398736), the URL format for direct room access after authentication should be as follows:
+
+-   https://sfu.mirotalk.com/?room=test
+
+After host authentication, participants can join the room using any of the following URL formats:`
+
+-   https://sfu.mirotalk.com/join/test
+-   https://sfu.mirotalk.com/join/?room=test
+-   https://sfu.mirotalk.com/join/?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=0
+
 </details>
 
 <details>

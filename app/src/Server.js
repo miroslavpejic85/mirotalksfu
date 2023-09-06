@@ -204,7 +204,23 @@ function startServer() {
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
-    // all start from here
+    // Logs requests
+    app.use((req, res, next) => {
+        log.debug('New request:', {
+            // headers: req.headers,
+            body: req.body,
+            method: req.method,
+            path: req.originalUrl,
+        });
+        next();
+    });
+
+    // POST start from here...
+    app.post('*', function (next) {
+        next();
+    });
+
+    // GET start from here...
     app.get('*', function (next) {
         next();
     });
@@ -229,57 +245,17 @@ function startServer() {
 
     // main page
     app.get(['/'], (req, res) => {
-        if (hostCfg.protected == true) {
+        if (hostCfg.protected) {
             hostCfg.authenticated = false;
             res.sendFile(views.login);
         } else {
             res.sendFile(views.landing);
-        }
-    });
-
-    // handle logged on host protected
-    app.get(['/logged'], (req, res) => {
-        const ip = getIP(req);
-        if (allowedIP(ip)) {
-            if (Object.keys(req.query).length > 0) {
-                log.debug('Logged: Direct Join', req.query);
-                // http://localhost:3010/?room=test
-                const { room } = checkXSS(req.query);
-                if (room) {
-                    return res.sendFile(views.room);
-                }
-            }
-            res.sendFile(views.landing);
-        } else {
-            hostCfg.authenticated = false;
-            res.sendFile(views.login);
-        }
-    });
-
-    // handle login on host protected
-    app.post(['/login'], (req, res) => {
-        if (hostCfg.protected == true) {
-            let ip = getIP(req);
-            log.debug(`Request login to host from: ${ip}`, req.body);
-            const { username, password } = checkXSS(req.body);
-            if (username == hostCfg.username && password == hostCfg.password) {
-                hostCfg.authenticated = true;
-                authHost = new Host(ip, true);
-                log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-                res.status(200).json({ message: 'authorized' });
-            } else {
-                log.debug('LOGIN KO', { ip: ip, authorized: false });
-                hostCfg.authenticated = false;
-                res.status(401).json({ message: 'unauthorized' });
-            }
-        } else {
-            res.redirect('/');
         }
     });
 
     // set new room name and join
     app.get(['/newroom'], (req, res) => {
-        if (hostCfg.protected == true) {
+        if (hostCfg.protected) {
             let ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.newRoom);
@@ -298,7 +274,8 @@ function startServer() {
             log.debug('Direct Join', req.query);
             // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
             const { room, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
-            if (room && password && name && audio && video && screen && notify) {
+            // if (room && password && name && audio && video && screen && notify) {
+            if (room) {
                 return res.sendFile(views.room);
             }
         }
@@ -339,6 +316,42 @@ function startServer() {
         const stats = config.stats ? config.stats : defaultStats;
         // log.debug('Send stats', stats);
         res.send(stats);
+    });
+
+    // handle logged on host protected
+    app.get(['/logged'], (req, res) => {
+        const ip = getIP(req);
+        if (allowedIP(ip)) {
+            res.sendFile(views.landing);
+        } else {
+            hostCfg.authenticated = false;
+            res.sendFile(views.login);
+        }
+    });
+
+    // ####################################################
+    // AXIOS
+    // ####################################################
+
+    // handle login on host protected
+    app.post(['/login'], (req, res) => {
+        if (hostCfg.protected) {
+            let ip = getIP(req);
+            log.debug(`Request login to host from: ${ip}`, req.body);
+            const { username, password } = checkXSS(req.body);
+            if (username == hostCfg.username && password == hostCfg.password) {
+                hostCfg.authenticated = true;
+                authHost = new Host(ip, true);
+                log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+                res.status(200).json({ message: 'authorized' });
+            } else {
+                log.debug('LOGIN KO', { ip: ip, authorized: false });
+                hostCfg.authenticated = false;
+                res.status(401).json({ message: 'unauthorized' });
+            }
+        } else {
+            res.redirect('/');
+        }
     });
 
     // ####################################################
@@ -1265,7 +1278,7 @@ function startServer() {
         return authHost != null && authHost.isAuthorized(ip);
     }
     function removeIP(socket) {
-        if (hostCfg.protected == true) {
+        if (hostCfg.protected) {
             let ip = socket.handshake.address;
             if (ip && allowedIP(ip)) {
                 authHost.deleteIP(ip);
