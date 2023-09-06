@@ -93,7 +93,7 @@ When [host protection is enabled](https://github.com/miroslavpejic85/mirotalksfu
 
 -   https://sfu.mirotalk.com/?room=test
 
-After host authentication, participants can join the room using any of the following URL formats:`
+After host authentication, participants can join the room using any of the following URL formats:
 
 -   https://sfu.mirotalk.com/join/test
 -   https://sfu.mirotalk.com/join/?room=test
