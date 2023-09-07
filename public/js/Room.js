@@ -401,22 +401,24 @@ function addChild(device, els) {
 // ####################################################
 
 function getMicrophoneVolumeIndicator(stream) {
-    stopMicrophoneProcessing();
-    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-    const microphone = audioContext.createMediaStreamSource(stream);
-    scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
-    scriptProcessor.onaudioprocess = function (event) {
-        const inputBuffer = event.inputBuffer.getChannelData(0);
-        let sum = 0;
-        for (let i = 0; i < inputBuffer.length; i++) {
-            sum += inputBuffer[i] * inputBuffer[i];
-        }
-        const rms = Math.sqrt(sum / inputBuffer.length);
-        const volume = Math.max(0, Math.min(1, rms * 10));
-        updateVolumeIndicator(volume);
-    };
-    microphone.connect(scriptProcessor);
-    scriptProcessor.connect(audioContext.destination);
+    if (isAudioContextSupported() && hasAudioTrack(stream)) {
+        stopMicrophoneProcessing();
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const microphone = audioContext.createMediaStreamSource(stream);
+        scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
+        scriptProcessor.onaudioprocess = function (event) {
+            const inputBuffer = event.inputBuffer.getChannelData(0);
+            let sum = 0;
+            for (let i = 0; i < inputBuffer.length; i++) {
+                sum += inputBuffer[i] * inputBuffer[i];
+            }
+            const rms = Math.sqrt(sum / inputBuffer.length);
+            const volume = Math.max(0, Math.min(1, rms * 10));
+            updateVolumeIndicator(volume);
+        };
+        microphone.connect(scriptProcessor);
+        scriptProcessor.connect(audioContext.destination);
+    }
 }
 
 function stopMicrophoneProcessing() {
@@ -434,6 +436,20 @@ function updateVolumeIndicator(volume) {
     bars.forEach((bar, index) => {
         bar.classList.toggle('active', index < activeBars);
     });
+}
+
+function isAudioContextSupported() {
+    return !!(window.AudioContext || window.webkitAudioContext);
+}
+
+function hasAudioTrack(mediaStream) {
+    const audioTracks = mediaStream.getAudioTracks();
+    return audioTracks.length > 0;
+}
+
+function hasVideoTrack(mediaStream) {
+    const videoTracks = mediaStream.getVideoTracks();
+    return videoTracks.length > 0;
 }
 
 // ####################################################
