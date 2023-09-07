@@ -19,7 +19,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 // STATIC SETTINGS
 // ####################################################
 
-const RoomURL = window.location.href;
+console.log('Window Location', window.location);
 
 const socket = io({ transports: ['websocket'] });
 
@@ -129,6 +129,8 @@ let isRoomLocked = false;
 let initStream = null;
 
 let scriptProcessor = null;
+
+const RoomURL = window.location.origin + '/join/' + room_id;
 
 // ####################################################
 // INIT ROOM
