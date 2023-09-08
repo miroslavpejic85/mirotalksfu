@@ -91,6 +91,7 @@ let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isLobbyEnabled = false;
 let isLobbyOpen = false;
+let hostOnlyRecording = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
@@ -178,9 +179,10 @@ function initClient() {
         );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
-        setTippy('switchShare', "Show 'Share Room' popup on join.", 'right');
+        setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('roomId', 'Room name', 'right');
         setTippy('sessionTime', 'Session time', 'right');
+        setTippy('roomRecording', 'Only the host (presenter) has the capability to record the meeting', 'bottom');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -924,6 +926,7 @@ function roomIsReady() {
     show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
+    BUTTONS.settings.host_only_recording && show(roomRecording);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     handleButtons();
@@ -1522,6 +1525,14 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    // recording
+    switchHostOnlyRecording.onchange = (e) => {
+        hostOnlyRecording = e.currentTarget.checked;
+        rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff');
+        lsSettings.host_only_recording = hostOnlyRecording;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
     // styling
     BtnAspectRatio.onchange = () => {
         setAspectRatio(BtnAspectRatio.value);
@@ -1657,7 +1668,7 @@ function loadSettingsFromLocalStorage() {
 
 function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.startRec, () => {
-        console.log('Room Client start recoding');
+        console.log('Room event: Client start recoding');
         hide(startRecButton);
         show(stopRecButton);
         show(pauseRecButton);
@@ -1665,17 +1676,17 @@ function handleRoomClientEvents() {
         startRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.pauseRec, () => {
-        console.log('Room Client pause recoding');
+        console.log('Room event: Client pause recoding');
         hide(pauseRecButton);
         show(resumeRecButton);
     });
     rc.on(RoomClient.EVENTS.resumeRec, () => {
-        console.log('Room Client resume recoding');
+        console.log('Room event: Client resume recoding');
         hide(resumeRecButton);
         show(pauseRecButton);
     });
     rc.on(RoomClient.EVENTS.stopRec, () => {
-        console.log('Room Client stop recoding');
+        console.log('Room event: Client stop recoding');
         hide(stopRecButton);
         hide(pauseRecButton);
         hide(resumeRecButton);
@@ -1684,43 +1695,43 @@ function handleRoomClientEvents() {
         stopRecordingTimer();
     });
     rc.on(RoomClient.EVENTS.raiseHand, () => {
-        console.log('Room Client raise hand');
+        console.log('Room event: Client raise hand');
         hide(raiseHandButton);
         show(lowerHandButton);
         setColor(lowerHandIcon, 'lime');
     });
     rc.on(RoomClient.EVENTS.lowerHand, () => {
-        console.log('Room Client lower hand');
+        console.log('Room event: Client lower hand');
         hide(lowerHandButton);
         show(raiseHandButton);
         setColor(lowerHandIcon, 'white');
     });
     rc.on(RoomClient.EVENTS.startAudio, () => {
-        console.log('Room Client start audio');
+        console.log('Room event: Client start audio');
         hide(startAudioButton);
         show(stopAudioButton);
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
-        console.log('Room Client pause audio');
+        console.log('Room event: Client pause audio');
         hide(stopAudioButton);
         show(startAudioButton);
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
-        console.log('Room Client resume audio');
+        console.log('Room event: Client resume audio');
         hide(startAudioButton);
         show(stopAudioButton);
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
-        console.log('Room Client stop audio');
+        console.log('Room event: Client stop audio');
         hide(stopAudioButton);
         show(startAudioButton);
         setAudioButtonsDisabled(false);
         stopMicrophoneProcessing();
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
-        console.log('Room Client start video');
+        console.log('Room event: Client start video');
         hide(startVideoButton);
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
@@ -1728,17 +1739,17 @@ function handleRoomClientEvents() {
         if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
-        console.log('Room Client pause video');
+        console.log('Room event: Client pause video');
         hide(stopVideoButton);
         show(startVideoButton);
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
-        console.log('Room Client resume video');
+        console.log('Room event: Client resume video');
         hide(startVideoButton);
         show(stopVideoButton);
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
-        console.log('Room Client stop video');
+        console.log('Room event: Client stop video');
         hide(stopVideoButton);
         show(startVideoButton);
         setVideoButtonsDisabled(false);
@@ -1746,38 +1757,38 @@ function handleRoomClientEvents() {
         if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
-        console.log('Room Client start screen');
+        console.log('Room event: Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
         if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
-        console.log('Room Client pause screen');
+        console.log('Room event: Client pause screen');
     });
     rc.on(RoomClient.EVENTS.resumeScreen, () => {
-        console.log('Room Client resume screen');
+        console.log('Room event: Client resume screen');
     });
     rc.on(RoomClient.EVENTS.stopScreen, () => {
-        console.log('Room Client stop screen');
+        console.log('Room event: Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
         if (isParticipantsListOpen) getRoomParticipants(true);
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
-        console.log('Room Client lock room');
+        console.log('Room event: Client lock room');
         hide(lockRoomButton);
         show(unlockRoomButton);
         setColor(unlockRoomButton, 'red');
         isRoomLocked = true;
     });
     rc.on(RoomClient.EVENTS.roomUnlock, () => {
-        console.log('Room Client unlock room');
+        console.log('Room event: Client unlock room');
         hide(unlockRoomButton);
         show(lockRoomButton);
         isRoomLocked = false;
     });
     rc.on(RoomClient.EVENTS.lobbyOn, () => {
-        console.log('Room Client room lobby enabled');
+        console.log('Room event: Client room lobby enabled');
         if (isRulesActive && !isPresenter) {
             hide(lobbyButton);
         }
@@ -1785,13 +1796,36 @@ function handleRoomClientEvents() {
         isLobbyEnabled = true;
     });
     rc.on(RoomClient.EVENTS.lobbyOff, () => {
-        console.log('Room Client room lobby disabled');
+        console.log('Room event: Client room lobby disabled');
         isLobbyEnabled = false;
     });
+    rc.on(RoomClient.EVENTS.hostOnlyRecordingOn, () => {
+        if (isRulesActive && !isPresenter) {
+            console.log('Room event: host only recording enabled');
+            // Stop recording ...
+            if (rc.isRecording() || recordingStatus.innerText != '0s') {
+                console.log('Room event: host only recording enabled, going to stop recording');
+                rc.stopRecording();
+            }
+            hide(startRecButton);
+            hide(roomRecording);
+            show(recordingMessage);
+            hostOnlyRecording = true;
+        }
+    });
+    rc.on(RoomClient.EVENTS.hostOnlyRecordingOff, () => {
+        if (isRulesActive && !isPresenter) {
+            console.log('Room event: host only recording disabled');
+            show(startRecButton);
+            hide(roomRecording);
+            hide(recordingMessage);
+            hostOnlyRecording = false;
+        }
+    });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
-        console.log('Room Client leave room');
+        console.log('Room event: Client leave room');
         if (rc.isRecording() || recordingStatus.innerText != '0s') {
-            console.log('Room Client save recording before to exit');
+            console.log('Room event: Client save recording before to exit');
             rc.stopRecording();
         }
         if (survey.enabled) {
@@ -2387,6 +2421,8 @@ function whiteboardAction(data, emit = true) {
         case 'close':
             if (wbIsOpen) toggleWhiteboard();
             break;
+        default:
+            break;
         //...
     }
 }
@@ -2670,6 +2706,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#69140E, #3C1518)');
             document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
             selectTheme.selectedIndex = 4;
+            break;
+        default:
             break;
         //...
     }

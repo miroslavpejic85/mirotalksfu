@@ -24,11 +24,12 @@ const BUTTONS = {
         exitButton: true,
     },
     settings: {
-        lockRoomButton: true,
-        unlockRoomButton: true,
-        lobbyButton: true,
+        lockRoomButton: true, // presenter
+        unlockRoomButton: true, // presenter
+        lobbyButton: true, // presenter
         tabRecording: true,
         pushToTalk: true,
+        host_only_recording: true, // presenter
     },
     producerVideo: {
         videoPictureInPicture: true,
@@ -102,9 +103,19 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.muteVideoButton = true;
         BUTTONS.whiteboard.whiteboardLockButton = true;
         //...
+
+        // ##################################
+        // Auto detected rules for presenter
+        // ##################################
+
+        // Room lobby
         isLobbyEnabled = lsSettings.lobby;
         switchLobby.checked = isLobbyEnabled;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
+        // ROom host-only-recording
+        hostOnlyRecording = lsSettings.host_only_recording;
+        switchHostOnlyRecording.checked = hostOnlyRecording;
+        rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
         //...
     }
     // main. settings...

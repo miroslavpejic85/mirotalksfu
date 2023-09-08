@@ -7,17 +7,18 @@ const log = new Logger('Room');
 module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
-        this.survey = config.survey;
         this.worker = worker;
-        this.router = null;
+        this.io = io;
         this.audioLevelObserver = null;
         this.audioLevelObserverEnabled = true;
         this.audioLastUpdateTime = 0;
-        this.io = io;
         this._isLocked = false;
         this._isLobbyEnabled = false;
         this._roomPassword = null;
+        this._hostOnlyRecording = false;
+        this.survey = config.survey;
         this.peers = new Map();
+        this.router = null;
         this.createTheRouter();
     }
 
@@ -97,6 +98,23 @@ module.exports = class Room {
     }
 
     // ####################################################
+    // ROOM INFO
+    // ####################################################
+
+    toJson() {
+        return {
+            id: this.id,
+            config: {
+                isLocked: this._isLocked,
+                isLobbyEnabled: this._isLobbyEnabled,
+                hostOnlyRecording: this._hostOnlyRecording,
+            },
+            survey: this.survey,
+            peers: JSON.stringify([...this.peers]),
+        };
+    }
+
+    // ####################################################
     // PEERS
     // ####################################################
 
@@ -110,14 +128,6 @@ module.exports = class Room {
 
     getPeersCount() {
         return this.peers.size;
-    }
-
-    toJson() {
-        return {
-            id: this.id,
-            survey: this.survey,
-            peers: JSON.stringify([...this.peers]),
-        };
     }
 
     getProducerListForPeer() {
@@ -276,12 +286,18 @@ module.exports = class Room {
     isLobbyEnabled() {
         return this._isLobbyEnabled;
     }
+    isHostOnlyRecording() {
+        return this._hostOnlyRecording;
+    }
     setLocked(status, password) {
         this._isLocked = status;
         this._roomPassword = password;
     }
     setLobbyEnabled(status) {
         this._isLobbyEnabled = status;
+    }
+    setHostOnlyRecording(status) {
+        this._hostOnlyRecording = status;
     }
 
     // ####################################################

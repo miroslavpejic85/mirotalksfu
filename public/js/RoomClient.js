@@ -51,6 +51,7 @@ const icons = {
     sounds: '<i class="fas fa-music"></i>',
     fileSend: '<i class="fa-solid fa-file-export"></i>',
     fileReceive: '<i class="fa-solid fa-file-import"></i>',
+    recording: '<i class="fas fa-record-vinyl"></i>',
 };
 
 const image = {
@@ -107,6 +108,8 @@ const _EVENTS = {
     lobbyOn: 'lobbyOn',
     lobbyOff: 'lobbyOff',
     roomUnlock: 'roomUnlock',
+    hostOnlyRecordingOn: 'hostOnlyRecordingOn',
+    hostOnlyRecordingOff: 'hostOnlyRecordingOff',
 };
 
 let recordedBlobs;
@@ -280,6 +283,7 @@ class RoomClient {
             .request('join', data)
             .then(
                 async function (room) {
+                    console.log('##### JOIN ROOM #####', room);
                     if (room === 'isLocked') {
                         this.event(_EVENTS.roomLock);
                         console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
@@ -329,6 +333,10 @@ class RoomClient {
             this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
             handleRules(isPresenter);
+            room.config.hostOnlyRecording
+                ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
+                  this.event(_EVENTS.hostOnlyRecordingOn))
+                : this.event(_EVENTS.hostOnlyRecordingOff);
         }
         adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
@@ -1128,6 +1136,8 @@ class RoomClient {
                     },
                 }; // video cam constraints ultra high bandwidth
                 break;
+            default:
+                break;
         }
         this.videoQualitySelectedIndex = videoQuality.selectedIndex;
         return videoConstraints;
@@ -1440,6 +1450,8 @@ class RoomClient {
                     this.attachSinkId(elem, speakerSelect.value);
                 }
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
+                break;
+            default:
                 break;
         }
         return elem;
@@ -1846,6 +1858,8 @@ class RoomClient {
                 }
                 console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
+            default:
+                break;
         }
         return elem;
     }
@@ -2088,6 +2102,8 @@ class RoomClient {
             case mediaType.video:
             case mediaType.screen:
                 track = stream.getVideoTracks()[0];
+                break;
+            default:
                 break;
         }
         const consumerStream = new MediaStream();
@@ -2424,6 +2440,8 @@ class RoomClient {
                 document.documentElement.style.setProperty('--btns-width', '320px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'row');
                 break;
+            default:
+                break;
         }
     }
 
@@ -2608,6 +2626,8 @@ class RoomClient {
                 this.videoMediaContainer.style.width = null;
                 this.videoMediaContainer.style.width = '100% !important';
                 this.videoMediaContainer.style.height = '25%';
+                break;
+            default:
                 break;
         }
         resizeVideoMedia();
@@ -3832,6 +3852,8 @@ class RoomClient {
                 this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top-end');
                 this.closeVideo();
                 break;
+            default:
+                break;
         }
     }
 
@@ -3993,6 +4015,16 @@ class RoomClient {
                     this.socket.emit('roomAction', data);
                     if (popup) this.roomStatus(action);
                     break;
+                case 'hostOnlyRecordingOn':
+                    this.socket.emit('roomAction', data);
+                    if (popup) this.roomStatus(action);
+                    break;
+                case 'hostOnlyRecordingOff':
+                    this.socket.emit('roomAction', data);
+                    if (popup) this.roomStatus(action);
+                    break;
+                default:
+                    break;
             }
         } else {
             this.roomStatus(action);
@@ -4018,6 +4050,14 @@ class RoomClient {
                 this.event(_EVENTS.lobbyOff);
                 this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end');
                 break;
+            case 'hostOnlyRecordingOn':
+                this.event(_EVENTS.hostOnlyRecordingOn);
+                this.userLog('info', `${icons.recording} Host only recording is enabled`, 'top-end');
+                break;
+            case 'hostOnlyRecordingOff':
+                this.event(_EVENTS.hostOnlyRecordingOff);
+                this.userLog('info', `${icons.recording} Host only recording is disabled`, 'top-end');
+                break;
             default:
                 break;
         }
@@ -4040,7 +4080,11 @@ class RoomClient {
                 break;
             case 'notify':
                 this.sound('switch');
-                this.userLog('info', `${icons.share} Share room on join enabled ${status}`, 'top-end');
+                this.userLog('info', `${icons.share} Share room on join ${status}`, 'top-end');
+                break;
+            case 'hostOnlyRecording':
+                this.sound('switch');
+                this.userLog('info', `${icons.recording} Only host recording ${status}`, 'top-end');
                 break;
             default:
                 break;
@@ -4054,6 +4098,8 @@ class RoomClient {
                 break;
             case 'KO':
                 this.roomIsLocked();
+                break;
+            default:
                 break;
         }
     }
@@ -4121,6 +4167,8 @@ class RoomClient {
                         this.exit();
                     }
                 });
+                break;
+            default:
                 break;
         }
     }
@@ -4429,6 +4477,8 @@ class RoomClient {
             case 'privacy':
                 this.setVideoPrivacyStatus(words[1], words[2] == 'true');
                 break;
+            default:
+                break;
             //...
         }
     }
@@ -4500,6 +4550,8 @@ class RoomClient {
                         }
                     }
                     break;
+                default:
+                    break;
                 //...
             }
         }
@@ -4524,6 +4576,8 @@ class RoomClient {
                     break;
                 case 'eject':
                     this.exit();
+                    break;
+                default:
                     break;
             }
         });
@@ -4593,6 +4647,8 @@ class RoomClient {
                         title = 'Stop screen share to the ' + whoMuteHideStop;
                         text = "Once stop, you won't be able to start them, but they can start themselves at any time.";
                         break;
+                    default:
+                        break;
                 }
                 Swal.fire({
                     background: swalBackground,
@@ -4622,6 +4678,8 @@ class RoomClient {
                                     case 'stop':
                                         let peerScreenButton = this.getId(data.peer_id + '___pScreen');
                                         if (peerScreenButton) peerScreenButton.innerHTML = _PEER.screenOff;
+                                    default:
+                                        break;
                                 }
                             } else {
                                 this.socket.emit('peerAction', data);
@@ -4634,6 +4692,8 @@ class RoomClient {
                         if (muteHideStopConfirmed)
                             this.peerActionProgress(action, 'In progress, wait...', 2000, 'refresh');
                     });
+                break;
+            default:
                 break;
             //...
         }
@@ -4690,6 +4750,8 @@ class RoomClient {
                         this.event(_EVENTS.lowerHand);
                     }
                     break;
+                default:
+                    break;
             }
             let data = {
                 peer_name: peer_name,
@@ -4723,6 +4785,8 @@ class RoomClient {
                     } else {
                         if (peer_hand) peer_hand.style.display = 'none';
                     }
+                    break;
+                default:
                     break;
             }
         }

@@ -669,10 +669,23 @@ function startServer() {
                     room.setLobbyEnabled(false);
                     room.broadCast(socket.id, 'roomAction', data.action);
                     break;
+                case 'hostOnlyRecordingOn':
+                    if (!isPresenter) return;
+                    room.setHostOnlyRecording(true);
+                    room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
+                case 'hostOnlyRecordingOff':
+                    if (!isPresenter) return;
+                    room.setHostOnlyRecording(false);
+                    room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
+                default:
+                    break;
             }
             log.debug('Room status', {
                 locked: room.isLocked(),
                 lobby: room.isLobbyEnabled(),
+                hostOnlyRecording: room.isHostOnlyRecording(),
             });
         });
 

@@ -23,6 +23,7 @@ class LocalStorage {
             lobby: false, // default false
             pitch_bar: true, // volume indicator
             sounds: true, // room notify sounds
+            host_ony_recording: false, // presenter
             video_obj_fit: 2, // cover
             video_controls: 0, // off
             theme: 0, // dark
@@ -82,6 +83,8 @@ class LocalStorage {
                 break;
             case this.MEDIA_TYPE.audioVideo:
                 this.INIT_CONFIG.audioVideo = status;
+                break;
+            default:
                 break;
         }
         this.setObjectLocalStorage('INIT_CONFIG', this.INIT_CONFIG);
