@@ -73,6 +73,7 @@ const image = {
     exit: '../images/exit.png',
     feedback: '../images/feedback.png',
     lobby: '../images/lobby.png',
+    email: '../images/email.png',
 };
 
 const mediaType = {

@@ -815,7 +815,7 @@ function shareRoomByEmail() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
-        imageUrl: image.message,
+        imageUrl: image.email,
         position: 'center',
         title: 'Select a Date and Time',
         html: '<input type="text" id="datetimePicker" class="flatpickr" />',
