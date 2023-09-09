@@ -1083,7 +1083,7 @@ function handleButtons() {
         sound('ring', true);
     };
     roomId.onclick = () => {
-        copyRoomURL();
+        DetectRTC.isMobileDevice ? shareRoom() : copyRoomURL();
     };
     roomSendEmail.onclick = () => {
         shareRoomByEmail();
