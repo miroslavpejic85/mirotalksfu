@@ -180,7 +180,7 @@ function initClient() {
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
-        setTippy('roomId', 'Room name', 'right');
+        setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('roomRecording', 'Only the host (presenter) has the capability to record the meeting', 'bottom');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
@@ -589,7 +589,6 @@ function getPeerInfo() {
 
 function whoAreYou() {
     console.log('04 ----> Who are you');
-    sound('open');
 
     hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
@@ -620,12 +619,8 @@ function whoAreYou() {
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
-        showClass: {
-            popup: 'animate__animated animate__fadeInDown',
-        },
-        hideClass: {
-            popup: 'animate__animated animate__fadeOutUp',
-        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
             name = filterXSS(name);
@@ -773,22 +768,13 @@ async function shareRoom(useNavigator = false) {
             confirmButtonText: `Copy URL`,
             denyButtonText: `Email invite`,
             cancelButtonText: `Close`,
-            showClass: {
-                popup: 'animate__animated animate__fadeInDown',
-            },
-            hideClass: {
-                popup: 'animate__animated animate__fadeOutUp',
-            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
                 copyRoomURL();
             } else if (result.isDenied) {
-                let message = {
-                    email: '',
-                    subject: 'Please join our MiroTalkSfu Video Chat Meeting',
-                    body: 'Click to join: ' + RoomURL,
-                };
-                shareRoomByEmail(message);
+                shareRoomByEmail();
             }
             // share screen on join
             if (isScreenAllowed) {
@@ -824,11 +810,35 @@ function copyRoomURL() {
     userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
 }
 
-function shareRoomByEmail(message) {
-    let email = message.email;
-    let subject = message.subject;
-    let emailBody = message.body;
-    document.location = 'mailto:' + email + '?subject=' + subject + '&body=' + emailBody;
+function shareRoomByEmail() {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        background: swalBackground,
+        imageUrl: image.message,
+        position: 'center',
+        title: 'Select a Date and Time',
+        html: '<input type="text" id="datetimePicker" class="flatpickr" />',
+        showCancelButton: true,
+        confirmButtonText: 'OK',
+        cancelButtonColor: 'red',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        preConfirm: () => {
+            const selectedDateTime = document.getElementById('datetimePicker').value;
+            const newLine = '%0D%0A%0D%0A';
+            const email = '';
+            const emailSubject = `Please join our MiroTalk SFU Video Chat Meeting`;
+            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine} Click to join: ${RoomURL} ${newLine}`;
+            document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
+        },
+    });
+    flatpickr('#datetimePicker', {
+        enableTime: true,
+        dateFormat: 'Y-m-d H:i',
+        time_24hr: true,
+        theme: 'material_blue',
+    });
 }
 
 // ####################################################
@@ -1072,6 +1082,12 @@ function handleButtons() {
     };
     speakerTestBtn.onclick = () => {
         sound('ring', true);
+    };
+    roomId.onclick = () => {
+        copyRoomURL();
+    };
+    roomSendEmail.onclick = () => {
+        shareRoomByEmail();
     };
     chatButton.onclick = () => {
         rc.toggleChat();

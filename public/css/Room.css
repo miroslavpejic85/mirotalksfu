@@ -330,7 +330,8 @@ body {
 
 .title {
     display: inline-flex;
-    align-items: center;
+    justify-content: center; /* Vertical centering */
+    align-items: center; /* Horizontal centering */
     text-align: left;
     color: white;
 }
@@ -350,6 +351,7 @@ body {
 th {
     text-align: left;
     padding: 5px;
+    /* border: 1px solid grey; */
 }
 .settingsTable tr:nth-child(even) {
     /* background-color: #121212; */
@@ -463,6 +465,19 @@ th {
 /* on open display devices tab */
 #tabRoom {
     display: block;
+}
+
+/*--------------------------------------------------------------
+# Settings - data time picker
+--------------------------------------------------------------*/
+
+#datetimePicker {
+    padding: 10px;
+    text-align: center;
+    color: white;
+    background: black;
+    border: none;
+    border-radius: 5px;
 }
 
 /*--------------------------------------------------------------
