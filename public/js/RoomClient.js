@@ -4532,7 +4532,7 @@ class RoomClient {
                         if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
                             return this.userLog(
                                 'info',
-                                'Screen not shared, only the participant can initiate sharing',
+                                'The participant screen is not shared, only the participant can initiate sharing',
                                 'top-end',
                             );
                         }
