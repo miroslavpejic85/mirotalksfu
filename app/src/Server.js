@@ -573,6 +573,10 @@ function startServer() {
             log.error('Client error', error);
             socket.destroy();
         });
+        socket.on('error', (err) => {
+            log.error('Socket error:', err);
+            socket.destroy();
+        });
 
         socket.on('createRoom', async ({ room_id }, callback) => {
             socket.room_id = room_id;

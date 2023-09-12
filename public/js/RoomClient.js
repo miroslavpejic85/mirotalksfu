@@ -4505,6 +4505,42 @@ class RoomClient {
             if (!this.thereIsParticipants()) {
                 if (info) return this.userLog('info', 'No participants detected', 'top-end');
             }
+            switch (action) {
+                case 'mute':
+                    const peerAudioStatus = this.getId(data.peer_id + '__audio');
+                    if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
+                        return this.userLog(
+                            'info',
+                            'The participant has been muted, and only they have the ability to unmute themselves',
+                            'top-end',
+                        );
+                    }
+                    break;
+                case 'hide':
+                    const peerVideoOff = this.getId(data.peer_id + '__videoOff');
+                    if (peerVideoOff) {
+                        return this.userLog(
+                            'info',
+                            'The participant is currently hidden, and only they have the option to unhide themselves',
+                            'top-end',
+                        );
+                    }
+                case 'stop':
+                    const peerScreenButton = this.getId(id);
+                    if (peerScreenButton) {
+                        const peerScreenStatus = peerScreenButton.querySelector('i');
+                        if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
+                            return this.userLog(
+                                'info',
+                                'Screen not shared, only the participant can initiate sharing',
+                                'top-end',
+                            );
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
             this.confirmPeerAction(action, data);
         } else {
             switch (action) {
@@ -4667,7 +4703,6 @@ class RoomClient {
                         if (result.isConfirmed) {
                             muteHideStopConfirmed = true;
                             if (!data.broadcast) {
-                                this.socket.emit('peerAction', data);
                                 switch (action) {
                                     case 'mute':
                                         let peerAudioButton = this.getId(data.peer_id + '___pAudio');
@@ -4682,6 +4717,7 @@ class RoomClient {
                                     default:
                                         break;
                                 }
+                                this.socket.emit('peerAction', data);
                             } else {
                                 this.socket.emit('peerAction', data);
                                 let actionButton = this.getId(action + 'AllButton');
