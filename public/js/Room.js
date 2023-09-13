@@ -605,8 +605,24 @@ function whoAreYou() {
         default_name = getCookie(room_id + '_name');
     }
 
-    const initUser = document.getElementById('initUser');
-    initUser.classList.toggle('hidden');
+    if (!BUTTONS.main.startVideoButton) {
+        elemDisplay(document.getElementById('initVideoButton'), false);
+        elemDisplay(document.getElementById('initAudioVideoButton'), false);
+        elemDisplay(document.getElementById('initVideoSelect'), false);
+        elemDisplay(document.getElementById('tabVideoDevicesBtn'), false);
+    }
+    if (!BUTTONS.main.startAudioButton) {
+        elemDisplay(document.getElementById('initAudioButton'), false);
+        elemDisplay(document.getElementById('initAudioVideoButton'), false);
+        elemDisplay(document.getElementById('initMicrophoneSelect'), false);
+        elemDisplay(document.getElementById('initSpeakerSelect'), false);
+        elemDisplay(document.getElementById('tabAudioDevicesBtn'), false);
+    }
+    if (!BUTTONS.main.startScreenButton) {
+        elemDisplay(document.getElementById('initStartScreenButton'), false);
+    }
+
+    document.getElementById('initUser').classList.toggle('hidden');
 
     Swal.fire({
         allowOutsideClick: false,
