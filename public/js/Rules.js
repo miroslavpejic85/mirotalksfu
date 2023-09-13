@@ -124,7 +124,7 @@ function handleRules(isPresenter) {
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton
-        ? elemDisplay(whiteboardLockButton, true)
-        : elemDisplay(whiteboardLockButton, false, 'flex');
+        ? elemDisplay('whiteboardLockButton', true)
+        : elemDisplay('whiteboardLockButton', false, 'flex');
     //...
 }

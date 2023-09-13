@@ -606,20 +606,23 @@ function whoAreYou() {
     }
 
     if (!BUTTONS.main.startVideoButton) {
-        elemDisplay(document.getElementById('initVideoButton'), false);
-        elemDisplay(document.getElementById('initAudioVideoButton'), false);
-        elemDisplay(document.getElementById('initVideoSelect'), false);
-        elemDisplay(document.getElementById('tabVideoDevicesBtn'), false);
+        isVideoAllowed = false;
+        elemDisplay('initVideo', false);
+        elemDisplay('initVideoButton', false);
+        elemDisplay('initAudioVideoButton', false);
+        elemDisplay('initVideoSelect', false);
+        elemDisplay('tabVideoDevicesBtn', false);
     }
     if (!BUTTONS.main.startAudioButton) {
-        elemDisplay(document.getElementById('initAudioButton'), false);
-        elemDisplay(document.getElementById('initAudioVideoButton'), false);
-        elemDisplay(document.getElementById('initMicrophoneSelect'), false);
-        elemDisplay(document.getElementById('initSpeakerSelect'), false);
-        elemDisplay(document.getElementById('tabAudioDevicesBtn'), false);
+        isAudioAllowed = false;
+        elemDisplay('initAudioButton', false);
+        elemDisplay('initAudioVideoButton', false);
+        elemDisplay('initMicrophoneSelect', false);
+        elemDisplay('initSpeakerSelect', false);
+        elemDisplay('tabAudioDevicesBtn', false);
     }
     if (!BUTTONS.main.startScreenButton) {
-        elemDisplay(document.getElementById('initStartScreenButton'), false);
+        hide(initStartScreenButton);
     }
 
     document.getElementById('initUser').classList.toggle('hidden');
@@ -650,14 +653,16 @@ function whoAreYou() {
     }).then(() => {
         if (initStream && !joinRoomWithScreen) {
             stopTracks(initStream);
-            hide(initVideo);
+            // hide(initVideo);
+            elemDisplay('initVideo', false);
         }
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
 
     if (!isVideoAllowed) {
-        hide(initVideo);
+        // hide(initVideo);
+        elemDisplay('initVideo', false);
         hide(initVideoSelect);
     }
     if (!isAudioAllowed) {
@@ -708,13 +713,14 @@ function handleAudioVideo() {
 }
 
 function checkInitVideo(isVideoAllowed) {
-    if (isVideoAllowed) {
+    if (isVideoAllowed && BUTTONS.main.startVideoButton) {
         if (initVideoSelect.value) changeCamera(initVideoSelect.value);
         sound('joined');
     } else {
         if (initStream) {
             stopTracks(initStream);
-            hide(initVideo);
+            // hide(initVideo);
+            elemDisplay('initVideo', false);
             sound('left');
         }
     }
@@ -741,6 +747,9 @@ function checkMedia() {
         let queryPeerVideo = video === '1' || video === 'true';
         if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
     }
+    elemDisplay('tabVideoDevicesBtn', isVideoAllowed);
+    elemDisplay('tabAudioDevicesBtn', isAudioAllowed);
+
     console.log('Direct join', {
         audio: isAudioAllowed,
         video: isVideoAllowed,
@@ -969,7 +978,8 @@ function roomIsReady() {
 }
 
 function elemDisplay(element, display, mode = 'block') {
-    element.style.display = display ? mode : 'none';
+    const elem = document.getElementById(element);
+    elem ? (elem.style.display = display ? mode : 'none') : console.error('elemDisplay not found', element);
 }
 
 function hide(elem) {
@@ -1387,7 +1397,8 @@ function setSelectsInit() {
 async function changeCamera(deviceId) {
     if (initStream) {
         stopTracks(initStream);
-        show(initVideo);
+        //show(initVideo);
+        elemDisplay('initVideo', true);
         if (!initVideo.classList.contains('mirror')) {
             initVideo.classList.toggle('mirror');
         }
@@ -1427,13 +1438,17 @@ async function changeCamera(deviceId) {
 async function toggleScreenSharing() {
     if (initStream) {
         stopTracks(initStream);
-        show(initVideo);
+        //show(initVideo);
+        elemDisplay('initVideo', true);
     }
     joinRoomWithScreen = !joinRoomWithScreen;
     if (joinRoomWithScreen) {
         navigator.mediaDevices
             .getDisplayMedia({ audio: true, video: true })
             .then((screenStream) => {
+                if (initVideo.classList.contains('mirror')) {
+                    initVideo.classList.toggle('mirror');
+                }
                 initVideo.srcObject = screenStream;
                 initStream = screenStream;
                 console.log('04.6 ----> Success attached init screen video stream', initStream);
@@ -2433,18 +2448,18 @@ function whiteboardAction(data, emit = true) {
             break;
         case 'lock':
             if (!isPresenter) {
-                elemDisplay(whiteboardTitle, false);
-                elemDisplay(whiteboardOptions, false);
-                elemDisplay(whiteboardButton, false);
+                elemDisplay('whiteboardTitle', false);
+                elemDisplay('whiteboardOptions', false);
+                elemDisplay('whiteboardButton', false);
                 wbDrawing(false);
                 wbIsLock = true;
             }
             break;
         case 'unlock':
             if (!isPresenter) {
-                elemDisplay(whiteboardTitle, true, 'flex');
-                elemDisplay(whiteboardOptions, true, 'inline');
-                elemDisplay(whiteboardButton, true);
+                elemDisplay('whiteboardTitle', true, 'flex');
+                elemDisplay('whiteboardOptions', true, 'inline');
+                elemDisplay('whiteboardButton', true);
                 wbDrawing(true);
                 wbIsLock = false;
             }
