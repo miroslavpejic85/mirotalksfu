@@ -625,7 +625,8 @@ function whoAreYou() {
         hide(initStartScreenButton);
     }
 
-    document.getElementById('initUser').classList.toggle('hidden');
+    const initUser = document.getElementById('initUser');
+    initUser.classList.toggle('hidden');
 
     Swal.fire({
         allowOutsideClick: false,
