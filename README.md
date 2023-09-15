@@ -12,7 +12,7 @@
 
 <p align="center">
     <a href="https://sfu.mirotalk.com/">
-        <img src="public/images/mirotalksfu-ui.png">
+        <img src="public/images/mirotalksfu-header.gif">
     </a>
 </p>
 
