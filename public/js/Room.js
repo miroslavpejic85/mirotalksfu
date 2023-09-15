@@ -1217,6 +1217,9 @@ function saveImageLog(){
     // this is a good place to save the image logs on the server for the pro version.
     if(getIsPro() && currentSessionID != "-") // check if we ar in pro and if there is a session
     {
+        console.log("saveImageLog:");
+        console.log(currentSessionID);
+
         // take image from canvas
         var dataurl = realWhiteBoard.wbCanvas.toDataURL({
             format: 'jpeg',
@@ -1686,7 +1689,7 @@ function handleSelects() {
         realWhiteBoard.wbFillColor = wbFillColorEl.value/* + realWhiteBoard.wbOpacityHex*/;
         console.log(realWhiteBoard.wbFillColor);
         realWhiteBoard.whiteboardSetDrawingMode("none");
-        realWhiteBoard.set
+        //realWhiteBoard.set
         let data = {
             peer_name: peer_name,
             action: 'flcolor',
@@ -2125,7 +2128,7 @@ function wbTransmitDelete(data){
 
 
 function setupWhiteboard() {
-    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer, wbTransmitModify, wbTransmitDelete, is_pro);
+    realWhiteBoard = new WhiteBoard('image/*', wbWidth, wbHeight, wbCanvasToJson, wbTransmitPointer, wbTransmitModify, wbTransmitDelete, saveImageLog, is_pro);
 }
 
 /*function setupWhiteboard() {
@@ -2517,7 +2520,12 @@ function wbCanvasSaveImg() {
     const dataNow = getDataTimeString();
     const fileName = `whiteboard-${dataNow}.png`;
     saveDataToFile(dataURL, fileName);
+    saveImageLog();
 }
+
+function OpenWhiteBoardAfterSnapShot(){
+    if (!wbIsOpen) toggleWhiteboard();
+} 
 
 function SingleJsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
@@ -2666,11 +2674,11 @@ function whiteboardAction(data, emit = true) {
         case 'pointer':
             realWhiteBoard.movePointer(data.x,data.y);
             break;
-        case 'screenshot':
-            saveImageLog(); // save log moment on cloud
+        case 'screenshot':            
             realWhiteBoard.wbCanvas.clear();
             realWhiteBoard.whiteboardSetDrawingMode("draw");
-            realWhiteBoard.createImageFromURL(data.image);            
+            realWhiteBoard.createImageFromURL(data.image, true);            
+            //saveImageLog(); // save log moment on cloud
             break;
     
         //...

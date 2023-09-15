@@ -2538,7 +2538,14 @@ class RoomClient {
                 
                 if(!this.isPro)
                 {
+                    // we save the snapshot only in normal mode so to permit the good functioning on iPad
                     saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.jpeg');
+                }
+                else
+                {
+                    // if we are in PRO then open whiteboard automatically
+                    // after a snapshot
+                    OpenWhiteBoardAfterSnapShot();
                 }                
                 
                 let senddata = {

@@ -30,10 +30,13 @@ class WhiteBoard {
      * @param {*} wbWidth   width of initial canvas
      * @param {*} wbHeight height of initial canvas
      * @param {*} wbSocketFunction optional function to send data via socket
+     * @param {*} wbTransmitPointer optional function to send pointer data via socket
      * @param {*} wbTransmitModify optional function to send object mods via socket
      * @param {*} wbTransmitDelete optional function to send object deletions via socket
+     * @param {*} wbSaveLog optional function to send Image Log to database via API
+     * @param {*} is_pro optional value to tell if we are in free version or RoomXR PRO
      */
-    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null, wbTransmitModify = null, wbTransmitDelete = null, is_pro = false) {
+    constructor(wbImageInput, wbWidth, wbHeight, wbSocketFunction = null, wbTransmitPointer = null, wbTransmitModify = null, wbTransmitDelete = null, wbSaveLog = null, is_pro = false) {
         this.wbImageInput = wbImageInput;
         this.wbWidth = wbWidth;
         this.wbHeight = wbHeight;
@@ -41,6 +44,7 @@ class WhiteBoard {
         this.wbTransmitPointer = wbTransmitPointer;
         this.wbTransmitModify = wbTransmitModify;
         this.wbTransmitDelete = wbTransmitDelete;
+        this.wbSaveLog = wbSaveLog;
 
         this.wbCanvas = null;
         this.wbIsDrawing = false;
@@ -1000,7 +1004,7 @@ class WhiteBoard {
     }
 
 
-    createImageFromURL(wbCanvasImgURL) {
+    createImageFromURL(wbCanvasImgURL, savelog = false) {
         var that = this;
         fabric.Image.fromURL(wbCanvasImgURL, function (myImg) {
             let scale = Math.min(that.wbCanvas.width / myImg.width, that.wbCanvas.height / myImg.height);
@@ -1021,6 +1025,12 @@ class WhiteBoard {
             that.addWbCanvasObj(myImg, true);
             that.wbCanvas.discardActiveObject();
             that.wbCanvas.requestRenderAll();
+
+            if(savelog)
+            {
+                that.wbSaveLog();
+                that.wbCanvas.renderAll();
+            }
         });
 
     }
