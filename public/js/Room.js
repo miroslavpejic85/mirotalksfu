@@ -148,6 +148,8 @@ function initClient() {
         setTippy('stopVideoButton', 'Stop the video', 'right');
         setTippy('startScreenButton', 'Start screen share', 'right');
         setTippy('stopScreenButton', 'Stop screen share', 'right');
+        setTippy('raiseHandButton', 'Raise your hand', 'right');
+        setTippy('lowerHandButton', 'Lower your hand', 'right');
         setTippy('swapCameraButton', 'Swap the camera', 'right');
         setTippy('chatButton', 'Toggle the chat', 'right');
         setTippy('participantsButton', 'Toggle participants', 'right');
