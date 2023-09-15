@@ -78,6 +78,7 @@ const image = {
 
 const mediaType = {
     audio: 'audioType',
+    audioTab: 'audioTab',
     video: 'videoType',
     camera: 'cameraType',
     screen: 'screenType',
@@ -900,6 +901,11 @@ class RoomClient {
 
             this.producers.set(producer.id, producer);
 
+            // if screen sharing produce the tab audio + microphone
+            if (screen && stream.getAudioTracks()[0]) {
+                this.produceScreenAudio(stream);
+            }
+
             let elem, au;
             if (!audio) {
                 this.localVideoStream = stream;
@@ -978,11 +984,6 @@ class RoomClient {
                     return;
             }
             this.sound('joined');
-
-            // if present produce the tab audio on screen share
-            if (screen && stream.getAudioTracks()[0]) {
-                this.produceScreenAudio(stream);
-            }
         } catch (err) {
             console.error('Produce error:', err);
 
@@ -1577,10 +1578,10 @@ class RoomClient {
 
     async produceScreenAudio(stream) {
         try {
-            this.stopMyAudio();
+            //this.stopMyAudio();
 
-            if (this.producerLabel.has(mediaType.audio)) {
-                return console.log('Producer already exists for this type ' + mediaType.audio);
+            if (this.producerLabel.has(mediaType.audioTab)) {
+                return console.log('Producer already exists for this type ' + mediaType.audioTab);
             }
 
             const track = stream.getAudioTracks()[0];
@@ -1600,8 +1601,8 @@ class RoomClient {
             const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
             producerSa.on('trackended', () => {
-                this.closeProducer(mediaType.audio);
-                this.startMyAudio();
+                this.closeProducer(mediaType.audioTab);
+                // this.startMyAudio();
             });
 
             producerSa.on('transportclose', () => {
@@ -1624,7 +1625,7 @@ class RoomClient {
                 this.producers.delete(producerSa.id);
             });
 
-            this.producerLabel.set(mediaType.audio, producerSa.id);
+            this.producerLabel.set(mediaType.audioTab, producerSa.id);
         } catch (err) {
             console.error('Produce error:', err);
         }
