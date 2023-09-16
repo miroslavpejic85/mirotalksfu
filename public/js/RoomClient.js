@@ -2888,10 +2888,7 @@ class RoomClient {
                             this.peer_name,
                         );
                         this.cleanMessage();
-                        if (this.speechInMessages) {
-                            this.speechMessage(true, 'ChatGPT', completion);
-                        }
-                        this.sound('message');
+                        this.speechInMessages ? this.speechMessage(true, 'ChatGPT', completion) : this.sound('message');
                     }.bind(this),
                 )
                 .catch((err) => {
@@ -2976,10 +2973,7 @@ class RoomClient {
         if (!this.showChatOnMessage) {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
-        if (this.speechInMessages) {
-            this.speechMessage(true, data.peer_name, data.peer_msg);
-        }
-        this.sound('message');
+        this.speechInMessages ? this.speechMessage(true, data.peer_name, data.peer_msg) : this.sound('message');
     }
 
     setMsgAvatar(avatar, peerName) {
