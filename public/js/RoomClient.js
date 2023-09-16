@@ -2888,6 +2888,9 @@ class RoomClient {
                             this.peer_name,
                         );
                         this.cleanMessage();
+                        if (this.speechInMessages) {
+                            this.speechMessage(true, 'ChatGPT', completion);
+                        }
                         this.sound('message');
                     }.bind(this),
                 )
