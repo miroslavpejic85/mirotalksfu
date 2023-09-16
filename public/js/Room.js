@@ -209,7 +209,7 @@ function initClient() {
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('showChatOnMsg', 'Show chat on new message comes', 'top');
-        setTippy('speechIncomingMsg', 'speech the incoming messages', 'top');
+        setTippy('speechIncomingMsg', 'Speech the incoming messages', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
