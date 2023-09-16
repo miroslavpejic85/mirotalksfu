@@ -103,6 +103,7 @@ let isVideoControlsOn = false;
 let isChatPasteTxt = false;
 let isChatMarkdownOn = false;
 let isChatGPTOn = false;
+let isSpeechSynthesisSupported = 'speechSynthesis' in window;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
 let initAudioButton = null;
@@ -208,6 +209,7 @@ function initClient() {
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');
         setTippy('showChatOnMsg', 'Show chat on new message comes', 'top');
+        setTippy('speechIncomingMsg', 'speech the incoming messages', 'top');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
@@ -895,6 +897,7 @@ function joinRoom(peer_name, room_id) {
             isVideoAllowed,
             isScreenAllowed,
             joinRoomWithScreen,
+            isSpeechSynthesisSupported,
             roomIsReady,
         );
         handleRoomClientEvents();
@@ -966,6 +969,7 @@ function roomIsReady() {
     BUTTONS.settings.host_only_recording && show(roomRecording);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
+    if (!isSpeechSynthesisSupported) hide(speechIncomingMsg);
     handleButtons();
     handleSelects();
     handleInputs();
@@ -1613,14 +1617,16 @@ function handleSelects() {
     };
     // chat
     showChatOnMsg.onchange = (e) => {
-        sound('switch');
         rc.showChatOnMessage = e.currentTarget.checked;
-        if (rc.showChatOnMessage) {
-            userLog('info', 'Chat will be shown, when you receive a message', 'top-end');
-        } else {
-            userLog('info', 'Chat not will be shown, when you receive a message', 'top-end');
-        }
+        rc.roomMessage('showChat', rc.showChatOnMessage);
         lsSettings.show_chat_on_msg = rc.showChatOnMessage;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    speechIncomingMsg.onchange = (e) => {
+        rc.speechInMessages = e.currentTarget.checked;
+        rc.roomMessage('speechMessages', rc.speechInMessages);
+        lsSettings.speech_in_msg = rc.speechInMessages;
         lS.setSettings(lsSettings);
         e.target.blur();
     };
@@ -1693,9 +1699,11 @@ function handleInputs() {
 
 function loadSettingsFromLocalStorage() {
     rc.showChatOnMessage = lsSettings.show_chat_on_msg;
+    rc.speechInMessages = lsSettings.speech_in_msg;
     isPitchBarEnabled = lsSettings.pitch_bar;
     isSoundEnabled = lsSettings.sounds;
     showChatOnMsg.checked = rc.showChatOnMessage;
+    speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;

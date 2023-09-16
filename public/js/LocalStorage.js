@@ -18,6 +18,7 @@ class LocalStorage {
         this.SFU_SETTINGS = {
             share_on_join: true, // popup message on join
             show_chat_on_msg: true, // show chat on new message
+            speech_in_msg: false, // speech incoming message
             video_fps: 0, // default 1280x768 30fps
             screen_fps: 0, // max 30fps
             lobby: false, // default false

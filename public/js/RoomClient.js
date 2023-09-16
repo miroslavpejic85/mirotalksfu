@@ -42,6 +42,8 @@ const html = {
 };
 
 const icons = {
+    chat: '<i class="fas fa-comments"></i>',
+    speech: '<i class="fas fa-volume-high"></i>',
     share: '<i class="fas fa-share-alt"></i>',
     ptt: '<i class="fa-solid fa-hand-pointer"></i>',
     lobby: '<i class="fas fa-shield-halved"></i>',
@@ -131,6 +133,7 @@ class RoomClient {
         isVideoAllowed,
         isScreenAllowed,
         joinRoomWithScreen,
+        isSpeechSynthesisSupported,
         successCallback,
     ) {
         this.localAudioEl = localAudioEl;
@@ -166,6 +169,8 @@ class RoomClient {
         this.isVideoPictureInPictureSupported = !DetectRTC.isMobileDevice && document.pictureInPictureEnabled;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
+        this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
+        this.speechInMessages = false;
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
@@ -2968,6 +2973,9 @@ class RoomClient {
         if (!this.showChatOnMessage) {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
+        if (this.speechInMessages) {
+            this.speechMessage(true, data.peer_name, data.peer_msg);
+        }
         this.sound('message');
     }
 
@@ -3020,7 +3028,17 @@ class RoomClient {
                         id="msg-copy-${chatMessagesId}"
                         class="fas fa-copy" 
                         onclick="rc.copyToClipboard('${chatMessagesId}')"
+                    ></button>`;
+        if (this.isSpeechSynthesisSupported) {
+            msgHTML += `
+                    <button
+                        id="msg-speech-${chatMessagesId}"
+                        class="fas fa-volume-high" 
+                        onclick="rc.speechMessage(false, '${getFromName}', '${getMsg}')"
                     ></button>
+            `;
+        }
+        msgHTML += ` 
                 </div>
             </div>
         </div>
@@ -3030,6 +3048,7 @@ class RoomClient {
         chatMsger.scrollTop += 500;
         this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
         this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
+        this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
         this.setTippy('msg-private-reply-' + chatMessagesId, 'Reply', 'top');
         chatMessagesId++;
     }
@@ -3194,6 +3213,13 @@ class RoomClient {
             from: from,
             msg: msg,
         });
+    }
+
+    speechMessage(newMsg = true, from, msg) {
+        const speech = new SpeechSynthesisUtterance();
+        speech.text = (newMsg ? 'New' : '') + ' message from:' + from + '. The message is:' + msg;
+        speech.rate = 0.9;
+        window.speechSynthesis.speak(speech);
     }
 
     chatToggleBg() {
@@ -4067,26 +4093,30 @@ class RoomClient {
 
     roomMessage(action, active = false) {
         const status = active ? 'ON' : 'OFF';
+        this.sound('switch');
         switch (action) {
             case 'pitchBar':
-                this.sound('switch');
                 this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
                 break;
             case 'sounds':
-                this.sound('switch');
                 this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top-end');
                 break;
             case 'ptt':
-                this.sound('switch');
                 this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top-end');
                 break;
             case 'notify':
-                this.sound('switch');
                 this.userLog('info', `${icons.share} Share room on join ${status}`, 'top-end');
                 break;
             case 'hostOnlyRecording':
-                this.sound('switch');
                 this.userLog('info', `${icons.recording} Only host recording ${status}`, 'top-end');
+                break;
+            case 'showChat':
+                active
+                    ? userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
+                    : userLog('info', `${icons.chat} Chat not will be shown, when you receive a message`, 'top-end');
+                break;
+            case 'speechMessages':
+                this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
                 break;
             default:
                 break;

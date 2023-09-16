@@ -679,6 +679,16 @@ access to use this app.
                         <button id="chatCloseButton" class="fas fa-times"></button>
                         <button id="chatMaxButton" class="hidden"><i class="fas fa-expand"></i></button>
                         <button id="chatMinButton" class="hidden"><i class="fas fa-compress"></i></button>
+                        <div style="margin-left: 10px" class="title">
+                            <i class="fa-solid fa-eye"></i>
+                            <div style="margin-left: 5px" class="form-check form-switch form-switch-md">
+                                <input class="form-check-input" type="checkbox" id="showChatOnMsg" checked />
+                            </div>
+                            <i class="fas fa-volume-high"></i>
+                            <div style="margin-left: 5px" class="form-check form-switch form-switch-md">
+                                <input class="form-check-input" type="checkbox" id="speechIncomingMsg" />
+                            </div>
+                        </div>
                     </div>
                     <div class="chat-header-options">
                         <button id="chatGhostButton" class="fas fa-circle-half-stroke"></button>
@@ -723,9 +733,6 @@ access to use this app.
                     <button id="chatPasteButton" class="hidden">
                         <i class="fas fa-paste"></i>
                     </button>
-                    <div style="margin-left: 10px" class="form-check form-switch form-switch-md">
-                        <input class="form-check-input" type="checkbox" id="showChatOnMsg" checked />
-                    </div>
                     <button id="chatSendButton" class="hidden">
                         <i class="fas fa-paper-plane"></i>
                     </button>
