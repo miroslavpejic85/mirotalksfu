@@ -3028,11 +3028,11 @@ class RoomClient {
                     ></button>`;
         if (this.isSpeechSynthesisSupported) {
             msgHTML += `
-                    <button
-                        id="msg-speech-${chatMessagesId}"
-                        class="fas fa-volume-high" 
-                        onclick="rc.speechMessage(false, '${getFromName}', '${getMsg}')"
-                    ></button>
+                <button
+                    id="msg-speech-${chatMessagesId}"
+                    class="fas fa-volume-high" 
+                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')"
+                ></button>
             `;
         }
         msgHTML += ` 
