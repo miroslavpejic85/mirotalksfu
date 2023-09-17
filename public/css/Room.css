@@ -202,9 +202,14 @@ body {
     /* box-shadow: var(--box-shadow); */
 }
 
-#control p {
-    font-size: small;
-    cursor: default;
+@media screen and (max-width: 540px) {
+    #control button {
+        font-size: 0.8rem;
+    }
+    #control i {
+        font-size: 0.8rem;
+        cursor: default;
+    }
 }
 
 #exitButton {
