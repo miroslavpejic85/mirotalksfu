@@ -6,6 +6,7 @@
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1",
         "start": "node app/src/Server.js",
+        "start-dev": "nodemon app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
         "compile": "npx browserify public/sfu/MediasoupClientCompile.js -o public/sfu/MediasoupClient.js",
         "lint": "npx prettier --write .",
@@ -56,6 +57,7 @@
     },
     "devDependencies": {
         "node-fetch": "^3.3.2",
+        "nodemon": "^3.0.1",
         "prettier": "3.0.3"
     }
 }
