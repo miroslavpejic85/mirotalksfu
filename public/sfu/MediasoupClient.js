@@ -2130,7 +2130,7 @@
                      */
                     async load({ routerRtpCapabilities }) {
                         logger.debug('load() [routerRtpCapabilities:%o]', routerRtpCapabilities);
-                        routerRtpCapabilities = utils.clone(routerRtpCapabilities, undefined);
+                        routerRtpCapabilities = utils.clone(routerRtpCapabilities);
                         // Temporal handler to get its capabilities.
                         let handler;
                         try {
@@ -2893,7 +2893,7 @@
                         this._canProduceByKind = canProduceByKind;
                         this._maxSctpMessageSize = sctpParameters ? sctpParameters.maxMessageSize : null;
                         // Clone and sanitize additionalSettings.
-                        additionalSettings = utils.clone(additionalSettings, {});
+                        additionalSettings = utils.clone(additionalSettings) || {};
                         delete additionalSettings.iceServers;
                         delete additionalSettings.iceTransportPolicy;
                         delete additionalSettings.bundlePolicy;
@@ -3181,7 +3181,7 @@
                      */
                     async consume({ id, producerId, kind, rtpParameters, streamId, appData = {} }) {
                         logger.debug('consume()');
-                        rtpParameters = utils.clone(rtpParameters, undefined);
+                        rtpParameters = utils.clone(rtpParameters);
                         if (this._closed) {
                             throw new errors_1.InvalidStateError('closed');
                         } else if (this._direction !== 'recv') {
@@ -3300,7 +3300,7 @@
                         appData = {},
                     }) {
                         logger.debug('consumeData()');
-                        sctpStreamParameters = utils.clone(sctpStreamParameters, undefined);
+                        sctpStreamParameters = utils.clone(sctpStreamParameters);
                         if (this._closed) {
                             throw new errors_1.InvalidStateError('closed');
                         } else if (this._direction !== 'recv') {
@@ -4007,12 +4007,11 @@
                                 encoding.scalabilityMode = `L1T${maxTemporalLayers}`;
                             }
                         }
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -4711,11 +4710,10 @@
                         let offer = await this._pc.createOffer();
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
@@ -5293,11 +5291,10 @@
                         let offer = await this._pc.createOffer();
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
@@ -5911,12 +5908,11 @@
                     async send({ track, encodings, codecOptions, codec }) {
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -6600,12 +6596,11 @@
                                 encoding.rid = `r${idx}`;
                             });
                         }
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -7267,7 +7262,7 @@
                         }
                         logger.debug('send() | calling new RTCRtpSender()');
                         const rtpSender = new RTCRtpSender(track, this._dtlsTransport);
-                        const rtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const rtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         rtpParameters.codecs = ortc.reduceCodecs(rtpParameters.codecs, codec);
                         const useRtx = rtpParameters.codecs.some((_codec) => /.+\/rtx$/i.test(_codec.mimeType));
                         if (!encodings) {
@@ -7838,7 +7833,7 @@
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings) {
-                            encodings = utils.clone(encodings, []);
+                            encodings = utils.clone(encodings);
                             if (encodings.length > 1) {
                                 encodings.forEach((encoding, idx) => {
                                     encoding.rid = `r${idx}`;
@@ -7848,12 +7843,11 @@
                                 encodings.reverse();
                             }
                         }
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -8598,11 +8592,10 @@
                         let offer = await this._pc.createOffer();
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
@@ -9203,12 +9196,11 @@
                                 encoding.rid = `r${idx}`;
                             });
                         }
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -9964,11 +9956,10 @@
                         let offer = await this._pc.createOffer();
                         let localSdpObject = sdpTransform.parse(offer.sdp);
                         let offerMediaObject;
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs);
                         if (!this._transportReady) {
@@ -10591,12 +10582,11 @@
                         this.assertNotClosed();
                         this.assertSendDirection();
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
-                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind], {});
+                        const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
                         sendingRtpParameters.codecs = ortc.reduceCodecs(sendingRtpParameters.codecs, codec);
                         const sendingRemoteRtpParameters = utils.clone(
                             this._sendingRemoteRtpParametersByKind[track.kind],
-                            {},
                         );
                         // This may throw.
                         sendingRemoteRtpParameters.codecs = ortc.reduceCodecs(sendingRemoteRtpParameters.codecs, codec);
@@ -11124,12 +11114,15 @@
                  */
                 function getCapabilities() {
                     const nativeCaps = RTCRtpReceiver.getCapabilities();
-                    const caps = utils.clone(nativeCaps, {});
-                    for (const codec of caps.codecs) {
+                    const caps = utils.clone(nativeCaps);
+                    for (const codec of caps.codecs ?? []) {
                         // Rename numChannels to channels.
+                        // @ts-ignore
                         codec.channels = codec.numChannels;
+                        // @ts-ignore
                         delete codec.numChannels;
                         // Add mimeType.
+                        // @ts-ignore (due to codec.name).
                         codec.mimeType = codec.mimeType || `${codec.kind}/${codec.name}`;
                         // NOTE: Edge sets some numeric parameters as string rather than number. Fix them.
                         if (codec.parameters) {
@@ -11155,23 +11148,28 @@
                  * Generate RTCRtpParameters as ORTC based Edge likes.
                  */
                 function mangleRtpParameters(rtpParameters) {
-                    const params = utils.clone(rtpParameters, {});
+                    const params = utils.clone(rtpParameters);
                     // Rename mid to muxId.
                     if (params.mid) {
+                        // @ts-ignore (due to muxId).
                         params.muxId = params.mid;
                         delete params.mid;
                     }
                     for (const codec of params.codecs) {
                         // Rename channels to numChannels.
                         if (codec.channels) {
+                            // @ts-ignore.
                             codec.numChannels = codec.channels;
                             delete codec.channels;
                         }
                         // Add codec.name (requried by Edge).
+                        // @ts-ignore (due to name).
                         if (codec.mimeType && !codec.name) {
+                            // @ts-ignore (due to name).
                             codec.name = codec.mimeType.split('/')[1];
                         }
                         // Remove mimeType.
+                        // @ts-ignore
                         delete codec.mimeType;
                     }
                     return params;
@@ -11363,8 +11361,8 @@
                                         rtp.encoding = codec.channels;
                                     }
                                     this._mediaObject.rtp.push(rtp);
-                                    const codecParameters = utils.clone(codec.parameters, {});
-                                    let codecRtcpFeedback = utils.clone(codec.rtcpFeedback, []);
+                                    const codecParameters = utils.clone(codec.parameters) ?? {};
+                                    let codecRtcpFeedback = utils.clone(codec.rtcpFeedback) ?? [];
                                     if (codecOptions) {
                                         const {
                                             opusStereo,
@@ -12796,7 +12794,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.100';
+                exports.version = '3.6.101';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13664,7 +13662,7 @@
                  */
                 function generateProbatorRtpParameters(videoRtpParameters) {
                     // Clone given reference video RTP parameters.
-                    videoRtpParameters = utils.clone(videoRtpParameters, {});
+                    videoRtpParameters = utils.clone(videoRtpParameters);
                     // This may throw.
                     validateRtpParameters(videoRtpParameters);
                     const rtpParameters = {
@@ -13878,13 +13876,19 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.generateRandomNumber = exports.clone = void 0;
                 /**
-                 * Clones the given data.
+                 * Clones the given value.
                  */
-                function clone(data, defaultValue) {
-                    if (typeof data === 'undefined') {
-                        return defaultValue;
+                function clone(value) {
+                    if (value === undefined) {
+                        return undefined;
+                    } else if (Number.isNaN(value)) {
+                        return NaN;
+                    } else if (typeof structuredClone === 'function') {
+                        // Available in Node >= 18.
+                        return structuredClone(value);
+                    } else {
+                        return JSON.parse(JSON.stringify(value));
                     }
-                    return JSON.parse(JSON.stringify(data));
                 }
                 exports.clone = clone;
                 /**
@@ -14872,7 +14876,7 @@
         47: [
             function (require, module, exports) {
                 /////////////////////////////////////////////////////////////////////////////////
-                /* UAParser.js v1.0.35
+                /* UAParser.js v1.0.36
    Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
    MIT License */ /*
    Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
@@ -14888,7 +14892,7 @@
                     // Constants
                     /////////////
 
-                    var LIBVERSION = '1.0.35',
+                    var LIBVERSION = '1.0.36',
                         EMPTY = '',
                         UNKNOWN = '?',
                         FUNC_TYPE = 'function',
@@ -15217,7 +15221,7 @@
                                 /(naver)\(.*?(\d+\.[\w\.]+).*\)/i, // Naver InApp
                                 /safari (line)\/([\w\.]+)/i, // Line App for iOS
                                 /\b(line)\/([\w\.]+)\/iab/i, // Line App for Android
-                                /(chromium|instagram)[\/ ]([-\w\.]+)/i, // Chromium/Instagram
+                                /(chromium|instagram|snapchat)[\/ ]([-\w\.]+)/i, // Chromium/Instagram/Snapchat
                             ],
                             [NAME, VERSION],
                             [
@@ -15377,7 +15381,7 @@
                             [MODEL, [VENDOR, HUAWEI], [TYPE, MOBILE]],
                             [
                                 // Xiaomi
-                                /\b(poco[\w ]+)(?: bui|\))/i, // Xiaomi POCO
+                                /\b(poco[\w ]+|m2\d{3}j\d\d[a-z]{2})(?: bui|\))/i, // Xiaomi POCO
                                 /\b; (\w+) build\/hm\1/i, // Xiaomi Hongmi 'numeric' models
                                 /\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui/i, // Xiaomi Hongmi
                                 /\b(redmi[\-_ ]?(?:note|k)?[\w_ ]+)(?: bui|\))/i, // Xiaomi Redmi
@@ -15533,7 +15537,7 @@
                             [MODEL, [VENDOR, 'Meizu'], [TYPE, MOBILE]],
                             [
                                 // MIXED
-                                /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron)[-_ ]?([-\w]*)/i,
+                                /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron|infinix|tecno)[-_ ]?([-\w]*)/i,
                                 // BlackBerry/BenQ/Palm/Sony-Ericsson/Acer/Asus/Dell/Meizu/Motorola/Polytron
                                 /(hp) ([\w ]+\w)/i, // HP iPAQ
                                 /(asus)-?(\w+)/i, // Asus
@@ -15703,7 +15707,7 @@
                                 [TYPE, SMARTTV],
                             ],
                             [
-                                /droid.+aft(\w)( bui|\))/i, // Fire TV
+                                /droid.+aft(\w+)( bui|\))/i, // Fire TV
                             ],
                             [MODEL, [VENDOR, AMAZON], [TYPE, SMARTTV]],
                             [
@@ -15861,7 +15865,7 @@
                             [
                                 // iOS/macOS
                                 /ip[honead]{2,4}\b(?:.*os ([\w]+) like mac|; opera)/i, // iOS
-                                /ios;fbsv\/([\d\.]+)/i,
+                                /(?:ios;fbsv\/|iphone.+ios[\/ ])([\d\.]+)/i,
                                 /cfnetwork\/.+darwin/i,
                             ],
                             [
