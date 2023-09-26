@@ -2513,7 +2513,7 @@ class RoomClient {
         let videoPlayer = this.getId(elemId);
         let btnFs = this.getId(fsId);
         if (btnFs) {
-            this.setTippy(fsId, 'Full screen', 'top-end');
+            this.setTippy(fsId, 'Full screen', 'bottom');
             btnFs.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
                     return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
@@ -3051,10 +3051,10 @@ class RoomClient {
         this.collectMessages(time, getFromName, getMsg);
         chatMsger.insertAdjacentHTML('beforeend', msgHTML);
         chatMsger.scrollTop += 500;
-        this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top-end');
-        this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top-end');
-        this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top-end');
-        this.setTippy('msg-private-reply-' + chatMessagesId, 'Reply', 'top-end');
+        this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
+        this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
+        this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
+        this.setTippy('msg-private-reply-' + chatMessagesId, 'Reply', 'top');
         chatMessagesId++;
     }
 

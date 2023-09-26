@@ -180,9 +180,9 @@ function initClient() {
         setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
         setTippy('whiteboardLockButton', 'If enabled, participants cannot interact', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
-        setTippy('chatCleanTextButton', 'Clean', 'top-end');
-        setTippy('chatPasteButton', 'Paste', 'top-end');
-        setTippy('chatSendButton', 'Send', 'top-end');
+        setTippy('chatCleanTextButton', 'Clean', 'top');
+        setTippy('chatPasteButton', 'Paste', 'top');
+        setTippy('chatSendButton', 'Send', 'top');
         setTippy('showChatOnMsg', 'Show chat on new message comes', 'bottom');
         setTippy('speechIncomingMsg', 'Speech the incoming messages', 'bottom');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
@@ -1335,11 +1335,11 @@ function handleButtons() {
 
 function setButtonsInit() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Toggle the audio', 'top-end');
-        setTippy('initVideoButton', 'Toggle the video', 'top-end');
-        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top-end');
-        setTippy('initStartScreenButton', 'Toggle screen sharing', 'top-end');
-        setTippy('initStopScreenButton', 'Toggle screen sharing', 'top-end');
+        setTippy('initAudioButton', 'Toggle the audio', 'top');
+        setTippy('initVideoButton', 'Toggle the video', 'top');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top');
+        setTippy('initStartScreenButton', 'Toggle screen sharing', 'top');
+        setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
     }
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
@@ -2703,24 +2703,24 @@ async function getParticipantsTable(peers) {
 function setParticipantsTippy(peers) {
     //
     if (!DetectRTC.isMobileDevice) {
-        setTippy('muteAllButton', 'Mute all participants', 'top-end');
-        setTippy('hideAllButton', 'Hide all participants', 'top-end');
-        setTippy('stopAllButton', 'Stop screen share to all participants', 'top-end');
-        setTippy('sendAllButton', 'Share file to all', 'top-end');
-        setTippy('sendMessageToAll', 'Send message to all', 'top-end');
-        setTippy('sendVideoToAll', 'Share video to all', 'top-end');
-        setTippy('ejectAllButton', 'Eject all participants', 'top-end');
+        setTippy('muteAllButton', 'Mute all participants', 'top');
+        setTippy('hideAllButton', 'Hide all participants', 'top');
+        setTippy('stopAllButton', 'Stop screen share to all participants', 'top');
+        setTippy('sendAllButton', 'Share file to all', 'top');
+        setTippy('sendMessageToAll', 'Send message to all', 'top');
+        setTippy('sendVideoToAll', 'Share video to all', 'top');
+        setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
             let peer_info = peers.get(peer).peer_info;
             let peer_id = peer_info.peer_id;
-            setTippy(peer_id + '___pAudio', 'Mute', 'top-end');
-            setTippy(peer_id + '___pVideo', 'Hide', 'top-end');
-            setTippy(peer_id + '___pScreen', 'Stop', 'top-end');
-            setTippy(peer_id + '___shareFile', 'Share file', 'top-end');
-            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top-end');
-            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top-end');
-            setTippy(peer_id + '___pEject', 'Eject', 'top-end');
+            setTippy(peer_id + '___pAudio', 'Mute', 'top');
+            setTippy(peer_id + '___pVideo', 'Hide', 'top');
+            setTippy(peer_id + '___pScreen', 'Stop', 'top');
+            setTippy(peer_id + '___shareFile', 'Share file', 'top');
+            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
+            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
+            setTippy(peer_id + '___pEject', 'Eject', 'top');
         }
     }
 }
