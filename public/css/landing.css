@@ -1415,6 +1415,9 @@ label {
 .feature-icon {
     display: flex;
     justify-content: center;
+    padding: 1rem;
+    border-radius: 1rem;
+    background: radial-gradient(circle at bottom, #539ce2 0%, #1870d7 50%, #1d2026 100%);
 }
 @media (min-width: 641px) {
     .features-wrap:first-of-type {
@@ -1922,6 +1925,10 @@ main {
     }
 }
 
+/*--------------------------------------------------------------
+# Last room link
+--------------------------------------------------------------*/
+
 .last-room {
     display: none;
     flex-wrap: nowrap;
@@ -1958,4 +1965,13 @@ main {
     .last-room {
         flex-wrap: wrap;
     }
+}
+
+/*--------------------------------------------------------------
+# svg custom size
+--------------------------------------------------------------*/
+
+.wh-200-150 {
+    width: 200px;
+    height: 150px;
 }
