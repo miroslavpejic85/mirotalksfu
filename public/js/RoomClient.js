@@ -998,7 +998,7 @@ class RoomClient {
                 this.userLog(
                     'error',
                     `Your device doesn't support the selected video quality (${videoQuality.value}), please select the another one.`,
-                    'top-end',
+                    'top',
                 );
             }
         }
@@ -1435,11 +1435,11 @@ class RoomClient {
                 if (isScreen) pn.click();
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
-                    this.setTippy(ts.id, 'Snapshot', 'top-end');
-                    this.setTippy(vp.id, 'Toggle video privacy', 'top-end');
-                    this.setTippy(au.id, 'Audio status', 'top-end');
+                    this.setTippy(pn.id, 'Toggle Pin', 'top');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'top');
+                    this.setTippy(ts.id, 'Snapshot', 'top');
+                    this.setTippy(vp.id, 'Toggle video privacy', 'top');
+                    this.setTippy(au.id, 'Audio status', 'top');
                 }
                 console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
                 break;
@@ -1838,16 +1838,16 @@ class RoomClient {
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
-                    this.setTippy(ts.id, 'Snapshot', 'top-end');
-                    this.setTippy(sf.id, 'Send file', 'top-end');
-                    this.setTippy(sm.id, 'Send message', 'top-end');
-                    this.setTippy(sv.id, 'Send video', 'top-end');
-                    this.setTippy(cm.id, 'Hide', 'top-end');
-                    this.setTippy(au.id, 'Mute', 'top-end');
-                    this.setTippy(pv.id, '🔊 Volume', 'top-end');
-                    this.setTippy(ko.id, 'Eject', 'top-end');
+                    this.setTippy(pn.id, 'Toggle Pin', 'top');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'top');
+                    this.setTippy(ts.id, 'Snapshot', 'top');
+                    this.setTippy(sf.id, 'Send file', 'top');
+                    this.setTippy(sm.id, 'Send message', 'top');
+                    this.setTippy(sv.id, 'Send video', 'top');
+                    this.setTippy(cm.id, 'Hide', 'top');
+                    this.setTippy(au.id, 'Mute', 'top');
+                    this.setTippy(pv.id, '🔊 Volume', 'top');
+                    this.setTippy(ko.id, 'Eject', 'top');
                 }
                 break;
             case mediaType.audio:
@@ -2007,12 +2007,12 @@ class RoomClient {
         handleAspectRatio();
         if (isParticipantsListOpen) getRoomParticipants(true);
         if (!this.isMobileDevice && remotePeer) {
-            this.setTippy(sm.id, 'Send message', 'top-end');
-            this.setTippy(sf.id, 'Send file', 'top-end');
-            this.setTippy(sv.id, 'Send video', 'top-end');
-            this.setTippy(au.id, 'Mute', 'top-end');
-            this.setTippy(pv.id, '🔊 Volume', 'top-end');
-            this.setTippy(ko.id, 'Eject', 'top-end');
+            this.setTippy(sm.id, 'Send message', 'top');
+            this.setTippy(sf.id, 'Send file', 'top');
+            this.setTippy(sv.id, 'Send video', 'top');
+            this.setTippy(au.id, 'Mute', 'top');
+            this.setTippy(pv.id, '🔊 Volume', 'top');
+            this.setTippy(ko.id, 'Eject', 'top');
         }
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         //
@@ -2131,14 +2131,14 @@ class RoomClient {
                     if (err.name === 'SecurityError')
                         errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
                     console.error('Attach SinkId error: ', errorMessage);
-                    this.userLog('error', errorMessage, 'top-end');
+                    this.userLog('error', errorMessage, 'top');
                     speakerSelect.selectedIndex = 0;
                     lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, 0, speakerSelect.value);
                 });
         } else {
             let error = `Browser seems doesn't support output device selection.`;
             console.warn(error);
-            this.userLog('error', error, 'top-end');
+            this.userLog('error', error, 'top');
         }
     }
 
@@ -2371,7 +2371,7 @@ class RoomClient {
             case 'toast':
                 const Toast = Swal.mixin({
                     background: swalBackground,
-                    position: 'top-end',
+                    position: 'top',
                     icon: 'info',
                     showConfirmButton: false,
                     timerProgressBar: true,
@@ -2508,7 +2508,7 @@ class RoomClient {
             this.setTippy(fsId, 'Full screen', 'top');
             btnFs.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
-                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top');
                 }
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
@@ -2518,7 +2518,7 @@ class RoomClient {
         if (videoPlayer) {
             videoPlayer.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
-                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top');
                 }
                 if (!videoPlayer.hasAttribute('controls')) {
                     if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
@@ -2688,7 +2688,7 @@ class RoomClient {
         if (btnTs && videoPlayer) {
             btnTs.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
-                    return this.userLog('info', 'SnapShoot not allowed if video on privacy mode', 'top-end');
+                    return this.userLog('info', 'SnapShoot not allowed if video on privacy mode', 'top');
                 }
                 this.sound('snapshot');
                 let context, canvas, width, height, dataURL;
@@ -2857,7 +2857,7 @@ class RoomClient {
         if (!this.thereIsParticipants() && !isChatGPTOn) {
             this.cleanMessage();
             isChatPasteTxt = false;
-            return this.userLog('info', 'No participants in the room', 'top-end');
+            return this.userLog('info', 'No participants in the room', 'top');
         }
         chatMessage.value = filterXSS(chatMessage.value.trim());
         let peer_msg = this.formatMsg(chatMessage.value);
@@ -2913,7 +2913,7 @@ class RoomClient {
         if (!this.thereIsParticipants()) {
             isChatPasteTxt = false;
             this.cleanMessage();
-            return this.userLog('info', 'No participants in the room except you', 'top-end');
+            return this.userLog('info', 'No participants in the room except you', 'top');
         }
         Swal.fire({
             background: swalBackground,
@@ -2971,7 +2971,7 @@ class RoomClient {
             data.to_peer_name,
         );
         if (!this.showChatOnMessage) {
-            this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
+            this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top');
         }
         this.speechInMessages ? this.speechMessage(true, data.peer_name, data.peer_msg) : this.sound('message');
     }
@@ -3074,10 +3074,10 @@ class RoomClient {
         navigator.clipboard
             .writeText(text)
             .then(() => {
-                this.userLog('success', 'Message copied!', 'top-end', 1000);
+                this.userLog('success', 'Message copied!', 'top', 1000);
             })
             .catch((err) => {
-                this.userLog('error', err, 'top-end', 2000);
+                this.userLog('error', err, 'top', 2000);
             });
     }
 
@@ -3228,7 +3228,7 @@ class RoomClient {
 
     chatClean() {
         if (this.chatMessages.length === 0) {
-            return userLog('info', 'No chat messages to clean', 'top-end');
+            return userLog('info', 'No chat messages to clean', 'top');
         }
         Swal.fire({
             background: swalBackground,
@@ -3255,7 +3255,7 @@ class RoomClient {
 
     chatSave() {
         if (this.chatMessages.length === 0) {
-            return userLog('info', 'No chat messages to save', 'top-end');
+            return userLog('info', 'No chat messages to save', 'top');
         }
         saveObjToJsonFile(this.chatMessages, 'CHAT');
     }
@@ -3309,12 +3309,12 @@ class RoomClient {
                     })
                     .catch((err) => {
                         console.error('Error Unable to recording the screen + audio', err);
-                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top-end');
+                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top');
                     });
             }
         } catch (err) {
             console.error('Exception while creating MediaRecorder: ', err);
-            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end');
+            return this.userLog('error', "Can't start stream recording reason: " + err, 'top');
         }
     }
 
@@ -3459,19 +3459,19 @@ class RoomClient {
             videoPlayer.addEventListener('drop', function (e) {
                 e.preventDefault();
                 if (itsMe) {
-                    return userLog('warning', 'You cannot send files to yourself.', 'top-end');
+                    return userLog('warning', 'You cannot send files to yourself.', 'top');
                 }
                 if (this.sendInProgress) {
-                    return userLog('warning', 'Please wait for the previous file to be sent.', 'top-end');
+                    return userLog('warning', 'Please wait for the previous file to be sent.', 'top');
                 }
                 if (e.dataTransfer.items && e.dataTransfer.items.length > 1) {
-                    return userLog('warning', 'Please drag and drop a single file.', 'top-end');
+                    return userLog('warning', 'Please drag and drop a single file.', 'top');
                 }
                 if (e.dataTransfer.items) {
                     let item = e.dataTransfer.items[0].webkitGetAsEntry();
                     console.log('Drag and drop', item);
                     if (item.isDirectory) {
-                        return userLog('warning', 'Please drag and drop a single file not a folder.', 'top-end');
+                        return userLog('warning', 'Please drag and drop a single file not a folder.', 'top');
                     }
                     var file = e.dataTransfer.items[0].getAsFile();
                     rc.sendFileInformations(file, peer_id);
@@ -3514,11 +3514,11 @@ class RoomClient {
         //
         if (this.fileToSend && this.fileToSend.size > 0) {
             if (!this.thereIsParticipants()) {
-                return userLog('info', 'No participants detected', 'top-end');
+                return userLog('info', 'No participants detected', 'top');
             }
             // prevent XSS injection
             if (this.isHtml(this.fileToSend.name) || !this.isValidFileName(this.fileToSend.name))
-                return userLog('warning', 'Invalid file name!', 'top-end', 5000);
+                return userLog('warning', 'Invalid file name!', 'top', 5000);
 
             const fileInfo = {
                 peer_id: peer_id,
@@ -3549,7 +3549,7 @@ class RoomClient {
                 this.sendFileData(peer_id, broadcast);
             }, 1000);
         } else {
-            userLog('error', 'File not selected or empty.', 'top-end');
+            userLog('error', 'File not selected or empty.', 'top');
         }
     }
 
@@ -3589,7 +3589,7 @@ class RoomClient {
         receiveFileInfo.innerText = fileToReceiveInfo;
         receiveFileDiv.style.display = 'inline';
         receiveProgress.max = this.incomingFileInfo.fileSize;
-        this.userLog('info', fileToReceiveInfo, 'top-end');
+        this.userLog('info', fileToReceiveInfo, 'top');
         this.receiveInProgress = true;
     }
 
@@ -3639,7 +3639,7 @@ class RoomClient {
             if (offset === this.fileToSend.size) {
                 this.sendInProgress = false;
                 sendFileDiv.style.display = 'none';
-                userLog('success', 'The file ' + this.fileToSend.name + ' was sent successfully.', 'top-end');
+                userLog('success', 'The file ' + this.fileToSend.name + ' was sent successfully.', 'top');
             }
 
             if (offset < this.fileToSend.size) readSlice(offset);
@@ -3677,7 +3677,7 @@ class RoomClient {
         this.receiveInProgress = false;
         receiveFileDiv.style.display = 'none';
         console.log(data.peer_name + ' aborted the file transfer');
-        userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
+        userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top');
     }
 
     handleFile(data) {
@@ -3809,7 +3809,7 @@ class RoomClient {
             if (result.value) {
                 result.value = filterXSS(result.value);
                 if (!this.thereIsParticipants()) {
-                    return userLog('info', 'No participants detected', 'top-end');
+                    return userLog('info', 'No participants detected', 'top');
                 }
                 if (!this.isVideoTypeSupported(result.value)) {
                     return userLog('warning', 'Something wrong, try with another Video or audio URL');
@@ -3833,7 +3833,7 @@ class RoomClient {
                     this.socket.emit('shareVideoAction', data);
                     this.openVideo(data);
                 } else {
-                    this.userLog('error', 'Not valid video URL', 'top-end');
+                    this.userLog('error', 'Not valid video URL', 'top');
                 }
             }
         });
@@ -3870,11 +3870,11 @@ class RoomClient {
         let action = data.action;
         switch (action) {
             case 'open':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top-end');
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top');
                 this.openVideo(data);
                 break;
             case 'close':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top-end');
+                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top');
                 this.closeVideo();
                 break;
             default:
@@ -3937,8 +3937,8 @@ class RoomClient {
         });
         this.handlePN(video.id, pn.id, d.id);
         if (!this.isMobileDevice) {
-            this.setTippy(pn.id, 'Toggle Pin video player', 'top-end');
-            this.setTippy(e.id, 'Close video player', 'top-end');
+            this.setTippy(pn.id, 'Toggle Pin video player', 'top');
+            this.setTippy(e.id, 'Close video player', 'top');
         }
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
@@ -4061,27 +4061,27 @@ class RoomClient {
             case 'lock':
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
-                this.userLog('info', `${icons.lock} LOCKED the room by the password`, 'top-end');
+                this.userLog('info', `${icons.lock} LOCKED the room by the password`, 'top');
                 break;
             case 'unlock':
                 this.event(_EVENTS.roomUnlock);
-                this.userLog('info', `${icons.unlock} UNLOCKED the room`, 'top-end');
+                this.userLog('info', `${icons.unlock} UNLOCKED the room`, 'top');
                 break;
             case 'lobbyOn':
                 this.event(_EVENTS.lobbyOn);
-                this.userLog('info', `${icons.lobby} Lobby is enabled`, 'top-end');
+                this.userLog('info', `${icons.lobby} Lobby is enabled`, 'top');
                 break;
             case 'lobbyOff':
                 this.event(_EVENTS.lobbyOff);
-                this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end');
+                this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top');
                 break;
             case 'hostOnlyRecordingOn':
                 this.event(_EVENTS.hostOnlyRecordingOn);
-                this.userLog('info', `${icons.recording} Host only recording is enabled`, 'top-end');
+                this.userLog('info', `${icons.recording} Host only recording is enabled`, 'top');
                 break;
             case 'hostOnlyRecordingOff':
                 this.event(_EVENTS.hostOnlyRecordingOff);
-                this.userLog('info', `${icons.recording} Host only recording is disabled`, 'top-end');
+                this.userLog('info', `${icons.recording} Host only recording is disabled`, 'top');
                 break;
             default:
                 break;
@@ -4093,27 +4093,27 @@ class RoomClient {
         this.sound('switch');
         switch (action) {
             case 'pitchBar':
-                this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
+                this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top');
                 break;
             case 'sounds':
-                this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top-end');
+                this.userLog('info', `${icons.sounds} Sounds notification ${status}`, 'top');
                 break;
             case 'ptt':
-                this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top-end');
+                this.userLog('info', `${icons.ptt} Push to talk ${status}`, 'top');
                 break;
             case 'notify':
-                this.userLog('info', `${icons.share} Share room on join ${status}`, 'top-end');
+                this.userLog('info', `${icons.share} Share room on join ${status}`, 'top');
                 break;
             case 'hostOnlyRecording':
-                this.userLog('info', `${icons.recording} Only host recording ${status}`, 'top-end');
+                this.userLog('info', `${icons.recording} Only host recording ${status}`, 'top');
                 break;
             case 'showChat':
                 active
-                    ? userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
-                    : userLog('info', `${icons.chat} Chat not will be shown, when you receive a message`, 'top-end');
+                    ? userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top')
+                    : userLog('info', `${icons.chat} Chat not will be shown, when you receive a message`, 'top');
                 break;
             case 'speechMessages':
-                this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
+                this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top');
                 break;
             default:
                 break;
@@ -4169,7 +4169,7 @@ class RoomClient {
                         setTippy(lobbyAcceptId, 'Accept', 'top');
                         setTippy(lobbyRejectId, 'Reject', 'top');
                     }
-                    this.userLog('info', peer_name + ' wants to join the meeting', 'top-end');
+                    this.userLog('info', peer_name + ' wants to join the meeting', 'top');
                 }
                 break;
             case 'accept':
@@ -4227,7 +4227,7 @@ class RoomClient {
             this.socket.emit('roomLobby', data);
             this.lobbyRemoveAll();
         } else {
-            this.userLog('info', 'No participants in lobby detected', 'top-end');
+            this.userLog('info', 'No participants in lobby detected', 'top');
         }
     }
 
@@ -4237,7 +4237,7 @@ class RoomClient {
             this.socket.emit('roomLobby', data);
             this.lobbyRemoveAll();
         } else {
-            this.userLog('info', 'No participants in lobby detected', 'top-end');
+            this.userLog('info', 'No participants in lobby detected', 'top');
         }
     }
 
@@ -4531,7 +4531,7 @@ class RoomClient {
             };
 
             if (!this.thereIsParticipants()) {
-                if (info) return this.userLog('info', 'No participants detected', 'top-end');
+                if (info) return this.userLog('info', 'No participants detected', 'top');
             }
             switch (action) {
                 case 'mute':
@@ -4540,7 +4540,7 @@ class RoomClient {
                         return this.userLog(
                             'info',
                             'The participant has been muted, and only they have the ability to unmute themselves',
-                            'top-end',
+                            'top',
                         );
                     }
                     break;
@@ -4550,7 +4550,7 @@ class RoomClient {
                         return this.userLog(
                             'info',
                             'The participant is currently hidden, and only they have the option to unhide themselves',
-                            'top-end',
+                            'top',
                         );
                     }
                 case 'stop':
@@ -4561,7 +4561,7 @@ class RoomClient {
                             return this.userLog(
                                 'info',
                                 'The participant screen is not shared, only the participant can initiate sharing',
-                                'top-end',
+                                'top',
                             );
                         }
                     }
@@ -4586,7 +4586,7 @@ class RoomClient {
                         this.userLog(
                             'warning',
                             from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
-                            'top-end',
+                            'top',
                             10000,
                         );
                     }
@@ -4597,7 +4597,7 @@ class RoomClient {
                         this.userLog(
                             'warning',
                             from_peer_name + '  ' + _PEER.videoOff + ' has closed yours video',
-                            'top-end',
+                            'top',
                             10000,
                         );
                     }
@@ -4609,7 +4609,7 @@ class RoomClient {
                             this.userLog(
                                 'warning',
                                 from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
-                                'top-end',
+                                'top',
                                 10000,
                             );
                         }
@@ -4843,7 +4843,7 @@ class RoomClient {
                         this.userLog(
                             'warning',
                             peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',
-                            'top-end',
+                            'top',
                             10000,
                         );
                         this.sound('raiseHand');

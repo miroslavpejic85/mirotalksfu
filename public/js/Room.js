@@ -769,7 +769,7 @@ async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
             await navigator.share({ url: RoomURL });
-            userLog('info', 'Room Shared successfully', 'top-end');
+            userLog('info', 'Room Shared successfully', 'top');
         } catch (err) {
             share();
         }
@@ -837,7 +837,7 @@ function copyRoomURL() {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
+    userLog('info', 'Meeting URL copied to clipboard 👍', 'top');
 }
 
 function shareRoomByEmail() {
@@ -1438,7 +1438,7 @@ async function changeCamera(deviceId) {
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
-            userLog('error', 'Error while swapping camera' + err, 'top-end');
+            userLog('error', 'Error while swapping camera' + err, 'top');
         });
 }
 
@@ -2230,7 +2230,7 @@ function whiteboardAddObj(type) {
                             addWbCanvasObj(myImg);
                         });
                     } else {
-                        userLog('error', 'The URL is not a valid image', 'top-end');
+                        userLog('error', 'The URL is not a valid image', 'top');
                     }
                 }
             });
@@ -2267,7 +2267,7 @@ function whiteboardAddObj(type) {
                         };
                         reader.readAsDataURL(wbCanvasImg);
                     } else {
-                        userLog('error', 'File not selected or empty', 'top-end');
+                        userLog('error', 'File not selected or empty', 'top');
                     }
                 }
             });
@@ -2477,7 +2477,7 @@ function whiteboardAction(data, emit = true) {
         userLog(
             'info',
             `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
-            'top-end',
+            'top',
         );
     }
 
