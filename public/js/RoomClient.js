@@ -1435,11 +1435,11 @@ class RoomClient {
                 if (isScreen) pn.click();
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
-                    this.setTippy(ts.id, 'Snapshot', 'top-end');
-                    this.setTippy(vp.id, 'Toggle video privacy', 'top-end');
-                    this.setTippy(au.id, 'Audio status', 'top-end');
+                    this.setTippy(pn.id, 'Toggle Pin', 'bottom');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
+                    this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
+                    this.setTippy(au.id, 'Audio status', 'bottom');
                 }
                 console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
                 break;
@@ -1838,16 +1838,16 @@ class RoomClient {
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
-                    this.setTippy(pn.id, 'Toggle Pin', 'top-end');
-                    this.setTippy(pip.id, 'Toggle picture in picture', 'top-end');
-                    this.setTippy(ts.id, 'Snapshot', 'top-end');
-                    this.setTippy(sf.id, 'Send file', 'top-end');
-                    this.setTippy(sm.id, 'Send message', 'top-end');
-                    this.setTippy(sv.id, 'Send video', 'top-end');
-                    this.setTippy(cm.id, 'Hide', 'top-end');
-                    this.setTippy(au.id, 'Mute', 'top-end');
-                    this.setTippy(pv.id, '🔊 Volume', 'top-end');
-                    this.setTippy(ko.id, 'Eject', 'top-end');
+                    this.setTippy(pn.id, 'Toggle Pin', 'bottom');
+                    this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
+                    this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    this.setTippy(sf.id, 'Send file', 'bottom');
+                    this.setTippy(sm.id, 'Send message', 'bottom');
+                    this.setTippy(sv.id, 'Send video', 'bottom');
+                    this.setTippy(cm.id, 'Hide', 'bottom');
+                    this.setTippy(au.id, 'Mute', 'bottom');
+                    this.setTippy(pv.id, '🔊 Volume', 'bottom');
+                    this.setTippy(ko.id, 'Eject', 'bottom');
                 }
                 break;
             case mediaType.audio:
@@ -2007,12 +2007,12 @@ class RoomClient {
         handleAspectRatio();
         if (isParticipantsListOpen) getRoomParticipants(true);
         if (!this.isMobileDevice && remotePeer) {
-            this.setTippy(sm.id, 'Send message', 'top-end');
-            this.setTippy(sf.id, 'Send file', 'top-end');
-            this.setTippy(sv.id, 'Send video', 'top-end');
-            this.setTippy(au.id, 'Mute', 'top-end');
-            this.setTippy(pv.id, '🔊 Volume', 'top-end');
-            this.setTippy(ko.id, 'Eject', 'top-end');
+            this.setTippy(sm.id, 'Send message', 'bottom');
+            this.setTippy(sf.id, 'Send file', 'bottom');
+            this.setTippy(sv.id, 'Send video', 'bottom');
+            this.setTippy(au.id, 'Mute', 'bottom');
+            this.setTippy(pv.id, '🔊 Volume', 'bottom');
+            this.setTippy(ko.id, 'Eject', 'bottom');
         }
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         //
@@ -3945,8 +3945,8 @@ class RoomClient {
         });
         this.handlePN(video.id, pn.id, d.id);
         if (!this.isMobileDevice) {
-            this.setTippy(pn.id, 'Toggle Pin video player', 'top-end');
-            this.setTippy(e.id, 'Close video player', 'top-end');
+            this.setTippy(pn.id, 'Toggle Pin video player', 'bottom');
+            this.setTippy(e.id, 'Close video player', 'bottom');
         }
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
@@ -4174,8 +4174,8 @@ class RoomClient {
                     lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
                     if (!isLobbyOpen) this.lobbyToggle();
                     if (!this.isMobileDevice) {
-                        setTippy(lobbyAcceptId, 'Accept', 'top-end');
-                        setTippy(lobbyRejectId, 'Reject', 'top-end');
+                        setTippy(lobbyAcceptId, 'Accept', 'top');
+                        setTippy(lobbyRejectId, 'Reject', 'top');
                     }
                     this.userLog('info', peer_name + ' wants to join the meeting', 'top-end');
                 }

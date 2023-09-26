@@ -142,14 +142,14 @@ function initClient() {
     setTheme();
     if (!DetectRTC.isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
-        setTippy('mySettingsCloseBtn', 'Close', 'top-end');
+        setTippy('mySettingsCloseBtn', 'Close', 'bottom');
         setTippy(
             'switchPushToTalk',
             'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
             'right',
         );
-        setTippy('lobbyAcceptAllBtn', 'Accept', 'top-end');
-        setTippy('lobbyRejectAllBtn', 'Reject', 'top-end');
+        setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
+        setTippy('lobbyRejectAllBtn', 'Reject', 'top');
         setTippy(
             'switchLobby',
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
@@ -183,21 +183,21 @@ function initClient() {
         setTippy('chatCleanTextButton', 'Clean', 'top-end');
         setTippy('chatPasteButton', 'Paste', 'top-end');
         setTippy('chatSendButton', 'Send', 'top-end');
-        setTippy('showChatOnMsg', 'Show chat on new message comes', 'top-end');
-        setTippy('speechIncomingMsg', 'Speech the incoming messages', 'top-end');
-        setTippy('chatSpeechStartButton', 'Start speech recognition', 'top-end');
-        setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top-end');
-        setTippy('chatEmojiButton', 'Emoji', 'top-end');
-        setTippy('chatMarkdownButton', 'Markdown', 'top-end');
-        setTippy('chatGPTButton', 'ChatGPT', 'top-end');
-        setTippy('chatShareFileButton', 'Share file', 'top-end');
+        setTippy('showChatOnMsg', 'Show chat on new message comes', 'bottom');
+        setTippy('speechIncomingMsg', 'Speech the incoming messages', 'bottom');
+        setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
+        setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
+        setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatMarkdownButton', 'Markdown', 'top');
+        setTippy('chatGPTButton', 'ChatGPT', 'top');
+        setTippy('chatShareFileButton', 'Share file', 'top');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
-        setTippy('chatCloseButton', 'Close', 'right');
-        setTippy('chatMaxButton', 'Maximize', 'right');
-        setTippy('chatMinButton', 'Minimize', 'right');
-        setTippy('participantsCloseBtn', 'Close', 'left');
+        setTippy('chatCloseButton', 'Close', 'bottom');
+        setTippy('chatMaxButton', 'Maximize', 'bottom');
+        setTippy('chatMinButton', 'Minimize', 'bottom');
+        setTippy('participantsCloseBtn', 'Close', 'right');
         setTippy('participantsSaveBtn', 'Save participants info', 'right');
     }
     setupWhiteboard();
@@ -210,8 +210,7 @@ function initClient() {
 
 function refreshMainButtonsToolTipPlacement() {
     if (!DetectRTC.isMobileDevice) {
-        const placement =
-            BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
+        const placement = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top';
         setTippy('shareButton', 'Share room', placement);
         setTippy('hideMeButton', 'Toggle hide self view', placement);
         setTippy('startAudioButton', 'Start the audio', placement);
