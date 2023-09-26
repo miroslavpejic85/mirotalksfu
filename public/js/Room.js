@@ -141,7 +141,7 @@ const RoomURL = window.location.origin + '/join/' + room_id;
 function initClient() {
     setTheme();
     if (!DetectRTC.isMobileDevice) {
-        refreshMainButtonsToolTipPosition();
+        refreshMainButtonsToolTipPlacement();
         setTippy('mySettingsCloseBtn', 'Close', 'top-end');
         setTippy(
             'switchPushToTalk',
@@ -208,7 +208,7 @@ function initClient() {
 // HANDLE MAIN BUTTONS TOOLTIP
 // ####################################################
 
-function refreshMainButtonsToolTipPosition() {
+function refreshMainButtonsToolTipPlacement() {
     const placement = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
     setTippy('shareButton', 'Share room', placement);
     setTippy('hideMeButton', 'Toggle hide self view', placement);
@@ -1613,7 +1613,7 @@ function handleSelects() {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
         lsSettings.buttons_bar = BtnsBarPosition.selectedIndex;
         lS.setSettings(lsSettings);
-        refreshMainButtonsToolTipPosition();
+        refreshMainButtonsToolTipPlacement();
     };
     pinVideoPosition.onchange = () => {
         rc.togglePin(pinVideoPosition.value);
@@ -1758,7 +1758,7 @@ function loadSettingsFromLocalStorage() {
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
     rc.togglePin(pinVideoPosition.value);
-    refreshMainButtonsToolTipPosition();
+    refreshMainButtonsToolTipPlacement();
 }
 
 // ####################################################
