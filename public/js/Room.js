@@ -141,40 +141,15 @@ const RoomURL = window.location.origin + '/join/' + room_id;
 function initClient() {
     setTheme();
     if (!DetectRTC.isMobileDevice) {
-        setTippy('shareButton', 'Share room', 'right');
-        setTippy('hideMeButton', 'Toggle hide self view', 'right');
-        setTippy('startAudioButton', 'Start the audio', 'right');
-        setTippy('stopAudioButton', 'Stop the audio', 'right');
-        setTippy('startVideoButton', 'Start the video', 'right');
-        setTippy('stopVideoButton', 'Stop the video', 'right');
-        setTippy('startScreenButton', 'Start screen share', 'right');
-        setTippy('stopScreenButton', 'Stop screen share', 'right');
-        setTippy('raiseHandButton', 'Raise your hand', 'right');
-        setTippy('lowerHandButton', 'Lower your hand', 'right');
-        setTippy('swapCameraButton', 'Swap the camera', 'right');
-        setTippy('chatButton', 'Toggle the chat', 'right');
-        setTippy('participantsButton', 'Toggle participants', 'right');
-        setTippy('whiteboardButton', 'Toggle the whiteboard', 'right');
-        setTippy('settingsButton', 'Toggle the settings', 'right');
-        setTippy('aboutButton', 'About this project', 'right');
-        setTippy('exitButton', 'Leave room', 'right');
-        setTippy('mySettingsCloseBtn', 'Close', 'right');
-        setTippy('tabVideoDevicesBtn', 'Video devices', 'top');
-        setTippy('tabAudioDevicesBtn', 'Audio devices', 'top');
-        setTippy('tabRecordingBtn', 'Recording', 'top');
-        setTippy('tabRoomBtn', 'Room', 'top');
-        setTippy('tabVideoShareBtn', 'Video share', 'top');
-        setTippy('tabProfileBtn', 'Profile', 'top');
-        setTippy('tabAspectBtn', 'Aspect', 'top');
-        setTippy('tabStylingBtn', 'Styling', 'top');
-        setTippy('tabLanguagesBtn', 'Languages', 'top');
+        refreshMainButtonsToolTipPosition();
+        setTippy('mySettingsCloseBtn', 'Close', 'top-end');
         setTippy(
             'switchPushToTalk',
             'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
             'right',
         );
-        setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
-        setTippy('lobbyRejectAllBtn', 'Reject', 'top');
+        setTippy('lobbyAcceptAllBtn', 'Accept', 'top-end');
+        setTippy('lobbyRejectAllBtn', 'Reject', 'top-end');
         setTippy(
             'switchLobby',
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
@@ -205,17 +180,17 @@ function initClient() {
         setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
         setTippy('whiteboardLockButton', 'If enabled, participants cannot interact', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
-        setTippy('chatCleanTextButton', 'Clean', 'top');
-        setTippy('chatPasteButton', 'Paste', 'top');
-        setTippy('chatSendButton', 'Send', 'top');
-        setTippy('showChatOnMsg', 'Show chat on new message comes', 'top');
-        setTippy('speechIncomingMsg', 'Speech the incoming messages', 'top');
-        setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
-        setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
-        setTippy('chatEmojiButton', 'Emoji', 'top');
-        setTippy('chatMarkdownButton', 'Markdown', 'top');
-        setTippy('chatGPTButton', 'ChatGPT', 'top');
-        setTippy('chatShareFileButton', 'Share file', 'top');
+        setTippy('chatCleanTextButton', 'Clean', 'top-end');
+        setTippy('chatPasteButton', 'Paste', 'top-end');
+        setTippy('chatSendButton', 'Send', 'top-end');
+        setTippy('showChatOnMsg', 'Show chat on new message comes', 'top-end');
+        setTippy('speechIncomingMsg', 'Speech the incoming messages', 'top-end');
+        setTippy('chatSpeechStartButton', 'Start speech recognition', 'top-end');
+        setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top-end');
+        setTippy('chatEmojiButton', 'Emoji', 'top-end');
+        setTippy('chatMarkdownButton', 'Markdown', 'top-end');
+        setTippy('chatGPTButton', 'ChatGPT', 'top-end');
+        setTippy('chatShareFileButton', 'Share file', 'top-end');
         setTippy('chatCleanButton', 'Clean', 'bottom');
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
@@ -230,11 +205,41 @@ function initClient() {
 }
 
 // ####################################################
+// HANDLE MAIN BUTTONS TOOLTIP
+// ####################################################
+
+function refreshMainButtonsToolTipPosition() {
+    const mainBtnTTPosition =
+        BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
+    setTippy('shareButton', 'Share room', mainBtnTTPosition);
+    setTippy('hideMeButton', 'Toggle hide self view', mainBtnTTPosition);
+    setTippy('startAudioButton', 'Start the audio', mainBtnTTPosition);
+    setTippy('stopAudioButton', 'Stop the audio', mainBtnTTPosition);
+    setTippy('startVideoButton', 'Start the video', mainBtnTTPosition);
+    setTippy('stopVideoButton', 'Stop the video', mainBtnTTPosition);
+    setTippy('startScreenButton', 'Start screen share', mainBtnTTPosition);
+    setTippy('stopScreenButton', 'Stop screen share', mainBtnTTPosition);
+    setTippy('raiseHandButton', 'Raise your hand', mainBtnTTPosition);
+    setTippy('lowerHandButton', 'Lower your hand', mainBtnTTPosition);
+    setTippy('swapCameraButton', 'Swap the camera', mainBtnTTPosition);
+    setTippy('chatButton', 'Toggle the chat', mainBtnTTPosition);
+    setTippy('participantsButton', 'Toggle participants', mainBtnTTPosition);
+    setTippy('whiteboardButton', 'Toggle the whiteboard', mainBtnTTPosition);
+    setTippy('settingsButton', 'Toggle the settings', mainBtnTTPosition);
+    setTippy('aboutButton', 'About this project', mainBtnTTPosition);
+    setTippy('exitButton', 'Leave room', mainBtnTTPosition);
+}
+
+// ####################################################
 // HANDLE TOOLTIP
 // ####################################################
 
 function setTippy(elem, content, placement, allowHTML = false) {
-    tippy(document.getElementById(elem), {
+    const element = document.getElementById(elem);
+    if (element._tippy) {
+        element._tippy.destroy();
+    }
+    tippy(element, {
         content: content,
         placement: placement,
         allowHTML: allowHTML,
@@ -769,7 +774,7 @@ async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
             await navigator.share({ url: RoomURL });
-            userLog('info', 'Room Shared successfully', 'top');
+            userLog('info', 'Room Shared successfully', 'top-end');
         } catch (err) {
             share();
         }
@@ -837,7 +842,7 @@ function copyRoomURL() {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', 'Meeting URL copied to clipboard 👍', 'top');
+    userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
 }
 
 function shareRoomByEmail() {
@@ -1325,11 +1330,11 @@ function handleButtons() {
 
 function setButtonsInit() {
     if (!DetectRTC.isMobileDevice) {
-        setTippy('initAudioButton', 'Toggle the audio', 'top');
-        setTippy('initVideoButton', 'Toggle the video', 'top');
-        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top');
-        setTippy('initStartScreenButton', 'Toggle screen sharing', 'top');
-        setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
+        setTippy('initAudioButton', 'Toggle the audio', 'top-end');
+        setTippy('initVideoButton', 'Toggle the video', 'top-end');
+        setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top-end');
+        setTippy('initStartScreenButton', 'Toggle screen sharing', 'top-end');
+        setTippy('initStopScreenButton', 'Toggle screen sharing', 'top-end');
     }
     initAudioButton = document.getElementById('initAudioButton');
     initVideoButton = document.getElementById('initVideoButton');
@@ -1438,7 +1443,7 @@ async function changeCamera(deviceId) {
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
-            userLog('error', 'Error while swapping camera' + err, 'top');
+            userLog('error', 'Error while swapping camera' + err, 'top-end');
         });
 }
 
@@ -1609,6 +1614,7 @@ function handleSelects() {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
         lsSettings.buttons_bar = BtnsBarPosition.selectedIndex;
         lS.setSettings(lsSettings);
+        refreshMainButtonsToolTipPosition();
     };
     pinVideoPosition.onchange = () => {
         rc.togglePin(pinVideoPosition.value);
@@ -1753,6 +1759,7 @@ function loadSettingsFromLocalStorage() {
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
     rc.togglePin(pinVideoPosition.value);
+    refreshMainButtonsToolTipPosition();
 }
 
 // ####################################################
@@ -2229,7 +2236,7 @@ function whiteboardAddObj(type) {
                             addWbCanvasObj(myImg);
                         });
                     } else {
-                        userLog('error', 'The URL is not a valid image', 'top');
+                        userLog('error', 'The URL is not a valid image', 'top-end');
                     }
                 }
             });
@@ -2266,7 +2273,7 @@ function whiteboardAddObj(type) {
                         };
                         reader.readAsDataURL(wbCanvasImg);
                     } else {
-                        userLog('error', 'File not selected or empty', 'top');
+                        userLog('error', 'File not selected or empty', 'top-end');
                     }
                 }
             });
@@ -2476,7 +2483,7 @@ function whiteboardAction(data, emit = true) {
         userLog(
             'info',
             `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
-            'top',
+            'top-end',
         );
     }
 
@@ -2691,24 +2698,24 @@ async function getParticipantsTable(peers) {
 function setParticipantsTippy(peers) {
     //
     if (!DetectRTC.isMobileDevice) {
-        setTippy('muteAllButton', 'Mute all participants', 'top');
-        setTippy('hideAllButton', 'Hide all participants', 'top');
-        setTippy('stopAllButton', 'Stop screen share to all participants', 'top');
-        setTippy('sendAllButton', 'Share file to all', 'top');
-        setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendVideoToAll', 'Share video to all', 'top');
-        setTippy('ejectAllButton', 'Eject all participants', 'top');
+        setTippy('muteAllButton', 'Mute all participants', 'top-end');
+        setTippy('hideAllButton', 'Hide all participants', 'top-end');
+        setTippy('stopAllButton', 'Stop screen share to all participants', 'top-end');
+        setTippy('sendAllButton', 'Share file to all', 'top-end');
+        setTippy('sendMessageToAll', 'Send message to all', 'top-end');
+        setTippy('sendVideoToAll', 'Share video to all', 'top-end');
+        setTippy('ejectAllButton', 'Eject all participants', 'top-end');
         //
         for (let peer of Array.from(peers.keys())) {
             let peer_info = peers.get(peer).peer_info;
             let peer_id = peer_info.peer_id;
-            setTippy(peer_id + '___pAudio', 'Mute', 'top');
-            setTippy(peer_id + '___pVideo', 'Hide', 'top');
-            setTippy(peer_id + '___pScreen', 'Stop', 'top');
-            setTippy(peer_id + '___shareFile', 'Share file', 'top');
-            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
-            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
-            setTippy(peer_id + '___pEject', 'Eject', 'top');
+            setTippy(peer_id + '___pAudio', 'Mute', 'top-end');
+            setTippy(peer_id + '___pVideo', 'Hide', 'top-end');
+            setTippy(peer_id + '___pScreen', 'Stop', 'top-end');
+            setTippy(peer_id + '___shareFile', 'Share file', 'top-end');
+            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top-end');
+            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top-end');
+            setTippy(peer_id + '___pEject', 'Eject', 'top-end');
         }
     }
 }
