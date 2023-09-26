@@ -2158,11 +2158,19 @@ class RoomClient {
 
     setTippy(elem, content, placement, allowHTML = false) {
         if (DetectRTC.isMobileDevice) return;
-        tippy(this.getId(elem), {
-            content: content,
-            placement: placement,
-            allowHTML: allowHTML,
-        });
+        const element = this.getId(elem);
+        if (element) {
+            if (element._tippy) {
+                element._tippy.destroy();
+            }
+            tippy(element, {
+                content: content,
+                placement: placement,
+                allowHTML: allowHTML,
+            });
+        } else {
+            console.warn('setTippy element not found with content', content);
+        }
     }
 
     setVideoAvatarImgName(elemId, peer_name) {

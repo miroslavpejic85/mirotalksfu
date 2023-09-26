@@ -209,24 +209,27 @@ function initClient() {
 // ####################################################
 
 function refreshMainButtonsToolTipPlacement() {
-    const placement = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
-    setTippy('shareButton', 'Share room', placement);
-    setTippy('hideMeButton', 'Toggle hide self view', placement);
-    setTippy('startAudioButton', 'Start the audio', placement);
-    setTippy('stopAudioButton', 'Stop the audio', placement);
-    setTippy('startVideoButton', 'Start the video', placement);
-    setTippy('stopVideoButton', 'Stop the video', placement);
-    setTippy('startScreenButton', 'Start screen share', placement);
-    setTippy('stopScreenButton', 'Stop screen share', placement);
-    setTippy('raiseHandButton', 'Raise your hand', placement);
-    setTippy('lowerHandButton', 'Lower your hand', placement);
-    setTippy('swapCameraButton', 'Swap the camera', placement);
-    setTippy('chatButton', 'Toggle the chat', placement);
-    setTippy('participantsButton', 'Toggle participants', placement);
-    setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
-    setTippy('settingsButton', 'Toggle the settings', placement);
-    setTippy('aboutButton', 'About this project', placement);
-    setTippy('exitButton', 'Leave room', placement);
+    if (!DetectRTC.isMobileDevice) {
+        const placement =
+            BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
+        setTippy('shareButton', 'Share room', placement);
+        setTippy('hideMeButton', 'Toggle hide self view', placement);
+        setTippy('startAudioButton', 'Start the audio', placement);
+        setTippy('stopAudioButton', 'Stop the audio', placement);
+        setTippy('startVideoButton', 'Start the video', placement);
+        setTippy('stopVideoButton', 'Stop the video', placement);
+        setTippy('startScreenButton', 'Start screen share', placement);
+        setTippy('stopScreenButton', 'Stop screen share', placement);
+        setTippy('raiseHandButton', 'Raise your hand', placement);
+        setTippy('lowerHandButton', 'Lower your hand', placement);
+        setTippy('swapCameraButton', 'Swap the camera', placement);
+        setTippy('chatButton', 'Toggle the chat', placement);
+        setTippy('participantsButton', 'Toggle participants', placement);
+        setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+        setTippy('settingsButton', 'Toggle the settings', placement);
+        setTippy('aboutButton', 'About this project', placement);
+        setTippy('exitButton', 'Leave room', placement);
+    }
 }
 
 // ####################################################
@@ -235,14 +238,18 @@ function refreshMainButtonsToolTipPlacement() {
 
 function setTippy(elem, content, placement, allowHTML = false) {
     const element = document.getElementById(elem);
-    if (element._tippy) {
-        element._tippy.destroy();
+    if (element) {
+        if (element._tippy) {
+            element._tippy.destroy();
+        }
+        tippy(element, {
+            content: content,
+            placement: placement,
+            allowHTML: allowHTML,
+        });
+    } else {
+        console.warn('setTippy element not found with content', content);
     }
-    tippy(element, {
-        content: content,
-        placement: placement,
-        allowHTML: allowHTML,
-    });
 }
 
 // ####################################################
