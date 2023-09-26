@@ -209,24 +209,24 @@ function initClient() {
 // ####################################################
 
 function refreshMainButtonsToolTipPosition() {
-    const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
-    setTippy('shareButton', 'Share room', position);
-    setTippy('hideMeButton', 'Toggle hide self view', position);
-    setTippy('startAudioButton', 'Start the audio', position);
-    setTippy('stopAudioButton', 'Stop the audio', position);
-    setTippy('startVideoButton', 'Start the video', position);
-    setTippy('stopVideoButton', 'Stop the video', position);
-    setTippy('startScreenButton', 'Start screen share', position);
-    setTippy('stopScreenButton', 'Stop screen share', position);
-    setTippy('raiseHandButton', 'Raise your hand', position);
-    setTippy('lowerHandButton', 'Lower your hand', position);
-    setTippy('swapCameraButton', 'Swap the camera', position);
-    setTippy('chatButton', 'Toggle the chat', position);
-    setTippy('participantsButton', 'Toggle participants', position);
-    setTippy('whiteboardButton', 'Toggle the whiteboard', position);
-    setTippy('settingsButton', 'Toggle the settings', position);
-    setTippy('aboutButton', 'About this project', position);
-    setTippy('exitButton', 'Leave room', position);
+    const placement = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top-end';
+    setTippy('shareButton', 'Share room', placement);
+    setTippy('hideMeButton', 'Toggle hide self view', placement);
+    setTippy('startAudioButton', 'Start the audio', placement);
+    setTippy('stopAudioButton', 'Stop the audio', placement);
+    setTippy('startVideoButton', 'Start the video', placement);
+    setTippy('stopVideoButton', 'Stop the video', placement);
+    setTippy('startScreenButton', 'Start screen share', placement);
+    setTippy('stopScreenButton', 'Stop screen share', placement);
+    setTippy('raiseHandButton', 'Raise your hand', placement);
+    setTippy('lowerHandButton', 'Lower your hand', placement);
+    setTippy('swapCameraButton', 'Swap the camera', placement);
+    setTippy('chatButton', 'Toggle the chat', placement);
+    setTippy('participantsButton', 'Toggle participants', placement);
+    setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+    setTippy('settingsButton', 'Toggle the settings', placement);
+    setTippy('aboutButton', 'About this project', placement);
+    setTippy('exitButton', 'Leave room', placement);
 }
 
 // ####################################################
