@@ -3009,9 +3009,7 @@ function showAbout() {
         html: `
         <br/>
         <div id="about">
-            <b><a id="github-button" data-umami-event="GitHub button" href="https://github.com/miroslavpejic85/mirotalksfu" target="_blank">Open Source</a></b> project
-            <br/><br />
-            <button id="sponsor-button" data-umami-event="Sponsor button" class="pulsate" onclick="window.open('https://github.com/sponsors/miroslavpejic85?o=esb')"><i class="fas fa-heart"></i> Support</button>
+            <button id="sponsor-button" data-umami-event="Sponsor button" class="pulsate" onclick="window.open('https://codecanyon.net/user/miroslavpejic85')"><i class="fas fa-heart"></i> Support</button>
             <br /><br />
             Author: <a id="linkedin-button" data-umami-event="Linkedin button" href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> Miroslav Pejic</a>
         </div>
