@@ -3024,6 +3024,13 @@ function showAbout() {
                 href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" target="_blank"> 
                 Miroslav Pejic
             </a>
+            <br /><br />
+            Email:<a 
+                id="email-button" 
+                data-umami-event="Email button" 
+                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info&body=" target="_blank"> 
+                miroslav.pejic.85@gmail.com
+            </a>
         </div>
         `,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
