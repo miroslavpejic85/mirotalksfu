@@ -3028,7 +3028,7 @@ function showAbout() {
             Email:<a 
                 id="email-button" 
                 data-umami-event="Email button" 
-                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info&body=" target="_blank"> 
+                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
                 miroslav.pejic.85@gmail.com
             </a>
         </div>
