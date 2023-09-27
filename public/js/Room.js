@@ -50,7 +50,10 @@ const userAgent = navigator.userAgent.toLowerCase();
 const isTabletDevice = isTablet(userAgent);
 const isIPadDevice = isIpad(userAgent);
 
+const Base64Prefix = 'data:application/pdf;base64,';
+
 const wbImageInput = 'image/*';
+const wbPdfInput = 'application/pdf';
 const wbWidth = 1200;
 const wbHeight = 600;
 
@@ -169,6 +172,7 @@ function initClient() {
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
         setTippy('whiteboardImgFileBtn', 'Add image file', 'bottom');
+        setTippy('whiteboardPdfFileBtn', 'Add pdf file', 'bottom');
         setTippy('whiteboardImgUrlBtn', 'Add image url', 'bottom');
         setTippy('whiteboardTextBtn', 'Add text', 'bottom');
         setTippy('whiteboardLineBtn', 'Add line', 'bottom');
@@ -1278,6 +1282,9 @@ function handleButtons() {
     whiteboardImgFileBtn.onclick = () => {
         whiteboardAddObj('imgFile');
     };
+    whiteboardPdfFileBtn.onclick = () => {
+        whiteboardAddObj('pdfFile');
+    };
     whiteboardImgUrlBtn.onclick = () => {
         whiteboardAddObj('imgUrl');
     };
@@ -2283,6 +2290,40 @@ function whiteboardAddObj(type) {
                 }
             });
             break;
+        case 'pdfFile':
+            Swal.fire({
+                allowOutsideClick: false,
+                background: swalBackground,
+                position: 'center',
+                title: 'Select the PDF',
+                input: 'file',
+                inputAttributes: {
+                    accept: wbPdfInput,
+                    'aria-label': 'Select the PDF',
+                },
+                showDenyButton: true,
+                confirmButtonText: `OK`,
+                denyButtonText: `Cancel`,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    let wbCanvasPdf = result.value;
+                    if (wbCanvasPdf && wbCanvasPdf.size > 0) {
+                        let reader = new FileReader();
+                        reader.onload = async function (event) {
+                            wbCanvas.requestRenderAll();
+                            await pdfToImage(event.target.result, wbCanvas);
+                            whiteboardIsDrawingMode(false);
+                            wbCanvasToJson();
+                        };
+                        reader.readAsDataURL(wbCanvasPdf);
+                    } else {
+                        userLog('error', 'File not selected or empty', 'top-end');
+                    }
+                }
+            });
+            break;
         case 'text':
             const text = new fabric.IText('Lorem Ipsum', {
                 top: 0,
@@ -2342,11 +2383,73 @@ function whiteboardAddObj(type) {
     }
 }
 
+function readBlob(blob) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.addEventListener('load', () => resolve(reader.result));
+        reader.addEventListener('error', reject);
+        reader.readAsDataURL(blob);
+    });
+}
+
+async function loadPDF(pdfData, pages) {
+    const pdfjsLib = window['pdfjs-dist/build/pdf'];
+    pdfData = pdfData instanceof Blob ? await readBlob(pdfData) : pdfData;
+    const data = atob(pdfData.startsWith(Base64Prefix) ? pdfData.substring(Base64Prefix.length) : pdfData);
+    try {
+        const pdf = await pdfjsLib.getDocument({ data }).promise;
+        const numPages = pdf.numPages;
+        const canvases = await Promise.all(
+            Array.from({ length: numPages }, (_, i) => {
+                const pageNumber = i + 1;
+                if (pages && pages.indexOf(pageNumber) === -1) return null;
+                return pdf.getPage(pageNumber).then(async (page) => {
+                    const viewport = page.getViewport({ scale: window.devicePixelRatio });
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    canvas.height = viewport.height;
+                    canvas.width = viewport.width;
+                    const renderContext = {
+                        canvasContext: context,
+                        viewport: viewport,
+                    };
+                    await page.render(renderContext).promise;
+                    return canvas;
+                });
+            }),
+        );
+        return canvases.filter((canvas) => canvas !== null);
+    } catch (error) {
+        console.error('Error loading PDF:', error);
+        throw error;
+    }
+}
+
+async function pdfToImage(pdfData, canvas) {
+    const scale = 1 / window.devicePixelRatio;
+    try {
+        const canvases = await loadPDF(pdfData);
+        canvases.forEach(async (c) => {
+            canvas.add(
+                new fabric.Image(await c, {
+                    scaleX: scale,
+                    scaleY: scale,
+                }),
+            );
+        });
+    } catch (error) {
+        console.error('Error converting PDF to images:', error);
+        throw error;
+    }
+}
+
 function addWbCanvasObj(obj) {
     if (obj) {
         wbCanvas.add(obj).setActiveObject(obj);
         whiteboardIsDrawingMode(false);
         wbCanvasToJson();
+    } else {
+        console.error('Invalid input. Expected an obj of canvas elements');
     }
 }
 

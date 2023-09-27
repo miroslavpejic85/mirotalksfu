@@ -812,6 +812,7 @@ function startServer() {
 
             // let objLength = bytesToSize(Object.keys(data).length);
             // log.debug('Send Whiteboard canvas JSON', { length: objLength });
+
             room.broadCast(socket.id, 'wbCanvasToJson', data);
         });
 
