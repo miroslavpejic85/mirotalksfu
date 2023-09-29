@@ -694,6 +694,14 @@ class RoomClient {
         );
 
         this.socket.on(
+            'recordingAction',
+            function (data) {
+                console.log('Recording action:', data);
+                this.handleRecordingAction(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'connect',
             function () {
                 console.log('Connected to signaling server!');
@@ -3291,9 +3299,17 @@ class RoomClient {
         console.log('MediaRecorder supported options', options);
         options = { mimeType: options[0] };
         try {
+            // get all participants audio tracks
+            const audioTracks = this.getAudioTracksFromAudioElements();
+            //
             if (this.isMobileDevice) {
-                // on mobile devices recording camera + audio
-                let newStream = this.getNewStream(this.localVideoStream, this.localAudioStream);
+                console.log('INIT CAM RECORDING', {
+                    localAudioStream: this.localAudioStream,
+                    localVideoStream: this.localVideoStream,
+                    audioTracks: audioTracks,
+                });
+                // on mobile devices recording camera + all audio tracks
+                let newStream = new MediaStream([...this.localVideoStream.getTracks(), ...audioTracks]);
                 this.mediaRecorder = new MediaRecorder(newStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                 this.getId('swapCameraButton').className = 'hidden';
@@ -3302,17 +3318,24 @@ class RoomClient {
                 this.event(_EVENTS.startRec);
                 this.sound('recStart');
             } else {
-                // on desktop devices recording screen/window... + audio
+                // on desktop devices recording screen/window... + all audio tracks
                 const constraints = { video: true };
                 navigator.mediaDevices
                     .getDisplayMedia(constraints)
                     .then((screenStream) => {
-                        this.recScreenStream = this.getNewStream(screenStream, this.localAudioStream);
+                        console.log('INIT SCREEN - WINDOW RECORDING', {
+                            screenStream: screenStream,
+                            localAudioStream: this.localAudioStream,
+                            localVideoStream: this.localVideoStream,
+                            audioTracks: audioTracks,
+                        });
+                        this.recScreenStream = new MediaStream([...screenStream.getTracks(), ...audioTracks]);
                         this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
                         console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                         this._isRecording = true;
                         this.handleMediaRecorder();
                         this.event(_EVENTS.startRec);
+                        this.recordingAction('Start recording');
                         this.sound('recStart');
                     })
                     .catch((err) => {
@@ -3326,18 +3349,28 @@ class RoomClient {
         }
     }
 
-    getNewStream(videoStream, audioStream) {
-        let newStream = null;
-        let videoStreamTrack = videoStream ? videoStream.getVideoTracks()[0] : undefined;
-        let audioStreamTrack = audioStream ? audioStream.getAudioTracks()[0] : undefined;
-        if (videoStreamTrack && audioStreamTrack) {
-            newStream = new MediaStream([videoStreamTrack, audioStreamTrack]);
-        } else if (videoStreamTrack) {
-            newStream = new MediaStream([videoStreamTrack]);
-        } else if (audioStreamTrack) {
-            newStream = new MediaStream([audioStreamTrack]);
-        }
-        return newStream;
+    getAudioTracksFromAudioElements() {
+        const audioElements = document.querySelectorAll('audio');
+        const audioTracks = [];
+        audioElements.forEach((audio) => {
+            const audioTrack = audio.srcObject.getAudioTracks()[0];
+            if (audioTrack) {
+                audioTracks.push(audioTrack);
+            }
+        });
+        return audioTracks;
+    }
+
+    getAudioStreamFromAudioElements() {
+        const audioElements = document.querySelectorAll('audio');
+        const audioStream = new MediaStream();
+        audioElements.forEach((audio) => {
+            const audioTrack = audio.srcObject.getAudioTracks()[0];
+            if (audioTrack) {
+                audioStream.addTrack(audioTrack);
+            }
+        });
+        return audioStream;
     }
 
     handleMediaRecorder() {
@@ -3417,6 +3450,7 @@ class RoomClient {
             this._isRecording = false;
             this.mediaRecorder.pause();
             this.event(_EVENTS.pauseRec);
+            this.recordingAction('Pause recording');
         }
     }
 
@@ -3425,6 +3459,7 @@ class RoomClient {
             this._isRecording = true;
             this.mediaRecorder.resume();
             this.event(_EVENTS.resumeRec);
+            this.recordingAction('Resume recording');
         }
     }
 
@@ -3439,8 +3474,22 @@ class RoomClient {
             }
             if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
             this.event(_EVENTS.stopRec);
+            this.recordingAction('Stop recording');
             this.sound('recStop');
         }
+    }
+
+    recordingAction(action) {
+        if (!this.thereIsParticipants()) return;
+        this.socket.emit('recordingAction', {
+            peer_name: this.peer_name,
+            peer_id: this.peer_id,
+            action: action,
+        });
+    }
+
+    handleRecordingAction(data) {
+        this.userLog('warning', `${icons.recording} ${data.peer_name} ${data.action}`, 'top-end');
     }
 
     // ####################################################

@@ -838,6 +838,18 @@ function startServer() {
             room.broadCast(socket.id, 'setVideoOff', data);
         });
 
+        socket.on('recordingAction', async (dataObject) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Recording action', data);
+
+            const room = roomList.get(socket.room_id);
+
+            room.broadCast(data.peer_id, 'recordingAction', data);
+        });
+
         socket.on('join', async (dataObject, cb) => {
             if (!roomList.has(socket.room_id)) {
                 return cb({
