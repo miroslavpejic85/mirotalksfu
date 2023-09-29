@@ -3303,13 +3303,17 @@ class RoomClient {
             const audioTracks = this.getAudioTracksFromAudioElements();
             //
             if (this.isMobileDevice) {
+                const videoTracks = this.localVideoStream.getTracks();
                 console.log('INIT CAM RECORDING', {
                     localAudioStream: this.localAudioStream,
                     localVideoStream: this.localVideoStream,
+                    videoTracks: videoTracks,
                     audioTracks: audioTracks,
                 });
                 // on mobile devices recording camera + all audio tracks
-                let newStream = new MediaStream([...this.localVideoStream.getTracks(), ...audioTracks]);
+                let newStream = new MediaStream([...videoTracks, ...audioTracks]);
+                // TODO not recording all audio tracks
+                console.log('New Cam Media Stream  ---> ', newStream.getTracks());
                 this.mediaRecorder = new MediaRecorder(newStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                 this.getId('swapCameraButton').className = 'hidden';
@@ -3323,13 +3327,16 @@ class RoomClient {
                 navigator.mediaDevices
                     .getDisplayMedia(constraints)
                     .then((screenStream) => {
+                        const screenTracks = screenStream.getTracks();
                         console.log('INIT SCREEN - WINDOW RECORDING', {
-                            screenStream: screenStream,
                             localAudioStream: this.localAudioStream,
                             localVideoStream: this.localVideoStream,
+                            screenTracks: screenTracks,
                             audioTracks: audioTracks,
                         });
-                        this.recScreenStream = new MediaStream([...screenStream.getTracks(), ...audioTracks]);
+                        this.recScreenStream = new MediaStream([...screenTracks, ...audioTracks]);
+                        // TODO not recording all audio tracks
+                        console.log('New Screen/Window Media Stream  ---> ', this.recScreenStream.getTracks());
                         this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
                         console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                         this._isRecording = true;
@@ -3467,6 +3474,7 @@ class RoomClient {
         if (this.mediaRecorder) {
             this._isRecording = false;
             this.mediaRecorder.stop();
+            this.mediaRecorder = null;
             if (this.recScreenStream) {
                 this.recScreenStream.getTracks().forEach((track) => {
                     if (track.kind === 'video') track.stop();
