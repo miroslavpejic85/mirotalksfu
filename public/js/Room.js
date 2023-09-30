@@ -789,7 +789,7 @@ async function shareRoom(useNavigator = false) {
             share();
         }
     } else {
-        share();
+        // share();
     }
     function share() {
         sound('open');
@@ -2853,9 +2853,10 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#f9f5ec');
             document.documentElement.style.setProperty('--right-msg-bg', '#f9f5ec');
             document.documentElement.style.setProperty('--select-bg', 'transperent');
-            document.documentElement.style.setProperty('--select-fg', '#f9f5ec');
+            document.documentElement.style.setProperty('--select-fg', 'black');
             document.documentElement.style.setProperty('--border', '1px solid #dedede');
 
+            document.documentElement.style.setProperty('--settings-bg', '#f9f5ec');
             document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
             document.documentElement.style.setProperty('--btns-color', '#f9f5ec');
 

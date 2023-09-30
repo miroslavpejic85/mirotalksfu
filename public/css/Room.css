@@ -402,6 +402,19 @@ th {
     min-height: 480px;
 }
 
+.tabActions p{
+    color: black!important;
+}
+
+.tabActions i{
+    color: #EE3425 !important;
+}
+
+.mySettingsMain .tab button {
+    background-color: #EE3425 !important;
+    color: #fff !important;
+}
+
 @media screen and (max-width: 830px) {
     .tab {
         width: 100%;
@@ -918,7 +931,7 @@ button:hover {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: 380px;
+    min-width: 380px;
     background: var(--body-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
