@@ -188,7 +188,6 @@ class RoomClient {
         this.localVideoStream = null;
         this.localAudioStream = null;
         this.localScreenStream = null;
-        this.localScreenAudioTabStream = null;
         this.mediaRecorder = null;
         this.recScreenStream = null;
         this._isRecording = false;
@@ -1601,9 +1600,6 @@ class RoomClient {
             if (this.producerLabel.has(mediaType.audioTab)) {
                 return console.log('Producer already exists for this type ' + mediaType.audioTab);
             }
-            const audioTabStream = new MediaStream();
-            audioTabStream.addTrack(stream.getAudioTracks()[0]);
-            this.localScreenAudioTabStream = audioTabStream;
 
             const track = stream.getAudioTracks()[0];
             const params = {
