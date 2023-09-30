@@ -3311,11 +3311,14 @@ class RoomClient {
             console.log('Audio mixer tracks --->', audioMixerTracks);
             if (this.isMobileDevice) {
                 // on mobile devices recording camera + all audio tracks
-                const videoTracks = this.localVideoStream.getTracks();
-                console.log('Cam video tracks --->', videoTracks);
-                let newStream = new MediaStream([...videoTracks, ...audioMixerTracks]);
-                console.log('New Cam Media Stream tracks  --->', newStream.getTracks());
-                this.mediaRecorder = new MediaRecorder(newStream, options);
+                let recCamStream = new MediaStream([...audioMixerTracks]);
+                if (this.localVideoStream !== null) {
+                    const videoTracks = this.localVideoStream.getTracks();
+                    console.log('Cam video tracks --->', videoTracks);
+                    recCamStream.addTrack(videoTracks[0]);
+                }
+                console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
+                this.mediaRecorder = new MediaRecorder(recCamStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                 this.getId('swapCameraButton').className = 'hidden';
                 this._isRecording = true;
