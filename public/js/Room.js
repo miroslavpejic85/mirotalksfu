@@ -789,7 +789,7 @@ async function shareRoom(useNavigator = false) {
             share();
         }
     } else {
-        share();
+        // share();
     }
     function share() {
         sound('open');
@@ -2918,17 +2918,8 @@ function setTheme() {
             selectTheme.selectedIndex = 4;
             break;
         default:
-            swalBackground = '#F8F2E7';
             document.documentElement.style.setProperty('--body-bg', '#F8F2E7');
-            document.documentElement.style.setProperty('--msger-bg', '#F8F2E7');
-            document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
-            document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
-            document.documentElement.style.setProperty('--select-bg', '#3C1518');
-            document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
-            document.documentElement.style.setProperty('--settings-bg', '#F8F2E7');
-            document.documentElement.style.setProperty('--wb-bg', '#F8F2E7');
-            document.documentElement.style.setProperty('--btns-bg-color', '#F8F2E7');
-            document.body.style.background = '#F8F2E7';
+
             selectTheme.selectedIndex = 4;
             break;
         //...
