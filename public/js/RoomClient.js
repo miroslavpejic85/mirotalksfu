@@ -116,7 +116,9 @@ const _EVENTS = {
     hostOnlyRecordingOff: 'hostOnlyRecordingOff',
 };
 
+// Recording
 let recordedBlobs;
+
 class RoomClient {
     constructor(
         localAudioEl,
@@ -203,6 +205,8 @@ class RoomClient {
         this.receiveInProgress = false;
         this.fileSharingInput = '*';
         this.chunkSize = 1024 * 16; // 16kb/s
+
+        this.audioRecorder = null;
 
         // Encodings
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
@@ -373,10 +377,10 @@ class RoomClient {
         } catch (error) {
             if (error.name === 'UnsupportedError') {
                 console.error('Browser not supported');
-                this.userLog('error', 'Browser not supported', 'center');
+                this.userLog('error', 'Browser not supported', 'center', 6000);
             }
             console.error('Browser not supported: ', error);
-            this.userLog('error', 'Browser not supported: ' + error, 'center');
+            this.userLog('error', 'Browser not supported: ' + error, 'center', 6000);
         }
         await device.load({
             routerRtpCapabilities,
@@ -2139,14 +2143,14 @@ class RoomClient {
                     if (err.name === 'SecurityError')
                         errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
                     console.error('Attach SinkId error: ', errorMessage);
-                    this.userLog('error', errorMessage, 'top-end');
+                    this.userLog('error', errorMessage, 'top-end', 6000);
                     speakerSelect.selectedIndex = 0;
                     lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, 0, speakerSelect.value);
                 });
         } else {
             let error = `Browser seems doesn't support output device selection.`;
             console.warn(error);
-            this.userLog('error', error, 'top-end');
+            this.userLog('error', error, 'top-end', 6000);
         }
     }
 
@@ -3093,7 +3097,7 @@ class RoomClient {
                 this.userLog('success', 'Message copied!', 'top-end', 1000);
             })
             .catch((err) => {
-                this.userLog('error', err, 'top-end', 2000);
+                this.userLog('error', err, 'top-end', 6000);
             });
     }
 
@@ -3299,20 +3303,21 @@ class RoomClient {
         console.log('MediaRecorder supported options', options);
         options = { mimeType: options[0] };
         try {
-            // get all participants audio tracks
-            const audioTracks = this.getAudioTracksFromAudioElements();
-            //
+            this.audioRecorder = new MixedAudioRecorder();
+            const audioStreams = this.getAudioStreamFromAudioElements();
+            const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams, this.localAudioStream]);
+            const audioMixerTracks = audioMixerStreams.getTracks();
+
             if (this.isMobileDevice) {
                 const videoTracks = this.localVideoStream.getTracks();
                 console.log('INIT CAM RECORDING', {
                     localAudioStream: this.localAudioStream,
                     localVideoStream: this.localVideoStream,
                     videoTracks: videoTracks,
-                    audioTracks: audioTracks,
+                    audioMixerTracks: audioMixerTracks,
                 });
                 // on mobile devices recording camera + all audio tracks
-                let newStream = new MediaStream([...videoTracks, ...audioTracks]);
-                // TODO not recording all audio tracks
+                let newStream = new MediaStream([...videoTracks, ...audioMixerTracks]);
                 console.log('New Cam Media Stream  ---> ', newStream.getTracks());
                 this.mediaRecorder = new MediaRecorder(newStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
@@ -3332,10 +3337,9 @@ class RoomClient {
                             localAudioStream: this.localAudioStream,
                             localVideoStream: this.localVideoStream,
                             screenTracks: screenTracks,
-                            audioTracks: audioTracks,
+                            audioMixerTracks: audioMixerTracks,
                         });
-                        this.recScreenStream = new MediaStream([...screenTracks, ...audioTracks]);
-                        // TODO not recording all audio tracks
+                        this.recScreenStream = new MediaStream([...screenTracks, ...audioMixerTracks]);
                         console.log('New Screen/Window Media Stream  ---> ', this.recScreenStream.getTracks());
                         this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
                         console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
@@ -3347,13 +3351,23 @@ class RoomClient {
                     })
                     .catch((err) => {
                         console.error('Error Unable to recording the screen + audio', err);
-                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top-end');
+                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top-end', 6000);
                     });
             }
         } catch (err) {
             console.error('Exception while creating MediaRecorder: ', err);
-            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end');
+            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end', 6000);
         }
+    }
+
+    hasAudioTrack(mediaStream) {
+        const audioTracks = mediaStream.getAudioTracks();
+        return audioTracks.length > 0;
+    }
+
+    hasVideoTrack(mediaStream) {
+        const videoTracks = mediaStream.getVideoTracks();
+        return videoTracks.length > 0;
     }
 
     getAudioTracksFromAudioElements() {
@@ -3482,6 +3496,7 @@ class RoomClient {
             }
             if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
             this.event(_EVENTS.stopRec);
+            this.audioRecorder.stopMixedAudioStream();
             this.recordingAction('Stop recording');
             this.sound('recStop');
         }
@@ -3898,7 +3913,7 @@ class RoomClient {
                     this.socket.emit('shareVideoAction', data);
                     this.openVideo(data);
                 } else {
-                    this.userLog('error', 'Not valid video URL', 'top-end');
+                    this.userLog('error', 'Not valid video URL', 'top-end', 6000);
                 }
             }
         });
