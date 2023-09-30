@@ -48,11 +48,12 @@
     --left-msg-bg: #252d31;
     --right-msg-bg: #056162;
     --private-msg-bg: #6b1226;
-    --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
+    --box-shadow: 1px 0px 0px 0px rgb(237, 228, 228);
     --btns-hover-scale: scale(1.1);
     --settings-bg: radial-gradient(#393939, #000000);
     --tab-btn-active: rgb(42 42 42 / 70%);
     --btns-bg-color: rgba(0, 0, 0, 0.7);
+    --btns-color: #fff
     /* buttons bar horizontal */
     --btns-top: 50%;
     --btns-right: 0%;
@@ -202,6 +203,10 @@ body {
     /* box-shadow: var(--box-shadow); */
 }
 
+#control button i {
+    color: var(--btns-color);
+}
+
 @media screen and (max-width: 540px) {
     #control button {
         font-size: 0.8rem;
@@ -213,7 +218,7 @@ body {
 }
 
 #exitButton {
-    color: red;
+    color: green;
 }
 
 /*--------------------------------------------------------------
@@ -913,7 +918,7 @@ button:hover {
     position: absolute;
     margin: auto;
     padding: 10px;
-    min-width: 320px;
+    width: 380px;
     background: var(--body-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
@@ -944,9 +949,17 @@ button:hover {
 #roomParticipants td,
 #roomParticipants th {
     /* border: 1px solid #444444; */
-    color: #fff;
+    color:  black;
     text-align: left;
     padding: 8px;
+}
+
+#roomParticipants td button i{
+    color: #000000;
+}
+
+#roomParticipants input{
+    color: black;
 }
 
 /* #roomParticipants tr {

@@ -10,8 +10,8 @@ const isRulesActive = true;
 
 const BUTTONS = {
     main: {
-        shareButton: true,
-        hideMeButton: true,
+        shareButton: false,
+        hideMeButton: false,
         startAudioButton: true,
         startVideoButton: true,
         startScreenButton: true,
@@ -20,7 +20,7 @@ const BUTTONS = {
         participantsButton: true,
         whiteboardButton: true,
         settingsButton: true,
-        aboutButton: true, // Please keep me always visible, thank you!
+        aboutButton: false, // Please keep me always visible, thank you!
         exitButton: true,
     },
     settings: {

@@ -1346,7 +1346,7 @@ class RoomClient {
         if (myVideoWrap) myVideoWrap.style.display = isHideMeActive ? 'none' : 'block';
         if (myVideoWrapOff) myVideoWrapOff.style.display = isHideMeActive ? 'none' : 'block';
         hideMeIcon.className = isHideMeActive ? html.hideMeOn : html.hideMeOff;
-        hideMeIcon.style.color = isHideMeActive ? 'red' : 'white';
+        hideMeIcon.style.color = isHideMeActive ? 'white' : 'white';
         isHideMeActive ? this.sound('left') : this.sound('joined');
         resizeVideoMedia();
     }

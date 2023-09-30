@@ -40,7 +40,8 @@
     align-self: center;
     overflow: hidden;
     display: inline-block;
-    background: transparent;
+    /* background: transparent; */
+    background: #fff;
     border-radius: 10px;
     border: var(--border);
     box-shadow: var(--box-shadow);
@@ -91,7 +92,7 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    color: #fff;
+    color: #161616;
     font-size: 14px;
     display: flex;
     align-items: center;

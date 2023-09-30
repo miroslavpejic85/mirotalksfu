@@ -30,11 +30,11 @@ let survey = {
 
 const _PEER = {
     audioOn: '<i class="fas fa-microphone"></i>',
-    audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
+    audioOff: '<i class="fas fa-microphone-slash"></i>',
     videoOn: '<i class="fas fa-video"></i>',
-    videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
+    videoOff: '<i class="fas fa-video-slash"></i>',
     screenOn: '<i class="fas fa-desktop"></i>',
-    screenOff: '<i style="color: red;" class="fas fa-desktop"></i>',
+    screenOff: '<i class="fas fa-desktop"></i>',
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
@@ -789,7 +789,7 @@ async function shareRoom(useNavigator = false) {
             share();
         }
     } else {
-        // share();
+        share();
     }
     function share() {
         sound('open');
@@ -804,7 +804,7 @@ async function shareRoom(useNavigator = false) {
             </div>
             <br/>
             <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
+            <p style="background:transparent; color:black; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
             showDenyButton: true,
             showCancelButton: true,
@@ -1736,7 +1736,7 @@ function handleInputs() {
     };
 
     const pickerOptions = {
-        theme: 'dark',
+        theme: 'white',
         onEmojiSelect: addEmojiToMsg,
     };
     const emojiPicker = new EmojiMart.Picker(pickerOptions);
@@ -2846,17 +2846,20 @@ function setTheme() {
     selectTheme.selectedIndex = lsSettings.theme;
     const theme = selectTheme.value;
     switch (theme) {
-        case 'dark':
-            swalBackground = '#fff';
+        case 'white':
+            swalBackground = '#f9f5ec';
             document.documentElement.style.setProperty('--body-bg', '#F8F2E7');
-            // document.documentElement.style.setProperty('--msger-bg', '#F8F2E7');
-            // document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
-            // document.documentElement.style.setProperty('--right-msg-bg', '#fff');
+            document.documentElement.style.setProperty('--msger-bg', '#f9f5ec');
+            document.documentElement.style.setProperty('--left-msg-bg', '#f9f5ec');
+            document.documentElement.style.setProperty('--right-msg-bg', '#f9f5ec');
             document.documentElement.style.setProperty('--select-bg', 'transperent');
-            document.documentElement.style.setProperty('--select-fg', '#000');
+            document.documentElement.style.setProperty('--select-fg', '#f9f5ec');
             document.documentElement.style.setProperty('--border', '1px solid #dedede');
+
             document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
-            document.documentElement.style.setProperty('--btns-fg-color', '#fff');
+            document.documentElement.style.setProperty('--btns-color', '#f9f5ec');
+
+            document.documentElement.style.setProperty('--btns-fg-color', '#f9f5ec');
             
             document.body.style.background = '#F8F2E7';
             selectTheme.selectedIndex = 0;
@@ -2871,7 +2874,10 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#666');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-color', '#fff');
+
             document.body.style.background = 'radial-gradient(#666, #333)';
             selectTheme.selectedIndex = 1;
             break;
@@ -2885,7 +2891,10 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#003934');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#003934, #001E1A)');
+             
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-color', '#fff');
+
             document.body.style.background = 'radial-gradient(#003934, #001E1A)';
             selectTheme.selectedIndex = 2;
             break;
@@ -2899,7 +2908,10 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#306bac');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#141B41, #306bac)');
+
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-color', '#fff');
+
             document.body.style.background = 'radial-gradient(#306bac, #141B41)';
             selectTheme.selectedIndex = 3;
             break;
@@ -2913,13 +2925,28 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#69140E, #3C1518)');
+
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-color', '#fff');
+
             document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
             selectTheme.selectedIndex = 4;
             break;
         default:
             document.documentElement.style.setProperty('--body-bg', '#F8F2E7');
 
+            document.documentElement.style.setProperty('--msger-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
+            document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
+            document.documentElement.style.setProperty('--select-bg', '#3C1518');
+            document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
+            document.documentElement.style.setProperty('--settings-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--wb-bg', '#F8F2E7');
+
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-color', '#fff');
+            
+            document.body.style.background = '#F8F2E7';
             selectTheme.selectedIndex = 4;
             break;
         //...
