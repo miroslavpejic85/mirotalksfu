@@ -3306,46 +3306,55 @@ class RoomClient {
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
             console.log('Audio streams tracks --->', audioStreams.getTracks());
+
             const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams, this.localAudioStream]);
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
+
             if (this.isMobileDevice) {
                 // on mobile devices recording camera + all audio tracks
-                let recCamStream = new MediaStream([...audioMixerTracks]);
+                const recCamStream = new MediaStream([...(Array.isArray(audioMixerTracks) ? audioMixerTracks : [])]);
                 if (this.localVideoStream !== null) {
-                    const videoTracks = this.localVideoStream.getTracks();
+                    const videoTracks = this.localVideoStream.getVideoTracks();
                     console.log('Cam video tracks --->', videoTracks);
-                    recCamStream.addTrack(videoTracks[0]);
+                    if (videoTracks.length > 0) {
+                        recCamStream.addTrack(videoTracks[0]);
+                    }
                 }
                 console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
                 this.mediaRecorder = new MediaRecorder(recCamStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                 this.getId('swapCameraButton').className = 'hidden';
-                this._isRecording = true;
-                this.handleMediaRecorder();
-                this.event(_EVENTS.startRec);
-                this.sound('recStart');
+                this.initRecording();
             } else {
                 // on desktop devices recording screen/window... + all audio tracks
                 const constraints = { video: true };
                 navigator.mediaDevices
                     .getDisplayMedia(constraints)
                     .then((screenStream) => {
-                        const screenTracks = screenStream.getTracks();
+                        const screenTracks = screenStream.getVideoTracks();
                         console.log('Screen video tracks --->', screenTracks);
-                        this.recScreenStream = new MediaStream([...screenTracks, ...audioMixerTracks]);
-                        console.log('New Screen/Window Media Stream tracks  --->', this.recScreenStream.getTracks());
-                        this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
-                        console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
-                        this._isRecording = true;
-                        this.handleMediaRecorder();
-                        this.event(_EVENTS.startRec);
-                        this.recordingAction('Start recording');
-                        this.sound('recStart');
+
+                        const combinedTracks = [];
+                        if (Array.isArray(screenTracks)) {
+                            combinedTracks.push(...screenTracks);
+                        }
+                        if (Array.isArray(audioMixerTracks)) {
+                            combinedTracks.push(...audioMixerTracks);
+                        }
+                        const recScreenStream = new MediaStream(combinedTracks);
+                        console.log('New Screen/Window Media Stream tracks  --->', recScreenStream.getTracks());
+
+                        const mediaRecorder = new MediaRecorder(recScreenStream, options);
+                        console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
+
+                        this.recScreenStream = recScreenStream;
+                        this.mediaRecorder = mediaRecorder;
+                        this.initRecording();
                     })
                     .catch((err) => {
-                        console.error('Error Unable to recording the screen + audio', err);
-                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top-end', 6000);
+                        console.error('Error Unable to record the screen + audio', err);
+                        this.userLog('error', 'Unable to record the screen + audio reason: ' + err, 'top-end', 6000);
                     });
             }
         } catch (err) {
@@ -3354,12 +3363,22 @@ class RoomClient {
         }
     }
 
+    initRecording() {
+        this._isRecording = true;
+        this.handleMediaRecorder();
+        this.event(_EVENTS.startRec);
+        this.recordingAction('Start recording');
+        this.sound('recStart');
+    }
+
     hasAudioTrack(mediaStream) {
+        if (!mediaStream) return false;
         const audioTracks = mediaStream.getAudioTracks();
         return audioTracks.length > 0;
     }
 
     hasVideoTrack(mediaStream) {
+        if (!mediaStream) return false;
         const videoTracks = mediaStream.getVideoTracks();
         return videoTracks.length > 0;
     }
