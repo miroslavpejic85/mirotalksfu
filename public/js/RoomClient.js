@@ -186,8 +186,9 @@ class RoomClient {
         this.rightMsgAvatar = null;
 
         this.localVideoStream = null;
-        this.localScreenStream = null;
         this.localAudioStream = null;
+        this.localScreenStream = null;
+        this.localScreenAudioTabStream = null;
         this.mediaRecorder = null;
         this.recScreenStream = null;
         this._isRecording = false;
@@ -1600,6 +1601,9 @@ class RoomClient {
             if (this.producerLabel.has(mediaType.audioTab)) {
                 return console.log('Producer already exists for this type ' + mediaType.audioTab);
             }
+            const audioTabStream = new MediaStream();
+            audioTabStream.addTrack(stream.getAudioTracks()[0]);
+            this.localScreenAudioTabStream = audioTabStream;
 
             const track = stream.getAudioTracks()[0];
             const params = {
@@ -3305,20 +3309,16 @@ class RoomClient {
         try {
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
+            console.log('Audio streams tracks --->', audioStreams.getTracks());
             const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams, this.localAudioStream]);
             const audioMixerTracks = audioMixerStreams.getTracks();
-
+            console.log('Audio mixer tracks --->', audioMixerTracks);
             if (this.isMobileDevice) {
-                const videoTracks = this.localVideoStream.getTracks();
-                console.log('INIT CAM RECORDING', {
-                    localAudioStream: this.localAudioStream,
-                    localVideoStream: this.localVideoStream,
-                    videoTracks: videoTracks,
-                    audioMixerTracks: audioMixerTracks,
-                });
                 // on mobile devices recording camera + all audio tracks
+                const videoTracks = this.localVideoStream.getTracks();
+                console.log('Cam video tracks --->', videoTracks);
                 let newStream = new MediaStream([...videoTracks, ...audioMixerTracks]);
-                console.log('New Cam Media Stream  ---> ', newStream.getTracks());
+                console.log('New Cam Media Stream tracks  --->', newStream.getTracks());
                 this.mediaRecorder = new MediaRecorder(newStream, options);
                 console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                 this.getId('swapCameraButton').className = 'hidden';
@@ -3333,14 +3333,9 @@ class RoomClient {
                     .getDisplayMedia(constraints)
                     .then((screenStream) => {
                         const screenTracks = screenStream.getTracks();
-                        console.log('INIT SCREEN - WINDOW RECORDING', {
-                            localAudioStream: this.localAudioStream,
-                            localVideoStream: this.localVideoStream,
-                            screenTracks: screenTracks,
-                            audioMixerTracks: audioMixerTracks,
-                        });
+                        console.log('Screen video tracks --->', screenTracks);
                         this.recScreenStream = new MediaStream([...screenTracks, ...audioMixerTracks]);
-                        console.log('New Screen/Window Media Stream  ---> ', this.recScreenStream.getTracks());
+                        console.log('New Screen/Window Media Stream tracks  --->', this.recScreenStream.getTracks());
                         this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
                         console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
                         this._isRecording = true;
