@@ -32,7 +32,7 @@ dependencies: {
 */
 
 /**
- * MiroTalk SFU - Server component
+ * Cogo One - Server component
  *
  * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
  * @link    Official Live demo: https://sfu.mirotalk.com

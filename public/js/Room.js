@@ -3,7 +3,7 @@
 if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.href.substr(4, location.href.length - 4);
 
 /**
- * MiroTalk SFU - Room component
+ * Cogo One - Room component
  *
  * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
  * @link    Official Live demo: https://sfu.mirotalk.com
@@ -650,13 +650,14 @@ function whoAreYou() {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
-        title: 'MiroTalk SFU',
+        title: '<img alt="cogo_one_logo" src="https://cdn.cogoport.io/cms-prod/cogo_admin/vault/original/cogo-one-logo.svg" width="30" height="30" decoding="async" data-nimg="1" loading="lazy" style="color: transparent;"> CogoOne',
         input: 'text',
         inputPlaceholder: 'Enter your name',
         inputAttributes: { maxlength: 32 },
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
+        confirmButtonColor: '#EE3425',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
@@ -872,7 +873,7 @@ function shareRoomByEmail() {
             const selectedDateTime = document.getElementById('datetimePicker').value;
             const newLine = '%0D%0A%0D%0A';
             const email = '';
-            const emailSubject = `Please join our MiroTalk SFU Video Chat Meeting`;
+            const emailSubject = `Please join our Cogo One Video Chat Meeting`;
             const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine} Click to join: ${RoomURL} ${newLine}`;
             document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
         },
@@ -2846,17 +2847,18 @@ function setTheme() {
     const theme = selectTheme.value;
     switch (theme) {
         case 'dark':
-            swalBackground = 'radial-gradient(#393939, #000000)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
-            document.documentElement.style.setProperty('--right-msg-bg', '#056162');
-            document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
-            document.documentElement.style.setProperty('--tab-btn-active', '#393939');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
-            document.body.style.background = 'radial-gradient(#393939, #000000)';
+            swalBackground = '#fff';
+            document.documentElement.style.setProperty('--body-bg', '#F8F2E7');
+            // document.documentElement.style.setProperty('--msger-bg', '#F8F2E7');
+            // document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
+            // document.documentElement.style.setProperty('--right-msg-bg', '#fff');
+            document.documentElement.style.setProperty('--select-bg', 'transperent');
+            document.documentElement.style.setProperty('--select-fg', '#000');
+            document.documentElement.style.setProperty('--border', '1px solid #dedede');
+            document.documentElement.style.setProperty('--btns-bg-color', '#EE3425');
+            document.documentElement.style.setProperty('--btns-fg-color', '#fff');
+            
+            document.body.style.background = '#F8F2E7';
             selectTheme.selectedIndex = 0;
             break;
         case 'grey':
@@ -2916,6 +2918,18 @@ function setTheme() {
             selectTheme.selectedIndex = 4;
             break;
         default:
+            swalBackground = '#F8F2E7';
+            document.documentElement.style.setProperty('--body-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--msger-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
+            document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
+            document.documentElement.style.setProperty('--select-bg', '#3C1518');
+            document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
+            document.documentElement.style.setProperty('--settings-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--wb-bg', '#F8F2E7');
+            document.documentElement.style.setProperty('--btns-bg-color', '#F8F2E7');
+            document.body.style.background = '#F8F2E7';
+            selectTheme.selectedIndex = 4;
             break;
         //...
     }
@@ -3028,7 +3042,7 @@ function showAbout() {
             Email:<a 
                 id="email-button" 
                 data-umami-event="Email button" 
-                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
+                href="mailto:miroslav.pejic.85@gmail.com?subject=Cogo One info"> 
                 miroslav.pejic.85@gmail.com
             </a>
         </div>

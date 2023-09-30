@@ -55,7 +55,7 @@
     position: absolute;
     display: none;
     top: 0;
-    color: rgb(0, 255, 71);
+    color: rgba(0, 0, 0, 0.4);
     font-size: 14px;
     align-items: center;
     padding: 5px;
@@ -63,7 +63,7 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.4);
+    background: #fff;
 }
 
 .videoAvatarImage {
