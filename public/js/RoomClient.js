@@ -117,7 +117,7 @@ const _EVENTS = {
 };
 
 // Recording
-let recordedBlobs;
+let recordedBlobs = [];
 
 class RoomClient {
     constructor(
@@ -3284,6 +3284,11 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
+    handleRecordingError(error) {
+        console.error('Recording error', error);
+        this.userLog('error', error, 'top-end', 6000);
+    }
+
     getSupportedMimeTypes() {
         const possibleTypes = [
             'video/webm;codecs=vp9,opus',
@@ -3299,9 +3304,12 @@ class RoomClient {
 
     startRecording() {
         recordedBlobs = [];
-        let options = this.getSupportedMimeTypes();
-        console.log('MediaRecorder supported options', options);
-        options = { mimeType: options[0] };
+
+        // Get supported MIME types and set options
+        const supportedMimeTypes = this.getSupportedMimeTypes();
+        console.log('MediaRecorder supported options', supportedMimeTypes);
+        const options = { mimeType: supportedMimeTypes[0] };
+
         try {
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
@@ -3311,56 +3319,71 @@ class RoomClient {
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
 
-            if (this.isMobileDevice) {
-                // on mobile devices recording camera + all audio tracks
-                const recCamStream = new MediaStream([...(Array.isArray(audioMixerTracks) ? audioMixerTracks : [])]);
-                if (this.localVideoStream !== null) {
-                    const videoTracks = this.localVideoStream.getVideoTracks();
-                    console.log('Cam video tracks --->', videoTracks);
-                    if (videoTracks.length > 0) {
-                        recCamStream.addTrack(videoTracks[0]);
-                    }
-                }
-                console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
-                this.mediaRecorder = new MediaRecorder(recCamStream, options);
-                console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
-                this.getId('swapCameraButton').className = 'hidden';
-                this.initRecording();
-            } else {
-                // on desktop devices recording screen/window... + all audio tracks
-                const constraints = { video: true };
-                navigator.mediaDevices
-                    .getDisplayMedia(constraints)
-                    .then((screenStream) => {
-                        const screenTracks = screenStream.getVideoTracks();
-                        console.log('Screen video tracks --->', screenTracks);
-
-                        const combinedTracks = [];
-                        if (Array.isArray(screenTracks)) {
-                            combinedTracks.push(...screenTracks);
-                        }
-                        if (Array.isArray(audioMixerTracks)) {
-                            combinedTracks.push(...audioMixerTracks);
-                        }
-                        const recScreenStream = new MediaStream(combinedTracks);
-                        console.log('New Screen/Window Media Stream tracks  --->', recScreenStream.getTracks());
-
-                        const mediaRecorder = new MediaRecorder(recScreenStream, options);
-                        console.log('Created MediaRecorder', mediaRecorder, 'with options', options);
-
-                        this.recScreenStream = recScreenStream;
-                        this.mediaRecorder = mediaRecorder;
-                        this.initRecording();
-                    })
-                    .catch((err) => {
-                        console.error('Error Unable to record the screen + audio', err);
-                        this.userLog('error', 'Unable to record the screen + audio reason: ' + err, 'top-end', 6000);
-                    });
-            }
+            this.isMobileDevice
+                ? this.startMobileRecording(options, audioMixerTracks)
+                : this.startDesktopRecording(options, audioMixerTracks);
         } catch (err) {
-            console.error('Exception while creating MediaRecorder: ', err);
-            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end', 6000);
+            this.handleRecordingError('Exception while creating MediaRecorder: ' + err);
         }
+    }
+
+    startMobileRecording(options, audioMixerTracks) {
+        // Combine audioMixerTracks and videoTracks into a single array
+        const combinedTracks = [];
+
+        if (Array.isArray(audioMixerTracks)) {
+            combinedTracks.push(...audioMixerTracks);
+        }
+
+        if (this.localVideoStream !== null) {
+            const videoTracks = this.localVideoStream.getVideoTracks();
+            console.log('Cam video tracks --->', videoTracks);
+
+            if (Array.isArray(videoTracks)) {
+                combinedTracks.push(...videoTracks);
+            }
+        }
+
+        const recCamStream = new MediaStream(combinedTracks);
+        console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
+
+        this.mediaRecorder = new MediaRecorder(recCamStream, options);
+        console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+        this.getId('swapCameraButton').className = 'hidden';
+
+        this.initRecording();
+    }
+
+    startDesktopRecording(options, audioMixerTracks) {
+        // On desktop devices, record screen/window... + all audio tracks
+        const constraints = { video: true };
+        navigator.mediaDevices
+            .getDisplayMedia(constraints)
+            .then((screenStream) => {
+                const screenTracks = screenStream.getVideoTracks();
+                console.log('Screen video tracks --->', screenTracks);
+
+                const combinedTracks = [];
+                if (Array.isArray(screenTracks)) {
+                    combinedTracks.push(...screenTracks);
+                }
+                if (Array.isArray(audioMixerTracks)) {
+                    combinedTracks.push(...audioMixerTracks);
+                }
+
+                const recScreenStream = new MediaStream(combinedTracks);
+                console.log('New Screen/Window Media Stream tracks  --->', recScreenStream.getTracks());
+
+                this.recScreenStream = recScreenStream;
+                this.mediaRecorder = new MediaRecorder(recScreenStream, options);
+                console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+                this.initRecording();
+            })
+            .catch((err) => {
+                this.handleRecordingError('Unable to record the screen + audio: ' + err);
+            });
     }
 
     initRecording() {
@@ -3472,7 +3495,7 @@ class RoomClient {
                 window.URL.revokeObjectURL(url);
             }, 100);
             console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
-
+            recordedBlobs = [];
             recTime.innerText = '0s';
         } catch (ex) {
             console.warn('Recording save failed', ex);
