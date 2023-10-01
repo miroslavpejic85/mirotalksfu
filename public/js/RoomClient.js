@@ -3328,31 +3328,35 @@ class RoomClient {
     }
 
     startMobileRecording(options, audioMixerTracks) {
-        // Combine audioMixerTracks and videoTracks into a single array
-        const combinedTracks = [];
+        try {
+            // Combine audioMixerTracks and videoTracks into a single array
+            const combinedTracks = [];
 
-        if (Array.isArray(audioMixerTracks)) {
-            combinedTracks.push(...audioMixerTracks);
-        }
-
-        if (this.localVideoStream !== null) {
-            const videoTracks = this.localVideoStream.getVideoTracks();
-            console.log('Cam video tracks --->', videoTracks);
-
-            if (Array.isArray(videoTracks)) {
-                combinedTracks.push(...videoTracks);
+            if (Array.isArray(audioMixerTracks)) {
+                combinedTracks.push(...audioMixerTracks);
             }
+
+            if (this.localVideoStream !== null) {
+                const videoTracks = this.localVideoStream.getVideoTracks();
+                console.log('Cam video tracks --->', videoTracks);
+
+                if (Array.isArray(videoTracks)) {
+                    combinedTracks.push(...videoTracks);
+                }
+            }
+
+            const recCamStream = new MediaStream(combinedTracks);
+            console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
+
+            this.mediaRecorder = new MediaRecorder(recCamStream, options);
+            console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+            this.getId('swapCameraButton').className = 'hidden';
+
+            this.initRecording();
+        } catch (err) {
+            this.handleRecordingError('Unable to record the camera + audio: ' + err);
         }
-
-        const recCamStream = new MediaStream(combinedTracks);
-        console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
-
-        this.mediaRecorder = new MediaRecorder(recCamStream, options);
-        console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
-
-        this.getId('swapCameraButton').className = 'hidden';
-
-        this.initRecording();
     }
 
     startDesktopRecording(options, audioMixerTracks) {
@@ -3454,7 +3458,6 @@ class RoomClient {
             console.log('MediaRecorder Blobs: ', recordedBlobs);
 
             const dateTime = getDataTimeString();
-
             const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
             const blob = new Blob(recordedBlobs, { type: 'video/' + type });
             const recFileName = `${dateTime}-REC.${type}`;
@@ -3462,43 +3465,46 @@ class RoomClient {
             const blobFileSize = bytesToSize(blob.size);
             const recTime = document.getElementById('recordingStatus');
 
+            const recordingInfo = `
+                🔴 Recording Info: <br/><br/>
+                <ul>
+                    <li>Time: ${recTime.innerText}</li>
+                    <li>File: ${recFileName}</li>
+                    <li>Size: ${blobFileSize}</li>
+                </ul>
+                <br/>
+                Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+            `;
+
             Swal.fire({
                 background: swalBackground,
                 position: 'center',
                 icon: 'success',
                 title: 'Recording',
-                html: `
-                <div style="text-align: left;">
-                    🔴 Recording Info: <br/><br/>
-                    <ul>
-                        <li>Time: ${recTime.innerText}</li>
-                        <li>File: ${recFileName}</li>
-                        <li>Size: ${blobFileSize}</li>
-                    </ul>
-                    <br/>
-                    Please wait to be processed, then will be downloaded to your ${currentDevice} device.
-                </div>`,
+                html: `<div style="text-align: left;">${recordingInfo}</div>`,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
 
             console.log('MediaRecorder Download Blobs');
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = recFileName;
-            document.body.appendChild(a);
-            a.click();
+
+            const downloadLink = document.createElement('a');
+            downloadLink.style.display = 'none';
+            downloadLink.href = url;
+            downloadLink.download = recFileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+
             setTimeout(() => {
-                document.body.removeChild(a);
+                document.body.removeChild(downloadLink);
                 window.URL.revokeObjectURL(url);
+                console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
+                recordedBlobs = [];
+                recTime.innerText = '0s';
             }, 100);
-            console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
-            recordedBlobs = [];
-            recTime.innerText = '0s';
-        } catch (ex) {
-            console.warn('Recording save failed', ex);
+        } catch (err) {
+            console.error('Recording save failed', err);
         }
     }
 
