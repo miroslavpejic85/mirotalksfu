@@ -223,6 +223,8 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopVideoButton', 'Stop the video', placement);
         setTippy('startScreenButton', 'Start screen share', placement);
         setTippy('stopScreenButton', 'Stop screen share', placement);
+        setTippy('startRecButton', 'Start recording', placement);
+        setTippy('stopRecButton', 'Stop recording', placement);
         setTippy('raiseHandButton', 'Raise your hand', placement);
         setTippy('lowerHandButton', 'Lower your hand', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
