@@ -929,6 +929,7 @@ function roomIsReady() {
     if (BUTTONS.settings.tabRecording) {
         show(startRecButton);
     } else {
+        hide(startRecButton);
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
