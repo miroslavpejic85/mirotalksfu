@@ -1164,6 +1164,8 @@ function startServer() {
                 if (room.isLobbyEnabled()) {
                     room.setLobbyEnabled(false);
                 }
+                if (roomList.has(socket.room_id)) roomList.delete(socket.room_id);
+
                 delete presenters[socket.room_id];
                 log.debug('Disconnect - current presenters grouped by roomId', presenters);
             }
