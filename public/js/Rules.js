@@ -59,6 +59,7 @@ const BUTTONS = {
         ejectButton: true,
     },
     chat: {
+        chatPinButton: true,
         chatMaxButton: true,
         chatSaveButton: true,
         chatEmojiButton: true,

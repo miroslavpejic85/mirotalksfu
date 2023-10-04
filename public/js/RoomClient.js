@@ -176,6 +176,7 @@ class RoomClient {
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
+        this.isChatPinned = false;
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
@@ -2599,7 +2600,7 @@ class RoomClient {
                     cam.className = '';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
-                    this.togglePin(pinVideoPosition.value);
+                    this.toggleVideoPin(pinVideoPosition.value);
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
@@ -2622,10 +2623,10 @@ class RoomClient {
         }
     }
 
-    togglePin(position) {
+    toggleVideoPin(position) {
         if (!this.isVideoPinned) return;
         switch (position) {
-            case 'top-end':
+            case 'top':
                 this.videoPinMediaContainer.style.top = '25%';
                 this.videoPinMediaContainer.style.width = '100%';
                 this.videoPinMediaContainer.style.height = '75%';
@@ -2690,6 +2691,9 @@ class RoomClient {
         this.videoMediaContainer.style.height = '100%';
         this.pinnedVideoPlayerId = null;
         this.isVideoPinned = false;
+        if (this.isChatPinned) {
+            this.chatPin();
+        }
     }
 
     adaptVideoObjectFit(index) {
@@ -2814,6 +2818,8 @@ class RoomClient {
         let chatRoom = this.getId('chatRoom');
         if (this.isChatOpen == false) {
             chatRoom.style.display = 'block';
+            hide(chatMinButton);
+            show(chatMaxButton);
             this.chatCenter();
             this.sound('open');
             this.isChatOpen = true;
@@ -2821,6 +2827,12 @@ class RoomClient {
             chatRoom.style.display = 'none';
             this.isChatOpen = false;
         }
+        if (this.isChatPinned) this.chatUnpin();
+    }
+
+    toggleChatPin() {
+        this.isChatPinned ? this.chatUnpin() : this.chatPin();
+        this.sound('click');
     }
 
     chatMaximize() {
@@ -2834,14 +2846,59 @@ class RoomClient {
     chatMinimize() {
         hide(chatMinButton);
         show(chatMaxButton);
-        this.chatCenter();
+        if (this.isChatPinned) {
+            this.chatPin();
+        } else {
+            this.chatCenter();
+            document.documentElement.style.setProperty('--msger-width', '420px');
+            document.documentElement.style.setProperty('--msger-height', '680px');
+        }
+    }
+
+    chatPin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.width = '75%';
+            this.videoMediaContainer.style.height = '100%';
+        }
+        this.chatPinned();
+        this.isChatPinned = true;
+        setColor(chatTogglePin, 'lime');
+        resizeVideoMedia();
+    }
+
+    chatUnpin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.right = null;
+            this.videoMediaContainer.style.width = '100%';
+            this.videoMediaContainer.style.height = '100%';
+        }
         document.documentElement.style.setProperty('--msger-width', '420px');
         document.documentElement.style.setProperty('--msger-height', '680px');
+        hide(chatMinButton);
+        show(chatMaxButton);
+        this.chatCenter();
+        this.isChatPinned = false;
+        setColor(chatTogglePin, 'white');
+        resizeVideoMedia();
     }
 
     chatCenter() {
+        chatRoom.style.position = 'fixed';
+        chatRoom.style.transform = 'translate(-50%, -50%)';
         chatRoom.style.top = '50%';
         chatRoom.style.left = '50%';
+    }
+
+    chatPinned() {
+        chatRoom.style.position = 'absolute';
+        chatRoom.style.top = 0;
+        chatRoom.style.right = 0;
+        chatRoom.style.left = null;
+        chatRoom.style.transform = null;
+        document.documentElement.style.setProperty('--msger-width', '25%');
+        document.documentElement.style.setProperty('--msger-height', '100%');
     }
 
     toggleChatEmoji() {
