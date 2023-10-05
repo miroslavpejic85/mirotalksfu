@@ -68,6 +68,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
+const { firestoreDB } = require('../db/firebase')
 
 // Slack API
 const CryptoJS = require('crypto-js');
@@ -272,30 +273,49 @@ function startServer() {
     app.get('/join/', (req, res) => {
         if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
-            // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-            const { room, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
-            // if (room && password && name && audio && video && screen && notify) {
-            if (room) {
-                return res.sendFile(views.room);
+            
+            // http://localhost:3010/join?room=S2EzzFkqKVbYJVCoFybI&user_id=1234567&name=Abhijit
+            const { room, user_id, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
+            if (room && user_id ){
+                console.log('S2EzzFkqKVbYJVCoFybI' === room, user_id)
+                const  cogoone_constants = firestoreDB.collection('video_call').doc(room).get(); 
+    
+                cogoone_constants.then((response)=> {
+                    const video_call_user_data = response.data()
+
+                    const user_list = video_call_user_data.users
+                    const user_data = user_list.find((user) => user.user_id === user_id);
+
+                    if (user_data){
+                        return res.sendFile(views.room);
+                    }else{
+                        console.log(user_data, '------------------------------------------------)');
+                        res.redirect('/');
+                    }
+
+                }).catch((err)=>{
+                    console.log(err)
+                    res.redirect('/');
+                })
             }
         }
-        if (hostCfg.protected) {
-            return res.sendFile(views.login);
-        }
-        res.redirect('/');
+        // if (hostCfg.protected) {
+        //     return res.sendFile(views.login);
+        // }
+        // res.redirect('/');
     });
 
     // join room by id
-    app.get('/join/:roomId', (req, res) => {
-        if (hostCfg.authenticated) {
-            res.sendFile(views.room);
-        } else {
-            if (hostCfg.protected) {
-                return res.sendFile(views.login);
-            }
-            res.redirect('/');
-        }
-    });
+    // app.get('/join/:roomId', (req, res) => {
+    //     if (hostCfg.authenticated) {
+    //         res.sendFile(views.room);
+    //     } else {
+    //         if (hostCfg.protected) {
+    //             return res.sendFile(views.login);
+    //         }
+    //         res.redirect('/');
+    //     }
+    // });
 
     // not specified correctly the room id
     app.get('/join/*', (req, res) => {
@@ -318,11 +338,11 @@ function startServer() {
     });
 
     // Get stats endpoint
-    app.get(['/stats'], (req, res) => {
-        const stats = config.stats ? config.stats : defaultStats;
-        // log.debug('Send stats', stats);
-        res.send(stats);
-    });
+    // app.get(['/stats'], (req, res) => {
+    //     const stats = config.stats ? config.stats : defaultStats;
+    //     // log.debug('Send stats', stats);
+    //     res.send(stats);
+    // });
 
     // handle logged on host protected
     app.get(['/logged'], (req, res) => {

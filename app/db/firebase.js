@@ -16,20 +16,18 @@ const serviceAccount =  {
     "universe_domain": process.env.UNIVERSE_DOMAIN
 }
 
-console.log(serviceAccount)
-
 fs.initializeApp({
  credential: fs.credential.cert(serviceAccount)
 });
 
 const db = fs.firestore(); 
 
-const  cogoone_constants = db.collection('cogoone_constants').doc('IzVhMjQAJ7On78yV8V5b').get(); 
+// const  cogoone_constants = db.collection('cogoone_constants').doc('IzVhMjQAJ7On78yV8V5b').get(); 
 
-cogoone_constants.then((res)=> {
-    console.log(res.data())
-})
+// cogoone_constants.then((res)=> {
+//     console.log(res.data())
+// })
 
-// module.exports = {
-//     firestoreDB: db
-// }
+module.exports = {
+    firestoreDB: db
+}

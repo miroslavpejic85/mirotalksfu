@@ -1619,8 +1619,8 @@ main {
     position: relative;
     display: flex;
     flex-wrap: wrap;
-    padding-top: 48px;
-    padding-bottom: 48px;
+    /* padding-top: 48px;
+    padding-bottom: 48px; */
 }
 .footer-brand,
 .footer-links,
@@ -1654,8 +1654,8 @@ main {
     }
     .site-footer-inner {
         justify-content: space-between;
-        padding-top: 64px;
-        padding-bottom: 64px;
+        /* padding-top: 64px;
+        padding-bottom: 64px; */
     }
     .footer-brand,
     .footer-links,
