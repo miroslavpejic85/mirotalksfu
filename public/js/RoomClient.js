@@ -2798,6 +2798,16 @@ class RoomClient {
         }
     }
 
+    makeUnDraggable(elmnt, dragObj) {
+        if (dragObj) {
+            dragObj.onmousedown = null;
+        } else {
+            elmnt.onmousedown = null;
+        }
+        elmnt.style.top = '';
+        elmnt.style.left = '';
+    }
+
     // ####################################################
     // CHAT
     // ####################################################
@@ -2865,6 +2875,8 @@ class RoomClient {
         this.isChatPinned = true;
         setColor(chatTogglePin, 'lime');
         resizeVideoMedia();
+        chatRoom.style.resize = 'none';
+        if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
     }
 
     chatUnpin() {
@@ -2882,6 +2894,8 @@ class RoomClient {
         this.isChatPinned = false;
         setColor(chatTogglePin, 'white');
         resizeVideoMedia();
+        chatRoom.style.resize = 'both';
+        if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
     }
 
     chatCenter() {
