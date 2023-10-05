@@ -78,6 +78,7 @@ let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
 let room_id = getRoomId();
+let user_id = getUserId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
@@ -269,6 +270,18 @@ function getRoomId() {
     console.log('Direct join', { room: roomId });
     window.localStorage.lastRoom = roomId;
     return roomId;
+}
+
+function getUserId() {
+    let qs = new URLSearchParams(window.location.search);
+    let queryUserId = filterXSS(qs.get('user_id'));
+    let userId = queryUserId ? queryUserId : location.pathname.substring(6);
+    if (userId == '') {
+        userId = makeId(12);
+    }
+    console.log('Direct join', { user: userId });
+    window.localStorage.lastUserId = userId;
+    return userId;
 }
 
 function makeId(length) {
@@ -905,6 +918,7 @@ function joinRoom(peer_name, room_id) {
             window.mediasoupClient,
             socket,
             room_id,
+            user_id,
             peer_name,
             peer_uuid,
             peer_info,

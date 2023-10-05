@@ -128,6 +128,7 @@ class RoomClient {
         mediasoupClient,
         socket,
         room_id,
+        user_id,
         peer_name,
         peer_uuid,
         peer_info,
@@ -146,6 +147,7 @@ class RoomClient {
 
         this.socket = socket;
         this.room_id = room_id;
+        this.user_id = user_id;
         this.peer_id = socket.id;
         this.peer_name = peer_name;
         this.peer_uuid = peer_uuid;
@@ -774,7 +776,8 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                openURL((window.location.href = '/join/' + this.room_id));
+                openURL((window.location.href = '/join?room='+this.room_id+'&name='+this.peer_name+'&user_id='+this.user_id ))
+                // openURL((window.location.href = '/join/' + this.room_id));
             }
         });
     }
