@@ -208,11 +208,8 @@ body {
 
 @media screen and (max-width: 540px) {
     #control button {
-        font-size: 0.8rem;
-    }
-    #control button i {
-        font-size: 0.8rem;
-        cursor: default;
+        font-size: 1rem;
+        padding: 5px;
     }
 }
 
