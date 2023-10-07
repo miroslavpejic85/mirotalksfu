@@ -200,6 +200,7 @@ function initClient() {
         setTippy('chatSaveButton', 'Save', 'bottom');
         setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'bottom');
+        setTippy('chatTogglePin', 'Toggle pin', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('participantsCloseBtn', 'Close', 'right');
@@ -224,6 +225,8 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopVideoButton', 'Stop the video', placement);
         setTippy('startScreenButton', 'Start screen share', placement);
         setTippy('stopScreenButton', 'Stop screen share', placement);
+        setTippy('startRecButton', 'Start recording', placement);
+        setTippy('stopRecButton', 'Stop recording', placement);
         setTippy('raiseHandButton', 'Raise your hand', placement);
         setTippy('lowerHandButton', 'Lower your hand', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
@@ -942,6 +945,7 @@ function roomIsReady() {
     if (BUTTONS.settings.tabRecording) {
         show(startRecButton);
     } else {
+        hide(startRecButton);
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
@@ -962,6 +966,7 @@ function roomIsReady() {
     if (DetectRTC.isMobileDevice) {
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
         rc.chatMaximize();
+        hide(chatTogglePin);
         hide(chatMaxButton);
         hide(chatMinButton);
     } else {
@@ -978,6 +983,7 @@ function roomIsReady() {
                 show(ScreenFpsDiv);
             }
         }
+        BUTTONS.chat.chatPinButton && show(chatTogglePin);
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
     }
@@ -1164,6 +1170,9 @@ function handleButtons() {
     };
     chatCloseButton.onclick = () => {
         rc.toggleChat();
+    };
+    chatTogglePin.onclick = () => {
+        rc.toggleChatPin();
     };
     chatMaxButton.onclick = () => {
         rc.chatMaximize();
@@ -1644,7 +1653,7 @@ function handleSelects() {
         refreshMainButtonsToolTipPlacement();
     };
     pinVideoPosition.onchange = () => {
-        rc.togglePin(pinVideoPosition.value);
+        rc.toggleVideoPin(pinVideoPosition.value);
         lsSettings.pin_grid = pinVideoPosition.selectedIndex;
         lS.setSettings(lsSettings);
     };
@@ -1785,7 +1794,7 @@ function loadSettingsFromLocalStorage() {
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
-    rc.togglePin(pinVideoPosition.value);
+    rc.toggleVideoPin(pinVideoPosition.value);
     refreshMainButtonsToolTipPlacement();
 }
 

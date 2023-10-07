@@ -117,7 +117,7 @@ const _EVENTS = {
 };
 
 // Recording
-let recordedBlobs;
+let recordedBlobs = [];
 
 class RoomClient {
     constructor(
@@ -178,6 +178,7 @@ class RoomClient {
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
+        this.isChatPinned = false;
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
@@ -188,8 +189,8 @@ class RoomClient {
         this.rightMsgAvatar = null;
 
         this.localVideoStream = null;
-        this.localScreenStream = null;
         this.localAudioStream = null;
+        this.localScreenStream = null;
         this.mediaRecorder = null;
         this.recScreenStream = null;
         this._isRecording = false;
@@ -2601,7 +2602,7 @@ class RoomClient {
                     cam.className = '';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
-                    this.togglePin(pinVideoPosition.value);
+                    this.toggleVideoPin(pinVideoPosition.value);
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
@@ -2624,10 +2625,10 @@ class RoomClient {
         }
     }
 
-    togglePin(position) {
+    toggleVideoPin(position) {
         if (!this.isVideoPinned) return;
         switch (position) {
-            case 'top-end':
+            case 'top':
                 this.videoPinMediaContainer.style.top = '25%';
                 this.videoPinMediaContainer.style.width = '100%';
                 this.videoPinMediaContainer.style.height = '75%';
@@ -2692,6 +2693,9 @@ class RoomClient {
         this.videoMediaContainer.style.height = '100%';
         this.pinnedVideoPlayerId = null;
         this.isVideoPinned = false;
+        if (this.isChatPinned) {
+            this.chatPin();
+        }
     }
 
     adaptVideoObjectFit(index) {
@@ -2796,6 +2800,16 @@ class RoomClient {
         }
     }
 
+    makeUnDraggable(elmnt, dragObj) {
+        if (dragObj) {
+            dragObj.onmousedown = null;
+        } else {
+            elmnt.onmousedown = null;
+        }
+        elmnt.style.top = '';
+        elmnt.style.left = '';
+    }
+
     // ####################################################
     // CHAT
     // ####################################################
@@ -2816,6 +2830,8 @@ class RoomClient {
         let chatRoom = this.getId('chatRoom');
         if (this.isChatOpen == false) {
             chatRoom.style.display = 'block';
+            hide(chatMinButton);
+            show(chatMaxButton);
             this.chatCenter();
             this.sound('open');
             this.isChatOpen = true;
@@ -2823,6 +2839,12 @@ class RoomClient {
             chatRoom.style.display = 'none';
             this.isChatOpen = false;
         }
+        if (this.isChatPinned) this.chatUnpin();
+    }
+
+    toggleChatPin() {
+        this.isChatPinned ? this.chatUnpin() : this.chatPin();
+        this.sound('click');
     }
 
     chatMaximize() {
@@ -2836,14 +2858,63 @@ class RoomClient {
     chatMinimize() {
         hide(chatMinButton);
         show(chatMaxButton);
-        this.chatCenter();
+        if (this.isChatPinned) {
+            this.chatPin();
+        } else {
+            this.chatCenter();
+            document.documentElement.style.setProperty('--msger-width', '420px');
+            document.documentElement.style.setProperty('--msger-height', '680px');
+        }
+    }
+
+    chatPin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.width = '75%';
+            this.videoMediaContainer.style.height = '100%';
+        }
+        this.chatPinned();
+        this.isChatPinned = true;
+        setColor(chatTogglePin, 'lime');
+        resizeVideoMedia();
+        chatRoom.style.resize = 'none';
+        if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
+    }
+
+    chatUnpin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.right = null;
+            this.videoMediaContainer.style.width = '100%';
+            this.videoMediaContainer.style.height = '100%';
+        }
         document.documentElement.style.setProperty('--msger-width', '420px');
         document.documentElement.style.setProperty('--msger-height', '680px');
+        hide(chatMinButton);
+        show(chatMaxButton);
+        this.chatCenter();
+        this.isChatPinned = false;
+        setColor(chatTogglePin, 'white');
+        resizeVideoMedia();
+        chatRoom.style.resize = 'both';
+        if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
     }
 
     chatCenter() {
+        chatRoom.style.position = 'fixed';
+        chatRoom.style.transform = 'translate(-50%, -50%)';
         chatRoom.style.top = '50%';
         chatRoom.style.left = '50%';
+    }
+
+    chatPinned() {
+        chatRoom.style.position = 'absolute';
+        chatRoom.style.top = 0;
+        chatRoom.style.right = 0;
+        chatRoom.style.left = null;
+        chatRoom.style.transform = null;
+        document.documentElement.style.setProperty('--msger-width', '25%');
+        document.documentElement.style.setProperty('--msger-height', '100%');
     }
 
     toggleChatEmoji() {
@@ -3286,6 +3357,11 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
+    handleRecordingError(error) {
+        console.error('Recording error', error);
+        this.userLog('error', error, 'top-end', 6000);
+    }
+
     getSupportedMimeTypes() {
         const possibleTypes = [
             'video/webm;codecs=vp9,opus',
@@ -3301,73 +3377,108 @@ class RoomClient {
 
     startRecording() {
         recordedBlobs = [];
-        let options = this.getSupportedMimeTypes();
-        console.log('MediaRecorder supported options', options);
-        options = { mimeType: options[0] };
+
+        // Get supported MIME types and set options
+        const supportedMimeTypes = this.getSupportedMimeTypes();
+        console.log('MediaRecorder supported options', supportedMimeTypes);
+        const options = { mimeType: supportedMimeTypes[0] };
+
         try {
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
+            console.log('Audio streams tracks --->', audioStreams.getTracks());
+
             const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams, this.localAudioStream]);
             const audioMixerTracks = audioMixerStreams.getTracks();
+            console.log('Audio mixer tracks --->', audioMixerTracks);
 
-            if (this.isMobileDevice) {
-                const videoTracks = this.localVideoStream.getTracks();
-                console.log('INIT CAM RECORDING', {
-                    localAudioStream: this.localAudioStream,
-                    localVideoStream: this.localVideoStream,
-                    videoTracks: videoTracks,
-                    audioMixerTracks: audioMixerTracks,
-                });
-                // on mobile devices recording camera + all audio tracks
-                let newStream = new MediaStream([...videoTracks, ...audioMixerTracks]);
-                console.log('New Cam Media Stream  ---> ', newStream.getTracks());
-                this.mediaRecorder = new MediaRecorder(newStream, options);
-                console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
-                this.getId('swapCameraButton').className = 'hidden';
-                this._isRecording = true;
-                this.handleMediaRecorder();
-                this.event(_EVENTS.startRec);
-                this.sound('recStart');
-            } else {
-                // on desktop devices recording screen/window... + all audio tracks
-                const constraints = { video: true };
-                navigator.mediaDevices
-                    .getDisplayMedia(constraints)
-                    .then((screenStream) => {
-                        const screenTracks = screenStream.getTracks();
-                        console.log('INIT SCREEN - WINDOW RECORDING', {
-                            localAudioStream: this.localAudioStream,
-                            localVideoStream: this.localVideoStream,
-                            screenTracks: screenTracks,
-                            audioMixerTracks: audioMixerTracks,
-                        });
-                        this.recScreenStream = new MediaStream([...screenTracks, ...audioMixerTracks]);
-                        console.log('New Screen/Window Media Stream  ---> ', this.recScreenStream.getTracks());
-                        this.mediaRecorder = new MediaRecorder(this.recScreenStream, options);
-                        console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
-                        this._isRecording = true;
-                        this.handleMediaRecorder();
-                        this.event(_EVENTS.startRec);
-                        this.recordingAction('Start recording');
-                        this.sound('recStart');
-                    })
-                    .catch((err) => {
-                        console.error('Error Unable to recording the screen + audio', err);
-                        this.userLog('error', 'Unable to recording the screen + audio reason: ' + err, 'top-end', 6000);
-                    });
-            }
+            this.isMobileDevice
+                ? this.startMobileRecording(options, audioMixerTracks)
+                : this.startDesktopRecording(options, audioMixerTracks);
         } catch (err) {
-            console.error('Exception while creating MediaRecorder: ', err);
-            return this.userLog('error', "Can't start stream recording reason: " + err, 'top-end', 6000);
+            this.handleRecordingError('Exception while creating MediaRecorder: ' + err);
         }
     }
 
+    startMobileRecording(options, audioMixerTracks) {
+        try {
+            // Combine audioMixerTracks and videoTracks into a single array
+            const combinedTracks = [];
+
+            if (Array.isArray(audioMixerTracks)) {
+                combinedTracks.push(...audioMixerTracks);
+            }
+
+            if (this.localVideoStream !== null) {
+                const videoTracks = this.localVideoStream.getVideoTracks();
+                console.log('Cam video tracks --->', videoTracks);
+
+                if (Array.isArray(videoTracks)) {
+                    combinedTracks.push(...videoTracks);
+                }
+            }
+
+            const recCamStream = new MediaStream(combinedTracks);
+            console.log('New Cam Media Stream tracks  --->', recCamStream.getTracks());
+
+            this.mediaRecorder = new MediaRecorder(recCamStream, options);
+            console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+            this.getId('swapCameraButton').className = 'hidden';
+
+            this.initRecording();
+        } catch (err) {
+            this.handleRecordingError('Unable to record the camera + audio: ' + err);
+        }
+    }
+
+    startDesktopRecording(options, audioMixerTracks) {
+        // On desktop devices, record screen/window... + all audio tracks
+        const constraints = { video: true };
+        navigator.mediaDevices
+            .getDisplayMedia(constraints)
+            .then((screenStream) => {
+                const screenTracks = screenStream.getVideoTracks();
+                console.log('Screen video tracks --->', screenTracks);
+
+                const combinedTracks = [];
+                if (Array.isArray(screenTracks)) {
+                    combinedTracks.push(...screenTracks);
+                }
+                if (Array.isArray(audioMixerTracks)) {
+                    combinedTracks.push(...audioMixerTracks);
+                }
+
+                const recScreenStream = new MediaStream(combinedTracks);
+                console.log('New Screen/Window Media Stream tracks  --->', recScreenStream.getTracks());
+
+                this.recScreenStream = recScreenStream;
+                this.mediaRecorder = new MediaRecorder(recScreenStream, options);
+                console.log('Created MediaRecorder', this.mediaRecorder, 'with options', options);
+
+                this.initRecording();
+            })
+            .catch((err) => {
+                this.handleRecordingError('Unable to record the screen + audio: ' + err);
+            });
+    }
+
+    initRecording() {
+        this._isRecording = true;
+        this.handleMediaRecorder();
+        this.event(_EVENTS.startRec);
+        this.recordingAction('Start recording');
+        this.sound('recStart');
+    }
+
     hasAudioTrack(mediaStream) {
+        if (!mediaStream) return false;
         const audioTracks = mediaStream.getAudioTracks();
         return audioTracks.length > 0;
     }
 
     hasVideoTrack(mediaStream) {
+        if (!mediaStream) return false;
         const videoTracks = mediaStream.getVideoTracks();
         return videoTracks.length > 0;
     }
@@ -3420,7 +3531,6 @@ class RoomClient {
             console.log('MediaRecorder Blobs: ', recordedBlobs);
 
             const dateTime = getDataTimeString();
-
             const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
             const blob = new Blob(recordedBlobs, { type: 'video/' + type });
             const recFileName = `${dateTime}-REC.${type}`;
@@ -3428,43 +3538,46 @@ class RoomClient {
             const blobFileSize = bytesToSize(blob.size);
             const recTime = document.getElementById('recordingStatus');
 
+            const recordingInfo = `
+                🔴 Recording Info: <br/><br/>
+                <ul>
+                    <li>Time: ${recTime.innerText}</li>
+                    <li>File: ${recFileName}</li>
+                    <li>Size: ${blobFileSize}</li>
+                </ul>
+                <br/>
+                Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+            `;
+
             Swal.fire({
                 background: swalBackground,
                 position: 'center',
                 icon: 'success',
                 title: 'Recording',
-                html: `
-                <div style="text-align: left;">
-                    🔴 Recording Info: <br/><br/>
-                    <ul>
-                        <li>Time: ${recTime.innerText}</li>
-                        <li>File: ${recFileName}</li>
-                        <li>Size: ${blobFileSize}</li>
-                    </ul>
-                    <br/>
-                    Please wait to be processed, then will be downloaded to your ${currentDevice} device.
-                </div>`,
+                html: `<div style="text-align: left;">${recordingInfo}</div>`,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
 
             console.log('MediaRecorder Download Blobs');
             const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.style.display = 'none';
-            a.href = url;
-            a.download = recFileName;
-            document.body.appendChild(a);
-            a.click();
-            setTimeout(() => {
-                document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
-            }, 100);
-            console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
 
-            recTime.innerText = '0s';
-        } catch (ex) {
-            console.warn('Recording save failed', ex);
+            const downloadLink = document.createElement('a');
+            downloadLink.style.display = 'none';
+            downloadLink.href = url;
+            downloadLink.download = recFileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+
+            setTimeout(() => {
+                document.body.removeChild(downloadLink);
+                window.URL.revokeObjectURL(url);
+                console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
+                recordedBlobs = [];
+                recTime.innerText = '0s';
+            }, 100);
+        } catch (err) {
+            console.error('Recording save failed', err);
         }
     }
 
