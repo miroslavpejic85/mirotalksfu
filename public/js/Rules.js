@@ -19,6 +19,7 @@ const BUTTONS = {
         chatButton: true,
         participantsButton: true,
         whiteboardButton: true,
+        emojiRoomButton: true,
         settingsButton: true,
         aboutButton: true, // Please keep me always visible, thank you!
         exitButton: true,

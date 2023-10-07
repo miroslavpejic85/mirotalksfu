@@ -193,7 +193,7 @@ body {
 }
 
 #control button {
-    font-size: 1.2rem;
+    font-size: 1rem;
     padding: 10px;
     transition: all 0.3s ease-in-out;
     background: var(--btns-bg-color);
@@ -202,11 +202,15 @@ body {
     /* box-shadow: var(--box-shadow); */
 }
 
+#control button i {
+    font-size: 1.2rem;
+}
+
 @media screen and (max-width: 540px) {
     #control button {
         font-size: 0.8rem;
     }
-    #control i {
+    #control button i {
         font-size: 0.8rem;
         cursor: default;
     }
@@ -753,14 +757,44 @@ a:hover {
 }
 
 /*--------------------------------------------------------------
-# Chat room emoji picker
+# Chat/room/user emoji picker
 --------------------------------------------------------------*/
 
-em-emoji-picker {
+.chatEmojiPicker {
     z-index: 0;
     position: absolute;
     bottom: 110px;
     left: 10px;
+}
+
+.roomEmoji {
+    z-index: 9;
+    position: absolute;
+    display: none;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.userEmoji {
+    z-index: 9;
+    position: absolute;
+    left: 80px;
+    bottom: 60px;
+}
+
+.emojiPickerHeader {
+    display: flex;
+    justify-content: flex-start;
+    background: #151616;
+    border-radius: 10px;
+    padding: 10px;
+    color: #fff;
+    cursor: move;
+}
+
+#closeEmojiPickerContainer {
+    font-size: 1.3rem;
 }
 
 /*--------------------------------------------------------------
@@ -1272,4 +1306,5 @@ z-index:
     - 6 settings
     - 7 participants/lobby
     - 8 send receive progress
+    - 9 room/user emoji
 */

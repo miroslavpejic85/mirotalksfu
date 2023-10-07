@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.6
+ * @version 1.0.7
  *
  */
 
@@ -145,6 +145,7 @@ function initClient() {
     setTheme();
     if (!DetectRTC.isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
+        setTippy('closeEmojiPickerContainer', 'Close', 'bottom');
         setTippy('mySettingsCloseBtn', 'Close', 'bottom');
         setTippy(
             'switchPushToTalk',
@@ -228,6 +229,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopRecButton', 'Stop recording', placement);
         setTippy('raiseHandButton', 'Raise your hand', placement);
         setTippy('lowerHandButton', 'Lower your hand', placement);
+        setTippy('roomEmojiPicker', 'Toggle emoji reaction', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('participantsButton', 'Toggle participants', placement);
@@ -935,6 +937,7 @@ function roomIsReady() {
     }
     BUTTONS.main.chatButton && show(chatButton);
     BUTTONS.main.participantsButton && show(participantsButton);
+    BUTTONS.main.emojiRoomButton && show(roomEmojiPicker);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
@@ -955,6 +958,7 @@ function roomIsReady() {
         hide(chatMaxButton);
         hide(chatMinButton);
     } else {
+        rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(participants, participantsHeader);
@@ -993,6 +997,8 @@ function roomIsReady() {
     handleButtons();
     handleSelects();
     handleInputs();
+    handleChatEmojiPicker();
+    handleRoomEmojiPicker();
     loadSettingsFromLocalStorage();
     startSessionTimer();
     document.body.addEventListener('mousemove', (e) => {
@@ -1742,7 +1748,13 @@ function handleInputs() {
         isChatPasteTxt = true;
         rc.checkLineBreaks();
     };
+}
 
+// ####################################################
+// EMOJI PIKER
+// ####################################################
+
+function handleChatEmojiPicker() {
     const pickerOptions = {
         theme: 'dark',
         onEmojiSelect: addEmojiToMsg,
@@ -1753,6 +1765,42 @@ function handleInputs() {
     function addEmojiToMsg(data) {
         chatMessage.value += data.native;
         rc.toggleChatEmoji();
+    }
+}
+
+function handleRoomEmojiPicker() {
+    const pickerRoomOptions = {
+        theme: 'dark',
+        onEmojiSelect: sendEmojiToRoom,
+    };
+
+    const emojiRoomPicker = new EmojiMart.Picker(pickerRoomOptions);
+    emojiPickerContainer.appendChild(emojiRoomPicker);
+    emojiPickerContainer.style.display = 'none';
+
+    roomEmojiPicker.onclick = () => {
+        toggleEmojiPicker();
+    };
+    closeEmojiPickerContainer.onclick = () => {
+        toggleEmojiPicker();
+    };
+
+    function sendEmojiToRoom(data) {
+        console.log('Selected Emoji:', data.native);
+        const cmd = `roomEmoji|${peer_name}|${data.native}`;
+        rc.emitCmd(cmd);
+        rc.handleCmd(cmd);
+        // toggleEmojiPicker();
+    }
+
+    function toggleEmojiPicker() {
+        if (emojiPickerContainer.style.display === 'block') {
+            emojiPickerContainer.style.display = 'none';
+            setColor(roomEmojiPicker, 'white');
+        } else {
+            emojiPickerContainer.style.display = 'block';
+            setColor(roomEmojiPicker, 'yellow');
+        }
     }
 }
 
@@ -2549,7 +2597,7 @@ function wbUpdate() {
 
 function wbCanvasToJson() {
     if (!isPresenter && wbIsLock) return;
-    if (rc.thereIsParticipants()) {
+    if (rc.thereAreParticipants()) {
         let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
         rc.socket.emit('wbCanvasToJson', wbCanvasJson);
     }
@@ -2593,7 +2641,7 @@ function confirmClearBoard() {
 
 function whiteboardAction(data, emit = true) {
     if (emit) {
-        if (rc.thereIsParticipants()) {
+        if (rc.thereAreParticipants()) {
             rc.socket.emit('whiteboardAction', data);
         }
     } else {

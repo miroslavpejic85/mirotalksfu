@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.6
+ * @version 1.0.7
  *
  */
 
@@ -2412,7 +2412,7 @@ class RoomClient {
         }
     }
 
-    thereIsParticipants() {
+    thereAreParticipants() {
         // console.log('participantsCount ---->', participantsCount);
         if (this.consumers.size > 0 || participantsCount > 1) {
             return true;
@@ -2945,7 +2945,7 @@ class RoomClient {
     }
 
     sendMessage() {
-        if (!this.thereIsParticipants() && !isChatGPTOn) {
+        if (!this.thereAreParticipants() && !isChatGPTOn) {
             this.cleanMessage();
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
@@ -3001,7 +3001,7 @@ class RoomClient {
     }
 
     sendMessageTo(to_peer_id, to_peer_name) {
-        if (!this.thereIsParticipants()) {
+        if (!this.thereAreParticipants()) {
             isChatPasteTxt = false;
             this.cleanMessage();
             return this.userLog('info', 'No participants in the room except you', 'top-end');
@@ -3616,7 +3616,7 @@ class RoomClient {
     }
 
     recordingAction(action) {
-        if (!this.thereIsParticipants()) return;
+        if (!this.thereAreParticipants()) return;
         this.socket.emit('recordingAction', {
             peer_name: this.peer_name,
             peer_id: this.peer_id,
@@ -3706,7 +3706,7 @@ class RoomClient {
         this.fileToSend = file;
         //
         if (this.fileToSend && this.fileToSend.size > 0) {
-            if (!this.thereIsParticipants()) {
+            if (!this.thereAreParticipants()) {
                 return userLog('info', 'No participants detected', 'top-end');
             }
             // prevent XSS injection
@@ -4001,7 +4001,7 @@ class RoomClient {
         }).then((result) => {
             if (result.value) {
                 result.value = filterXSS(result.value);
-                if (!this.thereIsParticipants()) {
+                if (!this.thereAreParticipants()) {
                     return userLog('info', 'No participants detected', 'top-end');
                 }
                 if (!this.isVideoTypeSupported(result.value)) {
@@ -4699,9 +4699,27 @@ class RoomClient {
             case 'privacy':
                 this.setVideoPrivacyStatus(words[1], words[2] == 'true');
                 break;
+            case 'roomEmoji':
+                this.handleRoomEmoji(words);
+                break;
             default:
                 break;
             //...
+        }
+    }
+
+    handleRoomEmoji(words, duration = 5000) {
+        const userEmoji = document.getElementById(`userEmoji`);
+        if (userEmoji) {
+            const emojiDisplay = document.createElement('div');
+            emojiDisplay.className = 'animate__animated animate__backInUp';
+            emojiDisplay.style.fontSize = '3vh';
+            emojiDisplay.style.color = 'grey';
+            emojiDisplay.innerText = `${words[2]} ${words[1]}`;
+            userEmoji.appendChild(emojiDisplay);
+            setTimeout(() => {
+                emojiDisplay.remove();
+            }, duration);
         }
     }
 
@@ -4723,7 +4741,7 @@ class RoomClient {
                 broadcast: broadcast,
             };
 
-            if (!this.thereIsParticipants()) {
+            if (!this.thereAreParticipants()) {
                 if (info) return this.userLog('info', 'No participants detected', 'top-end');
             }
             switch (action) {

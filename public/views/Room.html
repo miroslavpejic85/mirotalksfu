@@ -146,6 +146,7 @@ access to use this app.
             <button id="stopRecButton" style="color: red" class="hidden"><i class="fas fa-record-vinyl"></i></button>
             <button id="raiseHandButton" class="hidden"><i class="fas fa-hand-paper"></i></button>
             <button id="lowerHandButton" class="hidden"><i id="lowerHandIcon" class="fas fa-hand-paper"></i></button>
+            <button id="roomEmojiPicker" class="hidden"><i class="fas fa-face-smile"></i></button>
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="participantsButton" class="hidden"><i class="fas fa-users"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
@@ -153,6 +154,13 @@ access to use this app.
             <button id="aboutButton" class="hidden"><i class="fas fa-question"></i></button>
             <button id="exitButton" class="hidden"><i class="fas fa-right-from-bracket"></i></button>
         </div>
+
+        <div id="emojiPickerContainer" class="roomEmoji fadein">
+            <div id="emojiPickerHeader" class="emojiPickerHeader">
+                <button id="closeEmojiPickerContainer" class="fas fa-times"></button>
+            </div>
+        </div>
+        <div id="userEmoji" class="userEmoji"></div>
 
         <section id="mySettings" class="fadein center hidden">
             <header id="mySettingsHeader">
@@ -737,7 +745,7 @@ access to use this app.
                         <i class="fas fa-paper-plane"></i>
                     </button>
                 </div>
-                <div id="chatEmoji" class="hidden fadein"></div>
+                <div id="chatEmoji" class="hidden fadein chatEmojiPicker"></div>
             </section>
         </section>
 
