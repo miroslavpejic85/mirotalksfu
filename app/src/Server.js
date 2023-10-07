@@ -76,6 +76,7 @@ const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
+const { getMeetingRoom } = require('../db/helper');
 
 const app = express();
 
@@ -274,22 +275,18 @@ function startServer() {
         if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
             
-            // http://localhost:3010/join?room=S2EzzFkqKVbYJVCoFybI&user_id=1234567&name=Abhijit
+            // http://localhost:3010/join?room=ed6ba5a0-a633-46ae-b8ce-30dfbda53902&user_id=3069c9db-4b38-43fc-aaa2-d27982aef4a8&name=Abhijit
             const { room, user_id, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
             if (room && user_id ){
-                console.log('S2EzzFkqKVbYJVCoFybI' === room, user_id)
-                const  cogoone_constants = firestoreDB.collection('video_call').doc(room).get(); 
-    
-                cogoone_constants.then((response)=> {
+                const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: room})
+            
+                get_meeting_room.then((response)=> {
                     const video_call_user_data = response.data()
+                    const user_list = video_call_user_data?.group_members_ids || []
 
-                    const user_list = video_call_user_data.users
-                    const user_data = user_list.find((user) => user.user_id === user_id);
-
-                    if (user_data){
+                    if (user_list.includes(user_id)){
                         return res.sendFile(views.room);
                     }else{
-                        console.log(user_data, '------------------------------------------------)');
                         res.redirect('/');
                     }
 
@@ -302,20 +299,53 @@ function startServer() {
         // if (hostCfg.protected) {
         //     return res.sendFile(views.login);
         // }
-        // res.redirect('/');
+        res.redirect('/');
     });
 
+    app.get('/external_join/', (req, res) => {
+        // if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
+        //     log.debug('Direct Join', req.query);
+            
+        //     // http://localhost:3010/external_join?room=ed6ba5a0-a633-46ae-b8ce-30dfbda53902&user_id=3069c9db-4b38-43fc-aaa2-d27982aef4a8&name=Abhijit
+        //     const { room, user_id, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
+        //     if (room && user_id ){
+        //         const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: room})
+            
+        //         get_meeting_room.then((response)=> {
+        //             const video_call_user_data = response.data()
+        //             const user_list = video_call_user_data?.group_members_ids || []
+
+        //             if (user_list.includes(user_id)){
+        //                 return res.sendFile(views.room);
+        //             }else{
+        //                 res.redirect('/');
+        //             }
+
+        //         }).catch((err)=>{
+        //             console.log(err)
+        //             res.redirect('/');
+        //         })
+        //     }
+        // }
+        if (hostCfg.protected) {
+            return res.sendFile(views.login);
+        }
+        res.redirect('/');
+    });
+
+    
+
     // join room by id
-    // app.get('/join/:roomId', (req, res) => {
-    //     if (hostCfg.authenticated) {
-    //         res.sendFile(views.room);
-    //     } else {
-    //         if (hostCfg.protected) {
-    //             return res.sendFile(views.login);
-    //         }
-    //         res.redirect('/');
-    //     }
-    // });
+    app.get('/join/:roomId', (req, res) => {
+        if (hostCfg.authenticated) {
+            res.sendFile(views.room);
+        } else {
+            if (hostCfg.protected) {
+                return res.sendFile(views.login);
+            }
+            res.redirect('/');
+        }
+    });
 
     // not specified correctly the room id
     app.get('/join/*', (req, res) => {
