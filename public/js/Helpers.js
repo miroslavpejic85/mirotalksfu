@@ -5,7 +5,6 @@ class MixedAudioRecorder {
         this.useGainNode = useGainNode;
         this.gainNode = null;
         this.audioSources = [];
-        this.audioSource = null;
         this.audioDestination = null;
         this.audioContext = this.createAudioContext();
     }
@@ -32,22 +31,23 @@ class MixedAudioRecorder {
         }
 
         audioStreams.forEach((stream) => {
-            if (!stream.getTracks().filter((t) => t.kind === 'audio').length) {
+            if (!stream || !stream.getTracks().filter((t) => t.kind === 'audio').length) {
                 return;
             }
+
+            console.log('Mixed audio tracks to add on MediaStreamAudioDestinationNode --->', stream.getTracks());
 
             let audioSource = this.audioContext.createMediaStreamSource(stream);
 
             if (this.useGainNode) {
                 audioSource.connect(this.gainNode);
             }
-
             this.audioSources.push(audioSource);
         });
 
         this.audioDestination = this.audioContext.createMediaStreamDestination();
-        this.audioSources.forEach((source) => {
-            source.connect(this.audioDestination);
+        this.audioSources.forEach((audioSource) => {
+            audioSource.connect(this.audioDestination);
         });
 
         return this.audioDestination.stream;
@@ -72,6 +72,7 @@ class MixedAudioRecorder {
             this.audioContext.close();
             this.audioContext = null;
         }
+        console.log('Stop Mixed Audio Stream');
     }
 }
 
