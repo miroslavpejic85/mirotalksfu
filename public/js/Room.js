@@ -568,6 +568,7 @@ function isPeerPresenter() {
 function getPeerName() {
     const qs = new URLSearchParams(window.location.search);
     const name = filterXSS(qs.get('name'));
+    
     if (isHtml(name)) {
         console.log('Direct join', { name: 'Invalid name' });
         return 'Invalid name';

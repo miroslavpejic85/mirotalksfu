@@ -164,6 +164,7 @@ const views = {
     permission: path.join(__dirname, '../../', 'public/views/permission.html'),
     privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
+    notValidMeetingLink: path.join(__dirname, '../../', 'public/views/not_valid_meeting_link.html'),
 };
 
 let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
@@ -271,6 +272,10 @@ function startServer() {
         }
     });
 
+    app.get(['/not_valid_meeting_link'], (req, res) => {
+        res.sendFile(views.notValidMeetingLink)
+    })
+
     app.get('/join/', (req, res) => {
         // https://localhost:3010/join/?meeting=U2FsdGVkX18mcHyaIoAN6Qd0ROfUZVNo4LrfE%2BNqa2vQl%2BnoRea3%2BIGrMiP3bh%2B%2F0itiTZDRoQvha5eI%2BWOD%2BNIBcXD5XlsBcCQQxRb3Xq4l9juwwq1HUSjNDrLT2O2Xl8I2IHZ%2F%2BsbCv%2Ffh9%2FToo9csh2Tszpr8KRi1kPQFB3SdKpg2qgzQQoy6mKhj9q21IKuUVnDEIeKbrpcaoE59ttHsftJZ%2Fx6AD6yAN8C6RY02B%2BLvo%2BFyXTrJRW5aQ28WgQHqEHBJZP6W22JOdRn0q3OTLD5wo%2Bj4yJNjmZse8ZM%3D
         try{
@@ -291,18 +296,18 @@ function startServer() {
                             return res.sendFile(views.room);
                         } 
                         else{
-                            res.redirect('/');
+                            res.redirect('/not_valid_meeting_link');
                         }
                     }).catch((err)=>{
                         console.log(err)
-                        res.redirect('/');
+                        res.redirect('/not_valid_meeting_link');
                     })
                 }
             }
         }
         catch (err){
             console.log(err)
-            res.redirect('/');
+            res.redirect('/not_valid_meeting_link');
         }
     });
 
