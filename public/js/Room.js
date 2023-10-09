@@ -1788,7 +1788,9 @@ function handleRoomEmojiPicker() {
     function sendEmojiToRoom(data) {
         console.log('Selected Emoji:', data.native);
         const cmd = `roomEmoji|${peer_name}|${data.native}`;
-        rc.emitCmd(cmd);
+        if (rc.thereAreParticipants()) { 
+            rc.emitCmd(cmd);
+        }
         rc.handleCmd(cmd);
         // toggleEmojiPicker();
     }
