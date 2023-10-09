@@ -77,8 +77,10 @@ let participantsCount = 0;
 let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
-let room_id = getRoomId();
-let user_id = getUserId();
+// let room_id = getRoomId();
+// let user_id = getUserId();
+
+let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
@@ -257,44 +259,6 @@ function setTippy(elem, content, placement, allowHTML = false) {
     } else {
         console.warn('setTippy element not found with content', content);
     }
-}
-
-// ####################################################
-// GET ROOM ID
-// ####################################################
-
-function getRoomId() {
-    let qs = new URLSearchParams(window.location.search);
-    let queryRoomId = filterXSS(qs.get('room'));
-    let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
-    if (roomId == '') {
-        roomId = makeId(12);
-    }
-    console.log('Direct join', { room: roomId });
-    window.localStorage.lastRoom = roomId;
-    return roomId;
-}
-
-function getUserId() {
-    let qs = new URLSearchParams(window.location.search);
-    let queryUserId = filterXSS(qs.get('user_id'));
-    let userId = queryUserId ? queryUserId : location.pathname.substring(6);
-    if (userId == '') {
-        userId = makeId(12);
-    }
-    console.log('Direct join', { user: userId });
-    window.localStorage.lastUserId = userId;
-    return userId;
-}
-
-function makeId(length) {
-    let result = '';
-    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let charactersLength = characters.length;
-    for (let i = 0; i < length; i++) {
-        result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    }
-    return result;
 }
 
 // ####################################################
@@ -489,6 +453,70 @@ function hasVideoTrack(mediaStream) {
 }
 
 // ####################################################
+// GET ROOM ID
+// ####################################################
+
+function getCookie(cname) {
+    let name = cname + "=";
+    let ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+      let c = ca[i];
+      while (c.charAt(0) == ' ') {
+        c = c.substring(1);
+      }
+      if (c.indexOf(name) == 0) {
+        return c.substring(name.length, c.length);
+      }
+    }
+    return "";
+}
+
+function getMeetingRoomData(){
+    let meeting_cookies = getCookie('meeting_data')
+
+    if (meeting_cookies){
+        return JSON.parse(meeting_cookies)
+    }
+
+    return {}
+}
+
+// function getRoomId() {
+//     let qs = new URLSearchParams(window.location.search);
+//     let queryRoomId = filterXSS(qs.get('room'));
+//     let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
+//     if (roomId == '') {
+//         roomId = makeId(12);
+//     }
+//     console.log('Direct join', { room: roomId });
+//     window.localStorage.lastRoom = roomId;
+//     return roomId;
+// }
+
+// function getUserId() {
+//     let qs = new URLSearchParams(window.location.search);
+//     let queryUserId = filterXSS(qs.get('user_id'));
+//     let userId = queryUserId ? queryUserId : location.pathname.substring(6);
+//     if (userId == '') {
+//         userId = makeId(12);
+//     }
+//     console.log('Direct join', { user: userId });
+//     window.localStorage.lastUserId = userId;
+//     return userId;
+// }
+
+function makeId(length) {
+    let result = '';
+    let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let charactersLength = characters.length;
+    for (let i = 0; i < length; i++) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+}
+
+
+// ####################################################
 // API CHECK
 // ####################################################
 
@@ -524,8 +552,7 @@ function getNotify() {
 }
 
 function isPeerPresenter() {
-    let qs = new URLSearchParams(window.location.search);
-    let presenter = filterXSS(qs.get('isPresenter'));
+    let {is_presenter:presenter} = getMeetingRoomData()
     if (presenter) {
         presenter = presenter.toLowerCase();
         let queryPresenter = presenter === '1' || presenter === 'true';

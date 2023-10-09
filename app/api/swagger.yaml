@@ -44,15 +44,21 @@ paths:
                   schema:
                       type: object
                       required:
-                          - room
-                          - name
+                          - meeting_id
+                          - user_id
+                          - user_name
+                          - user_type
                           - audio
                           - video
                           - notify
                       properties:
-                          room:
+                          meeting_id:
                               type: string
-                          name:
+                          user_id:
+                              type: string
+                          user_name:
+                              type: string
+                          user_type:
                               type: string
                           audio:
                               type: boolean

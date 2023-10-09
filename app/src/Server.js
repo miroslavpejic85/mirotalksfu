@@ -77,6 +77,7 @@ const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
 const { getMeetingRoom } = require('../db/helper');
+const { encrypt, decrypt } = require('../helper/encoder_decoder');
 
 const app = express();
 
@@ -270,87 +271,59 @@ function startServer() {
         }
     });
 
-    // no room name specified to join || direct join
     app.get('/join/', (req, res) => {
-        if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
-            log.debug('Direct Join', req.query);
-            
-            // http://localhost:3010/join?room=ed6ba5a0-a633-46ae-b8ce-30dfbda53902&user_id=3069c9db-4b38-43fc-aaa2-d27982aef4a8&name=Abhijit
-            const { room, user_id, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
-            if (room && user_id ){
-                const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: room})
-            
-                get_meeting_room.then((response)=> {
-                    const video_call_user_data = response.data()
-                    const user_list = video_call_user_data?.group_members_ids || []
+        // https://localhost:3010/join/?meeting=U2FsdGVkX18mcHyaIoAN6Qd0ROfUZVNo4LrfE%2BNqa2vQl%2BnoRea3%2BIGrMiP3bh%2B%2F0itiTZDRoQvha5eI%2BWOD%2BNIBcXD5XlsBcCQQxRb3Xq4l9juwwq1HUSjNDrLT2O2Xl8I2IHZ%2F%2BsbCv%2Ffh9%2FToo9csh2Tszpr8KRi1kPQFB3SdKpg2qgzQQoy6mKhj9q21IKuUVnDEIeKbrpcaoE59ttHsftJZ%2Fx6AD6yAN8C6RY02B%2BLvo%2BFyXTrJRW5aQ28WgQHqEHBJZP6W22JOdRn0q3OTLD5wo%2Bj4yJNjmZse8ZM%3D
+        try{
+            if (hostCfg.authenticated && Object.keys(req.query).length > 0){
+                const { meeting } = checkXSS(req.query);
+                const meetingData = decrypt(meeting)
+                const { meeting_id, user_id, user_name,  user_type, audio, video, screen, notify, isPresenter } =  meetingData
+                
+                if (meeting_id && user_id ){
+                    const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: meeting_id})
 
-                    if (user_list.includes(user_id)){
-                        return res.sendFile(views.room);
-                    }else{
+                    get_meeting_room.then((response)=> {
+                        const video_call_user_data = response.data()
+                        const user_list = video_call_user_data?.group_members_ids || []
+    
+                        if (user_list.includes(user_id)){
+                            res.cookie("meeting_data", JSON.stringify(meetingData));
+                            return res.sendFile(views.room);
+                        } 
+                        else{
+                            res.redirect('/');
+                        }
+                    }).catch((err)=>{
+                        console.log(err)
                         res.redirect('/');
-                    }
-
-                }).catch((err)=>{
-                    console.log(err)
-                    res.redirect('/');
-                })
+                    })
+                }
             }
         }
-        // if (hostCfg.protected) {
-        //     return res.sendFile(views.login);
-        // }
-        res.redirect('/');
-    });
-
-    app.get('/external_join/', (req, res) => {
-        // if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
-        //     log.debug('Direct Join', req.query);
-            
-        //     // http://localhost:3010/external_join?room=ed6ba5a0-a633-46ae-b8ce-30dfbda53902&user_id=3069c9db-4b38-43fc-aaa2-d27982aef4a8&name=Abhijit
-        //     const { room, user_id, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
-        //     if (room && user_id ){
-        //         const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: room})
-            
-        //         get_meeting_room.then((response)=> {
-        //             const video_call_user_data = response.data()
-        //             const user_list = video_call_user_data?.group_members_ids || []
-
-        //             if (user_list.includes(user_id)){
-        //                 return res.sendFile(views.room);
-        //             }else{
-        //                 res.redirect('/');
-        //             }
-
-        //         }).catch((err)=>{
-        //             console.log(err)
-        //             res.redirect('/');
-        //         })
-        //     }
-        // }
-        if (hostCfg.protected) {
-            return res.sendFile(views.login);
+        catch (err){
+            console.log(err)
+            res.redirect('/');
         }
-        res.redirect('/');
     });
 
     
 
     // join room by id
-    app.get('/join/:roomId', (req, res) => {
-        if (hostCfg.authenticated) {
-            res.sendFile(views.room);
-        } else {
-            if (hostCfg.protected) {
-                return res.sendFile(views.login);
-            }
-            res.redirect('/');
-        }
-    });
+    // app.get('/join/:roomId', (req, res) => {
+    //     if (hostCfg.authenticated) {
+    //         res.sendFile(views.room);
+    //     } else {
+    //         if (hostCfg.protected) {
+    //             return res.sendFile(views.login);
+    //         }
+    //         res.redirect('/');
+    //     }
+    // });
 
     // not specified correctly the room id
-    app.get('/join/*', (req, res) => {
-        res.redirect('/');
-    });
+    // app.get('/join/*', (req, res) => {
+    //     res.redirect('/');
+    // });
 
     // if not allow video/audio
     app.get(['/permission'], (req, res) => {
@@ -468,32 +441,32 @@ function startServer() {
     // SLACK API
     // ####################################################
 
-    app.post('/slack', (req, res) => {
-        if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
+    // app.post('/slack', (req, res) => {
+    //     if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
 
-        log.debug('Slack', req.headers);
+    //     log.debug('Slack', req.headers);
 
-        if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
+    //     if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
 
-        let slackSignature = req.headers['x-slack-signature'];
-        let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
-        let timeStamp = req.headers['x-slack-request-timestamp'];
-        let time = Math.floor(new Date().getTime() / 1000);
+    //     let slackSignature = req.headers['x-slack-signature'];
+    //     let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
+    //     let timeStamp = req.headers['x-slack-request-timestamp'];
+    //     let time = Math.floor(new Date().getTime() / 1000);
 
-        if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
+    //     if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
 
-        let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
-        let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
+    //     let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
+    //     let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
 
-        if (mySignature == slackSignature) {
-            let host = req.headers.host;
-            let api = new ServerApi(host);
-            let meetingURL = api.getMeetingURL();
-            log.debug('Slack', { meeting: meetingURL });
-            return res.end(meetingURL);
-        }
-        return res.end('`Wrong signature` - Verification failed!');
-    });
+    //     if (mySignature == slackSignature) {
+    //         let host = req.headers.host;
+    //         let api = new ServerApi(host);
+    //         let meetingURL = api.getMeetingURL();
+    //         log.debug('Slack', { meeting: meetingURL });
+    //         return res.end(meetingURL);
+    //     }
+    //     return res.end('`Wrong signature` - Verification failed!');
+    // });
 
     // not match any of page before, so 404 not found
     app.get('*', function (req, res) {

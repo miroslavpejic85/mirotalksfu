@@ -1,5 +1,6 @@
 'use strict';
 
+const { encrypt } = require('../helper/encoder_decoder');
 const config = require('./config');
 const { v4: uuidV4 } = require('uuid');
 
@@ -20,23 +21,13 @@ module.exports = class ServerApi {
     }
 
     getJoinURL(data) {
+        const encrypt_room_data = encrypt(data)
+
         return (
             'https://' +
             this._host +
-            '/join?room=' +
-            data.room +
-            '&password=' +
-            data.password +
-            '&name=' +
-            data.name +
-            '&audio=' +
-            data.audio +
-            '&video=' +
-            data.video +
-            '&screen=' +
-            data.screen +
-            '&notify=' +
-            data.notify
+            '/join/?meeting='+
+            encrypt_room_data
         );
     }
 };
