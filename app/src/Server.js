@@ -90,12 +90,7 @@ let io, httpsServer, host;
 let isHttps = config.server.ishttps;
 
 if (isHttps) {
-    const fs = require('fs');
-    const options = {
-        key: fs.readFileSync(path.join(__dirname, config.server.ssl.key), 'utf-8'),
-        cert: fs.readFileSync(path.join(__dirname, config.server.ssl.cert), 'utf-8'),
-    };
-    httpsServer = https.createServer(options, app);
+    httpsServer = http.createServer(app);
 
     host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
 } else {
