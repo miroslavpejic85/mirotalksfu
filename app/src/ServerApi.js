@@ -12,7 +12,7 @@ module.exports = class ServerApi {
     }
 
     isAuthorized() {
-        // if (this._authorization != this._api_key_secret) return false;
+        if (this._authorization != this._api_key_secret) return false;
         return true;
     }
 
