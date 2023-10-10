@@ -17,17 +17,25 @@ module.exports = class ServerApi {
     }
 
     getMeetingURL() {
-        return 'https://' + this._host + '/join/' + uuidV4();
+        let isHttps = config.server.ishttps;
+
+        if (isHttps) {
+            return 'https://' + this._host + '/join/' + uuidV4();
+        }
+        else{
+            return 'http://' + this._host + '/join/' + uuidV4();
+        }
     }
 
     getJoinURL(data) {
+        let isHttps = config.server.ishttps;
         const encrypt_room_data = encrypt(data)
 
-        return (
-            'https://' +
-            this._host +
-            '/join/?meeting='+
-            encrypt_room_data
-        );
+        if (isHttps) {
+            return 'https://' +this._host +'/join/?meeting='+encrypt_room_data
+        }
+        else{
+            return 'http://' +this._host +'/join/?meeting='+encrypt_room_data
+        }
     }
 };

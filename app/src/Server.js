@@ -45,9 +45,10 @@ dependencies: {
  */
 
 const express = require('express');
+const { Server } = require('socket.io');
 const cors = require('cors');
 const compression = require('compression');
-const https = require('httpolyglot');
+const https = require('https');
 const mediasoup = require('mediasoup');
 const mediasoupClient = require('mediasoup-client');
 const http = require('http');
@@ -81,17 +82,36 @@ const { encrypt, decrypt } = require('../helper/encoder_decoder');
 
 const app = express();
 
-const options = {
-    cert: fs.readFileSync(path.join(__dirname, config.server.ssl.cert), 'utf-8'),
-    key: fs.readFileSync(path.join(__dirname, config.server.ssl.key), 'utf-8'),
-};
 
-const httpsServer = https.createServer(options, app);
-const io = require('socket.io')(httpsServer, {
+
+
+let io, httpsServer, host;
+
+let isHttps = config.server.ishttps;
+
+if (isHttps) {
+    const fs = require('fs');
+    const options = {
+        key: fs.readFileSync(path.join(__dirname, config.server.ssl.key), 'utf-8'),
+        cert: fs.readFileSync(path.join(__dirname, config.server.ssl.cert), 'utf-8'),
+    };
+    httpsServer = https.createServer(options, app);
+
+    host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
+} else {
+    httpsServer = http.createServer(app);
+    host = 'http://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
+}
+
+/*  
+    Set maxHttpBufferSize from 1e6 (1MB) to 1e7 (10MB)
+*/
+
+io = new Server({
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
-});
-const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
+}).listen(httpsServer);
+
 
 const hostCfg = {
     protected: config.host.protected,
@@ -1265,15 +1285,32 @@ function startServer() {
         }
 
         function isValidHttpURL(input) {
-            const pattern = new RegExp(
-                '^(https?:\\/\\/)?' + // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                    '(\\#[-a-z\\d_]*)?$',
-                'i',
-            ); // fragment locator
+            let isHttps = config.server.ishttps
+            let pattern;
+
+            if (isHttps){
+                pattern = new RegExp(
+                    '^(https?:\\/\\/)?' + // protocol
+                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                        '(\\#[-a-z\\d_]*)?$',
+                    'i',
+                ); // fragment locator
+            }
+            else{
+                pattern = new RegExp(
+                    '^(http?:\\/\\/)?' + // protocol
+                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                        '(\\#[-a-z\\d_]*)?$',
+                    'i',
+                ); // fragment locator
+            }
+            
             return pattern.test(input);
         }
 

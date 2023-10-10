@@ -35,6 +35,7 @@ module.exports = {
             cert: '../ssl/cert.pem',
             key: '../ssl/key.pem',
         },
+        ishttps: false
     },
     host: {
         /*
