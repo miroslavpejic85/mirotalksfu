@@ -1049,7 +1049,7 @@ class RoomClient {
             max: 30,
         };
         const selectedValue = this.getSelectedIndexValue(videoFps);
-        const customFrameRate = { max: parseInt(selectedValue) };
+        const customFrameRate = parseInt(selectedValue, 10);
         const frameRate = selectedValue == 'max' ? defaultFrameRate : customFrameRate;
         let videoConstraints = {
             audio: false,
@@ -1165,13 +1165,13 @@ class RoomClient {
 
     getScreenConstraints() {
         const selectedValue = this.getSelectedIndexValue(screenFps);
-        const frameRate = selectedValue == 'max' ? 30 : parseInt(selectedValue);
+        const frameRate = selectedValue == 'max' ? 30 : parseInt(selectedValue, 10);
         return {
             audio: true,
             video: {
                 width: { max: 1920 },
                 height: { max: 1080 },
-                frameRate: { max: frameRate },
+                frameRate: frameRate,
             },
         };
     }
