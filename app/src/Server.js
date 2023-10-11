@@ -302,7 +302,7 @@ function startServer() {
 
                     get_meeting_room.then((response)=> {
                         const video_call_user_data = response.data()
-                        const user_list = video_call_user_data?.group_members_ids || []
+                        const user_list = video_call_user_data?.user_ids || []
     
                         if (user_list.includes(user_id)){
 
