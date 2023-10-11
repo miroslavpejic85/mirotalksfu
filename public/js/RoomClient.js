@@ -3386,7 +3386,7 @@ class RoomClient {
             const audioStreams = this.getAudioStreamFromAudioElements();
             console.log('Audio streams tracks --->', audioStreams.getTracks());
 
-            const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams, this.localAudioStream]);
+            const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams]);
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
 
