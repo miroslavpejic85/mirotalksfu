@@ -3382,11 +3382,19 @@ class RoomClient {
         const options = { mimeType: supportedMimeTypes[0] };
 
         try {
+            const allAudioStreams = [];
+
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
             console.log('Audio streams tracks --->', audioStreams.getTracks());
 
-            const audioMixerStreams = this.audioRecorder.getMixedAudioStream([audioStreams]);
+            audioStreams.getTracks().forEach((track) => {
+                if (track.kind === 'audio') {
+                    allAudioStreams.push(new MediaStream([track]));
+                }
+            });
+
+            const audioMixerStreams = this.audioRecorder.getMixedAudioStream(allAudioStreams);
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
 
