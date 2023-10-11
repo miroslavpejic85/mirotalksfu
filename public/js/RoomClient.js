@@ -127,6 +127,7 @@ class RoomClient {
         videoPinMediaContainer,
         mediasoupClient,
         socket,
+        meeting_param,
         room_id,
         user_id,
         peer_name,
@@ -146,6 +147,7 @@ class RoomClient {
         this.mediasoupClient = mediasoupClient;
 
         this.socket = socket;
+        this.meeting_param = meeting_param;
         this.room_id = room_id;
         this.user_id = user_id;
         this.peer_id = socket.id;
@@ -754,7 +756,7 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
-        return `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0&isPresenter=${isPresenter}`;
+        return `${window.location.origin}/join?meeting=${encodeURIComponent(this.meeting_param)}`;
     }
 
     // ####################################################
@@ -762,6 +764,7 @@ class RoomClient {
     // ####################################################
 
     async userNameAlreadyInRoom() {
+
         this.sound('alert');
         Swal.fire({
             allowOutsideClick: false,
@@ -777,7 +780,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                openURL((window.location.href = '/join?room='+this.room_id+'&user_id='+this.user_id ))
+                openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param)))
             }
         });
     }

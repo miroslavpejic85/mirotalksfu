@@ -81,6 +81,7 @@ let chatMessagesId = 0;
 // let user_id = getUserId();
 
 let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
+let meeting_param= getMeetingParam();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
@@ -479,6 +480,14 @@ function getMeetingRoomData(){
     }
 
     return {}
+}
+
+function getMeetingParam(){
+    let qs = new URLSearchParams(window.location.search);
+    let meeting = filterXSS(qs.get('meeting'));
+    let meetingParam = meeting ? meeting : getCookie('meeting_data');
+    
+    return meetingParam;
 }
 
 // function getRoomId() {
@@ -948,6 +957,7 @@ function joinRoom(peer_name, room_id) {
             videoPinMediaContainer,
             window.mediasoupClient,
             socket,
+            meeting_param,
             room_id,
             user_id,
             peer_name,
@@ -1995,7 +2005,7 @@ function handleRoomClientEvents() {
         if (survey.enabled) {
             leaveFeedback();
         } else {
-            openURL('/newroom');
+            openURL('/leave_meeting');
         }
     });
 }
@@ -2021,7 +2031,7 @@ function leaveFeedback() {
         if (result.isConfirmed) {
             openURL(survey.url);
         } else {
-            openURL('/newroom');
+            openURL('/leave_meeting');
         }
     });
 }

@@ -40,6 +40,7 @@
         "body-parser": "1.20.2",
         "colors": "1.4.0",
         "compression": "1.7.4",
+        "cookie-parser": "^1.4.6",
         "cors": "2.8.5",
         "crypto-js": "^4.1.1",
         "dotenv": "^16.3.1",

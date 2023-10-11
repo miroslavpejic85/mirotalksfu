@@ -45,6 +45,7 @@ dependencies: {
  */
 
 const express = require('express');
+var cookieParser = require('cookie-parser');  
 const { Server } = require('socket.io');
 const cors = require('cors');
 const compression = require('compression');
@@ -210,6 +211,7 @@ if (!announcedIP) {
 function startServer() {
     // Start the app
     app.use(cors());
+    app.use(cookieParser());
     app.use(compression());
     app.use(express.json());
     app.use(express.static(dir.public));
@@ -284,8 +286,11 @@ function startServer() {
         res.sendFile(views.notValidMeetingLink)
     })
 
+
+    // link to join in meeting
+    // join meeting link look like
+    // http://localhost:3010/join?meeting=U2FsdGVkX18jh7EkzQSxIblcvxBnN5GaWnuHyu7sg3Q3fsMx%2BUubFRg0GFzz%2FqGAcpG2SKzbyOcfYGHMRJDUgQ%2FFgxZjqE9ed8hftpFoUT9Oi%2BsXIClph%2F3LLDkw%2BSJtfXnq9Px15oj51GTOhPljC0FURbeuQEHuN8%2BoUfaHav%2FEPqIpX4sl9oI17u8yA1jClYswt9R9TCUWb4Tdyho4N64S1iQvlHCwGcQMwHScNntBvFF79qN%2FwE1%2FLukENH8lBYi82yaxa98yrR80UicjUXLXJ31OewCA5NTlhw4hc8E%3D
     app.get('/join/', (req, res) => {
-        // https://localhost:3010/join/?meeting=U2FsdGVkX18mcHyaIoAN6Qd0ROfUZVNo4LrfE%2BNqa2vQl%2BnoRea3%2BIGrMiP3bh%2B%2F0itiTZDRoQvha5eI%2BWOD%2BNIBcXD5XlsBcCQQxRb3Xq4l9juwwq1HUSjNDrLT2O2Xl8I2IHZ%2F%2BsbCv%2Ffh9%2FToo9csh2Tszpr8KRi1kPQFB3SdKpg2qgzQQoy6mKhj9q21IKuUVnDEIeKbrpcaoE59ttHsftJZ%2Fx6AD6yAN8C6RY02B%2BLvo%2BFyXTrJRW5aQ28WgQHqEHBJZP6W22JOdRn0q3OTLD5wo%2Bj4yJNjmZse8ZM%3D
         try{
             if (hostCfg.authenticated && Object.keys(req.query).length > 0){
                 const { meeting } = checkXSS(req.query);
@@ -300,7 +305,10 @@ function startServer() {
                         const user_list = video_call_user_data?.group_members_ids || []
     
                         if (user_list.includes(user_id)){
-                            res.cookie("meeting_data", JSON.stringify(meetingData));
+
+                            // this cookie will expire  after 5 hours
+                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000, httpOnly: true }); 
+
                             return res.sendFile(views.room);
                         } 
                         else{
@@ -318,6 +326,19 @@ function startServer() {
             res.redirect('/not_valid_meeting_link');
         }
     });
+
+    // calling this to end the meeting 
+    app.get('/leave_meeting', (req, res)=>{
+        const meeting_cookies = req.cookies?.meeting_data
+        if (meeting_cookies){
+            const meeting_data = JSON.parse(meeting_cookies || '{}')
+            res.clearCookie("meeting_data");
+            console.log(meeting_data, 'meeting_data ---------------------------------------------------------------->')
+            res.sendFile(views.landing);
+        }else{
+            res.redirect('/');
+        }
+    })
 
     
 
