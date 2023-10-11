@@ -565,7 +565,7 @@ function isPeerPresenter() {
     if (presenter) {
         presenter = String(presenter).toLowerCase();
         let queryPresenter = presenter === '1' || presenter === 'true';
-        if (queryPresenter != null) {
+        if (queryPresenter) {
             console.log('Direct join Reconnect', { isPresenter: queryPresenter });
             return queryPresenter;
         }
@@ -671,9 +671,9 @@ function whoAreYou() {
         return;
     }
 
-    let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : '';
+    let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : user_name;
     if (getCookie(room_id + '_name')) {
-        default_name = user_name || getCookie(room_id + '_name');
+        default_name = getCookie(room_id + '_name');
     }
 
     if (!BUTTONS.main.startVideoButton) {

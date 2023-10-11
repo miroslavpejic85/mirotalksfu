@@ -295,7 +295,7 @@ function startServer() {
             if (hostCfg.authenticated && Object.keys(req.query).length > 0){
                 const { meeting } = checkXSS(req.query);
                 const meetingData = decrypt(meeting)
-                const { meeting_id, user_id, user_name,  user_type, audio, video, screen, notify, isPresenter } =  meetingData
+                const { meeting_id, user_id, user_name,  user_type = '', audio, video, screen, notify, isPresenter } =  meetingData
                 
                 if (meeting_id && user_id ){
                     const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: meeting_id})
@@ -304,10 +304,12 @@ function startServer() {
                         const video_call_user_data = response.data()
                         const user_list = video_call_user_data?.user_ids || []
 
-                        meetingData['is_presenter'] = 'true'
-    
-                        if (user_list.includes(user_id)){
+                        meetingData['is_presenter'] = 'false'
+                        if ((user_type || '').toLowerCase() === 'admin'){
+                            meetingData['is_presenter'] = 'true'
+                        }
 
+                        if (user_list.includes(user_id)){
                             // this cookie will expire  after 5 hours
                             res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000}); 
 
@@ -929,17 +931,27 @@ function startServer() {
 
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
             const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false
 
-            if (Object.keys(presenters[socket.room_id]).length === 0) {
+            // if (Object.keys(presenters[socket.room_id]).length === 0 ) {
+            //     presenters[socket.room_id] = {
+            //         peer_ip: peer_ip,
+            //         peer_name: peer_name,
+            //         peer_uuid: peer_uuid,
+            //         is_presenter: is_presenter,
+            //     };
+            // }
+
+            if (is_presenter) {
                 presenters[socket.room_id] = {
                     peer_ip: peer_ip,
                     peer_name: peer_name,
                     peer_uuid: peer_uuid,
-                    is_presenter: true,
+                    is_presenter: is_presenter,
                 };
-            }
 
-            log.debug('[Join] - Connected presenters grp by roomId', presenters);
+                log.debug('[Join] - Connected presenters grp by roomId', presenters);
+            }
 
             const isPresenter = await isPeerPresenter(socket.room_id, peer_name, peer_uuid);
 
@@ -1353,7 +1365,7 @@ function startServer() {
                 typeof presenters[room_id] === 'object' &&
                 Object.keys(presenters[room_id]).length > 1 &&
                 presenters[room_id]['peer_name'] === peer_name &&
-                presenters[room_id]['peer_uuid'] === peer_uuid;
+                presenters[room_id]['peer_uuid'] === peer_uuid && presenters[room_id]['is_presenter'] === true;
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;
@@ -1363,7 +1375,7 @@ function startServer() {
             room_id: room_id,
             peer_name: peer_name,
             peer_uuid: peer_uuid,
-            isPresenter: isPresenter,
+            isPresenter: isPresenter
         });
 
         return isPresenter;
