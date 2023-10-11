@@ -303,11 +303,13 @@ function startServer() {
                     get_meeting_room.then((response)=> {
                         const video_call_user_data = response.data()
                         const user_list = video_call_user_data?.user_ids || []
+
+                        meetingData['is_presenter'] = 'true'
     
                         if (user_list.includes(user_id)){
 
                             // this cookie will expire  after 5 hours
-                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000, httpOnly: true }); 
+                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000}); 
 
                             return res.sendFile(views.room);
                         } 

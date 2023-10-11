@@ -561,9 +561,9 @@ function getNotify() {
 }
 
 function isPeerPresenter() {
-    let {is_presenter:presenter} = getMeetingRoomData()
+    let {is_presenter: presenter} = getMeetingRoomData()
     if (presenter) {
-        presenter = presenter.toLowerCase();
+        presenter = String(presenter).toLowerCase();
         let queryPresenter = presenter === '1' || presenter === 'true';
         if (queryPresenter != null) {
             console.log('Direct join Reconnect', { isPresenter: queryPresenter });
@@ -673,7 +673,7 @@ function whoAreYou() {
 
     let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : '';
     if (getCookie(room_id + '_name')) {
-        default_name = getCookie(room_id + '_name');
+        default_name = user_name || getCookie(room_id + '_name');
     }
 
     if (!BUTTONS.main.startVideoButton) {
