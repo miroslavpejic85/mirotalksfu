@@ -17,21 +17,20 @@ function updateUserCount({firestoreDB, user_list = [], room_id}){
         let video_conference_ref = firestoreDB.collection("video_conference").doc(room_id);
         let now_time = new Date().getTime() / 1000
     
-        let user_in_meeting = {
-            user_count: user_list.length
-        }
+        let users_in_meeting = {}
     
         for (user of user_list){
-            if (user_in_meeting[user.user_id]){
-                user_in_meeting[user.user_id] += 1 
+            if (users_in_meeting[user.user_id]){
+                users_in_meeting[user.user_id] += 1 
             }else{
-                user_in_meeting[user.user_id] = 1
+                users_in_meeting[user.user_id] = 1
             }
         }
     
         video_conference_ref.set({
             updated_at: now_time,
-            user_in_meeting: user_in_meeting
+            users_in_meeting: users_in_meeting,
+            user_count_in_meeting: user_list.length
         }, { merge: true })
     }
 }
