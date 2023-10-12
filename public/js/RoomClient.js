@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.7
+ * @version 1.0.8
  *
  */
 
@@ -3382,19 +3382,17 @@ class RoomClient {
         const options = { mimeType: supportedMimeTypes[0] };
 
         try {
-            const allAudioStreams = [];
-
             this.audioRecorder = new MixedAudioRecorder();
             const audioStreams = this.getAudioStreamFromAudioElements();
             console.log('Audio streams tracks --->', audioStreams.getTracks());
 
-            audioStreams.getTracks().forEach((track) => {
-                if (track.kind === 'audio') {
-                    allAudioStreams.push(new MediaStream([track]));
-                }
-            });
+            const audioMixerStreams = this.audioRecorder.getMixedAudioStream(
+                audioStreams
+                    .getTracks()
+                    .filter((track) => track.kind === 'audio')
+                    .map((track) => new MediaStream([track])),
+            );
 
-            const audioMixerStreams = this.audioRecorder.getMixedAudioStream(allAudioStreams);
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
 
