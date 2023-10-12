@@ -311,7 +311,7 @@ body {
     width: auto;
     max-width: 310px;
     height: 40px;
-    color: #fff;
+    color: #000000 !important;
     background-color: var(--select-bg) !important;
     border: var(--border);
     border-radius: 5px;
@@ -324,6 +324,7 @@ body {
     /* margin: 10px 0px 0px 10px; */
     font-size: 1.4rem;
     float: right;
+    color: black;
 }
 
 #mySettings button {

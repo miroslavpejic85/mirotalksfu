@@ -27,7 +27,7 @@ const BUTTONS = {
         lockRoomButton: true, // presenter
         unlockRoomButton: true, // presenter
         lobbyButton: true, // presenter
-        tabRecording: true,
+        tabRecording: false,
         pushToTalk: true,
         host_only_recording: true, // presenter
     },
