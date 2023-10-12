@@ -317,6 +317,10 @@ class RoomClient {
                             console.log('00-WARNING ----> Username already in use');
                             return this.userNameAlreadyInRoom();
                         }
+
+                        if (peer_info.peer_uuid == this.peer_uuid) {
+                            console.log('00-WARNING ----> UserId already in use');
+                        }
                     }
                     await this.joinAllowed(room);
                 }.bind(this),

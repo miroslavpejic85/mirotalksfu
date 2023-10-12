@@ -45,7 +45,7 @@ dependencies: {
  */
 
 const express = require('express');
-var cookieParser = require('cookie-parser');  
+var cookieParser = require('cookie-parser');
 const { Server } = require('socket.io');
 const cors = require('cors');
 const compression = require('compression');
@@ -78,7 +78,7 @@ const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
-const { getMeetingRoom } = require('../db/helper');
+const { getMeetingRoom, joinMeetingUpdate, leaveMeetingUpdate } = require('../db/helper');
 const { encrypt, decrypt } = require('../helper/encoder_decoder');
 
 const app = express();
@@ -291,60 +291,65 @@ function startServer() {
     // join meeting link look like
     // http://localhost:3010/join?meeting=U2FsdGVkX18jh7EkzQSxIblcvxBnN5GaWnuHyu7sg3Q3fsMx%2BUubFRg0GFzz%2FqGAcpG2SKzbyOcfYGHMRJDUgQ%2FFgxZjqE9ed8hftpFoUT9Oi%2BsXIClph%2F3LLDkw%2BSJtfXnq9Px15oj51GTOhPljC0FURbeuQEHuN8%2BoUfaHav%2FEPqIpX4sl9oI17u8yA1jClYswt9R9TCUWb4Tdyho4N64S1iQvlHCwGcQMwHScNntBvFF79qN%2FwE1%2FLukENH8lBYi82yaxa98yrR80UicjUXLXJ31OewCA5NTlhw4hc8E%3D
     app.get('/join/', (req, res) => {
-        try{
-            if (hostCfg.authenticated && Object.keys(req.query).length > 0){
+        try {
+            if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
                 const { meeting } = checkXSS(req.query);
                 const meetingData = decrypt(meeting)
-                const { meeting_id, user_id, user_name,  user_type = '', audio, video, screen, notify, isPresenter } =  meetingData
-                
-                if (meeting_id && user_id ){
-                    const  get_meeting_room = getMeetingRoom({firestoreDB, room_id: meeting_id})
+                const { meeting_id, user_id, user_name = '', user_type = '', audio, video, screen, notify, isPresenter } = meetingData
 
-                    get_meeting_room.then((response)=> {
+                if (meeting_id && user_id) {
+                    const get_meeting_room = getMeetingRoom({ firestoreDB, room_id: meeting_id })
+
+                    get_meeting_room.then((response) => {
                         const video_call_user_data = response.data()
                         const user_list = video_call_user_data?.user_ids || []
 
                         meetingData['is_presenter'] = 'false'
-                        if ((user_type || '').toLowerCase() === 'admin'){
+                        if ((user_type || '').toLowerCase() === 'admin') {
                             meetingData['is_presenter'] = 'true'
                         }
 
-                        if (user_list.includes(user_id)){
+                        if (user_list.includes(user_id)) {
                             // this cookie will expire  after 5 hours
-                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000}); 
+                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
 
+                            joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
                             return res.sendFile(views.room);
-                        } 
-                        else{
+                        }
+                        else {
                             res.redirect('/not_valid_meeting_link');
                         }
-                    }).catch((err)=>{
+                    }).catch((err) => {
                         console.log(err)
                         res.redirect('/not_valid_meeting_link');
                     })
                 }
             }
         }
-        catch (err){
+        catch (err) {
             console.log(err)
             res.redirect('/not_valid_meeting_link');
         }
     });
 
     // calling this to end the meeting 
-    app.get('/leave_meeting', (req, res)=>{
+    app.get('/leave_meeting', (req, res) => {
         const meeting_cookies = req.cookies?.meeting_data
-        if (meeting_cookies){
+        if (meeting_cookies) {
             const meeting_data = JSON.parse(meeting_cookies || '{}')
             res.clearCookie("meeting_data");
-            console.log(meeting_data, 'meeting_data ---------------------------------------------------------------->')
+
+            if (meeting_data?.user_id && meeting_data?.meeting_id) {
+                leaveMeetingUpdate({ firestoreDB, room_id: meeting_data.meeting_id, user_id: meeting_data.user_id, user_name: meeting_data.user_name })
+            }
+
             res.sendFile(views.landing);
-        }else{
+        } else {
             res.redirect('/');
         }
     })
 
-    
+
 
     // join room by id
     // app.get('/join/:roomId', (req, res) => {
@@ -645,7 +650,7 @@ function startServer() {
             }
         });
 
-        socket.on('getPeerCounts', async ({}, callback) => {
+        socket.on('getPeerCounts', async ({ }, callback) => {
             if (!roomList.has(socket.room_id)) return;
 
             const room = roomList.get(socket.room_id);
@@ -1304,29 +1309,29 @@ function startServer() {
             let isHttps = config.server.ishttps
             let pattern;
 
-            if (isHttps){
+            if (isHttps) {
                 pattern = new RegExp(
                     '^(https?:\\/\\/)?' + // protocol
-                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                        '(\\#[-a-z\\d_]*)?$',
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                    '(\\#[-a-z\\d_]*)?$',
                     'i',
                 ); // fragment locator
             }
-            else{
+            else {
                 pattern = new RegExp(
                     '^(http?:\\/\\/)?' + // protocol
-                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                        '(\\#[-a-z\\d_]*)?$',
+                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                    '(\\#[-a-z\\d_]*)?$',
                     'i',
                 ); // fragment locator
             }
-            
+
             return pattern.test(input);
         }
 

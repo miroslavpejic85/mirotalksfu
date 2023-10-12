@@ -77,14 +77,12 @@ let participantsCount = 0;
 let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
-// let room_id = getRoomId();
-// let user_id = getUserId();
 
 let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
 let meeting_param= getMeetingParam();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
-let peer_uuid = getPeerUUID();
+let peer_uuid = getPeerUUID(user_id);
 let isScreenAllowed = getScreen();
 let notify = getNotify();
 isPresenter = isPeerPresenter();
@@ -490,30 +488,6 @@ function getMeetingParam(){
     return meetingParam;
 }
 
-// function getRoomId() {
-//     let qs = new URLSearchParams(window.location.search);
-//     let queryRoomId = filterXSS(qs.get('room'));
-//     let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
-//     if (roomId == '') {
-//         roomId = makeId(12);
-//     }
-//     console.log('Direct join', { room: roomId });
-//     window.localStorage.lastRoom = roomId;
-//     return roomId;
-// }
-
-// function getUserId() {
-//     let qs = new URLSearchParams(window.location.search);
-//     let queryUserId = filterXSS(qs.get('user_id'));
-//     let userId = queryUserId ? queryUserId : location.pathname.substring(6);
-//     if (userId == '') {
-//         userId = makeId(12);
-//     }
-//     console.log('Direct join', { user: userId });
-//     window.localStorage.lastUserId = userId;
-//     return userId;
-// }
-
 function makeId(length) {
     let result = '';
     let characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -586,7 +560,14 @@ function getPeerName() {
     return name;
 }
 
-function getPeerUUID() {
+function getPeerUUID(user_id) {
+    console.log('getttttting user_id   --------------------------------> ', user_id);
+
+    if (user_id){
+        lS.setItemLocalStorage('peer_uuid', user_id);
+        return user_id
+    }
+
     if (lS.getItemLocalStorage('peer_uuid')) {
         return lS.getItemLocalStorage('peer_uuid');
     }
