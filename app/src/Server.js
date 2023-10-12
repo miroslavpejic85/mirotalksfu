@@ -78,7 +78,7 @@ const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
-const { getMeetingRoom, joinMeetingUpdate, leaveMeetingUpdate } = require('../db/helper');
+const { getMeetingRoom, joinMeetingUpdate, leaveMeetingUpdate, updateUserCount } = require('../db/helper');
 const { encrypt, decrypt } = require('../helper/encoder_decoder');
 
 const app = express();
@@ -348,7 +348,6 @@ function startServer() {
             res.redirect('/');
         }
     })
-
 
 
     // join room by id
@@ -932,20 +931,14 @@ function startServer() {
 
             room.addPeer(new Peer(socket.id, data));
 
+            const peers_list_in_meeting = room.getUsersDataInMeeting()
+            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
+
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
             const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
             const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false
-
-            // if (Object.keys(presenters[socket.room_id]).length === 0 ) {
-            //     presenters[socket.room_id] = {
-            //         peer_ip: peer_ip,
-            //         peer_name: peer_name,
-            //         peer_uuid: peer_uuid,
-            //         is_presenter: is_presenter,
-            //     };
-            // }
 
             if (is_presenter) {
                 presenters[socket.room_id] = {
@@ -1226,6 +1219,10 @@ function startServer() {
 
             room.removePeer(socket.id);
 
+            const peers_list_in_meeting = room.getUsersDataInMeeting()
+            console.log(peers_list_in_meeting, 'peers_list_in_meeting -->')
+            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
+
             if (room.getPeers().size === 0) {
                 if (room.isLocked()) {
                     room.setLocked(false);
@@ -1261,6 +1258,10 @@ function startServer() {
 
             // close transports
             await room.removePeer(socket.id);
+
+            const peers_list_in_meeting = room.getUsersDataInMeeting()
+            console.log(peers_list_in_meeting, 'peers_list_in_meeting -->')
+            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 

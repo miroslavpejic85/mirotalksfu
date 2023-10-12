@@ -126,6 +126,25 @@ module.exports = class Room {
         return this.peers;
     }
 
+    getUsersDataInMeeting(){
+        let peers_list = this.getPeers() 
+        let users_list_in_meeting = []
+
+        for (let [key, value] of peers_list){
+            let peer_info = value?.peer_info
+
+            if (peer_info && peer_info?.peer_uuid){
+                users_list_in_meeting.push({
+                    user_id: peer_info.peer_uuid,
+                    peer_name: peer_info.peer_name,
+                    peer_id: key
+                })
+            }
+        }
+
+        return users_list_in_meeting
+    }
+
     getPeersCount() {
         return this.peers.size;
     }
