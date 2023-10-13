@@ -70,7 +70,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
-const { firestoreDB } = require('../db/firebase')
+const { firestoreDB } = require('../db/firebase');
 
 // Slack API
 const CryptoJS = require('crypto-js');
@@ -82,7 +82,7 @@ const { getMeetingRoom, joinMeetingUpdate, leaveMeetingUpdate, updateUserCount }
 const { encrypt, decrypt } = require('../helper/encoder_decoder');
 const RubyApiCall = require('../mico_service/RubyApiCall');
 
-const ruby_api = new RubyApiCall()
+const ruby_api = new RubyApiCall();
 const app = express();
 
 let io, httpsServer, host;
@@ -106,7 +106,6 @@ io = new Server({
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
 }).listen(httpsServer);
-
 
 const hostCfg = {
     protected: config.host.protected,
@@ -282,9 +281,8 @@ function startServer() {
     });
 
     app.get(['/not_valid_meeting_link'], (req, res) => {
-        res.sendFile(views.notValidMeetingLink)
-    })
-
+        res.sendFile(views.notValidMeetingLink);
+    });
 
     // link to join in meeting
     // join meeting link look like
@@ -293,81 +291,102 @@ function startServer() {
         try {
             if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
                 const { meeting, auth } = checkXSS(req.query);
-                const meetingData = decrypt(meeting)
-                const { meeting_id, user_id, user_name = '', user_type = '', audio, video, screen, notify, isPresenter } = meetingData
+                const meetingData = decrypt(meeting);
+                const {
+                    meeting_id,
+                    user_id,
+                    user_name = '',
+                    user_type = '',
+                    audio,
+                    video,
+                    screen,
+                    notify,
+                    isPresenter,
+                } = meetingData;
 
                 if (meeting_id && user_id) {
-                    const get_meeting_room = getMeetingRoom({ firestoreDB, room_id: meeting_id })
+                    const get_meeting_room = getMeetingRoom({ firestoreDB, room_id: meeting_id });
 
-                    get_meeting_room.then((response) => {
-                        const video_call_room_data = response.data()
-                        const user_list = video_call_room_data?.user_ids || []
+                    get_meeting_room
+                        .then((response) => {
+                            const video_call_room_data = response.data();
+                            const user_list = video_call_room_data?.user_ids || [];
 
-                        meetingData['is_presenter'] = 'false'
-                        if ((user_type || '').toLowerCase() === 'admin') {
-                            meetingData['is_presenter'] = 'true'
-                        }
-
-                        if (user_list.includes(user_id)) {
-
-                            if (video_call_room_data?.is_private){
-                                ruby_api.userAuthenticate({auth_token: auth}).then((response) => {
-                                    if (response?.is_authenticated){
-                                        // this cookie will expire  after 5 hours
-                                        res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
-                                        joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
-                                        return res.sendFile(views.room);
-                                    }else{
-                                        return res.sendFile(views.notValidMeetingLink)
-                                    }
-                                }).catch((error)=>{
-                                    console.log('Error:', error)
-                                    return res.sendFile(views.notValidMeetingLink)
-                                })
+                            meetingData['is_presenter'] = 'false';
+                            if (user_id === video_call_room_data.performed_by_id) {
+                                meetingData['is_presenter'] = 'true';
                             }
-                            else{
-                                // this cookie will expire  after 5 hours
-                                res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
-                                joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
-                                return res.sendFile(views.room);
-                            }
-                            
 
-                            
-                        }
-                        else {
+                            if (user_list.includes(user_id)) {
+                                if (video_call_room_data?.is_private) {
+                                    ruby_api
+                                        .userAuthenticate({ auth_token: auth })
+                                        .then((response) => {
+                                            if (response?.is_authenticated) {
+                                                // this cookie will expire  after 5 hours
+                                                res.cookie('meeting_data', JSON.stringify(meetingData), {
+                                                    maxAge: 5 * 60 * 60 * 1000,
+                                                });
+                                                joinMeetingUpdate({
+                                                    firestoreDB,
+                                                    room_id: meeting_id,
+                                                    user_id,
+                                                    user_name,
+                                                });
+                                                return res.sendFile(views.room);
+                                            } else {
+                                                return res.sendFile(views.notValidMeetingLink);
+                                            }
+                                        })
+                                        .catch((error) => {
+                                            console.log('Error:', error);
+                                            return res.sendFile(views.notValidMeetingLink);
+                                        });
+                                } else {
+                                    // this cookie will expire  after 5 hours
+                                    res.cookie('meeting_data', JSON.stringify(meetingData), {
+                                        maxAge: 5 * 60 * 60 * 1000,
+                                    });
+                                    joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name });
+                                    return res.sendFile(views.room);
+                                }
+                            } else {
+                                res.redirect('/not_valid_meeting_link');
+                            }
+                        })
+                        .catch((err) => {
+                            console.log(err);
                             res.redirect('/not_valid_meeting_link');
-                        }
-                    }).catch((err) => {
-                        console.log(err)
-                        res.redirect('/not_valid_meeting_link');
-                    })
+                        });
                 }
             }
-        }
-        catch (err) {
-            console.log(err)
+        } catch (err) {
+            console.log(err);
             res.redirect('/not_valid_meeting_link');
         }
     });
 
-    // calling this to end the meeting 
+    // calling this to end the meeting
     app.get('/leave_meeting', (req, res) => {
-        const meeting_cookies = req.cookies?.meeting_data
+        const meeting_cookies = req.cookies?.meeting_data;
         if (meeting_cookies) {
-            const meeting_data = JSON.parse(meeting_cookies || '{}')
-            res.clearCookie("meeting_data");
+            const meeting_data = JSON.parse(meeting_cookies || '{}');
+            res.clearCookie('meeting_data');
 
             if (meeting_data?.user_id && meeting_data?.meeting_id) {
-                leaveMeetingUpdate({ firestoreDB, room_id: meeting_data.meeting_id, user_id: meeting_data.user_id, user_name: meeting_data.user_name })
+                leaveMeetingUpdate({
+                    firestoreDB,
+                    room_id: meeting_data.meeting_id,
+                    user_id: meeting_data.user_id,
+                    user_name: meeting_data.user_name,
+                });
             }
 
             res.sendFile(views.landing);
         } else {
             res.redirect('/');
         }
-    })
-
+    });
 
     // join room by id
     // app.get('/join/:roomId', (req, res) => {
@@ -668,7 +687,7 @@ function startServer() {
             }
         });
 
-        socket.on('getPeerCounts', async ({ }, callback) => {
+        socket.on('getPeerCounts', async ({}, callback) => {
             if (!roomList.has(socket.room_id)) return;
 
             const room = roomList.get(socket.room_id);
@@ -950,14 +969,14 @@ function startServer() {
 
             room.addPeer(new Peer(socket.id, data));
 
-            const peers_list_in_meeting = room.getUsersDataInMeeting()
-            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
+            const peers_list_in_meeting = room.getUsersDataInMeeting();
+            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
             const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
-            const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false
+            const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false;
 
             if (is_presenter) {
                 presenters[socket.room_id] = {
@@ -1238,8 +1257,8 @@ function startServer() {
 
             room.removePeer(socket.id);
 
-            const peers_list_in_meeting = room.getUsersDataInMeeting()
-            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
+            const peers_list_in_meeting = room.getUsersDataInMeeting();
+            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
 
             if (room.getPeers().size === 0) {
                 if (room.isLocked()) {
@@ -1277,8 +1296,8 @@ function startServer() {
             // close transports
             await room.removePeer(socket.id);
 
-            const peers_list_in_meeting = room.getUsersDataInMeeting()
-            updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
+            const peers_list_in_meeting = room.getUsersDataInMeeting();
+            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
@@ -1324,28 +1343,27 @@ function startServer() {
         }
 
         function isValidHttpURL(input) {
-            let isHttps = config.server.ishttps
+            let isHttps = config.server.ishttps;
             let pattern;
 
             if (isHttps) {
                 pattern = new RegExp(
                     '^(https?:\\/\\/)?' + // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                    '(\\#[-a-z\\d_]*)?$',
+                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                        '(\\#[-a-z\\d_]*)?$',
                     'i',
                 ); // fragment locator
-            }
-            else {
+            } else {
                 pattern = new RegExp(
                     '^(http?:\\/\\/)?' + // protocol
-                    '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                    '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                    '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                    '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                    '(\\#[-a-z\\d_]*)?$',
+                        '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
+                        '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
+                        '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
+                        '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
+                        '(\\#[-a-z\\d_]*)?$',
                     'i',
                 ); // fragment locator
             }
@@ -1388,7 +1406,8 @@ function startServer() {
                 typeof presenters[room_id] === 'object' &&
                 Object.keys(presenters[room_id]).length > 1 &&
                 presenters[room_id]['peer_name'] === peer_name &&
-                presenters[room_id]['peer_uuid'] === peer_uuid && presenters[room_id]['is_presenter'] === true;
+                presenters[room_id]['peer_uuid'] === peer_uuid &&
+                presenters[room_id]['is_presenter'] === true;
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;
@@ -1398,7 +1417,7 @@ function startServer() {
             room_id: room_id,
             peer_name: peer_name,
             peer_uuid: peer_uuid,
-            isPresenter: isPresenter
+            isPresenter: isPresenter,
         });
 
         return isPresenter;
