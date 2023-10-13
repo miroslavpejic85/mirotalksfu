@@ -27,11 +27,11 @@ function updateUserCount({firestoreDB, user_list = [], room_id}){
             }
         }
     
-        video_conference_ref.set({
+        video_conference_ref.update({
             updated_at: now_time,
             users_in_meeting: users_in_meeting,
             user_count_in_meeting: user_list.length
-        }, { merge: true })
+        })
     }
 }
 

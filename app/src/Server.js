@@ -80,11 +80,10 @@ const slackSigningSecret = config.slack.signingSecret;
 const bodyParser = require('body-parser');
 const { getMeetingRoom, joinMeetingUpdate, leaveMeetingUpdate, updateUserCount } = require('../db/helper');
 const { encrypt, decrypt } = require('../helper/encoder_decoder');
+const RubyApiCall = require('../mico_service/RubyApiCall');
 
+const ruby_api = new RubyApiCall()
 const app = express();
-
-
-
 
 let io, httpsServer, host;
 
@@ -293,7 +292,7 @@ function startServer() {
     app.get('/join/', (req, res) => {
         try {
             if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
-                const { meeting } = checkXSS(req.query);
+                const { meeting, auth } = checkXSS(req.query);
                 const meetingData = decrypt(meeting)
                 const { meeting_id, user_id, user_name = '', user_type = '', audio, video, screen, notify, isPresenter } = meetingData
 
@@ -301,8 +300,8 @@ function startServer() {
                     const get_meeting_room = getMeetingRoom({ firestoreDB, room_id: meeting_id })
 
                     get_meeting_room.then((response) => {
-                        const video_call_user_data = response.data()
-                        const user_list = video_call_user_data?.user_ids || []
+                        const video_call_room_data = response.data()
+                        const user_list = video_call_room_data?.user_ids || []
 
                         meetingData['is_presenter'] = 'false'
                         if ((user_type || '').toLowerCase() === 'admin') {
@@ -310,11 +309,33 @@ function startServer() {
                         }
 
                         if (user_list.includes(user_id)) {
-                            // this cookie will expire  after 5 hours
-                            res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
 
-                            joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
-                            return res.sendFile(views.room);
+                            if (video_call_room_data?.is_private){
+                                ruby_api.userAuthenticate().then((response) => {
+                                    if (response?.is_authenticated){
+                                        // this cookie will expire  after 5 hours
+                                        res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
+                                        joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
+                                        return res.sendFile(views.room);
+                                    }else{
+                                        return res.sendFile(views.notValidMeetingLink)
+                                    }
+                                }).catch((error)=>{
+                                    console.log('Error:', error)
+                                    return res.sendFile(views.notValidMeetingLink)
+                                })
+                                
+                                
+                            }
+                            else{
+                                // this cookie will expire  after 5 hours
+                                res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
+                                joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name })
+                                return res.sendFile(views.room);
+                            }
+                            
+
+                            
                         }
                         else {
                             res.redirect('/not_valid_meeting_link');
@@ -1220,7 +1241,6 @@ function startServer() {
             room.removePeer(socket.id);
 
             const peers_list_in_meeting = room.getUsersDataInMeeting()
-            console.log(peers_list_in_meeting, 'peers_list_in_meeting -->')
             updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
 
             if (room.getPeers().size === 0) {
@@ -1260,7 +1280,6 @@ function startServer() {
             await room.removePeer(socket.id);
 
             const peers_list_in_meeting = room.getUsersDataInMeeting()
-            console.log(peers_list_in_meeting, 'peers_list_in_meeting -->')
             updateUserCount({firestoreDB, user_list:peers_list_in_meeting, room_id:socket.room_id})
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
