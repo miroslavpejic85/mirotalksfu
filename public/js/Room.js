@@ -80,6 +80,7 @@ let chatMessagesId = 0;
 
 let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
 let meeting_param= getMeetingParam();
+let auth = getAuth();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID(user_id);
@@ -486,6 +487,13 @@ function getMeetingParam(){
     let meetingParam = meeting ? meeting : getCookie('meeting_data');
     
     return meetingParam;
+}
+
+function getAuth(){
+    let qs = new URLSearchParams(window.location.search);
+    let meetingAuth = filterXSS(qs.get('auth'));
+
+    return meetingAuth;
 }
 
 function makeId(length) {
@@ -939,6 +947,7 @@ function joinRoom(peer_name, room_id) {
             window.mediasoupClient,
             socket,
             meeting_param,
+            auth,
             room_id,
             user_id,
             peer_name,

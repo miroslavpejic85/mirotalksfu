@@ -128,6 +128,7 @@ class RoomClient {
         mediasoupClient,
         socket,
         meeting_param,
+        auth,
         room_id,
         user_id,
         peer_name,
@@ -148,6 +149,7 @@ class RoomClient {
 
         this.socket = socket;
         this.meeting_param = meeting_param;
+        this.auth = auth;
         this.room_id = room_id;
         this.user_id = user_id;
         this.peer_id = socket.id;
@@ -760,6 +762,9 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
+        if (this.auth){ 
+            return `${window.location.origin}/join?meeting=${encodeURIComponent(this.meeting_param)}&auth=${this.auth}`
+        }
         return `${window.location.origin}/join?meeting=${encodeURIComponent(this.meeting_param)}`;
     }
 
@@ -784,7 +789,11 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param)))
+                if (this.auth){
+                    openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param))+'&auth='+this.auth)
+                }else{
+                    openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param)))
+                }
             }
         });
     }
