@@ -31,19 +31,6 @@ dependencies: {
 }
 */
 
-/**
- * Cogo One - Server component
- *
- * @link    GitHub: https://github.com/miroslavpejic85/mirotalksfu
- * @link    Official Live demo: https://sfu.mirotalk.com
- * @license For open source use: AGPLv3
- * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
- * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
- * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.6
- *
- */
-
 const express = require('express');
 var cookieParser = require('cookie-parser');
 const { Server } = require('socket.io');
@@ -132,13 +119,6 @@ if (sentryEnabled) {
         ],
         tracesSampleRate: sentryTracesSampleRate,
     });
-    /*
-    log.log('test-log');
-    log.info('test-info');
-    log.warn('test-warning');
-    log.error('test-error');
-    log.debug('test-debug');
-    */
 }
 
 // OpenAI/ChatGPT
@@ -172,6 +152,7 @@ const views = {
     privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
     notValidMeetingLink: path.join(__dirname, '../../', 'public/views/not_valid_meeting_link.html'),
+    ununathenticatedUser: path.join(__dirname, '../../', 'public/views/unathenticated_user.html'),
 };
 
 let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
@@ -335,12 +316,12 @@ function startServer() {
                                                 });
                                                 return res.sendFile(views.room);
                                             } else {
-                                                return res.sendFile(views.notValidMeetingLink);
+                                                return res.sendFile(views.ununathenticatedUser);
                                             }
                                         })
                                         .catch((error) => {
                                             console.log('Error:', error);
-                                            return res.sendFile(views.notValidMeetingLink);
+                                            return res.sendFile(views.ununathenticatedUser);
                                         });
                                 } else {
                                     // this cookie will expire  after 5 hours
