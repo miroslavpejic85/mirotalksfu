@@ -54,6 +54,8 @@ function resizeVideoMedia() {
         Width = Width - bigWidth;
     }
 
+    resetZoom();
+
     // loop (i recommend you optimize this)
     let i = 1;
     while (i < 5000) {
@@ -68,6 +70,14 @@ function resizeVideoMedia() {
     max = max - Margin * 2;
     setWidth(Cameras, max, bigWidth, Margin, Height, isOneVideoElement);
     document.documentElement.style.setProperty('--vmi-wh', max / 3 + 'px');
+}
+
+function resetZoom() {
+    const videoElements = document.querySelectorAll('video');
+    videoElements.forEach((video) => {
+        video.style.transform = '';
+        video.style.transformOrigin = 'center';
+    });
 }
 
 function setWidth(Cameras, width, bigWidth, margin, maxHeight, isOneVideoElement) {

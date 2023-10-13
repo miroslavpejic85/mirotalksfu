@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.8
+ * @version 1.0.9
  *
  */
 
@@ -169,6 +169,7 @@ class RoomClient {
         this.isVideoOnFullScreen = false;
         this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
         this.isVideoPictureInPictureSupported = !DetectRTC.isMobileDevice && document.pictureInPictureEnabled;
+        this.isZoomCenterMode = false;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
@@ -1441,7 +1442,7 @@ class RoomClient {
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
-                this.handleZV(elem.id);
+                this.handleZV(elem.id, d.id, this.peer_id);
                 if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
@@ -1842,7 +1843,7 @@ class RoomClient {
                 this.handlePV(id + '___' + pv.id);
                 this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
-                this.handleZV(elem.id);
+                this.handleZV(elem.id, d.id, remotePeerId);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
@@ -2665,17 +2666,56 @@ class RoomClient {
     // HANDLE VIDEO ZOOM-IN/OUT
     // ####################################################
 
-    handleZV(elemId) {
+    handleZV(elemId, divId, peerId) {
         let videoPlayer = this.getId(elemId);
+        let videoWrap = this.getId(divId);
+        let videoPeerId = peerId;
         let zoom = 1;
-        if (videoPlayer) {
-            videoPlayer.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                let delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
-                delta > 0 ? (zoom *= 1.2) : (zoom /= 1.2);
-                if (zoom < 1) zoom = 1;
-                videoPlayer.style.scale = zoom;
-            });
+
+        const ZOOM_IN_FACTOR = 1.1;
+        const ZOOM_OUT_FACTOR = 0.9;
+        const MAX_ZOOM = 15;
+        const MIN_ZOOM = 1;
+
+        if (this.isZoomCenterMode) {
+            if (videoPlayer) {
+                videoPlayer.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    let delta = e.wheelDelta ? e.wheelDelta : -e.deltaY;
+                    delta > 0 ? (zoom *= 1.2) : (zoom /= 1.2);
+                    if (zoom < 1) zoom = 1;
+                    videoPlayer.style.scale = zoom;
+                });
+            }
+        } else {
+            if (videoPlayer && videoWrap) {
+                videoPlayer.addEventListener('wheel', (e) => {
+                    e.preventDefault();
+                    if (isVideoPrivacyActive) return;
+                    const rect = videoWrap.getBoundingClientRect();
+                    const cursorX = e.clientX - rect.left;
+                    const cursorY = e.clientY - rect.top;
+                    const zoomDirection = e.deltaY > 0 ? 'zoom-out' : 'zoom-in';
+                    const scaleFactor = zoomDirection === 'zoom-out' ? ZOOM_OUT_FACTOR : ZOOM_IN_FACTOR;
+                    zoom *= scaleFactor;
+                    zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
+                    videoPlayer.style.transformOrigin = `${cursorX}px ${cursorY}px`;
+                    videoPlayer.style.transform = `scale(${zoom})`;
+                    videoPlayer.style.cursor = zoomDirection;
+                });
+
+                videoWrap.addEventListener('mouseleave', () => {
+                    videoPlayer.style.cursor = 'pointer';
+                    if (videoPeerId === this.peer_id) {
+                        zoom = 1;
+                        videoPlayer.style.transform = '';
+                        videoPlayer.style.transformOrigin = 'center';
+                    }
+                });
+                videoPlayer.addEventListener('mouseleave', () => {
+                    videoPlayer.style.cursor = 'pointer';
+                });
+            }
         }
     }
 
