@@ -1,7 +1,7 @@
 require('dotenv').config()
 const  CryptoJS = require('crypto-js');
 
-const decrypt_encrypt_password = process.env.DECRYPT_ENCRYPT_PASSWORD || '@MrCogoport'
+const decrypt_encrypt_password = process.env.DECRYPT_ENCRYPT_PASSWORD
 const encrypt = (content, password = decrypt_encrypt_password) => encodeURIComponent(CryptoJS.AES.encrypt(JSON.stringify({ content }), password).toString())
 const decrypt = (crypted, password = decrypt_encrypt_password) => JSON.parse(CryptoJS.AES.decrypt(decodeURIComponent(crypted), password).toString(CryptoJS.enc.Utf8)).content
 
