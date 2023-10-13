@@ -6,18 +6,16 @@ module.exports =  class RubyApiCall{
         this.ruby_api_call_by_user = async (data) => await RubyClientUser(data)
     }
 
-    async userAuthenticate(){
+    async userAuthenticate({auth_token}){
         let params={
             request_api_path: 'get_user',
-        }
-        let headers ={
-            // AuthorizationScope: 'partner',
-            Authorization: 'Bearer: ' + 'eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2OTczNDkzOTcsImlhdCI6MTY5NzE3NjU5NywiVXNlclNlc3Npb25JRCI6ImEyYzYxNmI0LTkyYmYtNDMxNy04MTUwLWVjOThlYzljZjQ4OCJ9.BNlUGZJ9FbJeHZa5CtQgz3CVHW-zrZnvrxFw74vk9A92kM3pQy93idGZPFBx3t9PYVs4FrIs8bZ71lu2I0nz9Q'
+            request_auth_token: auth_token,
+            request_auth_scope: 'partner'
         }
 
         let request_type='GET'
         let path = '/auth/verify_request'
-        let api_response = await this.ruby_api_call_by_user({path, request_type, params, headers})
+        let api_response = await this.ruby_api_call_by_user({path, request_type, params})
 
         return api_response
     }

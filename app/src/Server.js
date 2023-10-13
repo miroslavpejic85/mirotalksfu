@@ -311,7 +311,7 @@ function startServer() {
                         if (user_list.includes(user_id)) {
 
                             if (video_call_room_data?.is_private){
-                                ruby_api.userAuthenticate().then((response) => {
+                                ruby_api.userAuthenticate({auth_token: auth}).then((response) => {
                                     if (response?.is_authenticated){
                                         // this cookie will expire  after 5 hours
                                         res.cookie("meeting_data", JSON.stringify(meetingData), { maxAge: 5 * 60 * 60 * 1000 });
@@ -324,8 +324,6 @@ function startServer() {
                                     console.log('Error:', error)
                                     return res.sendFile(views.notValidMeetingLink)
                                 })
-                                
-                                
                             }
                             else{
                                 // this cookie will expire  after 5 hours
