@@ -273,79 +273,78 @@ function startServer() {
             if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
                 const { meeting, auth } = checkXSS(req.query);
                 const meetingData = decrypt(meeting);
-                const {
-                    meeting_id,
-                    user_id,
-                    user_name = '',
-                    user_type = '',
-                    audio,
-                    video,
-                    screen,
-                    notify,
-                    isPresenter,
-                } = meetingData;
+                const {meeting_id,user_id} = meetingData;
+                
+                if (meeting_id && user_id){
+                    meetingData['is_presenter'] = false;
+                    res.cookie('meeting_data', JSON.stringify(meetingData), {maxAge: 5 * 60 * 60 * 1000});
+                    res.cookie('cogo_auth_token', auth,{maxAge: 5 * 60 * 60 * 1000})
 
-                if (meeting_id && user_id) {
-                    const get_meeting_room = getMeetingRoom({ firestoreDB, room_id: meeting_id });
-
-                    get_meeting_room
-                        .then((response) => {
-                            const video_call_room_data = response.data();
-                            const user_list = video_call_room_data?.user_ids || [];
-
-                            meetingData['is_presenter'] = 'false';
-                            if (user_id === video_call_room_data.performed_by_id) {
-                                meetingData['is_presenter'] = 'true';
-                            }
-
-                            if (user_list.includes(user_id)) {
-                                if (video_call_room_data?.is_private) {
-                                    ruby_api
-                                        .userAuthenticate({ auth_token: auth })
-                                        .then((response) => {
-                                            if (response?.is_authenticated) {
-                                                // this cookie will expire  after 5 hours
-                                                res.cookie('meeting_data', JSON.stringify(meetingData), {
-                                                    maxAge: 5 * 60 * 60 * 1000,
-                                                });
-                                                joinMeetingUpdate({
-                                                    firestoreDB,
-                                                    room_id: meeting_id,
-                                                    user_id,
-                                                    user_name,
-                                                });
-                                                return res.sendFile(views.room);
-                                            } else {
-                                                return res.sendFile(views.ununathenticatedUser);
-                                            }
-                                        })
-                                        .catch((error) => {
-                                            console.log('Error:', error);
-                                            return res.sendFile(views.ununathenticatedUser);
-                                        });
-                                } else {
-                                    // this cookie will expire  after 5 hours
-                                    res.cookie('meeting_data', JSON.stringify(meetingData), {
-                                        maxAge: 5 * 60 * 60 * 1000,
-                                    });
-                                    joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name });
-                                    return res.sendFile(views.room);
-                                }
-                            } else {
-                                res.redirect('/not_valid_meeting_link');
-                            }
-                        })
-                        .catch((err) => {
-                            console.log(err);
-                            res.redirect('/not_valid_meeting_link');
-                        });
+                    return res.redirect('/in_meeting')
                 }
             }
+
+            return res.redirect('/not_valid_meeting_link');
         } catch (err) {
             console.log(err);
             res.redirect('/not_valid_meeting_link');
         }
     });
+
+
+    // in a meeting
+    app.get('/in_meeting', async (req, res) => {
+        try{
+            const meeting_cookies = req.cookies?.meeting_data;
+            const cogo_auth_token = req.cookies?.cogo_auth_token
+
+            if (meeting_cookies){
+                const meeting_data = JSON.parse(meeting_cookies || '{}');
+                const {meeting_id,user_id,user_name = ''} = meeting_data;
+                if (meeting_id && user_id) {
+                    const get_meeting_room = await getMeetingRoom({ firestoreDB, room_id: meeting_id });
+                    const video_call_room_data = get_meeting_room.data();
+                    const user_list = video_call_room_data?.user_ids || [];
+
+                    meeting_data['is_presenter'] = 'false';
+                    if (user_id === video_call_room_data.performed_by_id) {
+                        meeting_data['is_presenter'] = 'true';
+                    }
+
+                    if (!user_list.includes(user_id)){
+                        return res.redirect('/not_valid_meeting_link');
+                    }
+
+                    if (!video_call_room_data?.is_private){
+                        res.cookie('meeting_data', JSON.stringify(meeting_data), {
+                            maxAge: 5 * 60 * 60 * 1000,
+                        });
+                        joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name });
+                        return res.sendFile(views.room);
+                    }
+        
+                    if (!cogo_auth_token){
+                        return res.sendFile(views.ununathenticatedUser); 
+                    }
+
+                    let isAuthenticated = await ruby_api.userAuthenticate({ auth_token: cogo_auth_token }) 
+                    if (isAuthenticated) {
+                        res.cookie('meeting_data', JSON.stringify(meeting_data), {
+                            maxAge: 5 * 60 * 60 * 1000,
+                        });
+                        joinMeetingUpdate({firestoreDB,room_id: meeting_id,user_id,user_name});
+                        return res.sendFile(views.room);
+                    }
+
+                    return res.sendFile(views.ununathenticatedUser); 
+                }
+            }
+            res.redirect('/not_valid_meeting_link');
+        }catch (err) {
+            console.log(err);
+            res.redirect('/not_valid_meeting_link');
+        }
+    })
 
     // calling this to end the meeting
     app.get('/leave_meeting', (req, res) => {
@@ -353,6 +352,7 @@ function startServer() {
         if (meeting_cookies) {
             const meeting_data = JSON.parse(meeting_cookies || '{}');
             res.clearCookie('meeting_data');
+            res.clearCookie('cogo_auth_token')
 
             if (meeting_data?.user_id && meeting_data?.meeting_id) {
                 leaveMeetingUpdate({

@@ -17,7 +17,11 @@ module.exports =  class RubyApiCall{
         let path = '/auth/verify_request'
         let api_response = await this.ruby_api_call_by_user({path, request_type, params})
 
-        return api_response
+        if (api_response?.is_authenticated){
+            return true
+        }
+
+        return false
     }
 
 

@@ -485,13 +485,14 @@ function getMeetingParam(){
     let qs = new URLSearchParams(window.location.search);
     let meeting = filterXSS(qs.get('meeting'));
     let meetingParam = meeting ? meeting : getCookie('meeting_data');
-    
+
     return meetingParam;
 }
 
 function getAuth(){
     let qs = new URLSearchParams(window.location.search);
-    let meetingAuth = filterXSS(qs.get('auth'));
+    let meeting_auth_token = filterXSS(qs.get('auth'));
+    let meetingAuth = meeting_auth_token ? meeting_auth_token : getCookie('cogo_auth_token');
 
     return meetingAuth;
 }

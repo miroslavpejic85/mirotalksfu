@@ -762,10 +762,7 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
-        if (this.auth){ 
-            return `${window.location.origin}/join?meeting=${encodeURIComponent(this.meeting_param)}&auth=${this.auth}`
-        }
-        return `${window.location.origin}/join?meeting=${encodeURIComponent(this.meeting_param)}`;
+        return `${window.location.origin}/in_meeting`;
     }
 
     // ####################################################
@@ -789,11 +786,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                if (this.auth){
-                    openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param))+'&auth='+this.auth)
-                }else{
-                    openURL((window.location.href = '/join?meeting=' + encodeURIComponent(this.meeting_param)))
-                }
+                openURL((window.location.href = '/in_meeting'))
             }
         });
     }
