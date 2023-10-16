@@ -2701,7 +2701,7 @@ class RoomClient {
                     zoom = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, zoom));
                     videoPlayer.style.transformOrigin = `${cursorX}px ${cursorY}px`;
                     videoPlayer.style.transform = `scale(${zoom})`;
-                    videoPlayer.style.cursor = zoomDirection;
+                    videoPlayer.style.cursor = zoom === 1 ? 'pointer' : zoomDirection;
                 });
 
                 videoWrap.addEventListener('mouseleave', () => {
