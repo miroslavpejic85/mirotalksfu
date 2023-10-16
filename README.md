@@ -326,12 +326,14 @@ Do you find MiroTalk SFU indispensable for your needs? Join us in supporting thi
 
 <br/>
 
+## Diving into Additional MiroTalk Projects:
+
 <details>
 <summary>MiroTalk P2P</summary>
 
 <br/>
 
-Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the difference between the two projects you can found [here](https://github.com/miroslavpejic85/mirotalksfu/issues/14#issuecomment-932701999).
+Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk) `peer to peer` real-time video conferences, optimized for small groups. `Unlimited time, unlimited concurrent rooms` each having 5-8 participants.
 
 </details>
 
@@ -340,7 +342,7 @@ Try also [MiroTalk P2P](https://github.com/miroslavpejic85/mirotalk), the differ
 
 <br>
 
-Try also [MiroTalk C2C](https://github.com/miroslavpejic85/mirotalkc2c) cam 2 cam.
+Try also [MiroTalk C2C](https://github.com/miroslavpejic85/mirotalkc2c) `peer to peer` real-time video conferences, optimized for cam 2 cam. `Unlimited time, unlimited concurrent rooms` each having 2 participants.
 
 </details>
 
@@ -349,7 +351,7 @@ Try also [MiroTalk C2C](https://github.com/miroslavpejic85/mirotalkc2c) cam 2 ca
 
 <br>
 
-Try also [MiroTalk BRO](https://github.com/miroslavpejic85/mirotalkbro) live broadcasting.
+Try also [MiroTalk BRO](https://github.com/miroslavpejic85/mirotalkbro) `Live broadcast` (peer to peer) live video, audio and screen stream to all connected users (viewers). `Unlimited time, unlimited concurrent rooms` each having a broadcast and many viewers.
 
 </details>
 
@@ -358,7 +360,7 @@ Try also [MiroTalk BRO](https://github.com/miroslavpejic85/mirotalkbro) live bro
 
 <br>
 
-Try also [MiroTalk WEB](https://github.com/miroslavpejic85/mirotalkwebrtc) rooms scheduler.
+Try also [MiroTalk WEB](https://github.com/miroslavpejic85/mirotalkwebrtc) a platform that allows for the management of an `unlimited number of users`. Each user must register with their email, username, and password, after which they gain access to their `personal dashboard`. Within the dashboard, users can `manage their rooms and schedule meetings` using the desired version of MiroTalk on a specified date and time. Invitations to these meetings can be sent via email, shared through the web browser, or sent via SMS.
 
 </details>
 
