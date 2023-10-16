@@ -364,4 +364,8 @@ Try also [MiroTalk WEB](https://github.com/miroslavpejic85/mirotalkwebrtc) a pla
 
 </details>
 
+---
+
 This project is tested with [BrowserStack](https://www.browserstack.com).
+
+---
