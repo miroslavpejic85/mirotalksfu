@@ -43,6 +43,7 @@ const html = {
 
 const icons = {
     chat: '<i class="fas fa-comments"></i>',
+    transcript: '<i class="fas fa-closed-captioning"></i>',
     speech: '<i class="fas fa-volume-high"></i>',
     share: '<i class="fas fa-share-alt"></i>',
     ptt: '<i class="fa-solid fa-hand-pointer"></i>',
@@ -4366,6 +4367,19 @@ class RoomClient {
                 break;
             case 'speechMessages':
                 this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
+                break;
+            case 'showTranscript':
+                active
+                    ? userLog(
+                          'info',
+                          `${icons.transcript} Transcript will be shown, when you receive a message`,
+                          'top-end',
+                      )
+                    : userLog(
+                          'info',
+                          `${icons.transcript} Transcript not will be shown, when you receive a message`,
+                          'top-end',
+                      );
                 break;
             default:
                 break;

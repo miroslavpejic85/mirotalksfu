@@ -760,6 +760,12 @@ access to use this app.
                         <button id="transcriptionMaxBtn" class=""><i class="fas fa-expand"></i></button>
                         <button id="transcriptionMinBtn" class="hidden"><i class="fas fa-compress"></i></button>
                         <button id="transcriptionSpeechStatus" class="fas fa-microphone-alt"></button>
+                        <div style="margin-left: 10px" class="title">
+                            <i class="fa-solid fa-eye"></i>
+                            <div style="margin-left: 5px" class="form-check form-switch form-switch-md">
+                                <input class="form-check-input" type="checkbox" id="transcriptShowOnMsg" checked />
+                            </div>
+                        </div>
                     </div>
                     <div class="transcription-header-options">
                         <button id="transcriptionGhostBtn" class="fas fa-circle-half-stroke"></button>
@@ -776,6 +782,8 @@ access to use this app.
                 </div>
             </section>
         </section>
+
+        <div id="transcriptionPopup" class="transcriptio-popup"></div>
 
         <section id="lobby" class="fadein center hidden">
             <header id="lobbyHeader" class="lobby-header">

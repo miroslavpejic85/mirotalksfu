@@ -210,6 +210,7 @@ function initClient() {
         setTippy('transcriptionMaxBtn', 'Maximize', 'bottom');
         setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
         setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
+        setTippy('transcriptShowOnMsg', 'Show transcript on new message comes', 'bottom');
         setTippy('transcriptionGhostBtn', 'Toggle transparent background', 'bottom');
         setTippy('transcriptionSaveBtn', 'Save', 'bottom');
         setTippy('transcriptionCleanBtn', 'Clean', 'bottom');
@@ -1720,6 +1721,14 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    // transcript
+    transcriptShowOnMsg.onchange = (e) => {
+        transcription.showOnMessage = e.currentTarget.checked;
+        rc.roomMessage('showTranscript', transcription.showOnMessage);
+        lsSettings.show_transcript_on_msg = transcription.showOnMessage;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
@@ -1873,10 +1882,12 @@ function handleRoomEmojiPicker() {
 
 function loadSettingsFromLocalStorage() {
     rc.showChatOnMessage = lsSettings.show_chat_on_msg;
+    transcription.showOnMessage = lsSettings.show_transcript_on_msg;
     rc.speechInMessages = lsSettings.speech_in_msg;
     isPitchBarEnabled = lsSettings.pitch_bar;
     isSoundEnabled = lsSettings.sounds;
     showChatOnMsg.checked = rc.showChatOnMessage;
+    transcriptShowOnMsg.checked = transcription.showOnMessage;
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;

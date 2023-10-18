@@ -80,6 +80,7 @@ class Transcription {
         this.transcripts = [];
         this.isBgTransparent = false;
         this.isPinned = false;
+        this.showOnMessage = true;
     }
 
     isSupported() {
@@ -166,7 +167,13 @@ class Transcription {
         const time_stamp = rc.getTimeNow();
         const avatar_image = rc.genAvatarSvg(peer_name, 32);
 
-        if (this.isHidden()) this.toggle();
+        if (this.isHidden()) {
+            if (this.showOnMessage) {
+                this.toggle();
+            } else {
+                this.handleTranscriptionPopup(transcriptionData);
+            }
+        }
 
         const msgHTML = `
         <div class="msg-transcription left-msg-transcription">
@@ -188,6 +195,21 @@ class Transcription {
             caption: text_data,
         });
         rc.sound('transcript');
+    }
+
+    handleTranscriptionPopup(transcriptionData, duration = 5000) {
+        const transcriptionDisplay = document.createElement('div');
+        transcriptionDisplay.className = 'animate__animated animate__fadeInUp';
+        transcriptionDisplay.style.padding = '10px';
+        transcriptionDisplay.style.fontSize = '1rem';
+        transcriptionDisplay.style.color = '#FFF';
+        transcriptionDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.5)';
+        transcriptionDisplay.style.borderRadius = '10px';
+        transcriptionDisplay.innerText = `${transcriptionData.peer_name}: ${transcriptionData.text_data}`;
+        transcriptionPopup.appendChild(transcriptionDisplay);
+        setTimeout(() => {
+            transcriptionDisplay.remove();
+        }, duration);
     }
 
     isHidden() {
