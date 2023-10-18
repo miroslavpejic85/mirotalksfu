@@ -169,7 +169,7 @@ class Transcription {
         if (this.isHidden()) this.toggle();
 
         const msgHTML = `
-        <div class="msg left-msg">
+        <div class="msg-transcription left-msg-transcription">
             <img class="msg-transcription-img" src="${avatar_image}" />
             <div class="msg-transcription-bubble">
                 <div class="msg-transcription-info">
