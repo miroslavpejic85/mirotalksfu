@@ -205,6 +205,16 @@ function initClient() {
         setTippy('chatTogglePin', 'Toggle pin', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
+        setTippy('transcriptionCloseBtn', 'Close', 'bottom');
+        setTippy('transcriptionTogglePinBtn', 'Toggle pin', 'bottom');
+        setTippy('transcriptionMaxBtn', 'Maximize', 'bottom');
+        setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
+        setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
+        setTippy('transcriptionGhostBtn', 'Toggle transparent background', 'bottom');
+        setTippy('transcriptionSaveBtn', 'Save', 'bottom');
+        setTippy('transcriptionCleanBtn', 'Clean', 'bottom');
+        setTippy('transcriptionSpeechStart', 'Start transcription', 'top');
+        setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
         setTippy('participantsCloseBtn', 'Close', 'right');
         setTippy('participantsSaveBtn', 'Save participants info', 'right');
     }
