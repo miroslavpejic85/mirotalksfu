@@ -77,10 +77,8 @@ function leaveMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
                             video_call_status: 'completed',
                             updated_at: now_time
                         },
-                        test:1234
-                    },{ merge: true })
-
-                    console.log('upadteedm,n')
+                        test: 1234
+                    }, { merge: true })
                 }
             }
         })
