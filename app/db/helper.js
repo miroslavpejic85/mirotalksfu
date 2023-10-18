@@ -41,7 +41,7 @@ function joinMeetingUpdate({firestoreDB, room_id, user_id, user_name}){
         let now_time = new Date().getTime() / 1000
 
         video_conference_user_ref.set({
-            user_name: user_name,
+            user_name: user_name || '',
             join_at: now_time,
             updated_at: now_time,
             activity_time_lines : FieldValue.arrayUnion({
