@@ -67,14 +67,20 @@ function leaveMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
             })
         }, { merge: true })
 
-        firestoreDB.collection("user").doc(user_id).get().then((user_ref_doc) => {
+        firestoreDB.collection("users").doc(user_id).get().then((user_ref_doc) => {
             if (user_ref_doc) {
                 user_room_data = user_ref_doc.data()
-                if (user_room_data.meeting_id === room_id) {
-                    firestoreDB.collection("user").doc(user_id).update({
-                        video_call_status: 'completed',
-                        updated_at: now_time
-                    })
+                console.log(user_room_data, 'user_room_data')
+                if (user_room_data?.video_conference?.meeting_id === room_id) {
+                    firestoreDB.collection("users").doc(user_id).set({
+                        video_conference: {
+                            video_call_status: 'completed',
+                            updated_at: now_time
+                        },
+                        test:1234
+                    },{ merge: true })
+
+                    console.log('upadteedm,n')
                 }
             }
         })

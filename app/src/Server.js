@@ -277,8 +277,8 @@ function startServer() {
                 
                 if (meeting_id && user_id){
                     meetingData['is_presenter'] = false;
-                    res.cookie('meeting_data', JSON.stringify(meetingData), {maxAge: 5 * 60 * 60 * 1000,sameSite:'none'});
-                    res.cookie('cogo_auth_token', auth,{maxAge: 5 * 60 * 60 * 1000,sameSite:'none'})
+                    res.cookie('meeting_data', JSON.stringify(meetingData), {maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true});
+                    res.cookie('cogo_auth_token', auth,{maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true})
 
                     return res.redirect('/in_meeting')
                 }
@@ -295,16 +295,21 @@ function startServer() {
     // in a meeting
     app.get('/in_meeting', async (req, res) => {
         try{
+            
             const meeting_cookies = req.cookies?.meeting_data;
             const cogo_auth_token = req.cookies?.cogo_auth_token
+            console.log('video_call_room_data', meeting_cookies, cogo_auth_token)
+
 
             if (meeting_cookies){
                 const meeting_data = JSON.parse(meeting_cookies || '{}');
                 const {meeting_id,user_id,user_name = ''} = meeting_data;
+
                 if (meeting_id && user_id) {
                     const get_meeting_room = await getMeetingRoom({ firestoreDB, room_id: meeting_id });
                     const video_call_room_data = get_meeting_room.data();
                     const user_list = video_call_room_data?.user_ids || [];
+
 
                     meeting_data['is_presenter'] = 'false';
                     if (user_id === video_call_room_data.performed_by_id) {
@@ -318,7 +323,8 @@ function startServer() {
                     if (!video_call_room_data?.is_private){
                         res.cookie('meeting_data', JSON.stringify(meeting_data), {
                             maxAge: 5 * 60 * 60 * 1000,
-                            sameSite:'none'
+                            sameSite:'none',
+                            secure: true
                         });
                         joinMeetingUpdate({ firestoreDB, room_id: meeting_id, user_id, user_name });
                         return res.sendFile(views.room);
@@ -332,7 +338,8 @@ function startServer() {
                     if (isAuthenticated) {
                         res.cookie('meeting_data', JSON.stringify(meeting_data), {
                             maxAge: 5 * 60 * 60 * 1000,
-                            sameSite:'none'
+                            sameSite:'none',
+                            secure: true
                         });
                         joinMeetingUpdate({firestoreDB,room_id: meeting_id,user_id,user_name});
                         return res.sendFile(views.room);
