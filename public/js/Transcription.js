@@ -365,7 +365,7 @@ class Transcription {
         try {
             this.transcriptionRunning = true;
             this.transcription.lang = transcriptionDialect.value;
-            this.selectEnabled(false);
+            this.selectDisabled(true);
             this.transcription.start();
         } catch (error) {
             this.transcriptionRunning = false;
@@ -376,12 +376,12 @@ class Transcription {
 
     stop() {
         this.transcriptionRunning = false;
-        this.selectEnabled();
+        this.selectDisabled(false);
         this.transcription.stop();
     }
 
-    selectEnabled(enabled = true) {
-        transcriptionLanguage.disabled = enabled;
-        transcriptionDialect.disabled = enabled;
+    selectDisabled(disabled = false) {
+        transcriptionLanguage.disabled = disabled;
+        transcriptionDialect.disabled = disabled;
     }
 }
