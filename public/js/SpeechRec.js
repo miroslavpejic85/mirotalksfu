@@ -8,6 +8,11 @@ let isVoiceCommandSupported = browserLanguage.includes('en-');
 
 const speechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
+/**
+ * Enable real-time voice recognition in the chat, allowing you to execute commands using your voice.
+ * Note: Currently, it supports only the English language.
+ * TODO make it multi languages...
+ */
 const commands = {
     shareRoom: 'room',
     hideMe: 'hide me',
@@ -23,6 +28,7 @@ const commands = {
     chatOn: 'open the chat',
     chatSend: 'send',
     chatOff: 'close the chat',
+    toggleTr: 'toggle transcription',
     chatGPTOn: 'open chatGPT',
     chatGPTOff: 'close chatGPT',
     whiteboardOn: 'open the whiteboard',
@@ -84,34 +90,37 @@ if (speechRecognition) {
     console.log('Speech recognition', recognition);
 
     recognition.onstart = function () {
-        console.log('Start speech recognition');
+        console.log('Speech recognition started');
         hide(chatSpeechStartButton);
         show(chatSpeechStopButton);
         setColor(chatSpeechStopButton, 'lime');
+        userLog('info', 'Speech recognition started', 'top-end');
     };
 
     recognition.onresult = (e) => {
         let current = e.resultIndex;
         let transcript = e.results[current][0].transcript;
-
-        if (transcript.trim().toLowerCase() != commands.chatSend) {
-            chatMessage.value = transcript;
-        }
-
-        if (isVoiceCommandsEnabled && isVoiceCommandSupported) {
-            execVoiceCommands(transcript);
+        if (transcript) {
+            if (transcript.trim().toLowerCase() != commands.chatSend) {
+                chatMessage.value = transcript;
+            }
+            if (isVoiceCommandsEnabled && isVoiceCommandSupported) {
+                execVoiceCommands(transcript);
+            }
         }
     };
 
     recognition.onerror = function (event) {
-        console.warn('Speech recognition error', event.error);
+        console.error('Speech recognition error', event.error);
+        userLog('error', `Speech recognition error ${event.error}`, 'top-end', 6000);
     };
 
     recognition.onend = function () {
-        console.log('Stop speech recognition');
+        console.log('Speech recognition stopped');
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
         setColor(chatSpeechStopButton, 'white');
+        userLog('info', 'Speech recognition stopped', 'top-end');
     };
 
     isWebkitSpeechRecognitionSupported = true;
@@ -120,13 +129,13 @@ if (speechRecognition) {
     console.warn('This browser not supports webkitSpeechRecognition');
 }
 
-function startSpeech(action) {
-    if (action) {
-        recognition.lang = browserLanguage;
-        recognition.start();
-    } else {
-        recognition.stop();
-    }
+function startSpeech() {
+    recognition.lang = browserLanguage;
+    recognition.start();
+}
+
+function stopSpeech() {
+    recognition.stop();
 }
 
 function execVoiceCommands(transcript) {
@@ -186,6 +195,9 @@ function execVoiceCommands(transcript) {
         case commands.chatOff:
             printCommand(commands.chatOff);
             chatCloseButton.click();
+            break;
+        case commands.toggleTr:
+            transcriptionButton.click();
             break;
         case commands.whiteboardOn:
             printCommand(commands.whiteboardOn);
@@ -342,6 +354,8 @@ function execVoiceCommands(transcript) {
             chatSpeechStopButton.click();
             break;
         // ...
+        default:
+            break;
     }
 }
 

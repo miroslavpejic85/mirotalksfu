@@ -68,6 +68,11 @@
     --btns-width: 320px;
     --btns-flex-direction: row;
     */
+
+    --transcription-height: 680px;
+    --transcription-width: 420px;
+    --transcription-bg: radial-gradient(#393939, #000000);
+
     --vmi-wh: 15vw;
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
@@ -513,6 +518,142 @@ th {
 
 .inactive {
     background-color: #ddd;
+}
+
+/*--------------------------------------------------------------
+# Transcription Room
+--------------------------------------------------------------*/
+
+.transcription-room {
+    z-index: 5;
+    display: none;
+    position: fixed;
+    height: var(--transcription-height);
+    width: var(--transcription-width);
+    min-height: var(--transcription-height);
+    min-width: var(--transcription-width);
+    background: var(--transcription-bg);
+    border: var(--border);
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    resize: both;
+    overflow: hidden;
+}
+
+.transcription {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-flow: column wrap;
+    justify-content: space-between;
+    background: var(--transcription-bg);
+}
+
+/*--------------------------------------------------------------
+#  Transcription room header
+--------------------------------------------------------------*/
+
+.transcription-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background: rgba(0, 0, 0, 0.2);
+    color: #666;
+    cursor: move;
+}
+
+.transcription-header-title button,
+.transcription-header-options button {
+    border: none;
+    transition: all 0.3s ease-in-out;
+    background: rgba(0, 0, 0, 0.2);
+    color: #fff;
+    border-radius: 5px;
+    transition: background 0.23s;
+}
+
+/*--------------------------------------------------------------
+# Transcription room output area
+--------------------------------------------------------------*/
+
+.transcription-chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    background: var(--transcription-bg);
+    max-width: 100%;
+}
+
+.transcription-chat::-webkit-scrollbar {
+    width: 5px;
+}
+.transcription-chat::-webkit-scrollbar-track {
+    background: transparent;
+}
+.transcription-chat::-webkit-scrollbar-thumb {
+    background: black;
+}
+
+/*--------------------------------------------------------------
+# Transcription room left side
+--------------------------------------------------------------*/
+
+.left-msg .msg-transcription-bubble {
+    background: var(--left-msg-bg);
+    border-bottom-left-radius: 0;
+    color: #fff;
+    width: var(--msger-bubble-width);
+}
+
+.left-msg .msg-transcription-img {
+    margin: 0px 5px 5px 0px;
+}
+
+/*--------------------------------------------------------------
+# Transcription bubble text
+--------------------------------------------------------------*/
+
+.msg-transcription-bubble {
+    padding: 15px;
+    border-radius: 15px;
+}
+
+.msg-transcription-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.msg-transcription-info-name {
+    margin-right: 10px;
+    font-weight: bold;
+}
+
+.msg-transcription-info-time {
+    font-size: 0.85em;
+}
+
+.msg-transcription-text {
+    display: inline;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
+    hyphens: auto;
+}
+
+/*--------------------------------------------------------------
+# Transcription room input area
+--------------------------------------------------------------*/
+
+.transcription-inputarea {
+    display: inline-flex;
+    padding: 10px;
+    border: none;
+    border: var(--border);
+}
+
+.transcription-inputarea select {
+    margin: 0 5px;
 }
 
 /*--------------------------------------------------------------

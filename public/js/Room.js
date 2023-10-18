@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.9
+ * @version 1.1.0
  *
  */
 
@@ -137,6 +137,8 @@ let scriptProcessor = null;
 
 const RoomURL = window.location.origin + '/join/' + room_id;
 
+let transcription;
+
 // ####################################################
 // INIT ROOM
 // ####################################################
@@ -208,6 +210,10 @@ function initClient() {
     }
     setupWhiteboard();
     initEnumerateDevices();
+
+    // Transcription
+    transcription = new Transcription();
+    transcription.init();
 }
 
 // ####################################################
@@ -232,6 +238,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('roomEmojiPicker', 'Toggle emoji reaction', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
+        setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('participantsButton', 'Toggle participants', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
@@ -917,6 +924,7 @@ function joinRoom(peer_name, room_id) {
             isScreenAllowed,
             joinRoomWithScreen,
             isSpeechSynthesisSupported,
+            transcription,
             roomIsReady,
         );
         handleRoomClientEvents();
@@ -943,11 +951,15 @@ function roomIsReady() {
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
     BUTTONS.chat.chatGPTButton && show(chatGPTButton);
     BUTTONS.chat.chatShareFileButton && show(chatShareFileButton);
-    if (isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton) {
-        show(chatSpeechStartButton);
-    } else {
-        BUTTONS.chat.chatSpeechStartButton = false;
-    }
+
+    isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton
+        ? show(chatSpeechStartButton)
+        : (BUTTONS.chat.chatSpeechStartButton = false);
+
+    transcription.isSupported() && BUTTONS.main.transcriptionButton
+        ? show(transcriptionButton)
+        : (BUTTONS.main.transcriptionButton = false);
+
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
@@ -957,6 +969,10 @@ function roomIsReady() {
         hide(chatTogglePin);
         hide(chatMaxButton);
         hide(chatMinButton);
+        transcription.maximize();
+        hide(transcriptionTogglePinBtn);
+        hide(transcriptionMaxBtn);
+        hide(transcriptionMinBtn);
     } else {
         rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
@@ -966,6 +982,7 @@ function roomIsReady() {
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
         rc.makeDraggable(lobby, lobbyHeader);
+        rc.makeDraggable(transcriptionRoom, transcriptionHeader);
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             if (BUTTONS.main.startScreenButton) {
                 show(startScreenButton);
@@ -1150,6 +1167,30 @@ function handleButtons() {
     chatButton.onclick = () => {
         rc.toggleChat();
     };
+    transcriptionButton.onclick = () => {
+        transcription.toggle();
+    };
+    transcriptionCloseBtn.onclick = () => {
+        transcription.toggle();
+    };
+    transcriptionTogglePinBtn.onclick = () => {
+        transcription.togglePinUnpin();
+    };
+    transcriptionMaxBtn.onclick = () => {
+        transcription.maximize();
+    };
+    transcriptionMinBtn.onclick = () => {
+        transcription.minimize();
+    };
+    transcriptionGhostBtn.onclick = () => {
+        transcription.toggleBg();
+    };
+    transcriptionSaveBtn.onclick = () => {
+        transcription.save();
+    };
+    transcriptionCleanBtn.onclick = () => {
+        transcription.delete();
+    };
     chatGhostButton.onclick = (e) => {
         rc.chatToggleBg();
     };
@@ -1195,10 +1236,16 @@ function handleButtons() {
         fileShareButton.click();
     };
     chatSpeechStartButton.onclick = () => {
-        startSpeech(true);
+        startSpeech();
     };
     chatSpeechStopButton.onclick = () => {
-        startSpeech(false);
+        stopSpeech();
+    };
+    transcriptionSpeechStart.onclick = () => {
+        transcription.start();
+    };
+    transcriptionSpeechStop.onclick = () => {
+        transcription.stop();
     };
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
@@ -1787,7 +1834,11 @@ function handleRoomEmojiPicker() {
 
     function sendEmojiToRoom(data) {
         console.log('Selected Emoji:', data.native);
-        const cmd = `roomEmoji|${peer_name}|${data.native}`;
+        const cmd = {
+            type: 'roomEmoji',
+            peer_name: peer_name,
+            emoji: data.native,
+        };
         if (rc.thereAreParticipants()) {
             rc.emitCmd(cmd);
         }
@@ -2907,6 +2958,7 @@ function setTheme() {
         case 'dark':
             swalBackground = 'radial-gradient(#393939, #000000)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
+            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--right-msg-bg', '#056162');
@@ -2921,6 +2973,7 @@ function setTheme() {
         case 'grey':
             swalBackground = 'radial-gradient(#666, #333)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
+            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--right-msg-bg', '#056162');
@@ -2935,6 +2988,7 @@ function setTheme() {
         case 'green':
             swalBackground = 'radial-gradient(#003934, #001E1A)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--left-msg-bg', '#003934');
             document.documentElement.style.setProperty('--right-msg-bg', '#001E1A');
@@ -2949,6 +3003,7 @@ function setTheme() {
         case 'blue':
             swalBackground = 'radial-gradient(#306bac, #141B41)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#306bac, #141B41)');
+            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--left-msg-bg', '#306bac');
             document.documentElement.style.setProperty('--right-msg-bg', '#141B41');
@@ -2963,6 +3018,7 @@ function setTheme() {
         case 'red':
             swalBackground = 'radial-gradient(#69140E, #3C1518)';
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
             document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');

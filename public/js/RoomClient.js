@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.0.9
+ * @version 1.1.0
  *
  */
 
@@ -136,6 +136,7 @@ class RoomClient {
         isScreenAllowed,
         joinRoomWithScreen,
         isSpeechSynthesisSupported,
+        transcription,
         successCallback,
     ) {
         this.localAudioEl = localAudioEl;
@@ -195,6 +196,8 @@ class RoomClient {
         this._isRecording = false;
 
         this.RoomPassword = false;
+
+        this.transcription = transcription;
 
         // File transfer settings
         this.fileToSend = null;
@@ -2734,6 +2737,9 @@ class RoomClient {
         if (this.isChatPinned) {
             this.chatPin();
         }
+        if (this.transcription.isPin()) {
+            this.transcription.pinned();
+        }
     }
 
     adaptVideoObjectFit(index) {
@@ -2782,7 +2788,11 @@ class RoomClient {
                 this.sound('click');
                 isVideoPrivacyActive = !isVideoPrivacyActive;
                 this.setVideoPrivacyStatus(this.peer_id, isVideoPrivacyActive);
-                this.emitCmd(`privacy|${this.peer_id}|${isVideoPrivacyActive}`);
+                this.emitCmd({
+                    type: 'privacy',
+                    peer_id: this.peer_id,
+                    active: isVideoPrivacyActive,
+                });
             });
         }
     }
@@ -2881,6 +2891,9 @@ class RoomClient {
     }
 
     toggleChatPin() {
+        if (transcription.isPin()) {
+            return userLog('info', 'Please unpin the transcription that appears to be currently pinned', 'top-end');
+        }
         this.isChatPinned ? this.chatUnpin() : this.chatPin();
         this.sound('click');
     }
@@ -4733,20 +4746,20 @@ class RoomClient {
     // HANDLE COMMANDS
     // ####################################################
 
-    emitCmd(data) {
-        this.socket.emit('cmd', data);
+    emitCmd(cmd) {
+        this.socket.emit('cmd', cmd);
     }
 
-    handleCmd(data) {
-        // cmd|foo|bar|....
-        const words = data.split('|');
-        let cmd = words[0];
-        switch (cmd) {
+    handleCmd(cmd) {
+        switch (cmd.type) {
             case 'privacy':
-                this.setVideoPrivacyStatus(words[1], words[2] == 'true');
+                this.setVideoPrivacyStatus(cmd.peer_id, cmd.active);
                 break;
             case 'roomEmoji':
-                this.handleRoomEmoji(words);
+                this.handleRoomEmoji(cmd);
+                break;
+            case 'transcript':
+                this.transcription.handleTranscript(cmd);
                 break;
             default:
                 break;
@@ -4754,7 +4767,7 @@ class RoomClient {
         }
     }
 
-    handleRoomEmoji(words, duration = 5000) {
+    handleRoomEmoji(cmd, duration = 5000) {
         const userEmoji = document.getElementById(`userEmoji`);
         if (userEmoji) {
             const emojiDisplay = document.createElement('div');
@@ -4764,7 +4777,7 @@ class RoomClient {
             emojiDisplay.style.color = '#FFF';
             emojiDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
             emojiDisplay.style.borderRadius = '10px';
-            emojiDisplay.innerText = `${words[2]} ${words[1]}`;
+            emojiDisplay.innerText = `${cmd.emoji} ${cmd.peer_name}`;
             userEmoji.appendChild(emojiDisplay);
             setTimeout(() => {
                 emojiDisplay.remove();

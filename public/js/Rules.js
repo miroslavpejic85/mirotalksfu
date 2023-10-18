@@ -17,6 +17,7 @@ const BUTTONS = {
         startScreenButton: true,
         swapCameraButton: true,
         chatButton: true,
+        transcriptionButton: true,
         participantsButton: true,
         whiteboardButton: true,
         emojiRoomButton: true,

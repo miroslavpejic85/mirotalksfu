@@ -80,6 +80,7 @@
         <script defer src="../js/Room.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/SpeechRec.js"></script>
+        <script defer src="../js/Transcription.js"></script>
         <script defer src="../js/VideoGrid.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/detectrtc@1.4.1/DetectRTC.min.js"></script>
@@ -148,6 +149,7 @@ access to use this app.
             <button id="lowerHandButton" class="hidden"><i id="lowerHandIcon" class="fas fa-hand-paper"></i></button>
             <button id="roomEmojiPicker" class="hidden"><i class="fas fa-face-smile"></i></button>
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
+            <button id="transcriptionButton" class="hidden"><i class="fas fa-closed-captioning"></i></button>
             <button id="participantsButton" class="hidden"><i class="fas fa-users"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
@@ -746,6 +748,32 @@ access to use this app.
                     </button>
                 </div>
                 <div id="chatEmoji" class="hidden fadein chatEmojiPicker"></div>
+            </section>
+        </section>
+
+        <section id="transcriptionRoom" class="transcription-room fadein">
+            <section id="transcriptionSection" class="transcription">
+                <header id="transcriptionHeader" class="transcription-header">
+                    <div class="transcription-header-title">
+                        <button id="transcriptionCloseBtn" class="fas fa-times"></button>
+                        <button id="transcriptionTogglePinBtn" class="fas fa-map-pin"></button>
+                        <button id="transcriptionMaxBtn" class=""><i class="fas fa-expand"></i></button>
+                        <button id="transcriptionMinBtn" class="hidden"><i class="fas fa-compress"></i></button>
+                        <button id="transcriptionSpeechStatus" class="fas fa-microphone-alt"></button>
+                    </div>
+                    <div class="transcription-header-options">
+                        <button id="transcriptionGhostBtn" class="fas fa-circle-half-stroke"></button>
+                        <button id="transcriptionSaveBtn" class="fas fa-save"></button>
+                        <button id="transcriptionCleanBtn" class="fas fa-trash"></button>
+                    </div>
+                </header>
+                <main id="transcriptionChat" class="transcription-chat"></main>
+                <div class="transcription-inputarea">
+                    <select id="transcriptionLanguage" class="form-select text-light bg-dark"></select>
+                    <select id="transcriptionDialect" class="form-select text-light bg-dark"></select>
+                    <button id="transcriptionSpeechStart" class=""><i class="fas fa-play"></i></button>
+                    <button id="transcriptionSpeechStop" class="hidden"><i class="fas fa-stop"></i></button>
+                </div>
             </section>
         </section>
 
