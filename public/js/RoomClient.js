@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.0
+ * @version 1.1.1
  *
  */
 
@@ -62,6 +62,7 @@ const image = {
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
+    recording: '../images/recording.png',
     delete: '../images/delete.png',
     locked: '../images/locked.png',
     mute: '../images/mute.png',
@@ -3452,10 +3453,34 @@ class RoomClient {
 
             this.isMobileDevice
                 ? this.startMobileRecording(options, audioMixerTracks)
-                : this.startDesktopRecording(options, audioMixerTracks);
+                : this.recordingOptions(options, audioMixerTracks);
         } catch (err) {
             this.handleRecordingError('Exception while creating MediaRecorder: ' + err);
         }
+    }
+
+    recordingOptions(options, audioMixerTracks) {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            //imageUrl: image.recording,
+            title: 'Recording options',
+            showDenyButton: true,
+            showCancelButton: true,
+            cancelButtonColor: 'red',
+            denyButtonColor: 'green',
+            confirmButtonText: `Camera`,
+            denyButtonText: `Screen/Window`,
+            cancelButtonText: `Cancel`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.startMobileRecording(options, audioMixerTracks);
+            } else if (result.isDenied) {
+                this.startDesktopRecording(options, audioMixerTracks);
+            }
+        });
     }
 
     startMobileRecording(options, audioMixerTracks) {
@@ -3491,7 +3516,7 @@ class RoomClient {
     }
 
     startDesktopRecording(options, audioMixerTracks) {
-        // On desktop devices, record screen/window... + all audio tracks
+        // On desktop devices, record camera or screen/window... + all audio tracks
         const constraints = { video: true };
         navigator.mediaDevices
             .getDisplayMedia(constraints)
@@ -3500,6 +3525,7 @@ class RoomClient {
                 console.log('Screen video tracks --->', screenTracks);
 
                 const combinedTracks = [];
+
                 if (Array.isArray(screenTracks)) {
                     combinedTracks.push(...screenTracks);
                 }
