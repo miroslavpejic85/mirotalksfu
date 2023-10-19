@@ -28,7 +28,7 @@ function updateUserCount({ firestoreDB, user_list = [], room_id, leaving_user_li
             }
         }
 
-        for (user_id in leaving_user_list) {
+        for (user_id of leaving_user_list) {
             in_meeting_user_actvity[user_id] = {
                 video_call_status: 'completed',
                 updated_at: now_time
@@ -40,7 +40,7 @@ function updateUserCount({ firestoreDB, user_list = [], room_id, leaving_user_li
             users_in_meeting: users_in_meeting,
             user_count_in_meeting: user_list.length,
             in_meeting_user_actvity: in_meeting_user_actvity
-        })
+        }, { merge: true })
     }
 }
 
