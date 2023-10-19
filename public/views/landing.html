@@ -267,6 +267,15 @@
 
         <script defer src="../js/landing.js"></script>
         <!-- <script defer src="../js/newRoom.js"></script> -->
+        <script>
+            // if it is open by some window.open()
+            try {
+                window.close()
+            }
+            catch(err) {
+                console.log(err)
+            }
+        </script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>
