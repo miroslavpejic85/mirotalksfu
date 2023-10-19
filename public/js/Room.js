@@ -789,8 +789,8 @@ function checkMedia() {
         let queryPeerVideo = video === '1' || video === 'true';
         if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
     }
-    elemDisplay('tabVideoDevicesBtn', isVideoAllowed);
-    elemDisplay('tabAudioDevicesBtn', isAudioAllowed);
+    // elemDisplay('tabVideoDevicesBtn', isVideoAllowed);
+    // elemDisplay('tabAudioDevicesBtn', isAudioAllowed);
 
     console.log('Direct join', {
         audio: isAudioAllowed,
