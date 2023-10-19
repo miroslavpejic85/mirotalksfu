@@ -12,7 +12,7 @@ function updateMeetingRoom({ firestoreDB, room_id, data_to_update }) {
     }
 }
 
-function updateUserCount({ firestoreDB, user_list = [], room_id }) {
+function updateUserCount({ firestoreDB, user_list = [], room_id, leaving_user_list = [] }) {
     if (room_id && user_list) {
         let video_conference_ref = firestoreDB.collection("video_conference").doc(room_id);
         let now_time = new Date().getTime() / 1000
@@ -27,10 +27,18 @@ function updateUserCount({ firestoreDB, user_list = [], room_id }) {
             }
         }
 
-        video_conference_ref.update({
+        for (user_id in leaving_user_list) {
+            in_meeting_user_actvity[user_id] = {
+                video_call_status: 'completed',
+                updated_at: now_time
+            }
+        }
+
+        video_conference_ref.set({
             updated_at: now_time,
             users_in_meeting: users_in_meeting,
-            user_count_in_meeting: user_list.length
+            user_count_in_meeting: user_list.length,
+            in_meeting_user_actvity: in_meeting_user_actvity
         })
     }
 }

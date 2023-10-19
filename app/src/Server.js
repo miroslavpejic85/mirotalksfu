@@ -1248,7 +1248,7 @@ function startServer() {
             room.removePeer(socket.id);
 
             const peers_list_in_meeting = room.getUsersDataInMeeting();
-            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
+            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id, leaving_user_list:[peerUuid]});
 
             if (room.getPeers().size === 0) {
                 if (room.isLocked()) {
@@ -1287,7 +1287,7 @@ function startServer() {
             await room.removePeer(socket.id);
 
             const peers_list_in_meeting = room.getUsersDataInMeeting();
-            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
+            updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id, leaving_user_list: [peerUuid]});
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
