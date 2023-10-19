@@ -18,6 +18,7 @@ function updateUserCount({ firestoreDB, user_list = [], room_id, leaving_user_li
         let now_time = new Date().getTime() / 1000
 
         let users_in_meeting = {}
+        let in_meeting_user_actvity = {}
 
         for (user of user_list) {
             if (users_in_meeting[user.user_id]) {
