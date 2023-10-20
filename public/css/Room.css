@@ -46,7 +46,7 @@
     --wb-bg: radial-gradient(#393939, #000000);
     --select-bg: #2c2c2c;
     --left-msg-bg: #252d31;
-    --right-msg-bg: #056162;
+    --right-msg-bg: #c1bcb2;
     --private-msg-bg: #6b1226;
     --box-shadow: 1px 0px 0px 0px rgb(237, 228, 228);
     --btns-hover-scale: scale(1.1);
@@ -564,6 +564,10 @@ th {
     background: var(--msger-bg);
 }
 
+.msger button{
+    color: #343232;
+}
+
 /*--------------------------------------------------------------
 # Chat room header
 --------------------------------------------------------------*/
@@ -608,7 +612,8 @@ th {
 }
 
 .chat-msger::-webkit-scrollbar-thumb {
-    background: black;
+    background: rgb(231, 230, 230);
+    width: 1px;
     /*aqua;*/
 }
 
@@ -627,21 +632,25 @@ th {
 --------------------------------------------------------------*/
 
 .left-msg .msg-bubble {
-    background: var(--left-msg-bg);
+    background: #fff;
     border-bottom-left-radius: 0;
-    color: #fff;
+    color: black;
     width: var(--msger-bubble-width);
 }
 
 .left-msg .msg-bubble-private {
-    background: var(--private-msg-bg);
+    background: #c7c4c4;
     border-bottom-left-radius: 0;
-    color: #fff;
+    color: black;
     width: var(--msger-bubble-width);
 }
 
 .left-msg .msg-img {
     margin: 0px 5px 5px 0px;
+}
+
+.left-msg .msg-bubble button{
+    color: #343232;
 }
 
 /*--------------------------------------------------------------
@@ -653,21 +662,25 @@ th {
 }
 
 .right-msg .msg-bubble {
-    background: var(--right-msg-bg);
+    background: #fff;
     border-bottom-right-radius: 0;
-    color: #fff;
+    color: black !important;
     width: var(--msger-bubble-width);
 }
 
 .right-msg .msg-bubble-private {
-    background: var(--private-msg-bg);
+    background: #bfbcbc;
     border-bottom-right-radius: 0;
-    color: #fff;
+    color: black !important;
     width: var(--msger-bubble-width);
 }
 
 .right-msg .msg-img {
     margin: 0px 0px 5px 5px;
+}
+
+.right-msg .msg-bubble button{
+    color: #343232;
 }
 
 /*--------------------------------------------------------------
@@ -738,7 +751,7 @@ a:hover {
     padding: 10px;
     height: 43px;
     font-size: 14px;
-    color: #fff;
+    color: #1e1d1d;
     border: none;
     border: var(--border);
     border-top-left-radius: 10px;

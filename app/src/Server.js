@@ -1395,8 +1395,6 @@ function startServer() {
         try {
             if (typeof presenters[room_id] === 'object' && presenters[room_id].length > 0){
                 const presenter_users = presenters[room_id].filter(user => user?.peer_uuid === peer_uuid && user?.peer_name === peer_name && user?.is_presenter === true)
-
-                log.error('inside presenter -> presenter_users',presenter_users)
                 isPresenter = typeof presenter_users === 'object' && presenter_users.length > 0 ? true : false
             }
 
