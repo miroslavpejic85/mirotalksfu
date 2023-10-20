@@ -821,7 +821,7 @@ function checkMedia() {
 }
 
 // ####################################################
-// SHARE ROOM
+// Add Partitions
 // ####################################################
 
 async function addParticipants(isAdd = false){
@@ -856,7 +856,9 @@ async function addParticipants(isAdd = false){
     }
 }
 
-
+// ####################################################
+// SHARE ROOM
+// ####################################################
 
 async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
