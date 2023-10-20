@@ -964,20 +964,19 @@ function startServer() {
             const peers_list_in_meeting = room.getUsersDataInMeeting();
             updateUserCount({ firestoreDB, user_list: peers_list_in_meeting, room_id: socket.room_id });
 
-            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
+            if (!(socket.room_id in presenters)) presenters[socket.room_id] = [];
 
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
             const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
             const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false;
 
             if (is_presenter) {
-                presenters[socket.room_id] = {...(presenters[socket.room_id] || []), ...[{
+                presenters[socket.room_id].push({
                     peer_ip: peer_ip,
                     peer_name: peer_name,
                     peer_uuid: peer_uuid,
                     is_presenter: is_presenter,
-                }] }
-
+                })
                 log.debug('[Join] - Connected presenters grp by roomId', presenters);
             }
 
@@ -1394,10 +1393,11 @@ function startServer() {
         if (typeof presenters[room_id] === 'undefined' || presenters[room_id] === null) return false;
 
         try {
-            if (typeof presenters[room_id] === 'object' && presenters[room_id].length > 1){
+            if (typeof presenters[room_id] === 'object' && presenters[room_id].length > 0){
                 const presenter_users = presenters[room_id].filter(user => user?.peer_uuid === peer_uuid && user?.peer_name === peer_name && user?.is_presenter === true)
 
-                isPresenter = typeof presenter_users === 'object' && presenter_users.length > 1 ? true : false
+                log.error('inside presenter -> presenter_users',presenter_users)
+                isPresenter = typeof presenter_users === 'object' && presenter_users.length > 0 ? true : false
             }
 
         } catch (err) {
