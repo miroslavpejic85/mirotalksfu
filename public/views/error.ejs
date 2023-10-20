@@ -1,9 +1,7 @@
 <!doctype html>
 <html lang="en" class="no-js">
     <head>
-        <!-- Title and Icon -->
-
-        <title>Cogo One, Free Video Calls, Messaging and Screen Sharing</title>
+        <title>Cogo Meet</title>
         <link rel="shortcut icon" href="https://admin.cogoport.com/v2/favicon.ico" />
         <link rel="apple-touch-icon" href="https://admin.cogoport.com/v2/favicon.ico" />
 
@@ -13,11 +11,6 @@
         <meta http-equiv="X-UA-Compatible" content="IE=edge" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <meta
-            name="description"
-            content="Cogo meet Join Meeting Using Simple Link"
-        />
-
         <meta property="og:type" content="app-webrtc" />
         <meta property="og:site_name" content="Cogo One" />
         <meta property="og:title" content="Click the link to make a call." />
@@ -25,12 +18,10 @@
             property="og:description"
             content="Cogo One calling provides real-time video calls, messaging and screen sharing."
         />
-        <meta property="og:image" content="" />
-
+         
         <!-- StyleSheet -->
 
         <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
-        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
         <link rel="stylesheet" href="../css/landing.css" />
 
         <!-- Js scripts -->
@@ -38,6 +29,9 @@
         <script async src="../js/Umami.js"></script>
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+
+        <!-- xss -->
+
         <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
     </head>
     <body class="is-boxed has-animations">
@@ -46,36 +40,37 @@
                 <div class="container">
                     <div class="site-header-inner">
                         <div class="brand header-brand">
-                            <div class="m-0">
+                            <h1 class="m-0">
                                 <a href="/">
-                                    <img
-                                        class="header-logo-image"
-                                        src="https://admin.cogoport.com/v2/favicon.ico"
-                                        alt="Cogoport logo"
-                                    />
+                                    <img class="header-logo-image" src="https://admin.cogoport.com/v2/favicon.ico" alt="Logo" />
                                 </a>
-                            </div>
+                            </h1>
                         </div>
                     </div>
                 </div>
             </header>
 
             <main>
-                <section class="hero reveal-from-bottom">
+                <section class="hero">
                     <div class="container">
                         <div class="hero-inner">
                             <div class="hero-copy">
-                                <h1 class="hero-title mt-0">
-                                    Cogo One<br />Free browser based Real-time video calls.<br />
-                                    Simple, Secure, Fast.
-                                </h1>
-                                <p class="hero-paragraph">
-                                    Start your next video call with a single click. No download, plug-in, or login is
-                                    required. Just get straight to talking, messaging, and sharing your screen.
-                                </p>
+                                 <%= error_message %>
                             </div>
                             <div class="hero-figure anime-element">
-                                <img src="../svg/group_call.svg"/>
+                                <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
+                                    <rect width="528" height="396" style="fill: transparent" />
+                                </svg>
+                                <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
+                                <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
+                                <div class="hero-figure-box hero-figure-box-05"></div>
+                                <div class="hero-figure-box hero-figure-box-06"></div>
+                                <div class="hero-figure-box hero-figure-box-07"></div>
+                                <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
+                                <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
+                                <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
                             </div>
                         </div>
                     </div>
@@ -84,15 +79,6 @@
         </div>
 
         <script defer src="../js/landing.js"></script>
-        <script>
-            // if it is open by some window.open()
-            try {
-                window.close()
-            }
-            catch(err) {
-                console.log(err)
-            }
-        </script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>

@@ -313,14 +313,15 @@ class RoomClient {
                     const peers = new Map(JSON.parse(room.peers));
                     for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
                         let peer_info = peers.get(peer).peer_info;
-                        if (peer_info.peer_name == this.peer_name) {
-                            console.log('00-WARNING ----> Username already in use');
-                            return this.userNameAlreadyInRoom();
-                        }
 
                         if (peer_info.peer_uuid == this.peer_uuid) {
-                            console.log('00-WARNING ----> UserId already in use');
+                            console.log('00-WARNING ----> user already already in meeting');
+                            this.youAreAlreadyInMeeeting(); 
                         }
+                        // if (peer_info.peer_name == this.peer_name) {
+                        //     console.log('01-WARNING ----> Username already in use');
+                        //     return this.userNameAlreadyInRoom();
+                        // }
                     }
                     await this.joinAllowed(room);
                 }.bind(this),
@@ -767,8 +768,31 @@ class RoomClient {
     // CHECK USER
     // ####################################################
 
-    async userNameAlreadyInRoom() {
+    async youAreAlreadyInMeeeting(){
+        this.sound('alert')
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.user,
+            position: 'center',
+            title: 'You Are Already In Meeting',
+            html: `<div>Do you want to add another device to join this meeting?.</div>`,
+            showDenyButton: true,
+            denyButtonText: 'No',
+            confirmButtonText: 'Yes',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isDenied){
+                openURL((window.location.href = '/leave_meeting'))
+                return false
+            }
+            return true;
+        })
+    }
 
+    async userNameAlreadyInRoom() {
         this.sound('alert');
         Swal.fire({
             allowOutsideClick: false,

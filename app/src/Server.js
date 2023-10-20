@@ -143,16 +143,10 @@ const dir = {
 
 // html views
 const views = {
-    about: path.join(__dirname, '../../', 'public/views/about.html'),
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
-    login: path.join(__dirname, '../../', 'public/views/login.html'),
-    newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
     notFound: path.join(__dirname, '../../', 'public/views/404.html'),
-    permission: path.join(__dirname, '../../', 'public/views/permission.html'),
-    privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
-    notValidMeetingLink: path.join(__dirname, '../../', 'public/views/not_valid_meeting_link.html'),
-    ununathenticatedUser: path.join(__dirname, '../../', 'public/views/unathenticated_user.html'),
+    error: path.join(__dirname, '../../', 'public/views/error.ejs'),
 };
 
 let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
@@ -189,6 +183,7 @@ if (!announcedIP) {
 
 function startServer() {
     // Start the app
+    app.set('view engine', 'ejs');
     app.use(cors());
     app.use(cookieParser());
     app.use(compression());
@@ -218,6 +213,7 @@ function startServer() {
         next();
     });
 
+
     // Remove trailing slashes in url handle bad requests
     app.use((err, req, res, next) => {
         if (err instanceof SyntaxError || err.status === 400 || 'body' in err) {
@@ -236,7 +232,11 @@ function startServer() {
         }
     });
 
-    // main page
+    app.get(['/hello'], function(req, res) {
+        return res.render(views.error, { error_message: 'ejs error testing' });
+    });
+
+    // landing page
     app.get(['/'], (req, res) => {
         if (hostCfg.protected) {
             hostCfg.authenticated = false;
@@ -246,28 +246,7 @@ function startServer() {
         }
     });
 
-    // set new room name and join
-    app.get(['/newroom'], (req, res) => {
-        if (hostCfg.protected) {
-            let ip = getIP(req);
-            if (allowedIP(ip)) {
-                res.sendFile(views.newRoom);
-            } else {
-                hostCfg.authenticated = false;
-                res.sendFile(views.login);
-            }
-        } else {
-            res.sendFile(views.newRoom);
-        }
-    });
-
-    app.get(['/not_valid_meeting_link'], (req, res) => {
-        res.sendFile(views.notValidMeetingLink);
-    });
-
-    // link to join in meeting
-    // join meeting link look like
-    // http://localhost:3010/join?meeting=U2FsdGVkX18jh7EkzQSxIblcvxBnN5GaWnuHyu7sg3Q3fsMx%2BUubFRg0GFzz%2FqGAcpG2SKzbyOcfYGHMRJDUgQ%2FFgxZjqE9ed8hftpFoUT9Oi%2BsXIClph%2F3LLDkw%2BSJtfXnq9Px15oj51GTOhPljC0FURbeuQEHuN8%2BoUfaHav%2FEPqIpX4sl9oI17u8yA1jClYswt9R9TCUWb4Tdyho4N64S1iQvlHCwGcQMwHScNntBvFF79qN%2FwE1%2FLukENH8lBYi82yaxa98yrR80UicjUXLXJ31OewCA5NTlhw4hc8E%3D
+    //join meeting with meeting_token
     app.get('/join/', (req, res) => {
         try {
             if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
@@ -293,6 +272,10 @@ function startServer() {
         }
     });
 
+    // for not a valid link
+    app.get(['/not_valid_meeting_link'], (req, res) => {
+        return res.render(views.error, { error_message: 'This is not a valid Meeting Link .Plz check Now' });
+    });
 
     // in a meeting
     app.get('/in_meeting', async (req, res) => {
@@ -330,7 +313,7 @@ function startServer() {
                     }
         
                     if (!cogo_auth_token){
-                        return res.sendFile(views.ununathenticatedUser); 
+                        return res.render(views.error, { error_message: 'You are UnAthenticated for this meeting. Go to https://admin.cogoport.com/ and after login try to join in this meeting from meeting link in  https://admin.cogoport.com/'});
                     }
 
                     let isAuthenticated = await ruby_api.userAuthenticate({ auth_token: cogo_auth_token }) 
@@ -343,8 +326,7 @@ function startServer() {
                         joinMeetingUpdate({firestoreDB,room_id: meeting_id,user_id,user_name});
                         return res.sendFile(views.room);
                     }
-
-                    return res.sendFile(views.ununathenticatedUser); 
+                    return res.render(views.error, { error_message: 'You are UnAthenticated for this meeting. Go to https://admin.cogoport.com/ and after login try to join in this meeting from meeting link in  https://admin.cogoport.com/' });
                 }
             }
             res.redirect('/not_valid_meeting_link');
@@ -377,73 +359,6 @@ function startServer() {
         }
     });
 
-    // join room by id
-    // app.get('/join/:roomId', (req, res) => {
-    //     if (hostCfg.authenticated) {
-    //         res.sendFile(views.room);
-    //     } else {
-    //         if (hostCfg.protected) {
-    //             return res.sendFile(views.login);
-    //         }
-    //         res.redirect('/');
-    //     }
-    // });
-
-    // not specified correctly the room id
-    // app.get('/join/*', (req, res) => {
-    //     res.redirect('/');
-    // });
-
-    // if not allow video/audio
-    app.get(['/permission'], (req, res) => {
-        res.sendFile(views.permission);
-    });
-
-    // privacy policy
-    app.get(['/privacy'], (req, res) => {
-        res.sendFile(views.privacy);
-    });
-
-    // mirotalk about
-    app.get(['/about'], (req, res) => {
-        res.sendFile(views.about);
-    });
-
-    // handle logged on host protected
-    app.get(['/logged'], (req, res) => {
-        const ip = getIP(req);
-        if (allowedIP(ip)) {
-            res.sendFile(views.landing);
-        } else {
-            hostCfg.authenticated = false;
-            res.sendFile(views.login);
-        }
-    });
-
-    // ####################################################
-    // AXIOS
-    // ####################################################
-
-    // handle login on host protected
-    app.post(['/login'], (req, res) => {
-        if (hostCfg.protected) {
-            let ip = getIP(req);
-            log.debug(`Request login to host from: ${ip}`, req.body);
-            const { username, password } = checkXSS(req.body);
-            if (username == hostCfg.username && password == hostCfg.password) {
-                hostCfg.authenticated = true;
-                authHost = new Host(ip, true);
-                log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-                res.status(200).json({ message: 'authorized' });
-            } else {
-                log.debug('LOGIN KO', { ip: ip, authorized: false });
-                hostCfg.authenticated = false;
-                res.status(401).json({ message: 'unauthorized' });
-            }
-        } else {
-            res.redirect('/');
-        }
-    });
 
     // ####################################################
     // API

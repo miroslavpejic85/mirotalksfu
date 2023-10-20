@@ -62,7 +62,7 @@ const commands = {
 };
 
 const browser = {
-    newroom: '/newroom',
+    newroom: '/',
     email: 'mailto:?subject=&body=',
     google: 'https://www.google.com',
     googleTr: 'https://translate.google.com/',
