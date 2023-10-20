@@ -971,12 +971,16 @@ function startServer() {
             const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false;
 
             if (is_presenter) {
-                presenters[socket.room_id] = {
+                if (!presenters[socket.room_id]){
+                    presenters[socket.room_id] = []
+                }
+                
+                presenters[socket.room_id].append({
                     peer_ip: peer_ip,
                     peer_name: peer_name,
                     peer_uuid: peer_uuid,
                     is_presenter: is_presenter,
-                };
+                });
 
                 log.debug('[Join] - Connected presenters grp by roomId', presenters);
             }
@@ -1394,12 +1398,12 @@ function startServer() {
         if (typeof presenters[room_id] === 'undefined' || presenters[room_id] === null) return false;
 
         try {
-            isPresenter =
-                typeof presenters[room_id] === 'object' &&
-                Object.keys(presenters[room_id]).length > 1 &&
-                presenters[room_id]['peer_name'] === peer_name &&
-                presenters[room_id]['peer_uuid'] === peer_uuid &&
-                presenters[room_id]['is_presenter'] === true;
+            if (typeof presenters[room_id] === 'object' && presenters[room_id].length > 1){
+                const presenter_users = presenters[room_id].filter(user => user?.peer_uuid === peer_uuid && user?.peer_name === peer_name && user?.is_presenter === true)
+
+                isPresenter = typeof presenter_users === 'object' && presenter_users.length > 1 ? true : false
+            }
+
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;
