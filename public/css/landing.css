@@ -1145,8 +1145,12 @@ label {
 }
 .hero {
     text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
     padding-top: 48px;
     padding-bottom: 88px;
+    min-height: 80vh;
 }
 .hero-copy {
     position: relative;
