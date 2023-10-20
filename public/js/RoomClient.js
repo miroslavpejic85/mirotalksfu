@@ -127,7 +127,6 @@ class RoomClient {
         videoPinMediaContainer,
         mediasoupClient,
         socket,
-        meeting_param,
         auth,
         room_id,
         user_id,
@@ -148,7 +147,6 @@ class RoomClient {
         this.mediasoupClient = mediasoupClient;
 
         this.socket = socket;
-        this.meeting_param = meeting_param;
         this.auth = auth;
         this.room_id = room_id;
         this.user_id = user_id;
@@ -372,7 +370,7 @@ class RoomClient {
         console.log('07.2 Participants Count ---->', participantsCount);
         // notify && participantsCount == 1 ? shareRoom() : sound('joined');
         if (notify && participantsCount == 1) {
-            shareRoom();
+            // shareRoom();
         } else {
             if (this.isScreenAllowed) {
                 this.shareScreen();

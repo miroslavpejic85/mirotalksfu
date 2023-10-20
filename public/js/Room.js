@@ -79,7 +79,7 @@ let chatMessagesId = 0;
 
 
 let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
-let meeting_param= getMeetingParam();
+let meeting_token = getMeetingToken();
 let auth = getAuth();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
@@ -138,11 +138,16 @@ let initStream = null;
 
 let scriptProcessor = null;
 
-const RoomURL = window.location.origin + '/join/' + room_id;
+const RoomURL = getJoinMeetingLink();
 
 // ####################################################
 // INIT ROOM
 // ####################################################
+
+function getJoinMeetingLink(auth){
+    if (!meeting_token) return null;
+    return  auth ? `${window.location.origin}/join/?meeting=${encodeURIComponent(meeting_token)}&auth=${auth}` : `${window.location.origin}/join/?meeting=${encodeURIComponent(meeting_token)}`;
+}
 
 function initClient() {
     setTheme();
@@ -481,12 +486,8 @@ function getMeetingRoomData(){
     return {}
 }
 
-function getMeetingParam(){
-    let qs = new URLSearchParams(window.location.search);
-    let meeting = filterXSS(qs.get('meeting'));
-    let meetingParam = meeting ? meeting : getCookie('meeting_data');
-
-    return meetingParam;
+function getMeetingToken(){
+    return getCookie('meeting_token');
 }
 
 function getAuth(){
@@ -823,6 +824,40 @@ function checkMedia() {
 // SHARE ROOM
 // ####################################################
 
+async function addParticipants(isAdd = false){
+    if (!isAdd) return;
+
+    if (auth && isAdd){
+        getParticipantsList();
+    }else{
+        noPermissionToAdd();
+    }
+
+    function getParticipantsList(){
+        sound('open');
+    }
+
+    function addParticipant(){
+
+    }
+
+    function noPermissionToAdd (){
+        sound('open');
+
+        Swal.fire({
+            background: swalBackground,
+            imageUrl: image.user,
+            position: 'center',
+            title: 'You do not have the authorization to add a participant.',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        })
+        makeRoomQR();
+    }
+}
+
+
+
 async function shareRoom(useNavigator = false) {
     if (navigator.share && useNavigator) {
         try {
@@ -832,7 +867,7 @@ async function shareRoom(useNavigator = false) {
             share();
         }
     } else {
-        // share();
+        share();
     }
     function share() {
         sound('open');
@@ -840,35 +875,19 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: 'Share the room',
+            title: 'Join Meeting using QR Code',
             html: `
             <div id="qrRoomContainer">
                 <canvas id="qrRoom"></canvas>
             </div>
             <br/>
             <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:black; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
-            <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
-            showDenyButton: true,
-            showCancelButton: true,
-            cancelButtonColor: 'red',
-            denyButtonColor: 'green',
-            confirmButtonText: `Copy URL`,
-            denyButtonText: `Email invite`,
-            cancelButtonText: `Close`,
+            <p style="background:transparent; color:black; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera and Join through link</p>
+            `,
+            confirmButtonText: `OK Close`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                copyRoomURL();
-            } else if (result.isDenied) {
-                shareRoomByEmail();
-            }
-            // share screen on join
-            if (isScreenAllowed) {
-                rc.shareScreen();
-            }
-        });
+        })
         makeRoomQR();
     }
 }
@@ -947,7 +966,6 @@ function joinRoom(peer_name, room_id) {
             videoPinMediaContainer,
             window.mediasoupClient,
             socket,
-            meeting_param,
             auth,
             room_id,
             user_id,
@@ -962,6 +980,7 @@ function joinRoom(peer_name, room_id) {
             roomIsReady,
         );
         handleRoomClientEvents();
+        sound('joined')
         //notify ? shareRoom() : sound('joined');
     }
 }
@@ -2747,7 +2766,7 @@ async function getParticipantsTable(peers) {
     <div>
         <button
             id="inviteParticipants"
-            onclick="shareRoom(true);"
+            onclick="addParticipants(true);"
         ><i class="fas fa-user-plus"></i>&nbsp; Invite Someone</button>
     </div>
     <div>

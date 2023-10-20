@@ -278,8 +278,10 @@ function startServer() {
                 if (meeting_id && user_id){
                     meetingData['is_presenter'] = false;
                     res.cookie('meeting_data', JSON.stringify(meetingData), {maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true});
-                    res.cookie('cogo_auth_token', auth,{maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true})
-
+                    res.cookie('meeting_token', meeting,{maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true})
+                    if (auth){
+                        res.cookie('cogo_auth_token', auth,{maxAge: 5 * 60 * 60 * 1000,sameSite:'none', secure: true})
+                    }
                     return res.redirect('/in_meeting')
                 }
             }
@@ -312,7 +314,7 @@ function startServer() {
 
 
                     meeting_data['is_presenter'] = 'false';
-                    if (user_id === video_call_room_data.performed_by_id) {
+                    if (user_id === video_call_room_data?.performed_by_id) {
                         meeting_data['is_presenter'] = 'true';
                     }
 

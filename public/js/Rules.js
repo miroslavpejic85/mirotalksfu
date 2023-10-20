@@ -10,7 +10,7 @@ const isRulesActive = true;
 
 const BUTTONS = {
     main: {
-        shareButton: false,
+        shareButton: true,
         hideMeButton: false,
         startAudioButton: true,
         startVideoButton: true,
