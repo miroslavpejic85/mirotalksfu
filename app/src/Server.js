@@ -300,9 +300,7 @@ function startServer() {
             
             const meeting_cookies = req.cookies?.meeting_data;
             const cogo_auth_token = req.cookies?.cogo_auth_token
-            console.log('video_call_room_data', meeting_cookies, cogo_auth_token)
-
-
+ 
             if (meeting_cookies){
                 const meeting_data = JSON.parse(meeting_cookies || '{}');
                 const {meeting_id,user_id,user_name = ''} = meeting_data;
@@ -311,7 +309,6 @@ function startServer() {
                     const get_meeting_room = await getMeetingRoom({ firestoreDB, room_id: meeting_id });
                     const video_call_room_data = get_meeting_room.data();
                     const user_list = video_call_room_data?.user_ids || [];
-
 
                     meeting_data['is_presenter'] = 'false';
                     if (user_id === video_call_room_data?.performed_by_id) {

@@ -1203,8 +1203,8 @@ function handleButtons() {
     roomId.onclick = () => {
         DetectRTC.isMobileDevice ? shareRoom(true) : copyRoomURL();
     };
-    roomSendEmail.onclick = () => {
-        shareRoomByEmail();
+    addParticipantsInMeeting.onclick = () => {
+        addParticipants(true);
     };
     chatButton.onclick = () => {
         rc.toggleChat();
