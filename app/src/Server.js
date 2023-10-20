@@ -971,16 +971,12 @@ function startServer() {
             const is_presenter = room.getPeers()?.get(socket.id)?.peer_info?.peer_presenter || false;
 
             if (is_presenter) {
-                if (!presenters[socket.room_id]){
-                    presenters[socket.room_id] = []
-                }
-                
-                presenters[socket.room_id].append({
+                presenters[socket.room_id] = {...(presenters[socket.room_id] || []), ...[{
                     peer_ip: peer_ip,
                     peer_name: peer_name,
                     peer_uuid: peer_uuid,
                     is_presenter: is_presenter,
-                });
+                }] }
 
                 log.debug('[Join] - Connected presenters grp by roomId', presenters);
             }
