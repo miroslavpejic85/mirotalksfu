@@ -29,6 +29,7 @@ const BUTTONS = {
         lockRoomButton: true, // presenter
         unlockRoomButton: true, // presenter
         lobbyButton: true, // presenter
+        micOptionsButton: true, // presenter
         tabRecording: true,
         pushToTalk: true,
         host_only_recording: true, // presenter
@@ -87,6 +88,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.lobbyButton = false;
+        BUTTONS.settings.micOptionsButton = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
@@ -99,6 +101,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.lockRoomButton = !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
         BUTTONS.settings.lobbyButton = true;
+        BUTTONS.settings.micOptionsButton = true;
         BUTTONS.videoOff.muteAudioButton = true;
         BUTTONS.videoOff.ejectButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
@@ -125,6 +128,7 @@ function handleRules(isPresenter) {
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
+    !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton
         ? elemDisplay('whiteboardLockButton', true)

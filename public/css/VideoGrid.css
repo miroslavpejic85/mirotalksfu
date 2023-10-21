@@ -213,7 +213,7 @@ video:fullscreen {
 }
 
 input[type='range'] {
-    display: none;
+    /* display: none; */
     color: #fff;
     width: 50px;
     cursor: pointer;

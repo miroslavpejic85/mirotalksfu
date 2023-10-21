@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.1
+ * @version 1.1.2
  *
  */
 
@@ -59,8 +59,8 @@ const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
-const lS = new LocalStorage();
 // Get Settings from localStorage
+const lS = new LocalStorage();
 const localStorageSettings = lS.getObjectLocalStorage('SFU_SETTINGS');
 const lsSettings = localStorageSettings ? localStorageSettings : lS.SFU_SETTINGS;
 console.log('LS_SETTINGS', lsSettings);
@@ -1166,6 +1166,9 @@ function handleButtons() {
     tabLanguagesBtn.onclick = (e) => {
         rc.openTab(e, 'tabLanguages');
     };
+    applyAudioOptionsButton.onclick = () => {
+        rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
+    };
     speakerTestBtn.onclick = () => {
         sound('ring', true);
     };
@@ -1668,6 +1671,49 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    // audio options
+    switchAutoGainControl.onchange = (e) => {
+        lsSettings.mic_auto_gain_control = e.currentTarget.checked;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchEchoCancellation.onchange = (e) => {
+        lsSettings.mic_echo_cancellations = e.currentTarget.checked;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchNoiseSuppression.onchange = (e) => {
+        lsSettings.mic_noise_suppression = e.currentTarget.checked;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    sampleRateSelect.onchange = (e) => {
+        lsSettings.mic_sample_rate = e.currentTarget.selectedIndex;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    sampleSizeSelect.onchange = (e) => {
+        lsSettings.mic_sample_size = e.currentTarget.selectedIndex;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    channelCountSelect.onchange = (e) => {
+        lsSettings.mic_channel_count = e.currentTarget.selectedIndex;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    micLatencyRange.oninput = (e) => {
+        lsSettings.mic_latency = e.currentTarget.value;
+        lS.setSettings(lsSettings);
+        micLatencyValue.innerText = e.currentTarget.value;
+        e.target.blur();
+    };
+    micVolumeRange.oninput = (e) => {
+        lsSettings.mic_volume = e.currentTarget.value;
+        lS.setSettings(lsSettings);
+        micVolumeValue.innerText = e.currentTarget.value;
+        e.target.blur();
+    };
     // recording
     switchHostOnlyRecording.onchange = (e) => {
         hostOnlyRecording = e.currentTarget.checked;
@@ -1892,6 +1938,18 @@ function loadSettingsFromLocalStorage() {
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
+
+    switchAutoGainControl.checked = lsSettings.mic_auto_gain_control;
+    switchEchoCancellation.checked = lsSettings.mic_echo_cancellations;
+    switchNoiseSuppression.checked = lsSettings.mic_noise_suppression;
+    sampleRateSelect.selectedIndex = lsSettings.mic_sample_rate;
+    sampleSizeSelect.selectedIndex = lsSettings.mic_sample_size;
+    channelCountSelect.selectedIndex = lsSettings.mic_channel_count;
+    micLatencyRange.value = lsSettings.mic_latency || 50;
+    micLatencyValue.innerText = lsSettings.mic_latency || 50;
+    micVolumeRange.value = lsSettings.mic_volume || 100;
+    micVolumeValue.innerText = lsSettings.mic_volume || 100;
+
     videoFps.selectedIndex = lsSettings.video_fps;
     screenFps.selectedIndex = lsSettings.screen_fps;
     BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;

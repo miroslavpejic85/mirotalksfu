@@ -20,6 +20,14 @@ class LocalStorage {
             show_chat_on_msg: true, // show chat on new message
             show_transcript_on_msg: true, // show transcript on new message
             speech_in_msg: false, // speech incoming message
+            mic_auto_gain_control: false,
+            mic_echo_cancellations: true,
+            mic_noise_suppression: true,
+            mic_sample_rate: 0, // 0: 48000 Hz 1: 44100 Hz
+            mic_sample_size: 0, // 0: 16 bits 1: 32 bits
+            mic_channel_count: 0, // 0: 1(mono) 1: 2 (stereo)
+            mic_latency: 50, // ms
+            mic_volume: 100, // %
             video_fps: 0, // default 1280x768 30fps
             screen_fps: 0, // max 30fps
             lobby: false, // default false

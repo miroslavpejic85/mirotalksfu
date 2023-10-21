@@ -378,6 +378,13 @@ th {
     width: 150px;
 }
 
+.microphone-table-width {
+    width: 180px;
+}
+.dropdown-menu {
+    background: var(--body-bg);
+}
+
 /*--------------------------------------------------------------
 # Style the tab
 --------------------------------------------------------------*/
@@ -399,6 +406,9 @@ th {
     width: 65%;
     background-color: var(--body-bg);
     min-height: 480px;
+    max-height: 550px;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 @media screen and (max-width: 830px) {
@@ -1404,6 +1414,28 @@ progress {
     background: rgba(#19bb5c, 0.65);
     transition-property: height background-color;
     transition-duration: 1s;
+}
+
+/*--------------------------------------------------------------
+# Webkit-Scrollbar Styles
+--------------------------------------------------------------*/
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--body-bg);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: var(--body-bg);
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1b1f;
 }
 
 /*--------------------------------------------------------------

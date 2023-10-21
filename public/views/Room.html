@@ -44,7 +44,7 @@
 
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-        <!-- Bootstrap 5 -->
+        <!-- Bootstrap 5  https://getbootstrap.com/docs/5.0/components/-->
 
         <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css" />
 
@@ -373,6 +373,181 @@ access to use this app.
                             <div class="volume-bar"></div>
                         </div>
                         <br />
+                        <div class="dropdown">
+                            <button
+                                class="dropdown-toggle"
+                                type="button"
+                                id="micOptionsButton"
+                                data-bs-toggle="dropdown"
+                                aria-expanded="false"
+                            >
+                                <i class="fas fa-screwdriver-wrench"></i>
+                                <p>Advance options</p>
+                            </button>
+                            <div class="dropdown-menu" aria-labelledby="micOptionsButton">
+                                <!-- onclick="event.stopPropagation()" -->
+                                <table class="settingsTable">
+                                    <tr id="autoGainControlButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-ear-listen"></i> -->
+                                                <p>Auto gain control</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchAutoGainControl"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="echoCancellationButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-ear-listen"></i> -->
+                                                <p>Echo cancellation</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchEchoCancellation"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="noiseSuppressionButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-ear-listen"></i> -->
+                                                <p>Noise suppression</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="form-check form-switch form-switch-md">
+                                                <input
+                                                    id="switchNoiseSuppression"
+                                                    class="form-check-input"
+                                                    type="checkbox"
+                                                    checked
+                                                />
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="sampleRateButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-microphone-lines"></i> -->
+                                                <p>Sample rate</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select
+                                                id="sampleRateSelect"
+                                                class="form-select form-select-sm text-light bg-dark"
+                                            >
+                                                <option value="48000">48000 Hz</option>
+                                                <option value="44100">44100 Hz</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr id="sampleSizeButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-microphone-lines"></i> -->
+                                                <p>Sample size</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select
+                                                id="sampleSizeSelect"
+                                                class="form-select form-select-sm text-light bg-dark"
+                                            >
+                                                <option value="16">16 bits</option>
+                                                <option value="32">32 bits</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr id="channelCountButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-microphone-lines"></i> -->
+                                                <p>Channel count</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <select
+                                                id="channelCountSelect"
+                                                class="form-select form-select-sm text-light bg-dark"
+                                            >
+                                                <option value="1">1 (mono)</option>
+                                                <option value="2">2 (stereo)</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr id="micLatencyButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fab fa-audible"></i> -->
+                                                <p>Latency</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="title">
+                                                <input
+                                                    type="range"
+                                                    class="form-range"
+                                                    id="micLatencyRange"
+                                                    name="latency"
+                                                    min="10"
+                                                    max="1000"
+                                                    value="50"
+                                                    step="10"
+                                                />
+                                                <p><span id="micLatencyValue">50</span>&nbsp;ms</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr id="micVolumeButton">
+                                        <td class="microphone-table-width">
+                                            <div class="title">
+                                                <!-- <i class="fas fa-volume-high"></i> -->
+                                                <p>Volume</p>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div>
+                                                <input
+                                                    type="range"
+                                                    class="form-range"
+                                                    id="micVolumeRange"
+                                                    name="volume"
+                                                    min="0"
+                                                    max="100"
+                                                    value="100"
+                                                    step="10"
+                                                />
+                                                <p><span id="micVolumeValue">100</span>&nbsp;%</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <button class="btn btn-primary" id="applyAudioOptionsButton">
+                                                Apply options
+                                            </button>
+                                        </td>
+                                    </tr>
+                                </table>
+                            </div>
+                            <hr style="border: 1px solid grey" />
+                        </div>
                         <div id="speakerSelectDiv">
                             <div class="title">
                                 <i class="fas fa-headphones"></i>
