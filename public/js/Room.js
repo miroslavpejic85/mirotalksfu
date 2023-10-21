@@ -577,7 +577,7 @@ function getActiveCallMedia(){
             let queryPeerVideo = video === '1' || video === 'true';
             if (queryPeerVideo != null) is_video_allowed = queryPeerVideo;
         }
-        
+
         if (direct_join){
             direct_join = direct_join.toLowerCase();
             let query_direct_join = direct_join === '1' || direct_join === 'true';
@@ -588,7 +588,7 @@ function getActiveCallMedia(){
             is_video_allowed = true;
         }
     }catch (err){
-        console.log('01--init audio video error', err)
+        console.error('01--init audio video select', err)
     }
     
     return {is_audio_allowed, is_video_allowed, is_direct_join}
@@ -684,11 +684,6 @@ function whoAreYou() {
         return;
     }
 
-    let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : user_name;
-    if (getCookie(room_id + '_name')) {
-        default_name = getCookie(room_id + '_name');
-    }
-
     if (!BUTTONS.main.startVideoButton) {
         isVideoAllowed = false;
         elemDisplay('initVideo', false);
@@ -712,31 +707,37 @@ function whoAreYou() {
     const initUser = document.getElementById('initUser');
     initUser.classList.toggle('hidden');
 
-    Swal.fire({
+    let swal_payload = {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
         title: '<img alt="cogo_one_logo" src="https://cdn.cogoport.io/cms-prod/cogo_admin/vault/original/cogo-one-logo.svg" width="30" height="30" decoding="async" data-nimg="1" loading="lazy" style="color: transparent;"> CogoOne',
-        input: 'text',
-        inputPlaceholder: 'Enter your name',
-        inputAttributes: { maxlength: 32 },
-        inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
         confirmButtonColor: '#EE3425',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        inputValidator: (name) => {
-            if (!name) return 'Please enter your name';
-            name = filterXSS(name);
-            if (isHtml(name)) return 'Invalid name!';
-            if (!getCookie(room_id + '_name')) {
-                window.localStorage.peer_name = name;
+    }
+
+    if (!peer_name){
+        swal_payload = {
+            ...swal_payload,
+            ...{
+                input: 'text',
+                inputPlaceholder: 'Enter your name',
+                disableInput: true,
+                inputAttributes: { maxlength: 32 },
+                inputValidator: (name) => {
+                    if (!name) return 'Please enter your name';
+                    name = filterXSS(name);
+                    if (isHtml(name)) return 'Invalid name!';
+                    peer_name = name;
+                },
             }
-            setCookie(room_id + '_name', name, 30);
-            peer_name = name;
-        },
-    }).then(() => {
+        }
+    }
+
+    Swal.fire(swal_payload).then(() => {
         if (initStream && !joinRoomWithScreen) {
             stopTracks(initStream);
             // hide(initVideo);
