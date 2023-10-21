@@ -406,7 +406,6 @@ th {
     width: 65%;
     background-color: var(--body-bg);
     min-height: 480px;
-    max-height: 550px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -420,7 +419,6 @@ th {
     }
     .tabActions {
         width: 100%;
-        min-height: 100px;
         border-radius: 10px;
     }
     .tabButtonText {
