@@ -821,7 +821,7 @@ function checkMedia() {
 }
 
 // ####################################################
-// Add Partitions
+// Add Participants
 // ####################################################
 
 async function addParticipants(isAdd = false){
@@ -835,11 +835,16 @@ async function addParticipants(isAdd = false){
 
     function getParticipantsList(){
         sound('open');
+        Swal.fire({
+            title: 'Select Participaints',
+            html: getSelectHtml(),
+            showCancelButton: true,
+        })
     }
 
-    function addParticipant(){
-
-    }
+    // function addParticipant(){
+    //     console.log("addParticipant", addParticipant);  
+    // }
 
     function noPermissionToAdd (){
         sound('open');
@@ -856,6 +861,87 @@ async function addParticipants(isAdd = false){
     }
 }
 
+// ####################################################
+// Add Partitions
+// ####################################################
+
+const debouncedSelectChange=debounce(onSelectChange,600);
+
+
+function getSelectHtml(){
+    return (
+        `<div class="select-wrapper">
+            <input 
+            type="text" 
+            id="participantsSelect" 
+            placeholder="Search for an option"
+            onkeypress="debouncedSelectChange()"
+            >
+            <div class="select-options" id="participantsOptions">search above</div>
+        </div>`
+    )
+}
+
+
+const SUCCESS=200;
+
+async function onSelectChange(){
+    const searchInput = document.getElementById("participantsSelect");
+    const selectOptions = document.getElementById("participantsOptions");
+
+    const searchTerm = searchInput.value?.toLowerCase();
+    selectOptions.innerHTML = `<div class="select-option">loading...</div>`;
+    try{
+        const res= await fetch(`https://api-apollo4.dev.cogoport.io/communication/listchat_agents?filters%5Bstatus_not%5D=inactive&filters%5Bq%5D=${searchTerm}&sort_by=agent_type`, {
+        headers: {
+          authorization: `Bearer: ${getCookie('cogo_auth_token')}`,
+          authorizationscope: "partner",
+          'Content-Type': 'application/json',
+          'Accept': 'application/json',
+          authorizationparameters:'cogo_one-omni_channel:all',
+        },
+        method: "GET",
+        mode: "cors",
+        credentials: "omit",
+      });
+      
+      const parsedRes = await res.json();
+      
+      if(parsedRes?.status!==SUCCESS){
+        throw new Error('something went wrong');
+      }
+      
+      selectOptions.innerHTML = '';
+      parsedRes?.list?.forEach((eachList) => {
+            const optionElement = document.createElement("div");
+            optionElement.classList.add("select-option");
+            optionElement.setAttribute('id',eachList?.agent_id);
+
+            optionElement.textContent = eachList?.name;
+            
+            selectOptions.appendChild(optionElement);
+    });
+    }catch(e){
+        console.log("e", e);
+        selectOptions.innerHTML = `<div class="select-option">something went wrong</div>`;
+    }
+}
+
+// ####################################################
+// debounce
+// ####################################################
+
+function debounce(func, timeout) {
+    var timer = null;
+    return function (...args) {
+
+      clearTimeout(timer);
+
+      timer = setTimeout(function () {
+        func(args);
+      }, timeout);
+    };
+  }
 // ####################################################
 // SHARE ROOM
 // ####################################################

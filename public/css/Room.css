@@ -1315,3 +1315,38 @@ z-index:
     - 7 participants/lobby
     - 8 send receive progress
 */
+
+/*--------------------------------------------------------------
+# participiants select
+--------------------------------------------------------------*/
+.select-wrapper{
+    width: 100%;
+}
+
+.loading{
+    font-weight: 600;
+    color:#000;
+}
+
+.select-options {
+    width: 100%;
+    height: 200px;
+    overflow-y: auto;
+    border: 1px solid #ccc;
+    border-top: none;
+    font-size: 14px;
+    color:#000;
+}
+
+#participantsSelect{
+    width: 100%;
+}
+
+.select-option {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.select-option:hover {
+    background-color: #f0f0f0;
+}
