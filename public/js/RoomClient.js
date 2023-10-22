@@ -63,6 +63,7 @@ const image = {
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
     poster: '../images/loader.gif',
+    rec: '../images/rec.png',
     recording: '../images/recording.png',
     delete: '../images/delete.png',
     locked: '../images/locked.png',
@@ -3583,7 +3584,7 @@ class RoomClient {
                 this.initRecording();
             })
             .catch((err) => {
-                this.handleRecordingError('Unable to record the screen + audio: ' + err);
+                this.handleRecordingError('Unable to record the screen + audio: ' + err, false);
             });
     }
 
