@@ -3450,9 +3450,9 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
-    handleRecordingError(error) {
+    handleRecordingError(error, popupLog = true) {
         console.error('Recording error', error);
-        this.userLog('error', error, 'top-end', 6000);
+        if (popupLog) this.userLog('error', error, 'top-end', 6000);
     }
 
     getSupportedMimeTypes() {
@@ -3502,7 +3502,7 @@ class RoomClient {
     recordingOptions(options, audioMixerTracks) {
         Swal.fire({
             background: swalBackground,
-            position: 'center',
+            position: 'top',
             imageUrl: image.recording,
             title: 'Recording options',
             showDenyButton: true,
@@ -3551,7 +3551,7 @@ class RoomClient {
 
             this.initRecording();
         } catch (err) {
-            this.handleRecordingError('Unable to record the camera + audio: ' + err);
+            this.handleRecordingError('Unable to record the camera + audio: ' + err, false);
         }
     }
 
@@ -3761,15 +3761,8 @@ class RoomClient {
             to_peer_name: 'all',
         };
         this.showMessage(recAction);
-
         if (!this.showChatOnMessage) {
-            this.msgHTML(
-                null,
-                image.recording,
-                null,
-                `${icons.user} ${data.peer_name}: <h1>${data.action}</h1>`,
-                'top',
-            );
+            this.msgHTML(null, image.recording, null, `${icons.user} ${data.peer_name}: <h1>${data.action}</h1>`);
         }
     }
 
