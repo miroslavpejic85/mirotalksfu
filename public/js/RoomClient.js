@@ -43,6 +43,7 @@ const html = {
 
 const icons = {
     chat: '<i class="fas fa-comments"></i>',
+    user: '<i class="fas fa-user"></i>',
     transcript: '<i class="fas fa-closed-captioning"></i>',
     speech: '<i class="fas fa-volume-high"></i>',
     share: '<i class="fas fa-share-alt"></i>',
@@ -2435,6 +2436,21 @@ class RoomClient {
         }
     }
 
+    msgHTML(icon, imageUrl, title, html, position = 'center') {
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            position: position,
+            icon: icon,
+            imageUrl: imageUrl,
+            title: title,
+            html: html,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+    }
+
     thereAreParticipants() {
         // console.log('participantsCount ---->', participantsCount);
         if (this.consumers.size > 0 || participantsCount > 1) {
@@ -3480,7 +3496,7 @@ class RoomClient {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            //imageUrl: image.recording,
+            imageUrl: image.recording,
             title: 'Recording options',
             showDenyButton: true,
             showCancelButton: true,
@@ -3728,7 +3744,19 @@ class RoomClient {
     }
 
     handleRecordingAction(data) {
-        this.userLog('warning', `${icons.recording} ${data.peer_name} ${data.action}`, 'top-end');
+        const recAction = {
+            side: 'left',
+            img: this.leftMsgAvatar,
+            peer_name: data.peer_name,
+            peer_id: data.peer_id,
+            peer_msg: `🔴 ${data.action}`,
+            to_peer_id: 'all',
+            to_peer_name: 'all',
+        };
+        this.showMessage(recAction);
+        if (!this.showChatOnMessage) {
+            this.msgHTML(null, image.recording, null, `${icons.user} ${data.peer_name}: <h1>${data.action}</h1>`);
+        }
     }
 
     // ####################################################
