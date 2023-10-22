@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.2
+ * @version 1.1.3
  *
  */
 
@@ -100,6 +100,7 @@ let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isVideoPrivacyActive = false;
+let isRecording = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
 let isVideoControlsOn = false;
@@ -610,6 +611,7 @@ function getPeerInfo() {
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
         peer_screen: isScreenAllowed,
+        peer_recording: isRecording,
         peer_video_privacy: isVideoPrivacyActive,
         peer_hand: false,
         is_desktop_device: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
@@ -1975,6 +1977,8 @@ function handleRoomClientEvents() {
         show(pauseRecButton);
         show(recordingTime);
         startRecordingTimer();
+        isRecording = true;
+        rc.updatePeerInfo(peer_name, socket.id, 'recording', true);
     });
     rc.on(RoomClient.EVENTS.pauseRec, () => {
         console.log('Room event: Client pause recoding');
@@ -1994,6 +1998,8 @@ function handleRoomClientEvents() {
         hide(recordingTime);
         show(startRecButton);
         stopRecordingTimer();
+        isRecording = false;
+        rc.updatePeerInfo(peer_name, socket.id, 'recording', false);
     });
     rc.on(RoomClient.EVENTS.raiseHand, () => {
         console.log('Room event: Client raise hand');

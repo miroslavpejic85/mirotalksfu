@@ -12,6 +12,7 @@ module.exports = class Peer {
         this.peer_audio = data.peer_info.peer_audio;
         this.peer_video = data.peer_info.peer_video;
         this.peer_video_privacy = data.peer_video_privacy;
+        this.peer_recording = data.peer_info.peer_recording;
         this.peer_hand = data.peer_info.peer_hand;
         this.transports = new Map();
         this.consumers = new Map();
@@ -54,6 +55,10 @@ module.exports = class Peer {
             case 'presenter':
                 this.peer_info.peer_presenter = data.status;
                 this.peer_presenter = data.status;
+                break;
+            case 'recording':
+                this.peer_info.peer_recording = data.status;
+                this.peer_recording = data.status;
                 break;
             default:
                 break;
