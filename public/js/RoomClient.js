@@ -3763,7 +3763,7 @@ class RoomClient {
         };
         this.showMessage(recAction);
         if (!this.showChatOnMessage) {
-            this.msgHTML(null, image.recording, null, `${icons.user} ${data.peer_name}: <h1>${data.action}</h1>`);
+            this.msgHTML(null, image.recording, null, `${icons.user} ${data.peer_name} <br /> <h1>${data.action}</h1>`);
         }
     }
 
