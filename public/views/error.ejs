@@ -1,84 +1,86 @@
 <!doctype html>
 <html lang="en" class="no-js">
-    <head>
-        <title>Cogo Meet</title>
-        <link rel="shortcut icon" href="https://admin.cogoport.com/v2/favicon.ico" />
-        <link rel="apple-touch-icon" href="https://admin.cogoport.com/v2/favicon.ico" />
 
-        <!-- Meta Information -->
+<head>
+    <title>CogoOne</title>
+    <link rel="shortcut icon" href="https://admin.cogoport.com/v2/favicon.ico" />
+    <link rel="apple-touch-icon" href="https://admin.cogoport.com/v2/favicon.ico" />
 
-        <meta charset="utf-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Meta Information -->
 
-        <meta property="og:type" content="app-webrtc" />
-        <meta property="og:site_name" content="Cogo One" />
-        <meta property="og:title" content="Click the link to make a call." />
-        <meta
-            property="og:description"
-            content="Cogo One calling provides real-time video calls, messaging and screen sharing."
-        />
-         
-        <!-- StyleSheet -->
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
-        <link rel="stylesheet" href="../css/landing.css" />
+    <meta property="og:type" content="app-webrtc" />
+    <meta property="og:site_name" content="Cogo One" />
+    <meta property="og:title" content="Click the link to make a call." />
+    <meta property="og:description"
+        content="Cogo One calling provides real-time video calls, messaging and screen sharing." />
 
-        <!-- Js scripts -->
+    <!-- StyleSheet -->
 
-        <script async src="../js/Umami.js"></script>
-        <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
-        <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=IBM+Plex+Sans:400,600" />
+    <link rel="stylesheet" href="../css/landing.css" />
 
-        <!-- xss -->
+    <!-- Js scripts -->
 
-        <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
-    </head>
-    <body class="is-boxed has-animations">
-        <div class="body-wrap">
-            <header class="site-header">
+    <script async src="../js/Umami.js"></script>
+    <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
+    <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
+
+    <!-- xss -->
+
+    <script src="https://rawgit.com/leizongmin/js-xss/master/dist/xss.js"></script>
+</head>
+
+<body class="is-boxed has-animations">
+    <div class="body-wrap">
+        <header class="site-header">
+            <div class="container">
+                <div class="site-header-inner">
+                    <div class="brand header-brand">
+                        <h1 class="m-0">
+                            <a href="/">
+                                <img class="header-logo-image" src="https://admin.cogoport.com/v2/favicon.ico"
+                                    alt="Logo" />
+                            </a>
+                        </h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
                 <div class="container">
-                    <div class="site-header-inner">
-                        <div class="brand header-brand">
-                            <h1 class="m-0">
-                                <a href="/">
-                                    <img class="header-logo-image" src="https://admin.cogoport.com/v2/favicon.ico" alt="Logo" />
-                                </a>
-                            </h1>
+                    <div class="hero-inner">
+                        <div class="hero-copy">
+                            <%= error_message %>
+                        </div>
+                        <div class="hero-figure anime-element">
+                            <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
+                                <rect width="528" height="396" style="fill: transparent" />
+                            </svg>
+                            <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
+                            <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
+                            <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
+                            <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
+                            <div class="hero-figure-box hero-figure-box-05"></div>
+                            <div class="hero-figure-box hero-figure-box-06"></div>
+                            <div class="hero-figure-box hero-figure-box-07"></div>
+                            <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
+                            <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
+                            <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
                         </div>
                     </div>
                 </div>
-            </header>
+            </section>
+        </main>
+    </div>
 
-            <main>
-                <section class="hero">
-                    <div class="container">
-                        <div class="hero-inner">
-                            <div class="hero-copy">
-                                 <%= error_message %>
-                            </div>
-                            <div class="hero-figure anime-element">
-                                <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
-                                    <rect width="528" height="396" style="fill: transparent" />
-                                </svg>
-                                <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
-                                <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
-                                <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
-                                <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
-                                <div class="hero-figure-box hero-figure-box-05"></div>
-                                <div class="hero-figure-box hero-figure-box-06"></div>
-                                <div class="hero-figure-box hero-figure-box-07"></div>
-                                <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
-                                <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
-                                <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-            </main>
-        </div>
+    <script defer src="../js/landing.js"></script>
+    <script async defer src="https://buttons.github.io/buttons.js"></script>
+</body>
 
-        <script defer src="../js/landing.js"></script>
-        <script async defer src="https://buttons.github.io/buttons.js"></script>
-    </body>
 </html>
