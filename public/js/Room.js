@@ -143,7 +143,7 @@ const RoomURL = getJoinMeetingLink();
 // INIT ROOM
 // ####################################################
 
-function getJoinMeetingLink(auth){
+function getJoinMeetingLink(){
     if (!meeting_token) return null;
     return  auth ? `${window.location.origin}/join/?meeting=${encodeURIComponent(meeting_token)}&auth=${auth}` : `${window.location.origin}/join/?meeting=${encodeURIComponent(meeting_token)}`;
 }
