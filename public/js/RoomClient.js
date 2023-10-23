@@ -3664,22 +3664,30 @@ class RoomClient {
             const recTime = document.getElementById('recordingStatus');
 
             const recordingInfo = `
-                🔴 Recording Info: <br/><br/>
-                <ul>
-                    <li>Time: ${recTime.innerText}</li>
-                    <li>File: ${recFileName}</li>
-                    <li>Size: ${blobFileSize}</li>
-                </ul>
-                <br/>
-                Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+            <br/><br/>
+            <ul>
+                <li>Time: ${recTime.innerText}</li>
+                <li>File: ${recFileName}</li>
+                <li>Size: ${blobFileSize}</li>
+            </ul>
+            <br/>
             `;
+
+            const lastRecordingInfo = document.getElementById('lastRecordingInfo');
+            lastRecordingInfo.style.color = '#FFFFFF';
+            lastRecordingInfo.innerHTML = `Last Recording Info: ${recordingInfo}`;
+            show(lastRecordingInfo);
 
             Swal.fire({
                 background: swalBackground,
                 position: 'center',
                 icon: 'success',
                 title: 'Recording',
-                html: `<div style="text-align: left;">${recordingInfo}</div>`,
+                html: `<div style="text-align: left;">
+                🔴 Recording Info: 
+                ${recordingInfo}
+                Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+                </div>`,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
