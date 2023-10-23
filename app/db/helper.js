@@ -44,22 +44,22 @@ function updateUserCount({ firestoreDB, user_list = [], room_id, leaving_user_li
     }
 }
 
-function joinMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
-    if (user_id && room_id) {
-        let video_conference_user_ref = firestoreDB.collection("video_conference").doc(room_id).collection('user').doc(user_id)
-        let now_time = new Date().getTime() / 1000
+// function joinMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
+//     if (user_id && room_id) {
+//         let video_conference_user_ref = firestoreDB.collection("video_conference").doc(room_id).collection('user').doc(user_id)
+//         let now_time = new Date().getTime() / 1000
 
-        video_conference_user_ref.set({
-            user_name: user_name || '',
-            join_at: now_time,
-            updated_at: now_time,
-            activity_time_lines: FieldValue.arrayUnion({
-                action: 'join_meeting',
-                join_at: now_time,
-            })
-        }, { merge: true })
-    }
-}
+//         video_conference_user_ref.set({
+//             user_name: user_name || '',
+//             join_at: now_time,
+//             updated_at: now_time,
+//             activity_time_lines: FieldValue.arrayUnion({
+//                 action: 'join_meeting',
+//                 join_at: now_time,
+//             })
+//         }, { merge: true })
+//     }
+// }
 
 function leaveMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
     if (user_id && room_id) {
@@ -98,7 +98,7 @@ function leaveMeetingUpdate({ firestoreDB, room_id, user_id, user_name }) {
 module.exports = {
     getMeetingRoom,
     updateMeetingRoom,
-    joinMeetingUpdate,
+    // joinMeetingUpdate,
     leaveMeetingUpdate,
     updateUserCount
 }
