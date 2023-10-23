@@ -78,15 +78,16 @@ let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
 
-let {meeting_id:room_id, user_id, user_name } = getMeetingRoomData();
+let {meeting_id:room_id, user_id, user_name:peer_name } = getMeetingRoomData();
 let meeting_token = getMeetingToken();
 let auth = getAuth();
 let room_password = getRoomPassword();
-let peer_name = getPeerName();
 let peer_uuid = getPeerUUID(user_id);
 let isScreenAllowed = getScreen();
 let notify = getNotify();
 isPresenter = isPeerPresenter();
+
+let {is_audio_allowed:isAudioAllowed, is_video_allowed:isVideoAllowed, is_direct_join} = getActiveCallMedia();
 
 let peer_info = null;
 
@@ -100,8 +101,6 @@ let isLobbyOpen = false;
 let hostOnlyRecording = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;
-let isAudioAllowed = false;
-let isVideoAllowed = false;
 let isVideoPrivacyActive = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
@@ -272,12 +271,20 @@ function setTippy(elem, content, placement, allowHTML = false) {
 
 async function initEnumerateDevices() {
     console.log('01 ----> init Enumerate Devices');
-    await initEnumerateVideoDevices();
-    await initEnumerateAudioDevices();
+    if (isVideoAllowed){
+        await initEnumerateVideoDevices();
+    }
+    if (isAudioAllowed){
+        await initEnumerateAudioDevices();
+    }
+    // await initEnumerateAudioDevices();
+    // await initEnumerateVideoDevices();
+
     if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
         BUTTONS.main.startScreenButton && show(initStartScreenButton);
     }
     if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
+        // need to see this problem
         openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
         whoAreYou();
@@ -558,21 +565,36 @@ function isPeerPresenter() {
     return false;
 }
 
-function getPeerName() {
-    const qs = new URLSearchParams(window.location.search);
-    const name = filterXSS(qs.get('name'));
-    
-    if (isHtml(name)) {
-        console.log('Direct join', { name: 'Invalid name' });
-        return 'Invalid name';
+function getActiveCallMedia(){
+    let {video, direct_join} = getMeetingRoomData()
+    let is_audio_allowed = true; 
+    let is_video_allowed = false;
+    let is_direct_join = false;
+
+    try{
+        if (video) {
+            video = video.toLowerCase();
+            let queryPeerVideo = video === '1' || video === 'true';
+            if (queryPeerVideo != null) is_video_allowed = queryPeerVideo;
+        }
+
+        if (direct_join){
+            direct_join = direct_join.toLowerCase();
+            let query_direct_join = direct_join === '1' || direct_join === 'true';
+            if (query_direct_join != null) is_direct_join = query_direct_join;
+        }
+
+        if (!is_direct_join){
+            is_video_allowed = true;
+        }
+    }catch (err){
+        console.error('01--init audio video select', err)
     }
-    console.log('Direct join', { name: name });
-    return name;
+    
+    return {is_audio_allowed, is_video_allowed, is_direct_join}
 }
 
 function getPeerUUID(user_id) {
-    console.log('getttttting user_id   --------------------------------> ', user_id);
-
     if (user_id){
         lS.setItemLocalStorage('peer_uuid', user_id);
         return user_id
@@ -655,16 +677,11 @@ function whoAreYou() {
     hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
 
-    if (peer_name) {
+    if (is_direct_join) {
         checkMedia();
         getPeerInfo();
         joinRoom(peer_name, room_id);
         return;
-    }
-
-    let default_name = window.localStorage.peer_name ? window.localStorage.peer_name : user_name;
-    if (getCookie(room_id + '_name')) {
-        default_name = getCookie(room_id + '_name');
     }
 
     if (!BUTTONS.main.startVideoButton) {
@@ -690,31 +707,37 @@ function whoAreYou() {
     const initUser = document.getElementById('initUser');
     initUser.classList.toggle('hidden');
 
-    Swal.fire({
+    let swal_payload = {
         allowOutsideClick: false,
         allowEscapeKey: false,
         background: swalBackground,
         title: '<img alt="cogo_one_logo" src="https://cdn.cogoport.io/cms-prod/cogo_admin/vault/original/cogo-one-logo.svg" width="30" height="30" decoding="async" data-nimg="1" loading="lazy" style="color: transparent;"> CogoOne',
-        input: 'text',
-        inputPlaceholder: 'Enter your name',
-        inputAttributes: { maxlength: 32 },
-        inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
         confirmButtonColor: '#EE3425',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        inputValidator: (name) => {
-            if (!name) return 'Please enter your name';
-            name = filterXSS(name);
-            if (isHtml(name)) return 'Invalid name!';
-            if (!getCookie(room_id + '_name')) {
-                window.localStorage.peer_name = name;
+    }
+
+    if (!peer_name){
+        swal_payload = {
+            ...swal_payload,
+            ...{
+                input: 'text',
+                inputPlaceholder: 'Enter your name',
+                disableInput: true,
+                inputAttributes: { maxlength: 32 },
+                inputValidator: (name) => {
+                    if (!name) return 'Please enter your name';
+                    name = filterXSS(name);
+                    if (isHtml(name)) return 'Invalid name!';
+                    peer_name = name;
+                },
             }
-            setCookie(room_id + '_name', name, 30);
-            peer_name = name;
-        },
-    }).then(() => {
+        }
+    }
+
+    Swal.fire(swal_payload).then(() => {
         if (initStream && !joinRoomWithScreen) {
             stopTracks(initStream);
             // hide(initVideo);
@@ -798,19 +821,6 @@ function checkInitAudio(isAudioAllowed) {
 }
 
 function checkMedia() {
-    let qs = new URLSearchParams(window.location.search);
-    let audio = filterXSS(qs.get('audio'));
-    let video = filterXSS(qs.get('video'));
-    if (audio) {
-        audio = audio.toLowerCase();
-        let queryPeerAudio = audio === '1' || audio === 'true';
-        if (queryPeerAudio != null) isAudioAllowed = queryPeerAudio;
-    }
-    if (video) {
-        video = video.toLowerCase();
-        let queryPeerVideo = video === '1' || video === 'true';
-        if (queryPeerVideo != null) isVideoAllowed = queryPeerVideo;
-    }
     elemDisplay('tabVideoDevicesBtn', isVideoAllowed);
     elemDisplay('tabAudioDevicesBtn', isAudioAllowed);
 
