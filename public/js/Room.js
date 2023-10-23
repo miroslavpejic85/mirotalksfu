@@ -844,17 +844,14 @@ async function addParticipants(isAdd = false){
     }
 
     function getParticipantsList(){
-        sound('open');
         Swal.fire({
             title: 'Select Participaints',
             html: getSelectHtml(),
+            showConfirmButton: false,
             showCancelButton: true,
+            didRender: onSelectChange
         })
     }
-
-    // function addParticipant(){
-    //     console.log("addParticipant", addParticipant);  
-    // }
 
     function noPermissionToAdd (){
         sound('open');
@@ -884,15 +881,46 @@ function getSelectHtml(){
             <input 
             type="text" 
             id="participantsSelect" 
-            placeholder="Search for an option"
+            placeholder="Type name here..."
             onkeypress="debouncedSelectChange()"
+            class="searchParticipants"
             >
-            <div class="select-options" id="participantsOptions">search above</div>
+            <div class="select-options" id="participantsOptions"></div>
         </div>`
     )
 }
 
+const participantHTML = (item)=> {
+    return `<div style="display: flex;"><div style="height: 35px; width: 35px; border-radius: calc(8.07692px); padding: calc(4.03846px);"><img src="${rc.genAvatarSvg(item.name, 28)}"/></div><div style="text-align: left;"><div>${item.name}</div><div>${item.agent_data.email}</div></div></div>`
+}
 
+const addParticipant = (e, obj)=>{
+    if(obj.dataset.invited) return
+
+    const payload = {
+        agent_id: obj.id,
+    }
+
+    document.getElementById("participantsSelect").disabled = true
+
+    fetch("/api/v1/add_participant", { 
+        method: 'POST',
+        headers: {
+            "Content-Type": "application/json",
+          },
+        body: JSON.stringify(payload)
+     })
+     .then(()=>{
+        document.getElementById("participantsSelect").disabled = false
+        const span = document.createElement('span')
+        span.innerHTML = 'Invited'
+        const el = document.getElementById(obj.id)
+        obj.appendChild(span)
+        el.style.cursor = 'not-allowed'
+        el.setAttribute('data-invited', true)
+     })
+     .catch(err=>console.error(err))
+}
 const SUCCESS=200;
 
 async function onSelectChange(){
@@ -902,13 +930,12 @@ async function onSelectChange(){
     const searchTerm = searchInput.value?.toLowerCase();
     selectOptions.innerHTML = `<div class="select-option">loading...</div>`;
     try{
-        const res= await fetch(`https://api-apollo4.dev.cogoport.io/communication/listchat_agents?filters%5Bstatus_not%5D=inactive&filters%5Bq%5D=${searchTerm}&sort_by=agent_type`, {
+        const res= await fetch(`https://api-apollo4.dev.cogoport.io/communication/list_chat_agents?filters%5Bstatus_not%5D=inactive&filters%5Bq%5D=${searchTerm}&sort_by=agent_type`, {
         headers: {
           authorization: `Bearer: ${getCookie('cogo_auth_token')}`,
           authorizationscope: "partner",
           'Content-Type': 'application/json',
           'Accept': 'application/json',
-          authorizationparameters:'cogo_one-omni_channel:all',
         },
         method: "GET",
         mode: "cors",
@@ -917,17 +944,19 @@ async function onSelectChange(){
       
       const parsedRes = await res.json();
       
-      if(parsedRes?.status!==SUCCESS){
-        throw new Error('something went wrong');
-      }
+    //   if(parsedRes?.status!==SUCCESS){
+    //     throw new Error('something went wrong');
+    //   }
       
       selectOptions.innerHTML = '';
       parsedRes?.list?.forEach((eachList) => {
             const optionElement = document.createElement("div");
             optionElement.classList.add("select-option");
             optionElement.setAttribute('id',eachList?.agent_id);
-
-            optionElement.textContent = eachList?.name;
+            optionElement.setAttribute('onClick', "addParticipant(event, this)");
+            optionElement.style.display = "flex"
+            optionElement.style.justifyContent= "space-between"
+            optionElement.innerHTML = participantHTML(eachList)
             
             selectOptions.appendChild(optionElement);
     });
@@ -2870,6 +2899,7 @@ async function getParticipantsTable(peers) {
     <div>
         <input
             id="searchParticipants"
+            class="searchParticipants"
             type="text"
             placeholder=" 🔍 Search participants ..."
             name="search"

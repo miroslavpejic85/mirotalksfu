@@ -418,6 +418,31 @@ function startServer() {
         });
     });
 
+    app.post(['/api/v1/add_participant'], async (req, res) => {
+
+        const meeting_cookies = req.cookies?.meeting_data;
+
+        if (meeting_cookies) {
+            const meeting_data = JSON.parse(meeting_cookies || '{}');
+            const { meeting_id, user_id, user_name = '' } = meeting_data;
+
+            if (meeting_id && user_id) {
+                api_calls.videoCallAction({
+                    user_ids: [req.body.agent_id], 
+                    meeting_id: meeting_id, 
+                    video_call_action: 'add_in_meeting', 
+                    additional_data: {
+                        created_by:  user_name,
+                        created_by_id: user_id,
+                    }
+                })
+                return res.end(JSON.stringify({ success: true }));
+            }
+        }
+
+        return res.end(JSON.stringify({ success: false, error: "meeting not found" }));
+    });
+
     // ####################################################
     // SLACK API
     // ####################################################
