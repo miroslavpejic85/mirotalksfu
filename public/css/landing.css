@@ -1645,6 +1645,13 @@ main {
 .footer-links li + li {
     margin-left: 24px;
 }
+.footer-social-icon {
+    transform: scale(1);
+    transition: transform 0.2s;
+}
+.footer-social-icon:hover {
+    transform: scale(2);
+}
 @media (min-width: 641px) {
     .site-footer {
         margin-top: 20px;
