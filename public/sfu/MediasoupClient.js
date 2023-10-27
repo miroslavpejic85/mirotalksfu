@@ -35,14 +35,9 @@
         1: [
             function (require, module, exports) {
                 'use strict';
-                var __importDefault =
-                    (this && this.__importDefault) ||
-                    function (mod) {
-                        return mod && mod.__esModule ? mod : { default: mod };
-                    };
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Logger = void 0;
-                const debug_1 = __importDefault(require('debug'));
+                const debug_1 = require('debug');
                 const LIB_NAME = 'awaitqueue';
                 class Logger {
                     constructor(prefix) {
@@ -88,7 +83,7 @@
                  */
                 class AwaitQueueStoppedError extends Error {
                     constructor(message) {
-                        super(message !== null && message !== void 0 ? message : 'AwaitQueue stopped');
+                        super(message ?? 'AwaitQueue stopped');
                         this.name = 'AwaitQueueStoppedError';
                         // @ts-ignore
                         if (typeof Error.captureStackTrace === 'function') {
@@ -104,7 +99,7 @@
                  */
                 class AwaitQueueRemovedTaskError extends Error {
                     constructor(message) {
-                        super(message !== null && message !== void 0 ? message : 'AwaitQueue task removed');
+                        super(message ?? 'AwaitQueue task removed');
                         this.name = 'AwaitQueueRemovedTaskError';
                         // @ts-ignore
                         if (typeof Error.captureStackTrace === 'function') {
@@ -127,7 +122,7 @@
                         return this.pendingTasks.size;
                     }
                     async push(task, name) {
-                        name = name !== null && name !== void 0 ? name : task.name;
+                        name = name ?? task.name;
                         logger.debug(`push() [name:${name}]`);
                         if (typeof task !== 'function') {
                             throw new TypeError('given task is not a function');
@@ -12794,7 +12789,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.6.102';
+                exports.version = '3.6.103';
                 /**
                  * Expose parseScalabilityMode() function.
                  */

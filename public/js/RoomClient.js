@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.3
+ * @version 1.1.4
  *
  */
 
@@ -344,6 +344,8 @@ class RoomClient {
     async handleRoomInfo(room) {
         console.log('07.0 ----> Room Survey', room.survey);
         survey = room.survey;
+        console.log('07.0 ----> Room Leave Redirect', room.redirect);
+        redirect = room.redirect;
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
         for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {

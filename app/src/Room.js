@@ -17,6 +17,7 @@ module.exports = class Room {
         this._roomPassword = null;
         this._hostOnlyRecording = false;
         this.survey = config.survey;
+        this.redirect = config.redirect;
         this.peers = new Map();
         this.router = null;
         this.createTheRouter();
@@ -110,6 +111,7 @@ module.exports = class Room {
                 hostOnlyRecording: this._hostOnlyRecording,
             },
             survey: this.survey,
+            redirect: this.redirect,
             peers: JSON.stringify([...this.peers]),
         };
     }

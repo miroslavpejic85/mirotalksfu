@@ -119,6 +119,15 @@ module.exports = {
         enabled: false,
         url: '',
     },
+    redirect: {
+        /*
+        Redirect URL on leave room
+            Upon leaving the room, users who either opt out of providing feedback or if the survey is disabled 
+            will be redirected to a specified URL. If enabled false the default '/newroom' URL will be used.
+        */
+        enabled: false,
+        url: '',
+    },
     stats: {
         /*
             Umami: https://github.com/umami-software/umami
