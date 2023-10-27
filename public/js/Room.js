@@ -2143,7 +2143,7 @@ function handleRoomClientEvents() {
         if (survey && survey.enabled) {
             leaveFeedback();
         } else {
-            redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
+            redirectOnLeave();
         }
     });
 }
@@ -2169,9 +2169,13 @@ function leaveFeedback() {
         if (result.isConfirmed) {
             openURL(survey.url);
         } else {
-            openURL('/newroom');
+            redirectOnLeave();
         }
     });
+}
+
+function redirectOnLeave() {
+    redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
 }
 
 function userLog(icon, message, position, timer = 3000) {
