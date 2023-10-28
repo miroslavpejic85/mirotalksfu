@@ -476,7 +476,9 @@ function startServer() {
                 mediasoup_client_version: mediasoupClient.version,
                 ip_lookup_enabled: config.IPLookup.enabled,
                 sentry_enabled: sentryEnabled,
+                redirect_enabled: config.redirect.enabled,
                 slack_enabled: slackEnabled,
+                stats_enabled: config.stats.enabled,
                 chatGPT_enabled: config.chatGPT.enabled,
             });
         } catch (err) {
@@ -518,7 +520,9 @@ function startServer() {
             mediasoup_client_version: mediasoupClient.version,
             ip_lookup_enabled: config.IPLookup.enabled,
             sentry_enabled: sentryEnabled,
+            redirect_enabled: config.redirect.enabled,
             slack_enabled: slackEnabled,
+            stats_enabled: config.stats.enabled,
             chatGPT_enabled: config.chatGPT.enabled,
         });
     });
