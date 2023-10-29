@@ -355,6 +355,11 @@ body {
     cursor: pointer;
 }
 
+#recImage:hover {
+    transform: scale(0.95);
+    transition: all 0.3s ease-in-out;
+}
+
 /*--------------------------------------------------------------
 # Settings Table
 --------------------------------------------------------------*/
