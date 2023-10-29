@@ -347,6 +347,14 @@ body {
     color: white;
 }
 
+#recImage {
+    width: 128px;
+    height: auto;
+    margin-bottom: 10px;
+    margin-top: 5px;
+    cursor: pointer;
+}
+
 /*--------------------------------------------------------------
 # Settings Table
 --------------------------------------------------------------*/

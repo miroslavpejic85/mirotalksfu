@@ -172,6 +172,7 @@ function initClient() {
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
+        setTippy('recImage', 'Toggle recording', 'right');
         setTippy('roomRecording', 'Only the host (presenter) has the capability to record the meeting', 'bottom');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
@@ -1270,6 +1271,9 @@ function handleButtons() {
     };
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
+    };
+    recImage.onclick = () => {
+        isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
         rc.startRecording();
