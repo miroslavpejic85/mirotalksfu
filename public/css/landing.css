@@ -1946,6 +1946,17 @@ main {
     }
 }
 
+.powered-container {
+    display: inline-flex;
+    padding: 10px;
+}
+.powered-element {
+    margin-right: 20px;
+}
+.powered-element:last-child {
+    margin-right: 0;
+}
+
 /*--------------------------------------------------------------
 # Last room link
 --------------------------------------------------------------*/
