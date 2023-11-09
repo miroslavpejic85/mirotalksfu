@@ -172,10 +172,10 @@
     border-radius: '10px';
 }
 
-.container {
+.init-container {
     position: relative;
 }
-.container video {
+.init-container video {
     z-index: 0;
     position: relative;
     height: 240px;

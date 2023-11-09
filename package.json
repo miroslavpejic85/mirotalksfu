@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.1.4",
+    "version": "1.2.0",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -34,9 +34,9 @@
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "dependencies": {
-        "@sentry/integrations": "7.75.1",
-        "@sentry/node": "7.75.1",
-        "axios": "^1.6.0",
+        "@sentry/integrations": "7.79.0",
+        "@sentry/node": "7.79.0",
+        "axios": "^1.6.1",
         "body-parser": "1.20.2",
         "colors": "1.4.0",
         "compression": "1.7.4",
@@ -47,7 +47,7 @@
         "mediasoup": "3.12.16",
         "mediasoup-client": "3.6.103",
         "ngrok": "^4.3.3",
-        "openai": "^4.14.0",
+        "openai": "^4.17.0",
         "qs": "6.11.2",
         "socket.io": "4.7.2",
         "swagger-ui-express": "5.0.0",

@@ -1,0 +1,353 @@
+.container {
+    padding: 2px !important;
+    transition: width 0.5s !important;
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+}
+
+/* Chat Room */
+.chat-container {
+    z-index: 5;
+    position: relative;
+    width: var(--msger-width);
+    height: var(--msger-height);
+    min-width: var(--msger-width);
+    min-height: var(--msger-height);
+    padding: 3px;
+    background: var(--msger-bg);
+    border: var(--border);
+    border-radius: 10px;
+    box-shadow: var(--box-shadow);
+    transition: background 1s;
+    /* border: 1px solid lime; */
+}
+
+/* Chat app container */
+.chat-app {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    /* overflow-y: auto;
+    overflow-x: hidden; */
+    /* border: 1px solid lime; */
+}
+
+/* Chat app people container */
+.chat-app .people-list {
+    z-index: 6;
+    position: absolute;
+    padding: 20px;
+    top: 0;
+    left: 0;
+    width: 300px;
+    height: 99%;
+    background: var(--msger-bg);
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* border: 1px solid lime; */
+}
+
+/* Chat app people list container */
+.people-list {
+    -moz-transition: 0.5s;
+    -o-transition: 0.5s;
+    -webkit-transition: 0.5s;
+    transition: 0.5s;
+    /* border: 1px solid lime; */
+}
+
+.people-list .chat-list li {
+    padding: 10px 15px;
+    list-style: none;
+    border-radius: 3px;
+}
+
+.people-list .chat-list li:hover {
+    background: rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+.people-list .chat-list li.active {
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.people-list .chat-list li .name {
+    color: #fff;
+    font-size: 15px;
+}
+
+.people-list .chat-list img {
+    width: 45px;
+    border-radius: 50%;
+}
+
+.people-list img {
+    float: left;
+    border-radius: 50%;
+}
+
+.people-list .about {
+    float: left;
+    padding-left: 8px;
+}
+
+.people-list .about-buttons {
+    margin-top: 10px;
+    display: inline-flex;
+}
+
+.people-list .status {
+    color: #999;
+    font-size: 13px;
+}
+
+/* Chat app people list container */
+.chat-app .chat-list {
+    height: 550px;
+    /* border: 1px solid lime; */
+}
+
+/* Chat app container */
+.chat-app .chat {
+    position: relative;
+    margin-left: 300px;
+    border-left: var(--border);
+    border-radius: 10px;
+    /* border: 1px solid lime; */
+}
+
+/* Chat header */
+.chat .chat-header {
+    padding: 15px 20px; /* top, right, bottom, left */
+    border-bottom: var(--border);
+    height: 70px;
+    max-height: 70px;
+    cursor: move;
+    /* overflow-x: auto; */
+    /* border: 1px solid lime; */
+}
+
+.all-participants-img {
+    border: var(--border);
+    width: 40px;
+    margin-right: 5px;
+    cursor: pointer;
+}
+
+.all-participants-img:hover {
+    background-color: #000000;
+    transition: all 0.3s ease-in-out;
+}
+
+.chat .chat-header img {
+    float: left;
+    border-radius: 40px;
+    width: 40px;
+}
+
+.chat .chat-header .chat-about {
+    float: left;
+    padding-left: 10px;
+    color: #fff;
+}
+
+.chat .chat-header .status {
+    color: #999;
+    font-size: 13px;
+}
+
+/* Chat history */
+.chat .chat-history {
+    padding: 20px;
+    min-height: 500px;
+    max-height: 500px;
+    border-bottom: var(--border);
+    overflow-x: auto;
+    /* border: 1px solid lime; */
+}
+
+.chat .chat-history ul {
+    padding: 0;
+}
+
+.chat .chat-history ul li {
+    list-style: none;
+    margin-bottom: 30px;
+}
+
+.chat .chat-history ul li:last-child {
+    margin-bottom: 0px;
+}
+
+.chat .chat-history .message-data {
+    margin-bottom: 15px;
+}
+
+.chat .chat-history .message-data img {
+    border-radius: 40px;
+    width: 40px;
+}
+
+.chat .chat-history .message-data-time {
+    color: #eeeeee;
+    padding-left: 6px;
+}
+
+/* chat message bubble */
+.chat .chat-history .message {
+    color: #fff;
+    padding: 18px 20px;
+    line-height: 26px;
+    font-size: 16px;
+    max-width: 100%;
+    border-radius: 7px;
+    display: inline-block;
+    position: relative;
+    /* border: 1px solid lime;  */
+}
+
+.chat .chat-history .message:after {
+    bottom: 100%;
+    left: 7%;
+    border: solid transparent;
+    content: ' ';
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-bottom-color: grey;
+    border-width: 10px;
+    margin-left: -10px;
+}
+
+.chat .chat-history .my-message {
+    background: var(--right-msg-bg);
+}
+
+.chat .chat-history .my-message:after {
+    bottom: 100%;
+    left: 30px;
+    border: solid transparent;
+    content: ' ';
+    height: 0;
+    width: 0;
+    position: absolute;
+    pointer-events: none;
+    border-bottom-color: #999;
+    border-width: 10px;
+    margin-left: -10px;
+}
+
+.chat .chat-history .other-message {
+    background: var(--left-msg-bg);
+    text-align: right;
+}
+
+.chat .chat-history .other-message:after {
+    border-bottom-color: grey;
+    left: 93%;
+}
+
+/* Chat message */
+.chat .chat-message {
+    padding: 20px;
+    height: 130px;
+    max-height: 130px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    /* border: 1px solid lime; */
+}
+
+/* Chat emoji */
+.chatEmojiPicker {
+    z-index: 0;
+    position: absolute;
+    left: 5px;
+    bottom: 135px;
+}
+
+/* status */
+.online,
+.offline,
+.me {
+    margin-right: 2px;
+    font-size: 8px;
+    vertical-align: middle;
+}
+
+.online {
+    color: #86c541;
+}
+.offline {
+    color: #e47297;
+}
+.me {
+    color: #1d8ecd;
+}
+
+.float-right {
+    float: right;
+}
+.float-left {
+    float: left;
+}
+
+.inline {
+    display: inline-flex;
+}
+
+.absolute {
+    position: absolute;
+}
+
+.clearfix:after {
+    visibility: hidden;
+    display: block;
+    font-size: 0;
+    content: ' ';
+    clear: both;
+    height: 0;
+}
+
+/** common **/
+.mt5 {
+    margin-top: 5px;
+}
+
+.mt10 {
+    margin-top: 10px;
+}
+
+.mr5 {
+    margin-right: 5px;
+}
+
+.ml5 {
+    margin-left: 5px;
+}
+
+.ml10 {
+    margin-left: 10px;
+}
+
+/* Chat search and input message */
+textarea,
+input[type='text'] {
+    background: var(--msger-bg) !important;
+    color: #fff !important;
+    transition: height 0.5s !important;
+}
+
+.form-check-input {
+    cursor: pointer;
+}
+
+.hr {
+    border: 0;
+    display: block;
+    height: 1px;
+    background: #000000;
+    margin-top: 0px;
+    margin-bottom: 10px;
+}

@@ -35,6 +35,7 @@
 
         <link rel="stylesheet" href="../css/Room.css" />
         <link rel="stylesheet" href="../css/VideoGrid.css" />
+        <link rel="stylesheet" href="../css/GroupChat.css" />
 
         <!-- https://cdnjs.com/libraries/font-awesome -->
 
@@ -108,7 +109,7 @@ access to use this app.
         <section>
             <div id="initUser" class="init-user hidden">
                 <!-- <p>Please allow the camera & microphone access to use this app.</p> -->
-                <div class="container">
+                <div class="init-container">
                     <video
                         id="initVideo"
                         playsinline="true"
@@ -118,15 +119,21 @@ access to use this app.
                         style="object-fit: contain"
                     ></video>
                 </div>
-                <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
-                <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-                <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
-                <button id="initStartScreenButton" class="hidden" onclick="toggleScreenSharing()">
-                    <i class="fas fa-desktop"></i>
-                </button>
-                <button id="initStopScreenButton" class="hidden" onclick="toggleScreenSharing()">
-                    <i class="fas fa-stop-circle"></i>
-                </button>
+                <div>
+                    <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
+                    <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
+                    <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
+                    <button
+                        id="initStartScreenButton"
+                        class="fas fa-desktop hidden"
+                        onclick="toggleScreenSharing()"
+                    ></button>
+                    <button
+                        id="initStopScreenButton"
+                        class="fas fa-stop-circle hidden"
+                        onclick="toggleScreenSharing()"
+                    ></button>
+                </div>
                 <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
                 <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
                 <select id="initSpeakerSelect" class="form-select text-light bg-dark"></select>
@@ -150,7 +157,6 @@ access to use this app.
             <button id="roomEmojiPicker" class="hidden"><i class="fas fa-face-smile"></i></button>
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
             <button id="transcriptionButton" class="hidden"><i class="fas fa-closed-captioning"></i></button>
-            <button id="participantsButton" class="hidden"><i class="fas fa-users"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
             <button id="aboutButton" class="hidden"><i class="fas fa-question"></i></button>
@@ -799,19 +805,6 @@ access to use this app.
             <button id="receiveHideBtn"><i class="fas fa-eye-slash"></i>&nbsp; Hide</button>
         </div>
 
-        <section id="participants" class="fadein center hidden">
-            <header id="participantsHeader" class="participants-header">
-                <div class="participants-header-options">
-                    <button id="participantsCloseBtn" class="fas fa-times"></button>
-                    <button id="participantsSaveBtn" class="hidden"><i class="fas fa-save"></i></button>
-                </div>
-                <div id="participantsTitle" class="participants-header-title"></div>
-            </header>
-            <main>
-                <div id="roomParticipants"></div>
-            </main>
-        </section>
-
         <section id="whiteboard" class="fadein center hidden">
             <header id="whiteboardHeader" class="whiteboard-header">
                 <div id="whiteboardTitle" class="whiteboard-header-title">
@@ -856,76 +849,201 @@ access to use this app.
             </main>
         </section>
 
-        <section id="chatRoom" class="chat-room fadein">
-            <section id="msger" class="msger">
-                <header id="chatHeader" class="chat-header">
-                    <div class="chat-header-title">
-                        <button id="chatCloseButton" class="fas fa-times"></button>
-                        <button id="chatTogglePin" class="hidden"><i class="fas fa-map-pin"></i></button>
-                        <button id="chatMaxButton" class="hidden"><i class="fas fa-expand"></i></button>
-                        <button id="chatMinButton" class="hidden"><i class="fas fa-compress"></i></button>
-                        <div style="margin-left: 10px" class="title">
-                            <i class="fa-solid fa-eye"></i>
-                            <div style="margin-left: 5px" class="form-check form-switch form-switch-md">
-                                <input class="form-check-input" type="checkbox" id="showChatOnMsg" checked />
+        <!-- CHAT ROOM CONTAINER -->
+        <section id="chatRoom" class="chat-container container fadein hidden">
+            <!-- CHAT APP -->
+            <div class="chat-app">
+                <!-- CHAT PEOPLE LIST -->
+                <div id="plist" class="people-list">
+                    <!-- CHAT LIST OPTIONS -->
+                    <div>
+                        <button id="chatShareRoomBtn"><i class="fas fa-user-plus"></i> Invite user</button>
+                        <button id="chatHideParticipantsList" class="float-right">
+                            <i class="fa-solid fa-circle-arrow-left"></i>
+                        </button>
+                        <button id="participantsUnreadMessagesBtn" class="float-right">
+                            <i class="fa-solid fa-comments"></i>
+                        </button>
+                        <button id="participantsSaveBtn" class="float-right hidden">
+                            <i class="fas fa-save"></i>
+                        </button>
+                    </div>
+                    <br />
+
+                    <!-- CHAT SEARCH -->
+                    <div class="input-group mt5">
+                        <span class="input-group-text"><i class="fa fa-search"></i></span>
+                        <input
+                            id="searchParticipantsFromList"
+                            type="text"
+                            class="form-control"
+                            placeholder="Search..."
+                            maxlength="36"
+                        />
+                    </div>
+
+                    <!-- CHAT LIST -->
+                    <ul id="participantsList" class="list-unstyled chat-list mt-2 mb-0"></ul>
+                </div>
+
+                <!-- CHAT -->
+                <div id="chat" class="chat">
+                    <!-- CHAT HEADER -->
+                    <div id="chatHeader" class="chat-header clearfix">
+                        <div class="w-100">
+                            <!-- CHAT ABOUT -->
+                            <div id="chatAbout" class="text-start">
+                                <img
+                                    class="all-participants-img"
+                                    id="chatShowParticipantsList"
+                                    src="../images/participants.png"
+                                    alt="participants"
+                                />
+                                <a data-toggle="modal" data-target="#view_info">
+                                    <img src="../images/all.png" alt="avatar" />
+                                </a>
+                                <div class="chat-about">
+                                    <h6 class="mb-0">Public chat</h6>
+                                </div>
                             </div>
-                        </div>
-                        <div id="speechMsgDiv" class="title">
-                            <i class="fas fa-volume-high"></i>
-                            <div style="margin-left: 5px" class="form-check form-switch form-switch-md">
-                                <input class="form-check-input" type="checkbox" id="speechIncomingMsg" />
+
+                            <!-- CHAT OPTIONS -->
+                            <div style="position: absolute; z-index: 5; right: 50px; top: 20px">
+                                <button id="chatTogglePin" class="hidden">
+                                    <i class="fas fa-map-pin"></i>
+                                </button>
+                                <button id="chatMaxButton" class="hidden">
+                                    <i class="fas fa-expand"></i>
+                                </button>
+                                <button id="chatMinButton" class="hidden">
+                                    <i class="fas fa-compress"></i>
+                                </button>
+                                <button id="chatCloseButton">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+
+                            <!-- CHAT MORE OPTIONS -->
+                            <div style="position: absolute; z-index: 5; right: 5px; top: 20px">
+                                <div class="dropdown">
+                                    <button
+                                        class="dropdown-toggle"
+                                        type="button"
+                                        id="chatDropDownMenu"
+                                        data-bs-toggle="dropdown"
+                                        aria-expanded="false"
+                                    >
+                                        <i class="fas fa-bars"></i>
+                                    </button>
+                                    <ul class="dropdown-menu text-start" aria-labelledby="chatDropDownMenu">
+                                        <li>
+                                            <hr class="hr" />
+                                            <div class="title ml10">
+                                                <i class="fa-solid fa-eye"></i>
+                                                <div class="form-check form-switch form-switch-md ml10">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        id="showChatOnMsg"
+                                                        checked
+                                                    />
+                                                </div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <hr class="hr" />
+                                            <div id="speechMsgDiv" class="title ml10">
+                                                <i class="fas fa-volume-high"></i>
+                                                <div class="form-check form-switch form-switch-md ml10">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        id="speechIncomingMsg"
+                                                    />
+                                                </div>
+                                            </div>
+                                            <hr class="hr" />
+                                        </li>
+                                        <li>
+                                            <button id="chatGhostButton" class="btn-sm">
+                                                <i class="fas fa-circle-half-stroke"></i> Toggle bg
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button id="chatSaveButton" class="btn-sm">
+                                                <i class="fas fa-save"></i> Save messages
+                                            </button>
+                                        </li>
+                                        <li>
+                                            <button id="chatCleanButton" class="btn-sm">
+                                                <i class="fas fa-trash"></i> Clean messages
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="chat-header-options">
-                        <button id="chatGhostButton" class="fas fa-circle-half-stroke"></button>
-                        <button id="chatSaveButton" class="fas fa-save"></button>
-                        <button id="chatCleanButton" class="fas fa-trash"></button>
+
+                    <!-- CHAT HISTORY -->
+                    <div id="chatHistory" class="chat-history">
+                        <!-- CHAT MESSAGES -->
+                        <ul id="chatGPTMessages" class="mb-0"></ul>
+                        <ul id="chatPublicMessages" class="mb-0"></ul>
+                        <ul id="chatPrivateMessages" class="mb-0"></ul>
+
+                        <!-- CHAT EMOJI -->
+                        <div id="chatEmoji" class="hidden fadein chatEmojiPicker"></div>
                     </div>
-                </header>
-                <main id="chatMsger" class="chat-msger">
-                    <!-- chat messages -->
-                </main>
-                <div class="chat-msger-inputarea">
-                    <textarea
-                        rows="1"
-                        cols="1"
-                        id="chatMessage"
-                        class="chat-msger-input"
-                        placeholder="💬 Write a message..."
-                    ></textarea>
+
+                    <!-- CHAT MESSAGE -->
+                    <div class="chat-message clearfix">
+                        <!-- CHAT MESSAGE INPUT -->
+                        <div class="input-group mb-0 w-100">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text"><i class="fas fa-message"></i></span>
+                                <textarea
+                                    id="chatMessage"
+                                    class="form-control"
+                                    placeholder="Enter text here..."
+                                    rows="1"
+                                ></textarea>
+                                <!-- <input 
+                                    id="chatMessage" 
+                                    type="text" 
+                                    class="form-control" 
+                                    placeholder="Enter text here..."
+                                > -->
+                            </div>
+                        </div>
+
+                        <!-- CHAT MESSAGE OPTIONS  -->
+                        <div class="mt10">
+                            <button id="chatEmojiButton" class="float-left mr5 hidden">
+                                <i class="fas fa-smile"></i>
+                            </button>
+                            <button id="chatMarkdownButton" class="float-left mr5 hidden">
+                                <i class="fab fa-markdown"></i>
+                            </button>
+                            <button id="chatSpeechStartButton" class="float-left mr5 hidden">
+                                <i class="fas fa-microphone-slash"></i>
+                            </button>
+                            <button id="chatSpeechStopButton" class="float-left mr5 hidden">
+                                <i class="fas fa-microphone"></i>
+                            </button>
+                            <button id="chatPasteButton" class="float-left mr5 hidden">
+                                <i class="fas fa-paste"></i>
+                            </button>
+                            <button id="chatCleanTextButton" class="float-left mr5 hidden">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                            <button id="chatSendButton" class="float-right hidden">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
                 </div>
-                <div class="chat-msger-buttons">
-                    <button id="chatEmojiButton" class="hidden">
-                        <i class="fas fa-smile"></i>
-                    </button>
-                    <button id="chatMarkdownButton" class="hidden">
-                        <i class="fab fa-markdown"></i>
-                    </button>
-                    <button id="chatGPTButton" class="hidden">
-                        <i class="fas fa-robot"></i>
-                    </button>
-                    <button id="chatShareFileButton" class="hidden">
-                        <i class="fas fa-paperclip"></i>
-                    </button>
-                    <button id="chatSpeechStartButton" class="hidden">
-                        <i class="fas fa-microphone-slash"></i>
-                    </button>
-                    <button id="chatSpeechStopButton" class="hidden">
-                        <i class="fas fa-microphone"></i>
-                    </button>
-                    <button id="chatCleanTextButton" class="hidden">
-                        <i class="fas fa-trash"></i>
-                    </button>
-                    <button id="chatPasteButton" class="hidden">
-                        <i class="fas fa-paste"></i>
-                    </button>
-                    <button id="chatSendButton" class="hidden">
-                        <i class="fas fa-paper-plane"></i>
-                    </button>
-                </div>
-                <div id="chatEmoji" class="hidden fadein chatEmojiPicker"></div>
-            </section>
+            </div>
         </section>
 
         <section id="transcriptionRoom" class="transcription-room fadein">

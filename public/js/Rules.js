@@ -18,7 +18,6 @@ const BUTTONS = {
         swapCameraButton: true,
         chatButton: true,
         transcriptionButton: true,
-        participantsButton: true,
         whiteboardButton: true,
         emojiRoomButton: true,
         settingsButton: true,
@@ -67,8 +66,6 @@ const BUTTONS = {
         chatSaveButton: true,
         chatEmojiButton: true,
         chatMarkdownButton: true,
-        chatGPTButton: true,
-        chatShareFileButton: true,
         chatSpeechStartButton: true,
     },
     participantsList: {
@@ -118,7 +115,7 @@ function handleRules(isPresenter) {
         isLobbyEnabled = lsSettings.lobby;
         switchLobby.checked = isLobbyEnabled;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
-        // ROom host-only-recording
+        // Room host-only-recording
         hostOnlyRecording = lsSettings.host_only_recording;
         switchHostOnlyRecording.checked = hostOnlyRecording;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);

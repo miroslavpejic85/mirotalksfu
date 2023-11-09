@@ -29,8 +29,6 @@ const commands = {
     chatSend: 'send',
     chatOff: 'close the chat',
     toggleTr: 'toggle transcription',
-    chatGPTOn: 'open chatGPT',
-    chatGPTOff: 'close chatGPT',
     whiteboardOn: 'open the whiteboard',
     whiteboardOff: 'close the whiteboard',
     recordingOn: 'start the recording',
@@ -203,14 +201,6 @@ function execVoiceCommands(transcript) {
             printCommand(commands.whiteboardOn);
             whiteboardButton.click();
             break;
-        case commands.chatGPTOn:
-            printCommand(commands.chatGPTOn);
-            chatGPTButton.click();
-            break;
-        case commands.chatGPTOff:
-            printCommand(commands.chatGPTOff);
-            chatGPTButton.click();
-            break;
         case commands.whiteboardOff:
             printCommand(commands.whiteboardOff);
             whiteboardCloseBtn.click();
@@ -241,11 +231,11 @@ function execVoiceCommands(transcript) {
             break;
         case commands.participantsOn:
             printCommand(commands.participantsOn);
-            participantsButton.click();
+            chatButton.click();
             break;
         case commands.participantsOff:
             printCommand(commands.participantsOff);
-            participantsCloseBtn.click();
+            chatCloseButton.click();
             break;
         case commands.participantsVideoOff:
             printCommand(commands.participantsVideoOff);

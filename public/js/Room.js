@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.4
+ * @version 1.2.0
  *
  */
 
@@ -203,15 +203,14 @@ function initClient() {
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
-        setTippy('chatGPTButton', 'ChatGPT', 'top');
-        setTippy('chatShareFileButton', 'Share file', 'top');
-        setTippy('chatCleanButton', 'Clean', 'bottom');
-        setTippy('chatSaveButton', 'Save', 'bottom');
-        setTippy('chatGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('chatTogglePin', 'Toggle pin', 'bottom');
+        setTippy('chatHideParticipantsList', 'Hide', 'bottom');
+        setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
+        setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
+        setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
         setTippy('transcriptionCloseBtn', 'Close', 'bottom');
         setTippy('transcriptionTogglePinBtn', 'Toggle pin', 'bottom');
         setTippy('transcriptionMaxBtn', 'Maximize', 'bottom');
@@ -223,8 +222,6 @@ function initClient() {
         setTippy('transcriptionCleanBtn', 'Clean', 'bottom');
         setTippy('transcriptionSpeechStart', 'Start transcription', 'top');
         setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
-        setTippy('participantsCloseBtn', 'Close', 'right');
-        setTippy('participantsSaveBtn', 'Save participants info', 'right');
     }
     setupWhiteboard();
     initEnumerateDevices();
@@ -257,7 +254,6 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
-        setTippy('participantsButton', 'Toggle participants', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('aboutButton', 'About this project', placement);
@@ -692,6 +688,7 @@ function whoAreYou() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
+            if (name.length > 15) return 'Name must be max 15 char';
             name = filterXSS(name);
             if (isHtml(name)) return 'Invalid name!';
             if (!getCookie(room_id + '_name')) {
@@ -963,13 +960,10 @@ function roomIsReady() {
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
-    BUTTONS.main.participantsButton && show(participantsButton);
     BUTTONS.main.emojiRoomButton && show(roomEmojiPicker);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
-    BUTTONS.chat.chatGPTButton && show(chatGPTButton);
-    BUTTONS.chat.chatShareFileButton && show(chatShareFileButton);
 
     isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton
         ? show(chatSpeechStartButton)
@@ -996,7 +990,6 @@ function roomIsReady() {
         rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
-        rc.makeDraggable(participants, participantsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
         rc.makeDraggable(sendFileDiv, imgShareSend);
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
@@ -1052,11 +1045,11 @@ function elemDisplay(element, display, mode = 'block') {
 }
 
 function hide(elem) {
-    elem.className = 'hidden';
+    if (!elem.classList.contains('hidden')) elem.classList.toggle('hidden');
 }
 
 function show(elem) {
-    elem.className = '';
+    if (elem.classList.contains('hidden')) elem.classList.toggle('hidden');
 }
 
 function disable(elem, disabled) {
@@ -1188,6 +1181,9 @@ function handleButtons() {
     };
     chatButton.onclick = () => {
         rc.toggleChat();
+        if (rc.isMobileDevice) {
+            rc.toggleShowParticipants();
+        }
     };
     transcriptionButton.onclick = () => {
         transcription.toggle();
@@ -1212,6 +1208,15 @@ function handleButtons() {
     };
     transcriptionCleanBtn.onclick = () => {
         transcription.delete();
+    };
+    chatHideParticipantsList.onclick = (e) => {
+        rc.toggleShowParticipants();
+    };
+    chatShowParticipantsList.onclick = (e) => {
+        rc.toggleShowParticipants();
+    };
+    chatShareRoomBtn.onclick = (e) => {
+        shareRoom(true);
     };
     chatGhostButton.onclick = (e) => {
         rc.chatToggleBg();
@@ -1249,13 +1254,6 @@ function handleButtons() {
     chatMarkdownButton.onclick = () => {
         isChatMarkdownOn = !isChatMarkdownOn;
         setColor(chatMarkdownButton, isChatMarkdownOn ? 'lime' : 'white');
-    };
-    chatGPTButton.onclick = () => {
-        isChatGPTOn = !isChatGPTOn;
-        setColor(chatGPTButton, isChatGPTOn ? 'lime' : 'white');
-    };
-    chatShareFileButton.onclick = () => {
-        fileShareButton.click();
     };
     chatSpeechStartButton.onclick = () => {
         startSpeech();
@@ -1403,14 +1401,14 @@ function handleButtons() {
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
     };
-    participantsButton.onclick = () => {
-        getRoomParticipants();
-    };
-    participantsCloseBtn.onclick = () => {
-        toggleParticipants();
-    };
     participantsSaveBtn.onclick = () => {
         saveRoomPeers();
+    };
+    participantsUnreadMessagesBtn.onclick = () => {
+        rc.toggleUnreadMsg();
+    };
+    searchParticipantsFromList.onkeyup = () => {
+        rc.searchPeer();
     };
     lockRoomButton.onclick = () => {
         rc.roomAction('lock');
@@ -2855,18 +2853,6 @@ function wbDrawing(status) {
 // HANDLE PARTICIPANTS
 // ####################################################
 
-function toggleParticipants() {
-    let participants = rc.getId('participants');
-    participants.classList.toggle('show');
-    participants.style.top = '50%';
-    participants.style.left = '50%';
-    if (DetectRTC.isMobileDevice) {
-        participants.style.width = '100%';
-        participants.style.height = '100%';
-    }
-    isParticipantsListOpen = !isParticipantsListOpen;
-}
-
 async function getRoomPeers() {
     let room_info = await rc.getRoomInfo();
     return new Map(JSON.parse(room_info.peers));
@@ -2882,133 +2868,207 @@ async function saveRoomPeers() {
 }
 
 async function getRoomParticipants(refresh = false) {
-    let peers = await getRoomPeers();
-    let table = await getParticipantsTable(peers);
-
+    const peers = await getRoomPeers();
+    const lists = await getParticipantsList(peers);
     participantsCount = peers.size;
-    roomParticipants.innerHTML = table;
+    participantsList.innerHTML = lists;
     refreshParticipantsCount(participantsCount, false);
-
-    if (!refresh) {
-        toggleParticipants();
-        sound('open');
-    }
-
     setParticipantsTippy(peers);
 }
 
-async function getParticipantsTable(peers) {
-    let table = `
-    <div>
-        <button
-            id="inviteParticipants"
-            onclick="shareRoom(true);"
-        ><i class="fas fa-user-plus"></i>&nbsp; Invite Someone</button>
-    </div>
-    <div>
-        <input
-            id="searchParticipants"
-            type="text"
-            placeholder=" 🔍 Search participants ..."
-            name="search"
-            maxlength="36"
-            onkeyup="rc.searchPeer();"
+async function getParticipantsList(peers) {
+    // CHAT-GPT
+    let li = `
+    <li 
+        id="ChatGPT" 
+        data-to-id="ChatGPT"
+        data-to-name="ChatGPT"
+        class="clearfix" 
+        onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', event)"
+    >
+        <img 
+            src="${image.chatgpt}"
+            alt="avatar"
         />
-    </div>
-    <table id="myTable">
-    <tr>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-        <th></th>
-    </tr>`;
-
-    if (!isRulesActive || isPresenter) {
-        table += `
-    <tr>
-        <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
-        <td>all</td>
-        <td><button id="muteAllButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff}</button></td>
-        <td><button id="hideAllButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff}</button></td>
-        <td><button id="stopAllButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff}</button></td>
-        <td></td>
-        <td><button id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile}</button></td>
-        <td><button id="sendMessageToAll" onclick="rc.sendMessageTo('all','all')">${_PEER.sendMsg}</button></td>
-        <td><button id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo}</button></td>
-        <td><button id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer}</button></td>
-    </tr>
+        <div class="about">
+            <div class="name">ChatGPT</div>
+            <div class="status"><i class="fa fa-circle online"></i> online</div>
+        </div>
+    </li>
     `;
+
+    // ALL
+    li += `
+    <li id="all"
+        data-to-id="all"
+        data-to-name="all"
+        class="clearfix active" 
+        onclick="rc.showPeerAboutAndMessages(this.id, 'all', event)"
+    >
+        <img 
+            src="${image.all}"
+            alt="avatar"
+        />
+        <div class="about">
+            <div class="name">Public chat</div>
+            <div class="status"> <i class="fa fa-circle online"></i> online ${participantsCount}</div>
+        </div>`;
+
+    // ONLY PRESENTER CAN EXECUTE THIS CMD
+    if (!isRulesActive || isPresenter) {
+        li += `
+        <div style="class="dropdown">
+            <button 
+                class="dropdown-toggle" 
+                type="button" 
+                id="${socket.id}-chatDropDownMenu" 
+                data-bs-toggle="dropdown" 
+                aria-expanded="false"
+            >
+            <!-- <i class="fas fa-bars"></i> -->
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="${socket.id}-chatDropDownMenu">
+                <li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>
+                <li><button class="btn-sm ml5" id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo} Share audio/video to all</button></li>
+                <li><button class="btn-sm ml5" id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer} Eject all participants</button></li>
+            </ul>
+        </div>
+
+        <br/>
+
+        <div class="about-buttons mt5">
+            <button class="ml5" id="muteAllButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff}</button>
+            <button class="ml5" id="hideAllButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff}</button>
+            <button class="ml5" id="stopAllButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff}</button>
+        </div>`;
     }
 
-    for (let peer of Array.from(peers.keys())) {
-        let peer_info = peers.get(peer).peer_info;
-        let peer_name = peer_info.peer_name;
-        let peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
-        let peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
-        let peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
-        let peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
-        let peer_eject = _PEER.ejectPeer;
-        let peer_sendFile = _PEER.sendFile;
-        let peer_sendMsg = _PEER.sendMsg;
-        let peer_id = peer_info.peer_id;
-        let avatarImg = getParticipantAvatar(peer_name);
-        if (socket.id === peer_id) {
-            table += `
-            <tr id='${peer_name}'>
-                <td><img src="${avatarImg}"></td>
-                <td>${peer_name} (me)</td>
-                <td><button>${peer_audio}</button></td>
-                <td><button>${peer_video}</button></td>
-                <td><button>${peer_screen}</button></td>
-                <td><button>${peer_hand}</button></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-            </tr>
-            `;
-        } else {
+    li += `
+    </li>
+    `;
+
+    // PEERS IN THE CURRENT ROOM
+    for (const peer of Array.from(peers.keys())) {
+        const peer_info = peers.get(peer).peer_info;
+        const peer_name = peer_info.peer_name;
+        const peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
+        const peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
+        const peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
+        const peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
+        const peer_eject = _PEER.ejectPeer;
+        const peer_sendFile = _PEER.sendFile;
+        const peer_id = peer_info.peer_id;
+        const avatarImg = getParticipantAvatar(peer_name);
+
+        // NOT ME
+        if (socket.id !== peer_id) {
+            // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
-                table += `
-                <tr id='${peer_id}'>
-                    <td><img src="${avatarImg}"></td>
-                    <td>${peer_name}</td>
-                    <td><button id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button></td>
-                    <td><button id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button></td>
-                    <td><button id='${peer_id}___pScreen' onclick="rc.peerAction('me',this.id,'stop')">${peer_screen}</button></td>
-                    <td><button>${peer_hand}</button></td>
-                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile}</button></td>
-                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
-                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
-                    <td><button id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject}</button></td>
-                </tr>
+                li += `
+                <li 
+                    id='${peer_id}'
+                    data-to-id="${peer_id}" 
+                    data-to-name="${peer_name}"
+                    class="clearfix" 
+                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', event)"
+                >
+                    <img
+                        src="${avatarImg}"
+                        alt="avatar" 
+                    />
+                    <div class="about">
+                        <div class="name">${peer_name}</div>
+                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
+                    </div>
+
+                    <div style="class="dropdown">
+                        <button 
+                            class="dropdown-toggle" 
+                            type="button" 
+                            id="${peer_id}-chatDropDownMenu" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                        >
+                        <!-- <i class="fas fa-bars"></i> -->
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="${peer_id}-chatDropDownMenu">
+                            <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
+                            <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>
+                            <li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>
+                        </ul>
+                    </div>
+
+                    <br/>
+
+                    <div class="about-buttons mt5"> 
+                        <button class="ml5" id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button>
+                        <button class="ml5" id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button>
+                        <button class="ml5" id='${peer_id}___pScreen' onclick="rc.peerAction('me',this.id,'stop')">${peer_screen}</button>
+                `;
+
+                if (peer_info.peer_hand) {
+                    li += `
+                        <button class="ml5" >${peer_hand}</button>`;
+                }
+
+                li += ` 
+                    </div>
+                </li>
                 `;
             } else {
-                table += `
-                <tr id='${peer_id}'>
-                    <td><img src="${avatarImg}"></td>
-                    <td>${peer_name}</td>
-                    <td><button id='${peer_id}___pAudio'>${peer_audio}</button></td>
-                    <td><button id='${peer_id}___pVideo'>${peer_video}</button></td>
-                    <td><button id='${peer_id}___pScreen'>${peer_screen}</button></td>
-                    <td><button>${peer_hand}</button></td>
-                    <td><button id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile}</button></td>
-                    <td><button id="${peer_id}___sendMessageTo" onclick="rc.sendMessageTo('${peer_id}','${peer_name}')">${peer_sendMsg}</button></td>
-                    <td><button id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo}</button></td>
-                    <td></td>
-                </tr>
+                // GUEST USER
+                li += `
+                <li 
+                    id='${peer_id}' 
+                    data-to-id="${peer_id}"
+                    data-to-name="${peer_name}"
+                    class="clearfix" 
+                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', event)"
+                >
+                <img 
+                    src="${avatarImg}"
+                    alt="avatar" 
+                />
+                    <div class="about">
+                        <div class="name">${peer_name}</div>
+                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
+                    </div>
+
+                    <div style="class="dropdown">
+                        <button 
+                            class="dropdown-toggle" 
+                            type="button" 
+                            id="${peer_id}-chatDropDownMenu" 
+                            data-bs-toggle="dropdown" 
+                            aria-expanded="false"
+                        >
+                        <!-- <i class="fas fa-bars"></i> -->
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="${peer_id}-chatDropDownMenu">
+                            <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
+                            <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
+                        </ul>
+                    </div>
+
+                    <br/>
+
+                    <div class="about-buttons mt5"> 
+                        <button class="ml5" id='${peer_id}___pAudio'>${peer_audio}</button>
+                        <button class="ml5" id='${peer_id}___pVideo'>${peer_video}</button>
+                        <button class="ml5" id='${peer_id}___pScreen'>${peer_screen}</button>
+                        `;
+                if (peer_info.peer_hand) {
+                    li += ` 
+                        <button class="ml5" >${peer_hand}</button>`;
+                }
+                li += ` 
+                    </div>
+                </li>
                 `;
             }
         }
     }
-    table += `</table>`;
-    return table;
+    return li;
 }
 
 function setParticipantsTippy(peers) {
@@ -3017,27 +3077,18 @@ function setParticipantsTippy(peers) {
         setTippy('muteAllButton', 'Mute all participants', 'top');
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('stopAllButton', 'Stop screen share to all participants', 'top');
-        setTippy('sendAllButton', 'Share file to all', 'top');
-        setTippy('sendMessageToAll', 'Send message to all', 'top');
-        setTippy('sendVideoToAll', 'Share video to all', 'top');
-        setTippy('ejectAllButton', 'Eject all participants', 'top');
         //
         for (let peer of Array.from(peers.keys())) {
-            let peer_info = peers.get(peer).peer_info;
-            let peer_id = peer_info.peer_id;
+            const peer_info = peers.get(peer).peer_info;
+            const peer_id = peer_info.peer_id;
             setTippy(peer_id + '___pAudio', 'Mute', 'top');
             setTippy(peer_id + '___pVideo', 'Hide', 'top');
             setTippy(peer_id + '___pScreen', 'Stop', 'top');
-            setTippy(peer_id + '___shareFile', 'Share file', 'top');
-            setTippy(peer_id + '___sendMessageTo', 'Send private message', 'top');
-            setTippy(peer_id + '___sendVideoTo', 'Share video', 'top');
-            setTippy(peer_id + '___pEject', 'Eject', 'top');
         }
     }
 }
 
 function refreshParticipantsCount(count, adapt = true) {
-    participantsTitle.innerHTML = `<i class="fas fa-users"></i> Participants ( ${count} )`;
     if (adapt) adaptAspectRatio(count);
 }
 
@@ -3058,8 +3109,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
-            document.documentElement.style.setProperty('--right-msg-bg', '#056162');
+            document.documentElement.style.setProperty('--left-msg-bg', '#056162');
+            document.documentElement.style.setProperty('--right-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
             document.documentElement.style.setProperty('--tab-btn-active', '#393939');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
@@ -3073,8 +3124,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#252d31');
-            document.documentElement.style.setProperty('--right-msg-bg', '#056162');
+            document.documentElement.style.setProperty('--left-msg-bg', '#056162');
+            document.documentElement.style.setProperty('--right-msg-bg', '#252d31');
             document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
             document.documentElement.style.setProperty('--tab-btn-active', '#666');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
@@ -3088,8 +3139,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#003934');
-            document.documentElement.style.setProperty('--right-msg-bg', '#001E1A');
+            document.documentElement.style.setProperty('--left-msg-bg', '#001E1A');
+            document.documentElement.style.setProperty('--right-msg-bg', '#003934');
             document.documentElement.style.setProperty('--select-bg', '#001E1A');
             document.documentElement.style.setProperty('--tab-btn-active', '#003934');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
@@ -3103,8 +3154,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#306bac, #141B41)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#306bac');
-            document.documentElement.style.setProperty('--right-msg-bg', '#141B41');
+            document.documentElement.style.setProperty('--left-msg-bg', '#141B41');
+            document.documentElement.style.setProperty('--right-msg-bg', '#306bac');
             document.documentElement.style.setProperty('--select-bg', '#141B41');
             document.documentElement.style.setProperty('--tab-btn-active', '#306bac');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
@@ -3118,8 +3169,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#69140E');
-            document.documentElement.style.setProperty('--right-msg-bg', '#3C1518');
+            document.documentElement.style.setProperty('--left-msg-bg', '#3C1518');
+            document.documentElement.style.setProperty('--right-msg-bg', '#69140E');
             document.documentElement.style.setProperty('--select-bg', '#3C1518');
             document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');

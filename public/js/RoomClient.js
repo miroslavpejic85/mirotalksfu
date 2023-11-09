@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.1.4
+ * @version 1.2.0
  *
  */
 
@@ -80,6 +80,8 @@ const image = {
     feedback: '../images/feedback.png',
     lobby: '../images/lobby.png',
     email: '../images/email.png',
+    chatgpt: '../images/chatgpt.png',
+    all: '../images/all.png',
 };
 
 const mediaType = {
@@ -183,6 +185,8 @@ class RoomClient {
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
         this.isChatPinned = false;
+        this.isChatMaximized = false;
+        this.isToggleUnreadMsg = false;
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
@@ -2919,20 +2923,41 @@ class RoomClient {
         }
     }
 
-    toggleChat() {
-        let chatRoom = this.getId('chatRoom');
-        if (this.isChatOpen == false) {
-            chatRoom.style.display = 'block';
+    async toggleChat() {
+        const chatRoom = this.getId('chatRoom');
+        chatRoom.classList.toggle('show');
+        if (!this.isChatOpen) {
+            await getRoomParticipants(true);
             hide(chatMinButton);
-            show(chatMaxButton);
+            if (!this.isMobileDevice) {
+                show(chatMaxButton);
+            }
             this.chatCenter();
             this.sound('open');
-            this.isChatOpen = true;
-        } else {
-            chatRoom.style.display = 'none';
-            this.isChatOpen = false;
+            this.showPeerAboutAndMessages('all', 'all');
         }
+        isParticipantsListOpen = !isParticipantsListOpen;
+        this.isChatOpen = !this.isChatOpen;
         if (this.isChatPinned) this.chatUnpin();
+    }
+
+    toggleShowParticipants() {
+        const plist = this.getId('plist');
+        const chat = this.getId('chat');
+        const chatHistory = this.getId('chatHistory');
+        plist.classList.toggle('hidden');
+        const isParticipantsListHidden = plist.classList.contains('hidden');
+        chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
+        chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
+        chatHistory.style.height = isParticipantsListHidden ? 'calc(100vh - 220px)' : '500px';
+        this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
+        plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
+    }
+
+    toggleChatHistorySize(max = true) {
+        const chatHistory = this.getId('chatHistory');
+        chatHistory.style.minHeight = max ? 'calc(100vh - 220px)' : '500px';
+        chatHistory.style.maxHeight = max ? 'calc(100vh - 220px)' : '500px';
     }
 
     toggleChatPin() {
@@ -2944,22 +2969,26 @@ class RoomClient {
     }
 
     chatMaximize() {
+        this.isChatMaximized = true;
         hide(chatMaxButton);
         show(chatMinButton);
         this.chatCenter();
         document.documentElement.style.setProperty('--msger-width', '100%');
         document.documentElement.style.setProperty('--msger-height', '100%');
+        this.toggleChatHistorySize(true);
     }
 
     chatMinimize() {
+        this.isChatMaximized = false;
         hide(chatMinButton);
         show(chatMaxButton);
         if (this.isChatPinned) {
             this.chatPin();
         } else {
             this.chatCenter();
-            document.documentElement.style.setProperty('--msger-width', '420px');
-            document.documentElement.style.setProperty('--msger-height', '680px');
+            document.documentElement.style.setProperty('--msger-width', '800px');
+            document.documentElement.style.setProperty('--msger-height', '700px');
+            this.toggleChatHistorySize(false);
         }
     }
 
@@ -2975,6 +3004,8 @@ class RoomClient {
         resizeVideoMedia();
         chatRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
+        if (!plist.classList.contains('hidden')) this.toggleShowParticipants();
+        if (chatRoom.classList.contains('container')) chatRoom.classList.remove('container');
     }
 
     chatUnpin() {
@@ -2984,16 +3015,17 @@ class RoomClient {
             this.videoMediaContainer.style.width = '100%';
             this.videoMediaContainer.style.height = '100%';
         }
-        document.documentElement.style.setProperty('--msger-width', '420px');
-        document.documentElement.style.setProperty('--msger-height', '680px');
+        document.documentElement.style.setProperty('--msger-width', '800px');
+        document.documentElement.style.setProperty('--msger-height', '700px');
         hide(chatMinButton);
         show(chatMaxButton);
         this.chatCenter();
         this.isChatPinned = false;
         setColor(chatTogglePin, 'white');
         resizeVideoMedia();
-        chatRoom.style.resize = 'both';
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
+        if (plist.classList.contains('hidden')) this.toggleShowParticipants();
+        if (!chatRoom.classList.contains('container')) chatRoom.classList.add('container');
     }
 
     chatCenter() {
@@ -3026,7 +3058,7 @@ class RoomClient {
 
     cleanMessage() {
         chatMessage.value = '';
-        chatMessage.style.height = '43px';
+        chatMessage.setAttribute('rows', '1');
     }
 
     pasteMessage() {
@@ -3049,12 +3081,35 @@ class RoomClient {
             return this.userLog('info', 'No participants in the room', 'top-end');
         }
         chatMessage.value = filterXSS(chatMessage.value.trim());
-        let peer_msg = this.formatMsg(chatMessage.value);
+        const peer_msg = this.formatMsg(chatMessage.value);
         if (!peer_msg) {
             return this.cleanMessage();
         }
         this.peer_name = filterXSS(this.peer_name);
+
+        const data = {
+            peer_name: this.peer_name,
+            peer_id: this.peer_id,
+            to_peer_id: 'ChatGPT',
+            to_peer_name: 'ChatGPT',
+            peer_msg: peer_msg,
+        };
+
         if (isChatGPTOn) {
+            console.log('Send message:', data);
+            this.socket.emit('message', data);
+            this.setMsgAvatar('left', this.peer_name);
+            this.appendMessage(
+                'left',
+                this.leftMsgAvatar,
+                this.peer_name,
+                this.peer_id,
+                peer_msg,
+                data.to_peer_id,
+                data.to_peer_name,
+            );
+            this.cleanMessage();
+
             this.socket
                 .request('getChatGPT', {
                     time: getDataTimeString(),
@@ -3066,15 +3121,15 @@ class RoomClient {
                     function (completion) {
                         if (!completion) return;
                         console.log('Receive message:', completion);
-                        this.setMsgAvatar('left', 'ChatGPT');
+                        this.setMsgAvatar('right', 'ChatGPT');
                         this.appendMessage(
-                            'left',
-                            this.leftMsgAvatar,
+                            'right',
+                            image.chatgpt,
                             'ChatGPT',
                             this.peer_id,
                             completion,
-                            this.peer_id,
-                            this.peer_name,
+                            'ChatGPT',
+                            'ChatGPT',
                         );
                         this.cleanMessage();
                         this.speechInMessages ? this.speechMessage(true, 'ChatGPT', completion) : this.sound('message');
@@ -3084,18 +3139,29 @@ class RoomClient {
                     console.log('ChatGPT error:', err);
                 });
         } else {
-            let data = {
-                peer_name: this.peer_name,
-                peer_id: this.peer_id,
-                to_peer_id: 'all',
-                peer_msg: peer_msg,
-            };
-            console.log('Send message:', data);
-            this.socket.emit('message', data);
+            const participantsList = this.getId('participantsList');
+            const participantsListItems = participantsList.getElementsByTagName('li');
+            for (let i = 0; i < participantsListItems.length; i++) {
+                const li = participantsListItems[i];
+                if (li.classList.contains('active')) {
+                    data.to_peer_id = li.getAttribute('data-to-id');
+                    data.to_peer_name = li.getAttribute('data-to-name');
+                    console.log('Send message:', data);
+                    this.socket.emit('message', data);
+                    this.setMsgAvatar('left', this.peer_name);
+                    this.appendMessage(
+                        'left',
+                        this.leftMsgAvatar,
+                        this.peer_name,
+                        this.peer_id,
+                        peer_msg,
+                        data.to_peer_id,
+                        data.to_peer_name,
+                    );
+                    this.cleanMessage();
+                }
+            }
         }
-        this.setMsgAvatar('right', this.peer_name);
-        this.appendMessage('right', this.rightMsgAvatar, this.peer_name, this.peer_id, peer_msg, 'all', 'all');
-        this.cleanMessage();
     }
 
     sendMessageTo(to_peer_id, to_peer_name) {
@@ -3132,10 +3198,10 @@ class RoomClient {
                 };
                 console.log('Send message:', data);
                 this.socket.emit('message', data);
-                this.setMsgAvatar('right', this.peer_name);
+                this.setMsgAvatar('left', this.peer_name);
                 this.appendMessage(
-                    'right',
-                    this.rightMsgAvatar,
+                    'left',
+                    this.leftMsgAvatar,
                     this.peer_name,
                     this.peer_id,
                     peer_msg,
@@ -3147,12 +3213,12 @@ class RoomClient {
         });
     }
 
-    showMessage(data) {
-        if (!this.isChatOpen && this.showChatOnMessage) this.toggleChat();
-        this.setMsgAvatar('left', data.peer_name);
+    async showMessage(data) {
+        if (!this.isChatOpen && this.showChatOnMessage) await this.toggleChat();
+        this.setMsgAvatar('right', data.peer_name);
         this.appendMessage(
-            'left',
-            this.leftMsgAvatar,
+            'right',
+            this.rightMsgAvatar,
             data.peer_name,
             data.peer_id,
             data.peer_msg,
@@ -3163,6 +3229,19 @@ class RoomClient {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
         this.speechInMessages ? this.speechMessage(true, data.peer_name, data.peer_msg) : this.sound('message');
+
+        const participantsList = this.getId('participantsList');
+        const participantsListItems = participantsList.getElementsByTagName('li');
+        for (let i = 0; i < participantsListItems.length; i++) {
+            const li = participantsListItems[i];
+            // INCOMING PRIVATE MESSAGE
+            if (li.id === data.peer_id && data.to_peer_id != 'all') {
+                li.classList.add('pulsate');
+                if (!['all', 'ChatGPT'].includes(data.to_peer_id)) {
+                    this.getId(`${data.peer_id}-unread-msg`).classList.remove('hidden');
+                }
+            }
+        }
     }
 
     setMsgAvatar(avatar, peerName) {
@@ -3181,61 +3260,81 @@ class RoomClient {
         const getToName = filterXSS(toName);
         const time = this.getTimeNow();
 
-        const msgBubble = getToId == 'all' ? 'msg-bubble' : 'msg-bubble-private';
-        const replyMsg = getFromId === this.peer_id ? `<hr/>Private message to ${getToName}` : '';
-        const message = getToId == 'all' ? getMsg : getMsg + replyMsg;
+        const myMessage = getSide === 'left';
+        const messageClass = myMessage ? 'my-message' : 'other-message float-right';
+        const messageData = myMessage ? 'text-start' : 'text-end';
+        const timeAndName = myMessage
+            ? `<span class="message-data-time">${time}, ${getFromName} ( me ) </span>`
+            : `<span class="message-data-time">${time}, ${getFromName} </span>`;
 
-        let msgHTML = `
-        <div id="msg-${chatMessagesId}" class="msg ${getSide}-msg">
-            <img class="msg-img" src="${getImg}" />
-            <div class=${msgBubble}>
-                <div class="msg-info">
-                    <div class="msg-info-name">${getFromName}</div>
-                    <div class="msg-info-time">${time}</div>
+        const speechButton = this.isSpeechSynthesisSupported
+            ? `<button 
+                    id="msg-speech-${chatMessagesId}" 
+                    class="mr5" 
+                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')">
+                    <i class="fas fa-volume-high"></i>
+                </button>`
+            : '';
+
+        const positionFirst = myMessage
+            ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
+            : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
+
+        const newMessageHTML = `
+            <li id="msg-${chatMessagesId}"  
+                data-from-id="${getFromId}" 
+                data-from-name="${getFromName}"
+                data-to-id="${getToId}" 
+                data-to-name="${getToName}"
+                class="clearfix"
+            >
+                <div class="message-data ${messageData}">
+                    ${positionFirst}
                 </div>
-                <div id="${chatMessagesId}" class="msg-text">${message}
-                    <hr/>`;
-        // add btn direct reply to private message
-        if (getFromId != this.peer_id) {
-            msgHTML += `
-                    <button 
-                        class="fas fa-paper-plane"
-                        id="msg-private-reply-${chatMessagesId}"
-                        onclick="rc.sendMessageTo('${getFromId}','${getFromName}')"
-                    ></button>`;
-        }
-        msgHTML += `                    
-                    <button
-                        id="msg-delete-${chatMessagesId}"
-                        class="fas fa-trash" 
-                        onclick="rc.deleteMessage('msg-${chatMessagesId}')"
-                    ></button>
-                    <button
-                        id="msg-copy-${chatMessagesId}"
-                        class="fas fa-copy" 
-                        onclick="rc.copyToClipboard('${chatMessagesId}')"
-                    ></button>`;
-        if (this.isSpeechSynthesisSupported) {
-            msgHTML += `
-                <button
-                    id="msg-speech-${chatMessagesId}"
-                    class="fas fa-volume-high" 
-                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')"
-                ></button>
-            `;
-        }
-        msgHTML += ` 
+                <div class="message ${messageClass}">
+                    <span class="text-start " id="${chatMessagesId}">${getMsg}</span>
+                    <hr/>
+                    <div class="about-buttons mt5">
+                        <button 
+                            id="msg-delete-${chatMessagesId}"   
+                            class="mr5" 
+                            onclick="rc.deleteMessage('msg-${chatMessagesId}')">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button 
+                            id="msg-copy-${chatMessagesId}" 
+                            class="mr5" 
+                            onclick="rc.copyToClipboard('${chatMessagesId}')">
+                            <i class="fas fa-paste"></i>
+                        </button>
+                        ${speechButton}
+                    </div>
                 </div>
-            </div>
-        </div>
+            </li>
         `;
+
         this.collectMessages(time, getFromName, getMsg);
-        chatMsger.insertAdjacentHTML('beforeend', msgHTML);
-        chatMsger.scrollTop += 500;
+
+        console.log('Append message to:', { to_id: getToId, to_name: getToName });
+
+        switch (getToId) {
+            case 'ChatGPT':
+                chatGPTMessages.insertAdjacentHTML('beforeend', newMessageHTML);
+                break;
+            case 'all':
+                chatPublicMessages.insertAdjacentHTML('beforeend', newMessageHTML);
+                break;
+            default:
+                chatPrivateMessages.insertAdjacentHTML('beforeend', newMessageHTML);
+                break;
+        }
+
+        chatHistory.scrollTop += 500;
+
         this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
         this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
         this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
-        this.setTippy('msg-private-reply-' + chatMessagesId, 'Reply', 'top');
+
         chatMessagesId++;
     }
 
@@ -3389,7 +3488,7 @@ class RoomClient {
     checkLineBreaks() {
         chatMessage.style.height = '';
         if (this.getLineBreaks(chatMessage.value) > 0 || chatMessage.value.length > 50) {
-            chatMessage.style.height = '200px';
+            chatMessage.setAttribute('rows', '2');
         }
     }
 
@@ -3422,7 +3521,7 @@ class RoomClient {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: 'Clean up chat Messages?',
+            title: 'Clean up all chat Messages?',
             imageUrl: image.delete,
             showDenyButton: true,
             confirmButtonText: `Yes`,
@@ -3431,11 +3530,15 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                let msgs = chatMsger.firstChild;
-                while (msgs) {
-                    chatMsger.removeChild(msgs);
-                    msgs = chatMsger.firstChild;
+                function removeAllChildNodes(parentNode) {
+                    while (parentNode.firstChild) {
+                        parentNode.removeChild(parentNode.firstChild);
+                    }
                 }
+                // Remove child nodes from different message containers
+                removeAllChildNodes(chatGPTMessages);
+                removeAllChildNodes(chatPublicMessages);
+                removeAllChildNodes(chatPrivateMessages);
                 this.chatMessages = [];
                 this.sound('delete');
             }
@@ -3870,10 +3973,10 @@ class RoomClient {
                 fileSize: this.fileToSend.size,
                 fileType: this.fileToSend.type,
             };
-            this.setMsgAvatar('right', this.peer_name);
+            this.setMsgAvatar('left', this.peer_name);
             this.appendMessage(
-                'right',
-                this.rightMsgAvatar,
+                'left',
+                this.leftMsgAvatar,
                 this.peer_name,
                 this.peer_id,
                 `${icons.fileSend} File send: 
@@ -3912,10 +4015,10 @@ class RoomClient {
             html.newline +
             ' File size: ' +
             this.bytesToSize(this.incomingFileInfo.fileSize);
-        this.setMsgAvatar('left', this.incomingFileInfo.peer_name);
+        this.setMsgAvatar('right', this.incomingFileInfo.peer_name);
         this.appendMessage(
-            'left',
-            this.leftMsgAvatar,
+            'right',
+            this.rightMsgAvatar,
             this.incomingFileInfo.peer_name,
             this.incomingFileInfo.peer_id,
             `${icons.fileReceive} File receive: 
@@ -5145,22 +5248,123 @@ class RoomClient {
     // ####################################################
 
     searchPeer() {
-        let input, filter, table, tr, td, i, txtValue;
-        input = this.getId('searchParticipants');
-        filter = input.value.toUpperCase();
-        table = this.getId('myTable');
-        tr = table.getElementsByTagName('tr');
-        for (i = 0; i < tr.length; i++) {
-            td = tr[i].getElementsByTagName('td')[1];
-            if (td) {
-                txtValue = td.textContent || td.innerText;
-                if (txtValue.toUpperCase().indexOf(filter) > -1) {
-                    tr[i].style.display = '';
-                } else {
-                    tr[i].style.display = 'none';
-                }
+        const searchParticipantsFromList = this.getId('searchParticipantsFromList');
+        const searchFilter = searchParticipantsFromList.value.toUpperCase();
+        const participantsList = this.getId('participantsList');
+        const participantsListItems = participantsList.getElementsByTagName('li');
+
+        for (let i = 0; i < participantsListItems.length; i++) {
+            const li = participantsListItems[i];
+            const participantName = li.getAttribute('data-to-name').toUpperCase();
+            const shouldDisplay = participantName.includes(searchFilter);
+            li.style.display = shouldDisplay ? '' : 'none';
+        }
+    }
+
+    // ####################################################
+    // FILTER PEER WITH UNREAD MESSAGES
+    // ####################################################
+
+    toggleUnreadMsg() {
+        const participantsList = this.getId('participantsList');
+        const participantsListItems = participantsList.getElementsByTagName('li');
+
+        for (let i = 0; i < participantsListItems.length; i++) {
+            const li = participantsListItems[i];
+            const shouldDisplay =
+                (li.classList.contains('pulsate') && !this.isToggleUnreadMsg) || this.isToggleUnreadMsg;
+            li.style.display = shouldDisplay ? '' : 'none';
+        }
+        this.isToggleUnreadMsg = !this.isToggleUnreadMsg;
+        setColor(participantsUnreadMessagesBtn, this.isToggleUnreadMsg ? 'lime' : 'white');
+    }
+
+    // ####################################################
+    // SHOW PEER ABOUT AND MESSAGES
+    // ####################################################
+
+    showPeerAboutAndMessages(peer_id, peer_name, event = null) {
+        this.hidePeerMessages();
+
+        const chatAbout = this.getId('chatAbout');
+        const participant = this.getId(peer_id);
+        const participantsList = this.getId('participantsList');
+        const chatPrivateMessages = this.getId('chatPrivateMessages');
+        const messagePrivateListItems = chatPrivateMessages.getElementsByTagName('li');
+        const participantsListItems = participantsList.getElementsByTagName('li');
+        const avatarImg = getParticipantAvatar(peer_name);
+
+        const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '') => {
+            return `
+                <img 
+                    class="all-participants-img"
+                    style="border: var(--border); width: 43px; margin-right: 5px; cursor: pointer;"
+                    id="chatShowParticipantsList" 
+                    src="${image.users}" 
+                    alt="participants"
+                    onclick="rc.toggleShowParticipants()" 
+                />
+                <a data-toggle="modal" data-target="#view_info">
+                    <img src="${imgSrc}" alt="avatar" />
+                </a>
+                <div class="chat-about">
+                    <h6 class="mb-0">${title}</h6>
+                    <span class="status"> <i class="fa fa-circle ${status}"></i> ${status} ${participants}</span>
+                </div>
+            `;
+        };
+
+        // CURRENT SELECTED PEER
+        for (let i = 0; i < participantsListItems.length; i++) {
+            participantsListItems[i].classList.remove('active');
+            participantsListItems[i].classList.remove('pulsate'); // private new message to read
+            if (!['all', 'ChatGPT'].includes(peer_id)) {
+                // icon private new message to read
+                this.getId(`${peer_id}-unread-msg`).classList.add('hidden');
             }
         }
+        participant.classList.add('active');
+
+        isChatGPTOn = false;
+        console.log('Display messages', peer_id);
+
+        switch (peer_id) {
+            case 'ChatGPT':
+                isChatGPTOn = true;
+                chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT');
+                this.getId('chatGPTMessages').style.display = 'block';
+                break;
+            case 'all':
+                chatAbout.innerHTML = generateChatAboutHTML(image.all, 'Public chat', 'online', participantsCount);
+                this.getId('chatPublicMessages').style.display = 'block';
+                break;
+            default:
+                chatAbout.innerHTML = generateChatAboutHTML(avatarImg, peer_name);
+                chatPrivateMessages.style.display = 'block';
+                for (let i = 0; i < messagePrivateListItems.length; i++) {
+                    const li = messagePrivateListItems[i];
+                    const itemFromId = li.getAttribute('data-from-id');
+                    const itemToId = li.getAttribute('data-to-id');
+                    const shouldDisplay = itemFromId.includes(peer_id) || itemToId.includes(peer_id);
+                    li.style.display = shouldDisplay ? '' : 'none';
+                }
+                break;
+        }
+
+        setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
+
+        const clickedElement = event ? event.target : null;
+        if (!event || (clickedElement.tagName === 'LI' || clickedElement.tagName === 'IMG')) {
+            if ((this.isMobileDevice || this.isChatPinned) && (!plist || !plist.classList.contains('hidden'))) {
+                this.toggleShowParticipants();
+            }
+        }
+    }
+
+    hidePeerMessages() {
+        elemDisplay('chatGPTMessages', false);
+        elemDisplay('chatPublicMessages', false);
+        elemDisplay('chatPrivateMessages', false);
     }
 
     // ####################################################
