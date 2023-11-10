@@ -5354,7 +5354,7 @@ class RoomClient {
         setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
 
         const clickedElement = event ? event.target : null;
-        if (!event || clickedElement.tagName === 'LI' || clickedElement.tagName === 'IMG') {
+        if (!event || (clickedElement.tagName != 'BUTTON' && clickedElement.tagName != 'I')) {
             if ((this.isMobileDevice || this.isChatPinned) && (!plist || !plist.classList.contains('hidden'))) {
                 this.toggleShowParticipants();
             }
