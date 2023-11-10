@@ -157,6 +157,14 @@
     font-size: 13px;
 }
 
+.chat .chat-header .chat-option-buttons {
+    position: absolute;
+    display: inline-flex;
+    top: 20px;
+    right: 20px;
+    z-index: 5;
+}
+
 /* Chat history */
 .chat .chat-history {
     padding: 20px;
