@@ -5012,41 +5012,43 @@ class RoomClient {
             if (!this.thereAreParticipants()) {
                 if (info) return this.userLog('info', 'No participants detected', 'top-end');
             }
-            switch (action) {
-                case 'mute':
-                    const peerAudioStatus = this.getId(data.peer_id + '__audio');
-                    if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
-                        return this.userLog(
-                            'info',
-                            'The participant has been muted, and only they have the ability to unmute themselves',
-                            'top-end',
-                        );
-                    }
-                    break;
-                case 'hide':
-                    const peerVideoOff = this.getId(data.peer_id + '__videoOff');
-                    if (peerVideoOff) {
-                        return this.userLog(
-                            'info',
-                            'The participant is currently hidden, and only they have the option to unhide themselves',
-                            'top-end',
-                        );
-                    }
-                case 'stop':
-                    const peerScreenButton = this.getId(id);
-                    if (peerScreenButton) {
-                        const peerScreenStatus = peerScreenButton.querySelector('i');
-                        if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
+            if (!broadcast) {
+                switch (action) {
+                    case 'mute':
+                        const peerAudioStatus = this.getId(data.peer_id + '__audio');
+                        if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
                             return this.userLog(
                                 'info',
-                                'The participant screen is not shared, only the participant can initiate sharing',
+                                'The participant has been muted, and only they have the ability to unmute themselves',
                                 'top-end',
                             );
                         }
-                    }
-                    break;
-                default:
-                    break;
+                        break;
+                    case 'hide':
+                        const peerVideoOff = this.getId(data.peer_id + '__videoOff');
+                        if (peerVideoOff) {
+                            return this.userLog(
+                                'info',
+                                'The participant is currently hidden, and only they have the option to unhide themselves',
+                                'top-end',
+                            );
+                        }
+                    case 'stop':
+                        const peerScreenButton = this.getId(id);
+                        if (peerScreenButton) {
+                            const peerScreenStatus = peerScreenButton.querySelector('i');
+                            if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
+                                return this.userLog(
+                                    'info',
+                                    'The participant screen is not shared, only the participant can initiate sharing',
+                                    'top-end',
+                                );
+                            }
+                        }
+                        break;
+                    default:
+                        break;
+                }
             }
             this.confirmPeerAction(action, data);
         } else {
