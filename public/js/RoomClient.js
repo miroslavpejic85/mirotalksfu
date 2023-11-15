@@ -5383,7 +5383,6 @@ class RoomClient {
     // ####################################################
 
     updatePeerInfo(peer_name, peer_id, type, status, emit = true) {
-        alert(type);
         if (emit) {
             switch (type) {
                 case 'audio':
