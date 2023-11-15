@@ -374,6 +374,15 @@ class RoomClient {
                 console.log('07.2 ----> MODERATOR', room.moderator);
                 this.start_muted = room.moderator && room.moderator.start_audio_muted;
                 this.start_hidden = room.moderator && room.moderator.start_video_hidden;
+                if (this.start_muted && this.start_hidden) {
+                    this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
+                }
+                if (this.start_muted && !this.start_hidden) {
+                    this.userLog('warning', 'The Moderator disabled your audio', 'top-end');
+                }
+                if (!this.start_muted && this.start_hidden) {
+                    this.userLog('warning', 'The Moderator disabled your video', 'top-end');
+                }
             }
         }
         adaptAspectRatio(participantsCount);
