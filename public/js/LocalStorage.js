@@ -20,6 +20,8 @@ class LocalStorage {
             show_chat_on_msg: true, // show chat on new message
             show_transcript_on_msg: true, // show transcript on new message
             speech_in_msg: false, // speech incoming message
+            moderator_audio_muted: false, // Everyone starts muted in the room
+            moderator_video_hidden: false, // Everyone starts hidden in the room
             mic_auto_gain_control: false,
             mic_echo_cancellations: true,
             mic_noise_suppression: true,

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.1
+ * @version 1.2.2
  *
  */
 
@@ -1158,6 +1158,9 @@ function handleButtons() {
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
     };
+    tabModeratorBtn.onclick = (e) => {
+        rc.openTab(e, 'tabModerator');
+    };
     tabProfileBtn.onclick = (e) => {
         rc.openTab(e, 'tabProfile');
     };
@@ -1796,6 +1799,21 @@ function handleSelects() {
         wbIsBgTransparent = !wbIsBgTransparent;
         wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
     };
+    // room moderator rules
+    switchEveryoneMute.onchange = (e) => {
+        const startMuted = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'audio', status: startMuted });
+        lsSettings.moderator_audio_muted = startMuted;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchEveryoneHidden.onchange = (e) => {
+        const startHidden = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'video', status: startHidden });
+        lsSettings.moderator_video_hidden = startHidden;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
 }
 
 // ####################################################
@@ -1954,6 +1972,7 @@ function loadSettingsFromLocalStorage() {
     sampleRateSelect.selectedIndex = lsSettings.mic_sample_rate;
     sampleSizeSelect.selectedIndex = lsSettings.mic_sample_size;
     channelCountSelect.selectedIndex = lsSettings.mic_channel_count;
+
     micLatencyRange.value = lsSettings.mic_latency || 50;
     micLatencyValue.innerText = lsSettings.mic_latency || 50;
     micVolumeRange.value = lsSettings.mic_volume || 100;
@@ -2050,7 +2069,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
@@ -2068,13 +2087,13 @@ function handleRoomClientEvents() {
         show(startVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room event: Client pause screen');
@@ -2086,7 +2105,7 @@ function handleRoomClientEvents() {
         console.log('Room event: Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room event: Client lock room');
@@ -2867,7 +2886,7 @@ async function saveRoomPeers() {
     saveObjToJsonFile(peersToSave, 'PARTICIPANTS');
 }
 
-async function getRoomParticipants(refresh = false) {
+async function getRoomParticipants() {
     const peers = await getRoomPeers();
     const lists = await getParticipantsList(peers);
     participantsCount = peers.size;

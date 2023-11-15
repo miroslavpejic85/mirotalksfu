@@ -30,6 +30,7 @@ const BUTTONS = {
         unlockRoomButton: true, // presenter
         lobbyButton: true, // presenter
         micOptionsButton: true, // presenter
+        tabModerator: true, // presenter
         tabRecording: true,
         pushToTalk: true,
         host_only_recording: true, // presenter
@@ -87,6 +88,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.lobbyButton = false;
         BUTTONS.settings.micOptionsButton = false;
+        BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
@@ -100,6 +102,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
         BUTTONS.settings.lobbyButton = true;
         BUTTONS.settings.micOptionsButton = true;
+        BUTTONS.settings.tabModerator = true;
         BUTTONS.videoOff.muteAudioButton = true;
         BUTTONS.videoOff.ejectButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
@@ -120,13 +123,18 @@ function handleRules(isPresenter) {
         hostOnlyRecording = lsSettings.host_only_recording;
         switchHostOnlyRecording.checked = hostOnlyRecording;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
-        //...
+        // Room moderator
+        switchEveryoneMute.checked = lsSettings.moderator_audio_muted;
+        switchEveryoneHidden.checked = lsSettings.moderator_video_hidden;
+        rc.updateRoomModerator({ type: 'audio', status: switchEveryoneMute.checked });
+        rc.updateRoomModerator({ type: 'video', status: switchEveryoneHidden.checked });
     }
     // main. settings...
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
+    !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton
         ? elemDisplay('whiteboardLockButton', true)

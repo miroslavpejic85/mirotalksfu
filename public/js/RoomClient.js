@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.1
+ * @version 1.2.2
  *
  */
 
@@ -157,6 +157,10 @@ class RoomClient {
         this.peer_name = peer_name;
         this.peer_uuid = peer_uuid;
         this.peer_info = peer_info;
+
+        // Moderator
+        this.start_muted = false;
+        this.start_hidden = false;
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
@@ -363,6 +367,13 @@ class RoomClient {
                 ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
                   this.event(_EVENTS.hostOnlyRecordingOn))
                 : this.event(_EVENTS.hostOnlyRecordingOff);
+
+            // Handle Room moderator rules
+            if (!isRulesActive || !isPresenter) {
+                console.log('07.2 ----> MODERATOR', room.moderator);
+                this.start_muted = room.moderator && room.moderator.start_audio_muted;
+                this.start_hidden = room.moderator && room.moderator.start_video_hidden;
+            }
         }
         adaptAspectRatio(participantsCount);
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
@@ -586,7 +597,7 @@ class RoomClient {
                 this.lobbyRemoveMe(data.peer_id);
                 participantsCount = data.peer_counts;
                 adaptAspectRatio(participantsCount);
-                if (isParticipantsListOpen) getRoomParticipants(true);
+                if (isParticipantsListOpen) getRoomParticipants();
             }.bind(this),
         );
 
@@ -807,21 +818,26 @@ class RoomClient {
 
     async startLocalMedia() {
         console.log('08 ----> Start local media');
-        if (this.isAudioAllowed) {
+        if (this.isAudioAllowed && !this.start_muted) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
-            setColor(startAudioButton, 'red');
             console.log('09 ----> Audio is off');
+            setColor(startAudioButton, 'red');
+            this.setIsAudio(this.peer_id, false);
+            this.event(_EVENTS.stopAudio);
+            this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
         }
-        if (this.isVideoAllowed) {
+        if (this.isVideoAllowed && !this.start_hidden) {
             console.log('10 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
         } else {
-            setColor(startVideoButton, 'red');
             console.log('10 ----> Video is off');
+            setColor(startVideoButton, 'red');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
+            this.event(_EVENTS.stopVideo);
+            this.updatePeerInfo(this.peer_name, this.peer_id, 'video', false);
         }
         if (this.joinRoomWithScreen) {
             console.log('08 ----> Start Screen media');
@@ -1504,7 +1520,7 @@ class RoomClient {
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
                 this.attachMediaStream(elem, stream, type, 'Producer');
-                if (this.isAudioAllowed && !speakerSelect.disabled) {
+                if (this.isAudioAllowed && !this.start_muted && !speakerSelect.disabled) {
                     this.attachSinkId(elem, speakerSelect.value);
                 }
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
@@ -1634,8 +1650,6 @@ class RoomClient {
 
     async produceScreenAudio(stream) {
         try {
-            //this.stopMyAudio();
-
             if (this.producerLabel.has(mediaType.audioTab)) {
                 return console.log('Producer already exists for this type ' + mediaType.audioTab);
             }
@@ -1658,7 +1672,6 @@ class RoomClient {
 
             producerSa.on('trackended', () => {
                 this.closeProducer(mediaType.audioTab);
-                // this.startMyAudio();
             });
 
             producerSa.on('transportclose', () => {
@@ -1687,20 +1700,6 @@ class RoomClient {
         }
     }
 
-    startMyAudio() {
-        startAudioButton.click();
-        this.setIsAudio(this.peer_id, true);
-        this.event(_EVENTS.startAudio);
-        setAudioButtonsDisabled(false);
-    }
-
-    stopMyAudio() {
-        stopAudioButton.click();
-        this.setIsAudio(this.peer_id, false);
-        this.event(_EVENTS.stopAudio);
-        setAudioButtonsDisabled(true);
-    }
-
     // ####################################################
     // CONSUMER
     // ####################################################
@@ -1717,7 +1716,7 @@ class RoomClient {
                 this.consumers.set(consumer.id, consumer);
 
                 if (kind === 'video') {
-                    if (isParticipantsListOpen) getRoomParticipants(true);
+                    if (isParticipantsListOpen) getRoomParticipants();
                 }
 
                 this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
@@ -2056,7 +2055,7 @@ class RoomClient {
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
         handleAspectRatio();
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        if (isParticipantsListOpen) getRoomParticipants();
         if (!this.isMobileDevice && remotePeer) {
             this.setTippy(sm.id, 'Send message', 'bottom');
             this.setTippy(sf.id, 'Send file', 'bottom');
@@ -2927,7 +2926,7 @@ class RoomClient {
         const chatRoom = this.getId('chatRoom');
         chatRoom.classList.toggle('show');
         if (!this.isChatOpen) {
-            await getRoomParticipants(true);
+            await getRoomParticipants();
             hide(chatMinButton);
             if (!this.isMobileDevice) {
                 show(chatMaxButton);
@@ -5118,7 +5117,7 @@ class RoomClient {
         }).then(() => {
             switch (action) {
                 case 'refresh':
-                    getRoomParticipants(true);
+                    getRoomParticipants();
                     break;
                 case 'eject':
                     this.exit();
@@ -5370,10 +5369,21 @@ class RoomClient {
     }
 
     // ####################################################
+    // UPDATE ROOM MODERATOR
+    // ####################################################
+
+    updateRoomModerator(data) {
+        if (!isRulesActive || isPresenter) {
+            this.socket.emit('updateRoomModerator', data);
+        }
+    }
+
+    // ####################################################
     // UPDATE PEER INFO
     // ####################################################
 
     updatePeerInfo(peer_name, peer_id, type, status, emit = true) {
+        alert(type);
         if (emit) {
             switch (type) {
                 case 'audio':
@@ -5437,7 +5447,7 @@ class RoomClient {
                     break;
             }
         }
-        if (isParticipantsListOpen) getRoomParticipants(true);
+        if (isParticipantsListOpen) getRoomParticipants();
     }
 
     checkPeerInfoStatus(peer_info) {

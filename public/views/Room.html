@@ -185,6 +185,9 @@ access to use this app.
                     <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
                         <p class="tabButtonText">Audio</p>
                     </button>
+                    <button id="tabModeratorBtn" class="fas fa-m tablinks">
+                        <p class="tabButtonText">Moderator</p>
+                    </button>
                     <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks">
                         <p class="tabButtonText">Recording</p>
                     </button>
@@ -586,6 +589,42 @@ access to use this app.
                             </table>
                         </div>
                         <br />
+                    </div>
+
+                    <div id="tabModerator" class="tabcontent">
+                        <table class="settingsTable">
+                            <tr id="everyoneMuteBtn">
+                                <td style="width: auto">
+                                    <div class="title">
+                                        <i class="fas fa-microphone-slash"></i>
+                                        <p>Everyone starts muted</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md title">
+                                        <input id="switchEveryoneMute" class="form-check-input" type="checkbox" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="everyoneHideBtn">
+                                <td style="width: auto">
+                                    <div class="title">
+                                        <i class="fas fa-video-slash"></i>
+                                        <p>Everyone starts hidden</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input
+                                            id="switchEveryoneHidden"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            checked
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
                     </div>
 
                     <div id="tabRecording" class="tabcontent">

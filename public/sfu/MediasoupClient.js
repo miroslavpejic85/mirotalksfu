@@ -14084,10 +14084,10 @@
                     typeof global !== 'undefined'
                         ? global
                         : typeof self !== 'undefined'
-                        ? self
-                        : typeof window !== 'undefined'
-                        ? window
-                        : {},
+                          ? self
+                          : typeof window !== 'undefined'
+                            ? window
+                            : {},
                 );
             },
             {},
@@ -14649,8 +14649,8 @@
                     var keyLocation = obj.push
                         ? {} // blank object that will be pushed
                         : needsBlank
-                        ? location[obj.name]
-                        : location; // otherwise, named location or root
+                          ? location[obj.name]
+                          : location; // otherwise, named location or root
 
                     attachProperties(content.match(obj.reg), keyLocation, obj.names, obj.name);
 

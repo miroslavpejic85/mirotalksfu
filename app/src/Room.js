@@ -16,6 +16,10 @@ module.exports = class Room {
         this._isLobbyEnabled = false;
         this._roomPassword = null;
         this._hostOnlyRecording = false;
+        this._moderator = {
+            start_audio_muted: false,
+            start_video_hidden: false,
+        };
         this.survey = config.survey;
         this.redirect = config.redirect;
         this.peers = new Map();
@@ -99,6 +103,23 @@ module.exports = class Room {
     }
 
     // ####################################################
+    // ROOM MODERATOR
+    // ####################################################
+
+    updateRoomModerator(data) {
+        log.debug('Update room moderator', data);
+        switch (data.type) {
+            case 'audio':
+                this._moderator.start_audio_muted = data.status;
+                break;
+            case 'video':
+                this._moderator.start_video_hidden = data.status;
+            default:
+                break;
+        }
+    }
+
+    // ####################################################
     // ROOM INFO
     // ####################################################
 
@@ -110,6 +131,7 @@ module.exports = class Room {
                 isLobbyEnabled: this._isLobbyEnabled,
                 hostOnlyRecording: this._hostOnlyRecording,
             },
+            moderator: this._moderator,
             survey: this.survey,
             redirect: this.redirect,
             peers: JSON.stringify([...this.peers]),
