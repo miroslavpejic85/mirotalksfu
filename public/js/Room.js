@@ -1803,6 +1803,7 @@ function handleSelects() {
     switchEveryoneMute.onchange = (e) => {
         const startMuted = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'audio', status: startMuted });
+        rc.roomMessage('mod_audio', startMuted);
         lsSettings.moderator_audio_muted = startMuted;
         lS.setSettings(lsSettings);
         e.target.blur();
@@ -1810,6 +1811,7 @@ function handleSelects() {
     switchEveryoneHidden.onchange = (e) => {
         const startHidden = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'video', status: startHidden });
+        rc.roomMessage('mod_video', startHidden);
         lsSettings.moderator_video_hidden = startHidden;
         lS.setSettings(lsSettings);
         e.target.blur();

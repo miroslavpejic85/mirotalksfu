@@ -56,6 +56,7 @@ const icons = {
     fileSend: '<i class="fa-solid fa-file-export"></i>',
     fileReceive: '<i class="fa-solid fa-file-import"></i>',
     recording: '<i class="fas fa-record-vinyl"></i>',
+    moderator: '<i class="fas fa-m"></i>',
 };
 
 const image = {
@@ -4571,6 +4572,12 @@ class RoomClient {
                           `${icons.transcript} Transcript not will be shown, when you receive a message`,
                           'top-end',
                       );
+                break;
+            case 'mod_audio':
+                this.userLog('info', `${icons.moderator} Moderator: everyone starts muted ${status}`, 'top-end');
+                break;
+            case 'mod_video':
+                this.userLog('info', `${icons.moderator} Moderator: everyone starts hidden ${status}`, 'top-end');
                 break;
             default:
                 break;
