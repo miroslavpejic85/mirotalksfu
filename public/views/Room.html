@@ -593,6 +593,7 @@ access to use this app.
 
                     <div id="tabModerator" class="tabcontent">
                         <h3 class="mod-title">Moderator options</h3>
+                        <hr style="border: 1px solid grey" />
                         <table class="settingsTable">
                             <tr id="everyoneMuteBtn">
                                 <td style="width: auto">
@@ -618,6 +619,65 @@ access to use this app.
                                     <div class="form-check form-switch form-switch-md">
                                         <input
                                             id="switchEveryoneHidden"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            checked
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <hr style="border: 1px solid grey" />
+                                </td>
+                            </tr>
+                            <tr id="everyoneCantUnmuteBtn">
+                                <td style="width: auto">
+                                    <div class="title">
+                                        <i class="fas fa-microphone red"></i>
+                                        <p>Everyone can't unmute themselves</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input
+                                            id="switchEveryoneCantUnmute"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            checked
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="everyoneCantUnhideBtn">
+                                <td style="width: auto">
+                                    <div class="title">
+                                        <i class="fas fa-video red"></i>
+                                        <p>Everyone can't unhide themselves</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input
+                                            id="switchEveryoneCantUnhide"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            checked
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="everyoneCantShareScreenBtn">
+                                <td style="width: auto">
+                                    <div class="title">
+                                        <i class="fas fa-display red"></i>
+                                        <p>Everyone can't share screen</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input
+                                            id="switchEveryoneCantShareScreen"
                                             class="form-check-input"
                                             type="checkbox"
                                             checked

@@ -83,6 +83,9 @@ function handleRules(isPresenter) {
     console.log('06.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
     if (!isPresenter) {
+        // ##################################
+        // GUEST
+        // ##################################
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
@@ -97,6 +100,9 @@ function handleRules(isPresenter) {
         BUTTONS.whiteboard.whiteboardLockButton = false;
         //...
     } else {
+        // ##################################
+        // PRESENTER
+        // ##################################
         BUTTONS.participantsList.saveInfoButton = true;
         BUTTONS.settings.lockRoomButton = !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
@@ -124,10 +130,16 @@ function handleRules(isPresenter) {
         switchHostOnlyRecording.checked = hostOnlyRecording;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
         // Room moderator
-        switchEveryoneMute.checked = lsSettings.moderator_audio_muted;
-        switchEveryoneHidden.checked = lsSettings.moderator_video_hidden;
-        rc.updateRoomModerator({ type: 'audio', status: switchEveryoneMute.checked });
-        rc.updateRoomModerator({ type: 'video', status: switchEveryoneHidden.checked });
+        switchEveryoneMute.checked = lsSettings.moderator_audio_start_muted;
+        switchEveryoneHidden.checked = lsSettings.moderator_video_start_hidden;
+        switchEveryoneCantUnmute.checked = lsSettings.moderator_audio_cant_unmute;
+        switchEveryoneCantUnhide.checked = lsSettings.moderator_video_cant_unhide;
+        switchEveryoneCantShareScreen.checked = lsSettings.moderator_screen_cant_share;
+        rc.updateRoomModerator({ type: 'audio_start_muted', status: switchEveryoneMute.checked });
+        rc.updateRoomModerator({ type: 'video_start_hidden', status: switchEveryoneHidden.checked });
+        rc.updateRoomModerator({ type: 'audio_cant_unmute', status: switchEveryoneCantUnmute.checked });
+        rc.updateRoomModerator({ type: 'video_cant_unhide', status: switchEveryoneCantUnhide.checked });
+        rc.updateRoomModerator({ type: 'screen_cant_share', status: switchEveryoneCantShareScreen.checked });
     }
     // main. settings...
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);

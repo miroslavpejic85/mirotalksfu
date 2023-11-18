@@ -17,8 +17,11 @@ module.exports = class Room {
         this._roomPassword = null;
         this._hostOnlyRecording = false;
         this._moderator = {
-            start_audio_muted: false,
-            start_video_hidden: false,
+            audio_start_muted: false,
+            video_start_hidden: false,
+            audio_cant_unmute: false,
+            video_cant_unhide: false,
+            screen_cant_share: false,
         };
         this.survey = config.survey;
         this.redirect = config.redirect;
@@ -109,11 +112,19 @@ module.exports = class Room {
     updateRoomModerator(data) {
         log.debug('Update room moderator', data);
         switch (data.type) {
-            case 'audio':
-                this._moderator.start_audio_muted = data.status;
+            case 'audio_start_muted':
+                this._moderator.audio_start_muted = data.status;
                 break;
-            case 'video':
-                this._moderator.start_video_hidden = data.status;
+            case 'video_start_hidden':
+                this._moderator.video_start_hidden = data.status;
+            case 'audio_cant_unmute':
+                this._moderator.audio_cant_unmute = data.status;
+                break;
+            case 'video_cant_unhide':
+                this._moderator.video_cant_unhide = data.status;
+            case 'screen_cant_share':
+                this._moderator.screen_cant_share = data.status;
+                break;
             default:
                 break;
         }

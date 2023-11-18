@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.2
+ * @version 1.2.3
  *
  */
 
@@ -160,8 +160,13 @@ class RoomClient {
         this.peer_info = peer_info;
 
         // Moderator
-        this.start_muted = false;
-        this.start_hidden = false;
+        this._moderator = {
+            audio_start_muted: false,
+            video_start_hidden: false,
+            audio_cant_unmute: false,
+            video_cant_unhide: false,
+            screen_cant_share: false,
+        };
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
@@ -370,17 +375,21 @@ class RoomClient {
                 : this.event(_EVENTS.hostOnlyRecordingOff);
 
             // Handle Room moderator rules
-            if (!isRulesActive || !isPresenter) {
+            if (room.moderator && (!isRulesActive || !isPresenter)) {
                 console.log('07.2 ----> MODERATOR', room.moderator);
-                this.start_muted = room.moderator && room.moderator.start_audio_muted;
-                this.start_hidden = room.moderator && room.moderator.start_video_hidden;
-                if (this.start_muted && this.start_hidden) {
+                this._moderator.audio_start_muted = room.moderator.audio_start_muted;
+                this._moderator.video_start_hidden = room.moderator.video_start_hidden;
+                this._moderator.audio_cant_unmute = room.moderator.audio_cant_unmute;
+                this._moderator.video_cant_unhide = room.moderator.video_cant_unhide;
+                this._moderator.screen_cant_share = room.moderator.screen_cant_share;
+                //
+                if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
                 }
-                if (this.start_muted && !this.start_hidden) {
+                if (this._moderator.audio_start_muted && !this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio', 'top-end');
                 }
-                if (!this.start_muted && this.start_hidden) {
+                if (!this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your video', 'top-end');
                 }
             }
@@ -741,6 +750,14 @@ class RoomClient {
         );
 
         this.socket.on(
+            'updateRoomModerator',
+            function (data) {
+                console.log('Update room moderator', data);
+                this.handleUpdateRoomModerator(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
             'recordingAction',
             function (data) {
                 console.log('Recording action:', data);
@@ -828,7 +845,7 @@ class RoomClient {
 
     async startLocalMedia() {
         console.log('08 ----> Start local media');
-        if (this.isAudioAllowed && !this.start_muted) {
+        if (this.isAudioAllowed && !this._moderator.audio_start_muted) {
             console.log('09 ----> Start audio media');
             this.produce(mediaType.audio, microphoneSelect.value);
         } else {
@@ -838,7 +855,7 @@ class RoomClient {
             this.event(_EVENTS.stopAudio);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
         }
-        if (this.isVideoAllowed && !this.start_hidden) {
+        if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
             console.log('10 ----> Start video media');
             this.produce(mediaType.video, videoSelect.value);
         } else {
@@ -849,7 +866,7 @@ class RoomClient {
             this.event(_EVENTS.stopVideo);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'video', false);
         }
-        if (this.joinRoomWithScreen) {
+        if (this.joinRoomWithScreen && !this._moderator.screen_cant_share) {
             console.log('08 ----> Start Screen media');
             this.produce(mediaType.screen, null, false, true);
         }
@@ -1530,7 +1547,7 @@ class RoomClient {
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
                 this.attachMediaStream(elem, stream, type, 'Producer');
-                if (this.isAudioAllowed && !this.start_muted && !speakerSelect.disabled) {
+                if (this.isAudioAllowed && !this._moderator.audio_start_muted && !speakerSelect.disabled) {
                     this.attachSinkId(elem, speakerSelect.value);
                 }
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
@@ -4583,11 +4600,32 @@ class RoomClient {
                           'top-end',
                       );
                 break;
-            case 'mod_audio':
+            case 'audio_start_muted':
                 this.userLog('info', `${icons.moderator} Moderator: everyone starts muted ${status}`, 'top-end');
                 break;
-            case 'mod_video':
+            case 'video_start_hidden':
                 this.userLog('info', `${icons.moderator} Moderator: everyone starts hidden ${status}`, 'top-end');
+                break;
+            case 'audio_cant_unmute':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't unmute themselves ${status}`,
+                    'top-end',
+                );
+                break;
+            case 'video_cant_unhide':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't unhide themselves ${status}`,
+                    'top-end',
+                );
+                break;
+            case 'screen_cant_share':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't share the screen ${status}`,
+                    'top-end',
+                );
                 break;
             default:
                 break;
@@ -5393,6 +5431,29 @@ class RoomClient {
         if (!isRulesActive || isPresenter) {
             this.socket.emit('updateRoomModerator', data);
         }
+    }
+
+    handleUpdateRoomModerator(data) {
+        switch (data.type) {
+            case 'audio_cant_unmute':
+                this._moderator.audio_cant_unmute = data.status;
+                rc.roomMessage('audio_cant_unmute', data.status);
+                break;
+            case 'video_cant_unhide':
+                this._moderator.video_cant_unhide = data.status;
+                rc.roomMessage('video_cant_unhide', data.status);
+            case 'screen_cant_share':
+                this._moderator.screen_cant_share = data.status;
+                rc.roomMessage('screen_cant_share', data.status);
+                break;
+            default:
+                break;
+        }
+    }
+
+    getModerator() {
+        console.log('Get Moderator', this._moderator);
+        return this._moderator;
     }
 
     // ####################################################

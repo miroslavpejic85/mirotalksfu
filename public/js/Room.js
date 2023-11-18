@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.2
+ * @version 1.2.3
  *
  */
 
@@ -1299,6 +1299,10 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
     startAudioButton.onclick = () => {
+        const moderator = rc.getModerator();
+        if (moderator.audio_cant_unmute) {
+            return userLog('warning', 'The moderator does not allow you to unmute', 'top-end', 6000);
+        }
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
         if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
@@ -1314,6 +1318,10 @@ function handleButtons() {
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = () => {
+        const moderator = rc.getModerator();
+        if (moderator.video_cant_unhide) {
+            return userLog('warning', 'The moderator does not allow you to unhide', 'top-end', 6000);
+        }
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
         if (isHideMeActive) rc.handleHideMe();
@@ -1327,6 +1335,10 @@ function handleButtons() {
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
     startScreenButton.onclick = () => {
+        const moderator = rc.getModerator();
+        if (moderator.screen_cant_share) {
+            return userLog('warning', 'The moderator does not allow you to share the screen', 'top-end', 6000);
+        }
         if (isHideMeActive) rc.handleHideMe();
         rc.produce(RoomClient.mediaType.screen);
     };
@@ -1801,18 +1813,42 @@ function handleSelects() {
     };
     // room moderator rules
     switchEveryoneMute.onchange = (e) => {
-        const startMuted = e.currentTarget.checked;
-        rc.updateRoomModerator({ type: 'audio', status: startMuted });
-        rc.roomMessage('mod_audio', startMuted);
-        lsSettings.moderator_audio_muted = startMuted;
+        const audioStartMuted = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'audio_start_muted', status: audioStartMuted });
+        rc.roomMessage('audio_start_muted', audioStartMuted);
+        lsSettings.moderator_audio_start_muted = audioStartMuted;
         lS.setSettings(lsSettings);
         e.target.blur();
     };
     switchEveryoneHidden.onchange = (e) => {
-        const startHidden = e.currentTarget.checked;
-        rc.updateRoomModerator({ type: 'video', status: startHidden });
-        rc.roomMessage('mod_video', startHidden);
-        lsSettings.moderator_video_hidden = startHidden;
+        const videoStartHidden = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'video_start_hidden', status: videoStartHidden });
+        rc.roomMessage('video_start_hidden', videoStartHidden);
+        lsSettings.moderator_video_start_hidden = videoStartHidden;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchEveryoneCantUnmute.onchange = (e) => {
+        const audioCantUnmute = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'audio_cant_unmute', status: audioCantUnmute });
+        rc.roomMessage('audio_cant_unmute', audioCantUnmute);
+        lsSettings.moderator_audio_cant_unmute = audioCantUnmute;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchEveryoneCantUnhide.onchange = (e) => {
+        const videoCantUnhide = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'video_cant_unhide', status: videoCantUnhide });
+        rc.roomMessage('video_cant_unhide', videoCantUnhide);
+        lsSettings.moderator_video_cant_unhide = videoCantUnhide;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchEveryoneCantShareScreen.onchange = (e) => {
+        const screenCantShare = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'screen_cant_share', status: screenCantShare });
+        rc.roomMessage('screen_cant_share', screenCantShare);
+        lsSettings.moderator_screen_cant_share = screenCantShare;
         lS.setSettings(lsSettings);
         e.target.blur();
     };
