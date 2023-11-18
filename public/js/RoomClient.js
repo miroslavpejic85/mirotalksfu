@@ -2958,6 +2958,7 @@ class RoomClient {
         const isParticipantsListHidden = plist.classList.contains('hidden');
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
         chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
+        if (this.isChatPinned) chat.style.display = isParticipantsListHidden ? 'block' : 'none';
         chatHistory.style.height = isParticipantsListHidden ? 'calc(100vh - 220px)' : '500px';
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
         plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
