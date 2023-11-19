@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.3
+ * @version 1.2.4
  *
  */
 
@@ -897,13 +897,21 @@ function startServer() {
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
             const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
 
-            if (Object.keys(presenters[socket.room_id]).length === 0) {
-                presenters[socket.room_id] = {
-                    peer_ip: peer_ip,
-                    peer_name: peer_name,
-                    peer_uuid: peer_uuid,
-                    is_presenter: true,
-                };
+            // Set the presenters
+            const presenter = {
+                peer_ip: peer_ip,
+                peer_name: peer_name,
+                peer_uuid: peer_uuid,
+                is_presenter: true,
+            };
+            // first we check if the username match the presenter username
+            if (config.presenter && peer_name === config.presenter.username) {
+                presenters[socket.room_id] = presenter;
+            } else {
+                // if not match the first one who join room is the presenter
+                if (Object.keys(presenters[socket.room_id]).length === 0) {
+                    presenters[socket.room_id] = presenter;
+                }
             }
 
             log.debug('[Join] - Connected presenters grp by roomId', presenters);
@@ -1300,10 +1308,11 @@ function startServer() {
 
         try {
             isPresenter =
-                typeof presenters[room_id] === 'object' &&
-                Object.keys(presenters[room_id]).length > 1 &&
-                presenters[room_id]['peer_name'] === peer_name &&
-                presenters[room_id]['peer_uuid'] === peer_uuid;
+                (typeof presenters[room_id] === 'object' &&
+                    Object.keys(presenters[room_id]).length > 1 &&
+                    presenters[room_id]['peer_name'] === peer_name &&
+                    presenters[room_id]['peer_uuid'] === peer_uuid) ||
+                (config.presenter && peer_name === config.presenter.username);
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;

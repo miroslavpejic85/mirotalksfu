@@ -46,6 +46,14 @@ module.exports = {
         username: 'username',
         password: 'password',
     },
+    presenter: {
+        /*
+            By default, the presenter is identified as the first participant to join the room, identified by username and uuid.
+            Additional layers can be added to specify the presenter by setting a designated username.
+            This username can also be used to apply presenter rules to another participant with the same username.
+        */
+        username: 'Miroslav Pejic',
+    },
     console: {
         debug: true,
         colors: true,
