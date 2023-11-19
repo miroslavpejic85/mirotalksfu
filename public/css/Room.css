@@ -260,7 +260,8 @@ body {
     box-shadow: var(--box-shadow);
     border: var(--border);
     border-radius: 10px;
-    overflow: hidden;
+    overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .mySettingsMain {
