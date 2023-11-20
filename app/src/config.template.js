@@ -38,13 +38,22 @@ module.exports = {
     },
     host: {
         /*
-            Host Protection (default False)
-            In order to protect your host set 
-            hostProtected to true and set your own Username and Password
+            Host Protection (default: false)
+            To enhance host security, enable host protection and provide valid
+            usernames and passwords in the users array.
         */
         protected: false,
-        username: 'username',
-        password: 'password',
+        users: [
+            {
+                username: 'username',
+                password: 'password',
+            },
+            {
+                username: 'username2',
+                password: 'password2',
+            },
+            //...
+        ],
     },
     presenters: [
         /*
