@@ -1312,9 +1312,16 @@ function startServer() {
     async function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         let isPresenter = false;
 
-        if (typeof presenters[room_id][peer_id] === 'undefined' || presenters[room_id][peer_id] === null) return false;
-
         try {
+            if (
+                typeof presenters[room_id] === 'undefined' ||
+                typeof presenters[room_id][peer_id] === 'undefined' ||
+                presenters[room_id] === null ||
+                presenters[room_id][peer_id] === null
+            ) {
+                return false;
+            }
+
             isPresenter =
                 (typeof presenters[room_id] === 'object' &&
                     Object.keys(presenters[room_id][peer_id]).length > 1 &&
