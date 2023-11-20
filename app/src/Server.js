@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.4
+ * @version 1.2.5
  *
  */
 
@@ -633,7 +633,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, data.peer_name, data.peer_uuid);
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
             const room = roomList.get(socket.room_id);
 
@@ -727,7 +727,12 @@ function startServer() {
 
             const presenterActions = ['mute', 'hide', 'eject'];
             if (presenterActions.some((v) => data.action === v)) {
-                const isPresenter = await isPeerPresenter(socket.room_id, data.from_peer_name, data.from_peer_uuid);
+                const isPresenter = await isPeerPresenter(
+                    socket.room_id,
+                    socket.id,
+                    data.from_peer_name,
+                    data.from_peer_uuid,
+                );
                 if (!isPresenter) return;
             }
 
@@ -904,23 +909,23 @@ function startServer() {
                 peer_uuid: peer_uuid,
                 is_presenter: true,
             };
-            // first we check if the username match the presenter username
-            if (config.presenter && peer_name === config.presenter.username) {
-                presenters[socket.room_id] = presenter;
+            // first we check if the username match the presenters username
+            if (config.presenters && config.presenters.includes(peer_name)) {
+                presenters[socket.room_id][socket.id] = presenter;
             } else {
-                // if not match the first one who join room is the presenter
+                // if not match the presenters username, the first one join room is the presenter
                 if (Object.keys(presenters[socket.room_id]).length === 0) {
-                    presenters[socket.room_id] = presenter;
+                    presenters[socket.room_id][socket.id] = presenter;
                 }
             }
 
-            log.debug('[Join] - Connected presenters grp by roomId', presenters);
+            log.info('[Join] - Connected presenters grp by roomId', presenters);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, peer_name, peer_uuid);
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
 
-            log.debug('[Join] - Is presenter', {
+            log.info('[Join] - Is presenter', {
                 roomId: socket.room_id,
                 peer_name: peer_name,
                 peer_presenter: isPresenter,
@@ -1178,7 +1183,7 @@ function startServer() {
 
             const peerName = room.getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
             const peerUuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
-            const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
             log.debug('Disconnect', peerName);
 
@@ -1194,7 +1199,7 @@ function startServer() {
                 if (roomList.has(socket.room_id)) roomList.delete(socket.room_id);
 
                 delete presenters[socket.room_id];
-                log.debug('Disconnect - current presenters grouped by roomId', presenters);
+                log.info('Disconnect - current presenters grouped by roomId', presenters);
             }
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
@@ -1213,7 +1218,7 @@ function startServer() {
 
             const peerName = room.getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
             const peerUuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
-            const isPresenter = await isPeerPresenter(socket.room_id, peerName, peerUuid);
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
             log.debug('Exit room', peerName);
 
@@ -1301,18 +1306,18 @@ function startServer() {
         }
     });
 
-    async function isPeerPresenter(room_id, peer_name, peer_uuid) {
+    async function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         let isPresenter = false;
 
-        if (typeof presenters[room_id] === 'undefined' || presenters[room_id] === null) return false;
+        if (typeof presenters[room_id][peer_id] === 'undefined' || presenters[room_id][peer_id] === null) return false;
 
         try {
             isPresenter =
                 (typeof presenters[room_id] === 'object' &&
-                    Object.keys(presenters[room_id]).length > 1 &&
-                    presenters[room_id]['peer_name'] === peer_name &&
-                    presenters[room_id]['peer_uuid'] === peer_uuid) ||
-                (config.presenter && peer_name === config.presenter.username);
+                    Object.keys(presenters[room_id][peer_id]).length > 1 &&
+                    presenters[room_id][peer_id]['peer_name'] === peer_name &&
+                    presenters[room_id][peer_id]['peer_uuid'] === peer_uuid) ||
+                (config.presenters && config.presenters.includes(peer_name));
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;
@@ -1320,6 +1325,7 @@ function startServer() {
 
         log.debug('isPeerPresenter', {
             room_id: room_id,
+            peer_id: peer_id,
             peer_name: peer_name,
             peer_uuid: peer_uuid,
             isPresenter: isPresenter,
