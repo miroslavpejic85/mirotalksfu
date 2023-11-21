@@ -392,6 +392,9 @@ class RoomClient {
                 if (!this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your video', 'top-end');
                 }
+                //
+                this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
+                this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
             }
         }
         adaptAspectRatio(participantsCount);
@@ -5437,10 +5440,12 @@ class RoomClient {
         switch (data.type) {
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;
+                this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 rc.roomMessage('audio_cant_unmute', data.status);
                 break;
             case 'video_cant_unhide':
                 this._moderator.video_cant_unhide = data.status;
+                this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 rc.roomMessage('video_cant_unhide', data.status);
             case 'screen_cant_share':
                 this._moderator.screen_cant_share = data.status;
