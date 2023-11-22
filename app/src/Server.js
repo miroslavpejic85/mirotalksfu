@@ -1310,38 +1310,42 @@ function startServer() {
     });
 
     async function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
-        let isPresenter = false;
-
         try {
-            if (
-                typeof presenters[room_id] === 'undefined' ||
-                typeof presenters[room_id][peer_id] === 'undefined' ||
-                presenters[room_id] === null ||
-                presenters[room_id][peer_id] === null
-            ) {
+            if (!presenters[room_id] || !presenters[room_id][peer_id]) {
+                // Presenter not in the presenters config list, disconnected, or peer_id changed...
+                for (const [existingPeerID, presenter] of Object.entries(presenters[room_id] || {})) {
+                    if (presenter.peer_name === peer_name) {
+                        log.info('Presenter found', {
+                            room: room_id,
+                            peer_id: existingPeerID,
+                            peer_name: peer_name,
+                        });
+                        return true;
+                    }
+                }
                 return false;
             }
 
-            isPresenter =
+            const isPresenter =
                 (typeof presenters[room_id] === 'object' &&
                     Object.keys(presenters[room_id][peer_id]).length > 1 &&
                     presenters[room_id][peer_id]['peer_name'] === peer_name &&
                     presenters[room_id][peer_id]['peer_uuid'] === peer_uuid) ||
                 (config.presenters && config.presenters.includes(peer_name));
+
+            log.debug('isPeerPresenter', {
+                room_id: room_id,
+                peer_id: peer_id,
+                peer_name: peer_name,
+                peer_uuid: peer_uuid,
+                isPresenter: isPresenter,
+            });
+
+            return isPresenter;
         } catch (err) {
             log.error('isPeerPresenter', err);
             return false;
         }
-
-        log.debug('isPeerPresenter', {
-            room_id: room_id,
-            peer_id: peer_id,
-            peer_name: peer_name,
-            peer_uuid: peer_uuid,
-            isPresenter: isPresenter,
-        });
-
-        return isPresenter;
     }
 
     async function getPeerGeoLocation(ip) {
