@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.7
+ * @version 1.2.8
  *
  */
 
@@ -83,6 +83,7 @@ const image = {
     email: '../images/email.png',
     chatgpt: '../images/chatgpt.png',
     all: '../images/all.png',
+    forbidden: '../images/forbidden.png',
 };
 
 const mediaType = {
@@ -318,6 +319,12 @@ class RoomClient {
             .then(
                 async function (room) {
                     console.log('##### JOIN ROOM #####', room);
+                    if (room === 'unauthorized') {
+                        console.log(
+                            '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
+                        );
+                        return this.userUnauthorized();
+                    }
                     if (room === 'isLocked') {
                         this.event(_EVENTS.roomLock);
                         console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
@@ -4828,6 +4835,24 @@ class RoomClient {
     // ####################################################
     // HANDLE ROOM ACTION
     // ####################################################
+
+    userUnauthorized() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Oops, Unauthorized',
+            text: 'The host has user authentication enabled',
+            confirmButtonText: `Login`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            // Login required to join room
+            openURL(`/login/?room=${this.room_id}`);
+        });
+    }
 
     unlockTheRoom() {
         if (room_password) {

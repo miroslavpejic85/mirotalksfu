@@ -39,10 +39,11 @@ module.exports = {
     host: {
         /*
             Host Protection (default: false)
-            To enhance host security, enable host protection and provide valid
+            To enhance host security, enable host protection - user auth and provide valid
             usernames and passwords in the users array.
         */
         protected: false,
+        user_auth: false,
         users: [
             {
                 username: 'username',

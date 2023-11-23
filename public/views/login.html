@@ -133,7 +133,9 @@
                                         const password = filterXSS(document.getElementById('password').value);
 
                                         // http://localhost:3010/join/?room=test
-                                        // http://localhost:3010/join/?room=test&password=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+                                        // http://localhost:3010/join/?room=test&roomPassword=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0
+                                        // http://localhost:3010/join/?room=test&roomPassword=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0&username=username&password=password
+
                                         const qs = new URLSearchParams(window.location.search);
                                         const room = filterXSS(qs.get('room'));
 
@@ -149,6 +151,10 @@
                                                 })
                                                 .then(function (response) {
                                                     console.log(response);
+
+                                                    // Store in session
+                                                    window.sessionStorage.peer_username = username;
+                                                    window.sessionStorage.peer_password = password;
 
                                                     if (room) {
                                                         return (window.location.href =

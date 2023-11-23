@@ -25,8 +25,8 @@ module.exports = class ServerApi {
             this._host +
             '/join?room=' +
             data.room +
-            '&password=' +
-            data.password +
+            '&roomPassword=' +
+            data.roomPassword +
             '&name=' +
             data.name +
             '&audio=' +

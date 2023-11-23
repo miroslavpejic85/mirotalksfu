@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.7
+ * @version 1.2.8
  *
  */
 
@@ -92,6 +92,7 @@ const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // conf
 
 const hostCfg = {
     protected: config.host.protected,
+    user_auth: config.host.user_auth,
     users: config.host.users,
     authenticated: !config.host.protected,
 };
@@ -269,13 +270,30 @@ function startServer() {
 
     // no room name specified to join || direct join
     app.get('/join/', (req, res) => {
-        if (hostCfg.authenticated && Object.keys(req.query).length > 0) {
+        if (Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
-            // http://localhost:3010/join?room=test&password=0&name=mirotalksfu&audio=1&video=1&screen=1&notify=1
-            const { room, password, name, audio, video, screen, notify, isPresenter } = checkXSS(req.query);
-            // if (room && password && name && audio && video && screen && notify) {
-            if (room) {
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=1
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=0&username=username&password=password
+            const { room, roomPassword, name, audio, video, screen, notify, username, password, isPresenter } =
+                checkXSS(req.query);
+
+            const isPeerValid = isAuthPeer(username, password);
+
+            if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
+                const ip = getIP(req);
+                hostCfg.authenticated = true;
+                authHost = new Host(ip, true);
+                log.debug('Direct Join user auth as host done', {
+                    ip: ip,
+                    username: username,
+                    password: password,
+                });
+            }
+
+            if (room && (hostCfg.authenticated || isPeerValid)) {
                 return res.sendFile(views.room);
+            } else {
+                return res.sendFile(views.login);
             }
         }
         if (hostCfg.protected) {
@@ -323,6 +341,11 @@ function startServer() {
         res.send(stats);
     });
 
+    // handle login if user_auth enabled
+    app.get(['/login'], (req, res) => {
+        res.sendFile(views.login);
+    });
+
     // handle logged on host protected
     app.get(['/logged'], (req, res) => {
         const ip = getIP(req);
@@ -340,24 +363,26 @@ function startServer() {
 
     // handle login on host protected
     app.post(['/login'], (req, res) => {
-        if (hostCfg.protected) {
-            let ip = getIP(req);
-            log.debug(`Request login to host from: ${ip}`, req.body);
-            const { username, password } = checkXSS(req.body);
-            const isValidUser =
-                hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password);
-            if (isValidUser) {
-                hostCfg.authenticated = true;
-                authHost = new Host(ip, true);
-                log.debug('LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
-                res.status(200).json({ message: 'authorized' });
-            } else {
-                log.debug('LOGIN KO', { ip: ip, authorized: false });
-                hostCfg.authenticated = false;
-                res.status(401).json({ message: 'unauthorized' });
-            }
+        const ip = getIP(req);
+        log.debug(`Request login to host from: ${ip}`, req.body);
+
+        const { username, password } = checkXSS(req.body);
+
+        const isPeerValid = isAuthPeer(username, password);
+
+        if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
+            const ip = getIP(req);
+            hostCfg.authenticated = true;
+            authHost = new Host(ip, true);
+            log.debug('HOST LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+            return res.status(200).json({ message: 'authorized' });
+        }
+
+        if (isPeerValid) {
+            log.debug('PEER LOGIN OK', { ip: ip, authorized: true });
+            return res.status(200).json({ message: 'authorized' });
         } else {
-            res.redirect('/');
+            return res.status(401).json({ message: 'unauthorized' });
         }
     });
 
@@ -896,6 +921,26 @@ function startServer() {
 
             log.debug('User joined', data);
 
+            // User Auth required, we check if peer valid
+            if (hostCfg.user_auth) {
+                const peer_username = data.peer_info.peer_username;
+                const peer_password = data.peer_info.peer_password;
+
+                const isPeerValid = isAuthPeer(peer_username, peer_password);
+
+                log.debug('[' + socket.id + '] JOIN ROOM - HOST PROTECTED - USER AUTH check peer', {
+                    ip: peer_ip,
+                    peer_username: peer_username,
+                    peer_password: peer_password,
+                    peer_valid: isPeerValid,
+                });
+
+                if (!isPeerValid) {
+                    // redirect peer to login page
+                    return cb('unauthorized');
+                }
+            }
+
             const room = roomList.get(socket.room_id);
 
             room.addPeer(new Peer(socket.id, data));
@@ -1346,6 +1391,10 @@ function startServer() {
             log.error('isPeerPresenter', err);
             return false;
         }
+    }
+
+    function isAuthPeer(username, password) {
+        return hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password);
     }
 
     async function getPeerGeoLocation(ip) {

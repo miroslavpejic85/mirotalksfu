@@ -13,7 +13,7 @@ headers = {
 
 data = {
     "room": "test",
-    "password": "false",
+    "roomPassword": "false",
     "name": "mirotalksfu",
     "audio": "true",
     "video": "true",

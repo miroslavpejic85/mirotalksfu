@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.7
+ * @version 1.2.8
  *
  */
 
@@ -86,6 +86,8 @@ let room_id = getRoomId();
 let room_password = getRoomPassword();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
+let peer_username = getPeerUsername();
+let peer_password = getPeerPassword();
 let isScreenAllowed = getScreen();
 let notify = getNotify();
 isPresenter = isPeerPresenter();
@@ -568,9 +570,33 @@ function getPeerUUID() {
     return peer_uuid;
 }
 
+function getPeerUsername() {
+    if (window.sessionStorage.peer_username) return window.sessionStorage.peer_username;
+    let qs = new URLSearchParams(window.location.search);
+    let username = filterXSS(qs.get('username'));
+    let queryUsername = false;
+    if (username) {
+        queryUsername = username;
+    }
+    console.log('Direct join', { username: queryUsername });
+    return queryUsername;
+}
+
+function getPeerPassword() {
+    if (window.sessionStorage.peer_password) return window.sessionStorage.peer_password;
+    let qs = new URLSearchParams(window.location.search);
+    let password = filterXSS(qs.get('password'));
+    let queryPassword = false;
+    if (password) {
+        queryPassword = password;
+    }
+    console.log('Direct join', { password: queryPassword });
+    return queryPassword;
+}
+
 function getRoomPassword() {
     let qs = new URLSearchParams(window.location.search);
-    let roomPassword = filterXSS(qs.get('password'));
+    let roomPassword = filterXSS(qs.get('roomPassword'));
     if (roomPassword) {
         let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
         if (queryNoRoomPassword) {
@@ -609,6 +635,8 @@ function getPeerInfo() {
         peer_uuid: peer_uuid,
         peer_id: socket.id,
         peer_name: peer_name,
+        peer_username: peer_username,
+        peer_password: peer_password,
         peer_presenter: isPresenter,
         peer_audio: isAudioAllowed,
         peer_video: isVideoAllowed,
