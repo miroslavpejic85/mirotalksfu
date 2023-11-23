@@ -89,12 +89,12 @@ let peer_uuid = getPeerUUID();
 let peer_username = getPeerUsername();
 let peer_password = getPeerPassword();
 let isScreenAllowed = getScreen();
+let isHideMeActive = getHideMeActive();
 let notify = getNotify();
 isPresenter = isPeerPresenter();
 
 let peer_info = null;
 
-let isHideMeActive = false;
 let isPushToTalkActive = false;
 let isSpaceDown = false;
 let isPitchBarEnabled = true;
@@ -533,6 +533,18 @@ function getNotify() {
     notify = lsSettings.share_on_join;
     console.log('Direct join', { notify: notify });
     return notify;
+}
+
+function getHideMeActive() {
+    let qs = new URLSearchParams(window.location.search);
+    let hide = filterXSS(qs.get('hide'));
+    let queryHideMe = false;
+    if (hide) {
+        hide = hide.toLowerCase();
+        queryHideMe = hide === '1' || hide === 'true';
+    }
+    console.log('Direct join', { hide: queryHideMe });
+    return queryHideMe;
 }
 
 function isPeerPresenter() {
@@ -1160,6 +1172,7 @@ function handleButtons() {
         shareRoom(true);
     };
     hideMeButton.onclick = (e) => {
+        isHideMeActive = !isHideMeActive;
         rc.handleHideMe();
     };
     settingsButton.onclick = () => {
@@ -1352,13 +1365,11 @@ function handleButtons() {
         }
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
-        if (isHideMeActive) rc.handleHideMe();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
-        if (isHideMeActive) rc.handleHideMe();
         rc.closeProducer(RoomClient.mediaType.video);
         // rc.pauseProducer(RoomClient.mediaType.video);
     };
@@ -1367,11 +1378,9 @@ function handleButtons() {
         if (moderator.screen_cant_share) {
             return userLog('warning', 'The moderator does not allow you to share the screen', 'top-end', 6000);
         }
-        if (isHideMeActive) rc.handleHideMe();
         rc.produce(RoomClient.mediaType.screen);
     };
     stopScreenButton.onclick = () => {
-        if (isHideMeActive) rc.handleHideMe();
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     fileShareButton.onclick = () => {

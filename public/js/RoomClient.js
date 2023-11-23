@@ -1013,6 +1013,10 @@ class RoomClient {
                 getMicrophoneVolumeIndicator(stream);
             }
 
+            if (type == mediaType.video) {
+                this.handleHideMe();
+            }
+
             producer.on('trackended', () => {
                 this.closeProducer(type);
             });
@@ -1418,7 +1422,6 @@ class RoomClient {
     // ####################################################
 
     handleHideMe() {
-        isHideMeActive = !isHideMeActive;
         //const myScreenWrap = this.getId(this.screenProducerId + '__video');
         const myVideoWrap = this.getId(this.videoProducerId + '__video');
         const myVideoWrapOff = this.getId(this.peer_id + '__videoOff');
@@ -2104,6 +2107,8 @@ class RoomClient {
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         //
         wbUpdate();
+
+        this.handleHideMe();
     }
 
     removeVideoOff(peer_id) {

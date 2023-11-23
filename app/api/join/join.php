@@ -23,6 +23,7 @@ $data = array(
     "audio"         => true,
     "video"         => true,
     "screen"        => true,
+    "hide"          => false,
     "notify"        => true,
 );
 $data_string = json_encode($data);

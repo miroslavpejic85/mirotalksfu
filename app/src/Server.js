@@ -272,9 +272,11 @@ function startServer() {
     app.get('/join/', (req, res) => {
         if (Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=1
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&notify=0&username=username&password=password
-            const { room, roomPassword, name, audio, video, screen, notify, username, password, isPresenter } =
+
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&username=username&password=password
+
+            const { room, roomPassword, name, audio, video, screen, hide, notify, username, password, isPresenter } =
                 checkXSS(req.query);
 
             const isPeerValid = isAuthPeer(username, password);

@@ -22,6 +22,7 @@ async function getJoin() {
                 audio: true,
                 video: true,
                 screen: true,
+                hide: false,
                 notify: true,
             }),
         });

@@ -91,8 +91,9 @@
     | video        | boolean        | Video stream    |
     | screen       | boolean        | Screen stream   |
     | notify       | boolean        | Welcome message |
-    | username     | string         | auth username   |
-    | password     | string         | auth password   |
+    | hide         | boolean        | Hide myself     |
+    | username     | string         | Auth username   |
+    | password     | string         | Auth password   |
 
 > **Note**
 >
