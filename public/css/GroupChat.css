@@ -106,7 +106,7 @@
 
 /* Chat app people list container */
 .chat-app .chat-list {
-    height: 550px;
+    height: auto;
     /* border: 1px solid lime; */
 }
 
@@ -170,10 +170,9 @@
 /* Chat history */
 .chat .chat-history {
     padding: 20px;
-    min-height: 500px;
-    max-height: 500px;
+    min-height: 490px;
+    max-height: 490px;
     border-bottom: var(--border);
-    overflow-x: auto;
     /* border: 1px solid lime; */
 }
 

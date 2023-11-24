@@ -494,11 +494,11 @@ function startServer() {
             const tunnel = pu0.startsWith('https') ? pu0 : pu1;
             log.info('Listening on', {
                 node_version: process.versions.node,
+                hostConfig: hostCfg,
+                presenters: config.presenters,
                 announced_ip: announcedIP,
                 server: host,
                 server_tunnel: tunnel,
-                hostConfig: hostCfg,
-                presenters: config.presenters,
                 api_docs: api_docs,
                 mediasoup_worker_bin: mediasoup.workerBin,
                 mediasoup_server_version: mediasoup.version,
@@ -540,11 +540,11 @@ function startServer() {
         }
         log.info('Settings', {
             node_version: process.versions.node,
+            hostConfig: hostCfg,
+            presenters: config.presenters,
             announced_ip: announcedIP,
             server: host,
             api_docs: api_docs,
-            hostConfig: hostCfg,
-            presenters: config.presenters,
             mediasoup_worker_bin: mediasoup.workerBin,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,

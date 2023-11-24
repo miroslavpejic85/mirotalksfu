@@ -2991,15 +2991,15 @@ class RoomClient {
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
         chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
         if (this.isChatPinned) chat.style.display = isParticipantsListHidden ? 'block' : 'none';
-        chatHistory.style.height = isParticipantsListHidden ? 'calc(100vh - 220px)' : '500px';
+        chatHistory.style.height = isParticipantsListHidden ? 'calc(100vh - 210px)' : '490px';
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
         plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
     }
 
     toggleChatHistorySize(max = true) {
         const chatHistory = this.getId('chatHistory');
-        chatHistory.style.minHeight = max ? 'calc(100vh - 220px)' : '500px';
-        chatHistory.style.maxHeight = max ? 'calc(100vh - 220px)' : '500px';
+        chatHistory.style.minHeight = max ? 'calc(100vh - 210px)' : '490px';
+        chatHistory.style.maxHeight = max ? 'calc(100vh - 210px)' : '490px';
     }
 
     toggleChatPin() {
@@ -3373,9 +3373,11 @@ class RoomClient {
 
         chatHistory.scrollTop += 500;
 
-        this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
-        this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
-        this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
+        if (!this.isMobileDevice) {
+            this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
+            this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
+            this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
+        }
 
         chatMessagesId++;
     }
@@ -5440,7 +5442,7 @@ class RoomClient {
                 break;
         }
 
-        setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
+        if (!this.isMobileDevice) setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
 
         const clickedElement = event ? event.target : null;
         if (!event || (clickedElement.tagName != 'BUTTON' && clickedElement.tagName != 'I')) {
