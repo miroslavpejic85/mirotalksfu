@@ -1279,6 +1279,8 @@ function startServer() {
 
             if (room.getPeers().size === 0) {
                 roomList.delete(socket.room_id);
+                delete presenters[socket.room_id];
+                log.info('REMOVE ME - current presenters grouped by roomId', presenters);
             }
 
             socket.room_id = null;
