@@ -173,6 +173,8 @@
     min-height: 490px;
     max-height: 490px;
     border-bottom: var(--border);
+    overflow-y: auto;
+    overflow-x: hidden;
     /* border: 1px solid lime; */
 }
 
