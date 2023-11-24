@@ -947,6 +947,10 @@ function startServer() {
 
             room.addPeer(new Peer(socket.id, data));
 
+            const roomIds = getRoomIds();
+
+            log.info('[Join] - current active rooms', roomIds);
+
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
             const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
@@ -1233,9 +1237,10 @@ function startServer() {
 
             const peerName = room.getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
             const peerUuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
+
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
-            log.debug('Disconnect', peerName);
+            log.debug('[Disconnect] - peer name', peerName);
 
             room.removePeer(socket.id);
 
@@ -1246,10 +1251,14 @@ function startServer() {
                 if (room.isLobbyEnabled()) {
                     room.setLobbyEnabled(false);
                 }
-                if (roomList.has(socket.room_id)) roomList.delete(socket.room_id);
+                roomList.delete(socket.room_id);
+
+                const roomIds = getRoomIds();
+
+                log.info('[Disconnect] - Last peer - current active rooms', roomIds);
 
                 delete presenters[socket.room_id];
-                log.info('Disconnect - current presenters grouped by roomId', presenters);
+                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
             }
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
@@ -1279,8 +1288,14 @@ function startServer() {
 
             if (room.getPeers().size === 0) {
                 roomList.delete(socket.room_id);
+
                 delete presenters[socket.room_id];
-                log.info('REMOVE ME - current presenters grouped by roomId', presenters);
+
+                log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
+
+                const roomIds = getRoomIds();
+
+                log.info('[REMOVE ME] - Last peer - current active rooms', roomIds);
             }
 
             socket.room_id = null;
@@ -1336,7 +1351,7 @@ function startServer() {
         function removeMeData(room, peerName, isPresenter) {
             const roomId = room && socket.room_id;
             const peerCounts = room && room.getPeers().size;
-            log.debug('REMOVE ME DATA', {
+            log.debug('[REMOVE ME] - DATA', {
                 roomId: roomId,
                 name: peerName,
                 isPresenter: isPresenter,
@@ -1399,6 +1414,10 @@ function startServer() {
 
     function isAuthPeer(username, password) {
         return hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password);
+    }
+
+    function getRoomIds() {
+        return Array.from(roomList.keys());
     }
 
     async function getPeerGeoLocation(ip) {
