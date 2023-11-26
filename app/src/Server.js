@@ -947,9 +947,9 @@ function startServer() {
 
             room.addPeer(new Peer(socket.id, data));
 
-            const roomIds = getRoomIds();
+            const activeRooms = getActiveRooms();
 
-            log.info('[Join] - current active rooms', roomIds);
+            log.info('[Join] - current active rooms', activeRooms);
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
@@ -1253,9 +1253,9 @@ function startServer() {
                 }
                 roomList.delete(socket.room_id);
 
-                const roomIds = getRoomIds();
+                const activeRooms = getActiveRooms();
 
-                log.info('[Disconnect] - Last peer - current active rooms', roomIds);
+                log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
 
                 delete presenters[socket.room_id];
                 log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
@@ -1293,9 +1293,9 @@ function startServer() {
 
                 log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
 
-                const roomIds = getRoomIds();
+                const activeRooms = getActiveRooms();
 
-                log.info('[REMOVE ME] - Last peer - current active rooms', roomIds);
+                log.info('[REMOVE ME] - Last peer - current active rooms', activeRooms);
             }
 
             socket.room_id = null;
@@ -1416,8 +1416,17 @@ function startServer() {
         return hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password);
     }
 
-    function getRoomIds() {
-        return Array.from(roomList.keys());
+    function getActiveRooms() {
+        const roomIds = Array.from(roomList.keys());
+        const roomPeersArray = roomIds.map((roomId) => {
+            const room = roomList.get(roomId);
+            const peerCount = room ? room.getPeers().size : 0;
+            return {
+                room: roomId,
+                peers: peerCount,
+            };
+        });
+        return roomPeersArray;
     }
 
     async function getPeerGeoLocation(ip) {
