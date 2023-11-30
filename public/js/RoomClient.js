@@ -2797,7 +2797,7 @@ class RoomClient {
                         if (this.isScreenAllowed) return;
                         return this.msgPopup('toast', 'Another video seems pinned, unpin it before to pin this one');
                     }
-                    if (!isScreen) videoPlayer.style.objectFit = 'var(--videoObjFit)';
+                    if (!isScreen && !isBroadcastingEnabled) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
                     cam.className = 'Camera';
                     this.videoMediaContainer.appendChild(cam);
