@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.8
+ * @version 1.2.9
  *
  */
 
@@ -42,6 +42,7 @@ const html = {
 };
 
 const icons = {
+    room: '<i class="fas fa-home"></i>',
     chat: '<i class="fas fa-comments"></i>',
     user: '<i class="fas fa-user"></i>',
     transcript: '<i class="fas fa-closed-captioning"></i>',
@@ -358,7 +359,11 @@ class RoomClient {
         this.device = await this.loadDevice(data);
         console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
-        await this.startLocalMedia();
+        if (isBroadcastingEnabled) {
+            isPresenter ? await this.startLocalMedia() : await this.handleRoomBroadcasting();
+        } else {
+            await this.startLocalMedia();
+        }
         this.socket.emit('getProducers');
     }
 
@@ -369,13 +374,19 @@ class RoomClient {
         redirect = room.redirect;
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
+        // ME
         for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {
             let my_peer_info = peers.get(peer).peer_info;
             console.log('07.1 ----> My Peer info', my_peer_info);
             isPresenter = window.localStorage.isReconnected === 'true' ? isPresenter : my_peer_info.peer_presenter;
+            this.peer_info.peer_presenter = isPresenter;
             this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
             handleRules(isPresenter);
+            // ###################################################################################################
+            isBroadcastingEnabled = isPresenter && !room.broadcasting ? isBroadcastingEnabled : room.broadcasting;
+            console.log('07.1 ----> ROOM BROADCASTING', isBroadcastingEnabled);
+            // ###################################################################################################
             room.config.hostOnlyRecording
                 ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
                   this.event(_EVENTS.hostOnlyRecordingOn))
@@ -404,13 +415,17 @@ class RoomClient {
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
             }
         }
-        adaptAspectRatio(participantsCount);
+        // PARTICIPANTS
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
             // console.log('07.1 ----> Remote Peer info', peer_info);
-            if (!peer_info.peer_video) {
+            const canSetVideoOff = !isBroadcastingEnabled || (isBroadcastingEnabled && peer_info.peer_presenter);
+
+            if (!peer_info.peer_video && canSetVideoOff) {
+                console.log('Detected peer video off ' + peer_info.peer_name);
                 await this.setVideoOff(peer_info, true);
             }
+
             if (peer_info.peer_recording) {
                 this.handleRecordingAction({
                     peer_id: peer_info.id,
@@ -419,8 +434,11 @@ class RoomClient {
                 });
             }
         }
+
         this.refreshParticipantsCount();
+
         console.log('07.2 Participants Count ---->', participantsCount);
+
         // notify && participantsCount == 1 ? shareRoom() : sound('joined');
         if (notify && participantsCount == 1) {
             shareRoom();
@@ -605,7 +623,7 @@ class RoomClient {
         this.socket.on(
             'consumerClosed',
             function ({ consumer_id, consumer_kind }) {
-                console.log('Closing consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
+                console.log('SocketOn Closing consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
                 this.removeConsumer(consumer_id, consumer_kind);
             }.bind(this),
         );
@@ -613,19 +631,24 @@ class RoomClient {
         this.socket.on(
             'setVideoOff',
             function (data) {
-                console.log('Video off:', data);
-                this.setVideoOff(data, true);
+                if (!isBroadcastingEnabled || (isBroadcastingEnabled && data.peer_presenter)) {
+                    console.log('SocketOn setVideoOff', {
+                        peer_name: data.peer_name,
+                        peer_presenter: data.peer_presenter,
+                    });
+                    this.setVideoOff(data, true);
+                }
             }.bind(this),
         );
 
         this.socket.on(
             'removeMe',
             function (data) {
-                console.log('Remove me:', data);
+                console.log('SocketOn Remove me:', data);
                 this.removeVideoOff(data.peer_id);
                 this.lobbyRemoveMe(data.peer_id);
                 participantsCount = data.peer_counts;
-                adaptAspectRatio(participantsCount);
+                if (!isBroadcastingEnabled) adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants();
             }.bind(this),
         );
@@ -633,9 +656,14 @@ class RoomClient {
         this.socket.on(
             'refreshParticipantsCount',
             function (data) {
-                console.log('Participants Count:', data);
+                console.log('SocketOn Participants Count:', data);
                 participantsCount = data.peer_counts;
-                adaptAspectRatio(participantsCount);
+                if (isBroadcastingEnabled) {
+                    if (isParticipantsListOpen) getRoomParticipants();
+                    wbUpdate();
+                } else {
+                    adaptAspectRatio(participantsCount);
+                }
             }.bind(this),
         );
 
@@ -643,7 +671,7 @@ class RoomClient {
             'newProducers',
             async function (data) {
                 if (data.length > 0) {
-                    console.log('New producers', data);
+                    console.log('SocketOn New producers', data);
                     for (let { producer_id, peer_name, peer_info, type } of data) {
                         await this.consume(producer_id, peer_name, peer_info, type);
                     }
@@ -654,7 +682,7 @@ class RoomClient {
         this.socket.on(
             'message',
             function (data) {
-                console.log('New message:', data);
+                console.log('SocketOn New message:', data);
                 this.showMessage(data);
             }.bind(this),
         );
@@ -662,7 +690,7 @@ class RoomClient {
         this.socket.on(
             'roomAction',
             function (data) {
-                console.log('Room action:', data);
+                console.log('SocketOn Room action:', data);
                 this.roomAction(data, false);
             }.bind(this),
         );
@@ -670,7 +698,7 @@ class RoomClient {
         this.socket.on(
             'roomPassword',
             function (data) {
-                console.log('Room password:', data.password);
+                console.log('SocketOn Room password:', data.password);
                 this.roomPassword(data);
             }.bind(this),
         );
@@ -678,7 +706,7 @@ class RoomClient {
         this.socket.on(
             'roomLobby',
             function (data) {
-                console.log('Room lobby:', data);
+                console.log('SocketOn Room lobby:', data);
                 this.roomLobby(data);
             }.bind(this),
         );
@@ -686,7 +714,7 @@ class RoomClient {
         this.socket.on(
             'cmd',
             function (data) {
-                console.log('Peer cmd:', data);
+                console.log('SocketOn Peer cmd:', data);
                 this.handleCmd(data);
             }.bind(this),
         );
@@ -694,7 +722,7 @@ class RoomClient {
         this.socket.on(
             'peerAction',
             function (data) {
-                console.log('Peer action:', data);
+                console.log('SocketOn Peer action:', data);
                 this.peerAction(data.from_peer_name, data.peer_id, data.action, false, data.broadcast);
             }.bind(this),
         );
@@ -702,15 +730,15 @@ class RoomClient {
         this.socket.on(
             'updatePeerInfo',
             function (data) {
-                console.log('Peer info update:', data);
-                this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false);
+                console.log('SocketOn Peer info update:', data);
+                this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false, data.peer_presenter);
             }.bind(this),
         );
 
         this.socket.on(
             'fileInfo',
             function (data) {
-                console.log('File info:', data);
+                console.log('SocketOn File info:', data);
                 this.handleFileInfo(data);
             }.bind(this),
         );
@@ -739,7 +767,7 @@ class RoomClient {
         this.socket.on(
             'wbCanvasToJson',
             function (data) {
-                console.log('Received whiteboard canvas JSON');
+                console.log('SocketOn Received whiteboard canvas JSON');
                 JsonToWbCanvas(data);
             }.bind(this),
         );
@@ -762,15 +790,23 @@ class RoomClient {
         this.socket.on(
             'updateRoomModerator',
             function (data) {
-                console.log('Update room moderator', data);
+                console.log('SocketOn Update room moderator', data);
                 this.handleUpdateRoomModerator(data);
+            }.bind(this),
+        );
+
+        this.socket.on(
+            'updateRoomModeratorALL',
+            function (data) {
+                console.log('SocketOn Update room moderator ALL', data);
+                this.handleUpdateRoomModeratorALL(data);
             }.bind(this),
         );
 
         this.socket.on(
             'recordingAction',
             function (data) {
-                console.log('Recording action:', data);
+                console.log('SocketOn Recording action:', data);
                 this.handleRecordingAction(data);
             }.bind(this),
         );
@@ -778,7 +814,7 @@ class RoomClient {
         this.socket.on(
             'connect',
             function () {
-                console.log('Connected to signaling server!');
+                console.log('SocketOn Connected to signaling server!');
                 this._isConnected = true;
                 // location.reload();
                 getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
@@ -847,6 +883,34 @@ class RoomClient {
                 openURL((window.location.href = '/join/' + this.room_id));
             }
         });
+    }
+
+    // ####################################################
+    // HANDLE ROOM BROADCASTING
+    // ####################################################
+
+    async handleRoomBroadcasting() {
+        console.log('07.4 ----> Room Broadcasting is currently active, and you are not the designated presenter');
+
+        this.peer_info.peer_audio = false;
+        this.peer_info.peer_video = false;
+        this.peer_info.peer_screen = false;
+
+        const mediaTypes = ['audio', 'video', 'screen'];
+
+        mediaTypes.forEach((type) => {
+            const data = {
+                peer_name: this.peer_name,
+                peer_id: this.peer_id,
+                peer_presenter: isPresenter,
+                type: type,
+                status: false,
+                broadcast: true,
+            };
+            this.socket.emit('updatePeerInfo', data);
+        });
+
+        handleRulesBroadcasting();
     }
 
     // ####################################################
@@ -1077,7 +1141,7 @@ class RoomClient {
                     this.event(_EVENTS.startScreen);
                     break;
                 default:
-                    return;
+                    break;
             }
             this.sound('joined');
         } catch (err) {
@@ -1682,7 +1746,7 @@ class RoomClient {
                 this.event(_EVENTS.stopScreen);
                 break;
             default:
-                return;
+                break;
         }
 
         this.sound('left');
@@ -1749,7 +1813,7 @@ class RoomClient {
         wbUpdate();
 
         this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
-            function ({ consumer, stream, kind }) {
+            async function ({ consumer, stream, kind }) {
                 console.log('CONSUMER MEDIA TYPE ----> ' + type);
                 console.log('CONSUMER', consumer);
 
@@ -1814,12 +1878,12 @@ class RoomClient {
 
         let remotePeerId = peer_info.peer_id;
         let remoteIsScreen = type == mediaType.screen;
+        let remotePeerAudio = peer_info.peer_audio;
         let remotePrivacyOn = peer_info.peer_video_privacy;
 
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
-                let remotePeerAudio = peer_info.peer_audio;
                 this.removeVideoOff(remotePeerId);
                 d = document.createElement('div');
                 d.className = 'Camera';
@@ -1939,6 +2003,7 @@ class RoomClient {
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
+                this.setPeerAudio(remotePeerId, remotePeerAudio);
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
@@ -1952,6 +2017,7 @@ class RoomClient {
                 let inputPv = this.getId(audioConsumerId);
                 if (inputPv) {
                     this.handlePV(id + '___' + audioConsumerId);
+                    this.setPeerAudio(remotePeerId, remotePeerAudio);
                 }
                 console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
@@ -2016,6 +2082,7 @@ class RoomClient {
     // ####################################################
 
     async setVideoOff(peer_info, remotePeer = false) {
+        //console.log('setVideoOff', peer_info);
         let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb, pv;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
@@ -2104,6 +2171,8 @@ class RoomClient {
             this.setTippy(pv.id, '🔊 Volume', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
         }
+        remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
+
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         //
         wbUpdate();
@@ -2315,25 +2384,44 @@ class RoomClient {
         return 'data:image/svg+xml,' + svg.replace(/#/g, '%23').replace(/"/g, "'").replace(/&/g, '&amp;');
     }
 
+    setPeerAudio(peer_id, status) {
+        if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
+            console.log('Set peer audio enabled: ' + status);
+            const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
+            const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
+            if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
+            if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
+        }
+    }
+
     setIsAudio(peer_id, status) {
-        this.peer_info.peer_audio = status;
-        let b = this.getPeerAudioBtn(peer_id);
-        if (b) b.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
+        if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
+            console.log('Set audio enabled: ' + status);
+            this.peer_info.peer_audio = status;
+            const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
+            if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
+        }
     }
 
     setIsVideo(status) {
-        this.peer_info.peer_video = status;
-        if (!this.peer_info.peer_video) {
-            this.setVideoOff(this.peer_info, false);
-            this.sendVideoOff();
+        if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
+            this.peer_info.peer_video = status;
+            if (!this.peer_info.peer_video) {
+                console.log('Set video enabled: ' + status);
+                this.setVideoOff(this.peer_info, false);
+                this.sendVideoOff();
+            }
         }
     }
 
     setIsScreen(status) {
-        this.peer_info.peer_screen = status;
-        if (!this.peer_info.peer_screen && !this.peer_info.peer_video) {
-            this.setVideoOff(this.peer_info, false);
-            this.sendVideoOff();
+        if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
+            this.peer_info.peer_screen = status;
+            if (!this.peer_info.peer_screen && !this.peer_info.peer_video) {
+                console.log('Set screen enabled: ' + status);
+                this.setVideoOff(this.peer_info, false);
+                this.sendVideoOff();
+            }
         }
     }
 
@@ -2392,6 +2480,10 @@ class RoomClient {
 
     getPeerAudioBtn(peer_id) {
         return this.getId(peer_id + '__audio');
+    }
+
+    getPeerAudioVolumeBtn(peer_id) {
+        return this.getId(peer_id + '___pVolume');
     }
 
     getPeerHandBtn(peer_id) {
@@ -4462,7 +4554,8 @@ class RoomClient {
     // ####################################################
 
     roomAction(action, emit = true, popup = true) {
-        let data = {
+        const data = {
+            room_broadcasting: isBroadcastingEnabled,
             room_id: this.room_id,
             peer_id: this.peer_id,
             peer_name: this.peer_name,
@@ -4472,6 +4565,10 @@ class RoomClient {
         };
         if (emit) {
             switch (action) {
+                case 'broadcasting':
+                    this.socket.emit('roomAction', data);
+                    if (popup) this.roomStatus(action);
+                    break;
                 case 'lock':
                     if (room_password) {
                         this.socket
@@ -4481,10 +4578,11 @@ class RoomClient {
                                     // Only the presenter can lock the room
                                     if (isPresenter || res.peerCounts == 1) {
                                         isPresenter = true;
+                                        this.peer_info.peer_presenter = isPresenter;
                                         this.getId('isUserPresenter').innerText = isPresenter;
                                         data.password = room_password;
                                         this.socket.emit('roomAction', data);
-                                        this.roomStatus(action);
+                                        if (popup) this.roomStatus(action);
                                     }
                                 }.bind(this),
                             )
@@ -4519,7 +4617,7 @@ class RoomClient {
                     break;
                 case 'unlock':
                     this.socket.emit('roomAction', data);
-                    this.roomStatus(action);
+                    if (popup) this.roomStatus(action);
                     break;
                 case 'lobbyOn':
                     this.socket.emit('roomAction', data);
@@ -4547,6 +4645,9 @@ class RoomClient {
 
     roomStatus(action) {
         switch (action) {
+            case 'broadcasting':
+                this.userLog('info', `${icons.room} BROADCASTING ${isBroadcastingEnabled ? 'On' : 'Off'}`, 'top-end');
+                break;
             case 'lock':
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
@@ -4666,7 +4767,7 @@ class RoomClient {
     // ROOM LOBBY
     // ####################################################
 
-    roomLobby(data) {
+    async roomLobby(data) {
         console.log('LOBBY--->', data);
         switch (data.lobby_status) {
             case 'waiting':
@@ -4702,7 +4803,7 @@ class RoomClient {
                 }
                 break;
             case 'accept':
-                this.joinAllowed(data.room);
+                await this.joinAllowed(data.room);
                 control.style.display = 'flex';
                 this.msgPopup('info', 'Your join meeting was be accepted by moderator');
                 break;
@@ -5464,8 +5565,24 @@ class RoomClient {
 
     updateRoomModerator(data) {
         if (!isRulesActive || isPresenter) {
-            this.socket.emit('updateRoomModerator', data);
+            const moderator = this.getModeratorData(data);
+            this.socket.emit('updateRoomModerator', moderator);
         }
+    }
+
+    updateRoomModeratorALL(data) {
+        if (!isRulesActive || isPresenter) {
+            const moderator = this.getModeratorData(data);
+            this.socket.emit('updateRoomModeratorALL', moderator);
+        }
+    }
+
+    getModeratorData(data) {
+        return {
+            peer_name: this.peer_name,
+            peer_uuid: this.peer_uuid,
+            moderator: data,
+        };
     }
 
     handleUpdateRoomModerator(data) {
@@ -5488,6 +5605,11 @@ class RoomClient {
         }
     }
 
+    handleUpdateRoomModeratorALL(data) {
+        this._moderator = data;
+        console.log('Update Room Moderator data all', this._moderator);
+    }
+
     getModerator() {
         console.log('Get Moderator', this._moderator);
         return this._moderator;
@@ -5497,7 +5619,7 @@ class RoomClient {
     // UPDATE PEER INFO
     // ####################################################
 
-    updatePeerInfo(peer_name, peer_id, type, status, emit = true) {
+    updatePeerInfo(peer_name, peer_id, type, status, emit = true, presenter = false) {
         if (emit) {
             switch (type) {
                 case 'audio':
@@ -5524,23 +5646,23 @@ class RoomClient {
                 default:
                     break;
             }
-            let data = {
+            const data = {
                 peer_name: peer_name,
                 peer_id: peer_id,
                 type: type,
                 status: status,
+                broadcast: true,
             };
             this.socket.emit('updatePeerInfo', data);
         } else {
+            const canUpdateMediaStatus = !isBroadcastingEnabled || (isBroadcastingEnabled && presenter);
             switch (type) {
                 case 'audio':
-                    this.setIsAudio(peer_id, status);
+                    if (canUpdateMediaStatus) this.setPeerAudio(peer_id, status);
                     break;
                 case 'video':
-                    this.setIsVideo(status);
                     break;
                 case 'screen':
-                    this.setIsScreen(status);
                     break;
                 case 'hand':
                     let peer_hand = this.getPeerHandBtn(peer_id);

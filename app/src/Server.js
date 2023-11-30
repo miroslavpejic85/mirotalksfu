@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.8
+ * @version 1.2.9
  *
  */
 
@@ -630,7 +630,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            let peerCounts = room.getPeersCount();
+            const peerCounts = room.getPeersCount();
 
             log.debug('Peer counts', { peerCounts: peerCounts });
 
@@ -668,7 +668,13 @@ function startServer() {
             const room = roomList.get(socket.room_id);
 
             log.debug('Room action:', data);
+
             switch (data.action) {
+                case 'broadcasting':
+                    if (!isPresenter) return;
+                    room.setIsBroadcasting(data.room_broadcasting);
+                    room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
                 case 'lock':
                     if (!isPresenter) return;
                     if (!room.isLocked()) {
@@ -716,6 +722,7 @@ function startServer() {
                     break;
             }
             log.debug('Room status', {
+                broadcasting: room.isBroadcasting(),
                 locked: room.isLocked(),
                 lobby: room.isLobbyEnabled(),
                 hostOnlyRecording: room.isHostOnlyRecording(),
@@ -780,29 +787,56 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            // update my peer_info status to all in the room
             room.getPeers().get(socket.id).updatePeerInfo(data);
-            room.broadCast(socket.id, 'updatePeerInfo', data);
+
+            if (data.broadcast) {
+                log.info('updatePeerInfo broadcast data');
+                room.broadCast(socket.id, 'updatePeerInfo', data);
+            }
         });
 
-        socket.on('updateRoomModerator', (dataObject) => {
+        socket.on('updateRoomModerator', async (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
             const data = checkXSS(dataObject);
 
             const room = roomList.get(socket.room_id);
 
-            room.updateRoomModerator(data);
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
-            switch (data.type) {
+            if (!isPresenter) return;
+
+            const moderator = data.moderator;
+
+            room.updateRoomModerator(moderator);
+
+            switch (moderator.type) {
                 case 'audio_cant_unmute':
                 case 'video_cant_unhide':
                 case 'screen_cant_share':
-                    room.broadCast(socket.id, 'updateRoomModerator', data);
+                    room.broadCast(socket.id, 'updateRoomModerator', moderator);
                     break;
                 default:
                     break;
             }
+        });
+
+        socket.on('updateRoomModeratorALL', async (dataObject) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
+
+            const room = roomList.get(socket.room_id);
+
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            const moderator = data.moderator;
+
+            room.updateRoomModeratorALL(moderator);
+
+            room.broadCast(socket.id, 'updateRoomModeratorALL', moderator);
         });
 
         socket.on('fileInfo', (dataObject) => {
@@ -886,9 +920,10 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            log.debug('Video off data', data.peer_name);
+
             const room = roomList.get(socket.room_id);
 
-            log.debug('Video off', getPeerName(room));
             room.broadCast(socket.id, 'setVideoOff', data);
         });
 
@@ -930,7 +965,7 @@ function startServer() {
 
                 const isPeerValid = isAuthPeer(peer_username, peer_password);
 
-                log.debug('[' + socket.id + '] JOIN ROOM - HOST PROTECTED - USER AUTH check peer', {
+                log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
                     ip: peer_ip,
                     peer_username: peer_username,
                     peer_password: peer_password,
@@ -953,8 +988,10 @@ function startServer() {
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
-            const peer_name = room.getPeers()?.get(socket.id)?.peer_info?.peer_name;
-            const peer_uuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid;
+            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+            const peer_id = peer.peer_id;
+            const peer_name = peer.peer_name;
+            const peer_uuid = peer.peer_uuid;
 
             // Set the presenters
             const presenter = {
@@ -995,8 +1032,8 @@ function startServer() {
                     'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
                 );
                 room.broadCast(socket.id, 'roomLobby', {
-                    peer_id: data.peer_info.peer_id,
-                    peer_name: data.peer_info.peer_name,
+                    peer_id: peer_id,
+                    peer_name: peer_name,
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
@@ -1235,8 +1272,10 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peerName = room.getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
-            const peerUuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
+            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+
+            const peerName = peer.peer_name || '';
+            const peerUuid = peer.peer_uuid || '';
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
@@ -1245,12 +1284,7 @@ function startServer() {
             room.removePeer(socket.id);
 
             if (room.getPeers().size === 0) {
-                if (room.isLocked()) {
-                    room.setLocked(false);
-                }
-                if (room.isLobbyEnabled()) {
-                    room.setLobbyEnabled(false);
-                }
+                //
                 roomList.delete(socket.room_id);
 
                 const activeRooms = getActiveRooms();
@@ -1275,8 +1309,11 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peerName = room.getPeers()?.get(socket.id)?.peer_info?.peer_name || '';
-            const peerUuid = room.getPeers()?.get(socket.id)?.peer_info?.peer_uuid || '';
+            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+
+            const peerName = peer.peer_name || '';
+            const peerUuid = peer.peer_uuid || '';
+
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
             log.debug('Exit room', peerName);
@@ -1287,6 +1324,7 @@ function startServer() {
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
             if (room.getPeers().size === 0) {
+                //
                 roomList.delete(socket.room_id);
 
                 delete presenters[socket.room_id];

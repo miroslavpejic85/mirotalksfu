@@ -252,7 +252,7 @@
 
 .chat .chat-history .other-message {
     background: var(--left-msg-bg);
-    text-align: right;
+    text-align: left;
 }
 
 .chat .chat-history .other-message:after {

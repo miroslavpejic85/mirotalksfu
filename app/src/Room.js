@@ -12,6 +12,9 @@ module.exports = class Room {
         this.audioLevelObserver = null;
         this.audioLevelObserverEnabled = true;
         this.audioLastUpdateTime = 0;
+        // ##########################
+        this._isBroadcasting = false;
+        // ##########################
         this._isLocked = false;
         this._isLobbyEnabled = false;
         this._roomPassword = null;
@@ -109,6 +112,11 @@ module.exports = class Room {
     // ROOM MODERATOR
     // ####################################################
 
+    updateRoomModeratorALL(data) {
+        this._moderator = data;
+        log.debug('Update room moderator all data', this._moderator);
+    }
+
     updateRoomModerator(data) {
         log.debug('Update room moderator', data);
         switch (data.type) {
@@ -137,6 +145,7 @@ module.exports = class Room {
     toJson() {
         return {
             id: this.id,
+            broadcasting: this._isBroadcasting,
             config: {
                 isLocked: this._isLocked,
                 isLobbyEnabled: this._isLobbyEnabled,
@@ -312,6 +321,10 @@ module.exports = class Room {
     // ROOM STATUS
     // ####################################################
 
+    // GET
+    isBroadcasting() {
+        return this._isBroadcasting;
+    }
     getPassword() {
         return this._roomPassword;
     }
@@ -323,6 +336,11 @@ module.exports = class Room {
     }
     isHostOnlyRecording() {
         return this._hostOnlyRecording;
+    }
+
+    // SET
+    setIsBroadcasting(status) {
+        this._isBroadcasting = status;
     }
     setLocked(status, password) {
         this._isLocked = status;

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.2.8
+ * @version 1.2.9
  *
  */
 
@@ -34,6 +34,8 @@ let redirect = {
 };
 
 const _PEER = {
+    presenter: '<i class="fa-solid fa-user-shield"></i>',
+    guest: '<i class="fa-solid fa-signal"></i>',
     audioOn: '<i class="fas fa-microphone"></i>',
     audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
     videoOn: '<i class="fas fa-video"></i>',
@@ -99,6 +101,7 @@ let isPushToTalkActive = false;
 let isSpaceDown = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
+let isBroadcastingEnabled = false;
 let isLobbyEnabled = false;
 let isLobbyOpen = false;
 let hostOnlyRecording = false;
@@ -164,6 +167,11 @@ function initClient() {
         );
         setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
         setTippy('lobbyRejectAllBtn', 'Reject', 'top');
+        setTippy(
+            'switchBroadcasting',
+            'Broadcasting is the dissemination of audio or video content to a large audience (one to many)',
+            'right',
+        );
         setTippy(
             'switchLobby',
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
@@ -252,7 +260,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopRecButton', 'Stop recording', placement);
         setTippy('raiseHandButton', 'Raise your hand', placement);
         setTippy('lowerHandButton', 'Lower your hand', placement);
-        setTippy('roomEmojiPicker', 'Toggle emoji reaction', placement);
+        setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
@@ -345,7 +353,7 @@ async function initEnumerateVideoDevices() {
 }
 
 function enumerateVideoDevices(stream) {
-    console.log('03 ----> Get Video Devices');
+    console.log('02 ----> Get Video Devices');
     navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
@@ -383,7 +391,7 @@ async function initEnumerateAudioDevices() {
 }
 
 function enumerateAudioDevices(stream) {
-    console.log('02 ----> Get Audio Devices');
+    console.log('03 ----> Get Audio Devices');
     navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
@@ -673,7 +681,7 @@ function getPeerInfo() {
 // ####################################################
 
 function whoAreYou() {
-    console.log('04 ----> Who are you');
+    console.log('04 ----> Who are you?');
 
     hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
@@ -1001,7 +1009,7 @@ function roomIsReady() {
     }
     BUTTONS.main.chatButton && show(chatButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
-    BUTTONS.main.emojiRoomButton && show(roomEmojiPicker);
+    BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
@@ -1058,6 +1066,7 @@ function roomIsReady() {
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
+    BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.settings.host_only_recording && show(roomRecording);
     BUTTONS.main.aboutButton && show(aboutButton);
@@ -1513,7 +1522,7 @@ function handleSelectsInit() {
 
 function setSelectsInit() {
     const localStorageDevices = lS.getLocalStorageDevices();
-    console.log('04 ----> Get Local Storage Devices before', localStorageDevices);
+    console.log('04.0 ----> Get Local Storage Devices before', localStorageDevices);
     if (localStorageDevices) {
         initMicrophoneSelect.selectedIndex = localStorageDevices.audio.index;
         initSpeakerSelect.selectedIndex = localStorageDevices.speaker.index;
@@ -1703,6 +1712,13 @@ function handleSelects() {
         }
     });
     // room
+    switchBroadcasting.onchange = (e) => {
+        isBroadcastingEnabled = e.currentTarget.checked;
+        rc.roomAction('broadcasting');
+        lsSettings.broadcasting = isBroadcastingEnabled;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
     switchLobby.onchange = (e) => {
         isLobbyEnabled = e.currentTarget.checked;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
@@ -1951,10 +1967,16 @@ function handleInputs() {
             ':N': '🥶',
             ':J': '🥴',
         };
-        for (let i in chatInputEmoji) {
-            let regex = new RegExp(i.replace(/([()[{*+.$^\\|?])/g, '\\$1'), 'gim');
-            this.value = this.value.replace(regex, chatInputEmoji[i]);
-        }
+        // Create a regular expression pattern for all keys in chatInputEmoji
+        const regexPattern = new RegExp(
+            Object.keys(chatInputEmoji)
+                .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
+                .join('|'),
+            'gim',
+        );
+        // Replace matching patterns with corresponding emojis
+        this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
+
         rc.checkLineBreaks();
     };
 
@@ -1992,7 +2014,7 @@ function handleRoomEmojiPicker() {
     emojiPickerContainer.appendChild(emojiRoomPicker);
     emojiPickerContainer.style.display = 'none';
 
-    roomEmojiPicker.onclick = () => {
+    emojiRoomButton.onclick = () => {
         toggleEmojiPicker();
     };
     closeEmojiPickerContainer.onclick = () => {
@@ -2016,10 +2038,10 @@ function handleRoomEmojiPicker() {
     function toggleEmojiPicker() {
         if (emojiPickerContainer.style.display === 'block') {
             emojiPickerContainer.style.display = 'none';
-            setColor(roomEmojiPicker, 'white');
+            setColor(emojiRoomButton, 'white');
         } else {
             emojiPickerContainer.style.display = 'block';
-            setColor(roomEmojiPicker, 'yellow');
+            setColor(emojiRoomButton, 'yellow');
         }
     }
 }
@@ -2968,6 +2990,7 @@ async function getRoomParticipants() {
     participantsList.innerHTML = lists;
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
+    console.log('*** Refresh Chat participant lists ***');
 }
 
 async function getParticipantsList(peers) {
@@ -3045,6 +3068,7 @@ async function getParticipantsList(peers) {
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
         const peer_name = peer_info.peer_name;
+        //const peer_presenter = peer_info.peer_presenter ? _PEER.presenter : _PEER.guest;
         const peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         const peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
         const peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
@@ -3100,6 +3124,9 @@ async function getParticipantsList(peers) {
                         <button class="ml5" id='${peer_id}___pScreen' onclick="rc.peerAction('me',this.id,'stop')">${peer_screen}</button>
                 `;
 
+                // li += `
+                //         <button class="ml5" >${peer_presenter}</button>`;
+
                 if (peer_info.peer_hand) {
                     li += `
                         <button class="ml5" >${peer_hand}</button>`;
@@ -3127,7 +3154,11 @@ async function getParticipantsList(peers) {
                         <div class="name">${peer_name}</div>
                         <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
                     </div>
+                `;
 
+                // NO ROOM BROADCASTING
+                if (!isBroadcastingEnabled) {
+                    li += `
                     <div style="class="dropdown">
                         <button 
                             class="dropdown-toggle" 
@@ -3143,7 +3174,10 @@ async function getParticipantsList(peers) {
                             <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
                         </ul>
                     </div>
+                    `;
+                }
 
+                li += `
                     <br/>
 
                     <div class="about-buttons mt5"> 
@@ -3151,10 +3185,15 @@ async function getParticipantsList(peers) {
                         <button class="ml5" id='${peer_id}___pVideo'>${peer_video}</button>
                         <button class="ml5" id='${peer_id}___pScreen'>${peer_screen}</button>
                         `;
+
+                // li += `
+                //         <button class="ml5" >${peer_presenter}</button>`;
+
                 if (peer_info.peer_hand) {
                     li += ` 
                         <button class="ml5" >${peer_hand}</button>`;
                 }
+
                 li += ` 
                     </div>
                 </li>
@@ -3175,9 +3214,14 @@ function setParticipantsTippy(peers) {
         for (let peer of Array.from(peers.keys())) {
             const peer_info = peers.get(peer).peer_info;
             const peer_id = peer_info.peer_id;
-            setTippy(peer_id + '___pAudio', 'Mute', 'top');
-            setTippy(peer_id + '___pVideo', 'Hide', 'top');
-            setTippy(peer_id + '___pScreen', 'Stop', 'top');
+
+            const peerAudioBtn = rc.getId(peer_id + '___pAudio');
+            const peerVideoBtn = rc.getId(peer_id + '___pVideo');
+            const peerScreenBtn = rc.getId(peer_id + '___pScreen');
+
+            if (peerAudioBtn) setTippy(peerAudioBtn.id, 'Mute', 'top');
+            if (peerVideoBtn) setTippy(peerVideoBtn.id, 'Hide', 'top');
+            if (peerScreenBtn) setTippy(peerScreenBtn.id, 'Stop', 'top');
         }
     }
 }

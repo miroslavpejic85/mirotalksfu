@@ -28,6 +28,7 @@ const BUTTONS = {
     settings: {
         lockRoomButton: true, // presenter
         unlockRoomButton: true, // presenter
+        broadcastingButton: true, // presenter
         lobbyButton: true, // presenter
         micOptionsButton: true, // presenter
         tabModerator: true, // presenter
@@ -80,7 +81,7 @@ const BUTTONS = {
 };
 
 function handleRules(isPresenter) {
-    console.log('06.1 ----> IsPresenter: ' + isPresenter);
+    console.log('07.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
     if (!isPresenter) {
         // ##################################
@@ -89,6 +90,7 @@ function handleRules(isPresenter) {
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
+        BUTTONS.settings.broadcastingButton = false;
         BUTTONS.settings.lobbyButton = false;
         BUTTONS.settings.micOptionsButton = false;
         BUTTONS.settings.tabModerator = false;
@@ -106,6 +108,7 @@ function handleRules(isPresenter) {
         BUTTONS.participantsList.saveInfoButton = true;
         BUTTONS.settings.lockRoomButton = !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = isRoomLocked;
+        BUTTONS.settings.broadcastingButton = true;
         BUTTONS.settings.lobbyButton = true;
         BUTTONS.settings.micOptionsButton = true;
         BUTTONS.settings.tabModerator = true;
@@ -121,6 +124,10 @@ function handleRules(isPresenter) {
         // Auto detected rules for presenter
         // ##################################
 
+        // Room broadcasting
+        isBroadcastingEnabled = lsSettings.broadcasting;
+        switchBroadcasting.checked = isBroadcastingEnabled;
+        rc.roomAction('broadcasting', true, false);
         // Room lobby
         isLobbyEnabled = lsSettings.lobby;
         switchLobby.checked = isLobbyEnabled;
@@ -135,15 +142,20 @@ function handleRules(isPresenter) {
         switchEveryoneCantUnmute.checked = lsSettings.moderator_audio_cant_unmute;
         switchEveryoneCantUnhide.checked = lsSettings.moderator_video_cant_unhide;
         switchEveryoneCantShareScreen.checked = lsSettings.moderator_screen_cant_share;
-        rc.updateRoomModerator({ type: 'audio_start_muted', status: switchEveryoneMute.checked });
-        rc.updateRoomModerator({ type: 'video_start_hidden', status: switchEveryoneHidden.checked });
-        rc.updateRoomModerator({ type: 'audio_cant_unmute', status: switchEveryoneCantUnmute.checked });
-        rc.updateRoomModerator({ type: 'video_cant_unhide', status: switchEveryoneCantUnhide.checked });
-        rc.updateRoomModerator({ type: 'screen_cant_share', status: switchEveryoneCantShareScreen.checked });
+        // Update moderator settings...
+        const moderatorData = {
+            audio_start_muted: switchEveryoneMute.checked,
+            video_start_hidden: switchEveryoneHidden.checked,
+            audio_cant_unmute: switchEveryoneCantUnmute.checked,
+            video_cant_unhide: switchEveryoneCantUnhide.checked,
+            screen_cant_share: switchEveryoneCantShareScreen.checked,
+        };
+        rc.updateRoomModeratorALL(moderatorData);
     }
     // main. settings...
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
+    BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
     !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
@@ -151,5 +163,52 @@ function handleRules(isPresenter) {
     BUTTONS.whiteboard.whiteboardLockButton
         ? elemDisplay('whiteboardLockButton', true)
         : elemDisplay('whiteboardLockButton', false, 'flex');
+    //...
+}
+
+function handleRulesBroadcasting() {
+    console.log('07.2 ----> handleRulesBroadcasting');
+    BUTTONS.main.shareButton = false;
+    BUTTONS.main.hideMeButton = false;
+    BUTTONS.main.startAudioButton = false;
+    BUTTONS.main.startVideoButton = false;
+    BUTTONS.main.startScreenButton = false;
+    BUTTONS.main.swapCameraButton = false;
+    BUTTONS.main.raiseHandButton = false;
+    BUTTONS.main.whiteboardButton = false;
+    //BUTTONS.main.emojiRoomButton = false,
+    BUTTONS.main.transcriptionButton = false;
+    BUTTONS.main.settingsButton = false;
+    BUTTONS.participantsList.saveInfoButton = false;
+    BUTTONS.settings.lockRoomButton = false;
+    BUTTONS.settings.unlockRoomButton = false;
+    BUTTONS.settings.lobbyButton = false;
+    BUTTONS.videoOff.muteAudioButton = false;
+    BUTTONS.videoOff.ejectButton = false;
+    BUTTONS.consumerVideo.sendMessageButton = false;
+    BUTTONS.consumerVideo.sendFileButton = false;
+    BUTTONS.consumerVideo.sendVideoButton = false;
+    BUTTONS.consumerVideo.ejectButton = false;
+    BUTTONS.consumerVideo.muteAudioButton = false;
+    BUTTONS.consumerVideo.muteVideoButton = false;
+    BUTTONS.whiteboard.whiteboardLockButton = false;
+    //...
+    elemDisplay('shareButton', false);
+    elemDisplay('hideMeButton', false);
+    elemDisplay('startAudioButton', false);
+    elemDisplay('stopAudioButton', false);
+    elemDisplay('startVideoButton', false);
+    elemDisplay('stopVideoButton', false);
+    elemDisplay('startScreenButton', false);
+    elemDisplay('stopScreenButton', false);
+    elemDisplay('swapCameraButton', false);
+    elemDisplay('raiseHandButton', false);
+    elemDisplay('whiteboardButton', false);
+    //elemDisplay('emojiRoomButton', false);
+    elemDisplay('transcriptionButton', false);
+    elemDisplay('lockRoomButton', false);
+    elemDisplay('unlockRoomButton', false);
+    elemDisplay('lobbyButton', false);
+    elemDisplay('settingsButton', false);
     //...
 }

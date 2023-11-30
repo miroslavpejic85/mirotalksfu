@@ -35,6 +35,7 @@ class LocalStorage {
             mic_volume: 100, // %
             video_fps: 0, // default 1280x768 30fps
             screen_fps: 0, // max 30fps
+            broadcasting: false, // default false (one to many a/v streaming)
             lobby: false, // default false
             pitch_bar: true, // volume indicator
             sounds: true, // room notify sounds

@@ -62,7 +62,7 @@ module.exports = {
             Additional layers can be added to specify valid presenters and co-presenters by setting designated usernames.
         */
         'Miroslav Pejic',
-        'MiroTalk Admin',
+        'MiroTalk SFU',
     ],
     console: {
         debug: true,
