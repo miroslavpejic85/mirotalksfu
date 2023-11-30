@@ -1540,7 +1540,7 @@ class RoomClient {
                 elem.muted = true;
                 elem.volume = 0;
                 elem.poster = image.poster;
-                elem.style.objectFit = isScreen ? 'contain' : 'var(--videoObjFit)';
+                elem.style.objectFit = isScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
                 elem.className = this.isMobileDevice || isScreen ? '' : 'mirror';
                 vb = document.createElement('div');
                 vb.setAttribute('id', this.peer_id + '__vb');
@@ -1896,7 +1896,7 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.className = '';
                 elem.poster = image.poster;
-                elem.style.objectFit = remoteIsScreen ? 'contain' : 'var(--videoObjFit)';
+                elem.style.objectFit = remoteIsScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
                 vb = document.createElement('div');
                 vb.setAttribute('id', remotePeerId + '__vb');
                 vb.className = 'videoMenuBar fadein';
