@@ -26,6 +26,7 @@ class LocalStorage {
             moderator_video_cant_unhide: false, // Everyone can't unhide themselves
             moderator_screen_cant_share: false, // Everyone can't share screen
             moderator_chat_cant_privately: false, // Everyone can't chat privately, only Public chat allowed
+            moderator_chat_cant_chatgpt: false, // Everyone can't chat with ChatGPT
             mic_auto_gain_control: false,
             mic_echo_cancellations: true,
             mic_noise_suppression: true,

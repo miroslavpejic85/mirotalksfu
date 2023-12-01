@@ -1913,6 +1913,14 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    switchEveryoneCantChatChatGPT.onchange = (e) => {
+        const chatCantChatGPT = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'chat_cant_chatgpt', status: chatCantChatGPT });
+        rc.roomMessage('chat_cant_chatgpt', chatCantChatGPT);
+        lsSettings.moderator_chat_cant_chatgpt = chatCantChatGPT;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
 }
 
 // ####################################################

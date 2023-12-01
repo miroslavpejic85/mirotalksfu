@@ -169,6 +169,7 @@ class RoomClient {
             video_cant_unhide: false,
             screen_cant_share: false,
             chat_cant_privately: false,
+            chat_cant_chatgpt: false,
         };
 
         this.isAudioAllowed = isAudioAllowed;
@@ -402,6 +403,7 @@ class RoomClient {
                 this._moderator.video_cant_unhide = room.moderator.video_cant_unhide;
                 this._moderator.screen_cant_share = room.moderator.screen_cant_share;
                 this._moderator.chat_cant_privately = room.moderator.chat_cant_privately;
+                this._moderator.chat_cant_chatgpt = room.moderator.chat_cant_chatgpt;
                 //
                 if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
@@ -4755,6 +4757,13 @@ class RoomClient {
                     'top-end',
                 );
                 break;
+            case 'chat_cant_chatgpt':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`,
+                    'top-end',
+                );
+                break;
             default:
                 break;
         }
@@ -5532,6 +5541,9 @@ class RoomClient {
 
         switch (peer_id) {
             case 'ChatGPT':
+                if (this._moderator.chat_cant_chatgpt) {
+                    return userLog('warning', 'The moderator does not allow you to chat with ChatGPT', 'top-end', 6000);
+                }
                 isChatGPTOn = true;
                 chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT');
                 this.getId('chatGPTMessages').style.display = 'block';
@@ -5616,6 +5628,10 @@ class RoomClient {
             case 'chat_cant_privately':
                 this._moderator.chat_cant_privately = data.status;
                 rc.roomMessage('chat_cant_privately', data.status);
+                break;
+            case 'chat_cant_chatgpt':
+                this._moderator.chat_cant_chatgpt = data.status;
+                rc.roomMessage('chat_cant_chatgpt', data.status);
                 break;
             default:
                 break;

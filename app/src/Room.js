@@ -26,6 +26,7 @@ module.exports = class Room {
             video_cant_unhide: false,
             screen_cant_share: false,
             chat_cant_privately: false,
+            chat_cant_chatgpt: false,
         };
         this.survey = config.survey;
         this.redirect = config.redirect;
@@ -136,6 +137,9 @@ module.exports = class Room {
                 break;
             case 'chat_cant_privately':
                 this._moderator.chat_cant_privately = data.status;
+                break;
+            case 'chat_cant_chatgpt':
+                this._moderator.chat_cant_chatgpt = data.status;
                 break;
             default:
                 break;

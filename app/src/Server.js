@@ -815,6 +815,7 @@ function startServer() {
                 case 'video_cant_unhide':
                 case 'screen_cant_share':
                 case 'chat_cant_privately':
+                case 'chat_cant_chatgpt':
                     room.broadCast(socket.id, 'updateRoomModerator', moderator);
                     break;
                 default:

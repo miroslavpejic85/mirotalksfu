@@ -143,6 +143,8 @@ function handleRules(isPresenter) {
         switchEveryoneCantUnhide.checked = lsSettings.moderator_video_cant_unhide;
         switchEveryoneCantShareScreen.checked = lsSettings.moderator_screen_cant_share;
         switchEveryoneCantChatPrivately.checked = lsSettings.moderator_chat_cant_privately;
+        switchEveryoneCantChatChatGPT.checked = lsSettings.moderator_chat_cant_chatgpt;
+
         // Update moderator settings...
         const moderatorData = {
             audio_start_muted: switchEveryoneMute.checked,
@@ -151,6 +153,7 @@ function handleRules(isPresenter) {
             video_cant_unhide: switchEveryoneCantUnhide.checked,
             screen_cant_share: switchEveryoneCantShareScreen.checked,
             chat_cant_privately: switchEveryoneCantChatPrivately.checked,
+            chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
         };
         rc.updateRoomModeratorALL(moderatorData);
     }
