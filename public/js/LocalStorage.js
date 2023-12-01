@@ -25,6 +25,7 @@ class LocalStorage {
             moderator_audio_cant_unmute: false, // Everyone can't unmute themselves
             moderator_video_cant_unhide: false, // Everyone can't unhide themselves
             moderator_screen_cant_share: false, // Everyone can't share screen
+            moderator_chat_cant_privately: false, // Everyone can't chat privately, only Public chat allowed
             mic_auto_gain_control: false,
             mic_echo_cancellations: true,
             mic_noise_suppression: true,

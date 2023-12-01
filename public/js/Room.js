@@ -1905,6 +1905,14 @@ function handleSelects() {
         lS.setSettings(lsSettings);
         e.target.blur();
     };
+    switchEveryoneCantChatPrivately.onchange = (e) => {
+        const chatCantPrivately = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'chat_cant_privately', status: chatCantPrivately });
+        rc.roomMessage('chat_cant_privately', chatCantPrivately);
+        lsSettings.moderator_chat_cant_privately = chatCantPrivately;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
 }
 
 // ####################################################

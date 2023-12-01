@@ -168,6 +168,7 @@ class RoomClient {
             audio_cant_unmute: false,
             video_cant_unhide: false,
             screen_cant_share: false,
+            chat_cant_privately: false,
         };
 
         this.isAudioAllowed = isAudioAllowed;
@@ -400,15 +401,17 @@ class RoomClient {
                 this._moderator.audio_cant_unmute = room.moderator.audio_cant_unmute;
                 this._moderator.video_cant_unhide = room.moderator.video_cant_unhide;
                 this._moderator.screen_cant_share = room.moderator.screen_cant_share;
+                this._moderator.chat_cant_privately = room.moderator.chat_cant_privately;
                 //
                 if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
-                }
-                if (this._moderator.audio_start_muted && !this._moderator.video_start_hidden) {
-                    this.userLog('warning', 'The Moderator disabled your audio', 'top-end');
-                }
-                if (!this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
-                    this.userLog('warning', 'The Moderator disabled your video', 'top-end');
+                } else {
+                    if (this._moderator.audio_start_muted && !this._moderator.video_start_hidden) {
+                        this.userLog('warning', 'The Moderator disabled your audio', 'top-end');
+                    }
+                    if (!this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
+                        this.userLog('warning', 'The Moderator disabled your video', 'top-end');
+                    }
                 }
                 //
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
@@ -4745,6 +4748,13 @@ class RoomClient {
                     'top-end',
                 );
                 break;
+            case 'chat_cant_privately':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't chat privately ${status}`,
+                    'top-end',
+                );
+                break;
             default:
                 break;
         }
@@ -5531,6 +5541,9 @@ class RoomClient {
                 this.getId('chatPublicMessages').style.display = 'block';
                 break;
             default:
+                if (this._moderator.chat_cant_privately) {
+                    return userLog('warning', 'The moderator does not allow you to chat privately', 'top-end', 6000);
+                }
                 chatAbout.innerHTML = generateChatAboutHTML(avatarImg, peer_name);
                 chatPrivateMessages.style.display = 'block';
                 for (let i = 0; i < messagePrivateListItems.length; i++) {
@@ -5599,6 +5612,10 @@ class RoomClient {
             case 'screen_cant_share':
                 this._moderator.screen_cant_share = data.status;
                 rc.roomMessage('screen_cant_share', data.status);
+                break;
+            case 'chat_cant_privately':
+                this._moderator.chat_cant_privately = data.status;
+                rc.roomMessage('chat_cant_privately', data.status);
                 break;
             default:
                 break;
