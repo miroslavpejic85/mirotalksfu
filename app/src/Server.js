@@ -1001,12 +1001,7 @@ function startServer() {
                 is_presenter: true,
             };
             // first we check if the username match the presenters username
-            if (
-                config.presenters &&
-                !config.presenters.join_first &&
-                config.presenters.list &&
-                config.presenters.list.includes(peer_name)
-            ) {
+            if (config.presenters && config.presenters.list && config.presenters.list.includes(peer_name)) {
                 presenters[socket.room_id][socket.id] = presenter;
             } else {
                 // if not match the presenters username, the first one join room is the presenter
