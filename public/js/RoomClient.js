@@ -201,6 +201,7 @@ class RoomClient {
         this.isChatPinned = false;
         this.isChatMaximized = false;
         this.isToggleUnreadMsg = false;
+        this.isToggleRaiseHand = false;
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.camera = 'user';
@@ -5470,6 +5471,24 @@ class RoomClient {
             const shouldDisplay = participantName.includes(searchFilter);
             li.style.display = shouldDisplay ? '' : 'none';
         }
+    }
+
+    // ####################################################
+    // FILTER PEER WITH RAISE HAND
+    // ####################################################
+
+    toggleRaiseHands() {
+        const participantsList = this.getId('participantsList');
+        const participantsListItems = participantsList.getElementsByTagName('li');
+
+        for (let i = 0; i < participantsListItems.length; i++) {
+            const li = participantsListItems[i];
+            const hasPulsateClass = li.querySelector('i.pulsate') !== null;
+            const shouldDisplay = (hasPulsateClass && !this.isToggleRaiseHand) || this.isToggleRaiseHand;
+            li.style.display = shouldDisplay ? '' : 'none';
+        }
+        this.isToggleRaiseHand = !this.isToggleRaiseHand;
+        setColor(participantsRaiseHandBtn, this.isToggleRaiseHand ? 'lime' : 'white');
     }
 
     // ####################################################

@@ -220,6 +220,7 @@ function initClient() {
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
+        setTippy('participantsRaiseHandBtn', 'Toggle raise hands', 'bottom');
         setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
         setTippy('transcriptionCloseBtn', 'Close', 'bottom');
         setTippy('transcriptionTogglePinBtn', 'Toggle pin', 'bottom');
@@ -1467,6 +1468,9 @@ function handleButtons() {
     };
     participantsUnreadMessagesBtn.onclick = () => {
         rc.toggleUnreadMsg();
+    };
+    participantsRaiseHandBtn.onclick = () => {
+        rc.toggleRaiseHands();
     };
     searchParticipantsFromList.onkeyup = () => {
         rc.searchPeer();
