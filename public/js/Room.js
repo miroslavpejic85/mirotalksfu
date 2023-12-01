@@ -3064,7 +3064,7 @@ async function getParticipantsList(peers) {
             >
             <!-- <i class="fas fa-bars"></i> -->
             </button>
-            <ul class="dropdown-menu" aria-labelledby="${socket.id}-chatDropDownMenu">
+            <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">
                 <li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>
                 <li><button class="btn-sm ml5" id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo} Share audio/video to all</button></li>
                 <li><button class="btn-sm ml5" id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer} Eject all participants</button></li>
@@ -3129,7 +3129,7 @@ async function getParticipantsList(peers) {
                         >
                         <!-- <i class="fas fa-bars"></i> -->
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="${peer_id}-chatDropDownMenu">
+                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
                             <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>
                             <li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>
@@ -3189,7 +3189,7 @@ async function getParticipantsList(peers) {
                         >
                         <!-- <i class="fas fa-bars"></i> -->
                         </button>
-                        <ul class="dropdown-menu" aria-labelledby="${peer_id}-chatDropDownMenu">
+                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
                             <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
                         </ul>

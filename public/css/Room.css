@@ -394,8 +394,19 @@ th {
 .microphone-table-width {
     width: 180px;
 }
+
+/*--------------------------------------------------------------
+# Dropdown menu
+--------------------------------------------------------------*/
+
 .dropdown-menu {
     background: var(--body-bg);
+}
+
+.dropdown-menu button:hover {
+    background-color: var(--body-bg);
+    color: white;
+    transform: scale(1);
 }
 
 /*--------------------------------------------------------------
