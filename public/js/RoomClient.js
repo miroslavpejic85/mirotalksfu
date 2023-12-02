@@ -729,7 +729,15 @@ class RoomClient {
             'peerAction',
             function (data) {
                 console.log('SocketOn Peer action:', data);
-                this.peerAction(data.from_peer_name, data.peer_id, data.action, false, data.broadcast);
+                this.peerAction(
+                    data.from_peer_name,
+                    data.peer_id,
+                    data.action,
+                    false,
+                    data.broadcast,
+                    true,
+                    data.message,
+                );
             }.bind(this),
         );
 
@@ -5205,17 +5213,18 @@ class RoomClient {
     // PEER ACTION
     // ####################################################
 
-    peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true) {
+    peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true, msg = '') {
         const words = id.split('___');
-        let peer_id = words[0];
+        const peer_id = words[0];
 
         if (emit) {
-            let data = {
+            const data = {
                 from_peer_name: this.peer_name,
                 from_peer_id: this.peer_id,
                 from_peer_uuid: this.peer_uuid,
                 peer_id: peer_id,
                 action: action,
+                message: '',
                 broadcast: broadcast,
             };
 
@@ -5265,9 +5274,12 @@ class RoomClient {
             switch (action) {
                 case 'eject':
                     if (peer_id === this.peer_id || broadcast) {
+                        const message = `Will eject you from the room${
+                            msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
+                        }`;
                         this.exit(true);
                         this.sound(action);
-                        this.peerActionProgress(from_peer_name, 'Will eject you from the room', 5000, action);
+                        this.peerActionProgress(from_peer_name, message, 5000, action);
                     }
                     break;
                 case 'mute':
@@ -5319,7 +5331,7 @@ class RoomClient {
             background: swalBackground,
             icon: action == 'eject' ? 'warning' : 'success',
             title: tt,
-            text: msg,
+            html: msg,
             timer: time,
             timerProgressBar: true,
             didOpen: () => {
@@ -5349,6 +5361,8 @@ class RoomClient {
                     position: 'center',
                     imageUrl: data.broadcast ? image.users : image.user,
                     title: 'Eject ' + whoEject,
+                    input: 'text',
+                    inputPlaceholder: 'Eject reason',
                     showDenyButton: true,
                     confirmButtonText: `Yes`,
                     denyButtonText: `No`,
@@ -5358,6 +5372,8 @@ class RoomClient {
                     .then((result) => {
                         if (result.isConfirmed) {
                             ejectConfirmed = true;
+                            const message = result.value;
+                            if (message) data.message = message;
                             if (!data.broadcast) {
                                 this.socket.emit('peerAction', data);
                                 let peer = this.getId(data.peer_id);
