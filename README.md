@@ -33,6 +33,7 @@
 
 -   Is `100% Free` - `Open Source (AGPLv3)` - `Self Hosted` and [PWA](https://en.wikipedia.org/wiki/Progressive_web_application)!
 -   Unlimited conference rooms with no time limitations.
+-   Live broadcasting streaming.
 -   Translated into 133 languages.
 -   Host protection to prevent unauthorized access.
 -   User auth to prevent unauthorized access.
