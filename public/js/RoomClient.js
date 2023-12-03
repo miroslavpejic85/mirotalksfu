@@ -58,6 +58,7 @@ const icons = {
     fileReceive: '<i class="fa-solid fa-file-import"></i>',
     recording: '<i class="fas fa-record-vinyl"></i>',
     moderator: '<i class="fas fa-m"></i>',
+    broadcaster: '<i class="fa-solid fa-wifi"></i>',
 };
 
 const image = {
@@ -656,6 +657,9 @@ class RoomClient {
                 participantsCount = data.peer_counts;
                 if (!isBroadcastingEnabled) adaptAspectRatio(participantsCount);
                 if (isParticipantsListOpen) getRoomParticipants();
+                if (isBroadcastingEnabled && data.isPresenter) {
+                    this.userLog('info', `${icons.broadcaster} ${data.peer_name} disconnected`, 'top-end', 6000);
+                }
             }.bind(this),
         );
 
@@ -2539,12 +2543,23 @@ class RoomClient {
             timer: timer,
             timerProgressBar: true,
         });
-        Toast.fire({
-            icon: icon,
-            title: message,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        });
+        switch (icon) {
+            case 'html':
+                Toast.fire({
+                    icon: icon,
+                    html: message,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                });
+                break;
+            default:
+                Toast.fire({
+                    icon: icon,
+                    title: message,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                });
+        }
     }
 
     msgPopup(type, message) {
@@ -2570,6 +2585,16 @@ class RoomClient {
                     icon: type,
                     title: type,
                     text: message,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                });
+                break;
+            case 'html':
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    icon: type,
+                    html: message,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });

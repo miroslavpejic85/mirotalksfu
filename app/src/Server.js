@@ -1400,6 +1400,7 @@ function startServer() {
             return {
                 room_id: roomId,
                 peer_id: socket.id,
+                peer_name: peerName,
                 peer_counts: peerCounts,
                 isPresenter: isPresenter,
             };
