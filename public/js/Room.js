@@ -182,7 +182,7 @@ function initClient() {
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
-        setTippy('recImage', 'Toggle recording', 'right');
+        setTippy('recordingImage', 'Toggle recording', 'right');
         setTippy('roomRecording', 'Only the host (presenter) has the capability to record the meeting', 'bottom');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
@@ -1069,7 +1069,10 @@ function roomIsReady() {
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
-    BUTTONS.settings.host_only_recording && show(roomRecording);
+    if (BUTTONS.settings.host_only_recording) {
+        show(roomRecording);
+        show(recordingImage);
+    }
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
@@ -1324,7 +1327,7 @@ function handleButtons() {
     fullScreenButton.onclick = () => {
         rc.toggleFullScreen();
     };
-    recImage.onclick = () => {
+    recordingImage.onclick = () => {
         isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
@@ -2259,6 +2262,7 @@ function handleRoomClientEvents() {
             }
             hide(startRecButton);
             hide(roomRecording);
+            hide(recordingImage);
             show(recordingMessage);
             hostOnlyRecording = true;
         }
@@ -2267,6 +2271,7 @@ function handleRoomClientEvents() {
         if (isRulesActive && !isPresenter) {
             console.log('Room event: host only recording disabled');
             show(startRecButton);
+            show(recordingImage);
             hide(roomRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;

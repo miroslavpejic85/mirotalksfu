@@ -347,7 +347,7 @@ body {
     color: white;
 }
 
-#recImage {
+#recordingImage {
     width: 128px;
     height: auto;
     margin-bottom: 10px;
@@ -355,7 +355,7 @@ body {
     cursor: pointer;
 }
 
-#recImage:hover {
+#recordingImage:hover {
     transform: scale(0.95);
     transition: all 0.3s ease-in-out;
 }
