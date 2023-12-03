@@ -991,9 +991,10 @@ function startServer() {
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
             const peer = room.getPeers()?.get(socket.id)?.peer_info;
-            const peer_id = peer.peer_id;
-            const peer_name = peer.peer_name;
-            const peer_uuid = peer.peer_uuid;
+
+            const peer_id = peer && peer.peer_id;
+            const peer_name = peer && peer.peer_name;
+            const peer_uuid = peer && peer.peer_uuid;
 
             // Set the presenters
             const presenter = {
@@ -1276,8 +1277,8 @@ function startServer() {
 
             const peer = room.getPeers()?.get(socket.id)?.peer_info;
 
-            const peerName = peer.peer_name || '';
-            const peerUuid = peer.peer_uuid || '';
+            const peerName = (peer && peer.peer_name) || '';
+            const peerUuid = (peer && peer.peer_uuid) || '';
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
@@ -1313,8 +1314,8 @@ function startServer() {
 
             const peer = room.getPeers()?.get(socket.id)?.peer_info;
 
-            const peerName = peer.peer_name || '';
-            const peerUuid = peer.peer_uuid || '';
+            const peerName = (peer && peer.peer_name) || '';
+            const peerUuid = (peer && peer.peer_uuid) || '';
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
