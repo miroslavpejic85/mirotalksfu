@@ -2105,6 +2105,9 @@ function loadSettingsFromLocalStorage() {
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
 
+    recPrioritizeH264 = lsSettings.rec_prioritize_h264;
+    switchH264Recording.checked = recPrioritizeH264;
+
     switchAutoGainControl.checked = lsSettings.mic_auto_gain_control;
     switchEchoCancellation.checked = lsSettings.mic_echo_cancellations;
     switchNoiseSuppression.checked = lsSettings.mic_noise_suppression;
