@@ -34,6 +34,7 @@ let redirect = {
 };
 
 let recCodecs = null;
+let recPrioritizeH264 = false;
 
 const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
@@ -185,7 +186,16 @@ function initClient() {
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('recordingImage', 'Toggle recording', 'right');
-        setTippy('roomRecording', 'Only the host (presenter) has the capability to record the meeting', 'bottom');
+        setTippy(
+            'switchHostOnlyRecording',
+            'Only the host (presenter) has the capability to record the meeting',
+            'right',
+        );
+        setTippy(
+            'switchH264Recording',
+            'Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs',
+            'right',
+        );
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -1805,6 +1815,12 @@ function handleSelects() {
         hostOnlyRecording = e.currentTarget.checked;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff');
         lsSettings.host_only_recording = hostOnlyRecording;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
+    switchH264Recording.onchange = (e) => {
+        recPrioritizeH264 = e.currentTarget.checked;
+        lsSettings.rec_prioritize_h264 = recPrioritizeH264;
         lS.setSettings(lsSettings);
         e.target.blur();
     };

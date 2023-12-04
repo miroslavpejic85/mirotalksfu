@@ -149,9 +149,6 @@ module.exports = {
         enabled: false,
         url: '',
     },
-    recording: {
-        prioritize_H264: false, // Give priority to h264,aac|h264,opus instead of vp8,opus/vp9,opus codec
-    },
     stats: {
         /*
             Umami: https://github.com/umami-software/umami

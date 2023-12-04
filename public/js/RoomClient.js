@@ -237,7 +237,6 @@ class RoomClient {
 
         // Recording
         this.audioRecorder = null;
-        this.recPrioritizeH264 = false;
 
         // Encodings
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
@@ -378,8 +377,6 @@ class RoomClient {
         survey = room.survey;
         console.log('07.0 ----> Room Leave Redirect', room.redirect);
         redirect = room.redirect;
-        console.log('07.0 ----> Room REC prioritize_H264', room.prioritize_H264);
-        this.recPrioritizeH264 = room.prioritize_H264;
         let peers = new Map(JSON.parse(room.peers));
         participantsCount = peers.size;
         // ME
@@ -3740,12 +3737,7 @@ class RoomClient {
 
     getSupportedMimeTypes() {
         const possibleTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/mp4'];
-        possibleTypes.splice(
-            this.recPrioritizeH264 ? 0 : 2,
-            0,
-            'video/mp4;codecs=h264,aac',
-            'video/webm;codecs=h264,opus',
-        );
+        possibleTypes.splice(recPrioritizeH264 ? 0 : 2, 0, 'video/mp4;codecs=h264,aac', 'video/webm;codecs=h264,opus');
         console.log('POSSIBLE CODECS', possibleTypes);
         return possibleTypes.filter((mimeType) => {
             return MediaRecorder.isTypeSupported(mimeType);

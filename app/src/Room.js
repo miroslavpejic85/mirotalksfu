@@ -30,7 +30,6 @@ module.exports = class Room {
         };
         this.survey = config.survey;
         this.redirect = config.redirect;
-        this.prioritize_H264 = config.recording.prioritize_H264;
         this.peers = new Map();
         this.router = null;
         this.createTheRouter();
@@ -163,7 +162,6 @@ module.exports = class Room {
             moderator: this._moderator,
             survey: this.survey,
             redirect: this.redirect,
-            prioritize_H264: this.prioritize_H264,
             peers: JSON.stringify([...this.peers]),
         };
     }
