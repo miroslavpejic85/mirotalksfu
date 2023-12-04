@@ -33,6 +33,8 @@ let redirect = {
     url: '/newroom',
 };
 
+let recCodecs = null;
+
 const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
     guest: '<i class="fa-solid fa-signal"></i>',

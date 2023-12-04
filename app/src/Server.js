@@ -509,6 +509,7 @@ function startServer() {
                 slack_enabled: slackEnabled,
                 stats_enabled: config.stats.enabled,
                 chatGPT_enabled: config.chatGPT.enabled,
+                rec_prioritize_H264: config.recording.prioritize_H264,
             });
         } catch (err) {
             log.error('Ngrok Start error: ', err.body);
@@ -554,6 +555,7 @@ function startServer() {
             slack_enabled: slackEnabled,
             stats_enabled: config.stats.enabled,
             chatGPT_enabled: config.chatGPT.enabled,
+            rec_prioritize_H264: config.recording.prioritize_H264,
         });
     });
 
