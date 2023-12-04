@@ -1084,6 +1084,7 @@ function roomIsReady() {
     if (BUTTONS.settings.host_only_recording) {
         show(roomRecording);
         show(recordingImage);
+        show(roomRecordingOptions);
     }
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
@@ -2281,6 +2282,7 @@ function handleRoomClientEvents() {
             hide(startRecButton);
             hide(roomRecording);
             hide(recordingImage);
+            hide(roomRecordingOptions);
             show(recordingMessage);
             hostOnlyRecording = true;
         }
@@ -2290,6 +2292,7 @@ function handleRoomClientEvents() {
             console.log('Room event: host only recording disabled');
             show(startRecButton);
             show(recordingImage);
+            show(roomRecordingOptions);
             hide(roomRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;
