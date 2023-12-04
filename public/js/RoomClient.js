@@ -364,7 +364,7 @@ class RoomClient {
         console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
         if (isBroadcastingEnabled) {
-            isPresenter ? await this.startLocalMedia() : await this.handleRoomBroadcasting();
+            isPresenter ? await this.startLocalMedia() : this.handleRoomBroadcasting();
         } else {
             await this.startLocalMedia();
         }
@@ -430,7 +430,7 @@ class RoomClient {
 
             if (!peer_info.peer_video && canSetVideoOff) {
                 console.log('Detected peer video off ' + peer_info.peer_name);
-                await this.setVideoOff(peer_info, true);
+                this.setVideoOff(peer_info, true);
             }
 
             if (peer_info.peer_recording) {
@@ -907,7 +907,7 @@ class RoomClient {
     // HANDLE ROOM BROADCASTING
     // ####################################################
 
-    async handleRoomBroadcasting() {
+    handleRoomBroadcasting() {
         console.log('07.4 ----> Room Broadcasting is currently active, and you are not the designated presenter');
 
         this.peer_info.peer_audio = false;
@@ -2099,7 +2099,7 @@ class RoomClient {
     // HANDLE VIDEO OFF
     // ####################################################
 
-    async setVideoOff(peer_info, remotePeer = false) {
+    setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
         let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb, pv;
         let peer_id = peer_info.peer_id;
@@ -2403,13 +2403,11 @@ class RoomClient {
     }
 
     setPeerAudio(peer_id, status) {
-        if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
-            console.log('Set peer audio enabled: ' + status);
-            const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
-            const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
-            if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
-            if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
-        }
+        console.log('Set peer audio enabled: ' + status);
+        const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
+        const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
+        if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
+        if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
     }
 
     setIsAudio(peer_id, status) {
