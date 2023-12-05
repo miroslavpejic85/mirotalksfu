@@ -59,6 +59,7 @@ const icons = {
     recording: '<i class="fas fa-record-vinyl"></i>',
     moderator: '<i class="fas fa-m"></i>',
     broadcaster: '<i class="fa-solid fa-wifi"></i>',
+    codecs: '<i class="fa-solid fa-film"></i>',
 };
 
 const image = {
@@ -4795,6 +4796,9 @@ class RoomClient {
                     `${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`,
                     'top-end',
                 );
+                break;
+            case 'recPrioritizeH264':
+                this.userLog('info', `${icons.codecs} Recording prioritize h.264  ${status}`, 'top-end');
                 break;
             default:
                 break;

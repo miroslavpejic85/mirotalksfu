@@ -1821,6 +1821,7 @@ function handleSelects() {
     };
     switchH264Recording.onchange = (e) => {
         recPrioritizeH264 = e.currentTarget.checked;
+        rc.roomMessage('recPrioritizeH264', recPrioritizeH264);
         lsSettings.rec_prioritize_h264 = recPrioritizeH264;
         lS.setSettings(lsSettings);
         e.target.blur();
