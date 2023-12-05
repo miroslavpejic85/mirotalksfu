@@ -87,6 +87,7 @@ const image = {
     chatgpt: '../images/chatgpt.png',
     all: '../images/all.png',
     forbidden: '../images/forbidden.png',
+    broadcasting: '../images/broadcasting.png',
 };
 
 const mediaType = {
@@ -931,6 +932,25 @@ class RoomClient {
         });
 
         handleRulesBroadcasting();
+    }
+
+    toggleRoomBroadcasting() {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.broadcasting,
+            title: 'Room broadcasting enabled',
+            text: 'Do you want to disable room broadcasting?',
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                switchBroadcasting.click();
+            }
+        });
     }
 
     // ####################################################

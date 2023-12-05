@@ -128,6 +128,7 @@ function handleRules(isPresenter) {
         isBroadcastingEnabled = lsSettings.broadcasting;
         switchBroadcasting.checked = isBroadcastingEnabled;
         rc.roomAction('broadcasting', true, false);
+        if (isBroadcastingEnabled) rc.toggleRoomBroadcasting();
         // Room lobby
         isLobbyEnabled = lsSettings.lobby;
         switchLobby.checked = isLobbyEnabled;
