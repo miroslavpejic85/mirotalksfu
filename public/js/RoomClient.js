@@ -5438,7 +5438,7 @@ class RoomClient {
                             mediaType.audio,
                             image.unmute,
                             'Enable Microphone',
-                            'Allow the presenter enable your microphone?',
+                            'Allow the presenter to enable your microphone?',
                         );
                     }
                     break;
@@ -5459,7 +5459,7 @@ class RoomClient {
                             mediaType.video,
                             image.unhide,
                             'Enable Camera',
-                            'Allow the presenter enable your camera?',
+                            'Allow the presenter to enable your camera?',
                         );
                     }
                     break;
@@ -5482,7 +5482,7 @@ class RoomClient {
                             mediaType.screen,
                             image.start,
                             'Start Screen share',
-                            'Allow the presenter start your screen share?',
+                            'Allow the presenter to start your screen share?',
                         );
                     }
                     break;
