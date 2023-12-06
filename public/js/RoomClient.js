@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.1
+ * @version 1.3.2
  *
  */
 
@@ -126,6 +126,16 @@ const _EVENTS = {
     roomUnlock: 'roomUnlock',
     hostOnlyRecordingOn: 'hostOnlyRecordingOn',
     hostOnlyRecordingOff: 'hostOnlyRecordingOff',
+};
+
+// Enums
+const enums = {
+    recording: {
+        started: 'Started recording',
+        start: 'Start recording',
+        stop: 'Stop recording',
+    },
+    //...
 };
 
 // Recording
@@ -440,7 +450,7 @@ class RoomClient {
                 this.handleRecordingAction({
                     peer_id: peer_info.id,
                     peer_name: peer_info.peer_name,
-                    action: 'Started recording',
+                    action: enums.recording.started,
                 });
             }
         }
@@ -2642,19 +2652,66 @@ class RoomClient {
         }
     }
 
-    msgHTML(icon, imageUrl, title, html, position = 'center') {
-        Swal.fire({
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            background: swalBackground,
-            position: position,
-            icon: icon,
-            imageUrl: imageUrl,
-            title: title,
-            html: html,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        });
+    msgHTML(data, icon, imageUrl, title, html, position = 'center') {
+        switch (data.type) {
+            case 'recording':
+                switch (data.action) {
+                    case enums.recording.started:
+                    case enums.recording.start:
+                        recordingStartMessage();
+                        break;
+                    case enums.recording.stop:
+                        defaultMessage();
+                        break;
+                    //...
+                    default:
+                        break;
+                }
+                if (!this.speechInMessages) this.speechText(`${data.peer_name} ${data.action}`);
+                break;
+            //...
+            default:
+                defaultMessage();
+                break;
+        }
+        // RECORDING
+        function recordingStartMessage() {
+            Swal.fire({
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                background: swalBackground,
+                position: position,
+                icon: icon,
+                imageUrl: imageUrl,
+                title: title,
+                html: html + '<br/> Do you want to leave the room?',
+                showDenyButton: true,
+                confirmButtonText: `Yes`,
+                denyButtonText: `No`,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    exitButton.onclick();
+                }
+            });
+        }
+        // DEFAULT
+        function defaultMessage() {
+            Swal.fire({
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                background: swalBackground,
+                position: position,
+                icon: icon,
+                imageUrl: imageUrl,
+                title: title,
+                html: html,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+        }
+        //...
     }
 
     thereAreParticipants() {
@@ -3702,6 +3759,13 @@ class RoomClient {
         window.speechSynthesis.speak(speech);
     }
 
+    speechText(msg) {
+        const speech = new SpeechSynthesisUtterance();
+        speech.text = msg;
+        speech.rate = 0.9;
+        window.speechSynthesis.speak(speech);
+    }
+
     chatToggleBg() {
         this.isChatBgTransparent = !this.isChatBgTransparent;
         this.isChatBgTransparent
@@ -3890,7 +3954,7 @@ class RoomClient {
         this._isRecording = true;
         this.handleMediaRecorder();
         this.event(_EVENTS.startRec);
-        this.recordingAction('Start recording');
+        this.recordingAction(enums.recording.start);
         this.sound('recStart');
     }
 
@@ -4044,7 +4108,7 @@ class RoomClient {
             if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
             this.event(_EVENTS.stopRec);
             this.audioRecorder.stopMixedAudioStream();
-            this.recordingAction('Stop recording');
+            this.recordingAction(enums.recording.stop);
             this.sound('recStop');
         }
     }
@@ -4059,6 +4123,7 @@ class RoomClient {
     }
 
     handleRecordingAction(data) {
+        console.log('Handle recording action', data);
         const recAction = {
             side: 'left',
             img: this.leftMsgAvatar,
@@ -4069,9 +4134,19 @@ class RoomClient {
             to_peer_name: 'all',
         };
         this.showMessage(recAction);
-        if (!this.showChatOnMessage) {
-            this.msgHTML(null, image.recording, null, `${icons.user} ${data.peer_name} <br /> <h1>${data.action}</h1>`);
-        }
+
+        const recData = {
+            type: 'recording',
+            action: data.action,
+            peer_name: data.peer_name,
+        };
+        this.msgHTML(
+            recData,
+            null,
+            image.recording,
+            null,
+            `${icons.user} ${data.peer_name} <br /> <h1>${data.action}</h1>`,
+        );
     }
 
     // ####################################################
