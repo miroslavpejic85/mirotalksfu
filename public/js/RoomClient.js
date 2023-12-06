@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.2
+ * @version 1.3.3
  *
  */
 
@@ -74,6 +74,9 @@ const image = {
     mute: '../images/mute.png',
     hide: '../images/hide.png',
     stop: '../images/stop.png',
+    unmute: '../images/unmute.png',
+    unhide: '../images/unhide.png',
+    start: '../images/start.png',
     users: '../images/participants.png',
     user: '../images/participant.png',
     username: '../images/user.png',
@@ -5358,6 +5361,10 @@ class RoomClient {
                     case 'mute':
                         const peerAudioStatus = this.getId(data.peer_id + '__audio');
                         if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
+                            if (isRulesActive && isPresenter) {
+                                data.action = 'unmute';
+                                return this.confirmPeerAction(data.action, data);
+                            }
                             return this.userLog(
                                 'info',
                                 'The participant has been muted, and only they have the ability to unmute themselves',
@@ -5368,6 +5375,10 @@ class RoomClient {
                     case 'hide':
                         const peerVideoOff = this.getId(data.peer_id + '__videoOff');
                         if (peerVideoOff) {
+                            if (isRulesActive && isPresenter) {
+                                data.action = 'unhide';
+                                return this.confirmPeerAction(data.action, data);
+                            }
                             return this.userLog(
                                 'info',
                                 'The participant is currently hidden, and only they have the option to unhide themselves',
@@ -5379,6 +5390,10 @@ class RoomClient {
                         if (peerScreenButton) {
                             const peerScreenStatus = peerScreenButton.querySelector('i');
                             if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
+                                if (isRulesActive && isPresenter) {
+                                    data.action = 'start';
+                                    return this.confirmPeerAction(data.action, data);
+                                }
                                 return this.userLog(
                                     'info',
                                     'The participant screen is not shared, only the participant can initiate sharing',
@@ -5391,11 +5406,12 @@ class RoomClient {
                         break;
                 }
             }
-            this.confirmPeerAction(action, data);
+            this.confirmPeerAction(data.action, data);
         } else {
+            const peerActionAllowed = peer_id === this.peer_id || broadcast;
             switch (action) {
                 case 'eject':
-                    if (peer_id === this.peer_id || broadcast) {
+                    if (peerActionAllowed) {
                         const message = `Will eject you from the room${
                             msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
                         }`;
@@ -5405,7 +5421,7 @@ class RoomClient {
                     }
                     break;
                 case 'mute':
-                    if (peer_id === this.peer_id || broadcast) {
+                    if (peerActionAllowed) {
                         this.closeProducer(mediaType.audio);
                         this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
                         this.userLog(
@@ -5416,8 +5432,18 @@ class RoomClient {
                         );
                     }
                     break;
+                case 'unmute':
+                    if (peerActionAllowed) {
+                        this.peerMediaStartConfirm(
+                            mediaType.audio,
+                            image.unmute,
+                            'Enable Microphone',
+                            'Allow the presenter enable your microphone?',
+                        );
+                    }
+                    break;
                 case 'hide':
-                    if (peer_id === this.peer_id || broadcast) {
+                    if (peerActionAllowed) {
                         this.closeProducer(mediaType.video);
                         this.userLog(
                             'warning',
@@ -5427,9 +5453,19 @@ class RoomClient {
                         );
                     }
                     break;
+                case 'unhide':
+                    if (peerActionAllowed) {
+                        this.peerMediaStartConfirm(
+                            mediaType.video,
+                            image.unhide,
+                            'Enable Camera',
+                            'Allow the presenter enable your camera?',
+                        );
+                    }
+                    break;
                 case 'stop':
                     if (this.isScreenShareSupported) {
-                        if (peer_id === this.peer_id || broadcast) {
+                        if (peerActionAllowed) {
                             this.closeProducer(mediaType.screen);
                             this.userLog(
                                 'warning',
@@ -5440,11 +5476,53 @@ class RoomClient {
                         }
                     }
                     break;
+                case 'start':
+                    if (peerActionAllowed) {
+                        this.peerMediaStartConfirm(
+                            mediaType.screen,
+                            image.start,
+                            'Start Screen share',
+                            'Allow the presenter start your screen share?',
+                        );
+                    }
+                    break;
                 default:
                     break;
                 //...
             }
         }
+    }
+
+    peerMediaStartConfirm(type, imageUrl, title, text) {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: imageUrl,
+            title: title,
+            text: text,
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                switch (type) {
+                    case mediaType.audio:
+                        this.produce(mediaType.audio, microphoneSelect.value);
+                        this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', true);
+                        break;
+                    case mediaType.video:
+                        this.produce(mediaType.video, videoSelect.value);
+                        break;
+                    case mediaType.screen:
+                        this.produce(mediaType.screen);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        });
     }
 
     peerActionProgress(tt, msg, time, action = 'na') {
@@ -5474,6 +5552,7 @@ class RoomClient {
     }
 
     confirmPeerAction(action, data) {
+        console.log('Confirm peer action', action);
         switch (action) {
             case 'eject':
                 let ejectConfirmed = false;
@@ -5518,28 +5597,46 @@ class RoomClient {
                     });
                 break;
             case 'mute':
+            case 'unmute':
             case 'hide':
+            case 'unhide':
             case 'stop':
+            case 'start':
                 let muteHideStopConfirmed = false;
-                let whoMuteHideStop = data.broadcast ? 'everyone except yourself?' : 'current participant?';
+                let who = data.broadcast ? 'everyone except yourself?' : 'current participant?';
                 let imageUrl, title, text;
                 switch (action) {
                     case 'mute':
                         imageUrl = image.mute;
-                        title = 'Mute ' + whoMuteHideStop;
+                        title = 'Mute ' + who;
                         text =
                             "Once muted, you won't be able to unmute them, but they can unmute themselves at any time.";
                         break;
+                    case 'unmute':
+                        imageUrl = image.unmute;
+                        title = 'Unmute ' + who;
+                        text = 'A pop-up message will appear to prompt and allow this action.';
+                        break;
                     case 'hide':
-                        title = 'Hide ' + whoMuteHideStop;
+                        title = 'Hide ' + who;
                         imageUrl = image.hide;
                         text =
                             "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.";
                         break;
+                    case 'unhide':
+                        title = 'Unhide ' + who;
+                        imageUrl = image.unhide;
+                        text = 'A pop-up message will appear to prompt and allow this action.';
+                        break;
                     case 'stop':
                         imageUrl = image.stop;
-                        title = 'Stop screen share to the ' + whoMuteHideStop;
+                        title = 'Stop screen share to the ' + who;
                         text = "Once stop, you won't be able to start them, but they can start themselves at any time.";
+                        break;
+                    case 'start':
+                        imageUrl = image.start;
+                        title = 'Start screen share to the ' + who;
+                        text = 'A pop-up message will appear to prompt and allow this action.';
                         break;
                     default:
                         break;
