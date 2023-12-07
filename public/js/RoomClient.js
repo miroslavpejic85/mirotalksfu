@@ -374,20 +374,20 @@ class RoomClient {
 
     async joinAllowed(room) {
         console.log('07 ----> Join Room allowed');
-        await this.handleRoomInfo(room);
+        this.handleRoomInfo(room);
         const data = await this.socket.request('getRouterRtpCapabilities');
         this.device = await this.loadDevice(data);
         console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
         if (isBroadcastingEnabled) {
-            isPresenter ? await this.startLocalMedia() : this.handleRoomBroadcasting();
+            isPresenter ? this.startLocalMedia() : this.handleRoomBroadcasting();
         } else {
-            await this.startLocalMedia();
+            this.startLocalMedia();
         }
         this.socket.emit('getProducers');
     }
 
-    async handleRoomInfo(room) {
+    handleRoomInfo(room) {
         console.log('07.0 ----> Room Survey', room.survey);
         survey = room.survey;
         console.log('07.0 ----> Room Leave Redirect', room.redirect);
@@ -898,7 +898,7 @@ class RoomClient {
     // CHECK USER
     // ####################################################
 
-    async userNameAlreadyInRoom() {
+    userNameAlreadyInRoom() {
         this.sound('alert');
         Swal.fire({
             allowOutsideClick: false,
@@ -970,7 +970,7 @@ class RoomClient {
     // START LOCAL AUDIO VIDEO MEDIA
     // ####################################################
 
-    async startLocalMedia() {
+    startLocalMedia() {
         console.log('08 ----> Start local media');
         if (this.isAudioAllowed && !this._moderator.audio_start_muted) {
             console.log('09 ----> Start audio media');
