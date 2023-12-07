@@ -762,7 +762,7 @@ function startServer() {
 
             log.debug('Peer action', data);
 
-            const presenterActions = ['mute', 'hide', 'eject'];
+            const presenterActions = ['mute', 'unmute', 'hide', 'unhide', 'stop', 'start', 'eject'];
             if (presenterActions.some((v) => data.action === v)) {
                 const isPresenter = await isPeerPresenter(
                     socket.room_id,
