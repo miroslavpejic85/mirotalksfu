@@ -5352,6 +5352,7 @@ class RoomClient {
                 message: '',
                 broadcast: broadcast,
             };
+            console.log('peerAction', data);
 
             if (!this.thereAreParticipants()) {
                 if (info) return this.userLog('info', 'No participants detected', 'top-end');
@@ -5359,33 +5360,59 @@ class RoomClient {
             if (!broadcast) {
                 switch (action) {
                     case 'mute':
-                        const peerAudioStatus = this.getId(data.peer_id + '__audio');
-                        if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
-                            if (isRulesActive && isPresenter) {
-                                data.action = 'unmute';
-                                return this.confirmPeerAction(data.action, data);
+                        const audioMessage =
+                            'The participant has been muted, and only they have the ability to unmute themselves';
+                        if (isBroadcastingEnabled) {
+                            const peerAudioButton = this.getId(data.peer_id + '___pAudio');
+                            if (peerAudioButton) {
+                                const peerAudioIcon = peerAudioButton.querySelector('i');
+                                if (peerAudioIcon && peerAudioIcon.style.color == 'red') {
+                                    if (isRulesActive && isPresenter) {
+                                        data.action = 'unmute';
+                                        return this.confirmPeerAction(data.action, data);
+                                    }
+                                    return this.userLog('info', audioMessage, 'top-end');
+                                }
                             }
-                            return this.userLog(
-                                'info',
-                                'The participant has been muted, and only they have the ability to unmute themselves',
-                                'top-end',
-                            );
+                        } else {
+                            const peerAudioStatus = this.getId(data.peer_id + '__audio');
+                            if (!peerAudioStatus || peerAudioStatus.className == html.audioOff) {
+                                if (isRulesActive && isPresenter) {
+                                    data.action = 'unmute';
+                                    return this.confirmPeerAction(data.action, data);
+                                }
+                                return this.userLog('info', audioMessage, 'top-end');
+                            }
                         }
                         break;
                     case 'hide':
-                        const peerVideoOff = this.getId(data.peer_id + '__videoOff');
-                        if (peerVideoOff) {
-                            if (isRulesActive && isPresenter) {
-                                data.action = 'unhide';
-                                return this.confirmPeerAction(data.action, data);
+                        const videoMessage =
+                            'The participant is currently hidden, and only they have the option to unhide themselves';
+                        if (isBroadcastingEnabled) {
+                            const peerVideoButton = this.getId(data.peer_id + '___pVideo');
+                            if (peerVideoButton) {
+                                const peerVideoIcon = peerVideoButton.querySelector('i');
+                                if (peerVideoIcon && peerVideoIcon.style.color == 'red') {
+                                    if (isRulesActive && isPresenter) {
+                                        data.action = 'unhide';
+                                        return this.confirmPeerAction(data.action, data);
+                                    }
+                                    return this.userLog('info', videoMessage, 'top-end');
+                                }
                             }
-                            return this.userLog(
-                                'info',
-                                'The participant is currently hidden, and only they have the option to unhide themselves',
-                                'top-end',
-                            );
+                        } else {
+                            const peerVideoOff = this.getId(data.peer_id + '__videoOff');
+                            if (peerVideoOff) {
+                                if (isRulesActive && isPresenter) {
+                                    data.action = 'unhide';
+                                    return this.confirmPeerAction(data.action, data);
+                                }
+                                return this.userLog('info', videoMessage, 'top-end');
+                            }
                         }
                     case 'stop':
+                        const screenMessage =
+                            'The participant screen is not shared, only the participant can initiate sharing';
                         const peerScreenButton = this.getId(id);
                         if (peerScreenButton) {
                             const peerScreenStatus = peerScreenButton.querySelector('i');
@@ -5394,11 +5421,7 @@ class RoomClient {
                                     data.action = 'start';
                                     return this.confirmPeerAction(data.action, data);
                                 }
-                                return this.userLog(
-                                    'info',
-                                    'The participant screen is not shared, only the participant can initiate sharing',
-                                    'top-end',
-                                );
+                                return this.userLog('info', screenMessage, 'top-end');
                             }
                         }
                         break;

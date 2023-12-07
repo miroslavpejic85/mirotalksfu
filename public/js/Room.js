@@ -3035,7 +3035,7 @@ async function saveRoomPeers() {
 
 async function getRoomParticipants() {
     const peers = await getRoomPeers();
-    const lists = await getParticipantsList(peers);
+    const lists = getParticipantsList(peers);
     participantsCount = peers.size;
     participantsList.innerHTML = lists;
     refreshParticipantsCount(participantsCount, false);
@@ -3043,7 +3043,7 @@ async function getRoomParticipants() {
     console.log('*** Refresh Chat participant lists ***');
 }
 
-async function getParticipantsList(peers) {
+function getParticipantsList(peers) {
     // CHAT-GPT
     let li = `
     <li 
