@@ -3175,6 +3175,11 @@ class RoomClient {
         }
     }
 
+    isPlistOpen() {
+        const plist = this.getId('plist');
+        return plist.classList.contains('hidden');
+    }
+
     async toggleChat() {
         const chatRoom = this.getId('chatRoom');
         chatRoom.classList.toggle('show');
@@ -3196,15 +3201,14 @@ class RoomClient {
     toggleShowParticipants() {
         const plist = this.getId('plist');
         const chat = this.getId('chat');
-        const chatHistory = this.getId('chatHistory');
         plist.classList.toggle('hidden');
-        const isParticipantsListHidden = plist.classList.contains('hidden');
+        const isParticipantsListHidden = this.isPlistOpen();
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
         chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
-        if (this.isChatPinned) chat.style.display = isParticipantsListHidden ? 'block' : 'none';
-        chatHistory.style.height = isParticipantsListHidden ? 'calc(100vh - 210px)' : '490px';
+        if (this.isChatPinned) elemDisplay(chat.id, isParticipantsListHidden);
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
         plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
+        plist.style.position = this.isMobileDevice ? 'fixed' : 'absolute';
     }
 
     toggleChatHistorySize(max = true) {
@@ -3257,7 +3261,7 @@ class RoomClient {
         resizeVideoMedia();
         chatRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
-        if (!plist.classList.contains('hidden')) this.toggleShowParticipants();
+        if (!this.isPlistOpen()) this.toggleShowParticipants();
         if (chatRoom.classList.contains('container')) chatRoom.classList.remove('container');
     }
 
@@ -3277,7 +3281,7 @@ class RoomClient {
         setColor(chatTogglePin, 'white');
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
-        if (plist.classList.contains('hidden')) this.toggleShowParticipants();
+        if (this.isPlistOpen()) this.toggleShowParticipants();
         if (!chatRoom.classList.contains('container')) chatRoom.classList.add('container');
     }
 

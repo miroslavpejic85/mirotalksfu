@@ -1251,7 +1251,7 @@ function handleButtons() {
     };
     chatButton.onclick = () => {
         rc.toggleChat();
-        if (rc.isMobileDevice) {
+        if (DetectRTC.isMobileDevice) {
             rc.toggleShowParticipants();
         }
     };

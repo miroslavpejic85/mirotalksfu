@@ -138,7 +138,7 @@
 }
 
 .all-participants-img:hover {
-    background-color: #000000;
+    background-color: lime;
     transition: all 0.3s ease-in-out;
 }
 
@@ -170,6 +170,7 @@
 /* Chat history */
 .chat .chat-history {
     padding: 20px;
+    height: calc(100vh - 210px);
     min-height: 490px;
     max-height: 490px;
     border-bottom: var(--border);
