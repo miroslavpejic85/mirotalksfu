@@ -163,13 +163,13 @@ const views = {
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
 };
 
-let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
+const authHost = new Host(); // Authenticated IP by Login
 
-let authHost; // Authenticated IP by Login
-
-let roomList = new Map();
+let roomList = new Map(); // All Rooms
 
 let presenters = {}; // collect presenters grp by roomId
+
+let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
 
 // All mediasoup workers
 let workers = [];
@@ -284,7 +284,7 @@ function startServer() {
             if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
                 const ip = getIP(req);
                 hostCfg.authenticated = true;
-                authHost = new Host(ip, true);
+                authHost.setAuthorizedIP(ip, true);
                 log.debug('Direct Join user auth as host done', {
                     ip: ip,
                     username: username,
@@ -375,8 +375,12 @@ function startServer() {
         if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
             const ip = getIP(req);
             hostCfg.authenticated = true;
-            authHost = new Host(ip, true);
-            log.debug('HOST LOGIN OK', { ip: ip, authorized: authHost.isAuthorized(ip) });
+            authHost.setAuthorizedIP(ip, true);
+            log.debug('HOST LOGIN OK', {
+                ip: ip,
+                authorized: authHost.isAuthorizedIP(ip),
+                authorizedIps: authHost.getAuthorizedIPs(),
+            });
             return res.status(200).json({ message: 'authorized' });
         }
 
@@ -1492,7 +1496,7 @@ function startServer() {
         return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     }
     function allowedIP(ip) {
-        return authHost != null && authHost.isAuthorized(ip);
+        return authHost != null && authHost.isAuthorizedIP(ip);
     }
     function removeIP(socket) {
         if (hostCfg.protected) {
@@ -1500,7 +1504,10 @@ function startServer() {
             if (ip && allowedIP(ip)) {
                 authHost.deleteIP(ip);
                 hostCfg.authenticated = false;
-                log.debug('Remove IP from auth', { ip: ip });
+                log.info('Remove IP from auth', {
+                    ip: ip,
+                    authorizedIps: authHost.getAuthorizedIPs(),
+                });
             }
         }
     }
