@@ -44,13 +44,18 @@ function resizeVideoMedia() {
     let Width = videoMediaContainer.offsetWidth - Margin * 2;
     let Height = videoMediaContainer.offsetHeight - Margin * 2;
     let max = 0;
-    let optional = isHideMeActive ? 1 : 0;
+    let optional = isHideMeActive && videoMediaContainer.childElementCount <= 2 ? 1 : 0;
     let isOneVideoElement = videoMediaContainer.childElementCount - optional == 1 ? true : false;
-    //console.log('videoMediaContainer.childElementCount: ', videoMediaContainer.childElementCount - optional);
+
+    // console.log('videoMediaContainer.childElementCount:', {
+    //     isOneVideoElement: isOneVideoElement,
+    //     children: videoMediaContainer.childElementCount,
+    //     optional: optional,
+    // });
 
     // full screen mode
     let bigWidth = Width * 4;
-    if (videoMediaContainer.childElementCount - optional == 1) {
+    if (isOneVideoElement) {
         Width = Width - bigWidth;
     }
 
