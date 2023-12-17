@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.4
+ * @version 1.3.41
  *
  */
 
@@ -1850,6 +1850,7 @@ function handleSelects() {
         lsSettings.buttons_bar = BtnsBarPosition.selectedIndex;
         lS.setSettings(lsSettings);
         refreshMainButtonsToolTipPlacement();
+        resizeMainButtons();
     };
     pinVideoPosition.onchange = () => {
         rc.toggleVideoPin(pinVideoPosition.value);
@@ -2132,6 +2133,7 @@ function loadSettingsFromLocalStorage() {
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
     rc.toggleVideoPin(pinVideoPosition.value);
     refreshMainButtonsToolTipPlacement();
+    resizeMainButtons();
 }
 
 // ####################################################
