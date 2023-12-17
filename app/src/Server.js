@@ -68,6 +68,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
+const packageJson = require('../../package.json');
 
 // Slack API
 const CryptoJS = require('crypto-js');
@@ -497,6 +498,7 @@ function startServer() {
             const pu1 = data.tunnels[1].public_url;
             const tunnel = pu0.startsWith('https') ? pu0 : pu1;
             log.info('Listening on', {
+                app_version: packageJson.version,
                 node_version: process.versions.node,
                 hostConfig: hostCfg,
                 presenters: config.presenters,
@@ -543,6 +545,7 @@ function startServer() {
             return ngrokStart();
         }
         log.info('Settings', {
+            app_version: packageJson.version,
             node_version: process.versions.node,
             hostConfig: hostCfg,
             presenters: config.presenters,
