@@ -2007,3 +2007,25 @@ main {
     width: 200px;
     height: 150px;
 }
+
+/*--------------------------------------------------------------
+# Webkit-Scrollbar Styles
+--------------------------------------------------------------*/
+
+::-webkit-scrollbar {
+    width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+    background: radial-gradient(#393939, #000000);
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background-color: radial-gradient(#393939, #000000);
+}
+
+::-webkit-scrollbar-track {
+    background: #1a1b1f;
+}
