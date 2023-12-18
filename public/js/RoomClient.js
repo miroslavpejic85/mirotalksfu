@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.42
+ * @version 1.3.43
  *
  */
 
@@ -5259,9 +5259,9 @@ class RoomClient {
         let btnKo = this.getId(uid);
         if (btnKo) {
             btnKo.addEventListener('click', () => {
-                if (!isPresenter)
-                    return this.userLog('warning', 'Only the presenter can eject the participants', 'top-end');
-                this.peerAction('me', peer_id, 'eject');
+                isPresenter
+                    ? this.peerAction('me', peer_id, 'eject')
+                    : this.userLog('warning', 'Only the presenter can eject the participants', 'top-end');
             });
         }
     }
@@ -5275,10 +5275,12 @@ class RoomClient {
         let peer_id = words[1] + '___pVideo';
         let btnCm = this.getId(uid);
         if (btnCm) {
-            btnCm.addEventListener('click', () => {
-                if (!isPresenter)
-                    return this.userLog('warning', 'Only the presenter can hide the participants', 'top-end');
-                this.peerAction('me', peer_id, 'hide');
+            btnCm.addEventListener('click', (e) => {
+                if (e.target.className === html.videoOn) {
+                    isPresenter
+                        ? this.peerAction('me', peer_id, 'hide')
+                        : this.userLog('warning', 'Only the presenter can hide the participants', 'top-end');
+                }
             });
         }
     }
@@ -5293,10 +5295,10 @@ class RoomClient {
         let btnAU = this.getId(uid);
         if (btnAU) {
             btnAU.addEventListener('click', (e) => {
-                if (!isPresenter)
-                    return this.userLog('warning', 'Only the presenter can mute the participants', 'top-end');
                 if (e.target.className === html.audioOn) {
-                    this.peerAction('me', peer_id, 'mute');
+                    isPresenter
+                        ? this.peerAction('me', peer_id, 'mute')
+                        : this.userLog('warning', 'Only the presenter can mute the participants', 'top-end');
                 }
             });
         }
