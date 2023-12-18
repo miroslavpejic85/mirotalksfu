@@ -97,8 +97,8 @@ function handleRules(isPresenter) {
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.ejectButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
-        BUTTONS.consumerVideo.muteAudioButton = false;
-        BUTTONS.consumerVideo.muteVideoButton = false;
+        //BUTTONS.consumerVideo.muteAudioButton = false;
+        //BUTTONS.consumerVideo.muteVideoButton = false;
         BUTTONS.whiteboard.whiteboardLockButton = false;
         //...
     } else {

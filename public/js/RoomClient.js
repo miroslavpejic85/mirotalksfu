@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.41
+ * @version 1.3.42
  *
  */
 
@@ -5259,6 +5259,8 @@ class RoomClient {
         let btnKo = this.getId(uid);
         if (btnKo) {
             btnKo.addEventListener('click', () => {
+                if (!isPresenter)
+                    return this.userLog('warning', 'Only the presenter can eject the participants', 'top-end');
                 this.peerAction('me', peer_id, 'eject');
             });
         }
@@ -5274,6 +5276,8 @@ class RoomClient {
         let btnCm = this.getId(uid);
         if (btnCm) {
             btnCm.addEventListener('click', () => {
+                if (!isPresenter)
+                    return this.userLog('warning', 'Only the presenter can hide the participants', 'top-end');
                 this.peerAction('me', peer_id, 'hide');
             });
         }
@@ -5289,6 +5293,8 @@ class RoomClient {
         let btnAU = this.getId(uid);
         if (btnAU) {
             btnAU.addEventListener('click', (e) => {
+                if (!isPresenter)
+                    return this.userLog('warning', 'Only the presenter can mute the participants', 'top-end');
                 if (e.target.className === html.audioOn) {
                     this.peerAction('me', peer_id, 'mute');
                 }
