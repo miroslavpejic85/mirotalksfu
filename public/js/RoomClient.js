@@ -5646,7 +5646,7 @@ class RoomClient {
                         imageUrl = image.mute;
                         title = 'Mute ' + who;
                         text =
-                            "Once muted, you won't be able to unmute them, but they can unmute themselves at any time.";
+                            'Once muted, Only the presenter will be able to unmute them, but they can unmute themselves at any time.';
                         break;
                     case 'unmute':
                         imageUrl = image.unmute;
@@ -5657,7 +5657,7 @@ class RoomClient {
                         title = 'Hide ' + who;
                         imageUrl = image.hide;
                         text =
-                            "Once hided, you won't be able to unhide them, but they can unhide themselves at any time.";
+                            'Once hidden, Only the presenter will be able to unhide them, but they can unhide themselves at any time.';
                         break;
                     case 'unhide':
                         title = 'Unhide ' + who;
@@ -5667,7 +5667,8 @@ class RoomClient {
                     case 'stop':
                         imageUrl = image.stop;
                         title = 'Stop screen share to the ' + who;
-                        text = "Once stop, you won't be able to start them, but they can start themselves at any time.";
+                        text =
+                            'Once stop, Only the presenter will be able to start them, but they can start themselves at any time.';
                         break;
                     case 'start':
                         imageUrl = image.start;
