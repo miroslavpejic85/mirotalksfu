@@ -5280,6 +5280,10 @@ class RoomClient {
                     isPresenter
                         ? this.peerAction('me', peer_id, 'hide')
                         : this.userLog('warning', 'Only the presenter can hide the participants', 'top-end');
+                } else {
+                    isPresenter
+                        ? this.peerAction('me', peer_id, 'unhide')
+                        : this.userLog('warning', 'Only the presenter can unhide the participants', 'top-end');
                 }
             });
         }
@@ -5299,6 +5303,10 @@ class RoomClient {
                     isPresenter
                         ? this.peerAction('me', peer_id, 'mute')
                         : this.userLog('warning', 'Only the presenter can mute the participants', 'top-end');
+                } else {
+                    isPresenter
+                        ? this.peerAction('me', peer_id, 'unmute')
+                        : this.userLog('warning', 'Only the presenter can unmute the participants', 'top-end');
                 }
             });
         }
