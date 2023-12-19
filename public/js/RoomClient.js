@@ -5539,6 +5539,7 @@ class RoomClient {
     }
 
     peerMediaStartConfirm(type, imageUrl, title, text) {
+        sound('notify');
         Swal.fire({
             background: swalBackground,
             position: 'center',
