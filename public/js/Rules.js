@@ -52,7 +52,7 @@ const BUTTONS = {
         sendVideoButton: true,
         muteVideoButton: true,
         muteAudioButton: true,
-        audioVolumeInput: true,
+        audioVolumeInput: true, // Disabled for mobile
         ejectButton: true,
     },
     videoOff: {
@@ -60,7 +60,7 @@ const BUTTONS = {
         sendFileButton: true,
         sendVideoButton: true,
         muteAudioButton: true,
-        audioVolumeInput: true,
+        audioVolumeInput: true, // Disabled for mobile
         ejectButton: true,
     },
     chat: {

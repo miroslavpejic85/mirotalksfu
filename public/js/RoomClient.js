@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.43
+ * @version 1.3.44
  *
  */
 
@@ -2005,7 +2005,7 @@ class RoomClient {
                 pb.style.height = '1%';
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
-                BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
+                BUTTONS.consumerVideo.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
                 vb.appendChild(au);
                 vb.appendChild(cm);
                 BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
@@ -2193,7 +2193,7 @@ class RoomClient {
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
-            BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
+            BUTTONS.videoOff.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
         }
         vb.appendChild(au);
         d.appendChild(i);
@@ -5243,6 +5243,7 @@ class RoomClient {
         if (inputPv && audioConsumerPlayer) {
             inputPv.style.display = 'inline';
             inputPv.value = 100;
+            // Not work on Mobile?
             inputPv.addEventListener('input', () => {
                 audioConsumerPlayer.volume = inputPv.value / 100;
             });
@@ -5654,7 +5655,7 @@ class RoomClient {
                         imageUrl = image.mute;
                         title = 'Mute ' + who;
                         text =
-                            'Once muted, Only the presenter will be able to unmute them, but they can unmute themselves at any time.';
+                            'Once muted, only the presenter will be able to unmute participants, but participants can unmute themselves at any time';
                         break;
                     case 'unmute':
                         imageUrl = image.unmute;
@@ -5665,7 +5666,7 @@ class RoomClient {
                         title = 'Hide ' + who;
                         imageUrl = image.hide;
                         text =
-                            'Once hidden, Only the presenter will be able to unhide them, but they can unhide themselves at any time.';
+                            'Once hidden, only the presenter will be able to unhide participants, but participants can unhide themselves at any time';
                         break;
                     case 'unhide':
                         title = 'Unhide ' + who;
@@ -5676,7 +5677,7 @@ class RoomClient {
                         imageUrl = image.stop;
                         title = 'Stop screen share to the ' + who;
                         text =
-                            'Once stop, Only the presenter will be able to start them, but they can start themselves at any time.';
+                            "Once stopped, only the presenter will be able to start the participants' screens, but participants can start their screens themselves at any time";
                         break;
                     case 'start':
                         imageUrl = image.start;
@@ -5732,6 +5733,23 @@ class RoomClient {
             default:
                 break;
             //...
+        }
+    }
+
+    peerGuestNotAllowed(action) {
+        console.log('peerGuestNotAllowed', action);
+        switch (action) {
+            case 'audio':
+                this.userLog('warning', 'Only the presenter can mute/unmute participants', 'top-end');
+                break;
+            case 'video':
+                this.userLog('warning', 'Only the presenter can hide/show participants', 'top-end');
+                break;
+            case 'screen':
+                this.userLog('warning', 'Only the presenter can start/stop the screen of participants', 'top-end');
+                break;
+            default:
+                break;
         }
     }
 

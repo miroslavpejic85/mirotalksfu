@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.43
+ * @version 1.3.44
  *
  */
 
@@ -3233,9 +3233,9 @@ function getParticipantsList(peers) {
                     <br/>
 
                     <div class="about-buttons mt5"> 
-                        <button class="ml5" id='${peer_id}___pAudio'>${peer_audio}</button>
-                        <button class="ml5" id='${peer_id}___pVideo'>${peer_video}</button>
-                        <button class="ml5" id='${peer_id}___pScreen'>${peer_screen}</button>
+                        <button class="ml5" id='${peer_id}___pAudio' onclick="rc.peerGuestNotAllowed('audio')">${peer_audio}</button>
+                        <button class="ml5" id='${peer_id}___pVideo' onclick="rc.peerGuestNotAllowed('video')">${peer_video}</button>
+                        <button class="ml5" id='${peer_id}___pScreen' onclick="rc.peerGuestNotAllowed('screen')">${peer_screen}</button>
                         `;
 
                 // li += `
