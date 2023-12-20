@@ -164,7 +164,7 @@ function resizeMainButtons() {
 // ####################################################
 
 function resizeChatRoom() {
-    if (DetectRTC.isMobileDevice || !rc.isChatOpen) return;
+    if (DetectRTC.isMobileDevice || !rc.isChatOpen || rc.isChatPinned) return;
 
     const windowWidth = window.innerWidth;
     const windowHeight = window.innerHeight;
