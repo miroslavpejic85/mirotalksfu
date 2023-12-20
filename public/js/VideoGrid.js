@@ -105,13 +105,17 @@ function setWidth(Cameras, width, bigWidth, margin, maxHeight, isOneVideoElement
 }
 
 // ####################################################
-// RESPONSIVE MAIN BUTTONS
+// BREAKPOINTS
 // ####################################################
 
 const MOBILE_BREAKPOINT = 500;
 const TABLET_BREAKPOINT = 580;
 const DESKTOP_BREAKPOINT = 730;
 const CUSTOM_BREAKPOINT = 680;
+
+// ####################################################
+// RESPONSIVE MAIN BUTTONS
+// ####################################################
 
 const mainButtonsBar = document.querySelectorAll('#control button');
 const mainButtonsIcon = document.querySelectorAll('#control button i');
