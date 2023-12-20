@@ -3285,6 +3285,7 @@ class RoomClient {
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
         if (!this.isPlistOpen()) this.toggleShowParticipants();
         if (!chatRoom.classList.contains('container')) chatRoom.classList.add('container');
+        resizeChatRoom();
     }
 
     chatCenter() {

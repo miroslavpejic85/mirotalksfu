@@ -111,6 +111,7 @@ function setWidth(Cameras, width, bigWidth, margin, maxHeight, isOneVideoElement
 const MOBILE_BREAKPOINT = 500;
 const TABLET_BREAKPOINT = 580;
 const DESKTOP_BREAKPOINT = 730;
+const CUSTOM_BREAKPOINT = 680;
 
 const mainButtonsBar = document.querySelectorAll('#control button');
 const mainButtonsIcon = document.querySelectorAll('#control button i');
@@ -173,6 +174,27 @@ function resizeChatRoom() {
 }
 
 // ####################################################
+// RESPONSIVE TRANSCRIPTION
+// ####################################################
+
+function resizeTranscriptionRoom() {
+    if (
+        DetectRTC.isMobileDevice ||
+        !Boolean(transcription.speechTranscription) ||
+        transcription.isHidden ||
+        transcription.isPinned
+    )
+        return;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    windowWidth <= CUSTOM_BREAKPOINT || windowHeight <= CUSTOM_BREAKPOINT
+        ? transcription.maximize()
+        : transcription.minimize();
+}
+
+// ####################################################
 // WINDOW LOAD/RESIZE EVENT
 // ####################################################
 
@@ -185,6 +207,7 @@ window.addEventListener(
             resizeVideoMedia();
             resizeMainButtons();
             resizeChatRoom();
+            resizeTranscriptionRoom();
         };
     },
     false,

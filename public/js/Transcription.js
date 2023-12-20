@@ -80,6 +80,7 @@ class Transcription {
         this.transcripts = [];
         this.isBgTransparent = false;
         this.isPinned = false;
+        this.isHidden = true;
         this.showOnMessage = true;
     }
 
@@ -98,8 +99,8 @@ class Transcription {
 
             this.transcription.onstart = function () {
                 console.log('Transcription started');
-                transcriptionSpeechStart.style.display = 'none';
-                transcriptionSpeechStop.style.display = 'block';
+                hide(transcriptionSpeechStart);
+                show(transcriptionSpeechStop);
                 setColor(transcriptionSpeechStatus, 'lime');
                 userLog('info', 'Transcription started', 'top-end');
             };
@@ -135,8 +136,8 @@ class Transcription {
 
             this.transcription.onend = function () {
                 console.log('Transcription stopped');
-                transcriptionSpeechStop.style.display = 'none';
-                transcriptionSpeechStart.style.display = 'block';
+                hide(transcriptionSpeechStop);
+                show(transcriptionSpeechStart);
                 setColor(transcriptionSpeechStatus, 'white');
                 userLog('info', 'Transcription stopped', 'top-end');
             };
@@ -167,7 +168,7 @@ class Transcription {
         const time_stamp = rc.getTimeNow();
         const avatar_image = rc.genAvatarSvg(peer_name, 32);
 
-        if (this.isHidden()) {
+        if (this.isHidden) {
             if (this.showOnMessage) {
                 this.toggle();
             } else {
@@ -212,19 +213,17 @@ class Transcription {
         }, duration);
     }
 
-    isHidden() {
-        return Boolean(transcriptionRoom.style.display === 'none' || transcriptionRoom.style.display === '');
-    }
-
     toggle() {
-        if (this.isHidden()) {
+        if (this.isHidden) {
             this.center();
             transcriptionRoom.style.display = 'block';
             rc.sound('open');
         } else {
             transcriptionRoom.style.display = 'none';
         }
+        this.isHidden = !this.isHidden;
         if (this.isPinned) this.unpinned();
+        resizeTranscriptionRoom();
     }
 
     toggleBg() {
@@ -312,6 +311,7 @@ class Transcription {
         this.isPinned = false;
         setColor(transcriptionTogglePinBtn, 'white');
         resizeVideoMedia();
+        resizeTranscriptionRoom();
         transcriptionRoom.style.resize = 'both';
         if (!rc.isMobileDevice) rc.makeDraggable(transcriptionRoom, transcriptionHeader);
     }
