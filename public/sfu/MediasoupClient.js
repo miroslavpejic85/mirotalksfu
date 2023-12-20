@@ -841,9 +841,11 @@
         5: [
             function (require, module, exports) {
                 const debug = require('debug')('h264-profile-level-id');
+                const warn = require('debug')('h264-profile-level-id:WARN');
 
                 /* eslint-disable no-console */
                 debug.log = console.info.bind(console);
+                warn.log = console.warn.bind(console);
                 /* eslint-enable no-console */
 
                 const ProfileConstrainedBaseline = 1;
@@ -851,12 +853,14 @@
                 const ProfileMain = 3;
                 const ProfileConstrainedHigh = 4;
                 const ProfileHigh = 5;
+                const ProfilePredictiveHigh444 = 6;
 
                 exports.ProfileConstrainedBaseline = ProfileConstrainedBaseline;
                 exports.ProfileBaseline = ProfileBaseline;
                 exports.ProfileMain = ProfileMain;
                 exports.ProfileConstrainedHigh = ProfileConstrainedHigh;
                 exports.ProfileHigh = ProfileHigh;
+                exports.ProfilePredictiveHigh444 = ProfilePredictiveHigh444;
 
                 // All values are equal to ten times the level number, except level 1b which is
                 // special.
@@ -905,24 +909,8 @@
 
                 exports.ProfileLevelId = ProfileLevelId;
 
-                // Default ProfileLevelId.
-                //
-                // TODO: The default should really be profile Baseline and level 1 according to
-                // the spec: https://tools.ietf.org/html/rfc6184#section-8.1. In order to not
-                // break backwards compatibility with older versions of WebRTC where external
-                // codecs don't have any parameters, use profile ConstrainedBaseline level 3_1
-                // instead. This workaround will only be done in an interim period to allow
-                // external clients to update their code.
-                //
-                // http://crbug/webrtc/6337.
-                const DefaultProfileLevelId = new ProfileLevelId(ProfileConstrainedBaseline, Level3_1);
-
-                // For level_idc=11 and profile_idc=0x42, 0x4D, or 0x58, the constraint set3
-                // flag specifies if level 1b or level 1.1 is used.
-                const ConstraintSet3Flag = 0x10;
-
-                // Class for matching bit patterns such as "x1xx0000" where 'x' is allowed to be
-                // either 0 or 1.
+                // Class for matching bit patterns such as "x1xx0000" where 'x' is allowed to
+                // be either 0 or 1.
                 class BitPattern {
                     constructor(str) {
                         this._mask = ~byteMaskString('x', str);
@@ -953,6 +941,7 @@
                     new ProfilePattern(0x4d, new BitPattern('0x0x0000'), ProfileMain),
                     new ProfilePattern(0x64, new BitPattern('00000000'), ProfileHigh),
                     new ProfilePattern(0x64, new BitPattern('00001100'), ProfileConstrainedHigh),
+                    new ProfilePattern(0xf4, new BitPattern('00000000'), ProfilePredictiveHigh444),
                 ];
 
                 /**
@@ -965,12 +954,20 @@
                  * @returns {ProfileLevelId}
                  */
                 exports.parseProfileLevelId = function (str) {
+                    // For level_idc=11 and profile_idc=0x42, 0x4D, or 0x58, the constraint set3
+                    // flag specifies if level 1b or level 1.1 is used.
+                    const ConstraintSet3Flag = 0x10;
+
                     // The string should consist of 3 bytes in hexadecimal format.
-                    if (typeof str !== 'string' || str.length !== 6) return null;
+                    if (typeof str !== 'string' || str.length !== 6) {
+                        return null;
+                    }
 
                     const profile_level_id_numeric = parseInt(str, 16);
 
-                    if (profile_level_id_numeric === 0) return null;
+                    if (profile_level_id_numeric === 0) {
+                        return null;
+                    }
 
                     // Separate into three bytes.
                     const level_idc = profile_level_id_numeric & 0xff;
@@ -1005,7 +1002,7 @@
                         }
                         // Unrecognized level_idc.
                         default: {
-                            debug('parseProfileLevelId() | unrecognized level_idc:%s', level_idc);
+                            warn(`parseProfileLevelId() | unrecognized level_idc [str:${str}, level_idc:${level_idc}]`);
 
                             return null;
                         }
@@ -1018,7 +1015,9 @@
                         }
                     }
 
-                    debug('parseProfileLevelId() | unrecognized profile_idc/profile_iop combination');
+                    warn(
+                        `parseProfileLevelId() | unrecognized profile_idc/profile_iop combination [str:${str}, profile_idc:${profile_idc}, profile_iop:${profile_iop}]`,
+                    );
 
                     return null;
                 };
@@ -1046,9 +1045,8 @@
                             }
                             // Level 1_b is not allowed for other profiles.
                             default: {
-                                debug(
-                                    'profileLevelIdToString() | Level 1_b not is allowed for profile:%s',
-                                    profile_level_id.profile,
+                                warn(
+                                    `profileLevelIdToString() | Level 1_b not is allowed for profile ${profile_level_id.profile}`,
                                 );
 
                                 return null;
@@ -1079,8 +1077,12 @@
                             profile_idc_iop_string = '6400';
                             break;
                         }
+                        case ProfilePredictiveHigh444: {
+                            profile_idc_iop_string = 'f400';
+                            break;
+                        }
                         default: {
-                            debug('profileLevelIdToString() | unrecognized profile:%s', profile_level_id.profile);
+                            warn(`profileLevelIdToString() | unrecognized profile ${profile_level_id.profile}`);
 
                             return null;
                         }
@@ -1088,22 +1090,139 @@
 
                     let levelStr = profile_level_id.level.toString(16);
 
-                    if (levelStr.length === 1) levelStr = `0${levelStr}`;
+                    if (levelStr.length === 1) {
+                        levelStr = `0${levelStr}`;
+                    }
 
                     return `${profile_idc_iop_string}${levelStr}`;
                 };
 
                 /**
+                 * Prints name of given profile.
+                 *
+                 * @param {number} profile
+                 *
+                 * @returns {String}
+                 */
+                exports.profileToString = function (profile) {
+                    switch (profile) {
+                        case ProfileConstrainedBaseline: {
+                            return 'ConstrainedBaseline';
+                        }
+                        case ProfileBaseline: {
+                            return 'Baseline';
+                        }
+                        case ProfileMain: {
+                            return 'Main';
+                        }
+                        case ProfileConstrainedHigh: {
+                            return 'ConstrainedHigh';
+                        }
+                        case ProfileHigh: {
+                            return 'High';
+                        }
+                        case ProfilePredictiveHigh444: {
+                            return 'PredictiveHigh444';
+                        }
+                        default: {
+                            warn(`profileToString() | unrecognized profile ${profile}`);
+
+                            return null;
+                        }
+                    }
+                };
+
+                /**
+                 * Prints name of given level.
+                 *
+                 * @param {number} level
+                 *
+                 * @returns {String}
+                 */
+                exports.levelToString = function (level) {
+                    switch (level) {
+                        case Level1_b: {
+                            return '1b';
+                        }
+                        case Level1: {
+                            return '1';
+                        }
+                        case Level1_1: {
+                            return '1.1';
+                        }
+                        case Level1_2: {
+                            return '1.2';
+                        }
+                        case Level1_3: {
+                            return '1.3';
+                        }
+                        case Level2: {
+                            return '2';
+                        }
+                        case Level2_1: {
+                            return '2.1';
+                        }
+                        case Level2_2: {
+                            return '2.2';
+                        }
+                        case Level3: {
+                            return '3';
+                        }
+                        case Level3_1: {
+                            return '3.1';
+                        }
+                        case Level3_2: {
+                            return '3.2';
+                        }
+                        case Level4: {
+                            return '4';
+                        }
+                        case Level4_1: {
+                            return '4.1';
+                        }
+                        case Level4_2: {
+                            return '4.2';
+                        }
+                        case Level5: {
+                            return '5';
+                        }
+                        case Level5_1: {
+                            return '5.1';
+                        }
+                        case Level5_2: {
+                            return '5.2';
+                        }
+                        default: {
+                            warn(`levelToString() | unrecognized level ${level}`);
+
+                            return null;
+                        }
+                    }
+                };
+
+                /**
                  * Parse profile level id that is represented as a string of 3 hex bytes
                  * contained in an SDP key-value map. A default profile level id will be
-                 * returned if the profile-level-id key is missing. Nothing will be returned if
-                 * the key is present but the string is invalid.
+                 * returned if the profile-level-id key is missing. Nothing will be returned
+                 * if the key is present but the string is invalid.
                  *
                  * @param {Object} [params={}] - Codec parameters object.
                  *
                  * @returns {ProfileLevelId}
                  */
                 exports.parseSdpProfileLevelId = function (params = {}) {
+                    // Default ProfileLevelId.
+                    //
+                    // TODO: The default should really be profile Baseline and level 1 according to
+                    // the spec: https://tools.ietf.org/html/rfc6184#section-8.1. In order to not
+                    // break backwards compatibility with older versions of WebRTC where external
+                    // codecs don't have any parameters, use profile ConstrainedBaseline level 3_1
+                    // instead. This workaround will only be done in an interim period to allow
+                    // external clients to update their code.
+                    //
+                    // http://crbug/webrtc/6337.
+                    const DefaultProfileLevelId = new ProfileLevelId(ProfileConstrainedBaseline, Level3_1);
+
                     const profile_level_id = params['profile-level-id'];
 
                     return !profile_level_id ? DefaultProfileLevelId : exports.parseProfileLevelId(profile_level_id);
@@ -1135,9 +1254,9 @@
                  * based on local supported parameters and remote offered parameters. Both
                  * local_supported_params and remote_offered_params represent sendrecv media
                  * descriptions, i.e they are a mix of both encode and decode capabilities. In
-                 * theory, when the profile in local_supported_params represent a strict superset
-                 * of the profile in remote_offered_params, we could limit the profile in the
-                 * answer to the profile in remote_offered_params.
+                 * theory, when the profile in local_supported_params represent a strict
+                 * superset of the profile in remote_offered_params, we could limit the profile
+                 * in the answer to the profile in remote_offered_params.
                  *
                  * However, to simplify the code, each supported H264 profile should be listed
                  * explicitly in the list of local supported codecs, even if they are redundant.
@@ -1163,7 +1282,7 @@
                     // If both local and remote params do not contain profile-level-id, they are
                     // both using the default profile. In this case, don't return anything.
                     if (!local_supported_params['profile-level-id'] && !remote_offered_params['profile-level-id']) {
-                        debug('generateProfileLevelIdForAnswer() | no profile-level-id in local and remote params');
+                        warn('generateProfileLevelIdForAnswer() | profile-level-id missing in local and remote params');
 
                         return null;
                     }
@@ -1173,12 +1292,17 @@
                     const remote_profile_level_id = exports.parseSdpProfileLevelId(remote_offered_params);
 
                     // The local and remote codec must have valid and equal H264 Profiles.
-                    if (!local_profile_level_id) throw new TypeError('invalid local_profile_level_id');
+                    if (!local_profile_level_id) {
+                        throw new TypeError('invalid local_profile_level_id');
+                    }
 
-                    if (!remote_profile_level_id) throw new TypeError('invalid remote_profile_level_id');
+                    if (!remote_profile_level_id) {
+                        throw new TypeError('invalid remote_profile_level_id');
+                    }
 
-                    if (local_profile_level_id.profile !== remote_profile_level_id.profile)
+                    if (local_profile_level_id.profile !== remote_profile_level_id.profile) {
                         throw new TypeError('H264 Profile mismatch');
+                    }
 
                     // Parse level information.
                     const level_asymmetry_allowed =
@@ -1195,9 +1319,7 @@
                     const answer_level = level_asymmetry_allowed ? local_level : min_level;
 
                     debug(
-                        'generateProfileLevelIdForAnswer() | result: [profile:%s, level:%s]',
-                        local_profile_level_id.profile,
-                        answer_level,
+                        `generateProfileLevelIdForAnswer() | result [profile:${local_profile_level_id.profile}, level:${answer_level}]`,
                     );
 
                     // Return the resulting profile-level-id for the answer parameters.
@@ -1224,9 +1346,13 @@
 
                 // Compare H264 levels and handle the level 1b case.
                 function isLessLevel(a, b) {
-                    if (a === Level1_b) return b !== Level1 && b !== Level1_b;
+                    if (a === Level1_b) {
+                        return b !== Level1 && b !== Level1_b;
+                    }
 
-                    if (b === Level1_b) return a !== Level1;
+                    if (b === Level1_b) {
+                        return a !== Level1;
+                    }
 
                     return a < b;
                 }
@@ -2033,42 +2159,54 @@
                                 }
                             }
                             switch (handlerName) {
-                                case 'Chrome111':
+                                case 'Chrome111': {
                                     this._handlerFactory = Chrome111_1.Chrome111.createFactory();
                                     break;
-                                case 'Chrome74':
+                                }
+                                case 'Chrome74': {
                                     this._handlerFactory = Chrome74_1.Chrome74.createFactory();
                                     break;
-                                case 'Chrome70':
+                                }
+                                case 'Chrome70': {
                                     this._handlerFactory = Chrome70_1.Chrome70.createFactory();
                                     break;
-                                case 'Chrome67':
+                                }
+                                case 'Chrome67': {
                                     this._handlerFactory = Chrome67_1.Chrome67.createFactory();
                                     break;
-                                case 'Chrome55':
+                                }
+                                case 'Chrome55': {
                                     this._handlerFactory = Chrome55_1.Chrome55.createFactory();
                                     break;
-                                case 'Firefox60':
+                                }
+                                case 'Firefox60': {
                                     this._handlerFactory = Firefox60_1.Firefox60.createFactory();
                                     break;
-                                case 'Safari12':
+                                }
+                                case 'Safari12': {
                                     this._handlerFactory = Safari12_1.Safari12.createFactory();
                                     break;
-                                case 'Safari11':
+                                }
+                                case 'Safari11': {
                                     this._handlerFactory = Safari11_1.Safari11.createFactory();
                                     break;
-                                case 'Edge11':
+                                }
+                                case 'Edge11': {
                                     this._handlerFactory = Edge11_1.Edge11.createFactory();
                                     break;
-                                case 'ReactNativeUnifiedPlan':
+                                }
+                                case 'ReactNativeUnifiedPlan': {
                                     this._handlerFactory =
                                         ReactNativeUnifiedPlan_1.ReactNativeUnifiedPlan.createFactory();
                                     break;
-                                case 'ReactNative':
+                                }
+                                case 'ReactNative': {
                                     this._handlerFactory = ReactNative_1.ReactNative.createFactory();
                                     break;
-                                default:
+                                }
+                                default: {
                                     throw new TypeError(`unknown handlerName "${handlerName}"`);
+                                }
                             }
                         }
                         // Create a temporal handler to get its name.
@@ -3919,22 +4057,27 @@
                             logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -4642,22 +4785,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -4839,7 +4987,7 @@
                             id: this._nextSendSctpStreamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -4971,7 +5119,7 @@
                             id: streamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -5223,22 +5371,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -5465,7 +5618,7 @@
                             id: this._nextSendSctpStreamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -5603,7 +5756,7 @@
                             id: streamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -5848,22 +6001,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -6128,7 +6286,7 @@
                             id: this._nextSendSctpStreamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -6271,7 +6429,7 @@
                             id: streamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -6527,22 +6685,27 @@
                             logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -7458,43 +7621,53 @@
                         // NOTE: Not yet implemented by Edge.
                         iceTransport.addEventListener('statechange', () => {
                             switch (iceTransport.state) {
-                                case 'checking':
+                                case 'checking': {
                                     this.emit('@connectionstatechange', 'connecting');
                                     break;
+                                }
                                 case 'connected':
-                                case 'completed':
+                                case 'completed': {
                                     this.emit('@connectionstatechange', 'connected');
                                     break;
-                                case 'failed':
+                                }
+                                case 'failed': {
                                     this.emit('@connectionstatechange', 'failed');
                                     break;
-                                case 'disconnected':
+                                }
+                                case 'disconnected': {
                                     this.emit('@connectionstatechange', 'disconnected');
                                     break;
-                                case 'closed':
+                                }
+                                case 'closed': {
                                     this.emit('@connectionstatechange', 'closed');
                                     break;
+                                }
                             }
                         });
                         // NOTE: Not standard, but implemented by Edge.
                         iceTransport.addEventListener('icestatechange', () => {
                             switch (iceTransport.state) {
-                                case 'checking':
+                                case 'checking': {
                                     this.emit('@connectionstatechange', 'connecting');
                                     break;
+                                }
                                 case 'connected':
-                                case 'completed':
+                                case 'completed': {
                                     this.emit('@connectionstatechange', 'connected');
                                     break;
-                                case 'failed':
+                                }
+                                case 'failed': {
                                     this.emit('@connectionstatechange', 'failed');
                                     break;
-                                case 'disconnected':
+                                }
+                                case 'disconnected': {
                                     this.emit('@connectionstatechange', 'disconnected');
                                     break;
-                                case 'closed':
+                                }
+                                case 'closed': {
                                     this.emit('@connectionstatechange', 'closed');
                                     break;
+                                }
                             }
                         });
                         iceTransport.addEventListener('candidatepairchange', (event) => {
@@ -7769,22 +7942,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -8524,22 +8702,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -8722,7 +8905,7 @@
                             id: this._nextSendSctpStreamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -8866,7 +9049,7 @@
                             id: streamId,
                             ordered,
                             maxPacketLifeTime,
-                            maxRetransmitTime: maxPacketLifeTime,
+                            maxRetransmitTime: maxPacketLifeTime, // NOTE: Old spec.
                             maxRetransmits,
                             protocol,
                         };
@@ -9127,22 +9310,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -9888,22 +10076,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -10518,22 +10711,27 @@
                             this._pc.addEventListener('iceconnectionstatechange', () => {
                                 logger.warn('run() | pc.connectionState not supported, using pc.iceConnectionState');
                                 switch (this._pc.iceConnectionState) {
-                                    case 'checking':
+                                    case 'checking': {
                                         this.emit('@connectionstatechange', 'connecting');
                                         break;
+                                    }
                                     case 'connected':
-                                    case 'completed':
+                                    case 'completed': {
                                         this.emit('@connectionstatechange', 'connected');
                                         break;
-                                    case 'failed':
+                                    }
+                                    case 'failed': {
                                         this.emit('@connectionstatechange', 'failed');
                                         break;
-                                    case 'disconnected':
+                                    }
+                                    case 'disconnected': {
                                         this.emit('@connectionstatechange', 'disconnected');
                                         break;
-                                    case 'closed':
+                                    }
+                                    case 'closed': {
                                         this.emit('@connectionstatechange', 'closed');
                                         break;
+                                    }
                                 }
                             });
                         }
@@ -11534,15 +11732,18 @@
                     }
                     setDtlsRole(role) {
                         switch (role) {
-                            case 'client':
+                            case 'client': {
                                 this._mediaObject.setup = 'active';
                                 break;
-                            case 'server':
+                            }
+                            case 'server': {
                                 this._mediaObject.setup = 'passive';
                                 break;
-                            case 'auto':
+                            }
+                            case 'auto': {
                                 this._mediaObject.setup = 'actpass';
                                 break;
+                            }
                         }
                     }
                     resume() {
@@ -12347,15 +12548,18 @@
                     }
                     let role;
                     switch (setup) {
-                        case 'active':
+                        case 'active': {
                             role = 'client';
                             break;
-                        case 'passive':
+                        }
+                        case 'passive': {
                             role = 'server';
                             break;
-                        case 'actpass':
+                        }
+                        case 'actpass': {
                             role = 'auto';
                             break;
+                        }
                     }
                     const dtlsParameters = {
                         role,
@@ -12789,7 +12993,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.0';
+                exports.version = '3.7.1';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13403,18 +13607,22 @@
                             direction: 'sendrecv',
                         };
                         switch (remoteExt.direction) {
-                            case 'sendrecv':
+                            case 'sendrecv': {
                                 extendedExt.direction = 'sendrecv';
                                 break;
-                            case 'recvonly':
+                            }
+                            case 'recvonly': {
                                 extendedExt.direction = 'sendonly';
                                 break;
-                            case 'sendonly':
+                            }
+                            case 'sendonly': {
                                 extendedExt.direction = 'recvonly';
                                 break;
-                            case 'inactive':
+                            }
+                            case 'inactive': {
                                 extendedExt.direction = 'inactive';
                                 break;
+                            }
                         }
                         extendedRtpCapabilities.headerExtensions.push(extendedExt);
                     }

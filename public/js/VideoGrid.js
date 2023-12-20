@@ -159,6 +159,23 @@ function resizeMainButtons() {
     }
 }
 
+// ####################################################
+// RESPONSIVE CHAT
+// ####################################################
+
+function resizeChatRoom() {
+    if (DetectRTC.isMobileDevice || !rc.isChatOpen) return;
+
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
+
+    windowWidth <= DESKTOP_BREAKPOINT || windowHeight <= DESKTOP_BREAKPOINT ? rc.chatMaximize() : rc.chatMinimize();
+}
+
+// ####################################################
+// WINDOW LOAD/RESIZE EVENT
+// ####################################################
+
 window.addEventListener(
     'load',
     function (event) {
@@ -167,6 +184,7 @@ window.addEventListener(
         window.onresize = function () {
             resizeVideoMedia();
             resizeMainButtons();
+            resizeChatRoom();
         };
     },
     false,
