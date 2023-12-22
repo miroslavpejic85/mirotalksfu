@@ -96,7 +96,7 @@
     | username     | string         | Auth username   |
     | password     | string         | Auth password   |
 
-> **Note**
+> \[!NOTE]
 >
 > The `username` and `password` parameters are required when either `host.protected` or `host.user_auth` is set to `true` in the `app/src/config.js` file. The valid list of users is defined in the `host.users` configuration.
 
@@ -219,7 +219,8 @@ $ PORT=3011 npm start
 
 <br/>
 
-> **Note**
+> \[!NOTE]
+>
 > To run `MiroTalk SFU` on a `Windows operating system`, you can follow the instructions provided in [this documentation](https://github.com/miroslavpejic85/mirotalksfu/issues/99#issuecomment-1586073853).
 
 </details>
