@@ -860,6 +860,7 @@ class RoomClient {
             function () {
                 this.exit(true);
                 this.ServerAway();
+                this.saveRecording('Socket disconnected');
             }.bind(this),
         );
     }
@@ -4051,19 +4052,21 @@ class RoomClient {
             lastRecordingInfo.innerHTML = `Last Recording Info: ${recordingInfo}`;
             show(lastRecordingInfo);
 
-            Swal.fire({
-                background: swalBackground,
-                position: 'center',
-                icon: 'success',
-                title: 'Recording',
-                html: `<div style="text-align: left;">
-                🔴 Recording Info: 
-                ${recordingInfo}
-                Please wait to be processed, then will be downloaded to your ${currentDevice} device.
-                </div>`,
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            });
+            if (window.localStorage.isReconnected === 'false') {
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    icon: 'success',
+                    title: 'Recording',
+                    html: `<div style="text-align: left;">
+                    🔴 Recording Info: 
+                    ${recordingInfo}
+                    Please wait to be processed, then will be downloaded to your ${currentDevice} device.
+                    </div>`,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                });
+            }
 
             console.log('MediaRecorder Download Blobs');
             const url = window.URL.createObjectURL(blob);
@@ -4157,6 +4160,13 @@ class RoomClient {
             null,
             `${icons.user} ${data.peer_name} <br /> <h1>${data.action}</h1>`,
         );
+    }
+
+    saveRecording(reason) {
+        if (this._isRecording || recordingStatus.innerText != '0s') {
+            console.log(`Save recording: ${reason}`);
+            this.stopRecording();
+        }
     }
 
     // ####################################################

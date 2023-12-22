@@ -1342,6 +1342,9 @@ function handleButtons() {
         isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
+        if (participantsCount == 1 && !rc.peer_info.peer_audio) {
+            return userLog('warning', '🔴 Recording requires your audio to be enabled', 'top-end', 6000);
+        }
         rc.startRecording();
     };
     stopRecButton.onclick = () => {
@@ -2289,8 +2292,7 @@ function handleRoomClientEvents() {
             console.log('Room event: host only recording enabled');
             // Stop recording ...
             if (rc.isRecording() || recordingStatus.innerText != '0s') {
-                console.log('Room event: host only recording enabled, going to stop recording');
-                rc.stopRecording();
+                rc.saveRecording('Room event: host only recording enabled, going to stop recording');
             }
             hide(startRecButton);
             hide(roomRecording);
@@ -2314,8 +2316,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room event: Client leave room');
         if (rc.isRecording() || recordingStatus.innerText != '0s') {
-            console.log('Room event: Client save recording before to exit');
-            rc.stopRecording();
+            rc.saveRecording('Room event: Client save recording before to exit');
         }
         if (survey && survey.enabled) {
             leaveFeedback();
