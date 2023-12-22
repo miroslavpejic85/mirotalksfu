@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.45
+ * @version 1.3.46
  *
  */
 
@@ -240,9 +240,7 @@ function initClient() {
         setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
         setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
         setTippy('transcriptShowOnMsg', 'Show transcript on new message comes', 'bottom');
-        setTippy('transcriptionGhostBtn', 'Toggle transparent background', 'bottom');
-        setTippy('transcriptionSaveBtn', 'Save', 'bottom');
-        setTippy('transcriptionCleanBtn', 'Clean', 'bottom');
+        setTippy('transcriptPersistentMode', 'Prevent stopping in the absence of speech', 'bottom');
         setTippy('transcriptionSpeechStart', 'Start transcription', 'top');
         setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
     }
@@ -1873,10 +1871,17 @@ function handleSelects() {
         e.target.blur();
     };
     // transcript
+    transcriptPersistentMode.onchange = (e) => {
+        transcription.isPersistentMode = e.currentTarget.checked;
+        rc.roomMessage('transcriptIsPersistentMode', transcription.isPersistentMode);
+        lsSettings.transcript_persistent_mode = transcription.isPersistentMode;
+        lS.setSettings(lsSettings);
+        e.target.blur();
+    };
     transcriptShowOnMsg.onchange = (e) => {
         transcription.showOnMessage = e.currentTarget.checked;
-        rc.roomMessage('showTranscript', transcription.showOnMessage);
-        lsSettings.show_transcript_on_msg = transcription.showOnMessage;
+        rc.roomMessage('transcriptShowOnMsg', transcription.showOnMessage);
+        lsSettings.transcript_show_on_msg = transcription.showOnMessage;
         lS.setSettings(lsSettings);
         e.target.blur();
     };
@@ -2096,11 +2101,13 @@ function handleRoomEmojiPicker() {
 
 function loadSettingsFromLocalStorage() {
     rc.showChatOnMessage = lsSettings.show_chat_on_msg;
-    transcription.showOnMessage = lsSettings.show_transcript_on_msg;
+    transcription.isPersistentMode = lsSettings.transcript_persistent_mode;
+    transcription.showOnMessage = lsSettings.transcript_show_on_msg;
     rc.speechInMessages = lsSettings.speech_in_msg;
     isPitchBarEnabled = lsSettings.pitch_bar;
     isSoundEnabled = lsSettings.sounds;
     showChatOnMsg.checked = rc.showChatOnMessage;
+    transcriptPersistentMode.checked = transcription.isPersistentMode;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
@@ -2526,11 +2533,14 @@ function isHtml(str) {
 
 function toggleWhiteboard() {
     if (!wbIsOpen) rc.sound('open');
-    let whiteboard = rc.getId('whiteboard');
+    whiteboardCenter();
     whiteboard.classList.toggle('show');
+    wbIsOpen = !wbIsOpen;
+}
+
+function whiteboardCenter() {
     whiteboard.style.top = '50%';
     whiteboard.style.left = '50%';
-    wbIsOpen = wbIsOpen ? false : true;
 }
 
 function setupWhiteboard() {

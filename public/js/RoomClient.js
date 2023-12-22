@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.45
+ * @version 1.3.46
  *
  */
 
@@ -4848,7 +4848,10 @@ class RoomClient {
             case 'speechMessages':
                 this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
                 break;
-            case 'showTranscript':
+            case 'transcriptIsPersistentMode':
+                userLog('info', `${icons.transcript} Persistent transcription mode active: ${active}`, 'top-end');
+                break;
+            case 'transcriptShowOnMsg':
                 active
                     ? userLog(
                           'info',
