@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.46
+ * @version 1.3.47
  *
  */
 
@@ -54,6 +54,7 @@ const _PEER = {
     sendVideo: '<i class="fab fa-youtube"></i>',
 };
 
+const initUser = document.getElementById('initUser');
 const bars = document.querySelectorAll('.volume-bar');
 
 const userAgent = navigator.userAgent.toLowerCase();
@@ -69,11 +70,23 @@ const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
-// Get Settings from localStorage
+// ####################################################
+// LOCAL STORAGE
+// ####################################################
+
 const lS = new LocalStorage();
-const localStorageSettings = lS.getObjectLocalStorage('SFU_SETTINGS');
-const lsSettings = localStorageSettings ? localStorageSettings : lS.SFU_SETTINGS;
-console.log('LS_SETTINGS', lsSettings);
+
+const localStorageSettings = lS.getLocalStorageSettings() || lS.SFU_SETTINGS;
+
+const localStorageDevices = lS.getLocalStorageDevices() || lS.DEVICES_COUNT;
+
+const localStorageInitConfig = lS.getLocalStorageInitConfig() || lS.INIT_CONFIG;
+
+console.log('LOCAL_STORAGE', {
+    localStorageSettings: localStorageSettings,
+    localStorageDevices: localStorageDevices,
+    localStorageInitConfig: localStorageInitConfig,
+});
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -123,9 +136,6 @@ let isChatGPTOn = false;
 let isSpeechSynthesisSupported = 'speechSynthesis' in window;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
-let initAudioButton = null;
-let initVideoButton = null;
-let initAudioVideoButton = null;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -159,6 +169,11 @@ let transcription;
 
 function initClient() {
     setTheme();
+
+    // Transcription
+    transcription = new Transcription();
+    transcription.init();
+
     if (!DetectRTC.isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
         setTippy('closeEmojiPickerContainer', 'Close', 'bottom');
@@ -246,10 +261,6 @@ function initClient() {
     }
     setupWhiteboard();
     initEnumerateDevices();
-
-    // Transcription
-    transcription = new Transcription();
-    transcription.init();
 }
 
 // ####################################################
@@ -329,6 +340,26 @@ function makeId(length) {
 }
 
 // ####################################################
+// INIT ROOM
+// ####################################################
+
+async function initRoom() {
+    const { audio, video, speaker } = lS.DEVICES_COUNT;
+    console.warn('Devices count --> ', { device_count: lS.DEVICES_COUNT, audio, video, speaker });
+    if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
+        BUTTONS.main.startScreenButton && show(initStartScreenButton);
+    }
+    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
+        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
+    } else {
+        setButtonsInit();
+        handleSelectsInit();
+        await setSelectsInit();
+        await whoAreYou();
+    }
+}
+
+// ####################################################
 // ENUMERATE DEVICES
 // ####################################################
 
@@ -336,17 +367,7 @@ async function initEnumerateDevices() {
     console.log('01 ----> init Enumerate Devices');
     await initEnumerateVideoDevices();
     await initEnumerateAudioDevices();
-    if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-        BUTTONS.main.startScreenButton && show(initStartScreenButton);
-    }
-    if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
-        openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
-    } else {
-        whoAreYou();
-        setButtonsInit();
-        setSelectsInit();
-        handleSelectsInit();
-    }
+    await initRoom();
 }
 
 async function initEnumerateVideoDevices() {
@@ -354,8 +375,8 @@ async function initEnumerateVideoDevices() {
     // allow the video
     await navigator.mediaDevices
         .getUserMedia({ video: true })
-        .then((stream) => {
-            enumerateVideoDevices(stream);
+        .then(async (stream) => {
+            await enumerateVideoDevices(stream);
             isVideoAllowed = true;
         })
         .catch(() => {
@@ -363,25 +384,25 @@ async function initEnumerateVideoDevices() {
         });
 }
 
-function enumerateVideoDevices(stream) {
+async function enumerateVideoDevices(stream) {
     console.log('02 ----> Get Video Devices');
-    navigator.mediaDevices
+    await navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
-            devices.forEach((device) => {
-                let el = null;
-                let eli = null;
+            devices.forEach(async (device) => {
+                let el,
+                    eli = null;
                 if ('videoinput' === device.kind) {
                     el = videoSelect;
                     eli = initVideoSelect;
                     lS.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
-                addChild(device, [el, eli]);
+                await addChild(device, [el, eli]);
             }),
         )
-        .then(() => {
-            stopTracks(stream);
+        .then(async () => {
+            await stopTracks(stream);
             isEnumerateVideoDevices = true;
         });
 }
@@ -391,9 +412,9 @@ async function initEnumerateAudioDevices() {
     // allow the audio
     await navigator.mediaDevices
         .getUserMedia({ audio: true })
-        .then((stream) => {
-            enumerateAudioDevices(stream);
-            getMicrophoneVolumeIndicator(stream);
+        .then(async (stream) => {
+            await enumerateAudioDevices(stream);
+            await getMicrophoneVolumeIndicator(stream);
             isAudioAllowed = true;
         })
         .catch(() => {
@@ -401,14 +422,14 @@ async function initEnumerateAudioDevices() {
         });
 }
 
-function enumerateAudioDevices(stream) {
+async function enumerateAudioDevices(stream) {
     console.log('03 ----> Get Audio Devices');
-    navigator.mediaDevices
+    await navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
-            devices.forEach((device) => {
-                let el = null;
-                let eli = null;
+            devices.forEach(async (device) => {
+                let el,
+                    eli = null;
                 if ('audioinput' === device.kind) {
                     el = microphoneSelect;
                     eli = initMicrophoneSelect;
@@ -419,11 +440,11 @@ function enumerateAudioDevices(stream) {
                     lS.DEVICES_COUNT.speaker++;
                 }
                 if (!el) return;
-                addChild(device, [el, eli]);
+                await addChild(device, [el, eli]);
             }),
         )
-        .then(() => {
-            stopTracks(stream);
+        .then(async () => {
+            await stopTracks(stream);
             isEnumerateAudioDevices = true;
             const sinkId = 'sinkId' in HTMLMediaElement.prototype;
             speakerSelect.disabled = !sinkId;
@@ -435,13 +456,13 @@ function enumerateAudioDevices(stream) {
         });
 }
 
-function stopTracks(stream) {
+async function stopTracks(stream) {
     stream.getTracks().forEach((track) => {
         track.stop();
     });
 }
 
-function addChild(device, els) {
+async function addChild(device, els) {
     let kind = device.kind;
     els.forEach((el) => {
         let option = document.createElement('option');
@@ -467,7 +488,7 @@ function addChild(device, els) {
 // MICROPHONE VOLUME INDICATOR
 // ####################################################
 
-function getMicrophoneVolumeIndicator(stream) {
+async function getMicrophoneVolumeIndicator(stream) {
     if (isAudioContextSupported() && hasAudioTrack(stream)) {
         stopMicrophoneProcessing();
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -549,7 +570,7 @@ function getNotify() {
             return queryNotify;
         }
     }
-    notify = lsSettings.share_on_join;
+    notify = localStorageSettings.share_on_join;
     console.log('Direct join', { notify: notify });
     return notify;
 }
@@ -643,15 +664,15 @@ function getRoomPassword() {
 // INIT CONFIG
 // ####################################################
 
-function checkInitConfig() {
-    const initConfig = lS.getInitConfig();
-    console.log('04.5 ----> Get init config', initConfig);
-    if (initConfig) {
-        if (isAudioVideoAllowed && !initConfig.audioVideo) {
-            handleAudioVideo();
+async function checkInitConfig() {
+    const localStorageInitConfig = lS.getLocalStorageInitConfig();
+    console.log('04.5 ----> Get init config', localStorageInitConfig);
+    if (localStorageInitConfig) {
+        if (isAudioVideoAllowed && !localStorageInitConfig.audioVideo) {
+            await handleAudioVideo();
         } else {
-            if (isAudioAllowed && !initConfig.audio) handleAudio();
-            if (isVideoAllowed && !initConfig.video) handleVideo();
+            if (isAudioAllowed && !localStorageInitConfig.audio) handleAudio();
+            if (isVideoAllowed && !localStorageInitConfig.video) handleVideo();
         }
     }
 }
@@ -691,7 +712,7 @@ function getPeerInfo() {
 // ENTER YOUR NAME | Enable/Disable AUDIO/VIDEO
 // ####################################################
 
-function whoAreYou() {
+async function whoAreYou() {
     console.log('04 ----> Who are you?');
 
     hide(loadingDiv);
@@ -729,7 +750,6 @@ function whoAreYou() {
         hide(initStartScreenButton);
     }
 
-    const initUser = document.getElementById('initUser');
     initUser.classList.toggle('hidden');
 
     Swal.fire({
@@ -756,9 +776,9 @@ function whoAreYou() {
             setCookie(room_id + '_name', name, 30);
             peer_name = name;
         },
-    }).then(() => {
+    }).then(async () => {
         if (initStream && !joinRoomWithScreen) {
-            stopTracks(initStream);
+            await stopTracks(initStream);
             // hide(initVideo);
             elemDisplay('initVideo', false);
         }
@@ -795,7 +815,7 @@ function handleVideo() {
     lS.setInitConfig(lS.MEDIA_TYPE.video, isVideoAllowed);
 }
 
-function handleAudioVideo() {
+async function handleAudioVideo() {
     isAudioVideoAllowed = isAudioVideoAllowed ? false : true;
     isAudioAllowed = isAudioVideoAllowed;
     isVideoAllowed = isAudioVideoAllowed;
@@ -814,13 +834,13 @@ function handleAudioVideo() {
     setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
     setColor(startAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(startVideoButton, isVideoAllowed ? 'white' : 'red');
-    checkInitVideo(isVideoAllowed);
+    await checkInitVideo(isVideoAllowed);
     checkInitAudio(isAudioAllowed);
 }
 
-function checkInitVideo(isVideoAllowed) {
+async function checkInitVideo(isVideoAllowed) {
     if (isVideoAllowed && BUTTONS.main.startVideoButton) {
-        if (initVideoSelect.value) changeCamera(initVideoSelect.value);
+        if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
         sound('joined');
     } else {
         if (initStream) {
@@ -1366,14 +1386,14 @@ function handleButtons() {
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
-    startAudioButton.onclick = () => {
+    startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
         if (moderator.audio_cant_unmute) {
             return userLog('warning', 'The moderator does not allow you to unmute', 'top-end', 6000);
         }
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
-        if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
+        if (!isEnumerateAudioDevices) await initEnumerateAudioDevices();
         rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
         rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
         // rc.resumeProducer(RoomClient.mediaType.audio);
@@ -1385,13 +1405,13 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
         // rc.pauseProducer(RoomClient.mediaType.audio);
     };
-    startVideoButton.onclick = () => {
+    startVideoButton.onclick = async () => {
         const moderator = rc.getModerator();
         if (moderator.video_cant_unhide) {
             return userLog('warning', 'The moderator does not allow you to unhide', 'top-end', 6000);
         }
         setVideoButtonsDisabled(true);
-        if (!isEnumerateVideoDevices) initEnumerateVideoDevices();
+        if (!isEnumerateVideoDevices) await initEnumerateVideoDevices();
         rc.produce(RoomClient.mediaType.video, videoSelect.value);
         // rc.resumeProducer(RoomClient.mediaType.video);
     };
@@ -1515,9 +1535,6 @@ function setButtonsInit() {
         setTippy('initStartScreenButton', 'Toggle screen sharing', 'top');
         setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
     }
-    initAudioButton = document.getElementById('initAudioButton');
-    initVideoButton = document.getElementById('initVideoButton');
-    initAudioVideoButton = document.getElementById('initAudioVideoButton');
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
@@ -1526,14 +1543,14 @@ function setButtonsInit() {
 
 function handleSelectsInit() {
     // devices init options
-    initVideoSelect.onchange = () => {
-        changeCamera(initVideoSelect.value);
+    initVideoSelect.onchange = async () => {
+        await changeCamera(initVideoSelect.value);
         videoSelect.selectedIndex = initVideoSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, initVideoSelect.selectedIndex, initVideoSelect.value);
     };
     initMicrophoneSelect.onchange = () => {
         microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, initMicrophoneSelect.selectedIndex, initMicrophoneSelect.value);
     };
     initSpeakerSelect.onchange = () => {
         speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
@@ -1541,10 +1558,24 @@ function handleSelectsInit() {
     };
 }
 
-function setSelectsInit() {
-    const localStorageDevices = lS.getLocalStorageDevices();
-    console.log('04.0 ----> Get Local Storage Devices before', localStorageDevices);
+async function setSelectsInit() {
     if (localStorageDevices) {
+        // TODO Fix audio and speaker! O.o
+        console.log('04.0 ----> Get Local Storage Devices before', {
+            localStorageDevices: localStorageDevices,
+            devicesCount: lS.DEVICES_COUNT,
+            index: {
+                audio: localStorageDevices.audio.index,
+                speaker: localStorageDevices.speaker.index,
+                video: localStorageDevices.video.index,
+            },
+            count: {
+                audio: lS.DEVICES_COUNT.audio,
+                speaker: lS.DEVICES_COUNT.speaker,
+                video: lS.DEVICES_COUNT.video,
+            },
+        });
+        //
         initMicrophoneSelect.selectedIndex = localStorageDevices.audio.index;
         initSpeakerSelect.selectedIndex = localStorageDevices.speaker.index;
         initVideoSelect.selectedIndex = localStorageDevices.video.index;
@@ -1553,7 +1584,7 @@ function setSelectsInit() {
         speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
         videoSelect.selectedIndex = initVideoSelect.selectedIndex;
         //
-        if (lS.DEVICES_COUNT.audio != localStorageDevices.audio.count) {
+        if (lS.DEVICES_COUNT.audio !== localStorageDevices.audio.count) {
             console.log('04.1 ----> Audio devices seems changed, use default index 0');
             initMicrophoneSelect.selectedIndex = 0;
             microphoneSelect.selectedIndex = 0;
@@ -1563,17 +1594,13 @@ function setSelectsInit() {
                 initMicrophoneSelect.value,
             );
         }
-        if (lS.DEVICES_COUNT.speaker != localStorageDevices.speaker.count) {
+        if (lS.DEVICES_COUNT.speaker !== localStorageDevices.speaker.count) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
-            lS.setLocalStorageDevices(
-                lS.MEDIA_TYPE.speaker,
-                initSpeakerSelect.selectedIndexIndex,
-                initSpeakerSelect.value,
-            );
+            lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
         }
-        if (lS.DEVICES_COUNT.video != localStorageDevices.video.count) {
+        if (lS.DEVICES_COUNT.video !== localStorageDevices.video.count) {
             console.log('04.3 ----> Video devices seems changed, use default index 0');
             initVideoSelect.selectedIndex = 0;
             videoSelect.selectedIndex = 0;
@@ -1582,12 +1609,12 @@ function setSelectsInit() {
         //
         console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
     }
-    if (initVideoSelect.value) changeCamera(initVideoSelect.value);
+    if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
 }
 
 async function changeCamera(deviceId) {
     if (initStream) {
-        stopTracks(initStream);
+        await stopTracks(initStream);
         //show(initVideo);
         elemDisplay('initVideo', true);
         if (!initVideo.classList.contains('mirror')) {
@@ -1628,7 +1655,7 @@ async function changeCamera(deviceId) {
 
 async function toggleScreenSharing() {
     if (initStream) {
-        stopTracks(initStream);
+        await stopTracks(initStream);
         //show(initVideo);
         elemDisplay('initVideo', true);
     }
@@ -1675,21 +1702,21 @@ function handleSelects() {
     };
     videoFps.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        lsSettings.video_fps = videoFps.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.video_fps = videoFps.selectedIndex;
+        lS.setSettings(localStorageSettings);
     };
     screenFps.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.screen);
-        lsSettings.screen_fps = screenFps.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.screen_fps = screenFps.selectedIndex;
+        lS.setSettings(localStorageSettings);
     };
     microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     };
-    initSpeakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myAudioEl, initSpeakerSelect.value);
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+    speakerSelect.onchange = () => {
+        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
+        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, speakerSelect.selectedIndex, speakerSelect.value);
     };
     switchPushToTalk.onchange = (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
@@ -1736,79 +1763,79 @@ function handleSelects() {
     switchBroadcasting.onchange = (e) => {
         isBroadcastingEnabled = e.currentTarget.checked;
         rc.roomAction('broadcasting');
-        lsSettings.broadcasting = isBroadcastingEnabled;
-        lS.setSettings(lsSettings);
+        localStorageSettings.broadcasting = isBroadcastingEnabled;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchLobby.onchange = (e) => {
         isLobbyEnabled = e.currentTarget.checked;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff');
         rc.lobbyToggle();
-        lsSettings.lobby = isLobbyEnabled;
-        lS.setSettings(lsSettings);
+        localStorageSettings.lobby = isLobbyEnabled;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchPitchBar.onchange = (e) => {
         isPitchBarEnabled = e.currentTarget.checked;
         rc.roomMessage('pitchBar', isPitchBarEnabled);
-        lsSettings.pitch_bar = isPitchBarEnabled;
-        lS.setSettings(lsSettings);
+        localStorageSettings.pitch_bar = isPitchBarEnabled;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchSounds.onchange = (e) => {
         isSoundEnabled = e.currentTarget.checked;
         rc.roomMessage('sounds', isSoundEnabled);
-        lsSettings.sounds = isSoundEnabled;
-        lS.setSettings(lsSettings);
+        localStorageSettings.sounds = isSoundEnabled;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchShare.onchange = (e) => {
         notify = e.currentTarget.checked;
         rc.roomMessage('notify', notify);
-        lsSettings.share_on_join = notify;
-        lS.setSettings(lsSettings);
+        localStorageSettings.share_on_join = notify;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     // audio options
     switchAutoGainControl.onchange = (e) => {
-        lsSettings.mic_auto_gain_control = e.currentTarget.checked;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_auto_gain_control = e.currentTarget.checked;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEchoCancellation.onchange = (e) => {
-        lsSettings.mic_echo_cancellations = e.currentTarget.checked;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_echo_cancellations = e.currentTarget.checked;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchNoiseSuppression.onchange = (e) => {
-        lsSettings.mic_noise_suppression = e.currentTarget.checked;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_noise_suppression = e.currentTarget.checked;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     sampleRateSelect.onchange = (e) => {
-        lsSettings.mic_sample_rate = e.currentTarget.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_sample_rate = e.currentTarget.selectedIndex;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     sampleSizeSelect.onchange = (e) => {
-        lsSettings.mic_sample_size = e.currentTarget.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_sample_size = e.currentTarget.selectedIndex;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     channelCountSelect.onchange = (e) => {
-        lsSettings.mic_channel_count = e.currentTarget.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_channel_count = e.currentTarget.selectedIndex;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     micLatencyRange.oninput = (e) => {
-        lsSettings.mic_latency = e.currentTarget.value;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_latency = e.currentTarget.value;
+        lS.setSettings(localStorageSettings);
         micLatencyValue.innerText = e.currentTarget.value;
         e.target.blur();
     };
     micVolumeRange.oninput = (e) => {
-        lsSettings.mic_volume = e.currentTarget.value;
-        lS.setSettings(lsSettings);
+        localStorageSettings.mic_volume = e.currentTarget.value;
+        lS.setSettings(localStorageSettings);
         micVolumeValue.innerText = e.currentTarget.value;
         e.target.blur();
     };
@@ -1816,15 +1843,15 @@ function handleSelects() {
     switchHostOnlyRecording.onchange = (e) => {
         hostOnlyRecording = e.currentTarget.checked;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff');
-        lsSettings.host_only_recording = hostOnlyRecording;
-        lS.setSettings(lsSettings);
+        localStorageSettings.host_only_recording = hostOnlyRecording;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchH264Recording.onchange = (e) => {
         recPrioritizeH264 = e.currentTarget.checked;
         rc.roomMessage('recPrioritizeH264', recPrioritizeH264);
-        lsSettings.rec_prioritize_h264 = recPrioritizeH264;
-        lS.setSettings(lsSettings);
+        localStorageSettings.rec_prioritize_h264 = recPrioritizeH264;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     // styling
@@ -1833,59 +1860,59 @@ function handleSelects() {
     };
     BtnVideoObjectFit.onchange = () => {
         rc.handleVideoObjectFit(BtnVideoObjectFit.value);
-        lsSettings.video_obj_fit = BtnVideoObjectFit.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.video_obj_fit = BtnVideoObjectFit.selectedIndex;
+        lS.setSettings(localStorageSettings);
     }; // cover
     BtnVideoControls.onchange = () => {
         rc.handleVideoControls(BtnVideoControls.value);
-        lsSettings.video_controls = BtnVideoControls.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.video_controls = BtnVideoControls.selectedIndex;
+        lS.setSettings(localStorageSettings);
     };
     selectTheme.onchange = () => {
-        lsSettings.theme = selectTheme.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.theme = selectTheme.selectedIndex;
+        lS.setSettings(localStorageSettings);
         setTheme();
     };
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
-        lsSettings.buttons_bar = BtnsBarPosition.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.buttons_bar = BtnsBarPosition.selectedIndex;
+        lS.setSettings(localStorageSettings);
         refreshMainButtonsToolTipPlacement();
         resizeMainButtons();
     };
     pinVideoPosition.onchange = () => {
         rc.toggleVideoPin(pinVideoPosition.value);
-        lsSettings.pin_grid = pinVideoPosition.selectedIndex;
-        lS.setSettings(lsSettings);
+        localStorageSettings.pin_grid = pinVideoPosition.selectedIndex;
+        lS.setSettings(localStorageSettings);
     };
     // chat
     showChatOnMsg.onchange = (e) => {
         rc.showChatOnMessage = e.currentTarget.checked;
         rc.roomMessage('showChat', rc.showChatOnMessage);
-        lsSettings.show_chat_on_msg = rc.showChatOnMessage;
-        lS.setSettings(lsSettings);
+        localStorageSettings.show_chat_on_msg = rc.showChatOnMessage;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     speechIncomingMsg.onchange = (e) => {
         rc.speechInMessages = e.currentTarget.checked;
         rc.roomMessage('speechMessages', rc.speechInMessages);
-        lsSettings.speech_in_msg = rc.speechInMessages;
-        lS.setSettings(lsSettings);
+        localStorageSettings.speech_in_msg = rc.speechInMessages;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     // transcript
     transcriptPersistentMode.onchange = (e) => {
         transcription.isPersistentMode = e.currentTarget.checked;
         rc.roomMessage('transcriptIsPersistentMode', transcription.isPersistentMode);
-        lsSettings.transcript_persistent_mode = transcription.isPersistentMode;
-        lS.setSettings(lsSettings);
+        localStorageSettings.transcript_persistent_mode = transcription.isPersistentMode;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     transcriptShowOnMsg.onchange = (e) => {
         transcription.showOnMessage = e.currentTarget.checked;
         rc.roomMessage('transcriptShowOnMsg', transcription.showOnMessage);
-        lsSettings.transcript_show_on_msg = transcription.showOnMessage;
-        lS.setSettings(lsSettings);
+        localStorageSettings.transcript_show_on_msg = transcription.showOnMessage;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     // whiteboard options
@@ -1905,56 +1932,56 @@ function handleSelects() {
         const audioStartMuted = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'audio_start_muted', status: audioStartMuted });
         rc.roomMessage('audio_start_muted', audioStartMuted);
-        lsSettings.moderator_audio_start_muted = audioStartMuted;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_audio_start_muted = audioStartMuted;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneHidden.onchange = (e) => {
         const videoStartHidden = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'video_start_hidden', status: videoStartHidden });
         rc.roomMessage('video_start_hidden', videoStartHidden);
-        lsSettings.moderator_video_start_hidden = videoStartHidden;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_video_start_hidden = videoStartHidden;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneCantUnmute.onchange = (e) => {
         const audioCantUnmute = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'audio_cant_unmute', status: audioCantUnmute });
         rc.roomMessage('audio_cant_unmute', audioCantUnmute);
-        lsSettings.moderator_audio_cant_unmute = audioCantUnmute;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_audio_cant_unmute = audioCantUnmute;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneCantUnhide.onchange = (e) => {
         const videoCantUnhide = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'video_cant_unhide', status: videoCantUnhide });
         rc.roomMessage('video_cant_unhide', videoCantUnhide);
-        lsSettings.moderator_video_cant_unhide = videoCantUnhide;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_video_cant_unhide = videoCantUnhide;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneCantShareScreen.onchange = (e) => {
         const screenCantShare = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'screen_cant_share', status: screenCantShare });
         rc.roomMessage('screen_cant_share', screenCantShare);
-        lsSettings.moderator_screen_cant_share = screenCantShare;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_screen_cant_share = screenCantShare;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneCantChatPrivately.onchange = (e) => {
         const chatCantPrivately = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'chat_cant_privately', status: chatCantPrivately });
         rc.roomMessage('chat_cant_privately', chatCantPrivately);
-        lsSettings.moderator_chat_cant_privately = chatCantPrivately;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_chat_cant_privately = chatCantPrivately;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
     switchEveryoneCantChatChatGPT.onchange = (e) => {
         const chatCantChatGPT = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'chat_cant_chatgpt', status: chatCantChatGPT });
         rc.roomMessage('chat_cant_chatgpt', chatCantChatGPT);
-        lsSettings.moderator_chat_cant_chatgpt = chatCantChatGPT;
-        lS.setSettings(lsSettings);
+        localStorageSettings.moderator_chat_cant_chatgpt = chatCantChatGPT;
+        lS.setSettings(localStorageSettings);
         e.target.blur();
     };
 }
@@ -2103,12 +2130,12 @@ function handleRoomEmojiPicker() {
 // ####################################################
 
 function loadSettingsFromLocalStorage() {
-    rc.showChatOnMessage = lsSettings.show_chat_on_msg;
-    transcription.isPersistentMode = lsSettings.transcript_persistent_mode;
-    transcription.showOnMessage = lsSettings.transcript_show_on_msg;
-    rc.speechInMessages = lsSettings.speech_in_msg;
-    isPitchBarEnabled = lsSettings.pitch_bar;
-    isSoundEnabled = lsSettings.sounds;
+    rc.showChatOnMessage = localStorageSettings.show_chat_on_msg;
+    transcription.isPersistentMode = localStorageSettings.transcript_persistent_mode;
+    transcription.showOnMessage = localStorageSettings.transcript_show_on_msg;
+    rc.speechInMessages = localStorageSettings.speech_in_msg;
+    isPitchBarEnabled = localStorageSettings.pitch_bar;
+    isSoundEnabled = localStorageSettings.sounds;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptPersistentMode.checked = transcription.isPersistentMode;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
@@ -2117,27 +2144,27 @@ function loadSettingsFromLocalStorage() {
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
 
-    recPrioritizeH264 = lsSettings.rec_prioritize_h264;
+    recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
     switchH264Recording.checked = recPrioritizeH264;
 
-    switchAutoGainControl.checked = lsSettings.mic_auto_gain_control;
-    switchEchoCancellation.checked = lsSettings.mic_echo_cancellations;
-    switchNoiseSuppression.checked = lsSettings.mic_noise_suppression;
-    sampleRateSelect.selectedIndex = lsSettings.mic_sample_rate;
-    sampleSizeSelect.selectedIndex = lsSettings.mic_sample_size;
-    channelCountSelect.selectedIndex = lsSettings.mic_channel_count;
+    switchAutoGainControl.checked = localStorageSettings.mic_auto_gain_control;
+    switchEchoCancellation.checked = localStorageSettings.mic_echo_cancellations;
+    switchNoiseSuppression.checked = localStorageSettings.mic_noise_suppression;
+    sampleRateSelect.selectedIndex = localStorageSettings.mic_sample_rate;
+    sampleSizeSelect.selectedIndex = localStorageSettings.mic_sample_size;
+    channelCountSelect.selectedIndex = localStorageSettings.mic_channel_count;
 
-    micLatencyRange.value = lsSettings.mic_latency || 50;
-    micLatencyValue.innerText = lsSettings.mic_latency || 50;
-    micVolumeRange.value = lsSettings.mic_volume || 100;
-    micVolumeValue.innerText = lsSettings.mic_volume || 100;
+    micLatencyRange.value = localStorageSettings.mic_latency || 50;
+    micLatencyValue.innerText = localStorageSettings.mic_latency || 50;
+    micVolumeRange.value = localStorageSettings.mic_volume || 100;
+    micVolumeValue.innerText = localStorageSettings.mic_volume || 100;
 
-    videoFps.selectedIndex = lsSettings.video_fps;
-    screenFps.selectedIndex = lsSettings.screen_fps;
-    BtnVideoObjectFit.selectedIndex = lsSettings.video_obj_fit;
-    BtnVideoControls.selectedIndex = lsSettings.video_controls;
-    BtnsBarPosition.selectedIndex = lsSettings.buttons_bar;
-    pinVideoPosition.selectedIndex = lsSettings.pin_grid;
+    videoFps.selectedIndex = localStorageSettings.video_fps;
+    screenFps.selectedIndex = localStorageSettings.screen_fps;
+    BtnVideoObjectFit.selectedIndex = localStorageSettings.video_obj_fit;
+    BtnVideoControls.selectedIndex = localStorageSettings.video_controls;
+    BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
+    pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
@@ -2526,6 +2553,10 @@ function isHtml(str) {
         if (c[i].nodeType == 1) return true;
     }
     return false;
+}
+
+function getId(id) {
+    return document.getElementById(id);
 }
 
 // ####################################################
@@ -3302,7 +3333,7 @@ function getParticipantAvatar(peerName) {
 // ####################################################
 
 function setTheme() {
-    selectTheme.selectedIndex = lsSettings.theme;
+    selectTheme.selectedIndex = localStorageSettings.theme;
     const theme = selectTheme.value;
     switch (theme) {
         case 'dark':

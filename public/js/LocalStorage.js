@@ -137,11 +137,11 @@ class LocalStorage {
     // GET LOCAL STORAGE
     // ####################################################
 
-    getSettings() {
+    getLocalStorageSettings() {
         return this.getObjectLocalStorage('SFU_SETTINGS');
     }
 
-    getInitConfig() {
+    getLocalStorageInitConfig() {
         return this.getObjectLocalStorage('INIT_CONFIG');
     }
 

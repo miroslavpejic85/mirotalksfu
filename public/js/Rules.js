@@ -125,26 +125,26 @@ function handleRules(isPresenter) {
         // ##################################
 
         // Room broadcasting
-        isBroadcastingEnabled = lsSettings.broadcasting;
+        isBroadcastingEnabled = localStorageSettings.broadcasting;
         switchBroadcasting.checked = isBroadcastingEnabled;
         rc.roomAction('broadcasting', true, false);
         if (isBroadcastingEnabled) rc.toggleRoomBroadcasting();
         // Room lobby
-        isLobbyEnabled = lsSettings.lobby;
+        isLobbyEnabled = localStorageSettings.lobby;
         switchLobby.checked = isLobbyEnabled;
         rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
         // Room host-only-recording
-        hostOnlyRecording = lsSettings.host_only_recording;
+        hostOnlyRecording = localStorageSettings.host_only_recording;
         switchHostOnlyRecording.checked = hostOnlyRecording;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
         // Room moderator
-        switchEveryoneMute.checked = lsSettings.moderator_audio_start_muted;
-        switchEveryoneHidden.checked = lsSettings.moderator_video_start_hidden;
-        switchEveryoneCantUnmute.checked = lsSettings.moderator_audio_cant_unmute;
-        switchEveryoneCantUnhide.checked = lsSettings.moderator_video_cant_unhide;
-        switchEveryoneCantShareScreen.checked = lsSettings.moderator_screen_cant_share;
-        switchEveryoneCantChatPrivately.checked = lsSettings.moderator_chat_cant_privately;
-        switchEveryoneCantChatChatGPT.checked = lsSettings.moderator_chat_cant_chatgpt;
+        switchEveryoneMute.checked = localStorageSettings.moderator_audio_start_muted;
+        switchEveryoneHidden.checked = localStorageSettings.moderator_video_start_hidden;
+        switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
+        switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
+        switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
+        switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
+        switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
 
         // Update moderator settings...
         const moderatorData = {
