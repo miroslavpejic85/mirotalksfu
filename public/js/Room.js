@@ -1558,7 +1558,6 @@ function handleSelectsInit() {
 
 async function setSelectsInit() {
     if (localStorageDevices) {
-        // TODO Fix audio and speaker! O.o
         console.log('04.0 ----> Get Local Storage Devices before', {
             localStorageDevices: localStorageDevices,
             devicesCount: lS.DEVICES_COUNT,
