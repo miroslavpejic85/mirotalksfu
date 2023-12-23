@@ -344,8 +344,6 @@ function makeId(length) {
 // ####################################################
 
 async function initRoom() {
-    const { audio, video, speaker } = lS.DEVICES_COUNT;
-    console.warn('Devices count --> ', { device_count: lS.DEVICES_COUNT, audio, video, speaker });
     if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
         BUTTONS.main.startScreenButton && show(initStartScreenButton);
     }
