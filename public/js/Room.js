@@ -78,7 +78,7 @@ const lS = new LocalStorage();
 
 const localStorageSettings = lS.getLocalStorageSettings() || lS.SFU_SETTINGS;
 
-const localStorageDevices = lS.getLocalStorageDevices() || lS.DEVICES_COUNT;
+const localStorageDevices = lS.getLocalStorageDevices() || lS.LOCAL_STORAGE_DEVICES;
 
 const localStorageInitConfig = lS.getLocalStorageInitConfig() || lS.INIT_CONFIG;
 
