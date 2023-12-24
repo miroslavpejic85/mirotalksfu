@@ -1691,6 +1691,7 @@ async function toggleScreenSharing() {
 function handleSelects() {
     // devices options
     videoSelect.onchange = () => {
+        videoQuality.selectedIndex = 0;
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
         lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
     };
