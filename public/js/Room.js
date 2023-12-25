@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.47
+ * @version 1.3.48
  *
  */
 
@@ -735,6 +735,7 @@ async function whoAreYou() {
         elemDisplay('initAudioVideoButton', false);
         elemDisplay('initVideoSelect', false);
         elemDisplay('tabVideoDevicesBtn', false);
+        initVideoContainerShow(false);
     }
     if (!BUTTONS.main.startAudioButton) {
         isAudioAllowed = false;
@@ -761,6 +762,7 @@ async function whoAreYou() {
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
+        customClass: { popup: 'init-modal-size' },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
@@ -777,16 +779,16 @@ async function whoAreYou() {
     }).then(async () => {
         if (initStream && !joinRoomWithScreen) {
             await stopTracks(initStream);
-            // hide(initVideo);
             elemDisplay('initVideo', false);
+            initVideoContainerShow(false);
         }
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
 
     if (!isVideoAllowed) {
-        // hide(initVideo);
         elemDisplay('initVideo', false);
+        initVideoContainerShow(false);
         hide(initVideoSelect);
     }
     if (!isAudioAllowed) {
@@ -838,13 +840,16 @@ async function handleAudioVideo() {
 
 async function checkInitVideo(isVideoAllowed) {
     if (isVideoAllowed && BUTTONS.main.startVideoButton) {
-        if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
+        if (initVideoSelect.value) {
+            initVideoContainerShow();
+            await changeCamera(initVideoSelect.value);
+        }
         sound('joined');
     } else {
         if (initStream) {
             stopTracks(initStream);
-            // hide(initVideo);
             elemDisplay('initVideo', false);
+            initVideoContainerShow(false);
             sound('left');
         }
     }
@@ -855,6 +860,11 @@ function checkInitAudio(isAudioAllowed) {
     initMicrophoneSelect.disabled = !isAudioAllowed;
     initSpeakerSelect.disabled = !isAudioAllowed;
     isAudioAllowed ? sound('joined') : sound('left');
+}
+
+function initVideoContainerShow(show = true) {
+    initVideoContainer.style.padding = show ? '10px' : '0px';
+    initVideoContainer.style.width = show ? '100%' : 'auto';
 }
 
 function checkMedia() {
@@ -1612,8 +1622,8 @@ async function setSelectsInit() {
 async function changeCamera(deviceId) {
     if (initStream) {
         await stopTracks(initStream);
-        //show(initVideo);
         elemDisplay('initVideo', true);
+        initVideoContainerShow();
         if (!initVideo.classList.contains('mirror')) {
             initVideo.classList.toggle('mirror');
         }
@@ -1653,8 +1663,8 @@ async function changeCamera(deviceId) {
 async function toggleScreenSharing() {
     if (initStream) {
         await stopTracks(initStream);
-        //show(initVideo);
         elemDisplay('initVideo', true);
+        initVideoContainerShow();
     }
     joinRoomWithScreen = !joinRoomWithScreen;
     if (joinRoomWithScreen) {

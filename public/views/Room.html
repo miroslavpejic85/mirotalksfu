@@ -109,7 +109,7 @@ access to use this app.
         <section>
             <div id="initUser" class="init-user hidden">
                 <!-- <p>Please allow the camera & microphone access to use this app.</p> -->
-                <div class="init-container">
+                <div id="initVideoContainer" class="init-video-container">
                     <video
                         id="initVideo"
                         playsinline="true"
@@ -119,7 +119,7 @@ access to use this app.
                         style="object-fit: contain"
                     ></video>
                 </div>
-                <div>
+                <div class="initComands">
                     <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
                     <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
                     <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
@@ -133,10 +133,10 @@ access to use this app.
                         class="fas fa-stop-circle hidden"
                         onclick="toggleScreenSharing()"
                     ></button>
+                    <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
+                    <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
+                    <select id="initSpeakerSelect" class="form-select text-light bg-dark"></select>
                 </div>
-                <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
-                <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
-                <select id="initSpeakerSelect" class="form-select text-light bg-dark"></select>
             </div>
         </section>
 
