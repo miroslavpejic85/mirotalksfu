@@ -863,8 +863,10 @@ function checkInitAudio(isAudioAllowed) {
 }
 
 function initVideoContainerShow(show = true) {
-    initVideoContainer.style.padding = show ? '10px' : '0px';
-    initVideoContainer.style.width = show ? '100%' : 'auto';
+    const initVideoContainerClass = document.querySelector('.init-video-container');
+    const windowWidth = window.innerWidth;
+    initVideoContainerClass.style.padding = show && windowWidth >= 1024 ? '10px' : '0px';
+    initVideoContainerClass.style.width = show ? '100%' : 'auto';
 }
 
 function checkMedia() {
