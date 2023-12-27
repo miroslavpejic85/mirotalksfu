@@ -862,6 +862,10 @@ th {
 # Common
 --------------------------------------------------------------*/
 
+.dropdown-menu li:hover {
+    background: #000000;
+}
+
 select {
     height: 40px;
     line-height: 40px;
