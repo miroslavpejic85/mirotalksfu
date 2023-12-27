@@ -55,6 +55,7 @@ const _PEER = {
 };
 
 const initUser = document.getElementById('initUser');
+const initVideoContainerClass = document.querySelector('.init-video-container');
 const bars = document.querySelectorAll('.volume-bar');
 
 const userAgent = navigator.userAgent.toLowerCase();
@@ -863,9 +864,6 @@ function checkInitAudio(isAudioAllowed) {
 }
 
 function initVideoContainerShow(show = true) {
-    const initVideoContainerClass = document.querySelector('.init-video-container');
-    const windowWidth = window.innerWidth;
-    initVideoContainerClass.style.padding = show && windowWidth >= 1024 ? '10px' : '0px';
     initVideoContainerClass.style.width = show ? '100%' : 'auto';
 }
 
