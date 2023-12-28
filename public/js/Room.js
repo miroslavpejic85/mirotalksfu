@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.48
+ * @version 1.3.49
  *
  */
 
@@ -768,7 +768,7 @@ async function whoAreYou() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
             if (!name) return 'Please enter your name';
-            if (name.length > 15) return 'Name must be max 15 char';
+            if (name.length > 30) return 'Name must be max 30 char';
             name = filterXSS(name);
             if (isHtml(name)) return 'Invalid name!';
             if (!getCookie(room_id + '_name')) {
@@ -1036,7 +1036,12 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
-    myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
+    if (rc.isValidEmail(peer_name)) {
+        myProfileAvatar.style.borderRadius = `50px`;
+        myProfileAvatar.setAttribute('src', rc.genGravatar(peer_name));
+    } else {
+        myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
+    }
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
@@ -3170,6 +3175,7 @@ function getParticipantsList(peers) {
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
         const peer_name = peer_info.peer_name;
+        const peer_name_limited = peer_name.substring(0, 10) + '*****';
         //const peer_presenter = peer_info.peer_presenter ? _PEER.presenter : _PEER.guest;
         const peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         const peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
@@ -3197,7 +3203,7 @@ function getParticipantsList(peers) {
                         alt="avatar" 
                     />
                     <div class="about">
-                        <div class="name">${peer_name}</div>
+                        <div class="name">${peer_name_limited}</div>
                         <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
                     </div>
 
@@ -3253,7 +3259,7 @@ function getParticipantsList(peers) {
                     alt="avatar" 
                 />
                     <div class="about">
-                        <div class="name">${peer_name}</div>
+                        <div class="name">${peer_name_limited}</div>
                         <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
                     </div>
                 `;
@@ -3333,6 +3339,9 @@ function refreshParticipantsCount(count, adapt = true) {
 }
 
 function getParticipantAvatar(peerName) {
+    if (rc.isValidEmail(peerName)) {
+        return rc.genGravatar(peerName);
+    }
     return rc.genAvatarSvg(peerName, 32);
 }
 

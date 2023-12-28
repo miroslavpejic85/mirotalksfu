@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.48
+ * @version 1.3.49
  *
  */
 
@@ -2391,10 +2391,26 @@ class RoomClient {
     setVideoAvatarImgName(elemId, peer_name) {
         let elem = this.getId(elemId);
         if (cfg.useAvatarSvg) {
-            elem.setAttribute('src', this.genAvatarSvg(peer_name, 250));
+            rc.isValidEmail(peer_name)
+                ? elem.setAttribute('src', this.genGravatar(peer_name))
+                : elem.setAttribute('src', this.genAvatarSvg(peer_name, 250));
         } else {
             elem.setAttribute('src', image.avatar);
         }
+    }
+
+    genGravatar(email, size = false) {
+        const hash = md5(email.toLowerCase().trim());
+        const gravatarURL = `https://www.gravatar.com/avatar/${hash}` + (size ? `?s=${size}` : '?s=250') + '?d=404';
+        return gravatarURL;
+        function md5(input) {
+            return CryptoJS.MD5(input).toString();
+        }
+    }
+
+    isValidEmail(email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return emailRegex.test(email);
     }
 
     genAvatarSvg(peerName, avatarImgSize) {
@@ -3502,7 +3518,9 @@ class RoomClient {
     }
 
     setMsgAvatar(avatar, peerName) {
-        let avatarImg = this.genAvatarSvg(peerName, 32);
+        let avatarImg = rc.isValidEmail(peerName) 
+            ? this.genGravatar(peerName) 
+            : this.genAvatarSvg(peerName, 32);
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
@@ -4944,7 +4962,9 @@ class RoomClient {
                     let lobbyTr = '';
                     let peer_id = data.peer_id;
                     let peer_name = data.peer_name;
-                    let avatarImg = this.genAvatarSvg(peer_name, 32);
+                    let avatarImg = rc.isValidEmail(peer_name) 
+                        ? this.genGravatar(peer_name) 
+                        : this.genAvatarSvg(peer_name, 32);
                     let lobbyTb = this.getId('lobbyTb');
                     let lobbyAccept = _PEER.acceptPeer;
                     let lobbyReject = _PEER.ejectPeer;
@@ -5835,12 +5855,13 @@ class RoomClient {
         const avatarImg = getParticipantAvatar(peer_name);
 
         const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '') => {
+            const isSensitiveChat = !['all', 'ChatGPT'].includes(peer_id);
+            const truncatedTitle = isSensitiveChat ? `${title.substring(0, 10)}*****` : title;
             return `
-                <img 
-                    class="all-participants-img"
+                <img class="all-participants-img" 
                     style="border: var(--border); width: 43px; margin-right: 5px; cursor: pointer;"
                     id="chatShowParticipantsList" 
-                    src="${image.users}" 
+                    src="${image.users}"
                     alt="participants"
                     onclick="rc.toggleShowParticipants()" 
                 />
@@ -5848,8 +5869,10 @@ class RoomClient {
                     <img src="${imgSrc}" alt="avatar" />
                 </a>
                 <div class="chat-about">
-                    <h6 class="mb-0">${title}</h6>
-                    <span class="status"> <i class="fa fa-circle ${status}"></i> ${status} ${participants}</span>
+                    <h6 class="mb-0">${truncatedTitle}</h6>
+                    <span class="status">
+                        <i class="fa fa-circle ${status}"></i> ${status} ${participants}
+                    </span>
                 </div>
             `;
         };

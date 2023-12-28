@@ -350,6 +350,9 @@ body {
     margin-top: 10px;
     margin-bottom: 10px;
     padding: 5px;
+    width: 100px;
+    height: 100px;
+    border-radius: 50px;
 }
 
 .form-check-input {
@@ -678,6 +681,9 @@ th {
 
 .left-msg-transcription .msg-transcription-img {
     margin: 0px 5px 5px 0px;
+    width: 32px;
+    height: 32px;
+    border-radius: 50px;
 }
 
 /*--------------------------------------------------------------

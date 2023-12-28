@@ -183,7 +183,10 @@ class Transcription {
 
         const { peer_name, text_data } = transcriptionData;
         const time_stamp = rc.getTimeNow();
-        const avatar_image = rc.genAvatarSvg(peer_name, 32);
+
+        const avatar_image = rc.isValidEmail(peer_name) 
+            ? rc.genGravatar(peer_name)
+            : rc.genAvatarSvg(peer_name, 32);
 
         if (this.isHidden) {
             if (this.showOnMessage) {
