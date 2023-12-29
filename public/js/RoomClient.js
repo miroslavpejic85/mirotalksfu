@@ -205,7 +205,7 @@ class RoomClient {
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
         this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
-        this.isVideoPictureInPictureSupported = !DetectRTC.isMobileDevice && document.pictureInPictureEnabled;
+        this.isVideoPictureInPictureSupported = document.pictureInPictureEnabled;
         this.isZoomCenterMode = false;
         this.isChatOpen = false;
         this.isChatEmojiOpen = false;
@@ -2805,6 +2805,8 @@ class RoomClient {
                 } else if (document.pictureInPictureEnabled) {
                     videoPlayer.requestPictureInPicture().catch((error) => {
                         console.error('Failed to enter Picture-in-Picture mode:', error);
+                        this.userLog('warning', error.message, 'top-end', 6000);
+                        elemDisplay(btnPIP.id, false);
                     });
                 }
             });
@@ -3518,9 +3520,7 @@ class RoomClient {
     }
 
     setMsgAvatar(avatar, peerName) {
-        let avatarImg = rc.isValidEmail(peerName) 
-            ? this.genGravatar(peerName) 
-            : this.genAvatarSvg(peerName, 32);
+        let avatarImg = rc.isValidEmail(peerName) ? this.genGravatar(peerName) : this.genAvatarSvg(peerName, 32);
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
@@ -4962,8 +4962,8 @@ class RoomClient {
                     let lobbyTr = '';
                     let peer_id = data.peer_id;
                     let peer_name = data.peer_name;
-                    let avatarImg = rc.isValidEmail(peer_name) 
-                        ? this.genGravatar(peer_name) 
+                    let avatarImg = rc.isValidEmail(peer_name)
+                        ? this.genGravatar(peer_name)
                         : this.genAvatarSvg(peer_name, 32);
                     let lobbyTb = this.getId('lobbyTb');
                     let lobbyAccept = _PEER.acceptPeer;
