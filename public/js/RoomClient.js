@@ -1657,7 +1657,7 @@ class RoomClient {
                 if (!isScreen) this.handleVP(elem.id, vp.id);
                 this.popupPeerInfo(p.id, this.peer_info);
                 this.checkPeerInfoStatus(this.peer_info);
-                if (isScreen && videoMediaContainer.childElementCount >= 2) pn.click();
+                if (isScreen) pn.click();
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
