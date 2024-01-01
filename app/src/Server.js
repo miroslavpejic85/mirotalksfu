@@ -1246,7 +1246,7 @@ function startServer() {
             try {
                 // https://platform.openai.com/docs/api-reference/completions/create
                 const completion = await chatGPT.completions.create({
-                    model: config.chatGPT.model || 'text-davinci-003',
+                    model: config.chatGPT.model || 'gpt-3.5-turbo-instruct',
                     prompt: prompt,
                     max_tokens: config.chatGPT.max_tokens,
                     temperature: config.chatGPT.temperature,

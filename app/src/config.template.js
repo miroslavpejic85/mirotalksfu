@@ -116,7 +116,7 @@ module.exports = {
         enabled: false,
         basePath: 'https://api.openai.com/v1/',
         apiKey: '',
-        model: 'text-davinci-003',
+        model: 'gpt-3.5-turbo-instruct',
         max_tokens: 1000,
         temperature: 0,
     },
