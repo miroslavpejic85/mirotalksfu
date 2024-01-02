@@ -3175,7 +3175,7 @@ function getParticipantsList(peers) {
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
         const peer_name = peer_info.peer_name;
-        const peer_name_limited = peer_name.substring(0, 10) + '*****';
+        const peer_name_limited = peer_name.length > 15 ? peer_name.substring(0, 10) + '*****' : peer_name;
         //const peer_presenter = peer_info.peer_presenter ? _PEER.presenter : _PEER.guest;
         const peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
         const peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;

@@ -5855,7 +5855,7 @@ class RoomClient {
         const avatarImg = getParticipantAvatar(peer_name);
 
         const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '') => {
-            const isSensitiveChat = !['all', 'ChatGPT'].includes(peer_id);
+            const isSensitiveChat = !['all', 'ChatGPT'].includes(peer_id) && title.length > 15;
             const truncatedTitle = isSensitiveChat ? `${title.substring(0, 10)}*****` : title;
             return `
                 <img class="all-participants-img" 
