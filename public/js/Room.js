@@ -984,11 +984,15 @@ function shareRoomByEmail() {
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         preConfirm: () => {
-            const selectedDateTime = document.getElementById('datetimePicker').value;
             const newLine = '%0D%0A%0D%0A';
+            const selectedDateTime = document.getElementById('datetimePicker').value;
+            const roomPassword =
+                isRoomLocked && (room_password || rc.RoomPassword)
+                    ? 'Password: ' + (room_password || rc.RoomPassword) + newLine
+                    : '';
             const email = '';
             const emailSubject = `Please join our MiroTalk SFU Video Chat Meeting`;
-            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine} Click to join: ${RoomURL} ${newLine}`;
+            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine}${roomPassword}Click to join: ${RoomURL} ${newLine}`;
             document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
         },
     });
