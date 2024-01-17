@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.53
+ * @version 1.3.54
  *
  */
 
@@ -1662,6 +1662,7 @@ async function changeCamera(deviceId) {
                 initStream.getVideoTracks()[0].getSettings(),
             );
             checkInitConfig();
+            handleCameraMirror(initVideo);
         })
         .catch((err) => {
             console.error('[Error] changeCamera', err);
@@ -1704,6 +1705,21 @@ async function toggleScreenSharing() {
         disable(initVideoSelect, false);
         disable(initVideoButton, false);
         disable(initAudioVideoButton, false);
+    }
+}
+
+function handleCameraMirror(video) {
+    const isDesktopDevice = !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
+    if (isDesktopDevice) {
+        // Desktop devices...
+        if (!video.classList.contains('mirror')) {
+            video.classList.toggle('mirror');
+        }
+    } else {
+        // Mobile, Tablet, IPad devices...
+        if (video.classList.contains('mirror')) {
+            video.classList.remove('mirror');
+        }
     }
 }
 
