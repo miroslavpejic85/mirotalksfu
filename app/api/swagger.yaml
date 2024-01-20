@@ -45,21 +45,38 @@ paths:
                       type: object
                       required:
                           - room
+                          - roomPassword
                           - name
                           - audio
                           - video
+                          - screen
+                          - hide
                           - notify
                       properties:
                           room:
                               type: string
+                              default: 'test'
+                          roomPassword:
+                              type: ['boolean', 'string'] # Allow boolean or string type
+                              default: false
                           name:
                               type: string
+                              default: 'mirotalksfu'
                           audio:
                               type: boolean
+                              default: true
                           video:
                               type: boolean
+                              default: true
+                          screen:
+                              type: boolean
+                              default: false
+                          hide:
+                              type: boolean
+                              default: false
                           notify:
                               type: boolean
+                              default: true
             consumes:
                 - 'application/json'
             produces:
