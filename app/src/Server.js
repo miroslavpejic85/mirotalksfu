@@ -1261,8 +1261,9 @@ function startServer() {
                 });
                 cb(response);
             } catch (error) {
-                if (error instanceof OpenAI.APIError) {
+                if (error.name === 'APIError') {
                     log.error('ChatGPT', {
+                        name: error.name,
                         status: error.status,
                         message: error.message,
                         code: error.code,
@@ -1272,7 +1273,7 @@ function startServer() {
                 } else {
                     // Non-API error
                     log.error('ChatGPT', error);
-                    cb(error);
+                    cb(error.message);
                 }
             }
         });
