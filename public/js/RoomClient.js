@@ -1283,6 +1283,8 @@ class RoomClient {
             },
         }; // Init auto detect max cam resolution and fps
 
+        videoFps.disabled = false;
+
         switch (videoQuality.value) {
             case 'default':
                 // This will make the browser use HD Video and 30fps as default.
@@ -1293,9 +1295,10 @@ class RoomClient {
                         height: { ideal: 720 },
                         deviceId: deviceId,
                         aspectRatio: 1.777,
-                        frameRate: frameRate,
                     },
                 };
+                videoFps.selectedIndex = 0;
+                videoFps.disabled = true;
                 break;
             case 'qvga':
                 videoConstraints = {

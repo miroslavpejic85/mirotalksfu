@@ -1644,11 +1644,6 @@ async function changeCamera(deviceId) {
             height: { ideal: 720 },
             deviceId: deviceId,
             aspectRatio: 1.777,
-            frameRate: {
-                min: 5,
-                ideal: 15,
-                max: 30,
-            },
         },
     };
     navigator.mediaDevices
