@@ -152,7 +152,7 @@ module.exports = {
     stats: {
         /*
             Umami: https://github.com/umami-software/umami
-            We use Umami to track aggregated usage statistics in order to improve our service. 
+            We use our Self-hosted Umami to track aggregated usage statistics in order to improve our service.
         */
         enabled: true,
         src: 'https://stats.mirotalk.com/script.js',
