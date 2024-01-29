@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.57
+ * @version 1.3.58
  *
  */
 
@@ -355,6 +355,10 @@ class RoomClient {
                         this.event(_EVENTS.lobbyOn);
                         console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
                         return this.waitJoinConfirm();
+                    }
+                    if (room === 'isBanned') {
+                        console.log('00-WARNING ----> You are Banned from the Room!');
+                        return this.isBanned();
                     }
                     const peers = new Map(JSON.parse(room.peers));
                     for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
@@ -5232,6 +5236,25 @@ class RoomClient {
         });
     }
 
+    isBanned() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: false,
+            showConfirmButton: true,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Banned',
+            text: 'You are banned from this room!',
+            confirmButtonText: `Ok`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            this.exit();
+        });
+    }
+
     // ####################################################
     // HANDLE AUDIO VOLUME
     // ####################################################
@@ -5394,7 +5417,7 @@ class RoomClient {
     // PEER ACTION
     // ####################################################
 
-    peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true, msg = '') {
+    async peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true, msg = '') {
         const words = id.split('___');
         const peer_id = words[0];
 
@@ -5403,6 +5426,7 @@ class RoomClient {
                 from_peer_name: this.peer_name,
                 from_peer_id: this.peer_id,
                 from_peer_uuid: this.peer_uuid,
+                to_peer_uuid: '',
                 peer_id: peer_id,
                 action: action,
                 message: '',
@@ -5479,6 +5503,13 @@ class RoomClient {
                                 }
                                 return this.userLog('info', screenMessage, 'top-end');
                             }
+                        }
+                        break;
+                    case 'eject':
+                        if (!isRulesActive || isPresenter) {
+                            const peer_info = await getRemotePeerInfo(peer_id);
+                            console.log('EJECT PEER', peer_info);
+                            if (peer_info) data.to_peer_uuid = peer_info.peer_uuid;
                         }
                         break;
                     default:

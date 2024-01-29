@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.57
+ * @version 1.3.58
  *
  */
 
@@ -3090,6 +3090,14 @@ function wbDrawing(status) {
 // ####################################################
 // HANDLE PARTICIPANTS
 // ####################################################
+
+async function getRemotePeerInfo(peer_id) {
+    const peers = await getRoomPeers();
+    for (let peer of Array.from(peers.keys()).filter((id) => id === peer_id)) {
+        return peers.get(peer).peer_info;
+    }
+    return false;
+}
 
 async function getRoomPeers() {
     let room_info = await rc.getRoomInfo();

@@ -31,6 +31,7 @@ module.exports = class Room {
         this.survey = config.survey;
         this.redirect = config.redirect;
         this.peers = new Map();
+        this.bannedPeers = [];
         this.router = null;
         this.createTheRouter();
     }
@@ -323,6 +324,24 @@ module.exports = class Room {
 
     closeProducer(socket_id, producer_id) {
         this.peers.get(socket_id).closeProducer(producer_id);
+    }
+
+    // ####################################################
+    // HANDLE BANNED PEERS
+    // ####################################################
+
+    addBannedPeer(uuid) {
+        if (!this.bannedPeers.includes(uuid)) {
+            this.bannedPeers.push(uuid);
+            log.debug('Added to the banned list', {
+                uuid: uuid,
+                banned: this.bannedPeers,
+            });
+        }
+    }
+
+    isBanned(uuid) {
+        return this.bannedPeers.includes(uuid);
     }
 
     // ####################################################

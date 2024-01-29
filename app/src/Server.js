@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.57
+ * @version 1.3.58
  *
  */
 
@@ -782,6 +782,8 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
+            if (data.action === 'eject') room.addBannedPeer(data.to_peer_uuid);
+
             data.broadcast
                 ? room.broadCast(data.peer_id, 'peerAction', data)
                 : room.sendTo(data.peer_id, 'peerAction', data);
@@ -969,8 +971,7 @@ function startServer() {
 
             // User Auth required, we check if peer valid
             if (hostCfg.user_auth) {
-                const peer_username = data.peer_info.peer_username;
-                const peer_password = data.peer_info.peer_password;
+                const { peer_username, peer_password } = data.peer_info;
 
                 const isPeerValid = isAuthPeer(peer_username, peer_password);
 
@@ -988,6 +989,24 @@ function startServer() {
             }
 
             const room = roomList.get(socket.room_id);
+
+            // check if banned...
+            const peerUUID = data.peer_info.peer_uuid;
+            if (room.isBanned(peerUUID)) {
+                const { peer_name, peer_uuid, os_name, os_version, browser_name, browser_version } = data.peer_info;
+                log.info('[Join] - peer is banned!', {
+                    room_id: data.room_id,
+                    peer: {
+                        name: peer_name,
+                        uuid: peer_uuid,
+                        os_name: os_name,
+                        os_version: os_version,
+                        browser_name: browser_name,
+                        browser_version: browser_version,
+                    },
+                });
+                return cb('isBanned');
+            }
 
             room.addPeer(new Peer(socket.id, data));
 
