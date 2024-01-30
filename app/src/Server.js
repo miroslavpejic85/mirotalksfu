@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.58
+ * @version 1.3.59
  *
  */
 
@@ -724,6 +724,10 @@ function startServer() {
                     if (!isPresenter) return;
                     room.setHostOnlyRecording(false);
                     room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
+                case 'isBanned':
+                    log.info('The user has been banned from the room due to spamming messages', data);
+                    room.addBannedPeer(data.peer_uuid);
                     break;
                 default:
                     break;

@@ -38,9 +38,12 @@
 -   Host protection to prevent unauthorized access.
 -   User auth to prevent unauthorized access.
 -   Room password protection.
+-   Room lobby, central gathering space.
+-   Room spam mitigations, focused on preventing spam.
 -   Compatible with desktop and mobile devices.
 -   Optimized mobile room URL sharing.
 -   Webcam streaming with front and rear camera support for mobile devices.
+-   Broadcasting, distribution of audio or video content to a wide audience.
 -   Crystal-clear audio streaming with speaking detection and volume indicators.
 -   Screen sharing for presentations.
 -   File sharing with drag-and-drop support.

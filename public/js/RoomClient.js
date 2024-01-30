@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.58
+ * @version 1.3.59
  *
  */
 
@@ -187,6 +187,14 @@ class RoomClient {
             chat_cant_privately: false,
             chat_cant_chatgpt: false,
         };
+
+        // Chat messages
+        this.chatMessageLength = 1000; // chars
+        this.chatMessageTimeLast = 0;
+        this.chatMessageTimeBetween = 1000; // ms
+        this.chatMessageNotifyDelay = 10000; // ms
+        this.chatMessageSpamCount = 0;
+        this.chatMessageSpamCountToBan = 1;
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
@@ -3362,6 +3370,41 @@ class RoomClient {
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
         }
+
+        // Prevent long messages
+        if (chatMessage.value.length > this.chatMessageLength) {
+            return this.userLog(
+                'warning',
+                'The message seems too long, with a maximum of 1000 characters allowed',
+                'top-end',
+            );
+        }
+
+        // Spamming detected ban the user from the room
+        if (this.chatMessageSpamCount == this.chatMessageSpamCountToBan) {
+            return this.roomAction('isBanned', true);
+        }
+
+        // Prevent Spam messages
+        const currentTime = Date.now();
+        if (chatMessage.value && currentTime - this.chatMessageTimeLast <= this.chatMessageTimeBetween) {
+            this.cleanMessage();
+            chatMessage.readOnly = true;
+            chatSendButton.disabled = true;
+            setTimeout(function () {
+                chatMessage.readOnly = false;
+                chatSendButton.disabled = false;
+            }, this.chatMessageNotifyDelay);
+            this.chatMessageSpamCount++;
+            return this.userLog(
+                'warning',
+                `Kindly refrain from spamming. Please wait ${this.chatMessageNotifyDelay / 1000} seconds before sending another message`,
+                'top-end',
+                this.chatMessageNotifyDelay,
+            );
+        }
+        this.chatMessageTimeLast = currentTime;
+
         chatMessage.value = filterXSS(chatMessage.value.trim());
         const peer_msg = this.formatMsg(chatMessage.value);
         if (!peer_msg) {
@@ -4808,6 +4851,10 @@ class RoomClient {
                 case 'hostOnlyRecordingOff':
                     this.socket.emit('roomAction', data);
                     if (popup) this.roomStatus(action);
+                    break;
+                case 'isBanned':
+                    this.socket.emit('roomAction', data);
+                    this.isBanned();
                     break;
                 default:
                     break;
