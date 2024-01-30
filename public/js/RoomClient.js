@@ -194,7 +194,7 @@ class RoomClient {
         this.chatMessageTimeBetween = 1000; // ms
         this.chatMessageNotifyDelay = 10000; // ms
         this.chatMessageSpamCount = 0;
-        this.chatMessageSpamCountToBan = 1;
+        this.chatMessageSpamCountToBan = 10;
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
