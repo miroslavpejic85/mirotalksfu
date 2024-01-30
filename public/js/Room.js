@@ -49,6 +49,7 @@ const _PEER = {
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
     ejectPeer: '<i class="fas fa-times"></i>',
+    geoLocation: '<i class="fas fa-location-dot"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
     sendVideo: '<i class="fab fa-youtube"></i>',
@@ -2134,6 +2135,7 @@ function handleRoomEmojiPicker() {
             type: 'roomEmoji',
             peer_name: peer_name,
             emoji: data.native,
+            broadcast: true,
         };
         if (rc.thereAreParticipants()) {
             rc.emitCmd(cmd);
@@ -3205,6 +3207,7 @@ function getParticipantsList(peers) {
         const peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
         const peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
         const peer_eject = _PEER.ejectPeer;
+        const peer_geoLocation = _PEER.geoLocation;
         const peer_sendFile = _PEER.sendFile;
         const peer_id = peer_info.peer_id;
         const avatarImg = getParticipantAvatar(peer_name);
@@ -3243,6 +3246,7 @@ function getParticipantsList(peers) {
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
                             <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>
+                            <li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>
                             <li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>
                         </ul>
                     </div>

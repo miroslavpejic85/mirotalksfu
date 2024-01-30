@@ -118,6 +118,7 @@ class Transcription {
                     peer_name: peer_name,
                     text_data: transcript,
                     time_stamp: new Date(),
+                    broadcast: true,
                 };
                 if (transcript) {
                     this.sendTranscript(transcriptionData);

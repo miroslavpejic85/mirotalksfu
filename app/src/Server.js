@@ -662,7 +662,7 @@ function startServer() {
                 //...
             }
 
-            room.broadCast(socket.id, 'cmd', data);
+            data.broadcast ? room.broadCast(socket.id, 'cmd', data) : room.sendTo(data.peer_id, 'cmd', data);
         });
 
         socket.on('roomAction', async (dataObject) => {
@@ -773,7 +773,7 @@ function startServer() {
 
             log.debug('Peer action', data);
 
-            const presenterActions = ['mute', 'unmute', 'hide', 'unhide', 'stop', 'start', 'eject'];
+            const presenterActions = ['mute', 'unmute', 'hide', 'unhide', 'stop', 'start', 'eject', 'geoLocation'];
             if (presenterActions.some((v) => data.action === v)) {
                 const isPresenter = await isPeerPresenter(
                     socket.room_id,

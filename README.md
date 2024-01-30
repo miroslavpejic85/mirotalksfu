@@ -40,6 +40,7 @@
 -   Room password protection.
 -   Room lobby, central gathering space.
 -   Room spam mitigations, focused on preventing spam.
+-   Geolocation, identification or estimation of the real-world geographic location of the participants.
 -   Compatible with desktop and mobile devices.
 -   Optimized mobile room URL sharing.
 -   Webcam streaming with front and rear camera support for mobile devices.

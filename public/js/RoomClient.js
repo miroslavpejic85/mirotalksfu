@@ -91,6 +91,7 @@ const image = {
     all: '../images/all.png',
     forbidden: '../images/forbidden.png',
     broadcasting: '../images/broadcasting.png',
+    geolocation: '../images/geolocation.png',
 };
 
 const mediaType = {
@@ -3124,6 +3125,7 @@ class RoomClient {
                     type: 'privacy',
                     peer_id: this.peer_id,
                     active: isVideoPrivacyActive,
+                    broadcast: true,
                 });
             });
         }
@@ -5437,6 +5439,16 @@ class RoomClient {
             case 'transcript':
                 this.transcription.handleTranscript(cmd);
                 break;
+            case 'geoLocation':
+                this.confirmPeerGeoLocation(cmd);
+                break;
+            case 'geoLocationOK':
+                this.handleGeoPeerLocation(cmd);
+                break;
+            case 'geoLocationKO':
+                this.sound('alert');
+                this.userLog('warning', cmd.data, 'top-end', 5000);
+                break;
             default:
                 break;
             //...
@@ -5470,6 +5482,7 @@ class RoomClient {
         const peer_id = words[0];
 
         if (emit) {
+            // send...
             const data = {
                 from_peer_name: this.peer_name,
                 from_peer_id: this.peer_id,
@@ -5566,6 +5579,7 @@ class RoomClient {
             }
             this.confirmPeerAction(data.action, data);
         } else {
+            // receive...
             const peerActionAllowed = peer_id === this.peer_id || broadcast;
             switch (action) {
                 case 'eject':
@@ -6197,4 +6211,130 @@ class RoomClient {
             );
         }
     }
-}
+
+    // ####################################################
+    // HANDLE PEER GEOLOCATION
+    // ####################################################
+
+    askPeerGeoLocation(id) {
+        const words = id.split('___');
+        const peer_id = words[0];
+        const cmd = {
+            type: 'geoLocation',
+            from_peer_name: this.peer_name,
+            from_peer_id: this.peer_id,
+            peer_id: peer_id,
+            broadcast: false,
+        };
+        this.emitCmd(cmd);
+    }
+
+    sendPeerGeoLocation(peer_id, type, data) {
+        const cmd = {
+            type: type,
+            from_peer_name: this.peer_name,
+            from_peer_id: this.peer_id,
+            peer_id: peer_id,
+            data: data,
+            broadcast: false,
+        };
+        this.emitCmd(cmd);
+    }
+
+    confirmPeerGeoLocation(cmd) {
+        this.sound('notify');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.geolocation,
+            position: 'center',
+            title: 'Geo Location',
+            html: `Would you like to share your location to ${cmd.from_peer_name}?`,
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            result.isConfirmed ? this.getPeerGeoLocation(cmd.from_peer_id) : this.denyPeerGeoLocation(cmd.from_peer_id);
+        });
+    }
+
+    getPeerGeoLocation(peer_id) {
+        if ('geolocation' in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                function (position) {
+                    const geoLocation = {
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    };
+                    console.log('GeoLocation --->', geoLocation);
+
+                    rc.sendPeerGeoLocation(peer_id, 'geoLocationOK', geoLocation);
+                    // openURL(`https://www.openstreetmap.org/?mlat=${geoLocation.latitude}&mlon=${geoLocation.longitude}`, true);
+                    // openURL(`http://maps.apple.com/?ll=${geoLocation.latitude},${geoLocation.longitude}`, true);
+                    // openURL(`https://www.google.com/maps/search/?api=1&query=${geoLocation.latitude},${geoLocation.longitude}`, true);
+                },
+                function (error) {
+                    let geoError = error;
+                    switch (error.code) {
+                        case error.PERMISSION_DENIED:
+                            geoError = 'User denied the request for Geolocation';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            geoError = 'Location information is unavailable';
+                            break;
+                        case error.TIMEOUT:
+                            geoError = 'The request to get user location timed out';
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            geoError = 'An unknown error occurred';
+                            break;
+                    }
+                    rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: geoError`);
+                    rc.userLog('warning', geoError, 'top-end', 5000);
+                },
+            );
+        } else {
+            rc.sendPeerGeoLocation(
+                peer_id,
+                'geoLocationKO',
+                `${rc.peer_name}: Geolocation is not supported by this browser`,
+            );
+            rc.userLog('warning', 'Geolocation is not supported by this browser', 'top-end', 5000);
+        }
+    }
+
+    denyPeerGeoLocation(peer_id) {
+        rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: Has declined permission for geolocation`);
+    }
+
+    handleGeoPeerLocation(cmd) {
+        const geoLocation = cmd.data;
+        this.sound('notify');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.geolocation,
+            position: 'center',
+            title: 'Geo Location',
+            html: `Would you like to open ${cmd.from_peer_name} geolocation?`,
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // openURL(`https://www.openstreetmap.org/?mlat=${geoLocation.latitude}&mlon=${geoLocation.longitude}`, true);
+                // openURL(`http://maps.apple.com/?ll=${geoLocation.latitude},${geoLocation.longitude}`, true);
+                openURL(
+                    `https://www.google.com/maps/search/?api=1&query=${geoLocation.latitude},${geoLocation.longitude}`,
+                    true,
+                );
+            }
+        });
+    }
+} // End
