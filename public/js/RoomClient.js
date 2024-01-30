@@ -189,7 +189,8 @@ class RoomClient {
         };
 
         // Chat messages
-        this.chatMessageLength = 1000; // chars
+        this.chatMessageLengthCheck = false;
+        this.chatMessageLength = 4000; // chars
         this.chatMessageTimeLast = 0;
         this.chatMessageTimeBetween = 1000; // ms
         this.chatMessageNotifyDelay = 10000; // ms
@@ -3372,10 +3373,10 @@ class RoomClient {
         }
 
         // Prevent long messages
-        if (chatMessage.value.length > this.chatMessageLength) {
+        if (this.chatMessageLengthCheck && chatMessage.value.length > this.chatMessageLength) {
             return this.userLog(
                 'warning',
-                'The message seems too long, with a maximum of 1000 characters allowed',
+                `The message seems too long, with a maximum of ${this.chatMessageLength} characters allowed`,
                 'top-end',
             );
         }
