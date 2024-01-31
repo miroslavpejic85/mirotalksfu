@@ -53,7 +53,8 @@ const BUTTONS = {
         muteVideoButton: true,
         muteAudioButton: true,
         audioVolumeInput: true, // Disabled for mobile
-        ejectButton: true,
+        banButton: true, // presenter
+        ejectButton: true, // presenter
     },
     videoOff: {
         sendMessageButton: true,
@@ -61,7 +62,8 @@ const BUTTONS = {
         sendVideoButton: true,
         muteAudioButton: true,
         audioVolumeInput: true, // Disabled for mobile
-        ejectButton: true,
+        banButton: true, // presenter
+        ejectButton: true, // presenter
     },
     chat: {
         chatPinButton: true,
@@ -72,10 +74,10 @@ const BUTTONS = {
         chatSpeechStartButton: true,
     },
     participantsList: {
-        saveInfoButton: true,
+        saveInfoButton: true, // presenter
     },
     whiteboard: {
-        whiteboardLockButton: false,
+        whiteboardLockButton: false, // presenter
     },
     //...
 };
@@ -95,7 +97,9 @@ function handleRules(isPresenter) {
         BUTTONS.settings.micOptionsButton = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
+        BUTTONS.videoOff.banButton = false;
         BUTTONS.videoOff.ejectButton = false;
+        BUTTONS.consumerVideo.banButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
         //BUTTONS.consumerVideo.muteAudioButton = false;
         //BUTTONS.consumerVideo.muteVideoButton = false;
@@ -113,7 +117,9 @@ function handleRules(isPresenter) {
         BUTTONS.settings.micOptionsButton = true;
         BUTTONS.settings.tabModerator = true;
         BUTTONS.videoOff.muteAudioButton = true;
+        BUTTONS.videoOff.banButton = true;
         BUTTONS.videoOff.ejectButton = true;
+        BUTTONS.consumerVideo.banButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
         BUTTONS.consumerVideo.muteAudioButton = true;
         BUTTONS.consumerVideo.muteVideoButton = true;
@@ -190,10 +196,12 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.unlockRoomButton = false;
     BUTTONS.settings.lobbyButton = false;
     BUTTONS.videoOff.muteAudioButton = false;
+    BUTTONS.videoOff.banButton = false;
     BUTTONS.videoOff.ejectButton = false;
     BUTTONS.consumerVideo.sendMessageButton = false;
     BUTTONS.consumerVideo.sendFileButton = false;
     BUTTONS.consumerVideo.sendVideoButton = false;
+    BUTTONS.consumerVideo.banButton = false;
     BUTTONS.consumerVideo.ejectButton = false;
     BUTTONS.consumerVideo.muteAudioButton = false;
     BUTTONS.consumerVideo.muteVideoButton = false;

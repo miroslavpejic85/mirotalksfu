@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.59
+ * @version 1.3.60
  *
  */
 
@@ -48,6 +48,7 @@ const _PEER = {
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
+    banPeer: '<i class="fas fa-ban"></i>',
     ejectPeer: '<i class="fas fa-times"></i>',
     geoLocation: '<i class="fas fa-location-dot"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
@@ -3206,6 +3207,7 @@ function getParticipantsList(peers) {
         const peer_video = peer_info.peer_video ? _PEER.videoOn : _PEER.videoOff;
         const peer_screen = peer_info.peer_screen ? _PEER.screenOn : _PEER.screenOff;
         const peer_hand = peer_info.peer_hand ? _PEER.raiseHand : _PEER.lowerHand;
+        const peer_ban = _PEER.banPeer;
         const peer_eject = _PEER.ejectPeer;
         const peer_geoLocation = _PEER.geoLocation;
         const peer_sendFile = _PEER.sendFile;
@@ -3247,6 +3249,7 @@ function getParticipantsList(peers) {
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
                             <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>
                             <li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>
+                            <li><button class="btn-sm ml5" id='${peer_id}___pBan' onclick="rc.peerAction('me',this.id,'ban')">${peer_ban} Ban participant</button></li>
                             <li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>
                         </ul>
                     </div>

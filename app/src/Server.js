@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.59
+ * @version 1.3.60
  *
  */
 
@@ -773,7 +773,18 @@ function startServer() {
 
             log.debug('Peer action', data);
 
-            const presenterActions = ['mute', 'unmute', 'hide', 'unhide', 'stop', 'start', 'eject', 'geoLocation'];
+            const presenterActions = [
+                'mute',
+                'unmute',
+                'hide',
+                'unhide',
+                'stop',
+                'start',
+                'eject',
+                'ban',
+                'geoLocation',
+            ];
+
             if (presenterActions.some((v) => data.action === v)) {
                 const isPresenter = await isPeerPresenter(
                     socket.room_id,
@@ -786,7 +797,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            if (data.action === 'eject') room.addBannedPeer(data.to_peer_uuid);
+            if (data.action === 'ban') room.addBannedPeer(data.to_peer_uuid);
 
             data.broadcast
                 ? room.broadCast(data.peer_id, 'peerAction', data)

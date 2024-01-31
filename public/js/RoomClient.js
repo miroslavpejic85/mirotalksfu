@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.59
+ * @version 1.3.60
  *
  */
 
@@ -33,6 +33,8 @@ const html = {
     sendFile: 'fas fa-upload',
     sendMsg: 'fas fa-paper-plane',
     sendVideo: 'fab fa-youtube',
+    geolocation: 'fas fa-location-dot',
+    ban: 'fas fa-ban',
     kickOut: 'fas fa-times',
     ghost: 'fas fa-ghost',
     undo: 'fas fa-undo',
@@ -1943,7 +1945,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, ko, pb, pm, pv, pn;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, ban, ko, pb, pm, pv, pn;
 
         console.log('PEER-INFO', peer_info);
 
@@ -2004,6 +2006,9 @@ class RoomClient {
                 au = document.createElement('button');
                 au.id = remotePeerId + '__audio';
                 au.className = remotePeerAudio ? html.audioOn : html.audioOff;
+                ban = document.createElement('button');
+                ban.id = id + '___' + remotePeerId + '___ban';
+                ban.className = html.ban;
                 ko = document.createElement('button');
                 ko.id = id + '___' + remotePeerId + '___kickOut';
                 ko.className = html.kickOut;
@@ -2023,6 +2028,7 @@ class RoomClient {
                 pb.style.height = '1%';
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
+                BUTTONS.consumerVideo.banButton && vb.appendChild(ban);
                 BUTTONS.consumerVideo.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
                 vb.appendChild(au);
                 vb.appendChild(cm);
@@ -2052,6 +2058,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handlePV(id + '___' + pv.id);
+                this.handleBAN(ban.id);
                 this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.handleZV(elem.id, d.id, remotePeerId);
@@ -2072,6 +2079,7 @@ class RoomClient {
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
+                    this.setTippy(ban.id, 'Ban', 'bottom');
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
@@ -2154,7 +2162,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, ko, p, pm, pb, pv;
+        let d, vb, i, h, au, sf, sm, sv, ban, ko, p, pm, pb, pv;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -2184,6 +2192,9 @@ class RoomClient {
             sv = document.createElement('button');
             sv.id = 'remotePeer___' + peer_id + '___sendVideo';
             sv.className = html.sendVideo;
+            ban = document.createElement('button');
+            ban.id = 'remotePeer___' + peer_id + '___ban';
+            ban.className = html.ban;
             ko = document.createElement('button');
             ko.id = 'remotePeer___' + peer_id + '___kickOut';
             ko.className = html.kickOut;
@@ -2208,6 +2219,7 @@ class RoomClient {
         pm.appendChild(pb);
         if (remotePeer) {
             BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
+            BUTTONS.videoOff.banButton && vb.appendChild(ban);
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
@@ -2226,6 +2238,7 @@ class RoomClient {
             this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSV(sv.id);
+            this.handleBAN(ban.id);
             this.handleKO(ko.id);
         }
         this.handleDD(d.id, peer_id, !remotePeer);
@@ -2240,6 +2253,7 @@ class RoomClient {
             this.setTippy(sv.id, 'Send video', 'bottom');
             this.setTippy(au.id, 'Mute', 'bottom');
             this.setTippy(pv.id, '🔊 Volume', 'bottom');
+            this.setTippy(ban.id, 'Ban', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
         }
         remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
@@ -5358,6 +5372,23 @@ class RoomClient {
     }
 
     // ####################################################
+    // HANDLE BAN
+    // ###################################################
+
+    handleBAN(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1] + '___pBan';
+        let btnBan = this.getId(uid);
+        if (btnBan) {
+            btnBan.addEventListener('click', () => {
+                isPresenter
+                    ? this.peerAction('me', peer_id, 'ban')
+                    : this.userLog('warning', 'Only the presenter can ban the participants', 'top-end');
+            });
+        }
+    }
+
+    // ####################################################
     // HANDLE KICK-OUT
     // ###################################################
 
@@ -5566,11 +5597,14 @@ class RoomClient {
                             }
                         }
                         break;
-                    case 'eject':
+                    case 'ban':
                         if (!isRulesActive || isPresenter) {
                             const peer_info = await getRemotePeerInfo(peer_id);
-                            console.log('EJECT PEER', peer_info);
-                            if (peer_info) data.to_peer_uuid = peer_info.peer_uuid;
+                            console.log('BAN PEER', peer_info);
+                            if (peer_info) {
+                                data.to_peer_uuid = peer_info.peer_uuid;
+                                return this.confirmPeerAction(data.action, data);
+                            }
                         }
                         break;
                     default:
@@ -5582,6 +5616,16 @@ class RoomClient {
             // receive...
             const peerActionAllowed = peer_id === this.peer_id || broadcast;
             switch (action) {
+                case 'ban':
+                    if (peerActionAllowed) {
+                        const message = `Will ban you from the room${
+                            msg ? `<br><br><span class="red">Reason: ${msg}</span>` : ''
+                        }`;
+                        this.exit(true);
+                        this.sound(action);
+                        this.peerActionProgress(from_peer_name, message, 5000, action);
+                    }
+                    break;
                 case 'eject':
                     if (peerActionAllowed) {
                         const message = `Will eject you from the room${
@@ -5715,6 +5759,7 @@ class RoomClient {
                 case 'refresh':
                     getRoomParticipants();
                     break;
+                case 'ban':
                 case 'eject':
                     this.exit();
                     break;
@@ -5727,6 +5772,39 @@ class RoomClient {
     confirmPeerAction(action, data) {
         console.log('Confirm peer action', action);
         switch (action) {
+            case 'ban':
+                let banConfirmed = false;
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'center',
+                    imageUrl: image.forbidden,
+                    title: 'Ban current participant',
+                    input: 'text',
+                    inputPlaceholder: 'Ban reason',
+                    showDenyButton: true,
+                    confirmButtonText: `Yes`,
+                    denyButtonText: `No`,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                })
+                    .then((result) => {
+                        if (result.isConfirmed) {
+                            banConfirmed = true;
+                            const message = result.value;
+                            if (message) data.message = message;
+                            this.socket.emit('peerAction', data);
+                            let peer = this.getId(data.peer_id);
+                            if (peer) {
+                                peer.parentNode.removeChild(peer);
+                                participantsCount--;
+                                refreshParticipantsCount(participantsCount);
+                            }
+                        }
+                    })
+                    .then(() => {
+                        if (banConfirmed) this.peerActionProgress(action, 'In progress, wait...', 6000, 'refresh');
+                    });
+                break;
             case 'eject':
                 let ejectConfirmed = false;
                 let whoEject = data.broadcast ? 'All participants except yourself?' : 'current participant?';
