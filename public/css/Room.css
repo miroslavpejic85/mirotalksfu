@@ -872,6 +872,11 @@ th {
     background: #000000;
 }
 
+/* Hide the default Bootstrap dropdown icon */
+.dropdown-toggle::after {
+    display: none !important;
+}
+
 select {
     height: 40px;
     line-height: 40px;

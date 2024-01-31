@@ -3174,8 +3174,10 @@ function getParticipantsList(peers) {
                 id="${socket.id}-chatDropDownMenu" 
                 data-bs-toggle="dropdown" 
                 aria-expanded="false"
+                style="float: right"
             >
             <!-- <i class="fas fa-bars"></i> -->
+            <i class="fas fa-ellipsis-vertical"></i>
             </button>
             <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">
                 <li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>
@@ -3242,8 +3244,10 @@ function getParticipantsList(peers) {
                             id="${peer_id}-chatDropDownMenu" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false"
+                            style="float: right"
                         >
                         <!-- <i class="fas fa-bars"></i> -->
+                        <i class="fas fa-ellipsis-vertical"></i>
                         </button>
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
@@ -3304,8 +3308,10 @@ function getParticipantsList(peers) {
                             id="${peer_id}-chatDropDownMenu" 
                             data-bs-toggle="dropdown" 
                             aria-expanded="false"
+                            style="float: right"
                         >
                         <!-- <i class="fas fa-bars"></i> -->
+                        <i class="fas fa-ellipsis-vertical"></i>
                         </button>
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
                             <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
