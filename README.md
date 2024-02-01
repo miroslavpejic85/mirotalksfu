@@ -102,7 +102,11 @@
 
 > \[!NOTE]
 >
-> The `username` and `password` parameters are required when either `host.protected` or `host.user_auth` is set to `true` in the `app/src/config.js` file. The valid list of users is defined in the `host.users` configuration.
+> The `username` and `password` parameters are optional when either `host.protected` or `host.user_auth` is set to `true` in the `app/src/config.js` file. The valid list of users is defined in the `host.users` configuration.
+
+> **Caution**
+>
+> It is strongly advised against including usernames and passwords in URL parameters for security reasons.
 
 </details>
 
@@ -111,7 +115,7 @@
 
 <br/>
 
-When [host.protected](https://github.com/miroslavpejic85/mirotalksfu/commit/ab21686e9ad4b75e14c3ee020141d61b33111dde#commitcomment-62398736) or `host.user_auth` is enabled, the host/users must provide a valid username and password as specified in the `app/src/config.js` file.
+When [host.protected](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) or `host.user_auth` is enabled, the host/users must provide a valid username and password for joining the room as specified in the `app/src/config.js` file.
 
 | Params           | Value                                                                            | Description                                                                            |
 | ---------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -138,24 +142,6 @@ Example:
         ],
     },
 ```
-
-### Room Initialization
-
-To bypass the login page, join the room with URL parameters:
-
--   [https://sfu.mirotalk.com/join/?room=test&username=username&password=password](https://sfu.mirotalk.com/join/?room=test&username=username&password=password)
-
-### Participant Room Entry
-
-If `host.protected` is enabled, participants can join after host authentication using:
-
--   [https://sfu.mirotalk.com/join/test](https://sfu.mirotalk.com/join/test) (URL path)
--   [https://sfu.mirotalk.com/join/?room=test&roomPassword=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0](https://sfu.mirotalk.com/join/?room=test&roomPassword=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0) (URL with query parameters)
-
-If `host.user_auth` is enabled, participants can join with mandatory credentials:
-
--   [https://sfu.mirotalk.com/join/?room=test&username=username&password=password](https://sfu.mirotalk.com/join/?room=test&username=username&password=password) (URL path)
--   [https://sfu.mirotalk.com/join/?room=test&name=mirotalk&audio=0&video=0&screen=0&notify=0&username=username&password=password](https://sfu.mirotalk.com/join/?room=test&name=mirotalk&audio=0&video=0&screen=0&&notify=0&username=username&password=password) (URL with query parameters)
 
 </details>
 
