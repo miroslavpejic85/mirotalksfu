@@ -6405,7 +6405,7 @@ class RoomClient {
                             geoError = 'An unknown error occurred';
                             break;
                     }
-                    rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: geoError`);
+                    rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: ${geoError}`);
                     rc.userLog('warning', geoError, 'top-end', 5000);
                 },
             );
