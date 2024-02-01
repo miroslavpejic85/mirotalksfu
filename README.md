@@ -100,12 +100,7 @@
     | username     | string         | Auth username   |
     | password     | string         | Auth password   |
 
-> \[!NOTE]
->
-> The `username` and `password` parameters are optional when either `host.protected` or `host.user_auth` is set to `true` in the `app/src/config.js` file. The valid list of users is defined in the `host.users` configuration.
-
 > **Caution**
->
 > It is strongly advised against including usernames and passwords in URL parameters for security reasons.
 
 </details>
