@@ -1945,7 +1945,7 @@ class RoomClient {
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, ban, ko, pb, pm, pv, pn;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn;
 
         console.log('PEER-INFO', peer_info);
 
@@ -2006,6 +2006,9 @@ class RoomClient {
                 au = document.createElement('button');
                 au.id = remotePeerId + '__audio';
                 au.className = remotePeerAudio ? html.audioOn : html.audioOff;
+                gl = document.createElement('button');
+                gl.id = id + '___' + remotePeerId + '___geoLocation';
+                gl.className = html.geolocation;
                 ban = document.createElement('button');
                 ban.id = id + '___' + remotePeerId + '___ban';
                 ban.className = html.ban;
@@ -2029,6 +2032,7 @@ class RoomClient {
                 pm.appendChild(pb);
                 BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
                 BUTTONS.consumerVideo.banButton && vb.appendChild(ban);
+                BUTTONS.consumerVideo.geolocationButton && vb.appendChild(gl);
                 BUTTONS.consumerVideo.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
                 vb.appendChild(au);
                 vb.appendChild(cm);
@@ -2058,6 +2062,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
                 this.handlePV(id + '___' + pv.id);
+                this.handleGL(gl.id);
                 this.handleBAN(ban.id);
                 this.handleKO(ko.id);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
@@ -2079,6 +2084,7 @@ class RoomClient {
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
+                    this.setTippy(gl.id, 'Geolocation', 'bottom');
                     this.setTippy(ban.id, 'Ban', 'bottom');
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
@@ -2162,7 +2168,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, ban, ko, p, pm, pb, pv;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv;
         let peer_id = peer_info.peer_id;
         let peer_name = peer_info.peer_name;
         let peer_audio = peer_info.peer_audio;
@@ -2192,6 +2198,9 @@ class RoomClient {
             sv = document.createElement('button');
             sv.id = 'remotePeer___' + peer_id + '___sendVideo';
             sv.className = html.sendVideo;
+            gl = document.createElement('button');
+            gl.id = 'remotePeer___' + peer_id + '___geoLocation';
+            gl.className = html.geolocation;
             ban = document.createElement('button');
             ban.id = 'remotePeer___' + peer_id + '___ban';
             ban.className = html.ban;
@@ -2220,6 +2229,7 @@ class RoomClient {
         if (remotePeer) {
             BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
             BUTTONS.videoOff.banButton && vb.appendChild(ban);
+            BUTTONS.videoOff.geolocationButton && vb.appendChild(gl);
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
@@ -2238,6 +2248,7 @@ class RoomClient {
             this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSV(sv.id);
+            this.handleGL(gl.id);
             this.handleBAN(ban.id);
             this.handleKO(ko.id);
         }
@@ -2253,6 +2264,7 @@ class RoomClient {
             this.setTippy(sv.id, 'Send video', 'bottom');
             this.setTippy(au.id, 'Mute', 'bottom');
             this.setTippy(pv.id, '🔊 Volume', 'bottom');
+            this.setTippy(gl.id, 'Geolocation', 'bottom');
             this.setTippy(ban.id, 'Ban', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
         }
@@ -5375,6 +5387,23 @@ class RoomClient {
     // HANDLE BAN
     // ###################################################
 
+    handleGL(uid) {
+        const words = uid.split('___');
+        let peer_id = words[1] + '___pGeoLocation';
+        let btnGl = this.getId(uid);
+        if (btnGl) {
+            btnGl.addEventListener('click', () => {
+                isPresenter
+                    ? this.askPeerGeoLocation(peer_id)
+                    : this.userLog('warning', 'Only the presenter can ask geolocation to the participants', 'top-end');
+            });
+        }
+    }
+
+    // ####################################################
+    // HANDLE BAN
+    // ###################################################
+
     handleBAN(uid) {
         const words = uid.split('___');
         let peer_id = words[1] + '___pBan';
@@ -6305,6 +6334,12 @@ class RoomClient {
             broadcast: false,
         };
         this.emitCmd(cmd);
+        this.peerActionProgress(
+            'Geolocation',
+            'Geolocation requested. Please wait for confirmation...',
+            6000,
+            'geolocation',
+        );
     }
 
     sendPeerGeoLocation(peer_id, type, data) {

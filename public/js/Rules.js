@@ -53,6 +53,7 @@ const BUTTONS = {
         muteVideoButton: true,
         muteAudioButton: true,
         audioVolumeInput: true, // Disabled for mobile
+        geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
     },
@@ -62,6 +63,7 @@ const BUTTONS = {
         sendVideoButton: true,
         muteAudioButton: true,
         audioVolumeInput: true, // Disabled for mobile
+        geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
     },
@@ -97,8 +99,10 @@ function handleRules(isPresenter) {
         BUTTONS.settings.micOptionsButton = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
+        BUTTONS.videoOff.geolocationButton = false;
         BUTTONS.videoOff.banButton = false;
         BUTTONS.videoOff.ejectButton = false;
+        BUTTONS.consumerVideo.geolocationButton = false;
         BUTTONS.consumerVideo.banButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
         //BUTTONS.consumerVideo.muteAudioButton = false;
@@ -117,8 +121,10 @@ function handleRules(isPresenter) {
         BUTTONS.settings.micOptionsButton = true;
         BUTTONS.settings.tabModerator = true;
         BUTTONS.videoOff.muteAudioButton = true;
+        BUTTONS.videoOff.geolocationButton = true;
         BUTTONS.videoOff.banButton = true;
         BUTTONS.videoOff.ejectButton = true;
+        BUTTONS.consumerVideo.geolocationButton = true;
         BUTTONS.consumerVideo.banButton = true;
         BUTTONS.consumerVideo.ejectButton = true;
         BUTTONS.consumerVideo.muteAudioButton = true;
@@ -196,11 +202,13 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.unlockRoomButton = false;
     BUTTONS.settings.lobbyButton = false;
     BUTTONS.videoOff.muteAudioButton = false;
+    BUTTONS.videoOff.geolocationButton = false;
     BUTTONS.videoOff.banButton = false;
     BUTTONS.videoOff.ejectButton = false;
     BUTTONS.consumerVideo.sendMessageButton = false;
     BUTTONS.consumerVideo.sendFileButton = false;
     BUTTONS.consumerVideo.sendVideoButton = false;
+    BUTTONS.consumerVideo.geolocationButton = false;
     BUTTONS.consumerVideo.banButton = false;
     BUTTONS.consumerVideo.ejectButton = false;
     BUTTONS.consumerVideo.muteAudioButton = false;
