@@ -95,8 +95,9 @@
 }
 
 .people-list .about-buttons {
-    margin-top: 10px;
-    display: inline-flex;
+    margin-top: 30px;
+    width: auto;
+    /* display: inline-flex; */
 }
 
 .people-list .status {
