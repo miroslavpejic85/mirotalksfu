@@ -553,7 +553,7 @@
                     }).call(this);
                 }).call(this, require('_process'));
             },
-            { './common': 4, _process: 50 },
+            { './common': 4, _process: 51 },
         ],
         4: [
             function (require, module, exports) {
@@ -836,93 +836,146 @@
 
                 module.exports = setup;
             },
-            { ms: 41 },
+            { ms: 42 },
         ],
         5: [
             function (require, module, exports) {
-                const debug = require('debug')('h264-profile-level-id');
-                const warn = require('debug')('h264-profile-level-id:WARN');
-
-                /* eslint-disable no-console */
-                debug.log = console.info.bind(console);
-                warn.log = console.warn.bind(console);
-                /* eslint-enable no-console */
-
-                const ProfileConstrainedBaseline = 1;
-                const ProfileBaseline = 2;
-                const ProfileMain = 3;
-                const ProfileConstrainedHigh = 4;
-                const ProfileHigh = 5;
-                const ProfilePredictiveHigh444 = 6;
-
-                exports.ProfileConstrainedBaseline = ProfileConstrainedBaseline;
-                exports.ProfileBaseline = ProfileBaseline;
-                exports.ProfileMain = ProfileMain;
-                exports.ProfileConstrainedHigh = ProfileConstrainedHigh;
-                exports.ProfileHigh = ProfileHigh;
-                exports.ProfilePredictiveHigh444 = ProfilePredictiveHigh444;
-
-                // All values are equal to ten times the level number, except level 1b which is
-                // special.
-                const Level1_b = 0;
-                const Level1 = 10;
-                const Level1_1 = 11;
-                const Level1_2 = 12;
-                const Level1_3 = 13;
-                const Level2 = 20;
-                const Level2_1 = 21;
-                const Level2_2 = 22;
-                const Level3 = 30;
-                const Level3_1 = 31;
-                const Level3_2 = 32;
-                const Level4 = 40;
-                const Level4_1 = 41;
-                const Level4_2 = 42;
-                const Level5 = 50;
-                const Level5_1 = 51;
-                const Level5_2 = 52;
-
-                exports.Level1_b = Level1_b;
-                exports.Level1 = Level1;
-                exports.Level1_1 = Level1_1;
-                exports.Level1_2 = Level1_2;
-                exports.Level1_3 = Level1_3;
-                exports.Level2 = Level2;
-                exports.Level2_1 = Level2_1;
-                exports.Level2_2 = Level2_2;
-                exports.Level3 = Level3;
-                exports.Level3_1 = Level3_1;
-                exports.Level3_2 = Level3_2;
-                exports.Level4 = Level4;
-                exports.Level4_1 = Level4_1;
-                exports.Level4_2 = Level4_2;
-                exports.Level5 = Level5;
-                exports.Level5_1 = Level5_1;
-                exports.Level5_2 = Level5_2;
-
+                'use strict';
+                var __importDefault =
+                    (this && this.__importDefault) ||
+                    function (mod) {
+                        return mod && mod.__esModule ? mod : { default: mod };
+                    };
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.Logger = void 0;
+                const debug_1 = __importDefault(require('debug'));
+                const APP_NAME = 'h264-profile-level-id';
+                class Logger {
+                    constructor(prefix) {
+                        if (prefix) {
+                            this._debug = (0, debug_1.default)(`${APP_NAME}:${prefix}`);
+                            this._warn = (0, debug_1.default)(`${APP_NAME}:WARN:${prefix}`);
+                            this._error = (0, debug_1.default)(`${APP_NAME}:ERROR:${prefix}`);
+                        } else {
+                            this._debug = (0, debug_1.default)(APP_NAME);
+                            this._warn = (0, debug_1.default)(`${APP_NAME}:WARN`);
+                            this._error = (0, debug_1.default)(`${APP_NAME}:ERROR`);
+                        }
+                        /* eslint-disable no-console */
+                        this._debug.log = console.info.bind(console);
+                        this._warn.log = console.warn.bind(console);
+                        this._error.log = console.error.bind(console);
+                        /* eslint-enable no-console */
+                    }
+                    get debug() {
+                        return this._debug;
+                    }
+                    get warn() {
+                        return this._warn;
+                    }
+                    get error() {
+                        return this._error;
+                    }
+                }
+                exports.Logger = Logger;
+            },
+            { debug: 3 },
+        ],
+        6: [
+            function (require, module, exports) {
+                'use strict';
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.generateProfileLevelIdStringForAnswer =
+                    exports.isSameProfile =
+                    exports.parseSdpProfileLevelId =
+                    exports.levelToString =
+                    exports.profileToString =
+                    exports.profileLevelIdToString =
+                    exports.parseProfileLevelId =
+                    exports.ProfileLevelId =
+                    exports.Level =
+                    exports.Profile =
+                        void 0;
+                const Logger_1 = require('./Logger');
+                const logger = new Logger_1.Logger();
+                /**
+                 * Supported profiles.
+                 */
+                // ESLint absurdly complains about "'Profile' is already declared in
+                // the upper scope".
+                // eslint-disable-next-line no-shadow
+                var Profile;
+                (function (Profile) {
+                    Profile[(Profile['ConstrainedBaseline'] = 1)] = 'ConstrainedBaseline';
+                    Profile[(Profile['Baseline'] = 2)] = 'Baseline';
+                    Profile[(Profile['Main'] = 3)] = 'Main';
+                    Profile[(Profile['ConstrainedHigh'] = 4)] = 'ConstrainedHigh';
+                    Profile[(Profile['High'] = 5)] = 'High';
+                    Profile[(Profile['PredictiveHigh444'] = 6)] = 'PredictiveHigh444';
+                })(Profile || (exports.Profile = Profile = {}));
+                /**
+                 * Supported levels.
+                 */
+                // ESLint absurdly complains about "'Level' is already declared in
+                // the upper scope".
+                // eslint-disable-next-line no-shadow
+                var Level;
+                (function (Level) {
+                    Level[(Level['L1_b'] = 0)] = 'L1_b';
+                    Level[(Level['L1'] = 10)] = 'L1';
+                    Level[(Level['L1_1'] = 11)] = 'L1_1';
+                    Level[(Level['L1_2'] = 12)] = 'L1_2';
+                    Level[(Level['L1_3'] = 13)] = 'L1_3';
+                    Level[(Level['L2'] = 20)] = 'L2';
+                    Level[(Level['L2_1'] = 21)] = 'L2_1';
+                    Level[(Level['L2_2'] = 22)] = 'L2_2';
+                    Level[(Level['L3'] = 30)] = 'L3';
+                    Level[(Level['L3_1'] = 31)] = 'L3_1';
+                    Level[(Level['L3_2'] = 32)] = 'L3_2';
+                    Level[(Level['L4'] = 40)] = 'L4';
+                    Level[(Level['L4_1'] = 41)] = 'L4_1';
+                    Level[(Level['L4_2'] = 42)] = 'L4_2';
+                    Level[(Level['L5'] = 50)] = 'L5';
+                    Level[(Level['L5_1'] = 51)] = 'L5_1';
+                    Level[(Level['L5_2'] = 52)] = 'L5_2';
+                })(Level || (exports.Level = Level = {}));
+                /**
+                 * Represents a parsed h264 profile-level-id value.
+                 */
                 class ProfileLevelId {
                     constructor(profile, level) {
                         this.profile = profile;
                         this.level = level;
                     }
                 }
-
                 exports.ProfileLevelId = ProfileLevelId;
-
-                // Class for matching bit patterns such as "x1xx0000" where 'x' is allowed to
-                // be either 0 or 1.
+                // Default ProfileLevelId.
+                //
+                // TODO: The default should really be profile Baseline and level 1 according to
+                // the spec: https://tools.ietf.org/html/rfc6184#section-8.1. In order to not
+                // break backwards compatibility with older versions of WebRTC where external
+                // codecs don't have any parameters, use profile ConstrainedBaseline level 3_1
+                // instead. This workaround will only be done in an interim period to allow
+                // external clients to update their code.
+                //
+                // http://crbug/webrtc/6337.
+                const DefaultProfileLevelId = new ProfileLevelId(Profile.ConstrainedBaseline, Level.L3_1);
+                /**
+                 * Class for matching bit patterns such as "x1xx0000" where 'x' is allowed to
+                 * be either 0 or 1.
+                 */
                 class BitPattern {
                     constructor(str) {
-                        this._mask = ~byteMaskString('x', str);
-                        this._maskedValue = byteMaskString('1', str);
+                        this.mask = ~byteMaskString('x', str);
+                        this.masked_value = byteMaskString('1', str);
                     }
-
                     isMatch(value) {
-                        return this._maskedValue === (value & this._mask);
+                        return this.masked_value === (value & this.mask);
                     }
                 }
-
-                // Class for converting between profile_idc/profile_iop to Profile.
+                /**
+                 * Class for converting between profile_idc/profile_iop to Profile.
+                 */
                 class ProfilePattern {
                     constructor(profile_idc, profile_iop, profile) {
                         this.profile_idc = profile_idc;
@@ -930,325 +983,267 @@
                         this.profile = profile;
                     }
                 }
-
                 // This is from https://tools.ietf.org/html/rfc6184#section-8.1.
                 const ProfilePatterns = [
-                    new ProfilePattern(0x42, new BitPattern('x1xx0000'), ProfileConstrainedBaseline),
-                    new ProfilePattern(0x4d, new BitPattern('1xxx0000'), ProfileConstrainedBaseline),
-                    new ProfilePattern(0x58, new BitPattern('11xx0000'), ProfileConstrainedBaseline),
-                    new ProfilePattern(0x42, new BitPattern('x0xx0000'), ProfileBaseline),
-                    new ProfilePattern(0x58, new BitPattern('10xx0000'), ProfileBaseline),
-                    new ProfilePattern(0x4d, new BitPattern('0x0x0000'), ProfileMain),
-                    new ProfilePattern(0x64, new BitPattern('00000000'), ProfileHigh),
-                    new ProfilePattern(0x64, new BitPattern('00001100'), ProfileConstrainedHigh),
-                    new ProfilePattern(0xf4, new BitPattern('00000000'), ProfilePredictiveHigh444),
+                    new ProfilePattern(0x42, new BitPattern('x1xx0000'), Profile.ConstrainedBaseline),
+                    new ProfilePattern(0x4d, new BitPattern('1xxx0000'), Profile.ConstrainedBaseline),
+                    new ProfilePattern(0x58, new BitPattern('11xx0000'), Profile.ConstrainedBaseline),
+                    new ProfilePattern(0x42, new BitPattern('x0xx0000'), Profile.Baseline),
+                    new ProfilePattern(0x58, new BitPattern('10xx0000'), Profile.Baseline),
+                    new ProfilePattern(0x4d, new BitPattern('0x0x0000'), Profile.Main),
+                    new ProfilePattern(0x64, new BitPattern('00000000'), Profile.High),
+                    new ProfilePattern(0x64, new BitPattern('00001100'), Profile.ConstrainedHigh),
+                    new ProfilePattern(0xf4, new BitPattern('00000000'), Profile.PredictiveHigh444),
                 ];
-
                 /**
                  * Parse profile level id that is represented as a string of 3 hex bytes.
                  * Nothing will be returned if the string is not a recognized H264 profile
                  * level id.
-                 *
-                 * @param {String} str - profile-level-id value as a string of 3 hex bytes.
-                 *
-                 * @returns {ProfileLevelId}
                  */
-                exports.parseProfileLevelId = function (str) {
+                function parseProfileLevelId(str) {
                     // For level_idc=11 and profile_idc=0x42, 0x4D, or 0x58, the constraint set3
                     // flag specifies if level 1b or level 1.1 is used.
                     const ConstraintSet3Flag = 0x10;
-
                     // The string should consist of 3 bytes in hexadecimal format.
                     if (typeof str !== 'string' || str.length !== 6) {
-                        return null;
+                        return undefined;
                     }
-
                     const profile_level_id_numeric = parseInt(str, 16);
-
                     if (profile_level_id_numeric === 0) {
-                        return null;
+                        return undefined;
                     }
-
                     // Separate into three bytes.
                     const level_idc = profile_level_id_numeric & 0xff;
                     const profile_iop = (profile_level_id_numeric >> 8) & 0xff;
                     const profile_idc = (profile_level_id_numeric >> 16) & 0xff;
-
                     // Parse level based on level_idc and constraint set 3 flag.
                     let level;
-
                     switch (level_idc) {
-                        case Level1_1: {
-                            level = (profile_iop & ConstraintSet3Flag) !== 0 ? Level1_b : Level1_1;
+                        case Level.L1_1: {
+                            level = (profile_iop & ConstraintSet3Flag) !== 0 ? Level.L1_b : Level.L1_1;
                             break;
                         }
-                        case Level1:
-                        case Level1_2:
-                        case Level1_3:
-                        case Level2:
-                        case Level2_1:
-                        case Level2_2:
-                        case Level3:
-                        case Level3_1:
-                        case Level3_2:
-                        case Level4:
-                        case Level4_1:
-                        case Level4_2:
-                        case Level5:
-                        case Level5_1:
-                        case Level5_2: {
+                        case Level.L1:
+                        case Level.L1_2:
+                        case Level.L1_3:
+                        case Level.L2:
+                        case Level.L2_1:
+                        case Level.L2_2:
+                        case Level.L3:
+                        case Level.L3_1:
+                        case Level.L3_2:
+                        case Level.L4:
+                        case Level.L4_1:
+                        case Level.L4_2:
+                        case Level.L5:
+                        case Level.L5_1:
+                        case Level.L5_2: {
                             level = level_idc;
                             break;
                         }
                         // Unrecognized level_idc.
                         default: {
-                            warn(`parseProfileLevelId() | unrecognized level_idc [str:${str}, level_idc:${level_idc}]`);
-
-                            return null;
+                            logger.warn(
+                                `parseProfileLevelId() | unrecognized level_idc [str:${str}, level_idc:${level_idc}]`,
+                            );
+                            return undefined;
                         }
                     }
-
                     // Parse profile_idc/profile_iop into a Profile enum.
                     for (const pattern of ProfilePatterns) {
                         if (profile_idc === pattern.profile_idc && pattern.profile_iop.isMatch(profile_iop)) {
                             return new ProfileLevelId(pattern.profile, level);
                         }
                     }
-
-                    warn(
+                    logger.warn(
                         `parseProfileLevelId() | unrecognized profile_idc/profile_iop combination [str:${str}, profile_idc:${profile_idc}, profile_iop:${profile_iop}]`,
                     );
-
-                    return null;
-                };
-
+                    return undefined;
+                }
+                exports.parseProfileLevelId = parseProfileLevelId;
                 /**
                  * Returns canonical string representation as three hex bytes of the profile
                  * level id, or returns nothing for invalid profile level ids.
-                 *
-                 * @param {ProfileLevelId} profile_level_id
-                 *
-                 * @returns {String}
                  */
-                exports.profileLevelIdToString = function (profile_level_id) {
+                function profileLevelIdToString(profile_level_id) {
                     // Handle special case level == 1b.
-                    if (profile_level_id.level == Level1_b) {
+                    if (profile_level_id.level == Level.L1_b) {
                         switch (profile_level_id.profile) {
-                            case ProfileConstrainedBaseline: {
+                            case Profile.ConstrainedBaseline: {
                                 return '42f00b';
                             }
-                            case ProfileBaseline: {
+                            case Profile.Baseline: {
                                 return '42100b';
                             }
-                            case ProfileMain: {
+                            case Profile.Main: {
                                 return '4d100b';
                             }
                             // Level 1_b is not allowed for other profiles.
                             default: {
-                                warn(
+                                logger.warn(
                                     `profileLevelIdToString() | Level 1_b not is allowed for profile ${profile_level_id.profile}`,
                                 );
-
-                                return null;
+                                return undefined;
                             }
                         }
                     }
-
                     let profile_idc_iop_string;
-
                     switch (profile_level_id.profile) {
-                        case ProfileConstrainedBaseline: {
+                        case Profile.ConstrainedBaseline: {
                             profile_idc_iop_string = '42e0';
                             break;
                         }
-                        case ProfileBaseline: {
+                        case Profile.Baseline: {
                             profile_idc_iop_string = '4200';
                             break;
                         }
-                        case ProfileMain: {
+                        case Profile.Main: {
                             profile_idc_iop_string = '4d00';
                             break;
                         }
-                        case ProfileConstrainedHigh: {
+                        case Profile.ConstrainedHigh: {
                             profile_idc_iop_string = '640c';
                             break;
                         }
-                        case ProfileHigh: {
+                        case Profile.High: {
                             profile_idc_iop_string = '6400';
                             break;
                         }
-                        case ProfilePredictiveHigh444: {
+                        case Profile.PredictiveHigh444: {
                             profile_idc_iop_string = 'f400';
                             break;
                         }
                         default: {
-                            warn(`profileLevelIdToString() | unrecognized profile ${profile_level_id.profile}`);
-
-                            return null;
+                            logger.warn(`profileLevelIdToString() | unrecognized profile ${profile_level_id.profile}`);
+                            return undefined;
                         }
                     }
-
                     let levelStr = profile_level_id.level.toString(16);
-
                     if (levelStr.length === 1) {
                         levelStr = `0${levelStr}`;
                     }
-
                     return `${profile_idc_iop_string}${levelStr}`;
-                };
-
+                }
+                exports.profileLevelIdToString = profileLevelIdToString;
                 /**
-                 * Prints name of given profile.
-                 *
-                 * @param {number} profile
-                 *
-                 * @returns {String}
+                 * Returns a human friendly name for the given profile.
                  */
-                exports.profileToString = function (profile) {
+                function profileToString(profile) {
                     switch (profile) {
-                        case ProfileConstrainedBaseline: {
+                        case Profile.ConstrainedBaseline: {
                             return 'ConstrainedBaseline';
                         }
-                        case ProfileBaseline: {
+                        case Profile.Baseline: {
                             return 'Baseline';
                         }
-                        case ProfileMain: {
+                        case Profile.Main: {
                             return 'Main';
                         }
-                        case ProfileConstrainedHigh: {
+                        case Profile.ConstrainedHigh: {
                             return 'ConstrainedHigh';
                         }
-                        case ProfileHigh: {
+                        case Profile.High: {
                             return 'High';
                         }
-                        case ProfilePredictiveHigh444: {
+                        case Profile.PredictiveHigh444: {
                             return 'PredictiveHigh444';
                         }
                         default: {
-                            warn(`profileToString() | unrecognized profile ${profile}`);
-
-                            return null;
+                            logger.warn(`profileToString() | unrecognized profile ${profile}`);
+                            return undefined;
                         }
                     }
-                };
-
+                }
+                exports.profileToString = profileToString;
                 /**
-                 * Prints name of given level.
-                 *
-                 * @param {number} level
-                 *
-                 * @returns {String}
+                 * Returns a human friendly name for the given level.
                  */
-                exports.levelToString = function (level) {
+                function levelToString(level) {
                     switch (level) {
-                        case Level1_b: {
+                        case Level.L1_b: {
                             return '1b';
                         }
-                        case Level1: {
+                        case Level.L1: {
                             return '1';
                         }
-                        case Level1_1: {
+                        case Level.L1_1: {
                             return '1.1';
                         }
-                        case Level1_2: {
+                        case Level.L1_2: {
                             return '1.2';
                         }
-                        case Level1_3: {
+                        case Level.L1_3: {
                             return '1.3';
                         }
-                        case Level2: {
+                        case Level.L2: {
                             return '2';
                         }
-                        case Level2_1: {
+                        case Level.L2_1: {
                             return '2.1';
                         }
-                        case Level2_2: {
+                        case Level.L2_2: {
                             return '2.2';
                         }
-                        case Level3: {
+                        case Level.L3: {
                             return '3';
                         }
-                        case Level3_1: {
+                        case Level.L3_1: {
                             return '3.1';
                         }
-                        case Level3_2: {
+                        case Level.L3_2: {
                             return '3.2';
                         }
-                        case Level4: {
+                        case Level.L4: {
                             return '4';
                         }
-                        case Level4_1: {
+                        case Level.L4_1: {
                             return '4.1';
                         }
-                        case Level4_2: {
+                        case Level.L4_2: {
                             return '4.2';
                         }
-                        case Level5: {
+                        case Level.L5: {
                             return '5';
                         }
-                        case Level5_1: {
+                        case Level.L5_1: {
                             return '5.1';
                         }
-                        case Level5_2: {
+                        case Level.L5_2: {
                             return '5.2';
                         }
                         default: {
-                            warn(`levelToString() | unrecognized level ${level}`);
-
-                            return null;
+                            logger.warn(`levelToString() | unrecognized level ${level}`);
+                            return undefined;
                         }
                     }
-                };
-
+                }
+                exports.levelToString = levelToString;
                 /**
                  * Parse profile level id that is represented as a string of 3 hex bytes
                  * contained in an SDP key-value map. A default profile level id will be
                  * returned if the profile-level-id key is missing. Nothing will be returned
                  * if the key is present but the string is invalid.
-                 *
-                 * @param {Object} [params={}] - Codec parameters object.
-                 *
-                 * @returns {ProfileLevelId}
                  */
-                exports.parseSdpProfileLevelId = function (params = {}) {
-                    // Default ProfileLevelId.
-                    //
-                    // TODO: The default should really be profile Baseline and level 1 according to
-                    // the spec: https://tools.ietf.org/html/rfc6184#section-8.1. In order to not
-                    // break backwards compatibility with older versions of WebRTC where external
-                    // codecs don't have any parameters, use profile ConstrainedBaseline level 3_1
-                    // instead. This workaround will only be done in an interim period to allow
-                    // external clients to update their code.
-                    //
-                    // http://crbug/webrtc/6337.
-                    const DefaultProfileLevelId = new ProfileLevelId(ProfileConstrainedBaseline, Level3_1);
-
+                function parseSdpProfileLevelId(params = {}) {
                     const profile_level_id = params['profile-level-id'];
-
-                    return !profile_level_id ? DefaultProfileLevelId : exports.parseProfileLevelId(profile_level_id);
-                };
-
+                    return profile_level_id ? parseProfileLevelId(profile_level_id) : DefaultProfileLevelId;
+                }
+                exports.parseSdpProfileLevelId = parseSdpProfileLevelId;
                 /**
                  * Returns true if the parameters have the same H264 profile, i.e. the same
                  * H264 profile (Baseline, High, etc).
-                 *
-                 * @param {Object} [params1={}] - Codec parameters object.
-                 * @param {Object} [params2={}] - Codec parameters object.
-                 *
-                 * @returns {Boolean}
                  */
-                exports.isSameProfile = function (params1 = {}, params2 = {}) {
-                    const profile_level_id_1 = exports.parseSdpProfileLevelId(params1);
-                    const profile_level_id_2 = exports.parseSdpProfileLevelId(params2);
-
+                function isSameProfile(params1 = {}, params2 = {}) {
+                    const profile_level_id_1 = parseSdpProfileLevelId(params1);
+                    const profile_level_id_2 = parseSdpProfileLevelId(params2);
                     // Compare H264 profiles, but not levels.
                     return Boolean(
                         profile_level_id_1 &&
                             profile_level_id_2 &&
                             profile_level_id_1.profile === profile_level_id_2.profile,
                     );
-                };
-
+                }
+                exports.isSameProfile = isSameProfile;
                 /**
                  * Generate codec parameters that will be used as answer in an SDP negotiation
                  * based on local supported parameters and remote offered parameters. Both
@@ -1265,111 +1260,94 @@
                  * called. Therefore, this function does not need to handle profile intersection,
                  * and the profile of local_supported_params and remote_offered_params must be
                  * equal before calling this function. The parameters that are used when
-                 * negotiating are the level part of profile-level-id and level-asymmetry-allowed.
-                 *
-                 * @param {Object} [local_supported_params={}]
-                 * @param {Object} [remote_offered_params={}]
-                 *
-                 * @returns {String} Canonical string representation as three hex bytes of the
-                 *   profile level id, or null if no one of the params have profile-level-id.
-                 *
-                 * @throws {TypeError} If Profile mismatch or invalid params.
+                 * negotiating are the level part of profile-level-id and
+                 * level-asymmetry-allowed.
                  */
-                exports.generateProfileLevelIdForAnswer = function (
+                function generateProfileLevelIdStringForAnswer(
                     local_supported_params = {},
                     remote_offered_params = {},
                 ) {
                     // If both local and remote params do not contain profile-level-id, they are
                     // both using the default profile. In this case, don't return anything.
                     if (!local_supported_params['profile-level-id'] && !remote_offered_params['profile-level-id']) {
-                        warn('generateProfileLevelIdForAnswer() | profile-level-id missing in local and remote params');
-
-                        return null;
+                        logger.warn(
+                            'generateProfileLevelIdStringForAnswer() | profile-level-id missing in local and remote params',
+                        );
+                        return undefined;
                     }
-
                     // Parse profile-level-ids.
-                    const local_profile_level_id = exports.parseSdpProfileLevelId(local_supported_params);
-                    const remote_profile_level_id = exports.parseSdpProfileLevelId(remote_offered_params);
-
+                    const local_profile_level_id = parseSdpProfileLevelId(local_supported_params);
+                    const remote_profile_level_id = parseSdpProfileLevelId(remote_offered_params);
                     // The local and remote codec must have valid and equal H264 Profiles.
                     if (!local_profile_level_id) {
                         throw new TypeError('invalid local_profile_level_id');
                     }
-
                     if (!remote_profile_level_id) {
                         throw new TypeError('invalid remote_profile_level_id');
                     }
-
                     if (local_profile_level_id.profile !== remote_profile_level_id.profile) {
                         throw new TypeError('H264 Profile mismatch');
                     }
-
                     // Parse level information.
                     const level_asymmetry_allowed =
                         isLevelAsymmetryAllowed(local_supported_params) &&
                         isLevelAsymmetryAllowed(remote_offered_params);
-
                     const local_level = local_profile_level_id.level;
                     const remote_level = remote_profile_level_id.level;
                     const min_level = minLevel(local_level, remote_level);
-
                     // Determine answer level. When level asymmetry is not allowed, level upgrade
                     // is not allowed, i.e., the level in the answer must be equal to or lower
                     // than the level in the offer.
                     const answer_level = level_asymmetry_allowed ? local_level : min_level;
-
-                    debug(
-                        `generateProfileLevelIdForAnswer() | result [profile:${local_profile_level_id.profile}, level:${answer_level}]`,
+                    logger.debug(
+                        `generateProfileLevelIdStringForAnswer() | result [profile:${local_profile_level_id.profile}, level:${answer_level}]`,
                     );
-
                     // Return the resulting profile-level-id for the answer parameters.
-                    return exports.profileLevelIdToString(
-                        new ProfileLevelId(local_profile_level_id.profile, answer_level),
-                    );
-                };
-
-                // Convert a string of 8 characters into a byte where the positions containing
-                // character c will have their bit set. For example, c = 'x', str = "x1xx0000"
-                // will return 0b10110000.
+                    return profileLevelIdToString(new ProfileLevelId(local_profile_level_id.profile, answer_level));
+                }
+                exports.generateProfileLevelIdStringForAnswer = generateProfileLevelIdStringForAnswer;
+                /**
+                 * Convert a string of 8 characters into a byte where the positions containing
+                 * character c will have their bit set. For example, c = 'x', str = "x1xx0000"
+                 * will return 0b10110000.
+                 */
                 function byteMaskString(c, str) {
                     return (
-                        ((str[0] === c) << 7) |
-                        ((str[1] === c) << 6) |
-                        ((str[2] === c) << 5) |
-                        ((str[3] === c) << 4) |
-                        ((str[4] === c) << 3) |
-                        ((str[5] === c) << 2) |
-                        ((str[6] === c) << 1) |
-                        ((str[7] === c) << 0)
+                        (Number(str[0] === c) << 7) |
+                        (Number(str[1] === c) << 6) |
+                        (Number(str[2] === c) << 5) |
+                        (Number(str[3] === c) << 4) |
+                        (Number(str[4] === c) << 3) |
+                        (Number(str[5] === c) << 2) |
+                        (Number(str[6] === c) << 1) |
+                        (Number(str[7] === c) << 0)
                     );
                 }
-
                 // Compare H264 levels and handle the level 1b case.
                 function isLessLevel(a, b) {
-                    if (a === Level1_b) {
-                        return b !== Level1 && b !== Level1_b;
+                    if (a === Level.L1_b) {
+                        return b !== Level.L1 && b !== Level.L1_b;
                     }
-
-                    if (b === Level1_b) {
-                        return a !== Level1;
+                    if (b === Level.L1_b) {
+                        return a !== Level.L1;
                     }
-
                     return a < b;
                 }
-
                 function minLevel(a, b) {
                     return isLessLevel(a, b) ? a : b;
                 }
-
                 function isLevelAsymmetryAllowed(params = {}) {
                     const level_asymmetry_allowed = params['level-asymmetry-allowed'];
-
-                    return level_asymmetry_allowed === 1 || level_asymmetry_allowed === '1';
+                    return (
+                        level_asymmetry_allowed === true ||
+                        level_asymmetry_allowed === 1 ||
+                        level_asymmetry_allowed === '1'
+                    );
                 }
             },
-            { debug: 3 },
+            { './Logger': 5 },
         ],
-        6: [
+        7: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1561,9 +1539,9 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        7: [
+        8: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1731,9 +1709,9 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11 },
+            { './EnhancedEventEmitter': 11, './Logger': 12 },
         ],
-        8: [
+        9: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1919,9 +1897,9 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        9: [
+        10: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -2439,27 +2417,27 @@
                 exports.Device = Device;
             },
             {
-                './EnhancedEventEmitter': 10,
-                './Logger': 11,
-                './Transport': 15,
-                './errors': 16,
-                './handlers/Chrome111': 17,
-                './handlers/Chrome55': 18,
-                './handlers/Chrome67': 19,
-                './handlers/Chrome70': 20,
-                './handlers/Chrome74': 21,
-                './handlers/Edge11': 22,
-                './handlers/Firefox60': 23,
-                './handlers/ReactNative': 25,
-                './handlers/ReactNativeUnifiedPlan': 26,
-                './handlers/Safari11': 27,
-                './handlers/Safari12': 28,
-                './ortc': 37,
-                './utils': 40,
-                'ua-parser-js': 47,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/Chrome111': 18,
+                './handlers/Chrome55': 19,
+                './handlers/Chrome67': 20,
+                './handlers/Chrome70': 21,
+                './handlers/Chrome74': 22,
+                './handlers/Edge11': 23,
+                './handlers/Firefox60': 24,
+                './handlers/ReactNative': 26,
+                './handlers/ReactNativeUnifiedPlan': 27,
+                './handlers/Safari11': 28,
+                './handlers/Safari12': 29,
+                './ortc': 38,
+                './utils': 41,
+                'ua-parser-js': 48,
             },
         ],
-        10: [
+        11: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2535,9 +2513,9 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 11, events: 49 },
+            { './Logger': 12, events: 50 },
         ],
-        11: [
+        12: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -2580,7 +2558,7 @@
             },
             { debug: 3 },
         ],
-        12: [
+        13: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2873,9 +2851,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './EnhancedEventEmitter': 10, './Logger': 11, './errors': 16 },
+            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
         ],
-        13: [
+        14: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -2886,14 +2864,14 @@
             },
             {},
         ],
-        14: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        15: [
+        16: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -3816,20 +3794,20 @@
                 exports.Transport = Transport;
             },
             {
-                './Consumer': 6,
-                './DataConsumer': 7,
-                './DataProducer': 8,
-                './EnhancedEventEmitter': 10,
-                './Logger': 11,
-                './Producer': 12,
-                './errors': 16,
-                './ortc': 37,
-                './utils': 40,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './EnhancedEventEmitter': 11,
+                './Logger': 12,
+                './Producer': 13,
+                './errors': 17,
+                './ortc': 38,
+                './utils': 41,
                 awaitqueue: 2,
-                'queue-microtask': 42,
+                'queue-microtask': 43,
             },
         ],
-        16: [
+        17: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3871,7 +3849,7 @@
             },
             {},
         ],
-        17: [
+        18: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -3986,7 +3964,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             // libwebrtc supports NACK for OPUS but doesn't announce it.
                             ortcUtils.addNackSuppportForOpus(nativeRtpCapabilities);
                             return nativeRtpCapabilities;
@@ -4176,15 +4156,21 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         const offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings by parsing the SDP offer if no encodings are given.
                         if (!encodings) {
-                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                         }
                         // Set RTP encodings by parsing the SDP offer and complete them with given
                         // one if just a single encoding has been given.
                         else if (encodings.length === 1) {
-                            const newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            const newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                             Object.assign(newEncodings[0], encodings[0]);
                             sendingRtpParameters.encodings = newEncodings;
                         }
@@ -4560,7 +4546,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -4590,20 +4578,20 @@
                 exports.Chrome111 = Chrome111;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './ortc/utils': 30,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './ortc/utils': 31,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        18: [
+        19: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -4716,7 +4704,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -4881,9 +4871,14 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media.find((m) => m.type === track.kind);
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({ offerMediaObject, track });
+                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({
+                            offerMediaObject,
+                            track,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -4964,12 +4959,17 @@
                     async replaceTrack(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         localId,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         track,
                     ) {
                         throw new errors_1.UnsupportedError('not implemented');
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    async setMaxSpatialLayer(localId, spatialLayer) {
+                    async setMaxSpatialLayer(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        spatialLayer,
+                    ) {
                         throw new errors_1.UnsupportedError(' not implemented');
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -5086,7 +5086,10 @@
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
-                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                            this._remoteSdp.planBStopReceiving({
+                                mid: mid,
+                                offerRtpParameters: rtpParameters,
+                            });
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -5154,7 +5157,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -5179,18 +5184,18 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/planBUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/planBUtils': 35,
+                'sdp-transform': 45,
             },
         ],
-        19: [
+        20: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5302,7 +5307,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -5467,9 +5474,14 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media.find((m) => m.type === track.kind);
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({ offerMediaObject, track });
+                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({
+                            offerMediaObject,
+                            track,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -5703,7 +5715,11 @@
                                 throw new Error('new RTCRtpReceiver not');
                             }
                             // Insert into the map.
-                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
+                            this._mapRecvLocalIdInfo.set(localId, {
+                                mid,
+                                rtpParameters,
+                                rtpReceiver,
+                            });
                             results.push({
                                 localId,
                                 track: rtpReceiver.track,
@@ -5719,7 +5735,10 @@
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
-                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                            this._remoteSdp.planBStopReceiving({
+                                mid: mid,
+                                offerRtpParameters: rtpParameters,
+                            });
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -5791,7 +5810,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -5816,17 +5837,17 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 11,
-                '../ortc': 37,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/planBUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 38,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/planBUtils': 35,
+                'sdp-transform': 45,
             },
         ],
-        20: [
+        21: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5933,7 +5954,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -6136,9 +6159,13 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                        sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                            offerMediaObject,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -6464,7 +6491,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -6489,18 +6518,18 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 11,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        21: [
+        22: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6615,7 +6644,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             // libwebrtc supports NACK for OPUS but doesn't announce it.
                             ortcUtils.addNackSuppportForOpus(nativeRtpCapabilities);
                             return nativeRtpCapabilities;
@@ -6805,15 +6836,21 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings by parsing the SDP offer if no encodings are given.
                         if (!encodings) {
-                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                         }
                         // Set RTP encodings by parsing the SDP offer and complete them with given
                         // one if just a single encoding has been given.
                         else if (encodings.length === 1) {
-                            let newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            let newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                             Object.assign(newEncodings[0], encodings[0]);
                             // Hack for VP9 SVC.
                             if (hackVp9Svc) {
@@ -7208,7 +7245,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -7238,20 +7277,20 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './ortc/utils': 30,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './ortc/utils': 31,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        22: [
+        23: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7731,15 +7770,15 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './ortc/edgeUtils': 29,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './ortc/edgeUtils': 30,
             },
         ],
-        23: [
+        24: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7852,7 +7891,9 @@
                         const fakeVideoTrack = fakeStream.getVideoTracks()[0];
                         try {
                             pc.addTransceiver('audio', { direction: 'sendrecv' });
-                            const videoTransceiver = pc.addTransceiver(fakeVideoTrack, { direction: 'sendrecv' });
+                            const videoTransceiver = pc.addTransceiver(fakeVideoTrack, {
+                                direction: 'sendrecv',
+                            });
                             const parameters = videoTransceiver.sender.getParameters();
                             const encodings = [
                                 { rid: 'r0', maxBitrate: 100000 },
@@ -7871,7 +7912,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -8057,15 +8100,21 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         const offerMediaObject = localSdpObject.media[localSdpObject.media.length - 1];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings by parsing the SDP offer if no encodings are given.
                         if (!encodings) {
-                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                         }
                         // Set RTP encodings by parsing the SDP offer and complete them with given
                         // one if just a single encoding has been given.
                         else if (encodings.length === 1) {
-                            const newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            const newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                             Object.assign(newEncodings[0], encodings[0]);
                             sendingRtpParameters.encodings = newEncodings;
                         }
@@ -8459,7 +8508,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -8489,19 +8540,19 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        24: [
+        25: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -8514,9 +8565,9 @@
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../EnhancedEventEmitter': 10 },
+            { '../EnhancedEventEmitter': 11 },
         ],
-        25: [
+        26: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8633,7 +8684,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -8798,9 +8851,14 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media.find((m) => m.type === track.kind);
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({ offerMediaObject, track });
+                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({
+                            offerMediaObject,
+                            track,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -8882,12 +8940,17 @@
                     async replaceTrack(
                         // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         localId,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
                         track,
                     ) {
                         throw new errors_1.UnsupportedError('not implemented');
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                    async setMaxSpatialLayer(localId, spatialLayer) {
+                    async setMaxSpatialLayer(
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        localId,
+                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                        spatialLayer,
+                    ) {
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -9016,7 +9079,10 @@
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
-                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                            this._remoteSdp.planBStopReceiving({
+                                mid: mid,
+                                offerRtpParameters: rtpParameters,
+                            });
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -9084,7 +9150,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -9109,18 +9177,18 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/planBUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/planBUtils': 35,
+                'sdp-transform': 45,
             },
         ],
-        26: [
+        27: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9239,7 +9307,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             // libwebrtc supports NACK for OPUS but doesn't announce it.
                             ortcUtils.addNackSuppportForOpus(nativeRtpCapabilities);
                             return nativeRtpCapabilities;
@@ -9442,15 +9512,21 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings by parsing the SDP offer if no encodings are given.
                         if (!encodings) {
-                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                         }
                         // Set RTP encodings by parsing the SDP offer and complete them with given
                         // one if just a single encoding has been given.
                         else if (encodings.length === 1) {
-                            let newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                            let newEncodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                                offerMediaObject,
+                            });
                             Object.assign(newEncodings[0], encodings[0]);
                             // Hack for VP9 SVC.
                             if (hackVp9Svc) {
@@ -9853,7 +9929,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -9883,20 +9961,20 @@
                 exports.ReactNativeUnifiedPlan = ReactNativeUnifiedPlan;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './ortc/utils': 30,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './ortc/utils': 31,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        27: [
+        28: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10008,7 +10086,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             return nativeRtpCapabilities;
                         } catch (error) {
                             try {
@@ -10172,9 +10252,14 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media.find((m) => m.type === track.kind);
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({ offerMediaObject, track });
+                        sendingRtpParameters.encodings = sdpPlanBUtils.getRtpEncodings({
+                            offerMediaObject,
+                            track,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -10405,7 +10490,11 @@
                                 throw new Error('new RTCRtpReceiver not');
                             }
                             // Insert into the map.
-                            this._mapRecvLocalIdInfo.set(localId, { mid, rtpParameters, rtpReceiver });
+                            this._mapRecvLocalIdInfo.set(localId, {
+                                mid,
+                                rtpParameters,
+                                rtpReceiver,
+                            });
                             results.push({
                                 localId,
                                 track: rtpReceiver.track,
@@ -10421,7 +10510,10 @@
                             const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
-                            this._remoteSdp.planBStopReceiving({ mid: mid, offerRtpParameters: rtpParameters });
+                            this._remoteSdp.planBStopReceiving({
+                                mid: mid,
+                                offerRtpParameters: rtpParameters,
+                            });
                         }
                         const offer = { type: 'offer', sdp: this._remoteSdp.getSdp() };
                         logger.debug('stopReceiving() | calling pc.setRemoteDescription() [offer:%o]', offer);
@@ -10492,7 +10584,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -10517,17 +10611,17 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 11,
-                '../ortc': 37,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/planBUtils': 34,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../ortc': 38,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/planBUtils': 35,
+                'sdp-transform': 45,
             },
         ],
-        28: [
+        29: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10641,7 +10735,9 @@
                                 pc.close();
                             } catch (error) {}
                             const sdpObject = sdpTransform.parse(offer.sdp);
-                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({ sdpObject });
+                            const nativeRtpCapabilities = sdpCommonUtils.extractRtpCapabilities({
+                                sdpObject,
+                            });
                             // libwebrtc supports NACK for OPUS but doesn't announce it.
                             ortcUtils.addNackSuppportForOpus(nativeRtpCapabilities);
                             return nativeRtpCapabilities;
@@ -10817,9 +10913,13 @@
                         localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         offerMediaObject = localSdpObject.media[mediaSectionIdx.idx];
                         // Set RTCP CNAME.
-                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({ offerMediaObject });
+                        sendingRtpParameters.rtcp.cname = sdpCommonUtils.getCname({
+                            offerMediaObject,
+                        });
                         // Set RTP encodings.
-                        sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({ offerMediaObject });
+                        sendingRtpParameters.encodings = sdpUnifiedPlanUtils.getRtpEncodings({
+                            offerMediaObject,
+                        });
                         // Complete encodings with given values.
                         if (encodings) {
                             for (let idx = 0; idx < sendingRtpParameters.encodings.length; ++idx) {
@@ -11211,7 +11311,9 @@
                             localSdpObject = sdpTransform.parse(this._pc.localDescription.sdp);
                         }
                         // Get our local DTLS parameters.
-                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({ sdpObject: localSdpObject });
+                        const dtlsParameters = sdpCommonUtils.extractDtlsParameters({
+                            sdpObject: localSdpObject,
+                        });
                         // Set our DTLS role.
                         dtlsParameters.role = localDtlsRole;
                         // Update the remote DTLS role in the SDP.
@@ -11241,20 +11343,20 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 11,
-                '../errors': 16,
-                '../ortc': 37,
-                '../scalabilityModes': 38,
-                '../utils': 40,
-                './HandlerInterface': 24,
-                './ortc/utils': 30,
-                './sdp/RemoteSdp': 32,
-                './sdp/commonUtils': 33,
-                './sdp/unifiedPlanUtils': 35,
-                'sdp-transform': 44,
+                '../Logger': 12,
+                '../errors': 17,
+                '../ortc': 38,
+                '../scalabilityModes': 39,
+                '../utils': 41,
+                './HandlerInterface': 25,
+                './ortc/utils': 31,
+                './sdp/RemoteSdp': 33,
+                './sdp/commonUtils': 34,
+                './sdp/unifiedPlanUtils': 36,
+                'sdp-transform': 45,
             },
         ],
-        29: [
+        30: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11369,9 +11471,9 @@
                 }
                 exports.mangleRtpParameters = mangleRtpParameters;
             },
-            { '../../utils': 40 },
+            { '../../utils': 41 },
         ],
-        30: [
+        31: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -11397,7 +11499,7 @@
             },
             {},
         ],
-        31: [
+        32: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12031,9 +12133,9 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 40, 'sdp-transform': 44 },
+            { '../../utils': 41, 'sdp-transform': 45 },
         ],
-        32: [
+        33: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12370,9 +12472,9 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 11, './MediaSection': 31, 'sdp-transform': 44 },
+            { '../../Logger': 12, './MediaSection': 32, 'sdp-transform': 45 },
         ],
-        33: [
+        34: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12625,9 +12727,9 @@
                 }
                 exports.applyCodecParameters = applyCodecParameters;
             },
-            { 'sdp-transform': 44 },
+            { 'sdp-transform': 45 },
         ],
-        34: [
+        35: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12784,7 +12886,7 @@
             },
             {},
         ],
-        35: [
+        36: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12916,7 +13018,7 @@
             },
             {},
         ],
-        36: [
+        37: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12993,7 +13095,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.1';
+                exports.version = '3.7.2';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13005,9 +13107,9 @@
                     },
                 });
             },
-            { './Device': 9, './scalabilityModes': 38, './types': 39, debug: 3 },
+            { './Device': 10, './scalabilityModes': 39, './types': 40, debug: 3 },
         ],
-        37: [
+        38: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13936,7 +14038,7 @@
                                 }
                                 let selectedProfileLevelId;
                                 try {
-                                    selectedProfileLevelId = h264.generateProfileLevelIdForAnswer(
+                                    selectedProfileLevelId = h264.generateProfileLevelIdStringForAnswer(
                                         aCodec.parameters,
                                         bCodec.parameters,
                                     );
@@ -13992,9 +14094,9 @@
                     return reducedRtcpFeedback;
                 }
             },
-            { './utils': 40, 'h264-profile-level-id': 5 },
+            { './utils': 41, 'h264-profile-level-id': 6 },
         ],
-        38: [
+        39: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14018,7 +14120,7 @@
             },
             {},
         ],
-        39: [
+        40: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -14061,19 +14163,19 @@
                 __exportStar(require('./errors'), exports);
             },
             {
-                './Consumer': 6,
-                './DataConsumer': 7,
-                './DataProducer': 8,
-                './Device': 9,
-                './Producer': 12,
-                './RtpParameters': 13,
-                './SctpParameters': 14,
-                './Transport': 15,
-                './errors': 16,
-                './handlers/HandlerInterface': 24,
+                './Consumer': 7,
+                './DataConsumer': 8,
+                './DataProducer': 9,
+                './Device': 10,
+                './Producer': 13,
+                './RtpParameters': 14,
+                './SctpParameters': 15,
+                './Transport': 16,
+                './errors': 17,
+                './handlers/HandlerInterface': 25,
             },
         ],
-        40: [
+        41: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14104,7 +14206,7 @@
             },
             {},
         ],
-        41: [
+        42: [
             function (require, module, exports) {
                 /**
                  * Helpers.
@@ -14269,7 +14371,7 @@
             },
             {},
         ],
-        42: [
+        43: [
             function (require, module, exports) {
                 (function (global) {
                     (function () {
@@ -14300,7 +14402,7 @@
             },
             {},
         ],
-        43: [
+        44: [
             function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
@@ -14813,7 +14915,7 @@
             },
             {},
         ],
-        44: [
+        45: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -14827,9 +14929,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './parser': 45, './writer': 46 },
+            { './parser': 46, './writer': 47 },
         ],
-        45: [
+        46: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -14962,9 +15064,9 @@
                     });
                 };
             },
-            { './grammar': 43 },
+            { './grammar': 44 },
         ],
-        46: [
+        47: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -15074,9 +15176,9 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 43 },
+            { './grammar': 44 },
         ],
-        47: [
+        48: [
             function (require, module, exports) {
                 /////////////////////////////////////////////////////////////////////////////////
                 /* UAParser.js v1.0.37
@@ -16355,14 +16457,14 @@
             },
             {},
         ],
-        48: [
+        49: [
             function (require, module, exports) {
                 const client = require('mediasoup-client');
                 window.mediasoupClient = client;
             },
-            { 'mediasoup-client': 36 },
+            { 'mediasoup-client': 37 },
         ],
-        49: [
+        50: [
             function (require, module, exports) {
                 // Copyright Joyent, Inc. and other Node contributors.
                 //
@@ -16851,7 +16953,7 @@
             },
             {},
         ],
-        50: [
+        51: [
             function (require, module, exports) {
                 // shim for using process in browser
                 var process = (module.exports = {});
@@ -17043,5 +17145,5 @@
         ],
     },
     {},
-    [48],
+    [49],
 );
