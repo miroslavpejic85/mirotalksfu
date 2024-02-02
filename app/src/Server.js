@@ -40,7 +40,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.61
+ * @version 1.3.62
  *
  */
 
@@ -68,6 +68,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
+const restrictAccessByIP = require('./middleware/IpWhitelist.js');
 const packageJson = require('../../package.json');
 
 // Slack API
@@ -204,6 +205,9 @@ function startServer() {
     app.use(express.static(dir.public));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
+
+    // IP Whitelist check ...
+    app.use(restrictAccessByIP);
 
     // Logs requests
     app.use((req, res, next) => {
@@ -502,6 +506,7 @@ function startServer() {
                 node_version: process.versions.node,
                 hostConfig: hostCfg,
                 presenters: config.presenters,
+                middleware: config.middleware,
                 announced_ip: announcedIP,
                 server: host,
                 server_tunnel: tunnel,
@@ -549,6 +554,7 @@ function startServer() {
             node_version: process.versions.node,
             hostConfig: hostCfg,
             presenters: config.presenters,
+            middleware: config.middleware,
             announced_ip: announcedIP,
             server: host,
             api_docs: api_docs,

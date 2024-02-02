@@ -67,6 +67,17 @@ module.exports = {
         ],
         join_first: true, // Set to true for traditional behavior, false to prioritize presenters
     },
+    middleware: {
+        /*
+            Middleware:
+                - IP Whitelist: Access to the instance is restricted to only the specified IP addresses in the allowed list. This feature is disabled by default.
+                - ...
+        */
+        IpWhitelist: {
+            enabled: false,
+            allowed: ['127.0.0.1', '::1'],
+        },
+    },
     console: {
         debug: true,
         colors: true,
