@@ -1565,15 +1565,15 @@ function handleSelectsInit() {
     initVideoSelect.onchange = async () => {
         await changeCamera(initVideoSelect.value);
         videoSelect.selectedIndex = initVideoSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, initVideoSelect.selectedIndex, initVideoSelect.value);
+        await refreshLsDevices();
     };
-    initMicrophoneSelect.onchange = () => {
+    initMicrophoneSelect.onchange = async () => {
         microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, initMicrophoneSelect.selectedIndex, initMicrophoneSelect.value);
+        await refreshLsDevices();
     };
-    initSpeakerSelect.onchange = () => {
+    initSpeakerSelect.onchange = async () => {
         speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+        await refreshLsDevices();
     };
 }
 
@@ -1606,28 +1606,30 @@ async function setSelectsInit() {
             console.log('04.1 ----> Audio devices seems changed, use default index 0');
             initMicrophoneSelect.selectedIndex = 0;
             microphoneSelect.selectedIndex = 0;
-            lS.setLocalStorageDevices(
-                lS.MEDIA_TYPE.audio,
-                initMicrophoneSelect.selectedIndex,
-                initMicrophoneSelect.value,
-            );
+            await refreshLsDevices();
         }
         if (lS.DEVICES_COUNT.speaker !== localStorageDevices.speaker.count) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
-            lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, initSpeakerSelect.selectedIndex, initSpeakerSelect.value);
+            await refreshLsDevices();
         }
         if (lS.DEVICES_COUNT.video !== localStorageDevices.video.count) {
             console.log('04.3 ----> Video devices seems changed, use default index 0');
             initVideoSelect.selectedIndex = 0;
             videoSelect.selectedIndex = 0;
-            lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, initVideoSelect.selectedIndex, initVideoSelect.value);
+            await refreshLsDevices();
         }
         //
         console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
     }
     if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
+}
+
+async function refreshLsDevices() {
+    lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
+    lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+    lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, speakerSelect.selectedIndex, speakerSelect.value);
 }
 
 async function changeCamera(deviceId) {
@@ -1722,10 +1724,10 @@ function handleCameraMirror(video) {
 
 function handleSelects() {
     // devices options
-    videoSelect.onchange = () => {
+    videoSelect.onchange = async () => {
         videoQuality.selectedIndex = 0;
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
+        await refreshLsDevices();
     };
     videoQuality.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
@@ -1740,13 +1742,13 @@ function handleSelects() {
         localStorageSettings.screen_fps = screenFps.selectedIndex;
         lS.setSettings(localStorageSettings);
     };
-    microphoneSelect.onchange = () => {
+    microphoneSelect.onchange = async () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
+        await refreshLsDevices();
     };
-    speakerSelect.onchange = () => {
+    speakerSelect.onchange = async () => {
         rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
-        lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, speakerSelect.selectedIndex, speakerSelect.value);
+        await refreshLsDevices();
     };
     switchPushToTalk.onchange = (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
