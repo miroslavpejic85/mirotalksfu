@@ -820,7 +820,7 @@ function startServer() {
             room.getPeers().get(socket.id).updatePeerInfo(data);
 
             if (data.broadcast) {
-                log.info('updatePeerInfo broadcast data');
+                log.debug('updatePeerInfo broadcast data');
                 room.broadCast(socket.id, 'updatePeerInfo', data);
             }
         });
@@ -988,7 +988,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            log.debug('User joined', data);
+            log.info('User joined', data);
 
             // User Auth required, we check if peer valid
             if (hostCfg.user_auth) {
@@ -1273,7 +1273,7 @@ function startServer() {
                 return;
             }
 
-            log.debug('message', data);
+            log.info('message', data);
 
             data.to_peer_id == 'all'
                 ? room.broadCast(socket.id, 'message', data)
@@ -1292,7 +1292,7 @@ function startServer() {
                     temperature: config.chatGPT.temperature,
                 });
                 const response = completion.choices[0].text;
-                log.debug('ChatGPT', {
+                log.info('ChatGPT', {
                     time: time,
                     room: room,
                     name: name,
