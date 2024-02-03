@@ -1565,15 +1565,15 @@ function handleSelectsInit() {
     initVideoSelect.onchange = async () => {
         await changeCamera(initVideoSelect.value);
         videoSelect.selectedIndex = initVideoSelect.selectedIndex;
-        await refreshLsDevices();
+        refreshLsDevices();
     };
-    initMicrophoneSelect.onchange = async () => {
+    initMicrophoneSelect.onchange = () => {
         microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
-        await refreshLsDevices();
+        refreshLsDevices();
     };
-    initSpeakerSelect.onchange = async () => {
+    initSpeakerSelect.onchange = () => {
         speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
-        await refreshLsDevices();
+        refreshLsDevices();
     };
 }
 
@@ -1606,19 +1606,19 @@ async function setSelectsInit() {
             console.log('04.1 ----> Audio devices seems changed, use default index 0');
             initMicrophoneSelect.selectedIndex = 0;
             microphoneSelect.selectedIndex = 0;
-            await refreshLsDevices();
+            refreshLsDevices();
         }
         if (lS.DEVICES_COUNT.speaker !== localStorageDevices.speaker.count) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
-            await refreshLsDevices();
+            refreshLsDevices();
         }
         if (lS.DEVICES_COUNT.video !== localStorageDevices.video.count) {
             console.log('04.3 ----> Video devices seems changed, use default index 0');
             initVideoSelect.selectedIndex = 0;
             videoSelect.selectedIndex = 0;
-            await refreshLsDevices();
+            refreshLsDevices();
         }
         //
         console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
@@ -1724,10 +1724,10 @@ function handleCameraMirror(video) {
 
 function handleSelects() {
     // devices options
-    videoSelect.onchange = async () => {
+    videoSelect.onchange = () => {
         videoQuality.selectedIndex = 0;
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
-        await refreshLsDevices();
+        refreshLsDevices();
     };
     videoQuality.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
@@ -1742,13 +1742,13 @@ function handleSelects() {
         localStorageSettings.screen_fps = screenFps.selectedIndex;
         lS.setSettings(localStorageSettings);
     };
-    microphoneSelect.onchange = async () => {
+    microphoneSelect.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
-        await refreshLsDevices();
+        refreshLsDevices();
     };
-    speakerSelect.onchange = async () => {
+    speakerSelect.onchange = () => {
         rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
-        await refreshLsDevices();
+        refreshLsDevices();
     };
     switchPushToTalk.onchange = (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);

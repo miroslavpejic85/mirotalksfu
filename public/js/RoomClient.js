@@ -2383,7 +2383,7 @@ class RoomClient {
                 .then(() => {
                     console.log(`Success, audio output device attached: ${sinkId}`);
                 })
-                .catch(async (err) => {
+                .catch((err) => {
                     let errorMessage = err;
                     let speakerSelect = this.getId('speakerSelect');
                     if (err.name === 'SecurityError')
@@ -2391,7 +2391,7 @@ class RoomClient {
                     console.error('Attach SinkId error: ', errorMessage);
                     this.userLog('error', errorMessage, 'top-end', 6000);
                     speakerSelect.selectedIndex = 0;
-                    await refreshLsDevices();
+                    refreshLsDevices();
                 });
         } else {
             let error = `Browser seems doesn't support output device selection.`;
