@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.62
+ * @version 1.3.63
  *
  */
 
@@ -1579,54 +1579,71 @@ function handleSelectsInit() {
 
 async function setSelectsInit() {
     if (localStorageDevices) {
-        console.log('04.0 ----> Get Local Storage Devices before', {
-            localStorageDevices: localStorageDevices,
-            devicesCount: lS.DEVICES_COUNT,
-            index: {
-                audio: localStorageDevices.audio.index,
-                speaker: localStorageDevices.speaker.index,
-                video: localStorageDevices.video.index,
-            },
-            count: {
-                audio: lS.DEVICES_COUNT.audio,
-                speaker: lS.DEVICES_COUNT.speaker,
-                video: lS.DEVICES_COUNT.video,
-            },
+        console.log('04.0 ----> Get Local Storage Devices before', localStorageDevices);
+        //
+        const initMicrophoneExist = selectOptionByValueExist(initMicrophoneSelect, localStorageDevices.audio.select);
+        const initSpeakerExist = selectOptionByValueExist(initSpeakerSelect, localStorageDevices.speaker.select);
+        const initVideoExist = selectOptionByValueExist(initVideoSelect, localStorageDevices.video.select);
+        //
+        const microphoneExist = selectOptionByValueExist(microphoneSelect, localStorageDevices.audio.select);
+        const speakerExist = selectOptionByValueExist(speakerSelect, localStorageDevices.speaker.select);
+        const videoExist = selectOptionByValueExist(videoSelect, localStorageDevices.video.select);
+
+        console.log('Check for audio changes', {
+            previous: localStorageDevices.audio.select,
+            current: microphoneSelect.value,
         });
-        //
-        initMicrophoneSelect.selectedIndex = localStorageDevices.audio.index;
-        initSpeakerSelect.selectedIndex = localStorageDevices.speaker.index;
-        initVideoSelect.selectedIndex = localStorageDevices.video.index;
-        //
-        microphoneSelect.selectedIndex = initMicrophoneSelect.selectedIndex;
-        speakerSelect.selectedIndex = initSpeakerSelect.selectedIndex;
-        videoSelect.selectedIndex = initVideoSelect.selectedIndex;
-        //
-        if (lS.DEVICES_COUNT.audio !== localStorageDevices.audio.count) {
+
+        if (!initMicrophoneExist || !microphoneExist) {
             console.log('04.1 ----> Audio devices seems changed, use default index 0');
             initMicrophoneSelect.selectedIndex = 0;
             microphoneSelect.selectedIndex = 0;
             refreshLsDevices();
         }
-        if (lS.DEVICES_COUNT.speaker !== localStorageDevices.speaker.count) {
+
+        console.log('Check for speaker changes', {
+            previous: localStorageDevices.speaker.select,
+            current: speakerSelect.value,
+        });
+
+        if (!initSpeakerExist || !speakerExist) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
             refreshLsDevices();
         }
-        if (lS.DEVICES_COUNT.video !== localStorageDevices.video.count) {
+
+        console.log('Check for video changes', {
+            previous: localStorageDevices.video.select,
+            current: videoSelect.value,
+        });
+
+        if (!initVideoExist || !videoExist) {
             console.log('04.3 ----> Video devices seems changed, use default index 0');
             initVideoSelect.selectedIndex = 0;
             videoSelect.selectedIndex = 0;
             refreshLsDevices();
         }
+
         //
         console.log('04.4 ----> Get Local Storage Devices after', lS.getLocalStorageDevices());
     }
     if (initVideoSelect.value) await changeCamera(initVideoSelect.value);
 }
 
-async function refreshLsDevices() {
+function selectOptionByValueExist(selectElement, value) {
+    let foundValue = false;
+    for (let i = 0; i < selectElement.options.length; i++) {
+        if (selectElement.options[i].value === value) {
+            selectElement.selectedIndex = i;
+            foundValue = true;
+            break;
+        }
+    }
+    return foundValue;
+}
+
+function refreshLsDevices() {
     lS.setLocalStorageDevices(lS.MEDIA_TYPE.video, videoSelect.selectedIndex, videoSelect.value);
     lS.setLocalStorageDevices(lS.MEDIA_TYPE.audio, microphoneSelect.selectedIndex, microphoneSelect.value);
     lS.setLocalStorageDevices(lS.MEDIA_TYPE.speaker, speakerSelect.selectedIndex, speakerSelect.value);
