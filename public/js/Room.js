@@ -1606,7 +1606,8 @@ async function setSelectsInit() {
             current: speakerSelect.value,
         });
 
-        if (!initSpeakerExist || !speakerExist) {
+        // TODO: Fix me, keep for now always default speaker...
+        if (true || !initSpeakerExist || !speakerExist) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
