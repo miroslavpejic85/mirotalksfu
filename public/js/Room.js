@@ -73,6 +73,9 @@ const wbHeight = 600;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
+// Media
+const sinkId = 'sinkId' in HTMLMediaElement.prototype;
+
 // ####################################################
 // LOCAL STORAGE
 // ####################################################
@@ -447,7 +450,6 @@ async function enumerateAudioDevices(stream) {
         .then(async () => {
             await stopTracks(stream);
             isEnumerateAudioDevices = true;
-            const sinkId = 'sinkId' in HTMLMediaElement.prototype;
             speakerSelect.disabled = !sinkId;
             // Check if there is speakers
             if (!sinkId || initSpeakerSelect.options.length === 0) {
@@ -1606,8 +1608,7 @@ async function setSelectsInit() {
             current: speakerSelect.value,
         });
 
-        // TODO: Fix me, keep for now always default speaker...
-        if (true || !initSpeakerExist || !speakerExist) {
+        if (!initSpeakerExist || !speakerExist) {
             console.log('04.2 ----> Speaker devices seems changed, use default index 0');
             initSpeakerSelect.selectedIndex = 0;
             speakerSelect.selectedIndex = 0;
@@ -1765,7 +1766,7 @@ function handleSelects() {
         refreshLsDevices();
     };
     speakerSelect.onchange = () => {
-        rc.attachSinkId(rc.myAudioEl, speakerSelect.value);
+        rc.changeAudioDestination();
         refreshLsDevices();
     };
     switchPushToTalk.onchange = (e) => {

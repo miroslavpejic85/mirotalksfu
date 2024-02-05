@@ -1697,9 +1697,6 @@ class RoomClient {
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
                 this.attachMediaStream(elem, stream, type, 'Producer');
-                if (this.isAudioAllowed && !this._moderator.audio_start_muted && !speakerSelect.disabled) {
-                    this.attachSinkId(elem, speakerSelect.value);
-                }
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
             default:
@@ -2104,6 +2101,9 @@ class RoomClient {
                     this.handlePV(id + '___' + audioConsumerId);
                     this.setPeerAudio(remotePeerId, remotePeerAudio);
                 }
+                if (sinkId && speakerSelect.value) {
+                    this.changeAudioDestination(elem);
+                }
                 console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
             default:
@@ -2375,6 +2375,18 @@ class RoomClient {
         consumerStream.addTrack(track);
         elem.srcObject = consumerStream;
         console.log(who + ' Success attached media ' + type);
+    }
+
+    async changeAudioDestination(audioElement = false) {
+        const audioDestination = speakerSelect.value;
+        if (audioElement) {
+            await this.attachSinkId(audioElement, audioDestination);
+        } else {
+            const audioElements = this.remoteAudioEl.querySelectorAll('audio');
+            audioElements.forEach(async (audioElement) => {
+                await this.attachSinkId(audioElement, audioDestination);
+            });
+        }
     }
 
     async attachSinkId(elem, sinkId) {
