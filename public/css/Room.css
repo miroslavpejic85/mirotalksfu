@@ -568,7 +568,8 @@ th {
 
 .theme-color-picker {
     padding: 10px;
-    border: none;
+    width: 120px;
+    border: var(--border);
     border-radius: 5px;
     margin-top: 10px;
     margin-bottom: 20px;
