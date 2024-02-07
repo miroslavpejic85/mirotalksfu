@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.64
+ * @version 1.3.65
  *
  */
 
@@ -62,6 +62,7 @@ const icons = {
     moderator: '<i class="fas fa-m"></i>',
     broadcaster: '<i class="fa-solid fa-wifi"></i>',
     codecs: '<i class="fa-solid fa-film"></i>',
+    theme: '<i class="fas fa-fill-drip"></i>',
 };
 
 const image = {
@@ -5026,6 +5027,9 @@ class RoomClient {
                 break;
             case 'recPrioritizeH264':
                 this.userLog('info', `${icons.codecs} Recording prioritize h.264  ${status}`, 'top-end');
+                break;
+            case 'customThemeKeep':
+                this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');
                 break;
             default:
                 break;

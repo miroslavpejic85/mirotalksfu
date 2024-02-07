@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.64
+ * @version 1.3.65
  *
  */
 
@@ -93,6 +93,71 @@ console.log('LOCAL_STORAGE', {
     localStorageDevices: localStorageDevices,
     localStorageInitConfig: localStorageInitConfig,
 });
+
+// ####################################################
+// THEME CUSTOM COLOR - PICKER
+// ####################################################
+
+const themeCustom = {
+    input: document.getElementById('themeColorPicker'),
+    color: localStorageSettings.theme_color ? localStorageSettings.theme_color : '#000000',
+    keep: localStorageSettings.theme_custom ? localStorageSettings.theme_custom : false,
+};
+
+const pickr = Pickr.create({
+    el: themeCustom.input,
+    theme: 'classic', // or 'monolith', or 'nano'
+    default: themeCustom.color,
+    useAsButton: true,
+
+    swatches: [
+        'rgba(244, 67, 54, 1)',
+        'rgba(233, 30, 99, 0.95)',
+        'rgba(156, 39, 176, 0.9)',
+        'rgba(103, 58, 183, 0.85)',
+        'rgba(63, 81, 181, 0.8)',
+        'rgba(33, 150, 243, 0.75)',
+        'rgba(3, 169, 244, 0.7)',
+        'rgba(0, 188, 212, 0.7)',
+        'rgba(0, 150, 136, 0.75)',
+        'rgba(76, 175, 80, 0.8)',
+        'rgba(139, 195, 74, 0.85)',
+        'rgba(205, 220, 57, 0.9)',
+        'rgba(255, 235, 59, 0.95)',
+        'rgba(255, 193, 7, 1)',
+    ],
+
+    components: {
+        // Main components
+        preview: true,
+        opacity: true,
+        hue: true,
+
+        // Input / output Options
+        interaction: {
+            hex: false,
+            rgba: false,
+            hsla: false,
+            hsva: false,
+            cmyk: false,
+            input: false,
+            clear: false,
+            save: false,
+        },
+    },
+})
+    .on('init', (pickr) => {
+        themeCustom.input.value = pickr.getSelectedColor().toHEXA().toString(0);
+    })
+    .on('change', (color) => {
+        themeCustom.color = color.toHEXA().toString();
+        themeCustom.input.value = themeCustom.color;
+        setCustomTheme();
+    })
+    .on('changestop', (color) => {
+        localStorageSettings.theme_color = themeCustom.color;
+        lS.setSettings(localStorageSettings);
+    });
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -1906,6 +1971,16 @@ function handleSelects() {
         e.target.blur();
     };
     // styling
+    keepCustomTheme.onchange = (e) => {
+        themeCustom.keep = e.currentTarget.checked;
+        selectTheme.disabled = themeCustom.keep;
+        rc.roomMessage('customThemeKeep', themeCustom.keep);
+        localStorageSettings.theme_custom = themeCustom.keep;
+        localStorageSettings.theme_color = themeCustom.color;
+        lS.setSettings(localStorageSettings);
+        setTheme();
+        e.target.blur();
+    };
     BtnAspectRatio.onchange = () => {
         setAspectRatio(BtnAspectRatio.value);
     };
@@ -2198,6 +2273,10 @@ function loadSettingsFromLocalStorage() {
 
     recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
     switchH264Recording.checked = recPrioritizeH264;
+
+    keepCustomTheme.checked = themeCustom.keep;
+    selectTheme.disabled = themeCustom.keep;
+    themeCustom.input.value = themeCustom.color;
 
     switchAutoGainControl.checked = localStorageSettings.mic_auto_gain_control;
     switchEchoCancellation.checked = localStorageSettings.mic_echo_cancellations;
@@ -3406,7 +3485,25 @@ function getParticipantAvatar(peerName) {
 // SET THEME
 // ####################################################
 
+function setCustomTheme() {
+    const color = themeCustom.color;
+    swalBackground = `radial-gradient(${color}, ${color})`;
+    document.documentElement.style.setProperty('--body-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--transcription-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--msger-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--left-msg-bg', `${color}`);
+    document.documentElement.style.setProperty('--right-msg-bg', `${color}`);
+    document.documentElement.style.setProperty('--select-bg', `${color}`);
+    document.documentElement.style.setProperty('--tab-btn-active', `${color}`);
+    document.documentElement.style.setProperty('--settings-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--wb-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+    document.body.style.background = `radial-gradient(${color}, ${color})`;
+}
+
 function setTheme() {
+    if (themeCustom.keep) return setCustomTheme();
+
     selectTheme.selectedIndex = localStorageSettings.theme;
     const theme = selectTheme.value;
     switch (theme) {

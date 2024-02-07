@@ -54,6 +54,18 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
         <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css" />
 
+        <!--  pickr  https://github.com/simonwep/pickr -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/classic.min.css" />
+        <!-- 'classic' theme -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/monolith.min.css" />
+        <!-- 'monolith' theme -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/themes/nano.min.css" />
+        <!-- 'nano' theme -->
+
+        <!-- Modern or es5 bundle -->
+        <script defer src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.min.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/@simonwep/pickr/dist/pickr.es5.min.js"></script>
+
         <!-- Bootstrap 5 -->
 
         <link
@@ -905,6 +917,23 @@ access to use this app.
                             <option value="blue">🔵 &nbsp;Blue</option>
                             <option value="red">🔴 &nbsp;Red</option>
                         </select>
+                        <br />
+                        <div class="title">
+                            <i class="fas fa-fill-drip"></i>
+                            <p>Custom theme:</p>
+                        </div>
+                        <br />
+                        <input id="themeColorPicker" class="theme-color-picker" type="text" />
+                        <br />
+                        <div class="inline-check-box">
+                            <div class="custom-width">
+                                <i class="fas fa-save"></i>
+                                <p>Keep custom</p>
+                            </div>
+                            <div class="form-check form-switch form-switch-md title">
+                                <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
+                            </div>
+                        </div>
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-up-down-left-right"></i>

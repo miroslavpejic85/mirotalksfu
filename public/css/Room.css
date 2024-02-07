@@ -367,6 +367,15 @@ body {
     color: white;
 }
 
+.inline-check-box {
+    margin-bottom: 20px;
+    display: inline-flex;
+    justify-content: center; /* Vertical centering */
+    align-items: center; /* Horizontal centering */
+    text-align: left;
+    color: white;
+}
+
 #recordingImage {
     width: 128px;
     height: auto;
@@ -551,6 +560,18 @@ th {
     background: black;
     border: none;
     border-radius: 5px;
+}
+
+/*--------------------------------------------------------------
+# Settings - dynamic colors picker
+--------------------------------------------------------------*/
+
+.theme-color-picker {
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+    margin-bottom: 20px;
 }
 
 /*--------------------------------------------------------------
@@ -871,7 +892,7 @@ th {
 --------------------------------------------------------------*/
 
 .dropdown-menu li:hover {
-    background: #000000;
+    background: var(--btns-bg-color);
 }
 
 /* Hide the default Bootstrap dropdown icon */
