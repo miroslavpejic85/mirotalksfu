@@ -2385,7 +2385,9 @@ class RoomClient {
         } else {
             const audioElements = this.remoteAudioEl.querySelectorAll('audio');
             audioElements.forEach(async (audioElement) => {
-                await this.attachSinkId(audioElement, audioDestination);
+                if (!audioElement.includes('__localAudio')) {
+                    await this.attachSinkId(audioElement, audioDestination);
+                }
             });
         }
     }
