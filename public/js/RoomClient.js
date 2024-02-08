@@ -2105,6 +2105,9 @@ class RoomClient {
                 if (sinkId && speakerSelect.value) {
                     this.changeAudioDestination(elem);
                 }
+                elem.addEventListener('play', () => {
+                    elem.volume = 0.1;
+                });
                 console.log('[Add audioConsumers]', this.audioConsumers);
                 break;
             default:
