@@ -18,6 +18,7 @@ dependencies: {
     crypto-js               : https://www.npmjs.com/package/crypto-js
     express                 : https://www.npmjs.com/package/express
     httpolyglot             : https://www.npmjs.com/package/httpolyglot
+    jsonwebtoken            : https://www.npmjs.com/package/jsonwebtoken
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
     ngrok                   : https://www.npmjs.com/package/ngrok
@@ -40,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.65
+ * @version 1.3.66
  *
  */
 
@@ -54,6 +55,7 @@ const http = require('http');
 const path = require('path');
 const axios = require('axios');
 const ngrok = require('ngrok');
+const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const config = require('./config');
 const checkXSS = require('./XSS.js');
@@ -91,6 +93,11 @@ const io = require('socket.io')(httpsServer, {
     transports: ['websocket'],
 });
 const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
+
+const jwtCfg = {
+    JWT_KEY: (config.jwt && config.jwt.key) || 'mirotalksfu_jwt_secret',
+    JWT_EXP: (config.jwt && config.jwt.exp) || '1h',
+};
 
 const hostCfg = {
     protected: config.host.protected,
@@ -279,21 +286,40 @@ function startServer() {
             log.debug('Direct Join', req.query);
 
             // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&username=username&password=password
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
-            const { room, roomPassword, name, audio, video, screen, hide, notify, username, password, isPresenter } =
-                checkXSS(req.query);
+            const { room, roomPassword, name, audio, video, screen, hide, notify, token, isPresenter } = checkXSS(
+                req.query,
+            );
 
-            const isPeerValid = isAuthPeer(username, password);
+            let peerUsername,
+                peerPassword = '';
+            let isPeerValid = false;
+            let isPeerPresenter = false;
 
-            if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
+            if (token) {
+                try {
+                    const { username, password, presenter } = checkXSS(jwt.verify(token, jwtCfg.JWT_KEY));
+                    peerUsername = username;
+                    peerPassword = password;
+                    isPeerValid = isAuthPeer(username, password);
+                    isPeerPresenter = presenter === '1' || presenter === 'true';
+                } catch (err) {
+                    log.error('Direct Join JWT error', { error: err.message, token: token });
+                    return hostCfg.protected || hostCfg.user_auth
+                        ? res.sendFile(views.login)
+                        : res.sendFile(views.landing);
+                }
+            }
+
+            if (hostCfg.protected && isPeerValid && isPeerPresenter && !hostCfg.authenticated) {
                 const ip = getIP(req);
                 hostCfg.authenticated = true;
                 authHost.setAuthorizedIP(ip, true);
                 log.debug('Direct Join user auth as host done', {
                     ip: ip,
-                    username: username,
-                    password: password,
+                    username: peerUsername,
+                    password: peerPassword,
                 });
             }
 
@@ -386,12 +412,18 @@ function startServer() {
                 authorized: authHost.isAuthorizedIP(ip),
                 authorizedIps: authHost.getAuthorizedIPs(),
             });
-            return res.status(200).json({ message: 'authorized' });
+            const token = jwt.sign({ username: username, password: password, presenter: true }, jwtCfg.JWT_KEY, {
+                expiresIn: jwtCfg.JWT_EXP,
+            });
+            return res.status(200).json({ message: token });
         }
 
         if (isPeerValid) {
             log.debug('PEER LOGIN OK', { ip: ip, authorized: true });
-            return res.status(200).json({ message: 'authorized' });
+            const token = jwt.sign({ username: username, password: password, presenter: false }, jwtCfg.JWT_KEY, {
+                expiresIn: jwtCfg.JWT_EXP,
+            });
+            return res.status(200).json({ message: token });
         } else {
             return res.status(401).json({ message: 'unauthorized' });
         }
@@ -505,6 +537,7 @@ function startServer() {
                 app_version: packageJson.version,
                 node_version: process.versions.node,
                 hostConfig: hostCfg,
+                jwtCfg: jwtCfg,
                 presenters: config.presenters,
                 middleware: config.middleware,
                 announced_ip: announcedIP,
@@ -553,6 +586,7 @@ function startServer() {
             app_version: packageJson.version,
             node_version: process.versions.node,
             hostConfig: hostCfg,
+            jwtCfg: jwtCfg,
             presenters: config.presenters,
             middleware: config.middleware,
             announced_ip: announcedIP,
@@ -990,21 +1024,38 @@ function startServer() {
 
             log.info('User joined', data);
 
+            let is_presenter = true;
+
+            const { peer_token } = data.peer_info;
+
             // User Auth required, we check if peer valid
             if (hostCfg.user_auth) {
-                const { peer_username, peer_password } = data.peer_info;
+                // Check JWT
+                if (peer_token) {
+                    try {
+                        const { username, password, presenter } = checkXSS(jwt.verify(peer_token, jwtCfg.JWT_KEY));
 
-                const isPeerValid = isAuthPeer(peer_username, peer_password);
+                        const isPeerValid = isAuthPeer(username, password);
 
-                log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
-                    ip: peer_ip,
-                    peer_username: peer_username,
-                    peer_password: peer_password,
-                    peer_valid: isPeerValid,
-                });
+                        is_presenter = presenter === '1' || presenter === 'true';
 
-                if (!isPeerValid) {
-                    // redirect peer to login page
+                        log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
+                            ip: peer_ip,
+                            peer_username: username,
+                            peer_password: password,
+                            peer_valid: isPeerValid,
+                            peer_presenter: is_presenter,
+                        });
+
+                        if (!isPeerValid) {
+                            // redirect peer to login page
+                            return cb('unauthorized');
+                        }
+                    } catch (err) {
+                        log.error('[Join] - JWT error', { error: err.message, token: peer_token });
+                        return cb('unauthorized');
+                    }
+                } else {
                     return cb('unauthorized');
                 }
             }
@@ -1048,7 +1099,7 @@ function startServer() {
                 peer_ip: peer_ip,
                 peer_name: peer_name,
                 peer_uuid: peer_uuid,
-                is_presenter: true,
+                is_presenter: is_presenter,
             };
             // first we check if the username match the presenters username
             if (config.presenters && config.presenters.list && config.presenters.list.includes(peer_name)) {
@@ -1062,7 +1113,9 @@ function startServer() {
 
             log.info('[Join] - Connected presenters grp by roomId', presenters);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = peer_token
+                ? is_presenter
+                : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
 

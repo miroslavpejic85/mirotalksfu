@@ -37,6 +37,7 @@
 -   Translated into 133 languages.
 -   Host protection to prevent unauthorized access.
 -   User auth to prevent unauthorized access.
+-   JWT.io securely manages credentials for host configurations and user authentication, enhancing security and streamlining processes.
 -   Room password protection.
 -   Room lobby, central gathering space.
 -   Room spam mitigations, focused on preventing spam.
@@ -97,11 +98,7 @@
     | screen       | boolean        | Screen stream   |
     | notify       | boolean        | Welcome message |
     | hide         | boolean        | Hide myself     |
-    | username     | string         | Auth username   |
-    | password     | string         | Auth password   |
-
-> **Caution**
-> It is strongly advised against including usernames and passwords in URL parameters for security reasons.
+    | token        | string         | JWT             |
 
 </details>
 
@@ -110,7 +107,7 @@
 
 <br/>
 
-When [host.protected](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) or `host.user_auth` is enabled, the host/users must provide a valid username and password for joining the room as specified in the `app/src/config.js` file.
+When [host.protected](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) or `host.user_auth` is enabled, the host/users can provide a valid token for direct joining the room as specified in the `app/src/config.js` file.
 
 | Params           | Value                                                                            | Description                                                                            |
 | ---------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
@@ -253,8 +250,11 @@ $ docker-compose down
     $ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
     $ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
     # The response will give you a entrypoint / URL for the direct join to the meeting.
-    $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","password":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false"}'
-    $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","password":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false"}'
+    $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false"}'
+    $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false"}'
+    # The response will give you a entrypoint / URL for the direct join to the meeting with a token.
+    $ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","token":{"username":"username","password":"password","presenter":"true", "expire":"1h"}}'
+    $ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","token":{"username":"username","password":"password","presenter":"true", "expire":"1h"}}'
     ```
 
 </details>

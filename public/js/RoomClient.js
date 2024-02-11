@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.65
+ * @version 1.3.66
  *
  */
 
@@ -374,11 +374,14 @@ class RoomClient {
                         return this.isBanned();
                     }
                     const peers = new Map(JSON.parse(room.peers));
-                    for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-                        let peer_info = peers.get(peer).peer_info;
-                        if (peer_info.peer_name == this.peer_name) {
-                            console.log('00-WARNING ----> Username already in use');
-                            return this.userNameAlreadyInRoom();
+                    if (!peer_info.peer_token) {
+                        // hack...
+                        for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
+                            let peer_info = peers.get(peer).peer_info;
+                            if (peer_info.peer_name == this.peer_name) {
+                                console.log('00-WARNING ----> Username already in use');
+                                return this.userNameAlreadyInRoom();
+                            }
                         }
                     }
                     await this.joinAllowed(room);
@@ -909,7 +912,10 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
-        return `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0&isPresenter=${isPresenter}`;
+        return (
+            `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0&isPresenter=${isPresenter}` +
+            (this.peer_info.peer_token ? `&token=${peer_info.peer_token}` : '')
+        );
     }
 
     // ####################################################

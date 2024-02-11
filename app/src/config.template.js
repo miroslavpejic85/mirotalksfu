@@ -56,6 +56,14 @@ module.exports = {
             //...
         ],
     },
+    jwt: {
+        /*
+            JWT https://jwt.io/
+            Securely manages credentials for host configurations and user authentication, enhancing security and streamlining processes.
+         */
+        key: 'mirotalksfu_jwt_secret',
+        exp: '1h',
+    },
     presenters: {
         list: [
             /*

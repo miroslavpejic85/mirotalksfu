@@ -1,7 +1,11 @@
 'use strict';
 
+const jwt = require('jsonwebtoken');
 const config = require('./config');
 const { v4: uuidV4 } = require('uuid');
+
+const JWT_KEY = (config.jwt && config.jwt.key) || 'mirotalksfu_jwt_secret';
+const JWT_EXP = (config.jwt && config.jwt.exp) || '1h';
 
 module.exports = class ServerApi {
     constructor(host = null, authorization = null) {
@@ -20,23 +24,37 @@ module.exports = class ServerApi {
     }
 
     getJoinURL(data) {
+        // Get data...
+        const { room, roomPassword, name, audio, video, screen, notify, token } = data;
+
+        let jwtToken = '';
+
+        if (token) {
+            const { username, password, presenter, expire } = token;
+            jwtToken =
+                '&token=' +
+                jwt.sign({ username: username, password: password, presenter: presenter }, JWT_KEY, {
+                    expiresIn: expire ? expire : JWT_EXP,
+                });
+        }
         return (
             'https://' +
             this._host +
             '/join?room=' +
-            data.room +
+            room +
             '&roomPassword=' +
-            data.roomPassword +
+            roomPassword +
             '&name=' +
-            data.name +
+            name +
             '&audio=' +
-            data.audio +
+            audio +
             '&video=' +
-            data.video +
+            video +
             '&screen=' +
-            data.screen +
+            screen +
             '&notify=' +
-            data.notify
+            notify +
+            jwtToken
         );
     }
 };
