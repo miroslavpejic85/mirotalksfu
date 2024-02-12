@@ -214,10 +214,10 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-        const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenIps } = config.mediasoup.webRtcTransport;
+        const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = config.mediasoup.webRtcTransport;
 
         const transport = await this.router.createWebRtcTransport({
-            listenIps: listenIps,
+            listenInfos: listenInfos,
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,

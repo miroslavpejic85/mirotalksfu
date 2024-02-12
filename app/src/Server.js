@@ -178,14 +178,14 @@ let roomList = new Map(); // All Rooms
 
 let presenters = {}; // collect presenters grp by roomId
 
-let announcedIP = config.mediasoup.webRtcTransport.listenIps[0].announcedIp; // AnnouncedIP (server public IPv4)
+let announcedAddress = config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress; // announcedAddress (server public IPv4)
 
 // All mediasoup workers
 let workers = [];
 let nextMediasoupWorkerIdx = 0;
 
-// Autodetect announcedIP (https://www.ipify.org)
-if (!announcedIP) {
+// Autodetect announcedAddress (https://www.ipify.org)
+if (!announcedAddress) {
     http.get(
         {
             host: 'api.ipify.org',
@@ -194,8 +194,8 @@ if (!announcedIP) {
         },
         (resp) => {
             resp.on('data', (ip) => {
-                announcedIP = ip.toString();
-                config.mediasoup.webRtcTransport.listenIps[0].announcedIp = announcedIP;
+                announcedAddress = ip.toString();
+                config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress = announcedAddress;
                 startServer();
             });
         },
@@ -545,7 +545,7 @@ function startServer() {
                 jwtCfg: jwtCfg,
                 presenters: config.presenters,
                 middleware: config.middleware,
-                announced_ip: announcedIP,
+                announcedAddress: announcedAddress,
                 server: host,
                 server_tunnel: tunnel,
                 api_docs: api_docs,
@@ -595,7 +595,7 @@ function startServer() {
             jwtCfg: jwtCfg,
             presenters: config.presenters,
             middleware: config.middleware,
-            announced_ip: announcedIP,
+            announcedAddress: announcedAddress,
             server: host,
             api_docs: api_docs,
             mediasoup_worker_bin: mediasoup.workerBin,
