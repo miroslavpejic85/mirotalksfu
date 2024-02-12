@@ -1098,10 +1098,10 @@ progress {
 }
 
 .whiteboard-header button {
-    padding: 10px;
+    /* padding: 10px; */
     margin: 2px;
     border-radius: 5px;
-    border: var(--border);
+    /* border: var(--border); */
 }
 
 .whiteboardColorPicker {

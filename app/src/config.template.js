@@ -75,6 +75,93 @@ module.exports = {
         ],
         join_first: true, // Set to true for traditional behavior, false to prioritize presenters
     },
+    ui: {
+        /*
+            Toggle the visibility of specific HTML elements within the room
+        */
+        buttons: {
+            main: {
+                shareButton: true,
+                hideMeButton: true,
+                startAudioButton: true,
+                startVideoButton: true,
+                startScreenButton: true,
+                swapCameraButton: true,
+                chatButton: true,
+                raiseHandButton: true,
+                transcriptionButton: true,
+                whiteboardButton: true,
+                emojiRoomButton: true,
+                settingsButton: true,
+                aboutButton: true, // Please keep me always visible, thank you!
+                exitButton: true,
+            },
+            settings: {
+                fileSharing: true,
+                lockRoomButton: true, // presenter
+                unlockRoomButton: true, // presenter
+                broadcastingButton: true, // presenter
+                lobbyButton: true, // presenter
+                micOptionsButton: true, // presenter
+                tabModerator: true, // presenter
+                tabRecording: true,
+                pushToTalk: true,
+                host_only_recording: true, // presenter
+            },
+            producerVideo: {
+                videoPictureInPicture: true,
+                fullScreenButton: true,
+                snapShotButton: true,
+                muteAudioButton: true,
+                videoPrivacyButton: true,
+            },
+            consumerVideo: {
+                videoPictureInPicture: true,
+                fullScreenButton: true,
+                snapShotButton: true,
+                sendMessageButton: true,
+                sendFileButton: true,
+                sendVideoButton: true,
+                muteVideoButton: true,
+                muteAudioButton: true,
+                audioVolumeInput: true, // Disabled for mobile
+                geolocationButton: true, // Presenter
+                banButton: true, // presenter
+                ejectButton: true, // presenter
+            },
+            videoOff: {
+                sendMessageButton: true,
+                sendFileButton: true,
+                sendVideoButton: true,
+                muteAudioButton: true,
+                audioVolumeInput: true, // Disabled for mobile
+                geolocationButton: true, // Presenter
+                banButton: true, // presenter
+                ejectButton: true, // presenter
+            },
+            chat: {
+                chatPinButton: true,
+                chatMaxButton: true,
+                chatSaveButton: true,
+                chatEmojiButton: true,
+                chatMarkdownButton: true,
+                chatSpeechStartButton: true,
+            },
+            participantsList: {
+                saveInfoButton: true, // presenter
+                sendFileAllButton: true, // presenter
+                ejectAllButton: true, // presenter
+                sendFileButton: true, // presenter & guests
+                geoLocationButton: true, // presenter
+                banButton: true, // presenter
+                ejectButton: true, // presenter
+            },
+            whiteboard: {
+                whiteboardLockButton: true, // presenter
+            },
+            //...
+        },
+    },
     middleware: {
         /*
             Middleware:

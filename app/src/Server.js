@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.66
+ * @version 1.3.67
  *
  */
 
@@ -253,6 +253,11 @@ function startServer() {
         } else {
             next();
         }
+    });
+
+    // UI buttons configuration
+    app.get('/config', (req, res) => {
+        res.status(200).json({ message: config.ui ? config.ui.buttons : false });
     });
 
     // main page
@@ -553,6 +558,7 @@ function startServer() {
                 slack_enabled: slackEnabled,
                 stats_enabled: config.stats.enabled,
                 chatGPT_enabled: config.chatGPT.enabled,
+                configUI: config.ui,
             });
         } catch (err) {
             log.error('Ngrok Start error: ', err.body);
@@ -601,6 +607,7 @@ function startServer() {
             slack_enabled: slackEnabled,
             stats_enabled: config.stats.enabled,
             chatGPT_enabled: config.chatGPT.enabled,
+            configUI: config.ui,
         });
     });
 

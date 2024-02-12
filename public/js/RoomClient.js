@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.66
+ * @version 1.3.67
  *
  */
 
@@ -427,10 +427,13 @@ class RoomClient {
             isBroadcastingEnabled = isPresenter && !room.broadcasting ? isBroadcastingEnabled : room.broadcasting;
             console.log('07.1 ----> ROOM BROADCASTING', isBroadcastingEnabled);
             // ###################################################################################################
-            room.config.hostOnlyRecording
-                ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
-                  this.event(_EVENTS.hostOnlyRecordingOn))
-                : this.event(_EVENTS.hostOnlyRecordingOff);
+
+            if (BUTTONS.settings.tabRecording) {
+                room.config.hostOnlyRecording
+                    ? (console.log('07.1 ----> WARNING Room Host only recording enabled'),
+                      this.event(_EVENTS.hostOnlyRecordingOn))
+                    : this.event(_EVENTS.hostOnlyRecordingOff);
+            }
 
             // Handle Room moderator rules
             if (room.moderator && (!isRulesActive || !isPresenter)) {
@@ -1003,7 +1006,7 @@ class RoomClient {
             console.log('09 ----> Audio is off');
             setColor(startAudioButton, 'red');
             this.setIsAudio(this.peer_id, false);
-            this.event(_EVENTS.stopAudio);
+            if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
         }
         if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
@@ -1014,7 +1017,7 @@ class RoomClient {
             setColor(startVideoButton, 'red');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
-            this.event(_EVENTS.stopVideo);
+            if (BUTTONS.main.startVideoButton) this.event(_EVENTS.stopVideo);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'video', false);
         }
         if (this.joinRoomWithScreen && !this._moderator.screen_cant_share) {
@@ -3266,7 +3269,7 @@ class RoomClient {
             await getRoomParticipants();
             hide(chatMinButton);
             if (!this.isMobileDevice) {
-                show(chatMaxButton);
+                BUTTONS.chat.chatMaxButton && show(chatMaxButton);
             }
             this.chatCenter();
             this.sound('open');
@@ -3309,7 +3312,7 @@ class RoomClient {
     chatMaximize() {
         this.isChatMaximized = true;
         hide(chatMaxButton);
-        show(chatMinButton);
+        BUTTONS.chat.chatMaxButton && show(chatMinButton);
         this.chatCenter();
         document.documentElement.style.setProperty('--msger-width', '100%');
         document.documentElement.style.setProperty('--msger-height', '100%');
@@ -3319,7 +3322,7 @@ class RoomClient {
     chatMinimize() {
         this.isChatMaximized = false;
         hide(chatMinButton);
-        show(chatMaxButton);
+        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         if (this.isChatPinned) {
             this.chatPin();
         } else {
@@ -3356,7 +3359,7 @@ class RoomClient {
         document.documentElement.style.setProperty('--msger-width', '800px');
         document.documentElement.style.setProperty('--msger-height', '700px');
         hide(chatMinButton);
-        show(chatMaxButton);
+        BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         this.chatCenter();
         this.isChatPinned = false;
         setColor(chatTogglePin, 'white');

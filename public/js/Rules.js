@@ -8,7 +8,12 @@ let isPresenter = false;
 
 const isRulesActive = true;
 
-const BUTTONS = {
+/**
+ * WARNING!
+ * This will be replaced by the ui.buttons specified in the server configuration file located at app/src/config.js.
+ * Ensure that any changes made here are also reflected in the configuration file to maintain synchronization.
+ */
+let BUTTONS = {
     main: {
         shareButton: true,
         hideMeButton: true,
@@ -26,6 +31,7 @@ const BUTTONS = {
         exitButton: true,
     },
     settings: {
+        fileSharing: true,
         lockRoomButton: true, // presenter
         unlockRoomButton: true, // presenter
         broadcastingButton: true, // presenter
@@ -77,9 +83,15 @@ const BUTTONS = {
     },
     participantsList: {
         saveInfoButton: true, // presenter
+        sendFileAllButton: true, // presenter
+        ejectAllButton: true, // presenter
+        sendFileButton: false, // presenter & guests
+        geoLocationButton: true, // presenter
+        banButton: true, // presenter
+        ejectButton: true, // presenter
     },
     whiteboard: {
-        whiteboardLockButton: false, // presenter
+        whiteboardLockButton: true, // presenter
     },
     //...
 };
@@ -113,23 +125,8 @@ function handleRules(isPresenter) {
         // ##################################
         // PRESENTER
         // ##################################
-        BUTTONS.participantsList.saveInfoButton = true;
-        BUTTONS.settings.lockRoomButton = !isRoomLocked;
-        BUTTONS.settings.unlockRoomButton = isRoomLocked;
-        BUTTONS.settings.broadcastingButton = true;
-        BUTTONS.settings.lobbyButton = true;
-        BUTTONS.settings.micOptionsButton = true;
-        BUTTONS.settings.tabModerator = true;
-        BUTTONS.videoOff.muteAudioButton = true;
-        BUTTONS.videoOff.geolocationButton = true;
-        BUTTONS.videoOff.banButton = true;
-        BUTTONS.videoOff.ejectButton = true;
-        BUTTONS.consumerVideo.geolocationButton = true;
-        BUTTONS.consumerVideo.banButton = true;
-        BUTTONS.consumerVideo.ejectButton = true;
-        BUTTONS.consumerVideo.muteAudioButton = true;
-        BUTTONS.consumerVideo.muteVideoButton = true;
-        BUTTONS.whiteboard.whiteboardLockButton = true;
+        BUTTONS.settings.lockRoomButton = BUTTONS.settings.lockRoomButton && !isRoomLocked;
+        BUTTONS.settings.unlockRoomButton = BUTTONS.settings.lockRoomButton && isRoomLocked;
         //...
 
         // ##################################

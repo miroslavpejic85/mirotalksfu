@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.66
+ * @version 1.3.67
  *
  */
 
@@ -414,9 +414,6 @@ function makeId(length) {
 // ####################################################
 
 async function initRoom() {
-    if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
-        BUTTONS.main.startScreenButton && show(initStartScreenButton);
-    }
     if (!isAudioAllowed && !isVideoAllowed && !joinRoomWithoutAudioVideo) {
         openURL(`/permission?room_id=${room_id}&message=Not allowed both Audio and Video`);
     } else {
@@ -771,6 +768,26 @@ async function whoAreYou() {
 
     hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
+
+    try {
+        const response = await axios.get('/config', {
+            timeout: 5000,
+        });
+        const serverButtons = response.data.message;
+        if (serverButtons) {
+            BUTTONS = serverButtons;
+            console.log('04 ----> AXIOS ROOM BUTTONS SETTINGS', {
+                serverButtons: serverButtons,
+                clientButtons: BUTTONS,
+            });
+        }
+    } catch (error) {
+        console.error('04 ----> AXIOS GET CONFIG ERROR', error.message);
+    }
+
+    if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
+        BUTTONS.main.startScreenButton && show(initStartScreenButton);
+    }
 
     if (peer_name) {
         checkMedia();
@@ -1167,7 +1184,7 @@ function roomIsReady() {
     BUTTONS.main.settingsButton && show(settingsButton);
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
-    show(fileShareButton);
+    BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
@@ -3265,11 +3282,19 @@ function getParticipantsList(peers) {
             <!-- <i class="fas fa-bars"></i> -->
             <i class="fas fa-ellipsis-vertical"></i>
             </button>
-            <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">
-                <li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>
-                <li><button class="btn-sm ml5" id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo} Share audio/video to all</button></li>
-                <li><button class="btn-sm ml5" id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer} Eject all participants</button></li>
-            </ul>
+            <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">`;
+
+        if (BUTTONS.participantsList.sendFileAllButton) {
+            li += `<li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>`;
+        }
+
+        li += `<li><button class="btn-sm ml5" id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo} Share audio/video to all</button></li>`;
+
+        if (BUTTONS.participantsList.ejectAllButton) {
+            li += `<li><button class="btn-sm ml5" id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer} Eject all participants</button></li>`;
+        }
+
+        li += `</ul>
         </div>
 
         <br/>
@@ -3335,13 +3360,25 @@ function getParticipantsList(peers) {
                         <!-- <i class="fas fa-bars"></i> -->
                         <i class="fas fa-ellipsis-vertical"></i>
                         </button>
-                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
-                            <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
-                            <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>
-                            <li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>
-                            <li><button class="btn-sm ml5" id='${peer_id}___pBan' onclick="rc.peerAction('me',this.id,'ban')">${peer_ban} Ban participant</button></li>
-                            <li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>
-                        </ul>
+                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
+
+                if (BUTTONS.participantsList.sendFileButton) {
+                    li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>`;
+                }
+
+                li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>`;
+
+                if (BUTTONS.participantsList.geoLocationButton) {
+                    li += `<li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>`;
+                }
+                if (BUTTONS.participantsList.banButton) {
+                    li += `<li><button class="btn-sm ml5" id='${peer_id}___pBan' onclick="rc.peerAction('me',this.id,'ban')">${peer_ban} Ban participant</button></li>`;
+                }
+                if (BUTTONS.participantsList.ejectButton) {
+                    li += `<li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>`;
+                }
+
+                li += `</ul>
                     </div>
 
                     <br/>
@@ -3399,9 +3436,13 @@ function getParticipantsList(peers) {
                         <!-- <i class="fas fa-bars"></i> -->
                         <i class="fas fa-ellipsis-vertical"></i>
                         </button>
-                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">
-                            <li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>
-                            <li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
+                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
+
+                    if (BUTTONS.participantsList.sendFileButton) {
+                        li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>`;
+                    }
+
+                    li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
                         </ul>
                     </div>
                     `;
