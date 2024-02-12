@@ -24,36 +24,51 @@ module.exports = class ServerApi {
     }
 
     getJoinURL(data) {
-        // Get data...
+        // Get data
         const { room, roomPassword, name, audio, video, screen, notify, token } = data;
+
+        const roomValue = room || uuidV4();
+        const roomPasswordValue = roomPassword || false;
+        const nameValue = name || uuidV4();
+        const audioValue = audio || false;
+        const videoValue = video || false;
+        const screenValue = screen || false;
+        const notifyValue = notify || false;
 
         let jwtToken = '';
 
         if (token) {
+            // JWT.io
             const { username, password, presenter, expire } = token;
+
+            const usernameValue = username || 'username';
+            const passwordValue = password || 'password';
+            const presenterValue = String(presenter);
+            const expireValue = expire || JWT_EXP;
+
             jwtToken =
                 '&token=' +
-                jwt.sign({ username: username, password: password, presenter: presenter }, JWT_KEY, {
-                    expiresIn: expire ? expire : JWT_EXP,
+                jwt.sign({ username: usernameValue, password: passwordValue, presenter: presenterValue }, JWT_KEY, {
+                    expiresIn: expireValue,
                 });
         }
         return (
             'https://' +
             this._host +
             '/join?room=' +
-            room +
+            roomValue +
             '&roomPassword=' +
-            roomPassword +
+            roomPasswordValue +
             '&name=' +
-            name +
+            nameValue +
             '&audio=' +
-            audio +
+            audioValue +
             '&video=' +
-            video +
+            videoValue +
             '&screen=' +
-            screen +
+            screenValue +
             '&notify=' +
-            notify +
+            notifyValue +
             jwtToken
         );
     }

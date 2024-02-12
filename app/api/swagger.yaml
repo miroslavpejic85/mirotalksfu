@@ -43,15 +43,6 @@ paths:
                   description: Custom Join URL.
                   schema:
                       type: object
-                      required:
-                          - room
-                          - roomPassword
-                          - name
-                          - audio
-                          - video
-                          - screen
-                          - hide
-                          - notify
                       properties:
                           room:
                               type: string
@@ -64,10 +55,10 @@ paths:
                               default: 'mirotalksfu'
                           audio:
                               type: boolean
-                              default: true
+                              default: false
                           video:
                               type: boolean
-                              default: true
+                              default: false
                           screen:
                               type: boolean
                               default: false
@@ -76,7 +67,25 @@ paths:
                               default: false
                           notify:
                               type: boolean
-                              default: true
+                              default: false
+                          token:
+                              type: object
+                              description: |
+                                  Object containing authentication token details.
+                                  This token is required when host.protected or host.user_auth is enabled in the app/src/config.js file.
+                              properties:
+                                  username:
+                                      type: string
+                                      default: 'username'
+                                  password:
+                                      type: string
+                                      default: 'password'
+                                  presenter:
+                                      type: boolean
+                                      default: true
+                                  expire:
+                                      type: string
+                                      default: '1h'
             consumes:
                 - 'application/json'
             produces:
