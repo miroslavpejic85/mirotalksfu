@@ -29,7 +29,7 @@ module.exports = class ServerApi {
 
         const roomValue = room || uuidV4();
         const roomPasswordValue = roomPassword || false;
-        const nameValue = name || uuidV4();
+        const nameValue = name || 'User-' + this.getRandomNumber();
         const audioValue = audio || false;
         const videoValue = video || false;
         const screenValue = screen || false;
@@ -71,5 +71,9 @@ module.exports = class ServerApi {
             notifyValue +
             jwtToken
         );
+    }
+
+    getRandomNumber() {
+        return Math.floor(Math.random() * 999999);
     }
 };
