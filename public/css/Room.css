@@ -1102,6 +1102,7 @@ progress {
     margin: 2px;
     border-radius: 5px;
     /* border: var(--border); */
+    border: none !important;
 }
 
 .whiteboardColorPicker {
