@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.67
+ * @version 1.3.68
  *
  */
 
@@ -158,7 +158,16 @@ if (config.chatGPT.enabled) {
 // directory
 const dir = {
     public: path.join(__dirname, '../../', 'public'),
+    rec: path.join(__dirname, '../', config?.server?.recording?.dir ? config.server.recording.dir + '/' : 'rec/'),
 };
+
+// rec directory create
+const serverRecordingEnabled = config?.server?.recording?.enabled;
+if (serverRecordingEnabled) {
+    if (!fs.existsSync(dir.rec)) {
+        fs.mkdirSync(dir.rec, { recursive: true });
+    }
+}
 
 // html views
 const views = {
@@ -435,6 +444,43 @@ function startServer() {
     });
 
     // ####################################################
+    // KEEP RECORDING ON SERVER DIR
+    // ####################################################
+
+    app.post(['/recSync'], (req, res) => {
+        // Store recording...
+        if (serverRecordingEnabled) {
+            if (!fs.existsSync(dir.rec)) fs.mkdirSync(dir.rec, { recursive: true });
+
+            const { fileName } = req.query;
+
+            if (!fileName) {
+                return res.status(400).send('Filename not provided');
+            }
+
+            try {
+                const filePath = dir.rec + fileName;
+                const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+
+                req.pipe(writeStream);
+
+                writeStream.on('error', (err) => {
+                    log.error('Error writing to file:', err.message);
+                    res.status(500).send('Internal Server Error');
+                });
+
+                writeStream.on('finish', () => {
+                    log.debug('File saved successfully:', fileName);
+                    res.status(200).send('File uploaded successfully');
+                });
+            } catch (err) {
+                log.error('Error processing upload', err.message);
+                res.status(500).send('Internal Server Error');
+            }
+        }
+    });
+
+    // ####################################################
     // API
     // ####################################################
 
@@ -533,11 +579,8 @@ function startServer() {
             await ngrok.authtoken(config.ngrok.authToken);
             await ngrok.connect(config.server.listen.port);
             const api = ngrok.getApi();
-            // const data = JSON.parse(await api.get('api/tunnels')); // v3
-            const data = await api.listTunnels(); // v4
-            const pu0 = data.tunnels[0].public_url;
-            const pu1 = data.tunnels[1].public_url;
-            const tunnel = pu0.startsWith('https') ? pu0 : pu1;
+            const list = await api.listTunnels();
+            const tunnel = list.tunnels[0].public_url;
             log.info('Listening on', {
                 app_version: packageJson.version,
                 node_version: process.versions.node,
@@ -559,9 +602,11 @@ function startServer() {
                 stats_enabled: config.stats.enabled,
                 chatGPT_enabled: config.chatGPT.enabled,
                 configUI: config.ui,
+                serverRec: config?.server?.recording,
             });
         } catch (err) {
             log.error('Ngrok Start error: ', err.body);
+            await ngrok.kill();
             process.exit(1);
         }
     }
@@ -608,6 +653,7 @@ function startServer() {
             stats_enabled: config.stats.enabled,
             chatGPT_enabled: config.chatGPT.enabled,
             configUI: config.ui,
+            serverRec: config?.server?.recording,
         });
     });
 

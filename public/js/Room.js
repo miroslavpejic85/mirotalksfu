@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.67
+ * @version 1.3.68
  *
  */
 
@@ -281,6 +281,7 @@ function initClient() {
             'Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs',
             'right',
         );
+        setTippy('switchServerRecording', 'The recording will be stored on the server rather than locally', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
@@ -1189,10 +1190,11 @@ function roomIsReady() {
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     if (BUTTONS.settings.host_only_recording) {
-        show(roomRecording);
         show(recordingImage);
+        show(roomHostOnlyRecording);
         show(roomRecordingOptions);
     }
+    if (rc.recSyncServerRecording) show(roomRecordingServer);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
@@ -1973,6 +1975,13 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    switchServerRecording.onchange = (e) => {
+        rc.recSyncServerRecording = e.currentTarget.checked;
+        rc.roomMessage('recSyncServer', rc.recSyncServerRecording);
+        localStorageSettings.rec_server = rc.recSyncServerRecording;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     // styling
     keepCustomTheme.onchange = (e) => {
         themeCustom.keep = e.currentTarget.checked;
@@ -2277,6 +2286,8 @@ function loadSettingsFromLocalStorage() {
     recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
     switchH264Recording.checked = recPrioritizeH264;
 
+    switchServerRecording.checked = localStorageSettings.rec_server;
+
     keepCustomTheme.checked = themeCustom.keep;
     selectTheme.disabled = themeCustom.keep;
     themeCustom.input.value = themeCustom.color;
@@ -2456,9 +2467,10 @@ function handleRoomClientEvents() {
                 rc.saveRecording('Room event: host only recording enabled, going to stop recording');
             }
             hide(startRecButton);
-            hide(roomRecording);
             hide(recordingImage);
+            hide(roomHostOnlyRecording);
             hide(roomRecordingOptions);
+            hide(roomRecordingServer);
             show(recordingMessage);
             hostOnlyRecording = true;
         }
@@ -2468,8 +2480,7 @@ function handleRoomClientEvents() {
             console.log('Room event: host only recording disabled');
             show(startRecButton);
             show(recordingImage);
-            show(roomRecordingOptions);
-            hide(roomRecording);
+            hide(roomHostOnlyRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;
         }
@@ -2567,6 +2578,13 @@ function getDataTimeString() {
     const date = d.toISOString().split('T')[0];
     const time = d.toTimeString().split(' ')[0];
     return `${date}-${time}`;
+}
+
+function getDataTimeStringFormat() {
+    const d = new Date();
+    const date = d.toISOString().split('T')[0].replace(/-/g, '_');
+    const time = d.toTimeString().split(' ')[0].replace(/:/g, '_');
+    return `${date}_${time}`;
 }
 
 function getUUID() {

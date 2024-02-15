@@ -35,6 +35,11 @@ module.exports = {
             cert: '../ssl/cert.pem',
             key: '../ssl/key.pem',
         },
+        // The recording will be saved to the directory designated within your Server app/<dir>
+        recording: {
+            dir: 'rec',
+            enabled: false,
+        },
     },
     host: {
         /*
@@ -105,8 +110,8 @@ module.exports = {
                 micOptionsButton: true, // presenter
                 tabModerator: true, // presenter
                 tabRecording: true,
-                pushToTalk: true,
                 host_only_recording: true, // presenter
+                pushToTalk: true,
             },
             producerVideo: {
                 videoPictureInPicture: true,

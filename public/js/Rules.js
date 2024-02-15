@@ -39,8 +39,8 @@ let BUTTONS = {
         micOptionsButton: true, // presenter
         tabModerator: true, // presenter
         tabRecording: true,
-        pushToTalk: true,
         host_only_recording: true, // presenter
+        pushToTalk: true,
     },
     producerVideo: {
         videoPictureInPicture: true,

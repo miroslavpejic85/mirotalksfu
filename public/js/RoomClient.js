@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.67
+ * @version 1.3.68
  *
  */
 
@@ -63,6 +63,7 @@ const icons = {
     broadcaster: '<i class="fa-solid fa-wifi"></i>',
     codecs: '<i class="fa-solid fa-film"></i>',
     theme: '<i class="fas fa-fill-drip"></i>',
+    recSync: '<i class="fa-solid fa-cloud-arrow-up"></i>',
 };
 
 const image = {
@@ -243,9 +244,6 @@ class RoomClient {
         this.localVideoStream = null;
         this.localAudioStream = null;
         this.localScreenStream = null;
-        this.mediaRecorder = null;
-        this.recScreenStream = null;
-        this._isRecording = false;
 
         this.RoomPassword = false;
 
@@ -264,7 +262,13 @@ class RoomClient {
         this.chunkSize = 1024 * 16; // 16kb/s
 
         // Recording
+        this._isRecording = false;
+        this.mediaRecorder = null;
         this.audioRecorder = null;
+        this.recScreenStream = null;
+        this.recSyncServerRecording = false;
+        this.recSyncTime = 4000; // 4 sec
+        this.recSyncChunkSize = 1000000; // 1MB
 
         // Encodings
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
@@ -423,6 +427,7 @@ class RoomClient {
             this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
             handleRules(isPresenter);
+
             // ###################################################################################################
             isBroadcastingEnabled = isPresenter && !room.broadcasting ? isBroadcastingEnabled : room.broadcasting;
             console.log('07.1 ----> ROOM BROADCASTING', isBroadcastingEnabled);
@@ -434,6 +439,18 @@ class RoomClient {
                       this.event(_EVENTS.hostOnlyRecordingOn))
                     : this.event(_EVENTS.hostOnlyRecordingOff);
             }
+
+            // ###################################################################################################
+            if (room.recSyncServerRecording) {
+                console.log('07.1 WARNING ----> SERVER SYNC RECORDING ENABLED!');
+                this.recSyncServerRecording = localStorageSettings.rec_server;
+                if (BUTTONS.settings.tabRecording && !room.config.hostOnlyRecording) {
+                    show(roomRecordingServer);
+                }
+                switchServerRecording.checked = this.recSyncServerRecording;
+            }
+            console.log('07.1 ----> SERVER SYNC RECORDING', this.recSyncServerRecording);
+            // ###################################################################################################
 
             // Handle Room moderator rules
             if (room.moderator && (!isRulesActive || !isPresenter)) {
@@ -4123,87 +4140,168 @@ class RoomClient {
 
     handleMediaRecorder() {
         if (this.mediaRecorder) {
-            this.mediaRecorder.start();
+            this.recServerFileName = this.getServerRecFileName();
+            rc.recSyncServerRecording ? this.mediaRecorder.start(this.recSyncTime) : this.mediaRecorder.start();
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
             this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
             this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
         }
     }
 
+    getServerRecFileName() {
+        const dateTime = getDataTimeStringFormat();
+        return `Rec_${dateTime}.webm`;
+    }
+
     handleMediaRecorderStart(evt) {
         console.log('MediaRecorder started: ', evt);
+        rc.cleanLastRecordingInfo();
+        rc.disableRecordingOptions();
     }
 
     handleMediaRecorderData(evt) {
-        console.log('MediaRecorder data: ', evt);
-        if (evt.data && evt.data.size > 0) recordedBlobs.push(evt.data);
+        // console.log('MediaRecorder data: ', evt);
+        if (evt.data && evt.data.size > 0) {
+            rc.recSyncServerRecording ? rc.syncRecordingInCloud(evt.data) : recordedBlobs.push(evt.data);
+        }
+    }
+
+    async syncRecordingInCloud(data) {
+        const arrayBuffer = data;
+        const chunkSize = rc.recSyncChunkSize;
+        const fileReader = new FileReader();
+        fileReader.readAsArrayBuffer(arrayBuffer);
+        fileReader.onload = async (event) => {
+            const arrayBuffer = event.target.result;
+            const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
+            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+                const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
+                try {
+                    await axios.post('/recSync?fileName=' + rc.recServerFileName, chunk, {
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                            'Content-Length': chunk.length,
+                        },
+                    });
+                } catch (error) {
+                    console.error('Error syncing chunk:', error.message);
+                }
+            }
+        };
     }
 
     handleMediaRecorderStop(evt) {
         try {
             console.log('MediaRecorder stopped: ', evt);
-            console.log('MediaRecorder Blobs: ', recordedBlobs);
-
-            const dateTime = getDataTimeString();
-            const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
-            const blob = new Blob(recordedBlobs, { type: 'video/' + type });
-            const recFileName = `${dateTime}-REC.${type}`;
-            const currentDevice = DetectRTC.isMobileDevice ? 'MOBILE' : 'PC';
-            const blobFileSize = bytesToSize(blob.size);
-            const recTime = document.getElementById('recordingStatus');
-
-            const recordingInfo = `
-            <br/><br/>
-            <ul>
-                <li>Time: ${recTime.innerText}</li>
-                <li>File: ${recFileName}</li>
-                <li>Codecs: ${recCodecs}</li>
-                <li>Size: ${blobFileSize}</li>
-            </ul>
-            <br/>
-            `;
-
-            const lastRecordingInfo = document.getElementById('lastRecordingInfo');
-            lastRecordingInfo.style.color = '#FFFFFF';
-            lastRecordingInfo.innerHTML = `Last Recording Info: ${recordingInfo}`;
-            show(lastRecordingInfo);
-
-            if (window.localStorage.isReconnected === 'false') {
-                Swal.fire({
-                    background: swalBackground,
-                    position: 'center',
-                    icon: 'success',
-                    title: 'Recording',
-                    html: `<div style="text-align: left;">
-                    🔴 Recording Info: 
-                    ${recordingInfo}
-                    Please wait to be processed, then will be downloaded to your ${currentDevice} device.
-                    </div>`,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                });
-            }
-
-            console.log('MediaRecorder Download Blobs');
-            const url = window.URL.createObjectURL(blob);
-
-            const downloadLink = document.createElement('a');
-            downloadLink.style.display = 'none';
-            downloadLink.href = url;
-            downloadLink.download = recFileName;
-            document.body.appendChild(downloadLink);
-            downloadLink.click();
-
-            setTimeout(() => {
-                document.body.removeChild(downloadLink);
-                window.URL.revokeObjectURL(url);
-                console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
-                recordedBlobs = [];
-                recTime.innerText = '0s';
-            }, 100);
+            rc.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
+            rc.disableRecordingOptions(false);
         } catch (err) {
             console.error('Recording save failed', err);
         }
+    }
+
+    disableRecordingOptions(disabled = true) {
+        switchH264Recording.disabled = disabled;
+        switchServerRecording.disabled = disabled;
+        switchHostOnlyRecording.disabled = disabled;
+    }
+
+    handleLocalRecordingStop() {
+        console.log('MediaRecorder Blobs: ', recordedBlobs);
+
+        const dateTime = getDataTimeString();
+        const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
+        const blob = new Blob(recordedBlobs, { type: 'video/' + type });
+        const recFileName = `Rec_${dateTime}.${type}`;
+        const currentDevice = DetectRTC.isMobileDevice ? 'MOBILE' : 'PC';
+        const blobFileSize = bytesToSize(blob.size);
+        const recTime = document.getElementById('recordingStatus');
+        const recType = 'Locally';
+        const recordingInfo = `
+        <br/><br/>
+        <ul>
+            <li>Stored: ${recType}</li>
+            <li>Time: ${recTime.innerText}</li>
+            <li>File: ${recFileName}</li>
+            <li>Codecs: ${recCodecs}</li>
+            <li>Size: ${blobFileSize}</li>
+        </ul>
+        <br/>
+        `;
+        const recordingMsg = `Please wait to be processed, then will be downloaded to your ${currentDevice} device.`;
+
+        this.saveLastRecordingInfo(recordingInfo);
+        this.showRecordingInfo(recType, recordingInfo, recordingMsg);
+        this.saveRecordingInLocalDevice(blob, recFileName, recTime);
+    }
+
+    handleServerRecordingStop() {
+        console.log('MediaRecorder Stop');
+        const recTime = document.getElementById('recordingStatus');
+        const recType = 'Server';
+        const recordingInfo = `
+        <br/><br/>
+        <ul>
+            <li>Stored: ${recType}</li>
+            <li>Time: ${recTime.innerText}</li>
+            <li>File: ${this.recServerFileName}</li>
+            <li>Codecs: ${recCodecs}</li>
+        </ul>
+        <br/>
+        `;
+        this.saveLastRecordingInfo(recordingInfo);
+        this.showRecordingInfo(recType, recordingInfo);
+    }
+
+    saveLastRecordingInfo(recordingInfo) {
+        const lastRecordingInfo = document.getElementById('lastRecordingInfo');
+        lastRecordingInfo.style.color = '#FFFFFF';
+        lastRecordingInfo.innerHTML = `Last Recording Info: ${recordingInfo}`;
+        show(lastRecordingInfo);
+    }
+
+    cleanLastRecordingInfo() {
+        const lastRecordingInfo = document.getElementById('lastRecordingInfo');
+        lastRecordingInfo.innerHTML = '';
+        hide(lastRecordingInfo);
+    }
+
+    showRecordingInfo(recType, recordingInfo, recordingMsg = '') {
+        if (window.localStorage.isReconnected === 'false') {
+            Swal.fire({
+                background: swalBackground,
+                position: 'center',
+                icon: 'success',
+                title: 'Recording',
+                html: `<div style="text-align: left;">
+                🔴 ${recType} Recording Info: 
+                ${recordingInfo}
+                ${recordingMsg}
+                </div>`,
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+        }
+    }
+
+    saveRecordingInLocalDevice(blob, recFileName, recTime) {
+        console.log('MediaRecorder Download Blobs');
+        const url = window.URL.createObjectURL(blob);
+
+        const downloadLink = document.createElement('a');
+        downloadLink.style.display = 'none';
+        downloadLink.href = url;
+        downloadLink.download = recFileName;
+        document.body.appendChild(downloadLink);
+        downloadLink.click();
+
+        setTimeout(() => {
+            document.body.removeChild(downloadLink);
+            window.URL.revokeObjectURL(url);
+            console.log(`🔴 Recording FILE: ${recFileName} done 👍`);
+            recordedBlobs = [];
+            recTime.innerText = '0s';
+        }, 100);
     }
 
     pauseRecording() {
@@ -5037,6 +5135,9 @@ class RoomClient {
                 break;
             case 'recPrioritizeH264':
                 this.userLog('info', `${icons.codecs} Recording prioritize h.264  ${status}`, 'top-end');
+                break;
+            case 'recSyncServer':
+                this.userLog('info', `${icons.recSync} Server Sync Recording ${status}`, 'top-end');
                 break;
             case 'customThemeKeep':
                 this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');

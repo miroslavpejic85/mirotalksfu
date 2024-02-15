@@ -772,7 +772,8 @@ access to use this app.
                                 </tr>
                             </table>
                         </div>
-                        <div id="roomRecording" class="hidden">
+                        <div id="roomHostOnlyRecording" class="hidden">
+                            <hr style="border: 1px solid grey" />
                             <table class="settingsTable">
                                 <tr>
                                     <td class="width-180">
@@ -785,6 +786,27 @@ access to use this app.
                                         <div class="form-check form-switch form-switch-md title">
                                             <input
                                                 id="switchHostOnlyRecording"
+                                                class="form-check-input"
+                                                type="checkbox"
+                                            />
+                                        </div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div id="roomRecordingServer" class="hidden">
+                            <table class="settingsTable">
+                                <tr>
+                                    <td class="width-180">
+                                        <div class="title">
+                                            <i class="fas fa-cloud-arrow-up"></i>
+                                            <p>Server</p>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="form-check form-switch form-switch-md title">
+                                            <input
+                                                id="switchServerRecording"
                                                 class="form-check-input"
                                                 type="checkbox"
                                             />

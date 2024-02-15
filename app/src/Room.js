@@ -19,6 +19,9 @@ module.exports = class Room {
         this._isLobbyEnabled = false;
         this._roomPassword = null;
         this._hostOnlyRecording = false;
+        // ##########################
+        this._recSyncServerRecording = config?.server?.recording?.enabled || false;
+        // ##########################
         this._moderator = {
             audio_start_muted: false,
             video_start_hidden: false,
@@ -155,6 +158,7 @@ module.exports = class Room {
         return {
             id: this.id,
             broadcasting: this._isBroadcasting,
+            recSyncServerRecording: this._recSyncServerRecording,
             config: {
                 isLocked: this._isLocked,
                 isLobbyEnabled: this._isLobbyEnabled,
