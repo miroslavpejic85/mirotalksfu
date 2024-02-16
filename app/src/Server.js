@@ -450,8 +450,7 @@ function startServer() {
     app.post(['/recSync'], (req, res) => {
         // Store recording...
         if (serverRecordingEnabled) {
-            if (!fs.existsSync(dir.rec)) fs.mkdirSync(dir.rec, { recursive: true });
-
+            //
             const { fileName } = req.query;
 
             if (!fileName) {
@@ -459,6 +458,9 @@ function startServer() {
             }
 
             try {
+                if (!fs.existsSync(dir.rec)) {
+                    fs.mkdirSync(dir.rec, { recursive: true });
+                }
                 const filePath = dir.rec + fileName;
                 const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
 

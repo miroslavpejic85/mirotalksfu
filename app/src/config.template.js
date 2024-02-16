@@ -35,7 +35,11 @@ module.exports = {
             cert: '../ssl/cert.pem',
             key: '../ssl/key.pem',
         },
-        // The recording will be saved to the directory designated within your Server app/<dir>
+        /*
+            The recording will be saved to the directory designated within your Server app/<dir>
+            Note: if you use Docker: Create the "app/rec" directory, configure it as a volume in docker-compose.yml, 
+            ensure proper permissions, and start the Docker container.
+        */
         recording: {
             dir: 'rec',
             enabled: false,
