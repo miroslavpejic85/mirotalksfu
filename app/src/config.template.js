@@ -196,8 +196,15 @@ module.exports = {
         authToken: '',
     },
     api: {
-        // app/api
+        // Default secret key for app/api
         keySecret: 'mirotalksfu_default_secret',
+        // Define which endpoints are allowed
+        allowed: {
+            meetings: false,
+            meeting: true,
+            join: true,
+            //...
+        },
     },
     sentry: {
         /*

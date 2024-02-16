@@ -2,8 +2,8 @@ swagger: '2.0'
 
 info:
     title: MiroTalk SFU API
-    description: API description for external applications that integrates with MiroTalk SFU.
-    version: 1.0.0
+    description: API description for external applications that integrate with MiroTalk SFU.
+    version: 1.0.1
 
 basePath: /api/v1
 
@@ -12,6 +12,23 @@ schemes:
     - http
 
 paths:
+    /meetings:
+        get:
+            tags:
+                - 'meetings'
+            summary: 'Get meetings'
+            description: 'Get meetings'
+            produces:
+                - 'application/json'
+            security:
+                - secretApiKey: []
+            responses:
+                '200':
+                    description: 'Get Meetings done'
+                    schema:
+                        $ref: '#/definitions/MeetingsResponse'
+                '403':
+                    description: 'Unauthorized!'
     /meeting:
         post:
             tags:
@@ -42,50 +59,7 @@ paths:
                   name: Join
                   description: Custom Join URL.
                   schema:
-                      type: object
-                      properties:
-                          room:
-                              type: string
-                              default: 'test'
-                          roomPassword:
-                              type: ['boolean', 'string'] # Allow boolean or string type
-                              default: false
-                          name:
-                              type: string
-                              default: 'mirotalksfu'
-                          audio:
-                              type: boolean
-                              default: false
-                          video:
-                              type: boolean
-                              default: false
-                          screen:
-                              type: boolean
-                              default: false
-                          hide:
-                              type: boolean
-                              default: false
-                          notify:
-                              type: boolean
-                              default: false
-                          token:
-                              type: object
-                              description: |
-                                  Object containing authentication token details.
-                                  This token is required when host.protected or host.user_auth is enabled in the app/src/config.js file.
-                              properties:
-                                  username:
-                                      type: string
-                                      default: 'username'
-                                  password:
-                                      type: string
-                                      default: 'password'
-                                  presenter:
-                                      type: boolean
-                                      default: true
-                                  expire:
-                                      type: string
-                                      default: '1h'
+                      $ref: '#/definitions/JoinRequest'
             consumes:
                 - 'application/json'
             produces:
@@ -108,13 +82,93 @@ securityDefinitions:
         description: 'Format like this: authorization: {API_KEY_SECRET}'
 
 definitions:
+    MeetingsResponse:
+        type: object
+        properties:
+            meetings:
+                type: array
+                items:
+                    $ref: '#/definitions/Meeting'
     MeetingResponse:
         type: 'object'
         properties:
             meeting:
-                type: 'string'
+                type: string
+    JoinRequest:
+        type: object
+        properties:
+            room:
+                type: string
+                default: 'test'
+            roomPassword:
+                type: ['boolean', 'string'] # Allow boolean or string type
+                default: false
+            name:
+                type: string
+                default: 'mirotalksfu'
+            audio:
+                type: boolean
+                default: false
+            video:
+                type: boolean
+                default: false
+            screen:
+                type: boolean
+                default: false
+            hide:
+                type: boolean
+                default: false
+            notify:
+                type: boolean
+                default: false
+            token:
+                $ref: '#/definitions/TokenRequest'
+    TokenRequest:
+        type: object
+        properties:
+            username:
+                type: string
+                default: 'username'
+            password:
+                type: string
+                default: 'password'
+            presenter:
+                type: boolean
+                default: true
+            expire:
+                type: string
+                default: '1h'
     JoinResponse:
         type: 'object'
         properties:
             join:
-                type: 'string'
+                type: string
+    Peer:
+        type: object
+        properties:
+            name:
+                type: string
+            presenter:
+                type: boolean
+            video:
+                type: boolean
+            audio:
+                type: boolean
+            screen:
+                type: boolean
+            hand:
+                type: boolean
+            os:
+                type: string
+            browser:
+                type: string
+
+    Meeting:
+        type: object
+        properties:
+            roomId:
+                type: string
+            peers:
+                type: array
+                items:
+                    $ref: '#/definitions/Peer'

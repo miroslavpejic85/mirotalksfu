@@ -17,18 +17,22 @@ Some examples demonstrating how to call the API:
 
 ```bash
 # js
+node meetings.js
 node meeting.js
 node join.js
 
 # php
+php meetings.php
 php meeting.php
 php join.php
 
 # python
+python3 meetings.py
 python3 meeting.py
 python3 join.py
 
 # bash
+./meetings.sh
 ./meeting.sh
 ./join.sh
 ```

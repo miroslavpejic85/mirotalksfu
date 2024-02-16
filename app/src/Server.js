@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.68
+ * @version 1.3.69
  *
  */
 
@@ -106,8 +106,11 @@ const hostCfg = {
     authenticated: !config.host.protected,
 };
 
-const apiBasePath = '/api/v1'; // api endpoint path
-const api_docs = host + apiBasePath + '/docs'; // api docs
+const restApi = {
+    basePath: '/api/v1', // api endpoint path
+    docs: host + '/api/v1/docs', // api docs
+    allowed: config.api?.allowed,
+};
 
 // Sentry monitoring
 const sentryEnabled = config.sentry.enabled;
@@ -220,7 +223,7 @@ function startServer() {
     app.use(express.json());
     app.use(express.static(dir.public));
     app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(apiBasePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
+    app.use(restApi.basePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
     // IP Whitelist check ...
     app.use(restrictAccessByIP);
@@ -483,15 +486,69 @@ function startServer() {
     });
 
     // ####################################################
-    // API
+    // REST API
     // ####################################################
 
-    // request meeting room endpoint
-    app.post(['/api/v1/meeting'], (req, res) => {
+    // request meetings list
+    app.get([restApi.basePath + '/meetings'], (req, res) => {
+        // Check if endpoint allowed
+        if (restApi.allowed && !restApi.allowed.meetings) {
+            return res
+                .status(403)
+                .json({
+                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+                });
+        }
         // check if user was authorized for the api call
-        let host = req.headers.host;
-        let authorization = req.headers.authorization;
-        let api = new ServerApi(host, authorization);
+        const { host, authorization } = req.headers;
+        const api = new ServerApi(host, authorization);
+        if (!api.isAuthorized()) {
+            log.debug('MiroTalk get meetings - Unauthorized', {
+                header: req.headers,
+                body: req.body,
+            });
+            return res.status(403).json({ error: 'Unauthorized!' });
+        }
+        const meetings = Array.from(roomList.entries()).map(([id, room]) => {
+            const peers = Array.from(room.peers.values()).map((peer) => ({
+                name: peer.peer_info.peer_name,
+                presenter: peer.peer_info.peer_presenter,
+                video: peer.peer_info.peer_video,
+                audio: peer.peer_info.peer_audio,
+                screen: peer.peer_info.peer_screen,
+                hand: peer.peer_info.peer_hand,
+                os: peer.peer_info.os_name ? `${peer.peer_info.os_name} ${peer.peer_info.os_version}` : '',
+                browser: peer.peer_info.browser_name
+                    ? `${peer.peer_info.browser_name} ${peer.peer_info.browser_version}`
+                    : '',
+            }));
+            return {
+                roomId: id,
+                peers: peers,
+            };
+        });
+        res.json({ meetings: meetings });
+        // log.debug the output if all done
+        log.debug('MiroTalk get meetings - Authorized', {
+            header: req.headers,
+            body: req.body,
+            meetings: meetings,
+        });
+    });
+
+    // request meeting room endpoint
+    app.post([restApi.basePath + '/meeting'], (req, res) => {
+        // Check if endpoint allowed
+        if (restApi.allowed && !restApi.allowed.meeting) {
+            return res
+                .status(403)
+                .json({
+                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+                });
+        }
+        // check if user was authorized for the api call
+        const { host, authorization } = req.headers;
+        const api = new ServerApi(host, authorization);
         if (!api.isAuthorized()) {
             log.debug('MiroTalk get meeting - Unauthorized', {
                 header: req.headers,
@@ -501,8 +558,7 @@ function startServer() {
         }
         // setup meeting URL
         let meetingURL = api.getMeetingURL();
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ meeting: meetingURL }));
+        res.json({ meeting: meetingURL });
         // log.debug the output if all done
         log.debug('MiroTalk get meeting - Authorized', {
             header: req.headers,
@@ -512,11 +568,18 @@ function startServer() {
     });
 
     // request join room endpoint
-    app.post(['/api/v1/join'], (req, res) => {
+    app.post([restApi.basePath + '/join'], (req, res) => {
+        // Check if endpoint allowed
+        if (restApi.allowed && !restApi.allowed.join) {
+            return res
+                .status(403)
+                .json({
+                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+                });
+        }
         // check if user was authorized for the api call
-        let host = req.headers.host;
-        let authorization = req.headers.authorization;
-        let api = new ServerApi(host, authorization);
+        const { host, authorization } = req.headers;
+        const api = new ServerApi(host, authorization);
         if (!api.isAuthorized()) {
             log.debug('MiroTalk get join - Unauthorized', {
                 header: req.headers,
@@ -526,8 +589,7 @@ function startServer() {
         }
         // setup Join URL
         let joinURL = api.getJoinURL(req.body);
-        res.setHeader('Content-Type', 'application/json');
-        res.end(JSON.stringify({ join: joinURL }));
+        res.json({ join: joinURL });
         // log.debug the output if all done
         log.debug('MiroTalk get join - Authorized', {
             header: req.headers,
@@ -593,7 +655,7 @@ function startServer() {
                 announcedAddress: announcedAddress,
                 server: host,
                 server_tunnel: tunnel,
-                api_docs: api_docs,
+                rest_api: restApi,
                 mediasoup_worker_bin: mediasoup.workerBin,
                 mediasoup_server_version: mediasoup.version,
                 mediasoup_client_version: mediasoupClient.version,
@@ -644,7 +706,7 @@ function startServer() {
             middleware: config.middleware,
             announcedAddress: announcedAddress,
             server: host,
-            api_docs: api_docs,
+            rest_api: restApi,
             mediasoup_worker_bin: mediasoup.workerBin,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,
