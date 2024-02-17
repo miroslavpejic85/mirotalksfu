@@ -636,6 +636,37 @@ function startServer() {
     });
 
     // ####################################################
+    // SERVER CONFIG
+    // ####################################################
+
+    function getServerConfig(tunnel = false) {
+        return {
+            app_version: packageJson.version,
+            node_version: process.versions.node,
+            cors_options: corsOptions,
+            hostConfig: hostCfg,
+            jwtCfg: jwtCfg,
+            presenters: config.presenters,
+            middleware: config.middleware,
+            announcedAddress: announcedAddress,
+            server: host,
+            server_tunnel: tunnel,
+            rest_api: restApi,
+            mediasoup_worker_bin: mediasoup.workerBin,
+            mediasoup_server_version: mediasoup.version,
+            mediasoup_client_version: mediasoupClient.version,
+            ip_lookup_enabled: config.IPLookup.enabled,
+            sentry_enabled: sentryEnabled,
+            redirect_enabled: config.redirect.enabled,
+            slack_enabled: slackEnabled,
+            stats_enabled: config.stats.enabled,
+            chatGPT_enabled: config.chatGPT.enabled,
+            configUI: config.ui,
+            serverRec: config?.server?.recording,
+        };
+    }
+
+    // ####################################################
     // NGROK
     // ####################################################
 
@@ -646,30 +677,7 @@ function startServer() {
             const api = ngrok.getApi();
             const list = await api.listTunnels();
             const tunnel = list.tunnels[0].public_url;
-            log.info('Listening on', {
-                app_version: packageJson.version,
-                node_version: process.versions.node,
-                cors_options: corsOptions,
-                hostConfig: hostCfg,
-                jwtCfg: jwtCfg,
-                presenters: config.presenters,
-                middleware: config.middleware,
-                announcedAddress: announcedAddress,
-                server: host,
-                server_tunnel: tunnel,
-                rest_api: restApi,
-                mediasoup_worker_bin: mediasoup.workerBin,
-                mediasoup_server_version: mediasoup.version,
-                mediasoup_client_version: mediasoupClient.version,
-                ip_lookup_enabled: config.IPLookup.enabled,
-                sentry_enabled: sentryEnabled,
-                redirect_enabled: config.redirect.enabled,
-                slack_enabled: slackEnabled,
-                stats_enabled: config.stats.enabled,
-                chatGPT_enabled: config.chatGPT.enabled,
-                configUI: config.ui,
-                serverRec: config?.server?.recording,
-            });
+            log.info('Server config', getServerConfig(tunnel));
         } catch (err) {
             log.error('Ngrok Start error: ', err.body);
             await ngrok.kill();
@@ -699,29 +707,7 @@ function startServer() {
         if (config.ngrok.authToken !== '') {
             return ngrokStart();
         }
-        log.info('Settings', {
-            app_version: packageJson.version,
-            node_version: process.versions.node,
-            cors_options: corsOptions,
-            hostConfig: hostCfg,
-            jwtCfg: jwtCfg,
-            presenters: config.presenters,
-            middleware: config.middleware,
-            announcedAddress: announcedAddress,
-            server: host,
-            rest_api: restApi,
-            mediasoup_worker_bin: mediasoup.workerBin,
-            mediasoup_server_version: mediasoup.version,
-            mediasoup_client_version: mediasoupClient.version,
-            ip_lookup_enabled: config.IPLookup.enabled,
-            sentry_enabled: sentryEnabled,
-            redirect_enabled: config.redirect.enabled,
-            slack_enabled: slackEnabled,
-            stats_enabled: config.stats.enabled,
-            chatGPT_enabled: config.chatGPT.enabled,
-            configUI: config.ui,
-            serverRec: config?.server?.recording,
-        });
+        log.info('Server config', getServerConfig());
     });
 
     // ####################################################

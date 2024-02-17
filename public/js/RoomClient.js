@@ -521,9 +521,10 @@ class RoomClient {
             if (error.name === 'UnsupportedError') {
                 console.error('Browser not supported');
                 this.userLog('error', 'Browser not supported', 'center', 6000);
+            } else {
+                console.error('Browser not supported: ', error);
+                this.userLog('error', 'Browser not supported: ' + error, 'center', 6000);
             }
-            console.error('Browser not supported: ', error);
-            this.userLog('error', 'Browser not supported: ' + error, 'center', 6000);
         }
         await device.load({
             routerRtpCapabilities,
