@@ -35,6 +35,14 @@ module.exports = {
             cert: '../ssl/cert.pem',
             key: '../ssl/key.pem',
         },
+        /* 
+            origin: Allow specified origin or all origins if not specified es ['https://example.com', 'https://subdomain.example.com', 'http://localhost:3000']
+            methods: Allow only GET and POST methods
+        */
+        cors: {
+            origin: '*',
+            methods: ['GET', 'POST'],
+        },
         /*
             The recording will be saved to the directory designated within your Server app/<dir>
             Note: if you use Docker: Create the "app/rec" directory, configure it as a volume in docker-compose.yml, 

@@ -87,11 +87,18 @@ const options = {
     key: fs.readFileSync(path.join(__dirname, config.server.ssl.key), 'utf-8'),
 };
 
+const corsOptions = {
+    origin: config.server?.cors?.origin || '*',
+    methods: config.server?.cors?.methods || ['GET', 'POST'],
+};
+
 const httpsServer = https.createServer(options, app);
 const io = require('socket.io')(httpsServer, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
+    cors: corsOptions,
 });
+
 const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
 
 const jwtCfg = {
@@ -218,7 +225,7 @@ if (!announcedAddress) {
 
 function startServer() {
     // Start the app
-    app.use(cors());
+    app.use(cors(corsOptions));
     app.use(compression());
     app.use(express.json());
     app.use(express.static(dir.public));
@@ -493,11 +500,9 @@ function startServer() {
     app.get([restApi.basePath + '/meetings'], (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.meetings) {
-            return res
-                .status(403)
-                .json({
-                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
-                });
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
         }
         // check if user was authorized for the api call
         const { host, authorization } = req.headers;
@@ -540,11 +545,9 @@ function startServer() {
     app.post([restApi.basePath + '/meeting'], (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.meeting) {
-            return res
-                .status(403)
-                .json({
-                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
-                });
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
         }
         // check if user was authorized for the api call
         const { host, authorization } = req.headers;
@@ -571,11 +574,9 @@ function startServer() {
     app.post([restApi.basePath + '/join'], (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.join) {
-            return res
-                .status(403)
-                .json({
-                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
-                });
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
         }
         // check if user was authorized for the api call
         const { host, authorization } = req.headers;
@@ -648,6 +649,7 @@ function startServer() {
             log.info('Listening on', {
                 app_version: packageJson.version,
                 node_version: process.versions.node,
+                cors_options: corsOptions,
                 hostConfig: hostCfg,
                 jwtCfg: jwtCfg,
                 presenters: config.presenters,
@@ -700,6 +702,7 @@ function startServer() {
         log.info('Settings', {
             app_version: packageJson.version,
             node_version: process.versions.node,
+            cors_options: corsOptions,
             hostConfig: hostCfg,
             jwtCfg: jwtCfg,
             presenters: config.presenters,
