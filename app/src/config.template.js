@@ -37,7 +37,7 @@ module.exports = {
         },
         cors: {
             /* 
-                origin: Allow specified origin es ['https://example.com', 'https://subdomain.example.com', 'http://localhost:3000'] or all origins if not specified
+                origin: Allow specified origin es ['https://example.com', 'https://subdomain.example.com', 'http://localhost:3010'] or all origins if not specified
                 methods: Allow only GET and POST methods
             */
             origin: '*',
