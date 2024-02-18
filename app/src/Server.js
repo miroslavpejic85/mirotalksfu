@@ -771,12 +771,21 @@ function startServer() {
 
     io.on('connection', (socket) => {
         socket.on('clientError', (error) => {
-            log.error('Client error', error);
-            socket.destroy();
+            try {
+                log.error('Client error', error.message);
+                socket.disconnect(true); // true indicates a forced disconnection
+            } catch (error) {
+                log.error('Error handling Client error', error.message);
+            }
         });
-        socket.on('error', (err) => {
-            log.error('Socket error:', err);
-            socket.destroy();
+
+        socket.on('error', (error) => {
+            try {
+                log.error('Socket error', error.message);
+                socket.disconnect(true); // true indicates a forced disconnection
+            } catch (error) {
+                log.error('Error handling socket error', error.message);
+            }
         });
 
         socket.on('createRoom', async ({ room_id }, callback) => {
@@ -1442,7 +1451,11 @@ function startServer() {
             const realPeer = isRealPeer(data.peer_name, socket.id, socket.room_id);
             if (!realPeer) {
                 const peer_name = getPeerName(room, false);
-                log.debug('Fake message detected', { realFrom: peer_name, fakeFrom: data.peer_name, msg: data.msg });
+                log.debug('Fake message detected', {
+                    realFrom: peer_name,
+                    fakeFrom: data.peer_name,
+                    msg: data.peer_msg,
+                });
                 return;
             }
 
