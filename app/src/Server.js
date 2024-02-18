@@ -1439,7 +1439,7 @@ function startServer() {
             const room = roomList.get(socket.room_id);
 
             // check if the message coming from real peer
-            const realPeer = isRealPeer(data.peer_name, data.peer_id, socket.room_id);
+            const realPeer = isRealPeer(data.peer_name, socket.id, socket.room_id);
             if (!realPeer) {
                 const peer_name = getPeerName(room, false);
                 log.debug('Fake message detected', { realFrom: peer_name, fakeFrom: data.peer_name, msg: data.msg });
