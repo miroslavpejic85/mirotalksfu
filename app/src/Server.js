@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.70
+ * @version 1.3.71
  *
  */
 
@@ -813,7 +813,7 @@ function startServer() {
             callback({ peerCounts: peerCounts });
         });
 
-        socket.on('cmd', (dataObject) => {
+        socket.on('cmd', async (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
             const data = checkXSS(dataObject);
@@ -825,6 +825,11 @@ function startServer() {
             switch (data.type) {
                 case 'privacy':
                     room.getPeers().get(socket.id).updatePeerInfo({ type: data.type, status: data.active });
+                    break;
+                case 'ejectAll':
+                    const { peer_name, peer_uuid } = data;
+                    const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+                    if (!isPresenter) return;
                     break;
                 default:
                     break;

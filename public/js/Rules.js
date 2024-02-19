@@ -154,6 +154,7 @@ function handleRules(isPresenter) {
         switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
         switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
         switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
+        switchDisconnectAllOnLeave.checked = localStorageSettings.moderator_disconnect_all_on_leave;
 
         // Update moderator settings...
         const moderatorData = {

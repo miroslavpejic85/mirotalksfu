@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.70
+ * @version 1.3.71
  *
  */
 
@@ -2380,7 +2380,24 @@ class RoomClient {
 
     exitRoom() {
         //...
+        if (isPresenter && switchDisconnectAllOnLeave.checked) {
+            this.ejectAllOnLeave();
+        }
         this.exit();
+    }
+
+    // ####################################################
+    // EJECT ALL ON LEAVE ROOM
+    // ####################################################
+
+    ejectAllOnLeave() {
+        const cmd = {
+            type: 'ejectAll',
+            peer_name: this.peer_name,
+            peer_uuid: this.peer_uuid,
+            broadcast: true,
+        };
+        this.emitCmd(cmd);
     }
 
     // ####################################################
@@ -5134,6 +5151,9 @@ class RoomClient {
                     'top-end',
                 );
                 break;
+            case 'disconnect_all_on_leave':
+                this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
+                break;
             case 'recPrioritizeH264':
                 this.userLog('info', `${icons.codecs} Recording prioritize h.264  ${status}`, 'top-end');
                 break;
@@ -5636,6 +5656,9 @@ class RoomClient {
             case 'geoLocationKO':
                 this.sound('alert');
                 this.userLog('warning', cmd.data, 'top-end', 5000);
+                break;
+            case 'ejectAll':
+                this.exit();
                 break;
             default:
                 break;
