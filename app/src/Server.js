@@ -667,7 +667,7 @@ function startServer() {
             jwtCfg: jwtCfg,
             presenters: config.presenters,
             middleware: config.middleware,
-            announcedAddress: announcedAddress,
+            listenInfos: config.mediasoup.webRtcTransport.listenInfos,
             server: host,
             server_tunnel: tunnel,
             rest_api: restApi,
