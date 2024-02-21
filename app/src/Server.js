@@ -217,7 +217,9 @@ if (!announcedAddress) {
         (resp) => {
             resp.on('data', (ip) => {
                 announcedAddress = ip.toString();
-                config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress = announcedAddress;
+                config.mediasoup.webRtcTransport.listenInfos.forEach((info) => {
+                    info.announcedAddress = announcedAddress;
+                });
                 startServer();
             });
         },
