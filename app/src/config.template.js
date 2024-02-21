@@ -57,10 +57,14 @@ module.exports = {
         /*
             Host Protection (default: false)
             To enhance host security, enable host protection - user auth and provide valid
-            usernames and passwords in the users array.
+            usernames and passwords in the users array or active users_from_db using users_api_endpoint for check.
         */
         protected: false,
         user_auth: false,
+        users_from_db: false,
+        //users_api_endpoint: 'http://localhost:9000/api/v1/user/isAuth',
+        users_api_endpoint: 'https://webrtc.mirotalk.com/api/v1/user/isAuth',
+        users_api_secret_key: '91bbfac3-5e39-4583-9123-883b72be505c',
         users: [
             {
                 username: 'username',

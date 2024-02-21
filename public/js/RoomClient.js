@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.73
+ * @version 1.3.74
  *
  */
 
@@ -4185,27 +4185,21 @@ class RoomClient {
     }
 
     async syncRecordingInCloud(data) {
-        const arrayBuffer = data;
+        const arrayBuffer = await data.arrayBuffer();
         const chunkSize = rc.recSyncChunkSize;
-        const fileReader = new FileReader();
-        fileReader.readAsArrayBuffer(arrayBuffer);
-        fileReader.onload = async (event) => {
-            const arrayBuffer = event.target.result;
-            const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
-            for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
-                const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
-                try {
-                    await axios.post('/recSync?fileName=' + rc.recServerFileName, chunk, {
-                        headers: {
-                            'Content-Type': 'application/octet-stream',
-                            'Content-Length': chunk.length,
-                        },
-                    });
-                } catch (error) {
-                    console.error('Error syncing chunk:', error.message);
-                }
+        const totalChunks = Math.ceil(arrayBuffer.byteLength / chunkSize);
+        for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
+            const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
+            try {
+                await axios.post('/recSync?fileName=' + rc.recServerFileName, chunk, {
+                    headers: {
+                        'Content-Type': 'application/octet-stream',
+                    },
+                });
+            } catch (error) {
+                console.error('Error syncing chunk:', error.message);
             }
-        };
+        }
     }
 
     handleMediaRecorderStop(evt) {

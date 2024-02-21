@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.73
+ * @version 1.3.74
  *
  */
 
@@ -109,6 +109,9 @@ const jwtCfg = {
 const hostCfg = {
     protected: config.host.protected,
     user_auth: config.host.user_auth,
+    users_from_db: config.host.users_from_db,
+    users_api_endpoint: config.host.users_api_endpoint,
+    users_api_secret_key: config.host.users_api_secret_key,
     users: config.host.users,
     authenticated: !config.host.protected,
 };
@@ -305,7 +308,7 @@ function startServer() {
     });
 
     // no room name specified to join || direct join
-    app.get('/join/', (req, res) => {
+    app.get('/join/', async (req, res) => {
         if (Object.keys(req.query).length > 0) {
             log.debug('Direct Join', req.query);
 
@@ -326,7 +329,7 @@ function startServer() {
                     const { username, password, presenter } = checkXSS(jwt.verify(token, jwtCfg.JWT_KEY));
                     peerUsername = username;
                     peerPassword = password;
-                    isPeerValid = isAuthPeer(username, password);
+                    isPeerValid = await isAuthPeer(username, password);
                     isPeerPresenter = presenter === '1' || presenter === 'true';
                 } catch (err) {
                     log.error('Direct Join JWT error', { error: err.message, token: token });
@@ -419,13 +422,13 @@ function startServer() {
     // ####################################################
 
     // handle login on host protected
-    app.post(['/login'], (req, res) => {
+    app.post(['/login'], async (req, res) => {
         const ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.body);
 
         const { username, password } = checkXSS(req.body);
 
-        const isPeerValid = isAuthPeer(username, password);
+        const isPeerValid = await isAuthPeer(username, password);
 
         if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
             const ip = getIP(req);
@@ -1169,7 +1172,7 @@ function startServer() {
                     try {
                         const { username, password, presenter } = checkXSS(jwt.verify(peer_token, jwtCfg.JWT_KEY));
 
-                        const isPeerValid = isAuthPeer(username, password);
+                        const isPeerValid = await isAuthPeer(username, password);
 
                         is_presenter = presenter === '1' || presenter === 'true';
 
@@ -1699,8 +1702,24 @@ function startServer() {
         }
     }
 
-    function isAuthPeer(username, password) {
-        return hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password);
+    async function isAuthPeer(username, password) {
+        if (hostCfg.users_from_db && hostCfg.users_api_endpoint) {
+            try {
+                const response = await axios.post(hostCfg.users_api_endpoint, {
+                    email: username,
+                    password: password,
+                    api_secret_key: hostCfg.users_api_secret_key,
+                });
+                return response.data && response.data.message === true;
+            } catch (error) {
+                log.error('AXIOS isAuthPeer error', error.message);
+                return false;
+            }
+        } else {
+            return (
+                hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password)
+            );
+        }
     }
 
     function getActiveRooms() {
