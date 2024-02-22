@@ -19,6 +19,10 @@ module.exports = class Logger {
         this.timeStart = Date.now();
         this.timeEnd = null;
         this.timeElapsedMs = null;
+        this.tmOptions = {
+            timeZone: process.env.TZ || config.console.timeZone || 'UTC',
+            hour12: false,
+        };
     }
 
     debug(msg, op = '') {
@@ -60,10 +64,9 @@ module.exports = class Logger {
     }
 
     getDateTime() {
-        const options = {
-            timeZone: process.env.TZ || config.console.timeZone || 'UTC',
-        };
-        return colors.cyan(new Date().toLocaleString('en-US', options));
+        const currentTime = new Date().toLocaleString('en-US', this.tmOptions);
+        const milliseconds = String(new Date().getMilliseconds()).padStart(3, '0');
+        return colors.cyan(`${currentTime}:${milliseconds}`);
     }
 
     getFormatTime(ms) {
