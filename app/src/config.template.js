@@ -195,6 +195,10 @@ module.exports = {
         },
     },
     console: {
+        /*
+            timeZone: Time Zone corresponding to timezone identifiers from the IANA Time Zone Database es 'Europe/Rome' default UTC
+        */
+        timeZone: 'UTC',
         debug: true,
         colors: true,
     },

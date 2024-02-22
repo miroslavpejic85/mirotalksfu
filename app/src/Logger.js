@@ -61,7 +61,7 @@ module.exports = class Logger {
 
     getDateTime() {
         const options = {
-            timeZone: process.env.TZ || 'UTC',
+            timeZone: process.env.TZ || config.console.timeZone || 'UTC',
         };
         return colors.cyan(new Date().toLocaleString('en-US', options));
     }
