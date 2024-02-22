@@ -9,6 +9,8 @@ services:
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
+        # environment:
+        #     - TZ=Europe/Rome
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
             # These volume is mandatory if server.recording.enabled in the app/src/config.js
