@@ -19,7 +19,7 @@ module.exports = class Logger {
         this.timeStart = Date.now();
         this.timeEnd = null;
         this.timeElapsedMs = null;
-        this.tmOptions = {
+        this.tzOptions = {
             timeZone: process.env.TZ || config.console.timeZone || 'UTC',
             hour12: false,
         };
@@ -64,7 +64,7 @@ module.exports = class Logger {
     }
 
     getDateTime() {
-        const currentTime = new Date().toLocaleString('en-US', this.tmOptions);
+        const currentTime = new Date().toLocaleString('en-US', this.tzOptions);
         const milliseconds = String(new Date().getMilliseconds()).padStart(3, '0');
         return colors.cyan(`${currentTime}:${milliseconds}`);
     }
