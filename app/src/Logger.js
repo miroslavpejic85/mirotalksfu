@@ -26,7 +26,7 @@ module.exports = class Logger {
             this.timeEnd = Date.now();
             this.timeElapsedMs = this.getFormatTime(Math.floor(this.timeEnd - this.timeStart));
             console.debug(
-                '[' + this.getDataTime() + '] [' + this.appName + '] ' + msg,
+                '[' + this.getDateTime() + '] [' + this.appName + '] ' + msg,
                 util.inspect(op, options),
                 this.timeElapsedMs,
             );
@@ -35,32 +35,35 @@ module.exports = class Logger {
     }
 
     log(msg, op = '') {
-        console.log('[' + this.getDataTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
+        console.log('[' + this.getDateTime() + '] [' + this.appName + '] ' + msg, util.inspect(op, options));
     }
 
     info(msg, op = '') {
         console.info(
-            '[' + this.getDataTime() + '] [' + this.appName + '] ' + colors.green(msg),
+            '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.green(msg),
             util.inspect(op, options),
         );
     }
 
     warn(msg, op = '') {
         console.warn(
-            '[' + this.getDataTime() + '] [' + this.appName + '] ' + colors.yellow(msg),
+            '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.yellow(msg),
             util.inspect(op, options),
         );
     }
 
     error(msg, op = '') {
         console.error(
-            '[' + this.getDataTime() + '] [' + this.appName + '] ' + colors.red(msg),
+            '[' + this.getDateTime() + '] [' + this.appName + '] ' + colors.red(msg),
             util.inspect(op, options),
         );
     }
 
-    getDataTime() {
-        return colors.cyan(new Date().toISOString().replace(/T/, ' ').replace(/Z/, ''));
+    getDateTime() {
+        const options = {
+            timeZone: process.env.TZ || 'UTC',
+        };
+        return colors.cyan(new Date().toLocaleString('en-US', options));
     }
 
     getFormatTime(ms) {
