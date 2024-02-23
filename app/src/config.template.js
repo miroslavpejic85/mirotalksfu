@@ -64,7 +64,7 @@ module.exports = {
         users_from_db: false,
         //users_api_endpoint: 'http://localhost:9000/api/v1/user/isAuth',
         users_api_endpoint: 'https://webrtc.mirotalk.com/api/v1/user/isAuth',
-        users_api_secret_key: '91bbfac3-5e39-4583-9123-883b72be505c',
+        users_api_secret_key: 'mirotalkweb_default_secret',
         users: [
             {
                 username: 'username',
