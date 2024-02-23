@@ -1664,6 +1664,7 @@ class RoomClient {
                 au = document.createElement('button');
                 au.id = this.peer_id + '__audio';
                 au.className = this.peer_info.peer_audio ? html.audioOn : html.audioOff;
+                au.style.cursor = 'default';
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
