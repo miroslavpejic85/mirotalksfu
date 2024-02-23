@@ -1,6 +1,6 @@
 'use strict';
 
-async function getMeeting() {
+async function getToken() {
     try {
         // Use dynamic import with await
         const { default: fetch } = await import('node-fetch');
@@ -33,4 +33,4 @@ async function getMeeting() {
     }
 }
 
-getMeeting();
+getToken();
