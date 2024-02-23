@@ -73,6 +73,31 @@ paths:
                         $ref: '#/definitions/JoinResponse'
                 '403':
                     description: 'Unauthorized!'
+    /token:
+        post:
+            tags:
+                - 'token'
+            summary: 'Get token'
+            description: 'Get token'
+            parameters:
+                - in: body
+                  name: token
+                  description: Custom Token.
+                  schema:
+                      $ref: '#/definitions/TokenRequest'
+            consumes:
+                - 'application/json'
+            produces:
+                - 'application/json'
+            security:
+                - secretApiKey: []
+            responses:
+                '200':
+                    description: 'Get token done'
+                    schema:
+                        $ref: '#/definitions/TokenResponse'
+                '403':
+                    description: 'Unauthorized!'
 
 securityDefinitions:
     secretApiKey:
@@ -142,6 +167,11 @@ definitions:
         type: 'object'
         properties:
             join:
+                type: string
+    TokenResponse:
+        type: 'object'
+        properties:
+            token:
                 type: string
     Peer:
         type: object

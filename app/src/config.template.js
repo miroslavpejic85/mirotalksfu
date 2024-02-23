@@ -219,6 +219,7 @@ module.exports = {
             meetings: false,
             meeting: true,
             join: true,
+            token: true,
             //...
         },
     },

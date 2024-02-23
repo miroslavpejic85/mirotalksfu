@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.75
+ * @version 1.3.76
  *
  */
 
@@ -579,7 +579,7 @@ function startServer() {
             return res.status(403).json({ error: 'Unauthorized!' });
         }
         // setup meeting URL
-        let meetingURL = api.getMeetingURL();
+        const meetingURL = api.getMeetingURL();
         res.json({ meeting: meetingURL });
         // log.debug the output if all done
         log.debug('MiroTalk get meeting - Authorized', {
@@ -608,13 +608,42 @@ function startServer() {
             return res.status(403).json({ error: 'Unauthorized!' });
         }
         // setup Join URL
-        let joinURL = api.getJoinURL(req.body);
+        const joinURL = api.getJoinURL(req.body);
         res.json({ join: joinURL });
         // log.debug the output if all done
         log.debug('MiroTalk get join - Authorized', {
             header: req.headers,
             body: req.body,
             join: joinURL,
+        });
+    });
+
+    // request token endpoint
+    app.post([restApi.basePath + '/token'], (req, res) => {
+        // Check if endpoint allowed
+        if (restApi.allowed && !restApi.allowed.token) {
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
+        }
+        // check if user was authorized for the api call
+        const { host, authorization } = req.headers;
+        const api = new ServerApi(host, authorization);
+        if (!api.isAuthorized()) {
+            log.debug('MiroTalk get token - Unauthorized', {
+                header: req.headers,
+                body: req.body,
+            });
+            return res.status(403).json({ error: 'Unauthorized!' });
+        }
+        // Get Token
+        const token = api.getToken(req.body);
+        res.json({ token: token });
+        // log.debug the output if all done
+        log.debug('MiroTalk get token - Authorized', {
+            header: req.headers,
+            body: req.body,
+            token: token,
         });
     });
 
