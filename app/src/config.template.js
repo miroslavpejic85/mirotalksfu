@@ -61,7 +61,7 @@ module.exports = {
         */
         protected: false,
         user_auth: false,
-        users_from_db: false,
+        users_from_db: false, // if true ensure that api.token is also set to true.
         //users_api_endpoint: 'http://localhost:9000/api/v1/user/isAuth',
         users_api_endpoint: 'https://webrtc.mirotalk.com/api/v1/user/isAuth',
         users_api_secret_key: 'mirotalkweb_default_secret',
