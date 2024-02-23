@@ -77,6 +77,18 @@ module.exports = {
             //...
         ],
     },
+    api: {
+        // Default secret key for app/api
+        keySecret: 'mirotalksfu_default_secret',
+        // Define which endpoints are allowed
+        allowed: {
+            meetings: false,
+            meeting: true,
+            join: true,
+            token: false,
+            //...
+        },
+    },
     jwt: {
         /*
             JWT https://jwt.io/
@@ -210,18 +222,6 @@ module.exports = {
             3. Copy YourNgrokAuthToken: https://dashboard.ngrok.com/get-started/your-authtoken
         */
         authToken: '',
-    },
-    api: {
-        // Default secret key for app/api
-        keySecret: 'mirotalksfu_default_secret',
-        // Define which endpoints are allowed
-        allowed: {
-            meetings: false,
-            meeting: true,
-            join: true,
-            token: false,
-            //...
-        },
     },
     sentry: {
         /*
