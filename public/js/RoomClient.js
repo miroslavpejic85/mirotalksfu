@@ -1668,7 +1668,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
-                p.innerText = this.peer_name + ' (me)';
+                p.innerText = (isPresenter ? '★ ' : '') + this.peer_name + ' (me)';
                 i = document.createElement('i');
                 i.id = this.peer_id + '__hand';
                 i.className = html.userHand;
@@ -1975,10 +1975,11 @@ class RoomClient {
 
         console.log('PEER-INFO', peer_info);
 
-        let remotePeerId = peer_info.peer_id;
-        let remoteIsScreen = type == mediaType.screen;
-        let remotePeerAudio = peer_info.peer_audio;
-        let remotePrivacyOn = peer_info.peer_video_privacy;
+        const remotePeerId = peer_info.peer_id;
+        const remoteIsScreen = type == mediaType.screen;
+        const remotePeerAudio = peer_info.peer_audio;
+        const remotePrivacyOn = peer_info.peer_video_privacy;
+        const remotePeerPresenter = peer_info.peer_presenter;
 
         switch (type) {
             case mediaType.video:
@@ -2047,7 +2048,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                p.innerText = peer_name;
+                p.innerText = (remotePeerPresenter ? '★ ' : '') + peer_name;
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', remotePeerId + '__pitchMeter');
@@ -2199,9 +2200,12 @@ class RoomClient {
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
         let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv;
-        let peer_id = peer_info.peer_id;
-        let peer_name = peer_info.peer_name;
-        let peer_audio = peer_info.peer_audio;
+
+        const peer_id = peer_info.peer_id;
+        const peer_name = peer_info.peer_name;
+        const peer_audio = peer_info.peer_audio;
+        const peer_presenter = peer_info.peer_presenter;
+
         this.removeVideoOff(peer_id);
         d = document.createElement('div');
         d.className = 'Camera';
@@ -2244,7 +2248,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
-        p.innerText = peer_name + (remotePeer ? '' : ' (me) ');
+        p.innerText = (peer_presenter ? '★ ' : '') + peer_name + (remotePeer ? '' : ' (me) ');
         h = document.createElement('i');
         h.id = peer_id + '__hand';
         h.className = html.userHand;
