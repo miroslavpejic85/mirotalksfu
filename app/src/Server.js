@@ -519,38 +519,8 @@ function startServer() {
             });
             return res.status(403).json({ error: 'Unauthorized!' });
         }
-        const meetings = Array.from(roomList.entries()).map(([id, room]) => {
-            const peers = Array.from(room.peers.values()).map(
-                ({
-                    peer_info: {
-                        peer_name,
-                        peer_presenter,
-                        peer_video,
-                        peer_audio,
-                        peer_screen,
-                        peer_hand,
-                        os_name,
-                        os_version,
-                        browser_name,
-                        browser_version,
-                    },
-                }) => ({
-                    name: peer_name,
-                    presenter: peer_presenter,
-                    video: peer_video,
-                    audio: peer_audio,
-                    screen: peer_screen,
-                    hand: peer_hand,
-                    os: os_name ? `${os_name} ${os_version}` : '',
-                    browser: browser_name ? `${browser_name} ${browser_version}` : '',
-                }),
-            );
-            return {
-                roomId: id,
-                peers: peers,
-            };
-        });
-
+        // Get meetings
+        const meetings = api.getMeetings(roomList);
         res.json({ meetings: meetings });
         // log.debug the output if all done
         log.debug('MiroTalk get meetings - Authorized', {
