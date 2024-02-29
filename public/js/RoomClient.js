@@ -936,7 +936,6 @@ class RoomClient {
 
     getReconnectDirectJoinURL() {
         const baseUrl = `${window.location.origin}/join`;
-
         const queryParams = {
             room: this.room_id,
             password: this.RoomPassword,
@@ -948,7 +947,6 @@ class RoomClient {
             isPresenter: isPresenter,
         };
         if (this.peer_info.peer_token) queryParams.token = this.peer_info.peer_token;
-
         const url = `${baseUrl}?${Object.entries(queryParams)
             .map(([key, value]) => `${key}=${value}`)
             .join('&')}`;
