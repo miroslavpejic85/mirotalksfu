@@ -600,7 +600,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Producer Transport failed');
                             this.producerTransport.close();
-                            //location.reload();
+                            //openURL(this.getReconnectDirectJoinURL());
                             break;
 
                         default:
@@ -659,7 +659,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Consumer Transport failed');
                             this.consumerTransport.close();
-                            //location.reload();
+                            //openURL(this.getReconnectDirectJoinURL());
                             break;
 
                         default:
@@ -935,10 +935,24 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
-        return (
-            `${window.location.origin}/join?room=${this.room_id}&password=${this.RoomPassword}&name=${this.peer_name}&audio=${this.peer_info.peer_audio}&video=${this.peer_info.peer_video}&screen=${this.peer_info.peer_screen}&notify=0&isPresenter=${isPresenter}` +
-            (this.peer_info.peer_token ? `&token=${peer_info.peer_token}` : '')
-        );
+        const baseUrl = `${window.location.origin}/join`;
+
+        const queryParams = {
+            room: this.room_id,
+            password: this.RoomPassword,
+            name: this.peer_name,
+            audio: this.peer_info.peer_audio,
+            video: this.peer_info.peer_video,
+            screen: this.peer_info.peer_screen,
+            notify: 0,
+            isPresenter: isPresenter,
+        };
+        if (this.peer_info.peer_token) queryParams.token = this.peer_info.peer_token;
+
+        const url = `${baseUrl}?${Object.entries(queryParams)
+            .map(([key, value]) => `${key}=${value}`)
+            .join('&')}`;
+        return url;
     }
 
     // ####################################################
