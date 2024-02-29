@@ -196,9 +196,9 @@ const views = {
 
 const authHost = new Host(); // Authenticated IP by Login
 
-let roomList = new Map(); // All Rooms
+const roomList = new Map(); // All Rooms
 
-let presenters = {}; // collect presenters grp by roomId
+const presenters = {}; // collect presenters grp by roomId
 
 let announcedAddress = config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress; // announcedAddress (server public IPv4)
 
@@ -1166,6 +1166,8 @@ function startServer() {
 
             const { peer_token } = data.peer_info;
 
+            const room = roomList.get(socket.room_id);
+
             // User Auth required, we check if peer valid
             if (hostCfg.user_auth) {
                 // Check JWT
@@ -1175,7 +1177,7 @@ function startServer() {
 
                         const isPeerValid = await isAuthPeer(username, password);
 
-                        is_presenter = presenter === '1' || presenter === 'true';
+                        is_presenter = presenter === '1' || presenter === 'true' || room.getPeers().size === 0;
 
                         log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
                             ip: peer_ip,
@@ -1197,8 +1199,6 @@ function startServer() {
                     return cb('unauthorized');
                 }
             }
-
-            const room = roomList.get(socket.room_id);
 
             // check if banned...
             const peerUUID = data.peer_info.peer_uuid;

@@ -600,6 +600,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Producer Transport failed');
                             this.producerTransport.close();
+                            //location.reload();
                             break;
 
                         default:
@@ -658,6 +659,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Consumer Transport failed');
                             this.consumerTransport.close();
+                            //location.reload();
                             break;
 
                         default:
