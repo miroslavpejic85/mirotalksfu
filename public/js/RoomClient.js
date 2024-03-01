@@ -600,7 +600,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Producer Transport failed');
                             this.producerTransport.close();
-                            //openURL(this.getReconnectDirectJoinURL());
+                            //this.refreshBrowser();
                             break;
 
                         default:
@@ -659,7 +659,7 @@ class RoomClient {
                         case 'failed':
                             console.warn('Consumer Transport failed');
                             this.consumerTransport.close();
-                            //openURL(this.getReconnectDirectJoinURL());
+                            //this.refreshBrowser();
                             break;
 
                         default:
@@ -893,8 +893,7 @@ class RoomClient {
             function () {
                 console.log('SocketOn Connected to signaling server!');
                 this._isConnected = true;
-                // location.reload();
-                getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
+                this.refreshBrowser();
             }.bind(this),
         );
 
@@ -932,6 +931,10 @@ class RoomClient {
                 this.event(_EVENTS.exitRoom);
             }
         });
+    }
+
+    refreshBrowser() {
+        getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
     }
 
     getReconnectDirectJoinURL() {
