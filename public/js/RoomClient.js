@@ -4190,7 +4190,8 @@ class RoomClient {
 
     getServerRecFileName() {
         const dateTime = getDataTimeStringFormat();
-        return `Rec_${dateTime}.webm`;
+        const roomName = this.room_id.trim();
+        return `Rec_${roomName}_${dateTime}.webm`;
     }
 
     handleMediaRecorderStart(evt) {
