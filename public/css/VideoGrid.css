@@ -92,7 +92,7 @@
     right: 0;
     bottom: 0;
     color: #fff;
-    font-size: 14px;
+    font-size: 10px;
     display: flex;
     align-items: center;
     padding: 5px;
@@ -144,6 +144,17 @@
 .videoMenuBar button:hover {
     color: grey;
     transition: all 0.3s ease-in-out;
+}
+
+.expand-video-content {
+    position: relative;
+    display: none;
+    float: right;
+    width: auto;
+}
+
+.expand-video:hover .expand-video-content {
+    display: inline-flex;
 }
 
 #videoMediaContainer video {

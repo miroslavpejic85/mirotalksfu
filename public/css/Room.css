@@ -443,6 +443,15 @@ th {
     transform: scale(1);
 }
 
+.dropdown-menu li:hover {
+    background: var(--btns-bg-color);
+}
+
+/* Hide the default Bootstrap dropdown icon */
+.dropdown-toggle::after {
+    display: none !important;
+}
+
 /*--------------------------------------------------------------
 # Style the tab
 --------------------------------------------------------------*/
@@ -891,15 +900,6 @@ th {
 /*--------------------------------------------------------------
 # Common
 --------------------------------------------------------------*/
-
-.dropdown-menu li:hover {
-    background: var(--btns-bg-color);
-}
-
-/* Hide the default Bootstrap dropdown icon */
-.dropdown-toggle::after {
-    display: none !important;
-}
 
 select {
     height: 40px;

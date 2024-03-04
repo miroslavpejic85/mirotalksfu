@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.79
+ * @version 1.3.80
  *
  */
 
@@ -41,6 +41,7 @@ const html = {
     bg: 'fas fa-circle-half-stroke',
     pin: 'fas fa-map-pin',
     videoPrivacy: 'far fa-circle',
+    expand: 'fas fa-ellipsis-vertical',
 };
 
 const icons = {
@@ -1990,6 +1991,8 @@ class RoomClient {
     handleConsumer(id, type, stream, peer_name, peer_info) {
         let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn;
 
+        let eDiv, eBtn, eVc; // expand buttons
+
         console.log('PEER-INFO', peer_info);
 
         const remotePeerId = peer_info.peer_id;
@@ -2017,6 +2020,15 @@ class RoomClient {
                 vb = document.createElement('div');
                 vb.setAttribute('id', remotePeerId + '__vb');
                 vb.className = 'videoMenuBar fadein';
+
+                eDiv = document.createElement('div');
+                eDiv.className = 'expand-video';
+                eBtn = document.createElement('button');
+                eBtn.id = remotePeerId + '_videoExpandBtn';
+                eBtn.className = html.expand;
+                eVc = document.createElement('div');
+                eVc.className = 'expand-video-content';
+
                 pv = document.createElement('input');
                 pv.id = remotePeerId + '___pVolume';
                 pv.type = 'range';
@@ -2074,15 +2086,21 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
-                BUTTONS.consumerVideo.ejectButton && vb.appendChild(ko);
-                BUTTONS.consumerVideo.banButton && vb.appendChild(ban);
-                BUTTONS.consumerVideo.geolocationButton && vb.appendChild(gl);
+
+                BUTTONS.consumerVideo.sendMessageButton && eVc.appendChild(sm);
+                BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(sf);
+                BUTTONS.consumerVideo.sendVideoButton && eVc.appendChild(sv);
+                BUTTONS.consumerVideo.geolocationButton && eVc.appendChild(gl);
+                BUTTONS.consumerVideo.banButton && eVc.appendChild(ban);
+                BUTTONS.consumerVideo.ejectButton && eVc.appendChild(ko);
+
+                eDiv.appendChild(eBtn);
+                eDiv.appendChild(eVc);
+
+                vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
                 vb.appendChild(au);
                 vb.appendChild(cm);
-                BUTTONS.consumerVideo.sendVideoButton && vb.appendChild(sv);
-                BUTTONS.consumerVideo.sendFileButton && vb.appendChild(sf);
-                BUTTONS.consumerVideo.sendMessageButton && vb.appendChild(sm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
