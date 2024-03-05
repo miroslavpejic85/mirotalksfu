@@ -601,7 +601,8 @@ class RoomClient {
                         case 'failed':
                             console.warn('Producer Transport failed');
                             this.producerTransport.close();
-                            //this.refreshBrowser();
+                            // this.exit(true);
+                            // this.refreshBrowser();
                             break;
 
                         default:
@@ -660,7 +661,8 @@ class RoomClient {
                         case 'failed':
                             console.warn('Consumer Transport failed');
                             this.consumerTransport.close();
-                            //this.refreshBrowser();
+                            // this.exit(true);
+                            // this.refreshBrowser();
                             break;
 
                         default:
@@ -2393,7 +2395,7 @@ class RoomClient {
     // ####################################################
 
     exit(offline = false) {
-        let clean = function () {
+        const clean = function () {
             this._isConnected = false;
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
