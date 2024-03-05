@@ -449,7 +449,9 @@ function startServer() {
 
         if (isPeerValid) {
             log.debug('PEER LOGIN OK', { ip: ip, authorized: true });
-            const token = jwt.sign({ username: username, password: password, presenter: false }, jwtCfg.JWT_KEY, {
+            const isPresenter =
+                config.presenters && config.presenters.list && config.presenters.list.includes(username).toString();
+            const token = jwt.sign({ username: username, password: password, presenter: isPresenter }, jwtCfg.JWT_KEY, {
                 expiresIn: jwtCfg.JWT_EXP,
             });
             return res.status(200).json({ message: token });
