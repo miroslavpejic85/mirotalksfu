@@ -1110,6 +1110,7 @@ progress {
 }
 
 .whiteboard-header-options .dropdown-menu {
+    display: none;
     width: 100vw;
     padding: 10px;
     background: var(--body-bg);
