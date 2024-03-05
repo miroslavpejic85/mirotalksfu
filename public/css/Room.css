@@ -1084,7 +1084,6 @@ progress {
 
 .whiteboard-header {
     display: flex;
-    justify-content: space-between;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 10px;
@@ -1095,6 +1094,7 @@ progress {
 .whiteboard-header-title {
     display: inline-flex;
     align-items: center;
+    float: right;
 }
 
 .whiteboard-header button {
@@ -1102,6 +1102,11 @@ progress {
     border-radius: 5px;
     /* border: var(--border); */
     border: none !important;
+}
+
+.whiteboard-header-options {
+    position: absolute;
+    right: 20px;
 }
 
 .whiteboard-header-options .dropdown {
