@@ -1093,16 +1093,30 @@ progress {
 }
 
 .whiteboard-header-title {
-    display: flex;
+    display: inline-flex;
     align-items: center;
 }
 
 .whiteboard-header button {
     /* padding: 10px; */
-    margin: 2px;
     border-radius: 5px;
     /* border: var(--border); */
     border: none !important;
+}
+
+.whiteboard-header-options .dropdown {
+    margin-left: 10px;
+    float: right;
+}
+
+.whiteboard-header-options .dropdown-menu {
+    width: 100vw;
+    padding: 10px;
+    background: var(--body-bg);
+}
+
+.whiteboard-header-options .dropdown-menu button {
+    display: inline-flex;
 }
 
 .whiteboardColorPicker {

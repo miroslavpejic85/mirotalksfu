@@ -1057,27 +1057,40 @@ access to use this app.
                     <button id="whiteboardObjectBtn" class="fas fa-mouse-pointer"></button>
                     <button id="whiteboardUndoBtn" class="fas fa-undo"></button>
                     <button id="whiteboardRedoBtn" class="fas fa-redo"></button>
-                    <button id="whiteboardImgFileBtn" class="far fa-image"></button>
-                    <button id="whiteboardPdfFileBtn" class="far fa-file-pdf"></button>
-                    <button id="whiteboardImgUrlBtn" class="fas fa-link"></button>
-                    <button id="whiteboardTextBtn" class="fas fa-spell-check"></button>
-                    <button id="whiteboardLineBtn" class="fas fa-slash"></button>
-                    <button id="whiteboardRectBtn" class="far fa-square"></button>
-                    <button id="whiteboardTriangleBtn" class="fas">
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="1em"
-                            height="1em"
-                            viewBox="0 0 24 24"
-                            fill="#FFFFFF"
+                    <div class="dropdown">
+                        <button
+                            class="dropdown-toggle"
+                            type="button"
+                            id="whiteboardDropDownMenu"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
                         >
-                            <path d="M12 5.887l8.468 14.113h-16.936l8.468-14.113zm0-3.887l-12 20h24l-12-20z" />
-                        </svg>
-                    </button>
-                    <button id="whiteboardCircleBtn" class="far fa-circle"></button>
-                    <button id="whiteboardSaveBtn" class="fas fa-save"></button>
-                    <button id="whiteboardEraserBtn" class="fas fa-eraser"></button>
-                    <button id="whiteboardCleanBtn" class="fas fa-trash"></button>
+                            <i class="fas fa-ellipsis-vertical"></i>
+                        </button>
+                        <div class="dropdown-menu text-start" aria-labelledby="whiteboardDropDownMenu">
+                            <button id="whiteboardImgFileBtn" class="far fa-image"></button>
+                            <button id="whiteboardPdfFileBtn" class="far fa-file-pdf"></button>
+                            <button id="whiteboardImgUrlBtn" class="fas fa-link"></button>
+                            <button id="whiteboardTextBtn" class="fas fa-spell-check"></button>
+                            <button id="whiteboardLineBtn" class="fas fa-slash"></button>
+                            <button id="whiteboardRectBtn" class="far fa-square"></button>
+                            <button id="whiteboardTriangleBtn" class="fas">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="1em"
+                                    height="1em"
+                                    viewBox="0 0 24 24"
+                                    fill="#FFFFFF"
+                                >
+                                    <path d="M12 5.887l8.468 14.113h-16.936l8.468-14.113zm0-3.887l-12 20h24l-12-20z" />
+                                </svg>
+                            </button>
+                            <button id="whiteboardCircleBtn" class="far fa-circle"></button>
+                            <button id="whiteboardSaveBtn" class="fas fa-save"></button>
+                            <button id="whiteboardEraserBtn" class="fas fa-eraser"></button>
+                            <button id="whiteboardCleanBtn" class="fas fa-trash"></button>
+                        </div>
+                    </div>
                 </div>
             </header>
             <main>
