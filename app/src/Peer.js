@@ -94,43 +94,54 @@ module.exports = class Peer {
     }
 
     async createProducer(producerTransportId, rtpParameters, kind, type) {
-        let producer = await this.transports.get(producerTransportId).produce({
-            kind,
-            rtpParameters,
-        });
+        try {
+            if (!producerTransportId) {
+                throw new Error('Invalid producer transport ID');
+            }
 
-        producer.appData.mediaType = type;
+            const producerTransport = this.transports.get(producerTransportId);
+            if (!producerTransport) {
+                throw new Error(`Producer transport with ID ${producerTransportId} not found`);
+            }
 
-        this.producers.set(producer.id, producer);
-
-        const producerType = producer.type;
-
-        if (['simulcast', 'svc'].includes(producerType)) {
-            const scalabilityMode = producer.rtpParameters.encodings[0].scalabilityMode;
-            const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
-            const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
-            log.debug(`Producer  [${producerType}] ----->`, {
-                scalabilityMode: scalabilityMode,
-                spatialLayer: spatialLayer,
-                temporalLayer: temporalLayer,
+            const producer = await producerTransport.produce({
+                kind,
+                rtpParameters,
             });
-        } else {
-            log.debug('Producer ----->', { producerType: producerType });
-        }
 
-        producer.on(
-            'transportclose',
-            function () {
-                log.debug('Producer transport close', {
-                    peer_name: this.peer_info.peer_name,
-                    consumer_id: producer.id,
+            producer.appData.mediaType = type;
+
+            this.producers.set(producer.id, producer);
+
+            const producerType = producer.type;
+
+            if (['simulcast', 'svc'].includes(producerType)) {
+                const { scalabilityMode } = producer.rtpParameters.encodings[0];
+                const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
+                const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+                log.debug(`Producer [${producerType}] created with ID ${producer.id}`, {
+                    scalabilityMode,
+                    spatialLayer,
+                    temporalLayer,
+                });
+            } else {
+                log.debug(`Producer of type ${producerType} created with ID ${producer.id}`);
+            }
+
+            producer.on('transportclose', () => {
+                log.debug('Producer transport closed', {
+                    peer_name: this.peer_info?.peer_name,
+                    producer_id: producer.id,
                 });
                 producer.close();
                 this.producers.delete(producer.id);
-            }.bind(this),
-        );
+            });
 
-        return producer;
+            return producer;
+        } catch (error) {
+            log.error('Error creating producer', error);
+            return null;
+        }
     }
 
     closeProducer(producer_id) {
@@ -148,66 +159,64 @@ module.exports = class Peer {
     // ####################################################
 
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
-        let consumerTransport = this.transports.get(consumer_transport_id);
-        let consumer = null;
-
         try {
-            consumer = await consumerTransport.consume({
+            const consumerTransport = this.transports.get(consumer_transport_id);
+
+            if (!consumerTransport) {
+                throw new Error(`Consumer transport with id ${consumer_transport_id} not found`);
+            }
+
+            const consumer = await consumerTransport.consume({
                 producerId: producer_id,
                 rtpCapabilities,
                 enableRtx: true, // Enable NACK for OPUS.
                 paused: false,
             });
-        } catch (error) {
-            return console.error('Consume failed', error);
-        }
 
-        const consumerType = consumer.type;
+            const consumerType = consumer.type;
 
-        // https://www.w3.org/TR/webrtc-svc/#scalabilitymodes*
+            if (['simulcast', 'svc'].includes(consumerType)) {
+                const { scalabilityMode } = consumer.rtpParameters.encodings[0];
+                const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
+                const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+                await consumer.setPreferredLayers({
+                    spatialLayer: spatialLayer,
+                    temporalLayer: temporalLayer,
+                });
+                log.debug(`Consumer [${consumerType}] ----->`, {
+                    scalabilityMode,
+                    spatialLayer,
+                    temporalLayer,
+                });
+            } else {
+                log.debug('Consumer ----->', { type: consumerType });
+            }
 
-        if (['simulcast', 'svc'].includes(consumerType)) {
-            // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
-            const scalabilityMode = consumer.rtpParameters.encodings[0].scalabilityMode;
-            const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
-            const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
-            await consumer.setPreferredLayers({
-                spatialLayer: spatialLayer,
-                temporalLayer: temporalLayer,
-            });
-            log.debug(`Consumer [${consumerType}] ----->`, {
-                scalabilityMode: scalabilityMode,
-                spatialLayer: spatialLayer,
-                temporalLayer: temporalLayer,
-            });
-        } else {
-            log.debug('Consumer ----->', { consumerType: consumerType });
-        }
-
-        this.consumers.set(consumer.id, consumer);
-
-        consumer.on(
-            'transportclose',
-            function () {
+            consumer.on('transportclose', () => {
                 log.debug('Consumer transport close', {
-                    peer_name: this.peer_info.peer_name,
+                    peer_name: this.peer_info?.peer_name,
                     consumer_id: consumer.id,
                 });
                 this.removeConsumer(consumer.id);
-            }.bind(this),
-        );
+            });
 
-        return {
-            consumer,
-            params: {
-                producerId: producer_id,
-                id: consumer.id,
-                kind: consumer.kind,
-                rtpParameters: consumer.rtpParameters,
-                type: consumer.type,
-                producerPaused: consumer.producerPaused,
-            },
-        };
+            this.consumers.set(consumer.id, consumer);
+
+            return {
+                consumer,
+                params: {
+                    producerId: producer_id,
+                    id: consumer.id,
+                    kind: consumer.kind,
+                    rtpParameters: consumer.rtpParameters,
+                    type: consumer.type,
+                    producerPaused: consumer.producerPaused,
+                },
+            };
+        } catch (error) {
+            log.error('Error creating consumer', error);
+            return null;
+        }
     }
 
     removeConsumer(consumer_id) {

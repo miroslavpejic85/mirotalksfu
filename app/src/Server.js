@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.80
+ * @version 1.3.85
  *
  */
 
@@ -801,7 +801,7 @@ function startServer() {
                 callback({ error: 'already exists' });
             } else {
                 log.debug('Created room', { room_id: socket.room_id });
-                let worker = await getMediasoupWorker();
+                const worker = await getMediasoupWorker();
                 roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
                 callback({ room_id: socket.room_id });
             }
@@ -1313,7 +1313,7 @@ function startServer() {
             log.debug('Get producers', getPeerName(room));
 
             // send all the current producer to newly joined member
-            let producerList = room.getProducerListForPeer();
+            const producerList = room.getProducerListForPeer();
 
             socket.emit('newProducers', producerList);
         });
@@ -1330,7 +1330,7 @@ function startServer() {
                 const { params } = await room.createWebRtcTransport(socket.id);
                 callback(params);
             } catch (err) {
-                log.error('Create WebRtc Transport error: ', err.message);
+                log.error('Create WebRtc Transport error', err.message);
                 callback({
                     error: err.message,
                 });
@@ -1358,10 +1358,10 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            let peer_name = getPeerName(room, false);
+            const peer_name = getPeerName(room, false);
 
             // peer_info audio Or video ON
-            let data = {
+            const data = {
                 peer_name: peer_name,
                 peer_id: socket.id,
                 kind: kind,
@@ -1371,7 +1371,7 @@ function startServer() {
 
             await room.getPeers().get(socket.id).updatePeerInfo(data);
 
-            let producer_id = await room.produce(
+            const producer_id = await room.produce(
                 socket.id,
                 producerTransportId,
                 rtpParameters,
@@ -1404,7 +1404,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            let params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
+            const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
 
             log.debug('Consuming', {
                 peer_name: getPeerName(room, false),
@@ -1446,7 +1446,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            let data = {
+            const data = {
                 room_id: socket.room_id,
                 peer_counts: room.getPeers().size,
             };

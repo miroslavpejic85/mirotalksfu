@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.80
+ * @version 1.3.85
  *
  */
 
@@ -302,11 +302,9 @@ class RoomClient {
         console.log('06 ----> Load MediaSoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
 
-        Object.keys(_EVENTS).forEach(
-            function (evt) {
-                this.eventListeners.set(evt, []);
-            }.bind(this),
-        );
+        Object.keys(_EVENTS).forEach((evt) => {
+            this.eventListeners.set(evt, []);
+        });
 
         this.socket.request = function request(type, data = {}) {
             return new Promise((resolve, reject) => {
@@ -324,18 +322,16 @@ class RoomClient {
         // CREATE ROOM AND JOIN
         // ####################################################
 
-        this.createRoom(this.room_id).then(
-            async function () {
-                let data = {
-                    room_id: this.room_id,
-                    peer_info: this.peer_info,
-                };
-                await this.join(data);
-                this.initSockets();
-                this._isConnected = true;
-                successCallback();
-            }.bind(this),
-        );
+        this.createRoom(this.room_id).then(async () => {
+            const data = {
+                room_id: this.room_id,
+                peer_info: this.peer_info,
+            };
+            await this.join(data);
+            this.initSockets();
+            this._isConnected = true;
+            successCallback();
+        });
     }
 
     // ####################################################
@@ -355,43 +351,41 @@ class RoomClient {
     async join(data) {
         this.socket
             .request('join', data)
-            .then(
-                async function (room) {
-                    console.log('##### JOIN ROOM #####', room);
-                    if (room === 'unauthorized') {
-                        console.log(
-                            '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
-                        );
-                        return this.userUnauthorized();
-                    }
-                    if (room === 'isLocked') {
-                        this.event(_EVENTS.roomLock);
-                        console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
-                        return this.unlockTheRoom();
-                    }
-                    if (room === 'isLobby') {
-                        this.event(_EVENTS.lobbyOn);
-                        console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
-                        return this.waitJoinConfirm();
-                    }
-                    if (room === 'isBanned') {
-                        console.log('00-WARNING ----> You are Banned from the Room!');
-                        return this.isBanned();
-                    }
-                    const peers = new Map(JSON.parse(room.peers));
-                    if (!peer_info.peer_token) {
-                        // hack...
-                        for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-                            let peer_info = peers.get(peer).peer_info;
-                            if (peer_info.peer_name == this.peer_name) {
-                                console.log('00-WARNING ----> Username already in use');
-                                return this.userNameAlreadyInRoom();
-                            }
+            .then(async (room) => {
+                console.log('##### JOIN ROOM #####', room);
+                if (room === 'unauthorized') {
+                    console.log(
+                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
+                    );
+                    return this.userUnauthorized();
+                }
+                if (room === 'isLocked') {
+                    this.event(_EVENTS.roomLock);
+                    console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
+                    return this.unlockTheRoom();
+                }
+                if (room === 'isLobby') {
+                    this.event(_EVENTS.lobbyOn);
+                    console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
+                    return this.waitJoinConfirm();
+                }
+                if (room === 'isBanned') {
+                    console.log('00-WARNING ----> You are Banned from the Room!');
+                    return this.isBanned();
+                }
+                const peers = new Map(JSON.parse(room.peers));
+                if (!peer_info.peer_token) {
+                    // hack...
+                    for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
+                        let peer_info = peers.get(peer).peer_info;
+                        if (peer_info.peer_name == this.peer_name) {
+                            console.log('00-WARNING ----> Username already in use');
+                            return this.userNameAlreadyInRoom();
                         }
                     }
-                    await this.joinAllowed(room);
-                }.bind(this),
-            )
+                }
+                await this.joinAllowed(room);
+            })
             .catch((err) => {
                 console.log('Join error:', err);
             });
@@ -534,381 +528,309 @@ class RoomClient {
     }
 
     // ####################################################
-    // PRODUCER TRANSPORT
+    // TRANSPORTS
     // ####################################################
 
     async initTransports(device) {
-        {
-            const data = await this.socket.request('createWebRtcTransport', {
+        try {
+            // ####################################################
+            // PRODUCER TRANSPORT
+            // ####################################################
+
+            const producerTransportData = await this.socket.request('createWebRtcTransport', {
                 forceTcp: false,
                 rtpCapabilities: device.rtpCapabilities,
             });
 
-            if (data.error) {
-                return console.error('Create WebRtc Transport for Producer err: ', data.error);
+            if (producerTransportData.error) {
+                throw new Error('Error creating WebRTC producer transport: ' + producerTransportData.error);
             }
 
-            this.producerTransport = device.createSendTransport(data);
-            this.producerTransport.on(
-                'connect',
-                async function ({ dtlsParameters }, callback, errback) {
-                    this.socket
-                        .request('connectTransport', {
-                            dtlsParameters,
-                            transport_id: data.id,
-                        })
-                        .then(callback)
-                        .catch(errback);
-                }.bind(this),
-            );
+            this.producerTransport = device.createSendTransport(producerTransportData);
 
-            this.producerTransport.on(
-                'produce',
-                async function ({ kind, appData, rtpParameters }, callback, errback) {
-                    console.log('Going to produce', {
-                        kind: kind,
-                        appData: appData,
-                        rtpParameters: rtpParameters,
+            this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+                try {
+                    await this.socket.request('connectTransport', {
+                        dtlsParameters,
+                        transport_id: producerTransportData.id,
                     });
-                    try {
-                        const { producer_id } = await this.socket.request('produce', {
-                            producerTransportId: this.producerTransport.id,
-                            kind,
-                            appData,
-                            rtpParameters,
-                        });
-                        callback({
-                            id: producer_id,
-                        });
-                    } catch (err) {
-                        errback(err);
-                    }
-                }.bind(this),
-            );
+                    callback();
+                } catch (err) {
+                    errback(err);
+                }
+            });
 
-            this.producerTransport.on(
-                'connectionstatechange',
-                function (state) {
-                    switch (state) {
-                        case 'connecting':
-                            console.log('Producer Transport connecting...');
-                            break;
+            this.producerTransport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
+                console.log('Going to produce', { kind, appData, rtpParameters });
+                try {
+                    const { producer_id } = await this.socket.request('produce', {
+                        producerTransportId: this.producerTransport.id,
+                        kind,
+                        appData,
+                        rtpParameters,
+                    });
+                    callback({ id: producer_id });
+                } catch (err) {
+                    errback(err);
+                }
+            });
 
-                        case 'connected':
-                            console.log('Producer Transport connected');
-                            break;
+            this.producerTransport.on('connectionstatechange', (state) => {
+                switch (state) {
+                    case 'connecting':
+                        console.log('Producer Transport connecting...');
+                        break;
+                    case 'connected':
+                        console.log('Producer Transport connected');
+                        break;
+                    case 'failed':
+                        console.warn('Producer Transport failed');
+                        this.producerTransport.close();
+                        // this.exit(true);
+                        // this.refreshBrowser();
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-                        case 'failed':
-                            console.warn('Producer Transport failed');
-                            this.producerTransport.close();
-                            // this.exit(true);
-                            // this.refreshBrowser();
-                            break;
+            this.producerTransport.on('icegatheringstatechange', (state) => {
+                console.log('Producer icegatheringstatechange', state);
+            });
 
-                        default:
-                            break;
-                    }
-                }.bind(this),
-            );
+            // ####################################################
+            // CONSUMER TRANSPORT
+            // ####################################################
 
-            this.producerTransport.on(
-                'icegatheringstatechange',
-                function (state) {
-                    console.log('Producer icegatheringstatechange', state);
-                }.bind(this),
-            );
-        }
-
-        // ####################################################
-        // CONSUMER TRANSPORT
-        // ####################################################
-
-        {
-            const data = await this.socket.request('createWebRtcTransport', {
+            const consumerTransportData = await this.socket.request('createWebRtcTransport', {
                 forceTcp: false,
             });
 
-            if (data.error) {
-                return console.error('Create WebRtc Transport for Consumer err: ', data.error);
+            if (consumerTransportData.error) {
+                throw new Error('Error creating WebRTC consumer transport: ' + consumerTransportData.error);
             }
 
-            this.consumerTransport = device.createRecvTransport(data);
-            this.consumerTransport.on(
-                'connect',
-                function ({ dtlsParameters }, callback, errback) {
-                    this.socket
-                        .request('connectTransport', {
-                            transport_id: this.consumerTransport.id,
-                            dtlsParameters,
-                        })
-                        .then(callback)
-                        .catch(errback);
-                }.bind(this),
-            );
+            this.consumerTransport = device.createRecvTransport(consumerTransportData);
 
-            this.consumerTransport.on(
-                'connectionstatechange',
-                async function (state) {
-                    switch (state) {
-                        case 'connecting':
-                            console.log('Consumer Transport connecting...');
-                            break;
+            this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+                try {
+                    await this.socket.request('connectTransport', {
+                        transport_id: this.consumerTransport.id,
+                        dtlsParameters,
+                    });
+                    callback();
+                } catch (err) {
+                    errback(err);
+                }
+            });
 
-                        case 'connected':
-                            console.log('Consumer Transport connected');
-                            break;
+            this.consumerTransport.on('connectionstatechange', (state) => {
+                switch (state) {
+                    case 'connecting':
+                        console.log('Consumer Transport connecting...');
+                        break;
+                    case 'connected':
+                        console.log('Consumer Transport connected');
+                        break;
+                    case 'failed':
+                        console.warn('Consumer Transport failed');
+                        this.consumerTransport.close();
+                        // this.exit(true);
+                        // this.refreshBrowser();
+                        break;
+                    default:
+                        break;
+                }
+            });
 
-                        case 'failed':
-                            console.warn('Consumer Transport failed');
-                            this.consumerTransport.close();
-                            // this.exit(true);
-                            // this.refreshBrowser();
-                            break;
+            this.consumerTransport.on('icegatheringstatechange', (state) => {
+                console.log('Consumer icegatheringstatechange', state);
+            });
 
-                        default:
-                            break;
-                    }
-                }.bind(this),
-            );
+            // ####################################################
+            // TODO DATACHANNEL TRANSPORT
+            // ####################################################
 
-            this.consumerTransport.on(
-                'icegatheringstatechange',
-                function (state) {
-                    console.log('Consumer icegatheringstatechange', state);
-                }.bind(this),
-            );
+            //
+        } catch (error) {
+            console.error('Error initializing transports', error);
         }
     }
-
-    // ####################################################
-    // TODO DATACHANNEL TRANSPORT
-    // ####################################################
 
     // ####################################################
     // SOCKET ON
     // ####################################################
 
     initSockets() {
-        this.socket.on(
-            'consumerClosed',
-            function ({ consumer_id, consumer_kind }) {
-                console.log('SocketOn Closing consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
-                this.removeConsumer(consumer_id, consumer_kind);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'setVideoOff',
-            function (data) {
-                if (!isBroadcastingEnabled || (isBroadcastingEnabled && data.peer_presenter)) {
-                    console.log('SocketOn setVideoOff', {
-                        peer_name: data.peer_name,
-                        peer_presenter: data.peer_presenter,
-                    });
-                    this.setVideoOff(data, true);
-                }
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'removeMe',
-            function (data) {
-                console.log('SocketOn Remove me:', data);
-                this.removeVideoOff(data.peer_id);
-                this.lobbyRemoveMe(data.peer_id);
-                participantsCount = data.peer_counts;
-                if (!isBroadcastingEnabled) adaptAspectRatio(participantsCount);
-                if (isParticipantsListOpen) getRoomParticipants();
-                if (isBroadcastingEnabled && data.isPresenter) {
-                    this.userLog('info', `${icons.broadcaster} ${data.peer_name} disconnected`, 'top-end', 6000);
-                }
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'refreshParticipantsCount',
-            function (data) {
-                console.log('SocketOn Participants Count:', data);
-                participantsCount = data.peer_counts;
-                if (isBroadcastingEnabled) {
-                    if (isParticipantsListOpen) getRoomParticipants();
-                    wbUpdate();
-                } else {
-                    adaptAspectRatio(participantsCount);
-                }
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'newProducers',
-            async function (data) {
-                if (data.length > 0) {
-                    console.log('SocketOn New producers', data);
-                    for (let { producer_id, peer_name, peer_info, type } of data) {
-                        await this.consume(producer_id, peer_name, peer_info, type);
-                    }
-                }
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'message',
-            function (data) {
-                console.log('SocketOn New message:', data);
-                this.showMessage(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'roomAction',
-            function (data) {
-                console.log('SocketOn Room action:', data);
-                this.roomAction(data, false);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'roomPassword',
-            function (data) {
-                console.log('SocketOn Room password:', data.password);
-                this.roomPassword(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'roomLobby',
-            function (data) {
-                console.log('SocketOn Room lobby:', data);
-                this.roomLobby(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'cmd',
-            function (data) {
-                console.log('SocketOn Peer cmd:', data);
-                this.handleCmd(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'peerAction',
-            function (data) {
-                console.log('SocketOn Peer action:', data);
-                this.peerAction(
-                    data.from_peer_name,
-                    data.peer_id,
-                    data.action,
-                    false,
-                    data.broadcast,
-                    true,
-                    data.message,
-                );
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'updatePeerInfo',
-            function (data) {
-                console.log('SocketOn Peer info update:', data);
-                this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false, data.peer_presenter);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'fileInfo',
-            function (data) {
-                console.log('SocketOn File info:', data);
-                this.handleFileInfo(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'file',
-            function (data) {
-                this.handleFile(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'shareVideoAction',
-            function (data) {
-                this.shareVideoAction(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'fileAbort',
-            function (data) {
-                this.handleFileAbort(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'wbCanvasToJson',
-            function (data) {
-                console.log('SocketOn Received whiteboard canvas JSON');
-                JsonToWbCanvas(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'whiteboardAction',
-            function (data) {
-                console.log('Whiteboard action', data);
-                whiteboardAction(data, false);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'audioVolume',
-            function (data) {
-                this.handleAudioVolume(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'updateRoomModerator',
-            function (data) {
-                console.log('SocketOn Update room moderator', data);
-                this.handleUpdateRoomModerator(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'updateRoomModeratorALL',
-            function (data) {
-                console.log('SocketOn Update room moderator ALL', data);
-                this.handleUpdateRoomModeratorALL(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'recordingAction',
-            function (data) {
-                console.log('SocketOn Recording action:', data);
-                this.handleRecordingAction(data);
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'connect',
-            function () {
-                console.log('SocketOn Connected to signaling server!');
-                this._isConnected = true;
-                this.refreshBrowser();
-            }.bind(this),
-        );
-
-        this.socket.on(
-            'disconnect',
-            function () {
-                this.exit(true);
-                this.ServerAway();
-                this.saveRecording('Socket disconnected');
-            }.bind(this),
-        );
+        this.socket.on('consumerClosed', this.handleConsumerClosed);
+        this.socket.on('setVideoOff', this.handleSetVideoOff);
+        this.socket.on('removeMe', this.handleRemoveMe);
+        this.socket.on('refreshParticipantsCount', this.handleRefreshParticipantsCount);
+        this.socket.on('newProducers', this.handleNewProducers);
+        this.socket.on('message', this.handleMessage);
+        this.socket.on('roomAction', this.handleRoomAction);
+        this.socket.on('roomPassword', this.handleRoomPassword);
+        this.socket.on('roomLobby', this.handleRoomLobby);
+        this.socket.on('cmd', this.handleCmdData);
+        this.socket.on('peerAction', this.handlePeerAction);
+        this.socket.on('updatePeerInfo', this.handleUpdatePeerInfo);
+        this.socket.on('fileInfo', this.handleFileInfoData);
+        this.socket.on('file', this.handleFileData);
+        this.socket.on('shareVideoAction', this.handleShareVideoAction);
+        this.socket.on('fileAbort', this.handleFileAbortData);
+        this.socket.on('wbCanvasToJson', this.handleWbCanvasToJson);
+        this.socket.on('whiteboardAction', this.handleWhiteboardAction);
+        this.socket.on('audioVolume', this.handleAudioVolumeData);
+        this.socket.on('updateRoomModerator', this.handleUpdateRoomModeratorData);
+        this.socket.on('updateRoomModeratorALL', this.handleUpdateRoomModeratorALLData);
+        this.socket.on('recordingAction', this.handleRecordingActionData);
+        this.socket.on('connect', this.handleSocketConnect);
+        this.socket.on('disconnect', this.handleSocketDisconnect);
     }
+
+    // ####################################################
+    // HANDLE SOCKET DATA
+    // ####################################################
+
+    handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
+        console.log('SocketOn Closing consumer', { consumer_id, consumer_kind });
+        this.removeConsumer(consumer_id, consumer_kind);
+    };
+
+    handleSetVideoOff = (data) => {
+        if (!isBroadcastingEnabled || (isBroadcastingEnabled && data.peer_presenter)) {
+            console.log('SocketOn setVideoOff', {
+                peer_name: data.peer_name,
+                peer_presenter: data.peer_presenter,
+            });
+            this.setVideoOff(data, true);
+        }
+    };
+
+    handleRemoveMe = (data) => {
+        console.log('SocketOn Remove me:', data);
+        this.removeVideoOff(data.peer_id);
+        this.lobbyRemoveMe(data.peer_id);
+        participantsCount = data.peer_counts;
+        if (!isBroadcastingEnabled) adaptAspectRatio(participantsCount);
+        if (isParticipantsListOpen) getRoomParticipants();
+        if (isBroadcastingEnabled && data.isPresenter) {
+            this.userLog('info', `${icons.broadcaster} ${data.peer_name} disconnected`, 'top-end', 6000);
+        }
+    };
+
+    handleRefreshParticipantsCount = (data) => {
+        console.log('SocketOn Participants Count:', data);
+        participantsCount = data.peer_counts;
+        if (isBroadcastingEnabled) {
+            if (isParticipantsListOpen) getRoomParticipants();
+            wbUpdate();
+        } else {
+            adaptAspectRatio(participantsCount);
+        }
+    };
+
+    handleNewProducers = async (data) => {
+        if (data.length > 0) {
+            console.log('SocketOn New producers', data);
+            for (let { producer_id, peer_name, peer_info, type } of data) {
+                await this.consume(producer_id, peer_name, peer_info, type);
+            }
+        }
+    };
+
+    handleMessage = (data) => {
+        console.log('SocketOn New message:', data);
+        this.showMessage(data);
+    };
+
+    handleRoomAction = (data) => {
+        console.log('SocketOn Room action:', data);
+        this.roomAction(data, false);
+    };
+
+    handleRoomPassword = (data) => {
+        console.log('SocketOn Room password:', data.password);
+        this.roomPassword(data);
+    };
+
+    handleRoomLobby = (data) => {
+        console.log('SocketOn Room lobby:', data);
+        this.roomLobby(data);
+    };
+
+    handleCmdData = (data) => {
+        console.log('SocketOn Peer cmd:', data);
+        this.handleCmd(data);
+    };
+
+    handlePeerAction = (data) => {
+        console.log('SocketOn Peer action:', data);
+        this.peerAction(data.from_peer_name, data.peer_id, data.action, false, data.broadcast, true, data.message);
+    };
+
+    handleUpdatePeerInfo = (data) => {
+        console.log('SocketOn Peer info update:', data);
+        this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false, data.peer_presenter);
+    };
+
+    handleFileInfoData = (data) => {
+        console.log('SocketOn File info:', data);
+        this.handleFileInfo(data);
+    };
+
+    handleFileData = (data) => {
+        this.handleFile(data);
+    };
+
+    handleShareVideoAction = (data) => {
+        this.shareVideoAction(data);
+    };
+
+    handleFileAbortData = (data) => {
+        this.handleFileAbort(data);
+    };
+
+    handleWbCanvasToJson = (data) => {
+        console.log('SocketOn Received whiteboard canvas JSON');
+        JsonToWbCanvas(data);
+    };
+
+    handleWhiteboardAction = (data) => {
+        console.log('Whiteboard action', data);
+        whiteboardAction(data, false);
+    };
+
+    handleAudioVolumeData = (data) => {
+        this.handleAudioVolume(data);
+    };
+
+    handleUpdateRoomModeratorData = (data) => {
+        console.log('SocketOn Update room moderator', data);
+        this.handleUpdateRoomModerator(data);
+    };
+
+    handleUpdateRoomModeratorALLData = (data) => {
+        console.log('SocketOn Update room moderator ALL', data);
+        this.handleUpdateRoomModeratorALL(data);
+    };
+
+    handleRecordingActionData = (data) => {
+        console.log('SocketOn Recording action:', data);
+        this.handleRecordingAction(data);
+    };
+
+    handleSocketConnect = () => {
+        console.log('SocketOn Connected to signaling server!');
+        this._isConnected = true;
+        this.refreshBrowser();
+    };
+
+    handleSocketDisconnect = () => {
+        this.exit(true);
+        this.ServerAway();
+        this.saveRecording('Socket disconnected');
+    };
 
     // ####################################################
     // SERVER AWAY/MAINTENANCE
@@ -1103,7 +1025,7 @@ class RoomClient {
             return console.log('Producer already exists for this type ' + type);
         }
 
-        let videoPrivacyBtn = this.getId(this.peer_id + '__vp');
+        const videoPrivacyBtn = this.getId(this.peer_id + '__vp');
         if (videoPrivacyBtn) videoPrivacyBtn.style.display = screen ? 'none' : 'inline';
 
         console.log(`Media constraints ${type}:`, mediaConstraints);
@@ -1759,7 +1681,7 @@ class RoomClient {
             return console.log('There is no producer for this type ' + type);
         }
 
-        let producer_id = this.producerLabel.get(type);
+        const producer_id = this.producerLabel.get(type);
         this.producers.get(producer_id).pause();
 
         switch (type) {
@@ -1782,7 +1704,7 @@ class RoomClient {
             return console.log('There is no producer for this type ' + type);
         }
 
-        let producer_id = this.producerLabel.get(type);
+        const producer_id = this.producerLabel.get(type);
         this.producers.get(producer_id).resume();
 
         switch (type) {
@@ -1805,9 +1727,9 @@ class RoomClient {
             return console.log('There is no producer for this type ' + type);
         }
 
-        let producer_id = this.producerLabel.get(type);
+        const producer_id = this.producerLabel.get(type);
 
-        let data = {
+        const data = {
             peer_name: this.peer_name,
             producer_id: producer_id,
             type: type,
@@ -1822,8 +1744,8 @@ class RoomClient {
         this.producerLabel.delete(type);
 
         if (type !== mediaType.audio) {
-            let elem = this.getId(producer_id);
-            let d = this.getId(producer_id + '__video');
+            const elem = this.getId(producer_id);
+            const d = this.getId(producer_id + '__video');
             elem.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -1839,11 +1761,12 @@ class RoomClient {
             }
 
             handleAspectRatio();
+
             console.log('[producerClose] Video-element-count', this.videoMediaContainer.childElementCount);
         }
 
         if (type === mediaType.audio) {
-            let au = this.getId(producer_id + '__localAudio');
+            const au = this.getId(producer_id + '__localAudio');
             au.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -1928,66 +1851,73 @@ class RoomClient {
     // ####################################################
 
     async consume(producer_id, peer_name, peer_info, type) {
-        //
-        wbUpdate();
+        try {
+            wbUpdate();
 
-        this.getConsumeStream(producer_id, peer_info.peer_id, type).then(
-            async function ({ consumer, stream, kind }) {
-                console.log('CONSUMER MEDIA TYPE ----> ' + type);
-                console.log('CONSUMER', consumer);
+            const { consumer, stream, kind } = await this.getConsumeStream(producer_id, peer_info.peer_id, type);
 
-                this.consumers.set(consumer.id, consumer);
+            console.log('CONSUMER MEDIA TYPE ----> ' + type);
+            console.log('CONSUMER', consumer);
 
-                if (kind === 'video') {
-                    if (isParticipantsListOpen) getRoomParticipants();
-                }
+            this.consumers.set(consumer.id, consumer);
 
-                this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
+            consumer.on('trackended', () => {
+                this.removeConsumer(consumer.id, consumer.kind);
+            });
 
-                consumer.on(
-                    'trackended',
-                    function () {
-                        this.removeConsumer(consumer.id, consumer.kind);
-                    }.bind(this),
-                );
+            consumer.on('transportclose', () => {
+                this.removeConsumer(consumer.id, consumer.kind);
+            });
 
-                consumer.on(
-                    'transportclose',
-                    function () {
-                        this.removeConsumer(consumer.id, consumer.kind);
-                    }.bind(this),
-                );
-            }.bind(this),
-        );
+            this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
+
+            if (kind === 'video' && isParticipantsListOpen) {
+                await getRoomParticipants();
+            }
+        } catch (error) {
+            console.error('Error in consume', error);
+        }
     }
 
     async getConsumeStream(producerId, peer_id, type) {
-        const { rtpCapabilities } = this.device;
-        const data = await this.socket.request('consume', {
-            rtpCapabilities,
-            consumerTransportId: this.consumerTransport.id,
-            producerId,
-        });
-        console.log('DATA', data);
-        const { id, kind, rtpParameters } = data;
-        const codecOptions = {};
-        const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
-        const consumer = await this.consumerTransport.consume({
-            id,
-            producerId,
-            kind,
-            rtpParameters,
-            codecOptions,
-            streamId,
-        });
-        const stream = new MediaStream();
-        stream.addTrack(consumer.track);
+        try {
+            const { rtpCapabilities } = this.device;
+            const data = await this.socket.request('consume', {
+                rtpCapabilities,
+                consumerTransportId: this.consumerTransport.id,
+                producerId,
+            });
 
-        return {
-            consumer,
-            stream,
-            kind,
-        };
+            console.log('DATA', data);
+
+            if (!data || !data.id || !data.kind || !data.rtpParameters) {
+                throw new Error('Invalid data received from server');
+            }
+
+            const { id, kind, rtpParameters } = data;
+            const codecOptions = {};
+            const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
+            const consumer = await this.consumerTransport.consume({
+                id,
+                producerId,
+                kind,
+                rtpParameters,
+                codecOptions,
+                streamId,
+            });
+
+            const stream = new MediaStream();
+            stream.addTrack(consumer.track);
+
+            return {
+                consumer,
+                stream,
+                kind,
+            };
+        } catch (error) {
+            console.error('Error in getConsumeStream', error);
+            throw error;
+        }
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
@@ -2095,7 +2025,6 @@ class RoomClient {
                 BUTTONS.consumerVideo.geolocationButton && eVc.appendChild(gl);
                 BUTTONS.consumerVideo.banButton && eVc.appendChild(ban);
                 BUTTONS.consumerVideo.ejectButton && eVc.appendChild(ko);
-
                 eDiv.appendChild(eBtn);
                 eDiv.appendChild(eVc);
 
@@ -2183,7 +2112,7 @@ class RoomClient {
     removeConsumer(consumer_id, consumer_kind) {
         console.log('Remove consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
 
-        let elem = this.getId(consumer_id);
+        const elem = this.getId(consumer_id);
         if (elem) {
             elem.srcObject.getTracks().forEach(function (track) {
                 track.stop();
@@ -2192,7 +2121,7 @@ class RoomClient {
         }
 
         if (consumer_kind === 'video') {
-            let d = this.getId(consumer_id + '__video');
+            const d = this.getId(consumer_id + '__video');
             if (d) {
                 d.parentNode.removeChild(d);
                 //alert(this.pinnedVideoPlayerId + '==' + consumer_id);
@@ -2213,9 +2142,9 @@ class RoomClient {
         }
 
         if (consumer_kind === 'audio') {
-            let audioConsumerPlayerId = this.getMapKeyByValue(this.audioConsumers, consumer_id);
+            const audioConsumerPlayerId = this.getMapKeyByValue(this.audioConsumers, consumer_id);
             if (audioConsumerPlayerId) {
-                let inputPv = this.getId(audioConsumerPlayerId);
+                const inputPv = this.getId(audioConsumerPlayerId);
                 if (inputPv) inputPv.style.display = 'none';
                 this.audioConsumers.delete(audioConsumerPlayerId);
                 console.log('Remove audio Consumer', {
@@ -2395,26 +2324,24 @@ class RoomClient {
     // ####################################################
 
     exit(offline = false) {
-        const clean = function () {
+        const clean = () => {
             this._isConnected = false;
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
             this.socket.off('disconnect');
             this.socket.off('newProducers');
             this.socket.off('consumerClosed');
-        }.bind(this);
+        };
 
         if (!offline) {
             this.socket
                 .request('exitRoom')
                 .then((e) => console.log('Exit Room', e))
                 .catch((e) => console.warn('Exit Room ', e))
-                .finally(
-                    function () {
-                        clean();
-                        this.event(_EVENTS.exitRoom);
-                    }.bind(this),
-                );
+                .finally(() => {
+                    clean();
+                    this.event(_EVENTS.exitRoom);
+                });
         } else {
             clean();
         }
@@ -3571,24 +3498,22 @@ class RoomClient {
                     name: this.peer_name,
                     prompt: peer_msg,
                 })
-                .then(
-                    function (completion) {
-                        if (!completion) return;
-                        console.log('Receive message:', completion);
-                        this.setMsgAvatar('right', 'ChatGPT');
-                        this.appendMessage(
-                            'right',
-                            image.chatgpt,
-                            'ChatGPT',
-                            this.peer_id,
-                            completion,
-                            'ChatGPT',
-                            'ChatGPT',
-                        );
-                        this.cleanMessage();
-                        this.speechInMessages ? this.speechMessage(true, 'ChatGPT', completion) : this.sound('message');
-                    }.bind(this),
-                )
+                .then((completion) => {
+                    if (!completion) return;
+                    console.log('Receive message:', completion);
+                    this.setMsgAvatar('right', 'ChatGPT');
+                    this.appendMessage(
+                        'right',
+                        image.chatgpt,
+                        'ChatGPT',
+                        this.peer_id,
+                        completion,
+                        'ChatGPT',
+                        'ChatGPT',
+                    );
+                    this.cleanMessage();
+                    this.speechInMessages ? this.speechMessage(true, 'ChatGPT', completion) : this.sound('message');
+                })
                 .catch((err) => {
                     console.log('ChatGPT error:', err);
                 });
@@ -4995,19 +4920,17 @@ class RoomClient {
                     if (room_password) {
                         this.socket
                             .request('getPeerCounts')
-                            .then(
-                                async function (res) {
-                                    // Only the presenter can lock the room
-                                    if (isPresenter || res.peerCounts == 1) {
-                                        isPresenter = true;
-                                        this.peer_info.peer_presenter = isPresenter;
-                                        this.getId('isUserPresenter').innerText = isPresenter;
-                                        data.password = room_password;
-                                        this.socket.emit('roomAction', data);
-                                        if (popup) this.roomStatus(action);
-                                    }
-                                }.bind(this),
-                            )
+                            .then(async (res) => {
+                                // Only the presenter can lock the room
+                                if (isPresenter || res.peerCounts == 1) {
+                                    isPresenter = true;
+                                    this.peer_info.peer_presenter = isPresenter;
+                                    this.getId('isUserPresenter').innerText = isPresenter;
+                                    data.password = room_password;
+                                    this.socket.emit('roomAction', data);
+                                    if (popup) this.roomStatus(action);
+                                }
+                            })
                             .catch((err) => {
                                 console.log('Get peer counts:', err);
                             });
