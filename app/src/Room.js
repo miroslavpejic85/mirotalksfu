@@ -94,11 +94,12 @@ module.exports = class Room {
 
                 if (audioVolume > 1) {
                     this.peers.forEach((peer) => {
+                        const { id, peer_audio, peer_name } = peer;
                         peer.producers.forEach((peerProducer) => {
-                            if (peerProducer.id === producer.id && peerProducer.kind === 'audio' && peer.peer_audio) {
+                            if (peerProducer.id === producer.id && peerProducer.kind === 'audio' && peer_audio) {
                                 const data = {
-                                    peer_name: peer.peer_name,
-                                    peer_id: peer.id,
+                                    peer_id: id,
+                                    peer_name: peer_name,
                                     audioVolume: audioVolume,
                                 };
                                 // Uncomment the following line for debugging
@@ -200,8 +201,8 @@ module.exports = class Room {
     getProducerListForPeer() {
         const producerList = [];
         this.peers.forEach((peer) => {
+            const { peer_name, peer_info } = peer;
             peer.producers.forEach((producer) => {
-                const { peer_name, peer_info } = peer;
                 producerList.push({
                     producer_id: producer.id,
                     peer_name: peer_name,
