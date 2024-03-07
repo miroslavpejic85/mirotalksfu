@@ -51,7 +51,7 @@ function resizeVideoMedia() {
     let optional = isHideMeActive && videoMediaContainer.childElementCount <= 2 ? 1 : 0;
     let isOneVideoElement = videoMediaContainer.childElementCount - optional == 1 ? true : false;
 
-    // console.log('videoMediaContainer.childElementCount:', {
+    // console.log('videoMediaContainer.childElementCount', {
     //     isOneVideoElement: isOneVideoElement,
     //     children: videoMediaContainer.childElementCount,
     //     optional: optional,

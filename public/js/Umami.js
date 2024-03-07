@@ -22,7 +22,7 @@ if (statsData) {
             window.sessionStorage.setItem(statsDataKey, JSON.stringify(data));
         })
         .catch((error) => {
-            console.error('Stats fetch error:', error);
+            console.error('Stats fetch error', error);
         });
 }
 

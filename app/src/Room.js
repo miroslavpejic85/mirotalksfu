@@ -102,7 +102,7 @@ module.exports = class Room {
                                     audioVolume: audioVolume,
                                 };
                                 // Uncomment the following line for debugging
-                                // log.debug('Sending audio volume:', data);
+                                // log.debug('Sending audio volume', data);
                                 this.broadCast(0, 'audioVolume', data);
                             }
                         });
@@ -110,7 +110,7 @@ module.exports = class Room {
                 }
             }
         } catch (error) {
-            log.error('Error sending active speaker volume', error);
+            log.error('Error sending active speaker volume', error.message);
         }
     }
 
@@ -201,10 +201,11 @@ module.exports = class Room {
         const producerList = [];
         this.peers.forEach((peer) => {
             peer.producers.forEach((producer) => {
+                const { peer_name, peer_info } = peer;
                 producerList.push({
                     producer_id: producer.id,
-                    peer_name: peer.peer_name,
-                    peer_info: peer.peer_info,
+                    peer_name: peer_name,
+                    peer_info: peer_info,
                     type: producer.appData.mediaType,
                 });
             });
@@ -224,7 +225,7 @@ module.exports = class Room {
 
             await this.peers.get(socket_id).connectTransport(transport_id, dtlsParameters);
         } catch (error) {
-            log.error('Error connecting peer transport', error);
+            log.error('Error connecting peer transport', error.message);
         }
     }
 
@@ -253,34 +254,44 @@ module.exports = class Room {
                 initialAvailableOutgoingBitrate,
             });
 
+            const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
+
             if (maxIncomingBitrate) {
-                await transport.setMaxIncomingBitrate(maxIncomingBitrate);
+                try {
+                    await transport.setMaxIncomingBitrate(maxIncomingBitrate);
+                } catch (error) {
+                    log.error('Transport setMaxIncomingBitrate error', error.message);
+                }
             }
+
+            const peer = this.peers.get(socket_id);
+
+            const { peer_name } = peer;
 
             transport.on('dtlsstatechange', (dtlsState) => {
                 if (dtlsState === 'closed') {
-                    log.debug('Transport closed', { peer_name: this.peers.get(socket_id)?.peer_name });
+                    log.debug('Transport closed', { peer_name: peer_name });
                     transport.close();
                 }
             });
 
             transport.on('close', () => {
-                log.debug('Transport closed', { peer_name: this.peers.get(socket_id)?.peer_name });
+                log.debug('Transport closed', { peer_name: peer_name });
             });
 
-            log.debug('Adding transport', { transportId: transport.id });
-            this.peers.get(socket_id)?.addTransport(transport);
+            log.debug('Adding transport', { transportId: id });
+            peer.addTransport(transport);
 
             return {
                 params: {
-                    id: transport.id,
-                    iceParameters: transport.iceParameters,
-                    iceCandidates: transport.iceCandidates,
-                    dtlsParameters: transport.dtlsParameters,
+                    id: id,
+                    iceParameters: iceParameters,
+                    iceCandidates: iceCandidates,
+                    dtlsParameters: dtlsParameters,
                 },
             };
         } catch (error) {
-            log.error('Error creating WebRTC transport', error);
+            log.error('Error creating WebRTC transport', error.message);
             return null;
         }
     }
@@ -295,31 +306,35 @@ module.exports = class Room {
                 throw new Error('Invalid input parameters');
             }
 
-            const producer = await this.peers
-                .get(socket_id)
-                ?.createProducer(producerTransportId, rtpParameters, kind, type);
+            if (!this.peers.has(socket_id)) {
+                throw new Error(`Invalid socket ID: ${socket_id}`);
+            }
+
+            const peer = this.peers.get(socket_id);
+
+            const producer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
             if (!producer) {
                 throw new Error('Failed to create producer');
             }
 
-            const peer = this.peers.get(socket_id);
-            const peerName = peer?.peer_name;
-            const peerInfo = peer?.peer_info;
+            const { id } = producer;
+
+            const { peer_name, peer_info } = peer;
 
             this.broadCast(socket_id, 'newProducers', [
                 {
-                    producer_id: producer.id,
+                    producer_id: id,
                     producer_socket_id: socket_id,
-                    peer_name: peerName,
-                    peer_info: peerInfo,
+                    peer_name: peer_name,
+                    peer_info: peer_info,
                     type: type,
                 },
             ]);
 
-            return producer.id;
+            return id;
         } catch (error) {
-            console.error('Error producing', error);
-            throw error;
+            console.error('Error producing', error.message);
+            throw error.message;
         }
     }
 
@@ -342,11 +357,14 @@ module.exports = class Room {
                 return;
             }
 
-            const peer = this.peers.get(socket_id);
-            if (!peer) {
-                log.warn('Peer not found for socket ID:', socket_id);
+            if (!this.peers.has(socket_id)) {
+                log.warn('Peer not found for socket ID', socket_id);
                 return;
             }
+
+            const peer = this.peers.get(socket_id);
+
+            const { peer_name } = peer;
 
             const result = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
 
@@ -357,17 +375,19 @@ module.exports = class Room {
 
             const { consumer, params } = result;
 
+            const { id, kind } = consumer;
+
             consumer.on('producerclose', () => {
                 log.debug('Consumer closed due to producerclose event', {
-                    peer_name: this.peers.get(socket_id)?.peer_name,
-                    consumer_id: consumer.id,
+                    peer_name: peer_name,
+                    consumer_id: id,
                 });
-                this.peers.get(socket_id)?.removeConsumer(consumer.id);
+                peer.removeConsumer(id);
 
                 // Tell client consumer is dead
                 this.io.to(socket_id).emit('consumerClosed', {
-                    consumer_id: consumer.id,
-                    consumer_kind: consumer.kind,
+                    consumer_id: id,
+                    consumer_kind: kind,
                 });
             });
 
@@ -385,7 +405,7 @@ module.exports = class Room {
             }
             this.peers.get(socket_id).closeProducer(producer_id);
         } catch (error) {
-            log.error('Error closing producer:', error);
+            log.error('Error closing producer', error.message);
         }
     }
 

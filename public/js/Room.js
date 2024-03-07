@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.85
+ * @version 1.3.86
  *
  */
 
@@ -1752,9 +1752,9 @@ async function changeCamera(deviceId) {
             checkInitConfig();
             handleCameraMirror(initVideo);
         })
-        .catch((err) => {
-            console.error('[Error] changeCamera', err);
-            userLog('error', 'Error while swapping camera' + err, 'top-end');
+        .catch((error) => {
+            console.error('[Error] changeCamera', error);
+            userLog('error', 'Error while swapping camera' + error.message, 'top-end');
         });
 }
 
@@ -1781,8 +1781,8 @@ async function toggleScreenSharing() {
                 disable(initVideoButton, true);
                 disable(initAudioVideoButton, true);
             })
-            .catch((err) => {
-                console.error('[Error] toggleScreenSharing', err);
+            .catch((error) => {
+                console.error('[Error] toggleScreenSharing', error);
                 joinRoomWithScreen = false;
                 return checkInitVideo(isVideoAllowed);
             });
@@ -2246,7 +2246,7 @@ function handleRoomEmojiPicker() {
     };
 
     function sendEmojiToRoom(data) {
-        console.log('Selected Emoji:', data.native);
+        console.log('Selected Emoji', data.native);
         const cmd = {
             type: 'roomEmoji',
             peer_name: peer_name,
@@ -2995,8 +2995,8 @@ async function loadPDF(pdfData, pages) {
         );
         return canvases.filter((canvas) => canvas !== null);
     } catch (error) {
-        console.error('Error loading PDF:', error);
-        throw error;
+        console.error('Error loading PDF', error.message);
+        throw error.message;
     }
 }
 
@@ -3013,8 +3013,8 @@ async function pdfToImage(pdfData, canvas) {
             );
         });
     } catch (error) {
-        console.error('Error converting PDF to images:', error);
-        throw error;
+        console.error('Error converting PDF to images', error.message);
+        throw error.message;
     }
 }
 
