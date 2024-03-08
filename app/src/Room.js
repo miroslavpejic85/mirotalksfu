@@ -272,7 +272,10 @@ module.exports = class Room {
 
             transport.on('icestatechange', (iceState) => {
                 if (iceState === 'disconnected' || iceState === 'closed') {
-                    log.warn('Transport closed "icestatechange" event', { iceState: iceState });
+                    log.warn('Transport closed "icestatechange" event', {
+                        peer_name: peer_name,
+                        iceState: iceState,
+                    });
                     transport.close();
                     //this.router.close();
                     //peer.close();
@@ -280,12 +283,18 @@ module.exports = class Room {
             });
 
             transport.on('sctpstatechange', (sctpState) => {
-                log.debug('Transport "sctpstatechange" event', { sctpState: sctpState });
+                log.debug('Transport "sctpstatechange" event', {
+                    peer_name: peer_name,
+                    sctpState: sctpState,
+                });
             });
 
             transport.on('dtlsstatechange', (dtlsState) => {
                 if (dtlsState === 'failed' || dtlsState === 'closed') {
-                    log.warn('Transport closed "dtlsstatechange" event', { dtlsState: dtlsState });
+                    log.warn('Transport closed "dtlsstatechange" event', {
+                        peer_name: peer_name,
+                        dtlsState: dtlsState,
+                    });
                     transport.close();
                     //this.router.close();
                     //peer.close();
