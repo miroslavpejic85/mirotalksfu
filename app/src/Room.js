@@ -272,7 +272,7 @@ module.exports = class Room {
 
             transport.on('icestatechange', (iceState) => {
                 if (iceState === 'disconnected' || iceState === 'closed') {
-                    log.warn('Transport closed "icestatechange" event', {
+                    log.debug('Transport closed "icestatechange" event', {
                         peer_name: peer_name,
                         iceState: iceState,
                     });
@@ -291,7 +291,7 @@ module.exports = class Room {
 
             transport.on('dtlsstatechange', (dtlsState) => {
                 if (dtlsState === 'failed' || dtlsState === 'closed') {
-                    log.warn('Transport closed "dtlsstatechange" event', {
+                    log.debug('Transport closed "dtlsstatechange" event', {
                         peer_name: peer_name,
                         dtlsState: dtlsState,
                     });
