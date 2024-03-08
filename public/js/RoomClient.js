@@ -866,7 +866,7 @@ class RoomClient {
         const baseUrl = `${window.location.origin}/join`;
         const queryParams = {
             room: this.room_id,
-            password: this.RoomPassword,
+            roomPassword: this.RoomPassword,
             name: this.peer_name,
             audio: this.peer_info.peer_audio,
             video: this.peer_info.peer_video,

@@ -247,6 +247,7 @@ module.exports = class Room {
             }
 
             const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
+
             const transport = await this.router.createWebRtcTransport({
                 listenInfos: listenInfos,
                 enableUdp: true,
@@ -269,10 +270,25 @@ module.exports = class Room {
 
             const { peer_name } = peer;
 
-            transport.on('dtlsstatechange', (dtlsState) => {
-                if (dtlsState === 'closed') {
-                    log.debug('Transport closed', { peer_name: peer_name });
+            transport.on('icestatechange', (iceState) => {
+                if (iceState === 'disconnected' || iceState === 'closed') {
+                    log.warn('Transport closed "icestatechange" event', { iceState: iceState });
                     transport.close();
+                    //this.router.close();
+                    //peer.close();
+                }
+            });
+
+            transport.on('sctpstatechange', (sctpState) => {
+                log.debug('Transport "sctpstatechange" event', { sctpState: sctpState });
+            });
+
+            transport.on('dtlsstatechange', (dtlsState) => {
+                if (dtlsState === 'failed' || dtlsState === 'closed') {
+                    log.warn('Transport closed "dtlsstatechange" event', { dtlsState: dtlsState });
+                    transport.close();
+                    //this.router.close();
+                    //peer.close();
                 }
             });
 
@@ -281,6 +297,7 @@ module.exports = class Room {
             });
 
             log.debug('Adding transport', { transportId: id });
+
             peer.addTransport(transport);
 
             return {
