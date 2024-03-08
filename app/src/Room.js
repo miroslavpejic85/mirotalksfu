@@ -262,7 +262,7 @@ module.exports = class Room {
                 try {
                     await transport.setMaxIncomingBitrate(maxIncomingBitrate);
                 } catch (error) {
-                    log.error('Transport setMaxIncomingBitrate error', error.message);
+                    log.debug('Transport setMaxIncomingBitrate error', error.message);
                 }
             }
 
@@ -396,7 +396,7 @@ module.exports = class Room {
             const result = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
 
             if (!result || !result.consumer || !result.params) {
-                log.error('Consumer or params are not defined in createConsumer result');
+                log.debug('Consumer or params are not defined in createConsumer result');
                 return;
             }
 
