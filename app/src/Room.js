@@ -104,7 +104,7 @@ module.exports = class Room {
                                 };
                                 // Uncomment the following line for debugging
                                 // log.debug('Sending audio volume', data);
-                                this.broadCast(0, 'audioVolume', data);
+                                this.sendToAll('audioVolume', data);
                             }
                         });
                     });
@@ -506,6 +506,12 @@ module.exports = class Room {
 
     sendTo(socket_id, action, data) {
         for (let peer_id of Array.from(this.peers.keys()).filter((id) => id === socket_id)) {
+            this.send(peer_id, action, data);
+        }
+    }
+
+    sendToAll(action, data) {
+        for (let peer_id of Array.from(this.peers.keys())) {
             this.send(peer_id, action, data);
         }
     }

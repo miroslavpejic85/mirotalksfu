@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.87
+ * @version 1.3.88
  *
  */
 
@@ -807,6 +807,318 @@ function startServer() {
             }
         });
 
+        socket.on('join', async (dataObject, cb) => {
+            if (!roomList.has(socket.room_id)) {
+                return cb({
+                    error: 'Room does not exist',
+                });
+            }
+
+            // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
+            const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
+
+            // Get peer Geo Location
+            if (config.IPLookup.enabled && peer_ip != '::1') {
+                dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
+            }
+
+            const data = checkXSS(dataObject);
+
+            log.info('User joined', data);
+
+            let is_presenter = true;
+
+            const { peer_token } = data.peer_info;
+
+            const room = roomList.get(socket.room_id);
+
+            // User Auth required, we check if peer valid
+            if (hostCfg.user_auth) {
+                // Check JWT
+                if (peer_token) {
+                    try {
+                        const { username, password, presenter } = checkXSS(jwt.verify(peer_token, jwtCfg.JWT_KEY));
+
+                        const isPeerValid = await isAuthPeer(username, password);
+
+                        is_presenter =
+                            presenter === '1' ||
+                            presenter === 'true' ||
+                            (config.presenters.join_first && room.getPeers().size === 0);
+
+                        log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
+                            ip: peer_ip,
+                            peer_username: username,
+                            peer_password: password,
+                            peer_valid: isPeerValid,
+                            peer_presenter: is_presenter,
+                        });
+
+                        if (!isPeerValid) {
+                            // redirect peer to login page
+                            return cb('unauthorized');
+                        }
+                    } catch (err) {
+                        log.error('[Join] - JWT error', { error: err.message, token: peer_token });
+                        return cb('unauthorized');
+                    }
+                } else {
+                    return cb('unauthorized');
+                }
+            }
+
+            // check if banned...
+            const peerUUID = data.peer_info.peer_uuid;
+            if (room.isBanned(peerUUID)) {
+                const { peer_name, peer_uuid, os_name, os_version, browser_name, browser_version } = data.peer_info;
+                log.info('[Join] - peer is banned!', {
+                    room_id: data.room_id,
+                    peer: {
+                        name: peer_name,
+                        uuid: peer_uuid,
+                        os_name: os_name,
+                        os_version: os_version,
+                        browser_name: browser_name,
+                        browser_version: browser_version,
+                    },
+                });
+                return cb('isBanned');
+            }
+
+            room.addPeer(new Peer(socket.id, data));
+
+            const activeRooms = getActiveRooms();
+
+            log.info('[Join] - current active rooms', activeRooms);
+
+            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
+
+            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+
+            const peer_id = peer && peer.peer_id;
+            const peer_name = peer && peer.peer_name;
+            const peer_uuid = peer && peer.peer_uuid;
+
+            // Set the presenters
+            const presenter = {
+                peer_ip: peer_ip,
+                peer_name: peer_name,
+                peer_uuid: peer_uuid,
+                is_presenter: is_presenter,
+            };
+            // first we check if the username match the presenters username
+            if (config.presenters && config.presenters.list && config.presenters.list.includes(peer_name)) {
+                presenters[socket.room_id][socket.id] = presenter;
+            } else {
+                // if not match the presenters username, the first one join room is the presenter
+                if (Object.keys(presenters[socket.room_id]).length === 0) {
+                    presenters[socket.room_id][socket.id] = presenter;
+                }
+            }
+
+            log.info('[Join] - Connected presenters grp by roomId', presenters);
+
+            const isPresenter = peer_token
+                ? is_presenter
+                : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
+
+            log.info('[Join] - Is presenter', {
+                roomId: socket.room_id,
+                peer_name: peer_name,
+                peer_presenter: isPresenter,
+            });
+
+            if (room.isLocked() && !isPresenter) {
+                log.debug('The user was rejected because the room is locked, and they are not a presenter');
+                return cb('isLocked');
+            }
+
+            if (room.isLobbyEnabled() && !isPresenter) {
+                log.debug(
+                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
+                );
+                room.broadCast(socket.id, 'roomLobby', {
+                    peer_id: peer_id,
+                    peer_name: peer_name,
+                    lobby_status: 'waiting',
+                });
+                return cb('isLobby');
+            }
+
+            cb(room.toJson());
+        });
+
+        socket.on('getRouterRtpCapabilities', (_, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            log.debug('Get RouterRtpCapabilities', getPeerName(room));
+            try {
+                const routerRtpCapabilities = room.getRtpCapabilities();
+                callback(routerRtpCapabilities);
+            } catch (err) {
+                log.error('Get RouterRtpCapabilities error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('createWebRtcTransport', async (_, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            log.debug('Create webrtc transport', getPeerName(room));
+            try {
+                const { params } = await room.createWebRtcTransport(socket.id);
+                callback(params);
+            } catch (err) {
+                log.error('Create WebRtc Transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
+
+            try {
+                await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
+                callback('success');
+            } catch (err) {
+                log.error('Connect transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            // peer_info audio Or video ON
+            const data = {
+                peer_name: peer_name,
+                peer_id: socket.id,
+                kind: kind,
+                type: appData.mediaType,
+                status: true,
+            };
+
+            await room.getPeers().get(socket.id).updatePeerInfo(data);
+
+            try {
+                const producer_id = await room.produce(
+                    socket.id,
+                    producerTransportId,
+                    rtpParameters,
+                    kind,
+                    appData.mediaType,
+                );
+
+                log.debug('Produce', {
+                    kind: kind,
+                    type: appData.mediaType,
+                    peer_name: peer_name,
+                    peer_id: socket.id,
+                    producer_id: producer_id,
+                });
+
+                // add & monitor producer audio level
+                if (kind === 'audio') {
+                    room.addProducerToAudioLevelObserver({ producerId: producer_id });
+                }
+                callback({
+                    producer_id,
+                });
+            } catch (err) {
+                log.error('Producer transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities }, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            try {
+                const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
+
+                log.debug('Consuming', {
+                    peer_name: peer_name,
+                    producer_id: producerId,
+                    consumer_id: params ? params.id : undefined,
+                });
+
+                callback(params);
+            } catch (err) {
+                log.error('Consumer transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('producerClosed', (data) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            log.debug('Producer close', data);
+
+            const room = roomList.get(socket.room_id);
+
+            // peer_info audio Or video OFF
+            room.getPeers().get(socket.id).updatePeerInfo(data);
+            room.closeProducer(socket.id, data.producer_id);
+        });
+
+        socket.on('resume', async (_, callback) => {
+            await consumer.resume();
+            callback();
+        });
+
+        socket.on('getProducers', () => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            log.debug('Get producers', getPeerName(room));
+
+            // send all the current producer to newly joined member
+            const producerList = room.getProducerListForPeer();
+
+            socket.emit('newProducers', producerList);
+        });
+
         socket.on('getPeerCounts', async ({}, callback) => {
             if (!roomList.has(socket.room_id)) return;
 
@@ -1045,6 +1357,15 @@ function startServer() {
             room.broadCast(socket.id, 'updateRoomModeratorALL', moderator);
         });
 
+        socket.on('getRoomInfo', async (_, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            log.debug('Send Room Info to', getPeerName(room));
+            cb(room.toJson());
+        });
+
         socket.on('fileInfo', (dataObject) => {
             if (!roomList.has(socket.room_id)) return;
 
@@ -1104,7 +1425,8 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            // let objLength = bytesToSize(Object.keys(data).length);
+            // const objLength = bytesToSize(Object.keys(data).length);
+
             // log.debug('Send Whiteboard canvas JSON', { length: objLength });
 
             room.broadCast(socket.id, 'wbCanvasToJson', data);
@@ -1142,326 +1464,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            room.broadCast(data.peer_id, 'recordingAction', data);
-        });
-
-        socket.on('join', async (dataObject, cb) => {
-            if (!roomList.has(socket.room_id)) {
-                return cb({
-                    error: 'Room does not exist',
-                });
-            }
-
-            // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
-            const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
-
-            // Get peer Geo Location
-            if (config.IPLookup.enabled && peer_ip != '::1') {
-                dataObject.peer_geo = await getPeerGeoLocation(peer_ip);
-            }
-
-            const data = checkXSS(dataObject);
-
-            log.info('User joined', data);
-
-            let is_presenter = true;
-
-            const { peer_token } = data.peer_info;
-
-            const room = roomList.get(socket.room_id);
-
-            // User Auth required, we check if peer valid
-            if (hostCfg.user_auth) {
-                // Check JWT
-                if (peer_token) {
-                    try {
-                        const { username, password, presenter } = checkXSS(jwt.verify(peer_token, jwtCfg.JWT_KEY));
-
-                        const isPeerValid = await isAuthPeer(username, password);
-
-                        is_presenter =
-                            presenter === '1' ||
-                            presenter === 'true' ||
-                            (config.presenters.join_first && room.getPeers().size === 0);
-
-                        log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
-                            ip: peer_ip,
-                            peer_username: username,
-                            peer_password: password,
-                            peer_valid: isPeerValid,
-                            peer_presenter: is_presenter,
-                        });
-
-                        if (!isPeerValid) {
-                            // redirect peer to login page
-                            return cb('unauthorized');
-                        }
-                    } catch (err) {
-                        log.error('[Join] - JWT error', { error: err.message, token: peer_token });
-                        return cb('unauthorized');
-                    }
-                } else {
-                    return cb('unauthorized');
-                }
-            }
-
-            // check if banned...
-            const peerUUID = data.peer_info.peer_uuid;
-            if (room.isBanned(peerUUID)) {
-                const { peer_name, peer_uuid, os_name, os_version, browser_name, browser_version } = data.peer_info;
-                log.info('[Join] - peer is banned!', {
-                    room_id: data.room_id,
-                    peer: {
-                        name: peer_name,
-                        uuid: peer_uuid,
-                        os_name: os_name,
-                        os_version: os_version,
-                        browser_name: browser_name,
-                        browser_version: browser_version,
-                    },
-                });
-                return cb('isBanned');
-            }
-
-            room.addPeer(new Peer(socket.id, data));
-
-            const activeRooms = getActiveRooms();
-
-            log.info('[Join] - current active rooms', activeRooms);
-
-            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
-
-            const peer = room.getPeers()?.get(socket.id)?.peer_info;
-
-            const peer_id = peer && peer.peer_id;
-            const peer_name = peer && peer.peer_name;
-            const peer_uuid = peer && peer.peer_uuid;
-
-            // Set the presenters
-            const presenter = {
-                peer_ip: peer_ip,
-                peer_name: peer_name,
-                peer_uuid: peer_uuid,
-                is_presenter: is_presenter,
-            };
-            // first we check if the username match the presenters username
-            if (config.presenters && config.presenters.list && config.presenters.list.includes(peer_name)) {
-                presenters[socket.room_id][socket.id] = presenter;
-            } else {
-                // if not match the presenters username, the first one join room is the presenter
-                if (Object.keys(presenters[socket.room_id]).length === 0) {
-                    presenters[socket.room_id][socket.id] = presenter;
-                }
-            }
-
-            log.info('[Join] - Connected presenters grp by roomId', presenters);
-
-            const isPresenter = peer_token
-                ? is_presenter
-                : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-
-            room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
-
-            log.info('[Join] - Is presenter', {
-                roomId: socket.room_id,
-                peer_name: peer_name,
-                peer_presenter: isPresenter,
-            });
-
-            if (room.isLocked() && !isPresenter) {
-                log.debug('The user was rejected because the room is locked, and they are not a presenter');
-                return cb('isLocked');
-            }
-
-            if (room.isLobbyEnabled() && !isPresenter) {
-                log.debug(
-                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
-                );
-                room.broadCast(socket.id, 'roomLobby', {
-                    peer_id: peer_id,
-                    peer_name: peer_name,
-                    lobby_status: 'waiting',
-                });
-                return cb('isLobby');
-            }
-
-            cb(room.toJson());
-        });
-
-        socket.on('getRouterRtpCapabilities', (_, callback) => {
-            if (!roomList.has(socket.room_id)) {
-                return callback({ error: 'Room not found' });
-            }
-
-            const room = roomList.get(socket.room_id);
-
-            log.debug('Get RouterRtpCapabilities', getPeerName(room));
-            try {
-                callback(room.getRtpCapabilities());
-            } catch (err) {
-                callback({
-                    error: err.message,
-                });
-            }
-        });
-
-        socket.on('getProducers', () => {
-            if (!roomList.has(socket.room_id)) return;
-
-            const room = roomList.get(socket.room_id);
-
-            log.debug('Get producers', getPeerName(room));
-
-            // send all the current producer to newly joined member
-            const producerList = room.getProducerListForPeer();
-
-            socket.emit('newProducers', producerList);
-        });
-
-        socket.on('createWebRtcTransport', async (_, callback) => {
-            if (!roomList.has(socket.room_id)) {
-                return callback({ error: 'Room not found' });
-            }
-
-            const room = roomList.get(socket.room_id);
-
-            log.debug('Create webrtc transport', getPeerName(room));
-            try {
-                const { params } = await room.createWebRtcTransport(socket.id);
-                callback(params);
-            } catch (err) {
-                log.error('Create WebRtc Transport error', err.message);
-                callback({
-                    error: err.message,
-                });
-            }
-        });
-
-        socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
-            if (!roomList.has(socket.room_id)) {
-                return callback({ error: 'Room not found' });
-            }
-
-            const room = roomList.get(socket.room_id);
-
-            const peer_name = getPeerName(room, false);
-
-            log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
-
-            try {
-                await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
-                callback('success');
-            } catch (err) {
-                log.error('Connect transport error', err.message);
-                callback({
-                    error: err.message,
-                });
-            }
-        });
-
-        socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
-            if (!roomList.has(socket.room_id)) {
-                return callback({ error: 'Room not found' });
-            }
-
-            const room = roomList.get(socket.room_id);
-
-            const peer_name = getPeerName(room, false);
-
-            // peer_info audio Or video ON
-            const data = {
-                peer_name: peer_name,
-                peer_id: socket.id,
-                kind: kind,
-                type: appData.mediaType,
-                status: true,
-            };
-
-            await room.getPeers().get(socket.id).updatePeerInfo(data);
-
-            try {
-                const producer_id = await room.produce(
-                    socket.id,
-                    producerTransportId,
-                    rtpParameters,
-                    kind,
-                    appData.mediaType,
-                );
-
-                log.debug('Produce', {
-                    kind: kind,
-                    type: appData.mediaType,
-                    peer_name: peer_name,
-                    peer_id: socket.id,
-                    producer_id: producer_id,
-                });
-
-                // add & monitor producer audio level
-                if (kind === 'audio') {
-                    room.addProducerToAudioLevelObserver({ producerId: producer_id });
-                }
-                callback({
-                    producer_id,
-                });
-            } catch (err) {
-                log.error('Producer transport error', err.message);
-                callback({
-                    error: err.message,
-                });
-            }
-        });
-
-        socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities }, callback) => {
-            if (!roomList.has(socket.room_id)) {
-                return callback({ error: 'Room not found' });
-            }
-
-            const room = roomList.get(socket.room_id);
-
-            const peer_name = getPeerName(room, false);
-
-            try {
-                const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
-
-                log.debug('Consuming', {
-                    peer_name: peer_name,
-                    producer_id: producerId,
-                    consumer_id: params ? params.id : undefined,
-                });
-
-                callback(params);
-            } catch (err) {
-                log.error('Consumer transport error', err.message);
-                callback({
-                    error: err.message,
-                });
-            }
-        });
-
-        socket.on('producerClosed', (data) => {
-            if (!roomList.has(socket.room_id)) return;
-
-            log.debug('Producer close', data);
-
-            const room = roomList.get(socket.room_id);
-
-            // peer_info audio Or video OFF
-            room.getPeers().get(socket.id).updatePeerInfo(data);
-            room.closeProducer(socket.id, data.producer_id);
-        });
-
-        socket.on('resume', async (_, callback) => {
-            await consumer.resume();
-            callback();
-        });
-
-        socket.on('getRoomInfo', async (_, cb) => {
-            if (!roomList.has(socket.room_id)) return;
-
-            const room = roomList.get(socket.room_id);
-
-            log.debug('Send Room Info to', getPeerName(room));
-            cb(room.toJson());
+            room.broadCast(socket.id, 'recordingAction', data);
         });
 
         socket.on('refreshParticipantsCount', () => {
@@ -1469,9 +1472,11 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
+            const peerCounts = room.getPeers().size;
+
             const data = {
                 room_id: socket.room_id,
-                peer_counts: room.getPeers().size,
+                peer_counts: peerCounts,
             };
             log.debug('Refresh Participants count', data);
             room.broadCast(socket.id, 'refreshParticipantsCount', data);
@@ -1546,10 +1551,11 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
 
-            const peerName = (peer && peer.peer_name) || '';
-            const peerUuid = (peer && peer.peer_uuid) || '';
+            const peerName = peerInfo?.peer_name || '';
+
+            const peerUuid = peerInfo?.peer_uuid || '';
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
@@ -1583,10 +1589,11 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
 
-            const peerName = (peer && peer.peer_name) || '';
-            const peerUuid = (peer && peer.peer_uuid) || '';
+            const peerName = peerInfo?.peer_name || '';
+
+            const peerUuid = peerInfo?.peer_uuid || '';
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
 
@@ -1637,7 +1644,7 @@ function startServer() {
         function isRealPeer(name, id, roomId) {
             const room = roomList.get(roomId);
 
-            let peerName = (room && room.getPeers()?.get(id)?.peer_info?.peer_name) || 'undefined';
+            const peerName = (room && room.getPeers()?.get(id)?.peer_info?.peer_name) || 'undefined';
 
             return peerName == name;
         }
@@ -1663,19 +1670,15 @@ function startServer() {
         function removeMeData(room, peerName, isPresenter) {
             const roomId = room && socket.room_id;
             const peerCounts = room && room.getPeers().size;
-            log.debug('[REMOVE ME] - DATA', {
-                roomId: roomId,
-                name: peerName,
-                isPresenter: isPresenter,
-                count: peerCounts,
-            });
-            return {
+            const data = {
                 room_id: roomId,
                 peer_id: socket.id,
                 peer_name: peerName,
                 peer_counts: peerCounts,
                 isPresenter: isPresenter,
             };
+            log.debug('[REMOVE ME] - DATA', data);
+            return data;
         }
 
         function bytesToSize(bytes) {
