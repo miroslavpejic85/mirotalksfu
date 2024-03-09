@@ -893,11 +893,13 @@ function startServer() {
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
-            const peer = room.getPeers()?.get(socket.id)?.peer_info;
+            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
 
-            const peer_id = peer && peer.peer_id;
-            const peer_name = peer && peer.peer_name;
-            const peer_uuid = peer && peer.peer_uuid;
+            const peer_id = peerInfo?.peer_id || '';
+
+            const peer_name = peerInfo?.peer_name || '';
+
+            const peer_uuid = peerInfo?.peer_uuid || '';
 
             // Set the presenters
             const presenter = {
@@ -1627,7 +1629,7 @@ function startServer() {
         // common
         function getPeerName(room, json = true) {
             try {
-                let peer_name = (room && room.getPeers()?.get(socket.id)?.peer_info?.peer_name) || 'undefined';
+                const peer_name = (room && room.getPeers()?.get(socket.id)?.peer_info?.peer_name) || 'undefined';
 
                 if (json) {
                     return {
