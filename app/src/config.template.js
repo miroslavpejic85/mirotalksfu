@@ -356,18 +356,26 @@ module.exports = {
                 },
             ],
         },
-        // WebRtcTransport settings
+        // WebRtcServerOptions
+        webRtcServerActive: false,
+        webRtcServerOptions: {
+            listenInfos: [
+                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: getLocalIp(), port: 44444 },
+                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: getLocalIp(), port: 44444 },
+            ],
+        },
+        // WebRtcTransport
         webRtcTransport: {
             listenInfos: [
                 { protocol: 'udp', ip: '0.0.0.0', announcedAddress: getLocalIp() },
                 { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: getLocalIp() },
-                //announcedAddress: replace by 'public static IPV4 address' https://api.ipify.org (type string --> 'xx.xxx.xxx.xx' not xx.xxx.xxx.xx)
-                //announcedAddress: '' will be auto-detected on server start, for docker localPC set '127.0.0.1' otherwise the 'public static IPV4 address'
             ],
             initialAvailableOutgoingBitrate: 1000000,
             minimumAvailableOutgoingBitrate: 600000,
             maxSctpMessageSize: 262144,
             maxIncomingBitrate: 1500000,
         },
+        //announcedAddress: replace by 'public static IPV4 address' https://api.ipify.org (type string --> 'xx.xxx.xxx.xx' not xx.xxx.xxx.xx)
+        //announcedAddress: '' will be auto-detected on server start, for docker localPC set '127.0.0.1' otherwise the 'public static IPV4 address'
     },
 };

@@ -8,6 +8,8 @@ module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
         this.worker = worker;
+        this.webRtcServer = worker.appData.webRtcServer;
+        this.webRtcServerActive = config.mediasoup.webRtcServerActive;
         this.io = io;
         this.audioLevelObserver = null;
         this.audioLevelObserverEnabled = true;
@@ -248,13 +250,18 @@ module.exports = class Room {
 
             const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
-            const transport = await this.router.createWebRtcTransport({
+            const webRtcTransportOptions = {
                 listenInfos: listenInfos,
                 enableUdp: true,
                 enableTcp: true,
                 preferUdp: true,
+                iceConsentTimeout: 20,
                 initialAvailableOutgoingBitrate,
-            });
+            };
+
+            if (this.webRtcServerActive) webRtcTransportOptions.webRtcServer = this.webRtcServer;
+
+            const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
 
             if (!transport) {
                 throw new Error('Failed to create WebRTC transport');

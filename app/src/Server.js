@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.88
+ * @version 1.3.90
  *
  */
 
@@ -762,6 +762,26 @@ function startServer() {
                 setTimeout(() => process.exit(1), 2000);
             });
             workers.push(worker);
+
+            if (config.mediasoup.webRtcServerActive) {
+                //
+                log.debug('Create a WebRtcServer', { worker_pid: worker.pid });
+                const webRtcServerOptions = clone(config.mediasoup.webRtcServerOptions);
+                const portIncrement = numWorkers.length - 1;
+                for (const listenInfo of webRtcServerOptions.listenInfos) {
+                    listenInfo.port += portIncrement;
+                }
+                const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
+                worker.appData.webRtcServer = webRtcServer;
+            }
+            /*
+            setInterval(async () => {
+                const usage = await worker.getResourceUsage();
+                log.info('mediasoup Worker resource usage', { worker_pid: worker.pid, usage: usage });
+                const dump = await worker.dump();
+                log.info('mediasoup Worker dump', { worker_pid: worker.pid, dump: dump });
+            }, 120000);
+            */
         }
     }
 
@@ -1690,6 +1710,13 @@ function startServer() {
             return Math.round(bytes / Math.pow(1024, i), 2) + ' ' + sizes[i];
         }
     });
+
+    function clone(value) {
+        if (value === undefined) return undefined;
+        if (Number.isNaN(value)) return NaN;
+        if (typeof structuredClone === 'function') return structuredClone(value);
+        return JSON.parse(JSON.stringify(value));
+    }
 
     async function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         try {
