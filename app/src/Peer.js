@@ -109,7 +109,11 @@ module.exports = class Peer {
                 rtpParameters: producer_rtpParameters,
             });
 
-            const { id, appData, type, rtpParameters } = producer;
+            if (!producer) {
+                throw new Error(`Producer type: ${producer_type} kind: ${producer_kind} not found`);
+            }
+
+            const { id, appData, type, kind, rtpParameters } = producer;
 
             appData.mediaType = producer_type;
 
@@ -119,13 +123,13 @@ module.exports = class Peer {
                 const { scalabilityMode } = rtpParameters.encodings[0];
                 const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
                 const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
-                log.debug(`Producer [${type}] created with ID ${id}`, {
+                log.debug(`Producer [${type}-${kind}] ----->`, {
                     scalabilityMode,
                     spatialLayer,
                     temporalLayer,
                 });
             } else {
-                log.debug(`Producer of type ${type} created with ID ${id}`);
+                log.debug('Producer ----->', { type: type, kind: kind });
             }
 
             producer.on('transportclose', () => {
@@ -172,6 +176,10 @@ module.exports = class Peer {
                 paused: false,
             });
 
+            if (!consumer) {
+                throw new Error(`Consumer for producer ID ${producer_id} not found`);
+            }
+
             const { id, type, kind, rtpParameters, producerPaused } = consumer;
 
             if (['simulcast', 'svc'].includes(type)) {
@@ -182,13 +190,13 @@ module.exports = class Peer {
                     spatialLayer: spatialLayer,
                     temporalLayer: temporalLayer,
                 });
-                log.debug(`Consumer [${type}] ----->`, {
+                log.debug(`Consumer [${type}-${kind}] ----->`, {
                     scalabilityMode,
                     spatialLayer,
                     temporalLayer,
                 });
             } else {
-                log.debug('Consumer ----->', { type: type });
+                log.debug('Consumer ----->', { type: type, kind: kind });
             }
 
             consumer.on('transportclose', () => {

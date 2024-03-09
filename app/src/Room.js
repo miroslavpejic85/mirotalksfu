@@ -256,6 +256,10 @@ module.exports = class Room {
                 initialAvailableOutgoingBitrate,
             });
 
+            if (!transport) {
+                throw new Error('Failed to create WebRTC transport');
+            }
+
             const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
 
             if (maxIncomingBitrate) {

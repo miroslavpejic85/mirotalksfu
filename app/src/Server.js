@@ -1344,11 +1344,19 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            log.debug('Connect transport', getPeerName(room));
+            const peer_name = getPeerName(room, false);
 
-            await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
+            log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
 
-            callback('success');
+            try {
+                await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
+                callback('success');
+            } catch (err) {
+                log.error('Connect transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
         });
 
         socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
@@ -1371,30 +1379,36 @@ function startServer() {
 
             await room.getPeers().get(socket.id).updatePeerInfo(data);
 
-            const producer_id = await room.produce(
-                socket.id,
-                producerTransportId,
-                rtpParameters,
-                kind,
-                appData.mediaType,
-            );
+            try {
+                const producer_id = await room.produce(
+                    socket.id,
+                    producerTransportId,
+                    rtpParameters,
+                    kind,
+                    appData.mediaType,
+                );
 
-            log.debug('Produce', {
-                kind: kind,
-                type: appData.mediaType,
-                peer_name: peer_name,
-                peer_id: socket.id,
-                producer_id: producer_id,
-            });
+                log.debug('Produce', {
+                    kind: kind,
+                    type: appData.mediaType,
+                    peer_name: peer_name,
+                    peer_id: socket.id,
+                    producer_id: producer_id,
+                });
 
-            // add & monitor producer audio level
-            if (kind === 'audio') {
-                room.addProducerToAudioLevelObserver({ producerId: producer_id });
+                // add & monitor producer audio level
+                if (kind === 'audio') {
+                    room.addProducerToAudioLevelObserver({ producerId: producer_id });
+                }
+                callback({
+                    producer_id,
+                });
+            } catch (err) {
+                log.error('Producer transport error', err.message);
+                callback({
+                    error: err.message,
+                });
             }
-
-            callback({
-                producer_id,
-            });
         });
 
         socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities }, callback) => {
@@ -1404,15 +1418,24 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
+            const peer_name = getPeerName(room, false);
 
-            log.debug('Consuming', {
-                peer_name: getPeerName(room, false),
-                producer_id: producerId,
-                consumer_id: params ? params.id : undefined,
-            });
+            try {
+                const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
 
-            callback(params);
+                log.debug('Consuming', {
+                    peer_name: peer_name,
+                    producer_id: producerId,
+                    consumer_id: params ? params.id : undefined,
+                });
+
+                callback(params);
+            } catch (err) {
+                log.error('Consumer transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
         });
 
         socket.on('producerClosed', (data) => {
