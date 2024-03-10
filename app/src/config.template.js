@@ -299,7 +299,7 @@ module.exports = {
     },
     mediasoup: {
         // Worker settings
-        numWorkers: process.env.NUM_CPUS || require('os').cpus().length,
+        numWorkers: require('os').cpus().length,
         worker: {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
@@ -364,7 +364,7 @@ module.exports = {
                 { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: getLocalIp(), port: 44444 },
             ],
         },
-        // WebRtcTransport
+        // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
                 { protocol: 'udp', ip: '0.0.0.0', announcedAddress: getLocalIp() },

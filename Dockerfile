@@ -5,9 +5,6 @@ WORKDIR /src
 # https://mediasoup.org/documentation/v3/mediasoup/installation/
 ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD="true"
 
-# numWorkers
-ENV NUM_CPUS=$(nproc)
-
 COPY package.json .
 
 RUN \

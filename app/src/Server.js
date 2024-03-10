@@ -761,13 +761,13 @@ function startServer() {
 
             if (config.mediasoup.webRtcServerActive) {
                 //
-                log.debug('Create a WebRtcServer', { worker_pid: worker.pid });
+                log.info('Create a WebRtcServer', { worker_pid: worker.pid });
                 const webRtcServerOptions = clone(config.mediasoup.webRtcServerOptions);
                 const portIncrement = i;
                 for (const listenInfo of webRtcServerOptions.listenInfos) {
                     listenInfo.port += portIncrement;
                 }
-                //log.debug('WebRtcServer options', { webRtcServerOptions: webRtcServerOptions });
+                //log.info('WebRtcServer options', { webRtcServerOptions: webRtcServerOptions });
                 const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
                 worker.appData.webRtcServer = webRtcServer;
             }
