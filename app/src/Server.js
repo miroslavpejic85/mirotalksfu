@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.91
+ * @version 1.3.92
  *
  */
 
@@ -1593,26 +1593,33 @@ function startServer() {
                 : room.sendTo(data.to_peer_id, 'message', data);
         });
 
-        socket.on('getChatGPT', async ({ time, room, name, prompt }, cb) => {
+        socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {
             if (!roomList.has(socket.room_id)) return;
-            if (!config.chatGPT.enabled) return cb('ChatGPT seems disabled, try later!');
+            if (!config.chatGPT.enabled) return cb({ message: 'ChatGPT seems disabled, try later!' });
+            // https://platform.openai.com/docs/api-reference/completions/create
             try {
-                // https://platform.openai.com/docs/api-reference/completions/create
-                const completion = await chatGPT.completions.create({
-                    model: config.chatGPT.model || 'gpt-3.5-turbo-instruct',
-                    prompt: prompt,
+                // Add the prompt to the context
+                context.push({ role: 'user', content: prompt });
+                // Call OpenAI's API to generate response
+                const completion = await chatGPT.chat.completions.create({
+                    model: config.chatGPT.model || 'gpt-3.5-turbo',
+                    messages: context,
                     max_tokens: config.chatGPT.max_tokens,
                     temperature: config.chatGPT.temperature,
                 });
-                const response = completion.choices[0].text;
+                // Extract message from completion
+                const message = completion.choices[0].message.content.trim();
+                // Add response to context
+                context.push({ role: 'assistant', content: message });
+                // Log conversation details
                 log.info('ChatGPT', {
                     time: time,
                     room: room,
                     name: name,
-                    prompt: prompt,
-                    response: response,
+                    context: context,
                 });
-                cb(response);
+                // Callback response to client
+                cb({ message: message, context: context });
             } catch (error) {
                 if (error.name === 'APIError') {
                     log.error('ChatGPT', {
@@ -1622,11 +1629,11 @@ function startServer() {
                         code: error.code,
                         type: error.type,
                     });
-                    cb(error.message);
+                    cb({ message: error.message });
                 } else {
                     // Non-API error
                     log.error('ChatGPT', error);
-                    cb(error.message);
+                    cb({ message: error.message });
                 }
             }
         });

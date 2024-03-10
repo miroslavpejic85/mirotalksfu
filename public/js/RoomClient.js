@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.91
+ * @version 1.3.92
  *
  */
 
@@ -238,6 +238,7 @@ class RoomClient {
         this.camera = 'user';
         this.videoQualitySelectedIndex = 0;
 
+        this.chatGPTContext = [];
         this.chatMessages = [];
         this.leftMsgAvatar = null;
         this.rightMsgAvatar = null;
@@ -3511,22 +3512,17 @@ class RoomClient {
                     room: this.room_id,
                     name: this.peer_name,
                     prompt: peer_msg,
+                    context: this.chatGPTContext,
                 })
                 .then((completion) => {
                     if (!completion) return;
-                    console.log('Receive message:', completion);
+                    const { message, context } = completion;
+                    this.chatGPTContext = context ? context : [];
+                    console.log('Receive message:', message);
                     this.setMsgAvatar('right', 'ChatGPT');
-                    this.appendMessage(
-                        'right',
-                        image.chatgpt,
-                        'ChatGPT',
-                        this.peer_id,
-                        completion,
-                        'ChatGPT',
-                        'ChatGPT',
-                    );
+                    this.appendMessage('right', image.chatgpt, 'ChatGPT', this.peer_id, message, 'ChatGPT', 'ChatGPT');
                     this.cleanMessage();
-                    this.speechInMessages ? this.speechMessage(true, 'ChatGPT', completion) : this.sound('message');
+                    this.speechInMessages ? this.speechMessage(true, 'ChatGPT', message) : this.sound('message');
                 })
                 .catch((err) => {
                     console.log('ChatGPT error:', err);
@@ -3942,6 +3938,7 @@ class RoomClient {
                 removeAllChildNodes(chatPublicMessages);
                 removeAllChildNodes(chatPrivateMessages);
                 this.chatMessages = [];
+                this.chatGPTContext = [];
                 this.sound('delete');
             }
         });
