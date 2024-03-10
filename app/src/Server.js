@@ -200,10 +200,15 @@ const roomList = new Map(); // All Rooms
 
 const presenters = {}; // collect presenters grp by roomId
 
-let announcedAddress = config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress; // announcedAddress (server public IPv4)
+const webRtcServerActive = config.mediasoup.webRtcServerActive;
+
+// announcedAddress (server public IPv4)
+let announcedAddress = webRtcServerActive
+    ? config.mediasoup.webRtcServerOptions.listenInfos[0].announcedAddress
+    : config.mediasoup.webRtcTransport.listenInfos[0].announcedAddress;
 
 // All mediasoup workers
-let workers = [];
+const workers = [];
 let nextMediasoupWorkerIdx = 0;
 
 // Autodetect announcedAddress (https://www.ipify.org)
@@ -217,9 +222,15 @@ if (!announcedAddress) {
         (resp) => {
             resp.on('data', (ip) => {
                 announcedAddress = ip.toString();
-                config.mediasoup.webRtcTransport.listenInfos.forEach((info) => {
-                    info.announcedAddress = announcedAddress;
-                });
+                if (webRtcServerActive) {
+                    config.mediasoup.webRtcServerOptions.listenInfos.forEach((info) => {
+                        info.announcedAddress = announcedAddress;
+                    });
+                } else {
+                    config.mediasoup.webRtcTransport.listenInfos.forEach((info) => {
+                        info.announcedAddress = announcedAddress;
+                    });
+                }
                 startServer();
             });
         },
@@ -759,15 +770,19 @@ function startServer() {
                 rtcMaxPort: rtcMaxPort,
             });
 
-            if (config.mediasoup.webRtcServerActive) {
-                //
-                log.info('Create a WebRtcServer', { worker_pid: worker.pid });
+            if (webRtcServerActive) {
                 const webRtcServerOptions = clone(config.mediasoup.webRtcServerOptions);
                 const portIncrement = i;
+
                 for (const listenInfo of webRtcServerOptions.listenInfos) {
                     listenInfo.port += portIncrement;
                 }
-                //log.info('WebRtcServer options', { webRtcServerOptions: webRtcServerOptions });
+
+                log.info('Create a WebRtcServer', {
+                    worker_pid: worker.pid,
+                    webRtcServerOptions: webRtcServerOptions,
+                });
+
                 const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
                 worker.appData.webRtcServer = webRtcServer;
             }
