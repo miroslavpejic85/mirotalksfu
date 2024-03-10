@@ -748,7 +748,7 @@ function startServer() {
 
         const { logLevel, logTags, rtcMinPort, rtcMaxPort } = config.mediasoup.worker;
 
-        log.debug('WORKERS:', numWorkers);
+        log.info('WORKERS:', numWorkers);
 
         for (let i = 0; i < numWorkers; i++) {
             //
