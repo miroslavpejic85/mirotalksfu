@@ -1792,8 +1792,8 @@ function startServer() {
         const roomIds = Array.from(roomList.keys());
         const roomPeersArray = roomIds.map((roomId) => {
             const room = roomList.get(roomId);
-            const peerCount = room ? room.getPeers().size : 0;
-            const broadcasting = room ? room.isBroadcasting() : false;
+            const peerCount = (room && room.getPeers().size) || 0;
+            const broadcasting = (room && room.isBroadcasting()) || false;
             return {
                 room: roomId,
                 broadcasting: broadcasting,
