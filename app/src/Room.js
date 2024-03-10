@@ -251,15 +251,13 @@ module.exports = class Room {
             const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
             const webRtcTransportOptions = {
-                listenInfos: listenInfos,
+                ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos }),
                 enableUdp: true,
                 enableTcp: true,
                 preferUdp: true,
                 iceConsentTimeout: 20,
                 initialAvailableOutgoingBitrate,
             };
-
-            if (this.webRtcServerActive) webRtcTransportOptions.webRtcServer = this.webRtcServer;
 
             const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
 
