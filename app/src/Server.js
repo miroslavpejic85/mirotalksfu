@@ -751,29 +751,34 @@ function startServer() {
         log.debug('WORKERS:', numWorkers);
 
         for (let i = 0; i < numWorkers; i++) {
-            let worker = await mediasoup.createWorker({
+            //
+            const worker = await mediasoup.createWorker({
                 logLevel: logLevel,
                 logTags: logTags,
                 rtcMinPort: rtcMinPort,
                 rtcMaxPort: rtcMaxPort,
             });
-            worker.on('died', () => {
-                log.error('Mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid);
-                setTimeout(() => process.exit(1), 2000);
-            });
-            workers.push(worker);
 
             if (config.mediasoup.webRtcServerActive) {
                 //
                 log.debug('Create a WebRtcServer', { worker_pid: worker.pid });
                 const webRtcServerOptions = clone(config.mediasoup.webRtcServerOptions);
-                const portIncrement = numWorkers.length - 1;
+                const portIncrement = i;
                 for (const listenInfo of webRtcServerOptions.listenInfos) {
                     listenInfo.port += portIncrement;
                 }
+                //log.debug('WebRtcServer options', { webRtcServerOptions: webRtcServerOptions });
                 const webRtcServer = await worker.createWebRtcServer(webRtcServerOptions);
                 worker.appData.webRtcServer = webRtcServer;
             }
+
+            worker.on('died', () => {
+                log.error('Mediasoup worker died, exiting in 2 seconds... [pid:%d]', worker.pid);
+                setTimeout(() => process.exit(1), 2000);
+            });
+
+            workers.push(worker);
+
             /*
             setInterval(async () => {
                 const usage = await worker.getResourceUsage();
