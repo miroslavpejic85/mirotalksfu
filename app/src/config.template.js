@@ -299,7 +299,7 @@ module.exports = {
     },
     mediasoup: {
         // Worker settings
-        numWorkers: Object.keys(os.cpus()).length,
+        numWorkers: process.env.NUM_CPUS || require('os').cpus().length,
         worker: {
             rtcMinPort: 40000,
             rtcMaxPort: 40100,
