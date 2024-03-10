@@ -1676,13 +1676,20 @@ class RoomClient {
         return elem;
     }
 
-    pauseProducer(type) {
+    async pauseProducer(type) {
         if (!this.producerLabel.has(type)) {
             return console.log('There is no producer for this type ' + type);
         }
 
         const producer_id = this.producerLabel.get(type);
         this.producers.get(producer_id).pause();
+
+        try {
+            const response = await this.socket.request('pauseProducer', { producer_id: producer_id });
+            console.log('Producer paused', response);
+        } catch (error) {
+            console.error('Error pausing producer', error);
+        }
 
         switch (type) {
             case mediaType.audio:
@@ -1699,13 +1706,20 @@ class RoomClient {
         }
     }
 
-    resumeProducer(type) {
+    async resumeProducer(type) {
         if (!this.producerLabel.has(type)) {
             return console.log('There is no producer for this type ' + type);
         }
 
         const producer_id = this.producerLabel.get(type);
         this.producers.get(producer_id).resume();
+
+        try {
+            const response = await this.socket.request('resumeProducer', { producer_id: producer_id });
+            console.log('Producer resumed', response);
+        } catch (error) {
+            console.error('Error resuming producer', error);
+        }
 
         switch (type) {
             case mediaType.audio:

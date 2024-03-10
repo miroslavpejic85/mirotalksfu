@@ -1128,9 +1128,52 @@ function startServer() {
             room.closeProducer(socket.id, data.producer_id);
         });
 
-        socket.on('resume', async (_, callback) => {
-            await consumer.resume();
-            callback();
+        socket.on('pauseProducer', async ({ producer_id }, callback) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            const producer = room.getPeers()?.get(socket.id)?.getProducer(producer_id);
+
+            if (!producer) {
+                return callback({ error: `producer with id "${producer_id}" not found` });
+            }
+
+            log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
+
+            try {
+                await producer.pause();
+            } catch (error) {
+                return callback({ error: error.message });
+            }
+
+            callback('successfully');
+        });
+
+        socket.on('resumeProducer', async ({ producer_id }, callback) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            const producer = room.getPeers()?.get(socket.id)?.getProducer(producer_id);
+
+            if (!producer) {
+                return callback({ error: `producer with id "${producer_id}" not found` });
+            }
+
+            log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
+
+            try {
+                await producer.resume();
+            } catch (error) {
+                return callback({ error: error.message });
+            }
+
+            callback('successfully');
         });
 
         socket.on('getProducers', () => {
