@@ -98,12 +98,12 @@ module.exports = class Peer {
     async createProducer(producerTransportId, producer_rtpParameters, producer_kind, producer_type) {
         try {
             if (!producerTransportId) {
-                throw new Error('Invalid producer transport ID');
+                return 'Invalid producer transport ID';
             }
 
             const producerTransport = this.transports.get(producerTransportId);
             if (!producerTransport) {
-                throw new Error(`Producer transport with ID ${producerTransportId} not found`);
+                return `Producer transport with ID ${producerTransportId} not found`;
             }
 
             const producer = await producerTransport.produce({
@@ -112,7 +112,7 @@ module.exports = class Peer {
             });
 
             if (!producer) {
-                throw new Error(`Producer type: ${producer_type} kind: ${producer_kind} not found`);
+                return `Producer type: ${producer_type} kind: ${producer_kind} not found`;
             }
 
             const { id, appData, type, kind, rtpParameters } = producer;
@@ -145,7 +145,7 @@ module.exports = class Peer {
             return producer;
         } catch (error) {
             log.error('Error creating producer', error.message);
-            return null;
+            return error.message;
         }
     }
 
@@ -153,8 +153,8 @@ module.exports = class Peer {
         if (!this.producers.has(producer_id)) return;
         try {
             this.producers.get(producer_id).close();
-        } catch (ex) {
-            log.warn('Close Producer', ex);
+        } catch (error) {
+            log.warn('Close Producer', error.message);
         }
         this.producers.delete(producer_id);
     }
@@ -168,7 +168,7 @@ module.exports = class Peer {
             const consumerTransport = this.transports.get(consumer_transport_id);
 
             if (!consumerTransport) {
-                throw new Error(`Consumer transport with id ${consumer_transport_id} not found`);
+                return `Consumer transport with id ${consumer_transport_id} not found`;
             }
 
             const consumer = await consumerTransport.consume({
@@ -179,7 +179,7 @@ module.exports = class Peer {
             });
 
             if (!consumer) {
-                throw new Error(`Consumer for producer ID ${producer_id} not found`);
+                return `Consumer for producer ID ${producer_id} not found`;
             }
 
             const { id, type, kind, rtpParameters, producerPaused } = consumer;
@@ -224,7 +224,7 @@ module.exports = class Peer {
             };
         } catch (error) {
             log.error('Error creating consumer', error.message);
-            return null;
+            return error.message;
         }
     }
 

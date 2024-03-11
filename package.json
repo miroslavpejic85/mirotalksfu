@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.3.92",
+    "version": "1.3.93",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -38,8 +38,8 @@
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "dependencies": {
-        "@sentry/integrations": "7.106.0",
-        "@sentry/node": "7.106.0",
+        "@sentry/integrations": "7.106.1",
+        "@sentry/node": "7.106.1",
         "axios": "^1.6.7",
         "body-parser": "1.20.2",
         "colors": "1.4.0",

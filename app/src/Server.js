@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.92
+ * @version 1.3.93
  *
  */
 
@@ -1001,8 +1001,8 @@ function startServer() {
 
             log.debug('Get RouterRtpCapabilities', getPeerName(room));
             try {
-                const routerRtpCapabilities = room.getRtpCapabilities();
-                callback(routerRtpCapabilities);
+                const getRouterRtpCapabilities = room.getRtpCapabilities();
+                callback(getRouterRtpCapabilities);
             } catch (err) {
                 log.error('Get RouterRtpCapabilities error', err.message);
                 callback({
@@ -1020,8 +1020,8 @@ function startServer() {
 
             log.debug('Create webrtc transport', getPeerName(room));
             try {
-                const { params } = await room.createWebRtcTransport(socket.id);
-                callback(params);
+                const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
+                callback(createWebRtcTransport);
             } catch (err) {
                 log.error('Create WebRtc Transport error', err.message);
                 callback({
@@ -1042,8 +1042,8 @@ function startServer() {
             log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
 
             try {
-                await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
-                callback('success');
+                const connectTransport = await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
+                callback(connectTransport);
             } catch (err) {
                 log.error('Connect transport error', err.message);
                 callback({
@@ -1052,7 +1052,7 @@ function startServer() {
             }
         });
 
-        socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback) => {
+        socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback, errback) => {
             if (!roomList.has(socket.room_id)) {
                 return callback({ error: 'Room not found' });
             }

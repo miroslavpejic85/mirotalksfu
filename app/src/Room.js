@@ -216,22 +216,6 @@ module.exports = class Room {
         return producerList;
     }
 
-    async connectPeerTransport(socket_id, transport_id, dtlsParameters) {
-        try {
-            if (!socket_id || !transport_id || !dtlsParameters) {
-                throw new Error('Invalid input parameters');
-            }
-
-            if (!this.peers.has(socket_id)) {
-                throw new Error(`Peer with socket ID ${socket_id} not found`);
-            }
-
-            await this.peers.get(socket_id).connectTransport(transport_id, dtlsParameters);
-        } catch (error) {
-            log.error('Error connecting peer transport', error.message);
-        }
-    }
-
     async removePeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
         this.peers.get(socket_id).close();
@@ -243,92 +227,103 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-        try {
-            if (!socket_id || !this.peers.has(socket_id)) {
-                throw new Error(`Invalid socket ID: ${socket_id}`);
+        if (!this.peers.has(socket_id)) {
+            return this.printError(`[Room|createWebRtcTransport] Invalid socket ID: ${socket_id}`);
+        }
+
+        const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
+
+        const webRtcTransportOptions = {
+            ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos }),
+            enableUdp: true,
+            enableTcp: true,
+            preferUdp: true,
+            iceConsentTimeout: 20,
+            initialAvailableOutgoingBitrate,
+        };
+
+        const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
+
+        if (!transport) {
+            return this.printError('[Room|createWebRtcTransport] Failed to create WebRTC transport');
+        }
+
+        const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
+
+        if (maxIncomingBitrate) {
+            try {
+                await transport.setMaxIncomingBitrate(maxIncomingBitrate);
+            } catch (error) {
+                log.debug('Transport setMaxIncomingBitrate error', error.message);
             }
+        }
 
-            const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
+        const peer = this.peers.get(socket_id);
 
-            const webRtcTransportOptions = {
-                ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos }),
-                enableUdp: true,
-                enableTcp: true,
-                preferUdp: true,
-                iceConsentTimeout: 20,
-                initialAvailableOutgoingBitrate,
-            };
+        const { peer_name } = peer;
 
-            const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
-
-            if (!transport) {
-                throw new Error('Failed to create WebRTC transport');
-            }
-
-            const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
-
-            if (maxIncomingBitrate) {
-                try {
-                    await transport.setMaxIncomingBitrate(maxIncomingBitrate);
-                } catch (error) {
-                    log.debug('Transport setMaxIncomingBitrate error', error.message);
-                }
-            }
-
-            const peer = this.peers.get(socket_id);
-
-            const { peer_name } = peer;
-
-            transport.on('icestatechange', (iceState) => {
-                if (iceState === 'disconnected' || iceState === 'closed') {
-                    log.debug('Transport closed "icestatechange" event', {
-                        peer_name: peer_name,
-                        iceState: iceState,
-                    });
-                    transport.close();
-                    //this.router.close();
-                    //peer.close();
-                }
-            });
-
-            transport.on('sctpstatechange', (sctpState) => {
-                log.debug('Transport "sctpstatechange" event', {
+        transport.on('icestatechange', (iceState) => {
+            if (iceState === 'disconnected' || iceState === 'closed') {
+                log.debug('Transport closed "icestatechange" event', {
                     peer_name: peer_name,
-                    sctpState: sctpState,
+                    iceState: iceState,
                 });
+                transport.close();
+                //this.router.close();
+                //peer.close();
+            }
+        });
+
+        transport.on('sctpstatechange', (sctpState) => {
+            log.debug('Transport "sctpstatechange" event', {
+                peer_name: peer_name,
+                sctpState: sctpState,
             });
+        });
 
-            transport.on('dtlsstatechange', (dtlsState) => {
-                if (dtlsState === 'failed' || dtlsState === 'closed') {
-                    log.debug('Transport closed "dtlsstatechange" event', {
-                        peer_name: peer_name,
-                        dtlsState: dtlsState,
-                    });
-                    transport.close();
-                    //this.router.close();
-                    //peer.close();
-                }
-            });
+        transport.on('dtlsstatechange', (dtlsState) => {
+            if (dtlsState === 'failed' || dtlsState === 'closed') {
+                log.debug('Transport closed "dtlsstatechange" event', {
+                    peer_name: peer_name,
+                    dtlsState: dtlsState,
+                });
+                transport.close();
+                //this.router.close();
+                //peer.close();
+            }
+        });
 
-            transport.on('close', () => {
-                log.debug('Transport closed', { peer_name: peer_name });
-            });
+        transport.on('close', () => {
+            log.debug('Transport closed', { peer_name: peer_name });
+        });
 
-            log.debug('Adding transport', { transportId: id });
+        log.debug('Adding transport', { transportId: id });
 
-            peer.addTransport(transport);
+        peer.addTransport(transport);
 
-            return {
-                params: {
-                    id: id,
-                    iceParameters: iceParameters,
-                    iceCandidates: iceCandidates,
-                    dtlsParameters: dtlsParameters,
-                },
-            };
+        return {
+            id: id,
+            iceParameters: iceParameters,
+            iceCandidates: iceCandidates,
+            dtlsParameters: dtlsParameters,
+        };
+    }
+
+    async connectPeerTransport(socket_id, transport_id, dtlsParameters) {
+        try {
+            if (!socket_id || !transport_id || !dtlsParameters) {
+                return this.printError('[Room|connectPeerTransport] Invalid input parameters');
+            }
+
+            if (!this.peers.has(socket_id)) {
+                return this.printError(`[Room|connectPeerTransport] Peer with socket ID ${socket_id} not found`);
+            }
+
+            await this.peers.get(socket_id).connectTransport(transport_id, dtlsParameters);
+            return '[Room|connectPeerTransport] done';
         } catch (error) {
-            log.error('Error creating WebRTC transport', error.message);
-            return null;
+            log.error('Error connecting peer transport', error.message);
+            return this.printError(`[Room|connectPeerTransport] error: ${error.message}`);
         }
     }
 
@@ -337,41 +332,37 @@ module.exports = class Room {
     // ####################################################
 
     async produce(socket_id, producerTransportId, rtpParameters, kind, type) {
-        try {
-            if (!socket_id || !producerTransportId || !rtpParameters || !kind || !type) {
-                throw new Error('Invalid input parameters');
-            }
-
-            if (!this.peers.has(socket_id)) {
-                throw new Error(`Invalid socket ID: ${socket_id}`);
-            }
-
-            const peer = this.peers.get(socket_id);
-
-            const producer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
-            if (!producer) {
-                throw new Error('Failed to create producer');
-            }
-
-            const { id } = producer;
-
-            const { peer_name, peer_info } = peer;
-
-            this.broadCast(socket_id, 'newProducers', [
-                {
-                    producer_id: id,
-                    producer_socket_id: socket_id,
-                    peer_name: peer_name,
-                    peer_info: peer_info,
-                    type: type,
-                },
-            ]);
-
-            return id;
-        } catch (error) {
-            console.error('Error producing', error.message);
-            throw error.message;
+        //
+        if (!socket_id || !producerTransportId || !rtpParameters || !kind || !type) {
+            return this.printError('[Room|produce] Invalid input parameters');
         }
+
+        if (!this.peers.has(socket_id)) {
+            return this.printError(`[Room|produce] Invalid socket ID: ${socket_id}`);
+        }
+
+        const peer = this.peers.get(socket_id);
+
+        const peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
+        if (!peerProducer || !peerProducer.id) {
+            return this.printError(`[Room|produce] peerProducer error: '${peerProducer}'`);
+        }
+
+        const { id } = peerProducer;
+
+        const { peer_name, peer_info } = peer;
+
+        this.broadCast(socket_id, 'newProducers', [
+            {
+                producer_id: id,
+                producer_socket_id: socket_id,
+                peer_name: peer_name,
+                peer_info: peer_info,
+                type: type,
+            },
+        ]);
+
+        return id;
     }
 
     // ####################################################
@@ -381,7 +372,7 @@ module.exports = class Room {
     async consume(socket_id, consumer_transport_id, producer_id, rtpCapabilities) {
         try {
             if (!socket_id || !consumer_transport_id || !producer_id || !rtpCapabilities) {
-                throw new Error('Invalid input parameters');
+                return this.printError('[Room|consume] Invalid input parameters');
             }
 
             if (!this.router.canConsume({ producerId: producer_id, rtpCapabilities })) {
@@ -390,26 +381,26 @@ module.exports = class Room {
                     consumer_transport_id,
                     producer_id,
                 });
-                return;
+                return this.printError(`[Room|consume] Room router cannot consume producer_id: '${producer_id}'`);
             }
 
             if (!this.peers.has(socket_id)) {
                 log.warn('Peer not found for socket ID', socket_id);
-                return;
+                return this.printError('[Room|consume] Peer not found');
             }
 
             const peer = this.peers.get(socket_id);
 
             const { peer_name } = peer;
 
-            const result = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
+            const peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
 
-            if (!result || !result.consumer || !result.params) {
-                log.debug('Consumer or params are not defined in createConsumer result');
-                return;
+            if (!peerConsumer || !peerConsumer.consumer || !peerConsumer.params) {
+                log.debug('peerConsumer or params are not defined');
+                return this.printError(`[Room|consume] peerConsumer error: '${peerConsumer}'`);
             }
 
-            const { consumer, params } = result;
+            const { consumer, params } = peerConsumer;
 
             const { id, kind } = consumer;
 
@@ -430,19 +421,13 @@ module.exports = class Room {
             return params;
         } catch (error) {
             log.error('Error occurred during consumption', error.message);
-            return;
+            return this.printError(`[Room|consume] ${error.message}`);
         }
     }
 
     closeProducer(socket_id, producer_id) {
-        try {
-            if (!socket_id || !producer_id || !this.peers.has(socket_id)) {
-                throw new Error('Invalid socket ID or producer ID');
-            }
-            this.peers.get(socket_id).closeProducer(producer_id);
-        } catch (error) {
-            log.error('Error closing producer', error.message);
-        }
+        if (!socket_id || !producer_id || !this.peers.has(socket_id)) return;
+        this.peers.get(socket_id).closeProducer(producer_id);
     }
 
     // ####################################################
@@ -497,6 +482,14 @@ module.exports = class Room {
     }
     setHostOnlyRecording(status) {
         this._hostOnlyRecording = status;
+    }
+
+    // ####################################################
+    // ERRORS
+    // ####################################################
+
+    printError(message) {
+        return { error: message };
     }
 
     // ####################################################

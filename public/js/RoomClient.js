@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.92
+ * @version 1.3.93
  *
  */
 
@@ -387,8 +387,8 @@ class RoomClient {
                 }
                 await this.joinAllowed(room);
             })
-            .catch((err) => {
-                console.log('Join error:', err);
+            .catch((error) => {
+                console.error('Join error:', error);
             });
     }
 
@@ -533,129 +533,121 @@ class RoomClient {
     // ####################################################
 
     async initTransports(device) {
-        try {
-            // ####################################################
-            // PRODUCER TRANSPORT
-            // ####################################################
+        // ####################################################
+        // PRODUCER TRANSPORT
+        // ####################################################
 
-            const producerTransportData = await this.socket.request('createWebRtcTransport', {
-                forceTcp: false,
-                rtpCapabilities: device.rtpCapabilities,
-            });
+        const producerTransportData = await this.socket.request('createWebRtcTransport', {
+            forceTcp: false,
+            rtpCapabilities: device.rtpCapabilities,
+        });
 
-            if (producerTransportData.error) {
-                throw new Error('Error creating WebRTC producer transport: ' + producerTransportData.error);
+        this.producerTransport = device.createSendTransport(producerTransportData);
+
+        this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+            try {
+                await this.socket.request('connectTransport', {
+                    dtlsParameters,
+                    transport_id: producerTransportData.id,
+                });
+                callback();
+            } catch (err) {
+                errback(err);
             }
+        });
 
-            this.producerTransport = device.createSendTransport(producerTransportData);
-
-            this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
-                try {
-                    await this.socket.request('connectTransport', {
-                        dtlsParameters,
-                        transport_id: producerTransportData.id,
-                    });
-                    callback();
-                } catch (err) {
-                    errback(err);
-                }
-            });
-
-            this.producerTransport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
-                console.log('Going to produce', { kind, appData, rtpParameters });
-                try {
-                    const { producer_id } = await this.socket.request('produce', {
-                        producerTransportId: this.producerTransport.id,
-                        kind,
-                        appData,
-                        rtpParameters,
-                    });
+        this.producerTransport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
+            console.log('Going to produce', { kind, appData, rtpParameters });
+            try {
+                const { producer_id } = await this.socket.request('produce', {
+                    producerTransportId: this.producerTransport.id,
+                    kind,
+                    appData,
+                    rtpParameters,
+                });
+                if (producer_id.error) {
+                    errback(producer_id.error);
+                } else {
                     callback({ id: producer_id });
-                } catch (err) {
-                    errback(err);
                 }
-            });
-
-            this.producerTransport.on('connectionstatechange', (state) => {
-                switch (state) {
-                    case 'connecting':
-                        console.log('Producer Transport connecting...');
-                        break;
-                    case 'connected':
-                        console.log('Producer Transport connected');
-                        break;
-                    case 'failed':
-                        console.warn('Producer Transport failed');
-                        this.producerTransport.close();
-                        // this.exit(true);
-                        // this.refreshBrowser();
-                        break;
-                    default:
-                        break;
-                }
-            });
-
-            this.producerTransport.on('icegatheringstatechange', (state) => {
-                console.log('Producer icegatheringstatechange', state);
-            });
-
-            // ####################################################
-            // CONSUMER TRANSPORT
-            // ####################################################
-
-            const consumerTransportData = await this.socket.request('createWebRtcTransport', {
-                forceTcp: false,
-            });
-
-            if (consumerTransportData.error) {
-                throw new Error('Error creating WebRTC consumer transport: ' + consumerTransportData.error);
+            } catch (err) {
+                errback(err);
             }
+        });
 
-            this.consumerTransport = device.createRecvTransport(consumerTransportData);
+        this.producerTransport.on('connectionstatechange', (state) => {
+            switch (state) {
+                case 'connecting':
+                    console.log('Producer Transport connecting...');
+                    break;
+                case 'connected':
+                    console.log('Producer Transport connected');
+                    break;
+                case 'failed':
+                    console.warn('Producer Transport failed');
+                    this.producerTransport.close();
+                    // this.exit(true);
+                    // this.refreshBrowser();
+                    break;
+                default:
+                    break;
+            }
+        });
 
-            this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
-                try {
-                    await this.socket.request('connectTransport', {
-                        transport_id: this.consumerTransport.id,
-                        dtlsParameters,
-                    });
-                    callback();
-                } catch (err) {
-                    errback(err);
-                }
-            });
+        this.producerTransport.on('icegatheringstatechange', (state) => {
+            console.log('Producer icegatheringstatechange', state);
+        });
 
-            this.consumerTransport.on('connectionstatechange', (state) => {
-                switch (state) {
-                    case 'connecting':
-                        console.log('Consumer Transport connecting...');
-                        break;
-                    case 'connected':
-                        console.log('Consumer Transport connected');
-                        break;
-                    case 'failed':
-                        console.warn('Consumer Transport failed');
-                        this.consumerTransport.close();
-                        // this.exit(true);
-                        // this.refreshBrowser();
-                        break;
-                    default:
-                        break;
-                }
-            });
+        // ####################################################
+        // CONSUMER TRANSPORT
+        // ####################################################
 
-            this.consumerTransport.on('icegatheringstatechange', (state) => {
-                console.log('Consumer icegatheringstatechange', state);
-            });
+        const consumerTransportData = await this.socket.request('createWebRtcTransport', {
+            forceTcp: false,
+        });
 
-            // ####################################################
-            // TODO DATACHANNEL TRANSPORT
-            // ####################################################
+        this.consumerTransport = device.createRecvTransport(consumerTransportData);
 
-            //
-        } catch (error) {
-            console.error('Error initializing transports', error);
-        }
+        this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
+            try {
+                await this.socket.request('connectTransport', {
+                    transport_id: this.consumerTransport.id,
+                    dtlsParameters,
+                });
+                callback();
+            } catch (err) {
+                errback(err);
+            }
+        });
+
+        this.consumerTransport.on('connectionstatechange', (state) => {
+            switch (state) {
+                case 'connecting':
+                    console.log('Consumer Transport connecting...');
+                    break;
+                case 'connected':
+                    console.log('Consumer Transport connected');
+                    break;
+                case 'failed':
+                    console.warn('Consumer Transport failed');
+                    this.consumerTransport.close();
+                    // this.exit(true);
+                    // this.refreshBrowser();
+                    break;
+                default:
+                    break;
+            }
+        });
+
+        this.consumerTransport.on('icegatheringstatechange', (state) => {
+            console.log('Consumer icegatheringstatechange', state);
+        });
+
+        // ####################################################
+        // TODO DATACHANNEL TRANSPORT
+        // ####################################################
+
+        //
     }
 
     // ####################################################
@@ -1895,44 +1887,35 @@ class RoomClient {
     }
 
     async getConsumeStream(producerId, peer_id, type) {
-        try {
-            const { rtpCapabilities } = this.device;
-            const data = await this.socket.request('consume', {
-                rtpCapabilities,
-                consumerTransportId: this.consumerTransport.id,
-                producerId,
-            });
+        const { rtpCapabilities } = this.device;
+        const data = await this.socket.request('consume', {
+            rtpCapabilities,
+            consumerTransportId: this.consumerTransport.id,
+            producerId,
+        });
 
-            console.log('DATA', data);
+        console.log('DATA', data);
 
-            if (!data || !data.id || !data.kind || !data.rtpParameters) {
-                throw new Error('Invalid data received from server');
-            }
+        const { id, kind, rtpParameters } = data;
+        const codecOptions = {};
+        const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
+        const consumer = await this.consumerTransport.consume({
+            id,
+            producerId,
+            kind,
+            rtpParameters,
+            codecOptions,
+            streamId,
+        });
 
-            const { id, kind, rtpParameters } = data;
-            const codecOptions = {};
-            const streamId = peer_id + (type == mediaType.screen ? '-screen-sharing' : '-mic-webcam');
-            const consumer = await this.consumerTransport.consume({
-                id,
-                producerId,
-                kind,
-                rtpParameters,
-                codecOptions,
-                streamId,
-            });
+        const stream = new MediaStream();
+        stream.addTrack(consumer.track);
 
-            const stream = new MediaStream();
-            stream.addTrack(consumer.track);
-
-            return {
-                consumer,
-                stream,
-                kind,
-            };
-        } catch (error) {
-            console.error('Error in getConsumeStream', error);
-            throw error;
-        }
+        return {
+            consumer,
+            stream,
+            kind,
+        };
     }
 
     handleConsumer(id, type, stream, peer_name, peer_info) {
