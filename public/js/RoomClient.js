@@ -3660,7 +3660,7 @@ class RoomClient {
             ? `<button 
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
-                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')">
+                    onclick="rc.speechMessage(false, '${getFromName}', '${getMsg}')">
                     <i class="fas fa-volume-high"></i>
                 </button>`
             : '';
@@ -3668,6 +3668,8 @@ class RoomClient {
         const positionFirst = myMessage
             ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
             : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
+
+        const message = fromName === 'ChatGPT' ? `<pre>${getMsg}</pre>` : getMsg;
 
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
@@ -3681,7 +3683,7 @@ class RoomClient {
                     ${positionFirst}
                 </div>
                 <div class="message ${messageClass}">
-                    <span class="text-start " id="${chatMessagesId}">${getMsg}</span>
+                    <span class="text-start " id="${chatMessagesId}">${message}</span>
                     <hr/>
                     <div class="about-buttons mt5">
                         <button 
