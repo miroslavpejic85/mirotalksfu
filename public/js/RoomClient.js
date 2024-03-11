@@ -3660,7 +3660,7 @@ class RoomClient {
             ? `<button 
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
-                    onclick="rc.speechMessage(false, '${getFromName}', '${getMsg}')">
+                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')">
                     <i class="fas fa-volume-high"></i>
                 </button>`
             : '';
@@ -3669,7 +3669,7 @@ class RoomClient {
             ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
             : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
 
-        const message = getFromName === 'ChatGPT' ? `<pre>${getMsg}</pre>` : this.formatMsg(getMsg);
+        const message = getFromName === 'ChatGPT' ? `<pre>${getMsg}</pre>` : getMsg;
 
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
