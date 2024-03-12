@@ -228,7 +228,7 @@ module.exports = class Room {
 
     async createWebRtcTransport(socket_id) {
         if (!this.peers.has(socket_id)) {
-            return this.printError(`[Room|createWebRtcTransport] Invalid socket ID: ${socket_id}`);
+            return this.printError(`[Room|createWebRtcTransport] Peer with socket ID ${socket_id} not found`);
         }
 
         const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
@@ -338,14 +338,14 @@ module.exports = class Room {
         }
 
         if (!this.peers.has(socket_id)) {
-            return this.printError(`[Room|produce] Invalid socket ID: ${socket_id}`);
+            return this.printError(`[Room|produce] Peer with ID: ${socket_id} not found`);
         }
 
         const peer = this.peers.get(socket_id);
 
         const peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
         if (!peerProducer || !peerProducer.id) {
-            return this.printError(`[Room|produce] peerProducer error: '${peerProducer}'`);
+            return this.printError(`[Room|produce] Peer producer error: '${peerProducer}'`);
         }
 
         const { id } = peerProducer;
@@ -386,7 +386,7 @@ module.exports = class Room {
 
             if (!this.peers.has(socket_id)) {
                 log.warn('Peer not found for socket ID', socket_id);
-                return this.printError('[Room|consume] Peer not found');
+                return this.printError(`[Room|consume] Peer with ID: ${socket_id} not found`);
             }
 
             const peer = this.peers.get(socket_id);
