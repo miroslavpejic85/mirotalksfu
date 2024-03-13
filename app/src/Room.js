@@ -218,7 +218,22 @@ module.exports = class Room {
 
     async removePeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
-        this.peers.get(socket_id).close();
+
+        const peer = this.peers.get(socket_id);
+
+        const peerTransports = peer.getTransports();
+        const peerProducers = peer.getProducers();
+        const peerConsumers = peer.getConsumers();
+
+        log.debug('REMOVE PEER', {
+            id: peer.id,
+            peerTransports: peerTransports,
+            peerProducers: peerProducers,
+            peerConsumers: peerConsumers,
+        });
+
+        peer.close();
+
         this.peers.delete(socket_id);
     }
 
@@ -269,8 +284,6 @@ module.exports = class Room {
                     iceState: iceState,
                 });
                 transport.close();
-                //this.router.close();
-                //peer.close();
             }
         });
 
@@ -288,13 +301,11 @@ module.exports = class Room {
                     dtlsState: dtlsState,
                 });
                 transport.close();
-                //this.router.close();
-                //peer.close();
             }
         });
 
-        transport.on('close', () => {
-            log.debug('Transport closed', { peer_name: peer_name });
+        transport.observer.on('close', () => {
+            log.debug('Transport closed', { peer_name: peer_name, transport_id: transport.id });
         });
 
         log.debug('Adding transport', { transportId: id });

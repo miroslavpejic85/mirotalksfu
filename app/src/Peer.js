@@ -71,6 +71,10 @@ module.exports = class Peer {
     // TRANSPORT
     // ####################################################
 
+    getTransports() {
+        return JSON.parse(JSON.stringify([...this.transports]));
+    }
+
     addTransport(transport) {
         this.transports.set(transport.id, transport);
     }
@@ -94,6 +98,10 @@ module.exports = class Peer {
     // ####################################################
     // PRODUCER
     // ####################################################
+
+    getProducers() {
+        return JSON.parse(JSON.stringify([...this.producers]));
+    }
 
     getProducer(producer_id) {
         return this.producers.get(producer_id);
@@ -161,11 +169,16 @@ module.exports = class Peer {
             log.warn('Close Producer', error.message);
         }
         this.producers.delete(producer_id);
+        log.debug('Producer closed and deleted', { producer_id });
     }
 
     // ####################################################
     // CONSUMER
     // ####################################################
+
+    getConsumers() {
+        return JSON.parse(JSON.stringify([...this.consumers]));
+    }
 
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
         try {
@@ -234,7 +247,13 @@ module.exports = class Peer {
 
     removeConsumer(consumer_id) {
         if (this.consumers.has(consumer_id)) {
+            try {
+                this.consumers.get(consumer_id).close();
+            } catch (error) {
+                log.warn('Close Consumer', error.message);
+            }
             this.consumers.delete(consumer_id);
+            log.debug('Consumer closed and deleted', { consumer_id });
         }
     }
 };
