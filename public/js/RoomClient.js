@@ -644,7 +644,7 @@ class RoomClient {
         });
 
         // ####################################################
-        // TODO DATACHANNEL TRANSPORT
+        // TODO: DATA TRANSPORT
         // ####################################################
 
         //
@@ -914,6 +914,7 @@ class RoomClient {
 
         mediaTypes.forEach((type) => {
             const data = {
+                room_id: this.room_id,
                 peer_name: this.peer_name,
                 peer_id: this.peer_id,
                 peer_presenter: isPresenter,
@@ -3467,6 +3468,7 @@ class RoomClient {
         this.peer_name = filterXSS(this.peer_name);
 
         const data = {
+            room_id: this.room_id,
             peer_name: this.peer_name,
             peer_id: this.peer_id,
             to_peer_id: 'ChatGPT',
@@ -6342,6 +6344,7 @@ class RoomClient {
                     break;
             }
             const data = {
+                room_id: this.room_id,
                 peer_name: peer_name,
                 peer_id: peer_id,
                 type: type,

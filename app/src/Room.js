@@ -221,12 +221,15 @@ module.exports = class Room {
 
         const peer = this.peers.get(socket_id);
 
+        const { id, peer_name } = peer;
+
         const peerTransports = peer.getTransports();
         const peerProducers = peer.getProducers();
         const peerConsumers = peer.getConsumers();
 
         log.debug('REMOVE PEER', {
-            id: peer.id,
+            peer_id: id,
+            peer_name: peer_name,
             peerTransports: peerTransports,
             peerProducers: peerProducers,
             peerConsumers: peerConsumers,
@@ -481,6 +484,8 @@ module.exports = class Room {
     getPassword() {
         return this._roomPassword;
     }
+
+    // BOOL
     isLocked() {
         return this._isLocked;
     }

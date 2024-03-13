@@ -749,7 +749,7 @@ function startServer() {
         try {
             await createWorkers();
         } catch (err) {
-            log.error('Create Worker ERR --->', err);
+            log.error('Create Worker ERROR --->', err);
             process.exit(1);
         }
     })();
@@ -1063,8 +1063,9 @@ function startServer() {
 
             const peer_name = getPeerName(room, false);
 
-            // peer_info audio Or video ON
+            // peer_info.audio OR video ON
             const data = {
+                room_id: room.id,
                 peer_name: peer_name,
                 peer_id: socket.id,
                 kind: kind,
@@ -1144,8 +1145,7 @@ function startServer() {
 
             const peer = room.getPeers().get(socket.id);
 
-            // peer_info audio Or video OFF
-            peer.updatePeerInfo(data);
+            peer.updatePeerInfo(data); // peer_info.audio OR video OFF
 
             room.closeProducer(socket.id, data.producer_id);
         });
@@ -1602,6 +1602,7 @@ function startServer() {
 
             // check if the message coming from real peer
             const realPeer = isRealPeer(data.peer_name, socket.id, socket.room_id);
+
             if (!realPeer) {
                 const peer_name = getPeerName(room, false);
                 log.debug('Fake message detected', {
@@ -1679,7 +1680,7 @@ function startServer() {
 
             log.debug('[Disconnect] - peer name', peerName);
 
-            await room.removePeer(socket.id);
+            room.removePeer(socket.id);
 
             if (room.getPeers().size === 0) {
                 //
@@ -1717,8 +1718,7 @@ function startServer() {
 
             log.debug('Exit room', peerName);
 
-            // close transports
-            await room.removePeer(socket.id);
+            room.removePeer(socket.id);
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
