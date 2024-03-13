@@ -275,7 +275,7 @@ module.exports = class Room {
 
         const peer = this.peers.get(socket_id);
 
-        const { peer_name } = peer;
+        const { peer_name = 'undefined' } = peer;
 
         transport.on('icestatechange', (iceState) => {
             if (iceState === 'disconnected' || iceState === 'closed') {
@@ -364,13 +364,14 @@ module.exports = class Room {
         const peer = this.peers.get(socket_id);
 
         const peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
+
         if (!peerProducer || !peerProducer.id) {
             return this.printError(`[Room|produce] Peer producer error: '${peerProducer}'`);
         }
 
         const { id } = peerProducer;
 
-        const { peer_name, peer_info } = peer;
+        const { peer_name = 'undefined', peer_info = {} } = peer;
 
         this.broadCast(socket_id, 'newProducers', [
             {
@@ -411,7 +412,7 @@ module.exports = class Room {
 
             const peer = this.peers.get(socket_id);
 
-            const { peer_name } = peer;
+            const { peer_name = 'undefined' } = peer;
 
             const peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
 

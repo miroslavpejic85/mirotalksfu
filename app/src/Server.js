@@ -1251,7 +1251,6 @@ function startServer() {
             switch (data.type) {
                 case 'privacy':
                     const peer = room.getPeers().get(socket.id);
-
                     peer.updatePeerInfo({ type: data.type, status: data.active });
                     break;
                 case 'ejectAll':
