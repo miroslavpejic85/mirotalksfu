@@ -964,7 +964,9 @@ function startServer() {
                 ? is_presenter
                 : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            room.getPeers().get(socket.id).updatePeerInfo({ type: 'presenter', status: isPresenter });
+            const peer = room.getPeers().get(socket.id);
+
+            peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
 
             log.info('[Join] - Is presenter', {
                 roomId: socket.room_id,
@@ -1070,7 +1072,9 @@ function startServer() {
                 status: true,
             };
 
-            await room.getPeers().get(socket.id).updatePeerInfo(data);
+            const peer = room.getPeers().get(socket.id);
+
+            peer.updatePeerInfo(data);
 
             try {
                 const producer_id = await room.produce(
@@ -1138,8 +1142,11 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
+            const peer = room.getPeers().get(socket.id);
+
             // peer_info audio Or video OFF
-            room.getPeers().get(socket.id).updatePeerInfo(data);
+            peer.updatePeerInfo(data);
+
             room.closeProducer(socket.id, data.producer_id);
         });
 
@@ -1150,7 +1157,15 @@ function startServer() {
 
             const peer_name = getPeerName(room, false);
 
-            const producer = room.getPeers()?.get(socket.id)?.getProducer(producer_id);
+            const peer = room.getPeers().get(socket.id);
+
+            if (!peer) {
+                return callback({
+                    error: `peer with ID: ${socket.id} for producer with id "${producer_id}" not found`,
+                });
+            }
+
+            const producer = peer.getProducer(producer_id);
 
             if (!producer) {
                 return callback({ error: `producer with id "${producer_id}" not found` });
@@ -1174,7 +1189,15 @@ function startServer() {
 
             const peer_name = getPeerName(room, false);
 
-            const producer = room.getPeers()?.get(socket.id)?.getProducer(producer_id);
+            const peer = room.getPeers().get(socket.id);
+
+            if (!peer) {
+                return callback({
+                    error: `peer with ID: "${socket.id}" for producer with id "${producer_id}" not found`,
+                });
+            }
+
+            const producer = peer.getProducer(producer_id);
 
             if (!producer) {
                 return callback({ error: `producer with id "${producer_id}" not found` });
@@ -1227,7 +1250,9 @@ function startServer() {
 
             switch (data.type) {
                 case 'privacy':
-                    room.getPeers().get(socket.id).updatePeerInfo({ type: data.type, status: data.active });
+                    const peer = room.getPeers().get(socket.id);
+
+                    peer.updatePeerInfo({ type: data.type, status: data.active });
                     break;
                 case 'ejectAll':
                     const { peer_name, peer_uuid } = data;
@@ -1388,7 +1413,9 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            room.getPeers().get(socket.id).updatePeerInfo(data);
+            const peer = room.getPeers().get(socket.id);
+
+            peer.updatePeerInfo(data);
 
             if (data.broadcast) {
                 log.debug('updatePeerInfo broadcast data');

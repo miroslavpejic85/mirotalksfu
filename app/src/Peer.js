@@ -76,11 +76,15 @@ module.exports = class Peer {
     }
 
     async connectTransport(transport_id, dtlsParameters) {
-        if (!this.transports.has(transport_id)) return;
+        if (!this.transports.has(transport_id)) {
+            return false;
+        }
 
         await this.transports.get(transport_id).connect({
             dtlsParameters: dtlsParameters,
         });
+
+        return true;
     }
 
     close() {

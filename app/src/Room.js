@@ -234,7 +234,7 @@ module.exports = class Room {
         const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
         const webRtcTransportOptions = {
-            ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos }),
+            ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos: listenInfos }),
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,
@@ -319,7 +319,16 @@ module.exports = class Room {
                 return this.printError(`[Room|connectPeerTransport] Peer with socket ID ${socket_id} not found`);
             }
 
-            await this.peers.get(socket_id).connectTransport(transport_id, dtlsParameters);
+            const peer = this.peers.get(socket_id);
+
+            const connectTransport = await peer.connectTransport(transport_id, dtlsParameters);
+
+            if (!connectTransport) {
+                return this.printError(
+                    `[Room|connectPeerTransport] error: Transport with ID ${transport_id} not found`,
+                );
+            }
+
             return '[Room|connectPeerTransport] done';
         } catch (error) {
             log.error('Error connecting peer transport', error.message);
@@ -427,7 +436,10 @@ module.exports = class Room {
 
     closeProducer(socket_id, producer_id) {
         if (!socket_id || !producer_id || !this.peers.has(socket_id)) return;
-        this.peers.get(socket_id).closeProducer(producer_id);
+
+        const peer = this.peers.get(socket_id);
+
+        peer.closeProducer(producer_id);
     }
 
     // ####################################################
