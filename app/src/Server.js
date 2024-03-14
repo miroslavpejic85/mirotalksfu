@@ -1711,6 +1711,8 @@ function startServer() {
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
             removeIP(socket);
+
+            socket.room_id = null;
         });
 
         socket.on('exitRoom', async (_, callback) => {
