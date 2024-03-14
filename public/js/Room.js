@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.93
+ * @version 1.3.94
  *
  */
 
@@ -1189,6 +1189,7 @@ function roomIsReady() {
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
+    BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
     if (BUTTONS.settings.host_only_recording) {
         show(recordingImage);
         show(roomHostOnlyRecording);

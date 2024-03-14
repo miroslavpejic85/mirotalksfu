@@ -15,7 +15,7 @@ const isRulesActive = true;
  */
 let BUTTONS = {
     main: {
-        shareButton: true,
+        shareButton: true, // presenter
         hideMeButton: true,
         startAudioButton: true,
         startVideoButton: true,
@@ -36,6 +36,7 @@ let BUTTONS = {
         unlockRoomButton: true, // presenter
         broadcastingButton: true, // presenter
         lobbyButton: true, // presenter
+        sendEmailInvitation: true, // presenter
         micOptionsButton: true, // presenter
         tabModerator: true, // presenter
         tabRecording: true,
@@ -103,11 +104,13 @@ function handleRules(isPresenter) {
         // ##################################
         // GUEST
         // ##################################
+        BUTTONS.main.shareButton = false;
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.broadcastingButton = false;
         BUTTONS.settings.lobbyButton = false;
+        BUTTONS.settings.sendEmailInvitation = false;
         BUTTONS.settings.micOptionsButton = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
@@ -125,8 +128,10 @@ function handleRules(isPresenter) {
         // ##################################
         // PRESENTER
         // ##################################
+        BUTTONS.main.shareButton = true;
         BUTTONS.settings.lockRoomButton = BUTTONS.settings.lockRoomButton && !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = BUTTONS.settings.lockRoomButton && isRoomLocked;
+        BUTTONS.settings.sendEmailInvitation = true;
         //...
 
         // ##################################
@@ -169,10 +174,12 @@ function handleRules(isPresenter) {
         rc.updateRoomModeratorALL(moderatorData);
     }
     // main. settings...
+    BUTTONS.main.shareButton ? show(shareButton) : hide(shareButton);
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
+    BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
     !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);

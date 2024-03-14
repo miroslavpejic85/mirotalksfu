@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.93
+ * @version 1.3.94
  *
  */
 
@@ -1004,6 +1004,9 @@ function startServer() {
             log.debug('Get RouterRtpCapabilities', getPeerName(room));
             try {
                 const getRouterRtpCapabilities = room.getRtpCapabilities();
+
+                //log.debug('Get RouterRtpCapabilities callback', { callback: getRouterRtpCapabilities });
+
                 callback(getRouterRtpCapabilities);
             } catch (err) {
                 log.error('Get RouterRtpCapabilities error', err.message);
@@ -1020,9 +1023,12 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            log.debug('Create webrtc transport', getPeerName(room));
+            log.debug('Create WebRtc transport', getPeerName(room));
             try {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
+
+                //log.debug('Create WebRtc transport callback', { callback: createWebRtcTransport });
+
                 callback(createWebRtcTransport);
             } catch (err) {
                 log.error('Create WebRtc Transport error', err.message);
@@ -1045,6 +1051,9 @@ function startServer() {
 
             try {
                 const connectTransport = await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
+
+                //log.debug('Connect transport', { callback: connectTransport });
+
                 callback(connectTransport);
             } catch (err) {
                 log.error('Connect transport error', err.message);
@@ -1098,6 +1107,9 @@ function startServer() {
                 if (kind === 'audio') {
                     room.addProducerToAudioLevelObserver({ producerId: producer_id });
                 }
+
+                //log.debug('Producer transport callback', { callback: producer_id });
+
                 callback({
                     producer_id,
                 });
@@ -1126,6 +1138,8 @@ function startServer() {
                     producer_id: producerId,
                     consumer_id: params ? params.id : undefined,
                 });
+
+                //log.debug('Consumer transport callback', { callback: params });
 
                 callback(params);
             } catch (err) {

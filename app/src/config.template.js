@@ -114,7 +114,7 @@ module.exports = {
         */
         buttons: {
             main: {
-                shareButton: true,
+                shareButton: true, // presenter
                 hideMeButton: true,
                 startAudioButton: true,
                 startVideoButton: true,
@@ -135,6 +135,7 @@ module.exports = {
                 unlockRoomButton: true, // presenter
                 broadcastingButton: true, // presenter
                 lobbyButton: true, // presenter
+                sendEmailInvitation: true, // presenter
                 micOptionsButton: true, // presenter
                 tabModerator: true, // presenter
                 tabRecording: true,
