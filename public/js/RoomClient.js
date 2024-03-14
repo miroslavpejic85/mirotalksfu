@@ -581,10 +581,10 @@ class RoomClient {
                     console.log('Producer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('Producer Transport connected');
+                    console.log('Producer Transport connected', { id: this.producerTransport.id });
                     break;
                 case 'failed':
-                    console.warn('Producer Transport failed');
+                    console.warn('Producer Transport failed', { id: this.producerTransport.id });
                     this.producerTransport.close();
                     // this.exit(true);
                     // this.refreshBrowser();
@@ -626,10 +626,10 @@ class RoomClient {
                     console.log('Consumer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('Consumer Transport connected');
+                    console.log('Consumer Transport connected', { id: this.consumerTransport.id });
                     break;
                 case 'failed':
-                    console.warn('Consumer Transport failed');
+                    console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
                     this.consumerTransport.close();
                     // this.exit(true);
                     // this.refreshBrowser();
@@ -1085,7 +1085,7 @@ class RoomClient {
 
             console.log('PRODUCER PARAMS', params);
 
-            producer = await this.producerTransport.produce(params);
+            const producer = await this.producerTransport.produce(params);
 
             console.log('PRODUCER', producer);
 
@@ -1116,11 +1116,12 @@ class RoomClient {
             }
 
             producer.on('trackended', () => {
+                console.log('Producer track ended', { id: producer.id });
                 this.closeProducer(type);
             });
 
             producer.on('transportclose', () => {
-                console.log('Producer transport close');
+                console.log('Producer transport close', { id: producer.id });
                 if (!audio) {
                     elem.srcObject.getTracks().forEach(function (track) {
                         track.stop();
@@ -1140,7 +1141,7 @@ class RoomClient {
             });
 
             producer.on('close', () => {
-                console.log('Closing producer');
+                console.log('Closing producer', { id: producer.id });
                 if (!audio) {
                     elem.srcObject.getTracks().forEach(function (track) {
                         track.stop();
@@ -1825,11 +1826,12 @@ class RoomClient {
             const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
             producerSa.on('trackended', () => {
+                console.log('Producer Screen audio track ended', { id: producerSa.id });
                 this.closeProducer(mediaType.audioTab);
             });
 
             producerSa.on('transportclose', () => {
-                console.log('Producer Screen audio transport close');
+                console.log('Producer Screen audio transport close', { id: producerSa.id });
                 sa.srcObject.getTracks().forEach(function (track) {
                     track.stop();
                 });
@@ -1839,7 +1841,7 @@ class RoomClient {
             });
 
             producerSa.on('close', () => {
-                console.log('Closing Screen audio producer');
+                console.log('Closing Screen audio producer', { id: producerSa.id });
                 sa.srcObject.getTracks().forEach(function (track) {
                     track.stop();
                 });
@@ -1870,10 +1872,12 @@ class RoomClient {
             this.consumers.set(consumer.id, consumer);
 
             consumer.on('trackended', () => {
+                console.log('Consumer track end', { id: consumer.id });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
 
             consumer.on('transportclose', () => {
+                console.log('Consumer transport close', { id: consumer.id });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
 
