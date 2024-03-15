@@ -241,7 +241,7 @@ module.exports = class Room {
     }
 
     // ####################################################
-    // WEBRTC TRANSPORT
+    // WebRTC TRANSPORT
     // ####################################################
 
     async createWebRtcTransport(socket_id) {

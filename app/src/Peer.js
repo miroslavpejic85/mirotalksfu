@@ -180,6 +180,10 @@ module.exports = class Peer {
         return JSON.parse(JSON.stringify([...this.consumers]));
     }
 
+    getConsumer(consumer_id) {
+        return this.consumers.get(consumer_id);
+    }
+
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
         try {
             const consumerTransport = this.transports.get(consumer_transport_id);
@@ -205,18 +209,24 @@ module.exports = class Peer {
                 const { scalabilityMode } = rtpParameters.encodings[0];
                 const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
                 const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
-                await consumer.setPreferredLayers({
-                    spatialLayer: spatialLayer,
-                    temporalLayer: temporalLayer,
-                });
-                log.debug(`Consumer [${type}-${kind}] ----->`, {
-                    scalabilityMode,
-                    spatialLayer,
-                    temporalLayer,
-                });
+                try {
+                    await consumer.setPreferredLayers({
+                        spatialLayer: spatialLayer,
+                        temporalLayer: temporalLayer,
+                    });
+                    log.debug(`Consumer [${type}-${kind}] ----->`, {
+                        scalabilityMode,
+                        spatialLayer,
+                        temporalLayer,
+                    });
+                } catch (error) {
+                    return `Error to set Consumer preferred layers: ${error.message}`;
+                }
             } else {
                 log.debug('Consumer ----->', { type: type, kind: kind });
             }
+
+            this.consumers.set(id, consumer);
 
             consumer.on('transportclose', () => {
                 log.debug('Consumer transport close', {
@@ -225,8 +235,6 @@ module.exports = class Peer {
                 });
                 this.removeConsumer(id);
             });
-
-            this.consumers.set(id, consumer);
 
             return {
                 consumer,
