@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.94
+ * @version 1.3.95
  *
  */
 
@@ -1087,6 +1087,10 @@ class RoomClient {
 
             const producer = await this.producerTransport.produce(params);
 
+            if (!producer) {
+                throw new Error('Producer not found!');
+            }
+
             console.log('PRODUCER', producer);
 
             this.producers.set(producer.id, producer);
@@ -1181,6 +1185,8 @@ class RoomClient {
             this.sound('joined');
         } catch (err) {
             console.error('Produce error:', err);
+
+            handleMediaError(type, err);
 
             if (!audio && !screen && videoQuality.selectedIndex != 0) {
                 videoQuality.selectedIndex = this.videoQualitySelectedIndex;

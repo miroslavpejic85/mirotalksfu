@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.94
+ * @version 1.3.95
  *
  */
 
@@ -420,8 +420,8 @@ async function initRoom() {
     } else {
         setButtonsInit();
         handleSelectsInit();
-        await setSelectsInit();
         await whoAreYou();
+        await setSelectsInit();
     }
 }
 
@@ -1755,8 +1755,74 @@ async function changeCamera(deviceId) {
         })
         .catch((error) => {
             console.error('[Error] changeCamera', error);
-            userLog('error', 'Error while swapping camera' + error.message, 'top-end');
+            handleMediaError('video/audio', error);
         });
+}
+
+// ####################################################
+// HANDLE MEDIA ERROR
+// ####################################################
+
+function handleMediaError(mediaType, err) {
+    sound('alert');
+    let errMessage = err.message;
+    switch (err.name) {
+        case 'NotFoundError':
+        case 'DevicesNotFoundError':
+            errMessage = 'Required track is missing';
+            break;
+        case 'NotReadableError':
+        case 'TrackStartError':
+            errMessage = 'Already in use';
+            break;
+        case 'OverconstrainedError':
+        case 'ConstraintNotSatisfiedError':
+            errMessage = 'Constraints cannot be satisfied by available devices';
+            break;
+        case 'NotAllowedError':
+        case 'PermissionDeniedError':
+            errMessage = 'Permission denied in browser';
+            break;
+        case 'TypeError':
+            errMessage = 'Empty constraints object';
+            break;
+        default:
+            break;
+    }
+
+    const $html = `
+        <ul style="text-align: left">
+            <li>Media type: ${mediaType}</li>
+            <li>Error name: ${err.name}</li>
+            <li>Error message: ${errMessage}</li>
+            <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>
+        </ul>
+    `;
+
+    popupHtmlMessage(null, image.forbidden, 'Access denied', $html, 'center', '/');
+
+    throw new Error(
+        `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`,
+    );
+}
+
+function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false) {
+    Swal.fire({
+        allowOutsideClick: false,
+        allowEscapeKey: false,
+        background: swalBackground,
+        position: position,
+        icon: icon,
+        imageUrl: imageUrl,
+        title: title,
+        html: html,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed && redirectURL) {
+            openURL(redirectURL);
+        }
+    });
 }
 
 async function toggleScreenSharing() {
