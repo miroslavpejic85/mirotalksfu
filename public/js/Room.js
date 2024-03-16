@@ -1765,7 +1765,9 @@ async function changeCamera(deviceId) {
 
 function handleMediaError(mediaType, err) {
     sound('alert');
-    let errMessage = err.message;
+
+    let errMessage = err;
+
     switch (err.name) {
         case 'NotFoundError':
         case 'DevicesNotFoundError':
@@ -1794,7 +1796,7 @@ function handleMediaError(mediaType, err) {
         <ul style="text-align: left">
             <li>Media type: ${mediaType}</li>
             <li>Error name: ${err.name}</li>
-            <li>Error message: ${errMessage}</li>
+            <li>Error message: <p style="color: red">${errMessage}</p></li>
             <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>
         </ul>
     `;
