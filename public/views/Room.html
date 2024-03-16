@@ -135,6 +135,11 @@ access to use this app.
                     ></video>
                 </div>
                 <div class="initComands">
+                    <button
+                        id="initVideoAudioRefreshButton"
+                        class="fas fa-rotate"
+                        onclick="refreshMyAudioVideoDevices()"
+                    ></button>
                     <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
                     <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
                     <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
@@ -344,6 +349,11 @@ access to use this app.
 
                     <div id="tabVideoDevices" class="tabcontent">
                         <br />
+                        <div id="refreshVideoDevices" class="title">
+                            <i class="fas fa-rotate"></i>
+                            <p>Refresh video devices</p>
+                        </div>
+                        <br />
                         <div class="title">
                             <i class="fas fa-video"></i>
                             <p>Video Source:</p>
@@ -392,6 +402,11 @@ access to use this app.
                     </div>
 
                     <div id="tabAudioDevices" class="tabcontent">
+                        <br />
+                        <div id="refreshAudioDevices" class="title">
+                            <i class="fas fa-rotate"></i>
+                            <p>Refresh audio devices</p>
+                        </div>
                         <br />
                         <div class="title">
                             <i class="fas fa-microphone"></i>

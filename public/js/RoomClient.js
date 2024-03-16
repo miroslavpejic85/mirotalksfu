@@ -5131,6 +5131,12 @@ class RoomClient {
             case 'customThemeKeep':
                 this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');
                 break;
+            case 'refreshMyVideoDevices':
+                this.userLog('info', `Refreshed video devices`, 'top-end');
+                break;
+            case 'refreshMyAudioDevices':
+                this.userLog('info', `Refreshed audio devices`, 'top-end');
+                break;
             default:
                 break;
         }

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.95
+ * @version 1.3.96
  *
  */
 
@@ -160,6 +160,17 @@ const pickr = Pickr.create({
     });
 
 // ####################################################
+// ENUMERATE DEVICES SELECTS
+// ####################################################
+
+const videoSelect = getId('videoSelect');
+const initVideoSelect = getId('initVideoSelect');
+const microphoneSelect = getId('microphoneSelect');
+const initMicrophoneSelect = getId('initMicrophoneSelect');
+const speakerSelect = getId('speakerSelect');
+const initSpeakerSelect = getId('initSpeakerSelect');
+
+// ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
 
@@ -265,6 +276,7 @@ function initClient() {
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
             'right',
         );
+        setTippy('initVideoAudioRefreshButton', 'Refresh audio/video devices', 'top');
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
@@ -436,8 +448,34 @@ async function initEnumerateDevices() {
     await initRoom();
 }
 
+async function refreshMyAudioVideoDevices() {
+    await refreshMyVideoDevices();
+    await refreshMyAudioDevices();
+}
+
+async function refreshMyVideoDevices() {
+    if (!isVideoAllowed) return;
+    const initVideoSelectIndex = initVideoSelect ? initVideoSelect.selectedIndex : 0;
+    const videoSelectIndex = videoSelect ? videoSelect.selectedIndex : 0;
+    await initEnumerateVideoDevices();
+    if (initVideoSelect) initVideoSelect.selectedIndex = initVideoSelectIndex;
+    if (videoSelect) videoSelect.selectedIndex = videoSelectIndex;
+}
+
+async function refreshMyAudioDevices() {
+    if (!isAudioAllowed) return;
+    const initMicrophoneSelectIndex = initMicrophoneSelect ? initMicrophoneSelect.selectedIndex : 0;
+    const initSpeakerSelectIndex = initSpeakerSelect ? initSpeakerSelect.selectedIndex : 0;
+    const microphoneSelectIndex = microphoneSelect ? microphoneSelect.selectedIndex : 0;
+    const speakerSelectIndex = speakerSelect ? speakerSelect.selectedIndex : 0;
+    await initEnumerateAudioDevices();
+    if (initMicrophoneSelect) initMicrophoneSelect.selectedIndex = initMicrophoneSelectIndex;
+    if (initSpeakerSelect) initSpeakerSelect.selectedIndex = initSpeakerSelectIndex;
+    if (microphoneSelect) microphoneSelect.selectedIndex = microphoneSelectIndex;
+    if (speakerSelect) speakerSelect.selectedIndex = speakerSelectIndex;
+}
+
 async function initEnumerateVideoDevices() {
-    if (isEnumerateVideoDevices) return;
     // allow the video
     await navigator.mediaDevices
         .getUserMedia({ video: true })
@@ -452,6 +490,10 @@ async function initEnumerateVideoDevices() {
 
 async function enumerateVideoDevices(stream) {
     console.log('02 ----> Get Video Devices');
+
+    if (videoSelect) videoSelect.innerHTML = '';
+    if (initVideoSelect) initVideoSelect.innerHTML = '';
+
     await navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
@@ -459,8 +501,8 @@ async function enumerateVideoDevices(stream) {
                 let el,
                     eli = null;
                 if ('videoinput' === device.kind) {
-                    el = videoSelect;
-                    eli = initVideoSelect;
+                    if (videoSelect) el = videoSelect;
+                    if (initVideoSelect) eli = initVideoSelect;
                     lS.DEVICES_COUNT.video++;
                 }
                 if (!el) return;
@@ -474,7 +516,6 @@ async function enumerateVideoDevices(stream) {
 }
 
 async function initEnumerateAudioDevices() {
-    if (isEnumerateAudioDevices) return;
     // allow the audio
     await navigator.mediaDevices
         .getUserMedia({ audio: true })
@@ -490,6 +531,13 @@ async function initEnumerateAudioDevices() {
 
 async function enumerateAudioDevices(stream) {
     console.log('03 ----> Get Audio Devices');
+
+    if (microphoneSelect) microphoneSelect.innerHTML = '';
+    if (initMicrophoneSelect) initMicrophoneSelect.innerHTML = '';
+
+    if (speakerSelect) speakerSelect.innerHTML = '';
+    if (initSpeakerSelect) initSpeakerSelect.innerHTML = '';
+
     await navigator.mediaDevices
         .enumerateDevices()
         .then((devices) =>
@@ -497,12 +545,12 @@ async function enumerateAudioDevices(stream) {
                 let el,
                     eli = null;
                 if ('audioinput' === device.kind) {
-                    el = microphoneSelect;
-                    eli = initMicrophoneSelect;
+                    if (microphoneSelect) el = microphoneSelect;
+                    if (initMicrophoneSelect) eli = initMicrophoneSelect;
                     lS.DEVICES_COUNT.audio++;
                 } else if ('audiooutput' === device.kind) {
-                    el = speakerSelect;
-                    eli = initSpeakerSelect;
+                    if (speakerSelect) el = speakerSelect;
+                    if (initSpeakerSelect) eli = initSpeakerSelect;
                     lS.DEVICES_COUNT.speaker++;
                 }
                 if (!el) return;
@@ -807,6 +855,7 @@ async function whoAreYou() {
         elemDisplay('initVideo', false);
         elemDisplay('initVideoButton', false);
         elemDisplay('initAudioVideoButton', false);
+        elemDisplay('initVideoAudioRefreshButton', false);
         elemDisplay('initVideoSelect', false);
         elemDisplay('tabVideoDevicesBtn', false);
         initVideoContainerShow(false);
@@ -815,6 +864,7 @@ async function whoAreYou() {
         isAudioAllowed = false;
         elemDisplay('initAudioButton', false);
         elemDisplay('initAudioVideoButton', false);
+        elemDisplay('initVideoAudioRefreshButton', false);
         elemDisplay('initMicrophoneSelect', false);
         elemDisplay('initSpeakerSelect', false);
         elemDisplay('tabAudioDevicesBtn', false);
@@ -1347,6 +1397,14 @@ function handleButtons() {
     tabLanguagesBtn.onclick = (e) => {
         rc.openTab(e, 'tabLanguages');
     };
+    refreshVideoDevices.onclick = async () => {
+        await refreshMyVideoDevices();
+        rc.roomMessage('refreshMyVideoDevices', true);
+    };
+    refreshAudioDevices.onclick = async () => {
+        await refreshMyAudioDevices();
+        rc.roomMessage('refreshMyAudioDevices', true);
+    };
     applyAudioOptionsButton.onclick = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
     };
@@ -1630,6 +1688,7 @@ function setButtonsInit() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
+    if (!isAudioAllowed && !isVideoAllowed) hide(initVideoAudioRefreshButton);
     isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
@@ -1849,6 +1908,7 @@ async function toggleScreenSharing() {
                 disable(initVideoSelect, true);
                 disable(initVideoButton, true);
                 disable(initAudioVideoButton, true);
+                disable(initVideoAudioRefreshButton, true);
             })
             .catch((error) => {
                 console.error('[Error] toggleScreenSharing', error);
@@ -1862,6 +1922,7 @@ async function toggleScreenSharing() {
         disable(initVideoSelect, false);
         disable(initVideoButton, false);
         disable(initAudioVideoButton, false);
+        disable(initVideoAudioRefreshButton, false);
     }
 }
 
