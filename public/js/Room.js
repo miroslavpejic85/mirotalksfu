@@ -1404,11 +1404,11 @@ function handleButtons() {
     };
     refreshVideoDevices.onclick = async () => {
         await refreshMyVideoDevices();
-        rc.roomMessage('refreshMyVideoDevices', true);
+        userLog('info', 'Refreshed video devices', 'top-end');
     };
     refreshAudioDevices.onclick = async () => {
         await refreshMyAudioDevices();
-        rc.roomMessage('refreshMyAudioDevices', true);
+        userLog('info', 'Refreshed audio devices', 'top-end');
     };
     applyAudioOptionsButton.onclick = () => {
         rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
