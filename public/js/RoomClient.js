@@ -587,6 +587,7 @@ class RoomClient {
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
                     this.producerTransport.close();
+                    this.userLog('error', 'Producer Transport failed (Check Network Connectivity)', 'top-end', 6000);
                     // this.exit(true);
                     // this.refreshBrowser();
                     break;
@@ -632,6 +633,7 @@ class RoomClient {
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
                     this.consumerTransport.close();
+                    this.userLog('error', 'Consumer Transport failed (Check Network Connectivity)', 'top-end', 6000);
                     // this.exit(true);
                     // this.refreshBrowser();
                     break;
@@ -1128,10 +1130,12 @@ class RoomClient {
             producer.on('transportclose', () => {
                 console.log('Producer transport close', { id: producer.id });
                 if (!audio) {
+                    const d = this.getId(producer.id + '__video');
                     elem.srcObject.getTracks().forEach(function (track) {
                         track.stop();
                     });
                     elem.parentNode.removeChild(elem);
+                    d.parentNode.removeChild(d);
 
                     handleAspectRatio();
                     console.log('[transportClose] Video-element-count', this.videoMediaContainer.childElementCount);
@@ -1148,10 +1152,12 @@ class RoomClient {
             producer.on('close', () => {
                 console.log('Closing producer', { id: producer.id });
                 if (!audio) {
+                    const d = this.getId(producer.id + '__video');
                     elem.srcObject.getTracks().forEach(function (track) {
                         track.stop();
                     });
                     elem.parentNode.removeChild(elem);
+                    d.parentNode.removeChild(d);
 
                     handleAspectRatio();
                     console.log('[closingProducer] Video-element-count', this.videoMediaContainer.childElementCount);
