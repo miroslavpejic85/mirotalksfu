@@ -65,6 +65,7 @@ const icons = {
     codecs: '<i class="fa-solid fa-film"></i>',
     theme: '<i class="fas fa-fill-drip"></i>',
     recSync: '<i class="fa-solid fa-cloud-arrow-up"></i>',
+    refresh: '<i class="fas fa-rotate"></i>',
 };
 
 const image = {
@@ -5132,10 +5133,10 @@ class RoomClient {
                 this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');
                 break;
             case 'refreshMyVideoDevices':
-                this.userLog('info', `Refreshed video devices`, 'top-end');
+                this.userLog('info', `${icons.refresh} Refreshed video devices`, 'top-end');
                 break;
             case 'refreshMyAudioDevices':
-                this.userLog('info', `Refreshed audio devices`, 'top-end');
+                this.userLog('info', `${icons.refresh} Refreshed audio devices`, 'top-end');
                 break;
             default:
                 break;
