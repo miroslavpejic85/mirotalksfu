@@ -954,6 +954,7 @@ async function handleAudioVideo() {
         hide(initVideoButton);
         hide(initVideoAudioRefreshButton);
     }
+    if (isAudioAllowed && isVideoAllowed && !DetectRTC.isMobileDevice) show(initVideoAudioRefreshButton);
     setColor(initAudioVideoButton, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
