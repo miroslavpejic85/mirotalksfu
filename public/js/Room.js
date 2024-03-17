@@ -952,6 +952,7 @@ async function handleAudioVideo() {
     if (!isAudioVideoAllowed) {
         hide(initAudioButton);
         hide(initVideoButton);
+        hide(initVideoAudioRefreshButton);
     }
     setColor(initAudioVideoButton, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
@@ -1197,6 +1198,9 @@ function roomIsReady() {
     show(chatPasteButton);
     show(chatSendButton);
     if (DetectRTC.isMobileDevice) {
+        hide(initVideoAudioRefreshButton);
+        hide(refreshVideoDevices);
+        hide(refreshAudioDevices);
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
         rc.chatMaximize();
         hide(chatTogglePin);
@@ -1688,7 +1692,7 @@ function setButtonsInit() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
-    if (!isAudioAllowed && !isVideoAllowed) hide(initVideoAudioRefreshButton);
+    if ((!isAudioAllowed && !isVideoAllowed) || DetectRTC.isMobileDevice) hide(initVideoAudioRefreshButton);
     isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
