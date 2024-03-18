@@ -1,6 +1,8 @@
 'use strict';
 
 const jwt = require('jsonwebtoken');
+const CryptoJS = require('crypto-js');
+
 const config = require('./config');
 const { v4: uuidV4 } = require('uuid');
 
@@ -96,13 +98,19 @@ module.exports = class ServerApi {
 
         const expireValue = expire || JWT_EXP;
 
+        // Constructing payload
         const payload = {
             username: String(username),
             password: String(password),
             presenter: String(presenter),
         };
 
-        const jwtToken = jwt.sign(payload, JWT_KEY, { expiresIn: expireValue });
+        // Encrypt payload using AES encryption
+        const payloadString = JSON.stringify(payload);
+        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, JWT_KEY).toString();
+
+        // Constructing JWT token
+        const jwtToken = jwt.sign({ data: encryptedPayload }, JWT_KEY, { expiresIn: expireValue });
 
         return jwtToken;
     }

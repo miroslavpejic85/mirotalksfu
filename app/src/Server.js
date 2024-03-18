@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.3.96
+ * @version 1.3.97
  *
  */
 
@@ -339,7 +339,7 @@ function startServer() {
 
             if (token) {
                 try {
-                    const { username, password, presenter } = checkXSS(jwt.verify(token, jwtCfg.JWT_KEY));
+                    const { username, password, presenter } = checkXSS(decryptPayload(token));
                     peerUsername = username;
                     peerPassword = password;
                     isPeerValid = await isAuthPeer(username, password);
@@ -883,7 +883,7 @@ function startServer() {
                 // Check JWT
                 if (peer_token) {
                     try {
-                        const { username, password, presenter } = checkXSS(jwt.verify(peer_token, jwtCfg.JWT_KEY));
+                        const { username, password, presenter } = checkXSS(decryptPayload(peer_token));
 
                         const isPeerValid = await isAuthPeer(username, password);
 
@@ -1899,6 +1899,24 @@ function startServer() {
                 hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password)
             );
         }
+    }
+
+    function decryptPayload(jwtToken) {
+        if (!jwtToken) return null;
+
+        // Verify and decode the JWT token
+        const decodedToken = jwt.verify(jwtToken, jwtCfg.JWT_KEY);
+        if (!decodedToken || !decodedToken.data) {
+            throw new Error('Invalid token');
+        }
+
+        // Decrypt the payload using AES decryption
+        const decryptedPayload = CryptoJS.AES.decrypt(decodedToken.data, jwtCfg.JWT_KEY).toString(CryptoJS.enc.Utf8);
+
+        // Parse the decrypted payload as JSON
+        const payload = JSON.parse(decryptedPayload);
+
+        return payload;
     }
 
     function getActiveRooms() {
