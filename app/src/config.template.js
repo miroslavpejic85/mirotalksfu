@@ -86,6 +86,7 @@ module.exports = {
             meeting: true,
             join: true,
             token: false,
+            slack: true,
             //...
         },
     },

@@ -637,24 +637,30 @@ function startServer() {
     app.post('/slack', (req, res) => {
         if (!slackEnabled) return res.end('`Under maintenance` - Please check back soon.');
 
+        if (restApi.allowed && !restApi.allowed.slack) {
+            return res.end(
+                '`This endpoint has been disabled`. Please contact the administrator for further information.',
+            );
+        }
+
         log.debug('Slack', req.headers);
 
         if (!slackSigningSecret) return res.end('`Slack Signing Secret is empty!`');
 
-        let slackSignature = req.headers['x-slack-signature'];
-        let requestBody = qS.stringify(req.body, { format: 'RFC1738' });
-        let timeStamp = req.headers['x-slack-request-timestamp'];
-        let time = Math.floor(new Date().getTime() / 1000);
+        const slackSignature = req.headers['x-slack-signature'];
+        const requestBody = qS.stringify(req.body, { format: 'RFC1738' });
+        const timeStamp = req.headers['x-slack-request-timestamp'];
+        const time = Math.floor(new Date().getTime() / 1000);
 
         if (Math.abs(time - timeStamp) > 300) return res.end('`Wrong timestamp` - Ignore this request.');
 
-        let sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
-        let mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
+        const sigBaseString = 'v0:' + timeStamp + ':' + requestBody;
+        const mySignature = 'v0=' + CryptoJS.HmacSHA256(sigBaseString, slackSigningSecret);
 
         if (mySignature == slackSignature) {
-            let host = req.headers.host;
-            let api = new ServerApi(host);
-            let meetingURL = api.getMeetingURL();
+            const host = req.headers.host;
+            const api = new ServerApi(host);
+            const meetingURL = api.getMeetingURL();
             log.debug('Slack', { meeting: meetingURL });
             return res.end(meetingURL);
         }
