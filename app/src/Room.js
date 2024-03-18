@@ -44,6 +44,27 @@ module.exports = class Room {
     }
 
     // ####################################################
+    // ROOM INFO
+    // ####################################################
+
+    toJson() {
+        return {
+            id: this.id,
+            broadcasting: this._isBroadcasting,
+            recSyncServerRecording: this._recSyncServerRecording,
+            config: {
+                isLocked: this._isLocked,
+                isLobbyEnabled: this._isLobbyEnabled,
+                hostOnlyRecording: this._hostOnlyRecording,
+            },
+            moderator: this._moderator,
+            survey: this.survey,
+            redirect: this.redirect,
+            peers: JSON.stringify([...this.peers]),
+        };
+    }
+
+    // ####################################################
     // ROUTER
     // ####################################################
 
@@ -161,27 +182,6 @@ module.exports = class Room {
             default:
                 break;
         }
-    }
-
-    // ####################################################
-    // ROOM INFO
-    // ####################################################
-
-    toJson() {
-        return {
-            id: this.id,
-            broadcasting: this._isBroadcasting,
-            recSyncServerRecording: this._recSyncServerRecording,
-            config: {
-                isLocked: this._isLocked,
-                isLobbyEnabled: this._isLobbyEnabled,
-                hostOnlyRecording: this._hostOnlyRecording,
-            },
-            moderator: this._moderator,
-            survey: this.survey,
-            redirect: this.redirect,
-            peers: JSON.stringify([...this.peers]),
-        };
     }
 
     // ####################################################

@@ -181,6 +181,7 @@ module.exports = {
                 chatEmojiButton: true,
                 chatMarkdownButton: true,
                 chatSpeechStartButton: true,
+                chatGPT: true,
             },
             participantsList: {
                 saveInfoButton: true, // presenter

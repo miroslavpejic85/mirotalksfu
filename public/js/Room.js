@@ -3390,25 +3390,30 @@ async function getRoomParticipants() {
 }
 
 function getParticipantsList(peers) {
+    let li = '';
+
+    const chatGPT = BUTTONS.chat.chatGPT !== undefined ? BUTTONS.chat.chatGPT : true;
+
     // CHAT-GPT
-    let li = `
-    <li 
-        id="ChatGPT" 
-        data-to-id="ChatGPT"
-        data-to-name="ChatGPT"
-        class="clearfix" 
-        onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', event)"
-    >
-        <img 
-            src="${image.chatgpt}"
-            alt="avatar"
-        />
-        <div class="about">
-            <div class="name">ChatGPT</div>
-            <div class="status"><i class="fa fa-circle online"></i> online</div>
-        </div>
-    </li>
-    `;
+    if (chatGPT) {
+        li = `
+        <li 
+            id="ChatGPT" 
+            data-to-id="ChatGPT"
+            data-to-name="ChatGPT"
+            class="clearfix" 
+            onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', event)"
+        >
+            <img 
+                src="${image.chatgpt}"
+                alt="avatar"
+            />
+            <div class="about">
+                <div class="name">ChatGPT</div>
+                <div class="status"><i class="fa fa-circle online"></i> online</div>
+            </div>
+        </li>`;
+    }
 
     // ALL
     li += `
