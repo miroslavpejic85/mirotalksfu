@@ -234,7 +234,6 @@ module.exports = class Room {
     }
 
     async removePeer(socket_id) {
-
         const peer = this.getPeer(socket_id);
 
         if (!peer || typeof peer !== 'object') {
@@ -265,7 +264,6 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-
         const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
         const webRtcTransportOptions = {
@@ -308,7 +306,6 @@ module.exports = class Room {
                     iceState: iceState,
                 });
                 transport.close();
-                this.removePeer(peer.id);
             }
         });
 
@@ -326,7 +323,6 @@ module.exports = class Room {
                     dtlsState: dtlsState,
                 });
                 transport.close();
-                this.removePeer(peer.id);
             }
         });
 
