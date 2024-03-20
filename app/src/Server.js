@@ -1700,7 +1700,7 @@ function startServer() {
 
             log.debug('[Disconnect] - peer name', peerName);
 
-            // room.removePeer(socket.id); // handled on WebRtcTransport - transport.close()
+            room.removePeer(socket.id);
 
             if (room.getPeers().size === 0) {
                 //
