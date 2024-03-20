@@ -451,8 +451,8 @@ module.exports = class Room {
                 });
                 peer.removeConsumer(id);
 
-                // Tell client consumer is dead
-                this.io.to(socket_id).emit('consumerClosed', {
+                // Notify the client that consumer is closed
+                this.send(socket_id, 'consumerClosed', {
                     consumer_id: id,
                     consumer_kind: kind,
                 });
