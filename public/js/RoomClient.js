@@ -98,6 +98,7 @@ const image = {
     forbidden: '../images/forbidden.png',
     broadcasting: '../images/broadcasting.png',
     geolocation: '../images/geolocation.png',
+    network: '../images/network.gif',
 };
 
 const mediaType = {
@@ -586,10 +587,16 @@ class RoomClient {
                     break;
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
+
                     this.producerTransport.close();
-                    this.userLog('error', 'Producer Transport failed (Check Network Connectivity)', 'top-end', 6000);
-                    // this.exit(true);
-                    // this.refreshBrowser();
+
+                    popupHtmlMessage(
+                        null,
+                        image.network,
+                        'Producer Transport failed',
+                        'Check Your Network Connectivity',
+                        'center',
+                    );
                     break;
                 default:
                     break;
@@ -632,10 +639,16 @@ class RoomClient {
                     break;
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
+
                     this.consumerTransport.close();
-                    this.userLog('error', 'Consumer Transport failed (Check Network Connectivity)', 'top-end', 6000);
-                    // this.exit(true);
-                    // this.refreshBrowser();
+
+                    popupHtmlMessage(
+                        null,
+                        image.network,
+                        'Consumer Transport failed',
+                        'Check Your Network Connectivity',
+                        'center',
+                    );
                     break;
                 default:
                     break;

@@ -16,6 +16,7 @@ module.exports = class Peer {
         this.peer_video_privacy = peer_info.peer_video_privacy;
         this.peer_recording = peer_info.peer_recording;
         this.peer_hand = peer_info.peer_hand;
+
         this.transports = new Map();
         this.consumers = new Map();
         this.producers = new Map();

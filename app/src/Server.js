@@ -970,7 +970,7 @@ function startServer() {
                 ? is_presenter
                 : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
 
@@ -1088,7 +1088,7 @@ function startServer() {
                 status: true,
             };
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             peer.updatePeerInfo(data);
 
@@ -1163,7 +1163,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             peer.updatePeerInfo(data); // peer_info.audio OR video OFF
 
@@ -1177,7 +1177,7 @@ function startServer() {
 
             const peer_name = getPeerName(room, false);
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             if (!peer) {
                 return callback({
@@ -1209,7 +1209,7 @@ function startServer() {
 
             const peer_name = getPeerName(room, false);
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             if (!peer) {
                 return callback({
@@ -1270,7 +1270,7 @@ function startServer() {
 
             switch (data.type) {
                 case 'privacy':
-                    const peer = room.getPeers().get(socket.id);
+                    const peer = room.getPeer(socket.id);
                     peer.updatePeerInfo({ type: data.type, status: data.active });
                     break;
                 case 'ejectAll':
@@ -1432,7 +1432,7 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peer = room.getPeers().get(socket.id);
+            const peer = room.getPeer(socket.id);
 
             peer.updatePeerInfo(data);
 
@@ -1494,6 +1494,7 @@ function startServer() {
             const room = roomList.get(socket.room_id);
 
             log.debug('Send Room Info to', getPeerName(room));
+
             cb(room.toJson());
         });
 
