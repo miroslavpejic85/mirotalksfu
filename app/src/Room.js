@@ -192,6 +192,23 @@ module.exports = class Room {
         this.peers.set(peer.id, peer);
     }
 
+    getPeer(socket_id) {
+        //
+        if (!this.peers.has(socket_id)) {
+            log.error('---> Peer not found for socket ID', socket_id);
+            return null;
+        }
+
+        const peer = this.peers.get(socket_id);
+
+        if (!peer || typeof peer !== 'object') {
+            log.error('---> Peer object not found for socket ID', socket_id);
+            return null;
+        }
+
+        return peer;
+    }
+
     getPeers() {
         return this.peers;
     }
@@ -217,9 +234,12 @@ module.exports = class Room {
     }
 
     async removePeer(socket_id) {
-        if (!this.peers.has(socket_id)) return;
 
-        const peer = this.peers.get(socket_id);
+        const peer = this.getPeer(socket_id);
+
+        if (!peer || typeof peer !== 'object') {
+            return;
+        }
 
         const { id, peer_name } = peer;
 
@@ -245,9 +265,6 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-        if (!this.peers.has(socket_id)) {
-            return this.callback(`[Room|createWebRtcTransport] Peer with socket ID ${socket_id} not found`);
-        }
 
         const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
@@ -276,9 +293,13 @@ module.exports = class Room {
             }
         }
 
-        const peer = this.peers.get(socket_id);
+        const peer = this.getPeer(socket_id);
 
-        const { peer_name = 'undefined' } = peer;
+        if (!peer || typeof peer !== 'object') {
+            return this.callback(`[Room|createWebRtcTransport] Peer object not found for socket ID: ${socket_id}`);
+        }
+
+        const { peer_name } = peer;
 
         transport.on('icestatechange', (iceState) => {
             if (iceState === 'disconnected' || iceState === 'closed') {
@@ -287,6 +308,7 @@ module.exports = class Room {
                     iceState: iceState,
                 });
                 transport.close();
+                this.removePeer(peer.id);
             }
         });
 
@@ -304,6 +326,7 @@ module.exports = class Room {
                     dtlsState: dtlsState,
                 });
                 transport.close();
+                this.removePeer(peer.id);
             }
         });
 
@@ -329,11 +352,11 @@ module.exports = class Room {
                 return this.callback('[Room|connectPeerTransport] Invalid input parameters');
             }
 
-            if (!this.peers.has(socket_id)) {
-                return this.callback(`[Room|connectPeerTransport] Peer with socket ID ${socket_id} not found`);
-            }
+            const peer = this.getPeer(socket_id);
 
-            const peer = this.peers.get(socket_id);
+            if (!peer || typeof peer !== 'object') {
+                return this.callback(`[Room|connectPeerTransport] Peer object not found for socket ID: ${socket_id}`);
+            }
 
             const connectTransport = await peer.connectTransport(transport_id, dtlsParameters);
 
@@ -358,11 +381,11 @@ module.exports = class Room {
             return this.callback('[Room|produce] Invalid input parameters');
         }
 
-        if (!this.peers.has(socket_id)) {
-            return this.callback(`[Room|produce] Peer with ID: ${socket_id} not found`);
-        }
+        const peer = this.getPeer(socket_id);
 
-        const peer = this.peers.get(socket_id);
+        if (!peer || typeof peer !== 'object') {
+            return this.callback(`[Room|produce] Peer object not found for socket ID: ${socket_id}`);
+        }
 
         const peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
 
@@ -372,7 +395,7 @@ module.exports = class Room {
 
         const { id } = peerProducer;
 
-        const { peer_name = 'undefined', peer_info = {} } = peer;
+        const { peer_name, peer_info } = peer;
 
         this.broadCast(socket_id, 'newProducers', [
             {
@@ -406,14 +429,11 @@ module.exports = class Room {
                 return this.callback(`[Room|consume] Room router cannot consume producer_id: '${producer_id}'`);
             }
 
-            if (!this.peers.has(socket_id)) {
-                log.warn('Peer not found for socket ID', socket_id);
-                return this.callback(`[Room|consume] Peer with ID: ${socket_id} not found`);
+            const peer = this.getPeer(socket_id);
+
+            if (!peer || typeof peer !== 'object') {
+                return this.callback(`[Room|consume] Peer object not found for socket ID: ${socket_id}`);
             }
-
-            const peer = this.peers.get(socket_id);
-
-            const { peer_name = 'undefined' } = peer;
 
             const peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
 
@@ -425,6 +445,8 @@ module.exports = class Room {
             const { consumer, params } = peerConsumer;
 
             const { id, kind } = consumer;
+
+            const { peer_name } = peer;
 
             consumer.on('producerclose', () => {
                 log.debug('Consumer closed due to producerclose event', {
@@ -448,11 +470,17 @@ module.exports = class Room {
     }
 
     closeProducer(socket_id, producer_id) {
-        if (!socket_id || !producer_id || !this.peers.has(socket_id)) return;
+        if (!socket_id || !producer_id) return;
 
-        const peer = this.peers.get(socket_id);
+        const peer = this.getPeer(socket_id);
+
+        if (!peer || typeof peer !== 'object') {
+            return;
+        }
 
         peer.closeProducer(producer_id);
+
+        log.debug('Producer closed', producer_id);
     }
 
     // ####################################################
