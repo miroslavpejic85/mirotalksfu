@@ -1,27 +1,23 @@
 'use strict';
 
 const os = require('os');
-const ifaces = os.networkInterfaces();
-
-const getLocalIp = () => {
-    let localIp = '127.0.0.1';
-    let checkIp = true;
-    Object.keys(ifaces).forEach((ifname) => {
-        for (const iface of ifaces[ifname]) {
-            // Ignore IPv6 and 127.0.0.1
-            if (iface.family !== 'IPv4' || iface.internal !== false || checkIp === false) {
-                continue;
-            }
-            // Set the local ip to the first IPv4 address found and exit the loop
-            localIp = iface.address;
-            checkIp = false;
-            return;
-        }
-    });
-    return localIp;
-};
 
 // https://api.ipify.org
+
+function getIPv4() {
+    const ifaces = os.networkInterfaces();
+    for (const interfaceName in ifaces) {
+        const iface = ifaces[interfaceName];
+        for (const { address, family, internal } of iface) {
+            if (family === 'IPv4' && !internal) {
+                return address;
+            }
+        }
+    }
+    return '0.0.0.0'; // Default to 0.0.0.0 if no external IPv4 address found
+}
+
+const IPv4 = getIPv4();
 
 module.exports = {
     server: {
@@ -402,15 +398,15 @@ module.exports = {
         webRtcServerActive: false,
         webRtcServerOptions: {
             listenInfos: [
-                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: getLocalIp(), port: 44444 },
-                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: getLocalIp(), port: 44444 },
+                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
+                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
             ],
         },
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
-                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: getLocalIp() },
-                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: getLocalIp() },
+                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4 },
+                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4 },
             ],
             initialAvailableOutgoingBitrate: 1000000,
             minimumAvailableOutgoingBitrate: 600000,

@@ -202,6 +202,11 @@ const presenters = {}; // collect presenters grp by roomId
 
 const webRtcServerActive = config.mediasoup.webRtcServerActive;
 
+// ip (server local IPv4)
+const IPv4 = webRtcServerActive
+    ? config.mediasoup.webRtcServerOptions.listenInfos[0].ip
+    : config.mediasoup.webRtcTransport.listenInfos[0].ip;
+
 // announcedAddress (server public IPv4)
 let announcedAddress = webRtcServerActive
     ? config.mediasoup.webRtcServerOptions.listenInfos[0].announcedAddress
@@ -212,7 +217,7 @@ const workers = [];
 let nextMediasoupWorkerIdx = 0;
 
 // Autodetect announcedAddress (https://www.ipify.org)
-if (!announcedAddress) {
+if (!announcedAddress && IPv4 === '0.0.0.0') {
     http.get(
         {
             host: 'api.ipify.org',
