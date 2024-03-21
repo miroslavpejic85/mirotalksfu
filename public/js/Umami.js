@@ -10,7 +10,7 @@ const apiUrl = window.location.origin + '/stats';
 if (statsData) {
     setStats(JSON.parse(statsData));
 } else {
-    fetch(apiUrl)
+    fetch(apiUrl, { timeout: 5000 })
         .then((response) => {
             if (!response.ok) {
                 throw new Error('Network response was not ok');

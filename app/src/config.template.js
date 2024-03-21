@@ -111,6 +111,45 @@ module.exports = {
     },
     ui: {
         /*
+            Customize your MiroTalk instance
+        */
+        brand: {
+            app: {
+                name: 'MiroTalk SFU',
+                title: 'MiroTalk SFU<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+                description:
+                    'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
+            },
+            site: {
+                title: 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
+                icon: '../images/logo.svg',
+                appleTouchIcon: '../images/logo.svg',
+            },
+            meta: {
+                description:
+                    'MiroTalk SFU powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
+                keywords:
+                    'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
+            },
+            og: {
+                type: 'app-webrtc',
+                siteName: 'MiroTalk SFU',
+                title: 'Click the link to make a call.',
+                description: 'MiroTalk SFU calling provides real-time video calls, messaging and screen sharing.',
+                image: 'https://sfu.mirotalk.com/images/mirotalksfu.png',
+            },
+            html: {
+                features: true,
+                teams: true, // Please keep me always visible, thank you!
+                tryEasier: true,
+                poweredBy: true,
+                sponsors: true,
+                advertisers: true,
+                footer: true,
+            },
+            //...
+        },
+        /*
             Toggle the visibility of specific HTML elements within the room
         */
         buttons: {
