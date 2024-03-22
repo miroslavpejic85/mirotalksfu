@@ -1860,12 +1860,17 @@ function handleMediaError(mediaType, err) {
         <ul style="text-align: left">
             <li>Media type: ${mediaType}</li>
             <li>Error name: ${err.name}</li>
-            <li>Error message: <p style="color: red">${errMessage}</p></li>
+            <li>
+                <p>Error message:</p>
+                <p style="color: red">${errMessage}</p>
+            </li>
             <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>
         </ul>
     `;
 
-    popupHtmlMessage(null, image.forbidden, 'Access denied', $html, 'center', '/');
+    const redirectURL = ['screen', 'screenType'].includes(mediaType) ? false : '/';
+
+    popupHtmlMessage(null, image.forbidden, 'Access denied', $html, 'center', redirectURL);
 
     throw new Error(
         `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`,
