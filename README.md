@@ -173,12 +173,13 @@ $ apt install -y software-properties-common
 $ add-apt-repository -y ppa:deadsnakes/ppa
 $ apt update
 $ apt install -y python3.8 python3-pip
-# NodeJS 18.X and npm
-$ apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
-$ curl -sL https://deb.nodesource.com/setup_18.x | bash -
-$ apt-get install -y nodejs
-$ npm install -g npm@latest
 ```
+
+---
+
+Install `NodeJS 18.X` and `npm` using [Node Version Manager](https://docs.mirotalk.com/nvm/nvm/)
+
+---
 
 -   Start the server
 
