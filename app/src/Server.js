@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.0
+ * @version 1.4.1
  *
  */
 
@@ -349,7 +349,7 @@ function startServer() {
 
             if (token) {
                 try {
-                    const { username, password, presenter } = checkXSS(decryptPayload(token));
+                    const { username, password, presenter } = checkXSS(decodeToken(token));
                     peerUsername = username;
                     peerPassword = password;
                     isPeerValid = await isAuthPeer(username, password);
@@ -462,9 +462,7 @@ function startServer() {
                 authorized: authHost.isAuthorizedIP(ip),
                 authorizedIps: authHost.getAuthorizedIPs(),
             });
-            const token = jwt.sign({ username: username, password: password, presenter: true }, jwtCfg.JWT_KEY, {
-                expiresIn: jwtCfg.JWT_EXP,
-            });
+            const token = encodeToken({ username: username, password: password, presenter: true });
             return res.status(200).json({ message: token });
         }
 
@@ -472,9 +470,7 @@ function startServer() {
             log.debug('PEER LOGIN OK', { ip: ip, authorized: true });
             const isPresenter =
                 config.presenters && config.presenters.list && config.presenters.list.includes(username).toString();
-            const token = jwt.sign({ username: username, password: password, presenter: isPresenter }, jwtCfg.JWT_KEY, {
-                expiresIn: jwtCfg.JWT_EXP,
-            });
+            const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             return res.status(200).json({ message: token });
         } else {
             return res.status(401).json({ message: 'unauthorized' });
@@ -893,7 +889,7 @@ function startServer() {
                 // Check JWT
                 if (peer_token) {
                     try {
-                        const { username, password, presenter } = checkXSS(decryptPayload(peer_token));
+                        const { username, password, presenter } = checkXSS(decodeToken(peer_token));
 
                         const isPeerValid = await isAuthPeer(username, password);
 
@@ -1912,7 +1908,31 @@ function startServer() {
         }
     }
 
-    function decryptPayload(jwtToken) {
+    function encodeToken(token) {
+        if (!token) return '';
+
+        const { username = 'username', password = 'password', presenter = false, expire } = token;
+
+        const expireValue = expire || jwtCfg.JWT_EXP;
+
+        // Constructing payload
+        const payload = {
+            username: String(username),
+            password: String(password),
+            presenter: String(presenter),
+        };
+
+        // Encrypt payload using AES encryption
+        const payloadString = JSON.stringify(payload);
+        const encryptedPayload = CryptoJS.AES.encrypt(payloadString, jwtCfg.JWT_KEY).toString();
+
+        // Constructing JWT token
+        const jwtToken = jwt.sign({ data: encryptedPayload }, jwtCfg.JWT_KEY, { expiresIn: expireValue });
+
+        return jwtToken;
+    }
+
+    function decodeToken(jwtToken) {
         if (!jwtToken) return null;
 
         // Verify and decode the JWT token
