@@ -308,8 +308,13 @@ function startServer() {
     // main page
     app.get(['/'], (req, res) => {
         if (hostCfg.protected) {
-            hostCfg.authenticated = false;
-            res.sendFile(views.login);
+            let ip = getIP(req);
+            if (allowedIP(ip)) {
+                res.sendFile(views.landing);
+            } else {
+                hostCfg.authenticated = false;
+                res.sendFile(views.login);
+            }
         } else {
             res.sendFile(views.landing);
         }
@@ -1978,6 +1983,8 @@ function startServer() {
         return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     }
     function allowedIP(ip) {
+        const allowedIPs = authHost.getAuthorizedIPs();
+        log.info('Allowed IPs', { ip: ip, allowedIPs: allowedIPs });
         return authHost != null && authHost.isAuthorizedIP(ip);
     }
     function removeIP(socket) {
