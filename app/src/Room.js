@@ -275,6 +275,8 @@ module.exports = class Room {
             initialAvailableOutgoingBitrate,
         };
 
+        log.debug('webRtcTransportOptions ----->', webRtcTransportOptions);
+
         const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
 
         if (!transport) {
