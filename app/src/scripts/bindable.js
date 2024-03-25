@@ -40,10 +40,10 @@ async function main() {
     const rtcMaxPort = config.mediasoup.worker.rtcMaxPort;
 
     console.log('==================================');
-    console.log('checkServerIsBindable');
+    console.log('checkServerListenPorts');
     console.log('==================================');
 
-    await checkServerIsBindable(serverListenIp, serverListenPort);
+    await checkServerListenPorts(serverListenIp, serverListenPort);
 
     console.log('==================================');
     console.log('checkWebRtcTransportPorts');
@@ -67,11 +67,11 @@ async function main() {
 }
 
 /**
- * Check if Server port is bindable
- * @param {string} ipAddress 
- * @param {integer} port 
+ * Check if Server listen port is bindable
+ * @param {string} ipAddress
+ * @param {integer} port
  */
-async function checkServerIsBindable(ipAddress, port){
+async function checkServerListenPorts(ipAddress, port) {
     const bindable = await isBindable(ipAddress, port);
     if (bindable) {
         console.log(`${ipAddress}:${port} is bindable 🟢`);
