@@ -544,6 +544,8 @@ class RoomClient {
             rtpCapabilities: device.rtpCapabilities,
         });
 
+        console.info('07.4 producerTransportData ---->', { producerTransportData: producerTransportData });
+
         this.producerTransport = device.createSendTransport(producerTransportData);
 
         this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
@@ -616,6 +618,8 @@ class RoomClient {
         });
 
         this.consumerTransport = device.createRecvTransport(consumerTransportData);
+
+        console.info('07.5 consumerTransportData ---->', { consumerTransportData: consumerTransportData });
 
         this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
