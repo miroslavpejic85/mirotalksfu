@@ -544,15 +544,23 @@ class RoomClient {
             rtpCapabilities: device.rtpCapabilities,
         });
 
-        console.info('07.4 producerTransportData ---->', { producerTransportData: producerTransportData });
+        if (producerTransportData.error) {
+            console.error(producerTransportData.error);
+            return;
+        }
 
         this.producerTransport = device.createSendTransport(producerTransportData);
+
+        console.info('07.4 producerTransportData ---->', {
+            producerTransportId: this.producerTransport.id,
+            producerTransportData: producerTransportData,
+        });
 
         this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
+                    transport_id: this.producerTransport.id,
                     dtlsParameters,
-                    transport_id: producerTransportData.id,
                 });
                 callback();
             } catch (err) {
@@ -617,9 +625,17 @@ class RoomClient {
             forceTcp: false,
         });
 
+        if (consumerTransportData.error) {
+            console.error(consumerTransportData.error);
+            return;
+        }
+
         this.consumerTransport = device.createRecvTransport(consumerTransportData);
 
-        console.info('07.5 consumerTransportData ---->', { consumerTransportData: consumerTransportData });
+        console.info('07.5 consumerTransportData ---->', {
+            consumerTransportId: this.consumerTransport.id,
+            consumerTransportData: consumerTransportData,
+        });
 
         this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
