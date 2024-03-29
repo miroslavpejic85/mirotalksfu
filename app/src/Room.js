@@ -77,19 +77,28 @@ module.exports = class Room {
             .then((router) => {
                 this.router = router;
                 if (this.audioLevelObserverEnabled) {
-                    this.startAudioLevelObservation(router);
+                    this.startAudioLevelObservation();
                 }
+                this.router.observer.on('close', () => {
+                    log.info('---------------> Router is now closed as the last peer has left the room', {
+                        room: this.id,
+                    });
+                });
             });
+    }
+
+    closeRouter() {
+        this.router.close();
     }
 
     // ####################################################
     // PRODUCER AUDIO LEVEL OBSERVER
     // ####################################################
 
-    async startAudioLevelObservation(router) {
+    async startAudioLevelObservation() {
         log.debug('Start audioLevelObserver for signaling active speaker...');
 
-        this.audioLevelObserver = await router.createAudioLevelObserver({
+        this.audioLevelObserver = await this.router.createAudioLevelObserver({
             maxEntries: 1,
             threshold: -70,
             interval: 100,
@@ -257,6 +266,10 @@ module.exports = class Room {
         peer.close();
 
         this.peers.delete(socket_id);
+
+        if (this.getPeers().size === 0) {
+            this.closeRouter();
+        }
     }
 
     // ####################################################
@@ -328,7 +341,7 @@ module.exports = class Room {
             }
         });
 
-        transport.observer.on('close', () => {
+        transport.on('close', () => {
             log.debug('Transport closed', { peer_name: peer_name, transport_id: transport.id });
         });
 

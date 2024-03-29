@@ -115,6 +115,7 @@ module.exports = class Peer {
             }
 
             const producerTransport = this.transports.get(producerTransportId);
+
             if (!producerTransport) {
                 return `Producer transport with ID ${producerTransportId} not found`;
             }
