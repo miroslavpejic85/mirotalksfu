@@ -188,6 +188,10 @@ module.exports = class Peer {
 
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
         try {
+            if (!consumer_transport_id) {
+                return 'Invalid consumer transport ID';
+            }
+
             const consumerTransport = this.transports.get(consumer_transport_id);
 
             if (!consumerTransport) {

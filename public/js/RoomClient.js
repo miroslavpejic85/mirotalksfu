@@ -1939,6 +1939,7 @@ class RoomClient {
 
     async getConsumeStream(producerId, peer_id, type) {
         const { rtpCapabilities } = this.device;
+
         const data = await this.socket.request('consume', {
             rtpCapabilities,
             consumerTransportId: this.consumerTransport.id,
