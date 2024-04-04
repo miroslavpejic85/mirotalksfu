@@ -7,15 +7,18 @@ module.exports = class Peer {
     constructor(socket_id, data) {
         const { peer_info } = data;
 
+        const { peer_name, peer_presenter, peer_audio, peer_video, peer_video_privacy, peer_recording, peer_hand } =
+            peer_info;
+
         this.id = socket_id;
         this.peer_info = peer_info;
-        this.peer_name = peer_info.peer_name;
-        this.peer_presenter = peer_info.peer_presenter;
-        this.peer_audio = peer_info.peer_audio;
-        this.peer_video = peer_info.peer_video;
-        this.peer_video_privacy = peer_info.peer_video_privacy;
-        this.peer_recording = peer_info.peer_recording;
-        this.peer_hand = peer_info.peer_hand;
+        this.peer_name = peer_name;
+        this.peer_presenter = peer_presenter;
+        this.peer_audio = peer_audio;
+        this.peer_video = peer_video;
+        this.peer_video_privacy = peer_video_privacy;
+        this.peer_recording = peer_recording;
+        this.peer_hand = peer_hand;
 
         this.transports = new Map();
         this.consumers = new Map();
@@ -150,7 +153,7 @@ module.exports = class Peer {
 
             producer.on('transportclose', () => {
                 log.debug('Producer transport closed', {
-                    peer_name: this.peer_info?.peer_name,
+                    peer_name: this.peer_name,
                     producer_id: id,
                 });
                 this.closeProducer(id);
@@ -237,7 +240,7 @@ module.exports = class Peer {
 
             consumer.on('transportclose', () => {
                 log.debug('Consumer transport close', {
-                    peer_name: this.peer_info?.peer_name,
+                    peer_name: this.peer_name,
                     consumer_id: id,
                 });
                 this.removeConsumer(id);
