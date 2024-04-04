@@ -308,7 +308,7 @@ function startServer() {
     // main page
     app.get(['/'], (req, res) => {
         if (hostCfg.protected) {
-            let ip = getIP(req);
+            const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
             } else {
@@ -323,7 +323,7 @@ function startServer() {
     // set new room name and join
     app.get(['/newroom'], (req, res) => {
         if (hostCfg.protected) {
-            let ip = getIP(req);
+            const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.newRoom);
             } else {
