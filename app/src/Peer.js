@@ -212,6 +212,7 @@ module.exports = class Peer {
             const { id, type, kind, rtpParameters, producerPaused } = consumer;
 
             if (['simulcast', 'svc'].includes(type)) {
+                // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
                 const { scalabilityMode } = rtpParameters.encodings[0];
                 const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
                 const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
