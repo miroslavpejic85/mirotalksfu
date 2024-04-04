@@ -1983,13 +1983,14 @@ function startServer() {
         return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
     }
     function allowedIP(ip) {
-        const allowedIPs = authHost.getAuthorizedIPs();
-        log.info('Allowed IPs', { ip: ip, allowedIPs: allowedIPs });
-        return authHost != null && authHost.isAuthorizedIP(ip);
+        const authorizedIPs = authHost.getAuthorizedIPs();
+        const authorizedIP = authHost.isAuthorizedIP(ip);
+        log.info('Allowed IPs', { ip: ip, authorizedIP: authorizedIP, authorizedIPs: authorizedIPs });
+        return authHost != null && authorizedIP;
     }
     function removeIP(socket) {
         if (hostCfg.protected) {
-            let ip = socket.handshake.address;
+            const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
             if (ip && allowedIP(ip)) {
                 authHost.deleteIP(ip);
                 hostCfg.authenticated = false;
