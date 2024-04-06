@@ -210,11 +210,6 @@ module.exports = class Room {
 
         const peer = this.peers.get(socket_id);
 
-        if (!peer || typeof peer !== 'object') {
-            log.error('---> Peer object not found for socket ID', socket_id);
-            return null;
-        }
-
         return peer;
     }
 
@@ -251,6 +246,14 @@ module.exports = class Room {
 
         const { id, peer_name } = peer;
 
+        peer.close();
+
+        this.peers.delete(socket_id);
+
+        if (this.getPeers().size === 0) {
+            this.closeRouter();
+        }
+
         const peerTransports = peer.getTransports();
         const peerProducers = peer.getProducers();
         const peerConsumers = peer.getConsumers();
@@ -262,14 +265,6 @@ module.exports = class Room {
             peerProducers: peerProducers,
             peerConsumers: peerConsumers,
         });
-
-        peer.close();
-
-        this.peers.delete(socket_id);
-
-        if (this.getPeers().size === 0) {
-            this.closeRouter();
-        }
     }
 
     // ####################################################
@@ -318,6 +313,7 @@ module.exports = class Room {
             if (iceState === 'disconnected' || iceState === 'closed') {
                 log.debug('Transport closed "icestatechange" event', {
                     peer_name: peer_name,
+                    transport_id: id,
                     iceState: iceState,
                 });
                 transport.close();
@@ -327,6 +323,7 @@ module.exports = class Room {
         transport.on('sctpstatechange', (sctpState) => {
             log.debug('Transport "sctpstatechange" event', {
                 peer_name: peer_name,
+                transport_id: id,
                 sctpState: sctpState,
             });
         });
@@ -335,6 +332,7 @@ module.exports = class Room {
             if (dtlsState === 'failed' || dtlsState === 'closed') {
                 log.debug('Transport closed "dtlsstatechange" event', {
                     peer_name: peer_name,
+                    transport_id: id,
                     dtlsState: dtlsState,
                 });
                 transport.close();
@@ -345,9 +343,9 @@ module.exports = class Room {
             log.debug('Transport closed', { peer_name: peer_name, transport_id: transport.id });
         });
 
-        log.debug('Adding transport', { transportId: id });
-
         peer.addTransport(transport);
+
+        log.debug('Transport created', { transportId: id });
 
         return {
             id: id,
@@ -421,6 +419,18 @@ module.exports = class Room {
         return id;
     }
 
+    closeProducer(socket_id, producer_id) {
+        if (!socket_id || !producer_id) return;
+
+        const peer = this.getPeer(socket_id);
+
+        if (!peer || typeof peer !== 'object') {
+            return;
+        }
+
+        peer.closeProducer(producer_id);
+    }
+
     // ####################################################
     // CONSUME
     // ####################################################
@@ -457,13 +467,8 @@ module.exports = class Room {
 
             const { id, kind } = consumer;
 
-            const { peer_name } = peer;
-
             consumer.on('producerclose', () => {
-                log.debug('Consumer closed due to producerclose event', {
-                    peer_name: peer_name,
-                    consumer_id: id,
-                });
+                log.debug('Consumer closed due to "producerclose" event');
                 peer.removeConsumer(id);
 
                 // Notify the client that consumer is closed
@@ -478,20 +483,6 @@ module.exports = class Room {
             log.error('Error occurred during consumption', error.message);
             return this.callback(`[Room|consume] ${error.message}`);
         }
-    }
-
-    closeProducer(socket_id, producer_id) {
-        if (!socket_id || !producer_id) return;
-
-        const peer = this.getPeer(socket_id);
-
-        if (!peer || typeof peer !== 'object') {
-            return;
-        }
-
-        peer.closeProducer(producer_id);
-
-        log.debug('Producer closed', producer_id);
     }
 
     // ####################################################

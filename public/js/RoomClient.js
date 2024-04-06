@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.12
+ * @version 1.4.13
  *
  */
 
@@ -559,7 +559,7 @@ class RoomClient {
         this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
-                    transport_id: this.producerTransport.id,
+                    transport_id: producerTransportData.id,
                     dtlsParameters,
                 });
                 callback();
@@ -640,7 +640,7 @@ class RoomClient {
         this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
-                    transport_id: this.consumerTransport.id,
+                    transport_id: consumerTransportData.id,
                     dtlsParameters,
                 });
                 callback();
@@ -684,6 +684,38 @@ class RoomClient {
         // ####################################################
 
         //
+    }
+
+    // ####################################################
+    // RESTART ICE
+    // ####################################################
+
+    async restartIce() {
+        console.log('Restart ICE...');
+        try {
+            if (this.producerTransport) {
+                console.log('Restarting producer transport ICE');
+
+                const iceParameters = await this.socket.request('restartIce', {
+                    transport_id: this.producerTransport.id,
+                });
+
+                await this.producerTransport.restartIce({ iceParameters });
+            }
+
+            if (this.consumerTransport) {
+                console.log('Restarting consumer transport ICE');
+
+                const iceParameters = await this.socket.request('restartIce', {
+                    transport_id: this.consumerTransport.id,
+                });
+
+                await this.consumerTransport.restartIce({ iceParameters });
+            }
+            console.log('Restart ICE done');
+        } catch (error) {
+            console.error('Restart ICE error', error.message);
+        }
     }
 
     // ####################################################

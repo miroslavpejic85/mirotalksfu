@@ -79,6 +79,14 @@ module.exports = class Peer {
         return JSON.parse(JSON.stringify([...this.transports]));
     }
 
+    getTransport(transport_id) {
+        return this.transports.get(transport_id);
+    }
+
+    delTransport(transport_id) {
+        this.transports.delete(transport_id);
+    }
+
     addTransport(transport) {
         this.transports.set(transport.id, transport);
     }
@@ -96,7 +104,14 @@ module.exports = class Peer {
     }
 
     close() {
-        this.transports.forEach((transport) => transport.close());
+        this.transports.forEach((transport, transport_id) => {
+            log.debug('Close and delete peer transports', {
+                transport_id: transport_id,
+                //transportInternal: transport.internal,
+            });
+            transport.close();
+            this.delTransport(transport_id);
+        });
     }
 
     // ####################################################
@@ -109,6 +124,10 @@ module.exports = class Peer {
 
     getProducer(producer_id) {
         return this.producers.get(producer_id);
+    }
+
+    delProducer(producer_id) {
+        this.producers.delete(producer_id);
     }
 
     async createProducer(producerTransportId, producer_rtpParameters, producer_kind, producer_type) {
@@ -152,10 +171,7 @@ module.exports = class Peer {
             }
 
             producer.on('transportclose', () => {
-                log.debug('Producer transport closed', {
-                    peer_name: this.peer_name,
-                    producer_id: id,
-                });
+                log.debug('Producer "transportclose" event');
                 this.closeProducer(id);
             });
 
@@ -168,13 +184,25 @@ module.exports = class Peer {
 
     closeProducer(producer_id) {
         if (!this.producers.has(producer_id)) return;
+
+        const producer = this.getProducer(producer_id);
+        const { id, kind, type, appData } = producer;
+
         try {
-            this.producers.get(producer_id).close();
+            producer.close();
         } catch (error) {
             log.warn('Close Producer', error.message);
         }
-        this.producers.delete(producer_id);
-        log.debug('Producer closed and deleted', { producer_id });
+
+        this.delProducer(producer_id);
+
+        log.debug('Producer closed and deleted', {
+            peer_name: this.peer_name,
+            kind: kind,
+            type: type,
+            appData: appData,
+            producer_id: id,
+        });
     }
 
     // ####################################################
@@ -187,6 +215,10 @@ module.exports = class Peer {
 
     getConsumer(consumer_id) {
         return this.consumers.get(consumer_id);
+    }
+
+    delConsumer(consumer_id) {
+        this.consumers.delete(consumer_id);
     }
 
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
@@ -239,10 +271,7 @@ module.exports = class Peer {
             this.consumers.set(id, consumer);
 
             consumer.on('transportclose', () => {
-                log.debug('Consumer transport close', {
-                    peer_name: this.peer_name,
-                    consumer_id: id,
-                });
+                log.debug('Consumer "transportclose" event');
                 this.removeConsumer(id);
             });
 
@@ -264,14 +293,24 @@ module.exports = class Peer {
     }
 
     removeConsumer(consumer_id) {
-        if (this.consumers.has(consumer_id)) {
-            try {
-                this.consumers.get(consumer_id).close();
-            } catch (error) {
-                log.warn('Close Consumer', error.message);
-            }
-            this.consumers.delete(consumer_id);
-            log.debug('Consumer closed and deleted', { consumer_id });
+        if (!this.consumers.has(consumer_id)) return;
+
+        const consumer = this.getConsumer(consumer_id);
+        const { id, kind, type } = consumer;
+
+        try {
+            consumer.close();
+        } catch (error) {
+            log.warn('Close Consumer', error.message);
         }
+
+        this.delConsumer(consumer_id);
+
+        log.debug('Consumer closed and deleted', {
+            peer_name: this.peer_name,
+            kind: kind,
+            type: type,
+            consumer_id: id,
+        });
     }
 };

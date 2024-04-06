@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.12
+ * @version 1.4.13
  *
  */
 
@@ -1041,6 +1041,7 @@ function startServer() {
             const room = roomList.get(socket.room_id);
 
             log.debug('Create WebRtc transport', getPeerName(room));
+
             try {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
 
@@ -1074,6 +1075,37 @@ function startServer() {
                 callback(connectTransport);
             } catch (err) {
                 log.error('Connect transport error', err.message);
+                callback({
+                    error: err.message,
+                });
+            }
+        });
+
+        socket.on('restartIce', async ({ transport_id }, callback) => {
+            if (!roomList.has(socket.room_id)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const room = roomList.get(socket.room_id);
+
+            const peer = room.getPeer(socket.id);
+
+            const peer_name = getPeerName(room, false);
+
+            log.debug('Restart ICE', { peer_name: peer_name, transport_id: transport_id });
+
+            try {
+                const transport = peer.getTransport(transport_id);
+
+                if (!transport) throw new Error(`Restart ICE, transport with id "${transport_id}" not found`);
+
+                const iceParameters = await transport.restartIce();
+
+                log.debug('Restart ICE callback', { callback: iceParameters });
+
+                callback(iceParameters);
+            } catch (err) {
+                log.error('Restart ICE error', err.message);
                 callback({
                     error: err.message,
                 });
@@ -1169,8 +1201,6 @@ function startServer() {
 
         socket.on('producerClosed', (data) => {
             if (!roomList.has(socket.room_id)) return;
-
-            log.debug('Producer close', data);
 
             const room = roomList.get(socket.room_id);
 
