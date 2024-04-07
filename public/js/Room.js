@@ -1807,7 +1807,7 @@ async function changeCamera(deviceId) {
             aspectRatio: 1.777,
         },
     };
-    navigator.mediaDevices
+    await navigator.mediaDevices
         .getUserMedia(videoConstraints)
         .then((camStream) => {
             initVideo.className = 'mirror';
@@ -1907,7 +1907,7 @@ async function toggleScreenSharing() {
     }
     joinRoomWithScreen = !joinRoomWithScreen;
     if (joinRoomWithScreen) {
-        navigator.mediaDevices
+        await navigator.mediaDevices
             .getDisplayMedia({ audio: true, video: true })
             .then((screenStream) => {
                 if (initVideo.classList.contains('mirror')) {
