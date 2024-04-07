@@ -1676,9 +1676,9 @@ function handleButtons() {
     aboutButton.onclick = () => {
         showAbout();
     };
-    restartICE.onclick = async () => {
-        await rc.restartIce();
-    };
+    // restartICE.onclick = async () => {
+    //     await rc.restartIce();
+    // };
 }
 
 // ####################################################
