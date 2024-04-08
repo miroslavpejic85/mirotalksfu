@@ -595,6 +595,20 @@ class RoomClient {
                 case 'connected':
                     console.log('Producer Transport connected', { id: this.producerTransport.id });
                     break;
+                case 'disconnected':
+                    console.log('Producer Transport disconnected', { id: this.producerTransport.id });
+                    /*
+                    this.restartIce();
+
+                    popupHtmlMessage(
+                        null,
+                        image.network,
+                        'Producer Transport disconnected',
+                        'Check Your Network Connectivity (Restarted ICE)',
+                        'center',
+                    );
+                    */
+                    break;
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
 
@@ -609,12 +623,19 @@ class RoomClient {
                     );
                     break;
                 default:
+                    console.log('Producer transport connection state changes', {
+                        state: state,
+                        id: this.producerTransport.id,
+                    });
                     break;
             }
         });
 
         this.producerTransport.on('icegatheringstatechange', (state) => {
-            console.log('Producer icegatheringstatechange', state);
+            console.log('Producer icegatheringstatechange', {
+                state: state,
+                id: this.producerTransport.id,
+            });
         });
 
         // ####################################################
@@ -657,6 +678,19 @@ class RoomClient {
                 case 'connected':
                     console.log('Consumer Transport connected', { id: this.consumerTransport.id });
                     break;
+                case 'disconnected':
+                    console.log('Consumer Transport disconnected', { id: this.consumerTransport.id });
+                /*
+                    this.restartIce();
+
+                    popupHtmlMessage(
+                        null,
+                        image.network,
+                        'Consumer Transport disconnected',
+                        'Check Your Network Connectivity (Restarted ICE)',
+                        'center',
+                    );
+                    */
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
 
@@ -671,12 +705,19 @@ class RoomClient {
                     );
                     break;
                 default:
+                    console.log('Consumer transport connection state changes', {
+                        state: state,
+                        id: this.consumerTransport.id,
+                    });
                     break;
             }
         });
 
         this.consumerTransport.on('icegatheringstatechange', (state) => {
-            console.log('Consumer icegatheringstatechange', state);
+            console.log('Consumer icegatheringstatechange', {
+                state: state,
+                id: this.consumerTransport.id,
+            });
         });
 
         // ####################################################
