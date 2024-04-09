@@ -19,6 +19,8 @@ function getIPv4() {
 
 const IPv4 = getIPv4();
 
+const numWorkers = require('os').cpus().length;
+
 module.exports = {
     server: {
         listen: {
@@ -337,10 +339,8 @@ module.exports = {
     },
     mediasoup: {
         // Worker settings
-        numWorkers: require('os').cpus().length,
+        numWorkers: numWorkers,
         worker: {
-            rtcMinPort: 40000,
-            rtcMaxPort: 40100,
             logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
         },
@@ -400,13 +400,15 @@ module.exports = {
             listenInfos: [
                 { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
                 { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
+                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 44444, max: 44444 + numWorkers }},
+                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 44444, max: 44444 + numWorkers }},
             ],
         },
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
-                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4 },
-                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4 },
+                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 40000, max: 40100 } },
+                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 40000, max: 40100 } },
             ],
             initialAvailableOutgoingBitrate: 1000000,
             minimumAvailableOutgoingBitrate: 600000,
