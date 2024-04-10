@@ -10,7 +10,8 @@ const allowedIPs = config.middleware ? config.middleware.IpWhitelist.allowed : [
 const restrictAccessByIP = (req, res, next) => {
     if (!IpWhitelistEnabled) return next();
     //
-    const clientIP = req.headers['x-forwarded-for'] || req.socket.remoteAddress || req.ip;
+    const clientIP =
+        req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;
     log.debug('Check IP', clientIP);
     if (allowedIPs.includes(clientIP)) {
         next();

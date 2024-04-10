@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.15
+ * @version 1.4.16
  *
  */
 
@@ -311,6 +311,7 @@ function startServer() {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
+                hostCfg.authenticated = true;
             } else {
                 hostCfg.authenticated = false;
                 res.sendFile(views.login);
@@ -326,6 +327,7 @@ function startServer() {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.newRoom);
+                hostCfg.authenticated = true;
             } else {
                 hostCfg.authenticated = false;
                 res.sendFile(views.login);
@@ -439,6 +441,7 @@ function startServer() {
         const ip = getIP(req);
         if (allowedIP(ip)) {
             res.sendFile(views.landing);
+            hostCfg.authenticated = true;
         } else {
             hostCfg.authenticated = false;
             res.sendFile(views.login);
@@ -874,7 +877,7 @@ function startServer() {
             }
 
             // Get peer IPv4 (::1 Its the loopback address in ipv6, equal to 127.0.0.1 in ipv4)
-            const peer_ip = socket.handshake.headers['x-forwarded-for'] || socket.conn.remoteAddress;
+            const peer_ip = getIpSocket(socket);
 
             // Get peer Geo Location
             if (config.IPLookup.enabled && peer_ip != '::1') {
@@ -1760,7 +1763,7 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
 
-            removeIP(socket);
+            if (isPresenter) removeIP(socket);
 
             socket.room_id = null;
         });
@@ -1803,7 +1806,7 @@ function startServer() {
 
             socket.room_id = null;
 
-            removeIP(socket);
+            if (isPresenter) removeIP(socket);
 
             callback('Successfully exited room');
         });
@@ -2012,17 +2015,27 @@ function startServer() {
     }
 
     function getIP(req) {
-        return req.headers['x-forwarded-for'] || req.socket.remoteAddress;
+        return req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;
     }
+
+    function getIpSocket(socket) {
+        return (
+            socket.handshake.headers['x-forwarded-for'] ||
+            socket.handshake.headers['X-Forwarded-For'] ||
+            socket.handshake.address
+        );
+    }
+
     function allowedIP(ip) {
         const authorizedIPs = authHost.getAuthorizedIPs();
         const authorizedIP = authHost.isAuthorizedIP(ip);
         log.info('Allowed IPs', { ip: ip, authorizedIP: authorizedIP, authorizedIPs: authorizedIPs });
         return authHost != null && authorizedIP;
     }
+
     function removeIP(socket) {
         if (hostCfg.protected) {
-            const ip = socket.handshake.headers['x-forwarded-for'] || socket.handshake.address;
+            const ip = getIpSocket(socket);
             if (ip && allowedIP(ip)) {
                 authHost.deleteIP(ip);
                 hostCfg.authenticated = false;
