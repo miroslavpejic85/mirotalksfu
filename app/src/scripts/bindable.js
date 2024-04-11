@@ -34,10 +34,12 @@ async function main() {
     const webRtcTransportIpAddress =
         webRtcTransportIpInfo.ip !== '0.0.0.0' ? webRtcTransportIpInfo.ip : webRtcTransportIpInfo.announcedAddress;
 
-    // WorkersOptions
+    // WorkersOptions | webRtcTransportOptions
     const workers = config.mediasoup.numWorkers;
-    const rtcMinPort = config.mediasoup.worker.rtcMinPort;
-    const rtcMaxPort = config.mediasoup.worker.rtcMaxPort;
+    const rtcMinPort =
+        config.mediasoup.worker.rtcMinPort || config.mediasoup.webRtcTransport.listenInfos[0].portRange.min || 40000;
+    const rtcMaxPort =
+        config.mediasoup.worker.rtcMaxPort || config.mediasoup.webRtcTransport.listenInfos[0].portRange.max || 40100;
 
     console.log('==================================');
     console.log('checkServerListenPorts');
