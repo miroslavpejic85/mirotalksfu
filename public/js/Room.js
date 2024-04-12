@@ -386,11 +386,15 @@ function setTippy(elem, content, placement, allowHTML = false) {
         if (element._tippy) {
             element._tippy.destroy();
         }
-        tippy(element, {
-            content: content,
-            placement: placement,
-            allowHTML: allowHTML,
-        });
+        try {
+            tippy(element, {
+                content: content,
+                placement: placement,
+                allowHTML: allowHTML,
+            });
+        } catch (err) {
+            console.error('setTippy error', err.message);
+        }
     } else {
         console.warn('setTippy element not found with content', content);
     }
