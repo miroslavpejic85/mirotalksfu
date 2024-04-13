@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.17
+ * @version 1.4.18
  *
  */
 
@@ -307,7 +307,8 @@ function startServer() {
 
     // main page
     app.get(['/'], (req, res) => {
-        if (hostCfg.protected) {
+        log.debug('/ - hostCfg ----->', hostCfg);
+        if (hostCfg.protected && !hostCfg.authenticated) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
@@ -323,6 +324,8 @@ function startServer() {
 
     // set new room name and join
     app.get(['/newroom'], (req, res) => {
+        log.info('/newroom - hostCfg ----->', hostCfg);
+
         if (hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
@@ -337,9 +340,11 @@ function startServer() {
         }
     });
 
-    // no room name specified to join || direct join
+    // Handle Direct join room with params
     app.get('/join/', async (req, res) => {
         if (Object.keys(req.query).length > 0) {
+            log.debug('/join/params - hostCfg ----->', hostCfg);
+
             log.debug('Direct Join', req.query);
 
             // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1
@@ -386,14 +391,11 @@ function startServer() {
                 return res.sendFile(views.login);
             }
         }
-        if (hostCfg.protected) {
-            return res.sendFile(views.login);
-        }
-        res.redirect('/');
     });
 
     // join room by id
     app.get('/join/:roomId', (req, res) => {
+        log.debug('/join/room - hostCfg ----->', hostCfg);
         if (hostCfg.authenticated) {
             res.sendFile(views.room);
         } else {
