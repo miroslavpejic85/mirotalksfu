@@ -326,7 +326,7 @@ function startServer() {
     app.get(['/newroom'], (req, res) => {
         log.info('/newroom - hostCfg ----->', hostCfg);
 
-        if (hostCfg.protected) {
+        if (hostCfg.protected && !hostCfg.authenticated) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.newRoom);
