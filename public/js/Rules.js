@@ -15,7 +15,7 @@ const isRulesActive = true;
  */
 let BUTTONS = {
     main: {
-        shareButton: true, // presenter
+        shareButton: true, // for quest, presenter default true
         hideMeButton: true,
         startAudioButton: true,
         startVideoButton: true,
@@ -105,7 +105,7 @@ function handleRules(isPresenter) {
         // ##################################
         // GUEST
         // ##################################
-        BUTTONS.main.shareButton = false;
+        //BUTTONS.main.shareButton = false;
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
