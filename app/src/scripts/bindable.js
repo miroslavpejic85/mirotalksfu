@@ -36,10 +36,9 @@ async function main() {
 
     // WorkersOptions | webRtcTransportOptions
     const workers = config.mediasoup.numWorkers;
-    const rtcMinPort =
-        config.mediasoup.worker.rtcMinPort || config.mediasoup.webRtcTransport.listenInfos[0].portRange.min || 40000;
-    const rtcMaxPort =
-        config.mediasoup.worker.rtcMaxPort || config.mediasoup.webRtcTransport.listenInfos[0].portRange.max || 40100;
+    const { min, max } = config.mediasoup.webRtcTransport.listenInfos[0].portRange;
+    const rtcMinPort = config.mediasoup.worker.rtcMinPort || min || 40000;
+    const rtcMaxPort = config.mediasoup.worker.rtcMaxPort || max || 40100;
 
     console.log('==================================');
     console.log('checkServerListenPorts');
