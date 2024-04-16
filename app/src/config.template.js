@@ -107,6 +107,19 @@ module.exports = {
         ],
         join_first: true, // Set to true for traditional behavior, false to prioritize presenters
     },
+    email: {
+        /*
+            Configure email settings for notifications or alerts
+            Refer to the documentation for Gmail configuration: https://support.google.com/mail/answer/185833?hl=en
+        */
+        alert: false,
+        host: 'smtp.gmail.com',
+        port: 587,
+        username: 'your_username',
+        password: 'your_password',
+        sendTo: 'sfu.mirotalk@gmail.com',
+        domain: 'sfu.mirotalk.com',
+    },
     ui: {
         /*
             Customize your MiroTalk instance

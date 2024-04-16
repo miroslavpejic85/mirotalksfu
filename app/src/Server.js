@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.18
+ * @version 1.4.19
  *
  */
 
@@ -72,6 +72,9 @@ const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
 const restrictAccessByIP = require('./middleware/IpWhitelist.js');
 const packageJson = require('../../package.json');
+
+// Email alerts and notifications
+const nodemailer = require('./lib/nodemailer');
 
 // Slack API
 const CryptoJS = require('crypto-js');
@@ -1013,6 +1016,11 @@ function startServer() {
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
+            }
+
+            // SCENARIO: Notify when the first user join room and is awaiting assistance...
+            if (room.getPeersCount() === 1) {
+                nodemailer.sendEmailAlert('join', { peer_name: peer_name, room_id: room.id }); // config.email.alert: true
             }
 
             cb(room.toJson());
