@@ -53,9 +53,8 @@ function sendEmailAlert(event, data) {
 
     switch (event) {
         case 'join':
-            const { peer_name, room_id } = data;
-            subject = getJoinRoomSubject(room_id);
-            body = getJoinRoomBody(peer_name, room_id);
+            subject = getJoinRoomSubject(data);
+            body = getJoinRoomBody(data);
             break;
         // ...
         default:
@@ -80,11 +79,14 @@ function sendEmail(subject, body) {
 // EMAIL TEMPLATES
 // ####################################################
 
-function getJoinRoomSubject(room_id) {
+function getJoinRoomSubject(data) {
+    const { room_id } = data;
     return `MiroTalk SFU - New user Join to Room ${room_id}`;
 }
-function getJoinRoomBody(peer_name, room_id) {
+function getJoinRoomBody(data) {
+    const { peer_name, room_id, os, browser } = data;
     const currentDataTime = getCurrentDataTime();
+
     return `
         <h1>New user join</h1>
         <style>
@@ -108,11 +110,19 @@ function getJoinRoomBody(peer_name, room_id) {
                 <td>${peer_name}</td>
             </tr>
             <tr>
+                <td>Os</td>
+                <td>${os}</td>
+            </tr>
+            <tr>
+                <td>Browser</td>
+                <td>${browser}</td>
+            </tr>
+            <tr>
                 <td>Room</td>
                 <td>${ROOM_URL}${room_id}</td>
             </tr>
             <tr>
-                <td>Time</td>
+                <td>Date, Time</td>
                 <td>${currentDataTime}</td>
             </tr>
         </table>

@@ -899,6 +899,9 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
+            const { peer_name, peer_id, peer_uuid, os_name, os_version, browser_name, browser_version } =
+                data.peer_info;
+
             // User Auth required, we check if peer valid
             if (hostCfg.user_auth) {
                 // Check JWT
@@ -935,9 +938,7 @@ function startServer() {
             }
 
             // check if banned...
-            const peerUUID = data.peer_info.peer_uuid;
-            if (room.isBanned(peerUUID)) {
-                const { peer_name, peer_uuid, os_name, os_version, browser_name, browser_version } = data.peer_info;
+            if (room.isBanned(peer_uuid)) {
                 log.info('[Join] - peer is banned!', {
                     room_id: data.room_id,
                     peer: {
@@ -959,14 +960,6 @@ function startServer() {
             log.info('[Join] - current active rooms', activeRooms);
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
-
-            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
-
-            const peer_id = peerInfo?.peer_id || '';
-
-            const peer_name = peerInfo?.peer_name || '';
-
-            const peer_uuid = peerInfo?.peer_uuid || '';
 
             // Set the presenters
             const presenter = {
@@ -1020,7 +1013,12 @@ function startServer() {
 
             // SCENARIO: Notify when the first user join room and is awaiting assistance...
             if (room.getPeersCount() === 1) {
-                nodemailer.sendEmailAlert('join', { peer_name: peer_name, room_id: room.id }); // config.email.alert: true
+                nodemailer.sendEmailAlert('join', {
+                    room_id: room.id,
+                    peer_name: peer_name,
+                    os: os_name ? `${os_name} ${os_version}` : '',
+                    browser: browser_name ? `${browser_name} ${browser_version}` : '',
+                }); // config.email.alert: true
             }
 
             cb(room.toJson());
