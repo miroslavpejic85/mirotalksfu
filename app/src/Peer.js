@@ -276,7 +276,7 @@ module.exports = class Peer {
             });
 
             return {
-                consumer,
+                consumer: consumer,
                 params: {
                     producerId: producer_id,
                     id: id,
