@@ -1016,6 +1016,7 @@ function startServer() {
                 nodemailer.sendEmailAlert('join', {
                     room_id: room.id,
                     peer_name: peer_name,
+                    domain: socket.handshake.headers.host.split(':')[0],
                     os: os_name ? `${os_name} ${os_version}` : '',
                     browser: browser_name ? `${browser_name} ${browser_version}` : '',
                 }); // config.email.alert: true

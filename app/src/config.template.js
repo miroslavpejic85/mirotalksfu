@@ -118,7 +118,6 @@ module.exports = {
         username: 'your_username',
         password: 'your_password',
         sendTo: 'sfu.mirotalk@gmail.com',
-        domain: 'sfu.mirotalk.com',
     },
     ui: {
         /*

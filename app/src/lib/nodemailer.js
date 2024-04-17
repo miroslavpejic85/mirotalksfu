@@ -15,9 +15,6 @@ const EMAIL_USERNAME = config.email ? config.email.username : false;
 const EMAIL_PASSWORD = config.email ? config.email.password : false;
 const EMAIL_SEND_TO = config.email ? config.email.sendTo : false;
 const EMAIL_ALERT = config.email ? config.email.alert : false;
-const DOMAIN = config.email ? config.email.domain : 'sfu.mirotlalk.com';
-
-const ROOM_URL = `https://${DOMAIN}/join/`;
 
 log.info('Email', {
     alert: EMAIL_ALERT,
@@ -84,8 +81,17 @@ function getJoinRoomSubject(data) {
     return `MiroTalk SFU - New user Join to Room ${room_id}`;
 }
 function getJoinRoomBody(data) {
-    const { peer_name, room_id, os, browser } = data;
+    const { peer_name, room_id, domain, os, browser } = data;
+
     const currentDataTime = getCurrentDataTime();
+
+    const localDomains = ['localhost', '127.0.0.1'];
+
+    const currentDomain = localDomains.some((localDomain) => domain.includes(localDomain))
+        ? `${domain}:${config.server.listen.port}`
+        : domain;
+
+    const room_join = `https://${currentDomain}/join/`;
 
     return `
         <h1>New user join</h1>
@@ -119,7 +125,7 @@ function getJoinRoomBody(data) {
             </tr>
             <tr>
                 <td>Room</td>
-                <td>${ROOM_URL}${room_id}</td>
+                <td>${room_join}${room_id}</td>
             </tr>
             <tr>
                 <td>Date, Time</td>
