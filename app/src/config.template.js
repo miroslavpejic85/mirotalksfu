@@ -22,6 +22,14 @@ const IPv4 = getIPv4();
 const numWorkers = require('os').cpus().length;
 
 module.exports = {
+    console: {
+        /*
+            timeZone: Time Zone corresponding to timezone identifiers from the IANA Time Zone Database es 'Europe/Rome' default UTC
+        */
+        timeZone: 'UTC',
+        debug: true,
+        colors: true,
+    },
     server: {
         listen: {
             // app listen on
@@ -51,6 +59,38 @@ module.exports = {
             enabled: false,
         },
     },
+    middleware: {
+        /*
+            Middleware:
+                - IP Whitelist: Access to the instance is restricted to only the specified IP addresses in the allowed list. This feature is disabled by default.
+                - ...
+        */
+        IpWhitelist: {
+            enabled: false,
+            allowed: ['127.0.0.1', '::1'],
+        },
+    },
+    api: {
+        // Default secret key for app/api
+        keySecret: 'mirotalksfu_default_secret',
+        // Define which endpoints are allowed
+        allowed: {
+            meetings: false,
+            meeting: true,
+            join: true,
+            token: false,
+            slack: true,
+            //...
+        },
+    },
+    jwt: {
+        /*
+            JWT https://jwt.io/
+            Securely manages credentials for host configurations and user authentication, enhancing security and streamlining processes.
+         */
+        key: 'mirotalksfu_jwt_secret',
+        exp: '1h',
+    },
     host: {
         /*
             Host Protection (default: false)
@@ -75,27 +115,6 @@ module.exports = {
             //...
         ],
     },
-    api: {
-        // Default secret key for app/api
-        keySecret: 'mirotalksfu_default_secret',
-        // Define which endpoints are allowed
-        allowed: {
-            meetings: false,
-            meeting: true,
-            join: true,
-            token: false,
-            slack: true,
-            //...
-        },
-    },
-    jwt: {
-        /*
-            JWT https://jwt.io/
-            Securely manages credentials for host configurations and user authentication, enhancing security and streamlining processes.
-         */
-        key: 'mirotalksfu_jwt_secret',
-        exp: '1h',
-    },
     presenters: {
         list: [
             /*
@@ -106,6 +125,20 @@ module.exports = {
             'miroslav.pejic.85@gmail.com',
         ],
         join_first: true, // Set to true for traditional behavior, false to prioritize presenters
+    },
+    chatGPT: {
+        /*
+        ChatGPT
+            1. Goto https://platform.openai.com/
+            2. Create your account
+            3. Generate your APIKey https://platform.openai.com/account/api-keys
+        */
+        enabled: false,
+        basePath: 'https://api.openai.com/v1/',
+        apiKey: '',
+        model: 'gpt-3.5-turbo',
+        max_tokens: 1000,
+        temperature: 0,
     },
     email: {
         /*
@@ -118,6 +151,66 @@ module.exports = {
         username: 'your_username',
         password: 'your_password',
         sendTo: 'sfu.mirotalk@gmail.com',
+    },
+    ngrok: {
+        /* 
+        Ngrok
+            1. Goto https://ngrok.com
+            2. Get started for free 
+            3. Copy YourNgrokAuthToken: https://dashboard.ngrok.com/get-started/your-authtoken
+        */
+        authToken: '',
+    },
+    sentry: {
+        /*
+        Sentry
+            1. Goto https://sentry.io/
+            2. Create account
+            3. On dashboard goto Settings/Projects/YourProjectName/Client Keys (DSN)
+        */
+        enabled: false,
+        DSN: '',
+        tracesSampleRate: 0.5,
+    },
+    slack: {
+        /*
+        Slack
+            1. Goto https://api.slack.com/apps/
+            2. Create your app
+            3. On Settings - Basic Information - App Credentials, chose your Signing Secret
+            4. Create a Slash Commands and put as Request URL: https://your.domain.name/slack
+        */
+        enabled: false,
+        signingSecret: '',
+    },
+    IPLookup: {
+        /*
+        GeoJS
+            https://www.geojs.io/docs/v1/endpoints/geo/
+        */
+        enabled: false,
+        getEndpoint(ip) {
+            return `https://get.geojs.io/v1/ip/geo/${ip}.json`;
+        },
+    },
+    survey: {
+        /*
+        QuestionPro
+            1. GoTo https://www.questionpro.com/
+            2. Create your account
+            3. Create your custom survey
+        */
+        enabled: false,
+        url: '',
+    },
+    redirect: {
+        /*
+        Redirect URL on leave room
+            Upon leaving the room, users who either opt out of providing feedback or if the survey is disabled 
+            will be redirected to a specified URL. If enabled false the default '/newroom' URL will be used.
+        */
+        enabled: false,
+        url: '',
     },
     ui: {
         /*
@@ -246,99 +339,6 @@ module.exports = {
             },
             //...
         },
-    },
-    middleware: {
-        /*
-            Middleware:
-                - IP Whitelist: Access to the instance is restricted to only the specified IP addresses in the allowed list. This feature is disabled by default.
-                - ...
-        */
-        IpWhitelist: {
-            enabled: false,
-            allowed: ['127.0.0.1', '::1'],
-        },
-    },
-    console: {
-        /*
-            timeZone: Time Zone corresponding to timezone identifiers from the IANA Time Zone Database es 'Europe/Rome' default UTC
-        */
-        timeZone: 'UTC',
-        debug: true,
-        colors: true,
-    },
-    ngrok: {
-        /* 
-        Ngrok
-            1. Goto https://ngrok.com
-            2. Get started for free 
-            3. Copy YourNgrokAuthToken: https://dashboard.ngrok.com/get-started/your-authtoken
-        */
-        authToken: '',
-    },
-    sentry: {
-        /*
-        Sentry
-            1. Goto https://sentry.io/
-            2. Create account
-            3. On dashboard goto Settings/Projects/YourProjectName/Client Keys (DSN)
-        */
-        enabled: false,
-        DSN: '',
-        tracesSampleRate: 0.5,
-    },
-    slack: {
-        /*
-        Slack
-            1. Goto https://api.slack.com/apps/
-            2. Create your app
-            3. On Settings - Basic Information - App Credentials, chose your Signing Secret
-            4. Create a Slash Commands and put as Request URL: https://your.domain.name/slack
-        */
-        enabled: false,
-        signingSecret: '',
-    },
-    chatGPT: {
-        /*
-        ChatGPT
-            1. Goto https://platform.openai.com/
-            2. Create your account
-            3. Generate your APIKey https://platform.openai.com/account/api-keys
-        */
-        enabled: false,
-        basePath: 'https://api.openai.com/v1/',
-        apiKey: '',
-        model: 'gpt-3.5-turbo',
-        max_tokens: 1000,
-        temperature: 0,
-    },
-    IPLookup: {
-        /*
-        GeoJS
-            https://www.geojs.io/docs/v1/endpoints/geo/
-        */
-        enabled: false,
-        getEndpoint(ip) {
-            return `https://get.geojs.io/v1/ip/geo/${ip}.json`;
-        },
-    },
-    survey: {
-        /*
-        QuestionPro
-            1. GoTo https://www.questionpro.com/
-            2. Create your account
-            3. Create your custom survey
-        */
-        enabled: false,
-        url: '',
-    },
-    redirect: {
-        /*
-        Redirect URL on leave room
-            Upon leaving the room, users who either opt out of providing feedback or if the survey is disabled 
-            will be redirected to a specified URL. If enabled false the default '/newroom' URL will be used.
-        */
-        enabled: false,
-        url: '',
     },
     stats: {
         /*
