@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.19
+ * @version 1.4.20
  *
  */
 
@@ -142,9 +142,9 @@ const _EVENTS = {
 // Enums
 const enums = {
     recording: {
-        started: 'Started recording',
-        start: 'Start recording',
-        stop: 'Stop recording',
+        started: 'Started conference recording',
+        start: 'Start conference recording',
+        stop: 'Stop conference recording',
     },
     //...
 };
@@ -2871,10 +2871,11 @@ class RoomClient {
                 switch (data.action) {
                     case enums.recording.started:
                     case enums.recording.start:
-                        recordingStartMessage();
+                        html = html + '<br/> Your presence implies you agree to being recorded';
+                        toastMessage(6000);
                         break;
                     case enums.recording.stop:
-                        defaultMessage();
+                        toastMessage(3000);
                         break;
                     //...
                     default:
@@ -2887,26 +2888,22 @@ class RoomClient {
                 defaultMessage();
                 break;
         }
-        // RECORDING
-        function recordingStartMessage() {
-            Swal.fire({
-                allowOutsideClick: false,
-                allowEscapeKey: false,
+        // TOAST less invasive
+        function toastMessage(duration = 3000) {
+            const Toast = Swal.mixin({
                 background: swalBackground,
-                position: position,
+                position: 'top-end',
                 icon: icon,
-                imageUrl: imageUrl,
+                showConfirmButton: false,
+                timerProgressBar: true,
+                toast: true,
+                timer: duration,
+            });
+            Toast.fire({
                 title: title,
-                html: html + '<br/> Do you want to leave the room?',
-                showDenyButton: true,
-                confirmButtonText: `Yes`,
-                denyButtonText: `No`,
+                html: html,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    exitButton.onclick();
-                }
             });
         }
         // DEFAULT
@@ -4457,12 +4454,15 @@ class RoomClient {
 
     handleRecordingAction(data) {
         console.log('Handle recording action', data);
+
+        const { peer_name, peer_id, action } = data;
+
         const recAction = {
             side: 'left',
             img: this.leftMsgAvatar,
-            peer_name: data.peer_name,
-            peer_id: data.peer_id,
-            peer_msg: `🔴 ${data.action}`,
+            peer_name: peer_name,
+            peer_id: peer_id,
+            peer_msg: `🔴 ${action}`,
             to_peer_id: 'all',
             to_peer_name: 'all',
         };
@@ -4470,15 +4470,19 @@ class RoomClient {
 
         const recData = {
             type: 'recording',
-            action: data.action,
-            peer_name: data.peer_name,
+            action: action,
+            peer_name: peer_name,
         };
+
         this.msgHTML(
             recData,
             null,
             image.recording,
             null,
-            `${icons.user} ${data.peer_name} <br /> <h1>${data.action}</h1>`,
+            `${icons.user} ${peer_name} 
+            <br /><br /> 
+            <span>🔴 ${action}</span>
+            <br />`,
         );
     }
 
