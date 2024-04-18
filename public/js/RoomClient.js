@@ -397,8 +397,11 @@ class RoomClient {
     async joinAllowed(room) {
         console.log('07 ----> Join Room allowed');
         this.handleRoomInfo(room);
-        const data = await this.socket.request('getRouterRtpCapabilities');
-        this.device = await this.loadDevice(data);
+        const routerRtpCapabilities = await this.socket.request('getRouterRtpCapabilities');
+        routerRtpCapabilities.headerExtensions = routerRtpCapabilities.headerExtensions.filter(
+            (ext) => ext.uri !== 'urn:3gpp:video-orientation',
+        );
+        this.device = await this.loadDevice(routerRtpCapabilities);
         console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
         if (isBroadcastingEnabled) {
