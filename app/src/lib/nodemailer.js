@@ -1,4 +1,4 @@
-'use-strict';
+'use strict';
 
 const nodemailer = require('nodemailer');
 const config = require('../config');
