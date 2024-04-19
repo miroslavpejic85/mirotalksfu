@@ -16,13 +16,15 @@ const EMAIL_PASSWORD = config.email ? config.email.password : false;
 const EMAIL_SEND_TO = config.email ? config.email.sendTo : false;
 const EMAIL_ALERT = config.email ? config.email.alert : false;
 
-log.info('Email', {
-    alert: EMAIL_ALERT,
-    host: EMAIL_HOST,
-    port: EMAIL_PORT,
-    username: EMAIL_USERNAME,
-    password: EMAIL_PASSWORD,
-});
+if (EMAIL_ALERT && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD && EMAIL_SEND_TO) {
+    log.info('Email', {
+        alert: EMAIL_ALERT,
+        host: EMAIL_HOST,
+        port: EMAIL_PORT,
+        username: EMAIL_USERNAME,
+        password: EMAIL_PASSWORD,
+    });
+}
 
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
