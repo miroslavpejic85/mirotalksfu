@@ -6017,9 +6017,9 @@ class RoomClient {
             if (result.isConfirmed) {
                 switch (type) {
                     case mediaType.audio:
-                        !this.producerLabel.get(RoomClient.mediaType.audio)
-                            ? await this.produce(mediaType.audio, microphoneSelect.value)
-                            : await this.resumeProducer(mediaType.audio);
+                        this.producerExist(mediaType.audio)
+                            ? await this.resumeProducer(mediaType.audio)
+                            : await this.produce(mediaType.audio, microphoneSelect.value);
                         this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', true);
                         break;
                     case mediaType.video:
