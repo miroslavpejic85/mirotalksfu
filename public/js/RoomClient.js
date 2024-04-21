@@ -1067,22 +1067,27 @@ class RoomClient {
 
     async startLocalMedia() {
         console.log('08 ----> START LOCAL MEDIA...');
+        const audioProducerExist = this.producerExist(mediaType.audio);
         if (this.isAudioAllowed) {
-            if (!this.producerExist(mediaType.audio)) {
+            if (!audioProducerExist) {
                 await this.produce(mediaType.audio, microphoneSelect.value);
                 console.log('09 ----> START AUDIO MEDIA');
             }
         } else {
             if (isEnumerateAudioDevices) {
-                if (!this.producerExist(mediaType.audio)) {
+                if (!audioProducerExist) {
                     await this.produce(mediaType.audio, microphoneSelect.value);
                     console.log('09 ----> START AUDIO MEDIA');
+                    setColor(startAudioButton, 'red');
+                    this.setIsAudio(this.peer_id, false);
+                    if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
                     await this.pauseProducer(mediaType.audio);
                     console.log('09 ----> PAUSE AUDIO MEDIA');
+                    this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
                 }
             }
         }
-        if (this._moderator.audio_start_muted) {
+        if (this.isAudioAllowed && this._moderator.audio_start_muted) {
             setColor(startAudioButton, 'red');
             this.setIsAudio(this.peer_id, false);
             if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
