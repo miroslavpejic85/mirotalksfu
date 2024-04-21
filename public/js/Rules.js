@@ -172,6 +172,7 @@ function handleRules(isPresenter) {
             chat_cant_privately: switchEveryoneCantChatPrivately.checked,
             chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
         };
+        console.log('Rules moderator data ---->', moderatorData);
         rc.updateRoomModeratorALL(moderatorData);
     }
     // main. settings...

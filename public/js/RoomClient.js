@@ -457,14 +457,24 @@ class RoomClient {
 
             // Handle Room moderator rules
             if (room.moderator && (!isRulesActive || !isPresenter)) {
-                console.log('07.2 ----> MODERATOR', room.moderator);
-                this._moderator.audio_start_muted = room.moderator.audio_start_muted;
-                this._moderator.video_start_hidden = room.moderator.video_start_hidden;
-                this._moderator.audio_cant_unmute = room.moderator.audio_cant_unmute;
-                this._moderator.video_cant_unhide = room.moderator.video_cant_unhide;
-                this._moderator.screen_cant_share = room.moderator.screen_cant_share;
-                this._moderator.chat_cant_privately = room.moderator.chat_cant_privately;
-                this._moderator.chat_cant_chatgpt = room.moderator.chat_cant_chatgpt;
+                console.log('07.2 ----> ROOM MODERATOR', room.moderator);
+                const {
+                    audio_start_muted,
+                    video_start_hidden,
+                    audio_cant_unmute,
+                    video_cant_unhide,
+                    screen_cant_share,
+                    chat_cant_privately,
+                    chat_cant_chatgpt,
+                } = room.moderator;
+
+                this._moderator.audio_start_muted = audio_start_muted;
+                this._moderator.video_start_hidden = video_start_hidden;
+                this._moderator.audio_cant_unmute = audio_cant_unmute;
+                this._moderator.video_cant_unhide = video_cant_unhide;
+                this._moderator.screen_cant_share = screen_cant_share;
+                this._moderator.chat_cant_privately = chat_cant_privately;
+                this._moderator.chat_cant_chatgpt = chat_cant_chatgpt;
                 //
                 if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
