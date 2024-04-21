@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.20
+ * @version 1.4.21
  *
  */
 
@@ -404,12 +404,14 @@ class RoomClient {
         this.device = await this.loadDevice(routerRtpCapabilities);
         console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
         await this.initTransports(this.device);
-        if (isBroadcastingEnabled) {
-            isPresenter ? this.startLocalMedia() : this.handleRoomBroadcasting();
-        } else {
-            this.startLocalMedia();
-        }
+        // ###################################
         this.socket.emit('getProducers');
+        // ###################################
+        if (isBroadcastingEnabled) {
+            isPresenter ? await this.startLocalMedia() : this.handleRoomBroadcasting();
+        } else {
+            await this.startLocalMedia();
+        }
     }
 
     handleRoomInfo(room) {
@@ -1063,32 +1065,47 @@ class RoomClient {
     // START LOCAL AUDIO VIDEO MEDIA
     // ####################################################
 
-    startLocalMedia() {
-        console.log('08 ----> Start local media');
-        if (this.isAudioAllowed && !this._moderator.audio_start_muted) {
-            console.log('09 ----> Start audio media');
-            this.produce(mediaType.audio, microphoneSelect.value);
+    async startLocalMedia() {
+        console.log('08 ----> START LOCAL MEDIA...');
+        if (this.isAudioAllowed) {
+            if (!this.producerExist(mediaType.audio)) {
+                await this.produce(mediaType.audio, microphoneSelect.value);
+                console.log('09 ----> START AUDIO MEDIA');
+            }
         } else {
-            console.log('09 ----> Audio is off');
+            if (isEnumerateAudioDevices) {
+                if (!this.producerExist(mediaType.audio)) {
+                    await this.produce(mediaType.audio, microphoneSelect.value);
+                    console.log('09 ----> START AUDIO MEDIA');
+                    await this.pauseProducer(mediaType.audio);
+                    console.log('09 ----> PAUSE AUDIO MEDIA');
+                }
+            }
+        }
+        if (this._moderator.audio_start_muted) {
             setColor(startAudioButton, 'red');
             this.setIsAudio(this.peer_id, false);
             if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
+            await this.pauseProducer(mediaType.audio);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
+            console.log('09 ----> AUDIO IS OFF');
         }
+
         if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
-            console.log('10 ----> Start video media');
-            this.produce(mediaType.video, videoSelect.value);
+            await this.produce(mediaType.video, videoSelect.value);
+            console.log('10 ----> START VIDEO MEDIA');
         } else {
-            console.log('10 ----> Video is off');
             setColor(startVideoButton, 'red');
             this.setVideoOff(this.peer_info, false);
             this.sendVideoOff();
             if (BUTTONS.main.startVideoButton) this.event(_EVENTS.stopVideo);
             this.updatePeerInfo(this.peer_name, this.peer_id, 'video', false);
+            console.log('10 ----> VIDEO IS OFF');
         }
+
         if (this.joinRoomWithScreen && !this._moderator.screen_cant_share) {
-            console.log('08 ----> Start Screen media');
-            this.produce(mediaType.screen, null, false, true);
+            await this.produce(mediaType.screen, null, false, true);
+            console.log('11 ----> START SCREEN MEDIA');
         }
         // if (this.isScreenAllowed) {
         //     this.shareScreen();
@@ -1128,7 +1145,7 @@ class RoomClient {
             return console.error('Cannot produce video');
         }
         if (this.producerLabel.has(type)) {
-            return console.log('Producer already exists for this type ' + type);
+            return console.warn('Producer already exists for this type ' + type);
         }
 
         const videoPrivacyBtn = this.getId(this.peer_id + '__vp');
@@ -1206,6 +1223,7 @@ class RoomClient {
             console.log('PRODUCER', producer);
 
             this.producers.set(producer.id, producer);
+            this.producerLabel.set(type, producer.id);
 
             // if screen sharing produce the tab audio + microphone
             if (screen && stream.getAudioTracks()[0]) {
@@ -1280,8 +1298,6 @@ class RoomClient {
                 this.producers.delete(producer.id);
             });
 
-            this.producerLabel.set(type, producer.id);
-
             switch (type) {
                 case mediaType.audio:
                     this.setIsAudio(this.peer_id, true);
@@ -1299,6 +1315,7 @@ class RoomClient {
                     break;
             }
             this.sound('joined');
+            return producer;
         } catch (err) {
             console.error('Produce error:', err);
 
@@ -1676,8 +1693,8 @@ class RoomClient {
 
     closeThenProduce(type, deviceId = null, swapCamera = false) {
         this.closeProducer(type);
-        setTimeout(function () {
-            rc.produce(type, deviceId, swapCamera);
+        setTimeout(async function () {
+            await rc.produce(type, deviceId, swapCamera);
         }, 1000);
     }
 
@@ -1795,7 +1812,7 @@ class RoomClient {
 
     async pauseProducer(type) {
         if (!this.producerLabel.has(type)) {
-            return console.log('There is no producer for this type ' + type);
+            return console.warn('There is no producer for this type ' + type);
         }
 
         const producer_id = this.producerLabel.get(type);
@@ -1811,6 +1828,7 @@ class RoomClient {
         switch (type) {
             case mediaType.audio:
                 this.event(_EVENTS.pauseAudio);
+                this.setIsAudio(this.peer_id, false);
                 break;
             case mediaType.video:
                 this.event(_EVENTS.pauseVideo);
@@ -1825,7 +1843,7 @@ class RoomClient {
 
     async resumeProducer(type) {
         if (!this.producerLabel.has(type)) {
-            return console.log('There is no producer for this type ' + type);
+            return console.warn('There is no producer for this type ' + type);
         }
 
         const producer_id = this.producerLabel.get(type);
@@ -1841,6 +1859,7 @@ class RoomClient {
         switch (type) {
             case mediaType.audio:
                 this.event(_EVENTS.resumeAudio);
+                this.setIsAudio(this.peer_id, true);
                 break;
             case mediaType.video:
                 this.event(_EVENTS.resumeVideo);
@@ -1855,7 +1874,7 @@ class RoomClient {
 
     closeProducer(type) {
         if (!this.producerLabel.has(type)) {
-            return console.log('There is no producer for this type ' + type);
+            return console.warn('There is no producer for this type ' + type);
         }
 
         const producer_id = this.producerLabel.get(type);
@@ -1928,7 +1947,7 @@ class RoomClient {
     async produceScreenAudio(stream) {
         try {
             if (this.producerLabel.has(mediaType.audioTab)) {
-                return console.log('Producer already exists for this type ' + mediaType.audioTab);
+                return console.warn('Producer already exists for this type ' + mediaType.audioTab);
             }
 
             const track = stream.getAudioTracks()[0];
@@ -1944,6 +1963,7 @@ class RoomClient {
             console.log('PRODUCER SCREEN AUDIO', producerSa);
 
             this.producers.set(producerSa.id, producerSa);
+            this.producerLabel.set(mediaType.audioTab, producerSa.id);
 
             const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
@@ -1971,8 +1991,6 @@ class RoomClient {
                 console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
                 this.producers.delete(producerSa.id);
             });
-
-            this.producerLabel.set(mediaType.audioTab, producerSa.id);
         } catch (err) {
             console.error('Produce error:', err);
         }
@@ -5995,18 +6013,20 @@ class RoomClient {
             denyButtonText: `No`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
+        }).then(async (result) => {
             if (result.isConfirmed) {
                 switch (type) {
                     case mediaType.audio:
-                        this.produce(mediaType.audio, microphoneSelect.value);
+                        !this.producerLabel.get(RoomClient.mediaType.audio)
+                            ? await this.produce(mediaType.audio, microphoneSelect.value)
+                            : await this.resumeProducer(mediaType.audio);
                         this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', true);
                         break;
                     case mediaType.video:
-                        this.produce(mediaType.video, videoSelect.value);
+                        await this.produce(mediaType.video, videoSelect.value);
                         break;
                     case mediaType.screen:
-                        this.produce(mediaType.screen);
+                        await this.produce(mediaType.screen);
                         break;
                     default:
                         break;

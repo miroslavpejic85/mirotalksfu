@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.20
+ * @version 1.4.21
  *
  */
 
@@ -1521,9 +1521,6 @@ function handleButtons() {
         isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
-        if (participantsCount == 1 && !rc.peer_info.peer_audio) {
-            return userLog('warning', '🔴 Recording requires your audio to be enabled', 'top-end', 6000);
-        }
         rc.startRecording();
     };
     stopRecButton.onclick = () => {
@@ -1553,16 +1550,28 @@ function handleButtons() {
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
         if (!isEnumerateAudioDevices) await initEnumerateAudioDevices();
-        rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+
+        const producerExist = rc.producerExist(RoomClient.mediaType.audio);
+        console.log('START AUDIO producerExist --->', producerExist);
+
+        producerExist
+            ? await rc.resumeProducer(RoomClient.mediaType.audio)
+            : await rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+
         rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
-        // rc.resumeProducer(RoomClient.mediaType.audio);
     };
-    stopAudioButton.onclick = () => {
+    stopAudioButton.onclick = async () => {
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
-        rc.closeProducer(RoomClient.mediaType.audio);
+
+        const producerExist = rc.producerExist(RoomClient.mediaType.audio);
+        console.log('START STOP producerExist --->', producerExist);
+
+        producerExist
+            ? await rc.pauseProducer(RoomClient.mediaType.audio)
+            : await rc.closeProducer(RoomClient.mediaType.audio);
+
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
-        // rc.pauseProducer(RoomClient.mediaType.audio);
     };
     startVideoButton.onclick = async () => {
         const moderator = rc.getModerator();
@@ -1571,20 +1580,20 @@ function handleButtons() {
         }
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) await initEnumerateVideoDevices();
-        rc.produce(RoomClient.mediaType.video, videoSelect.value);
-        // rc.resumeProducer(RoomClient.mediaType.video);
+        await rc.produce(RoomClient.mediaType.video, videoSelect.value);
+        // await rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.video);
-        // rc.pauseProducer(RoomClient.mediaType.video);
+        // await rc.pauseProducer(RoomClient.mediaType.video);
     };
-    startScreenButton.onclick = () => {
+    startScreenButton.onclick = async () => {
         const moderator = rc.getModerator();
         if (moderator.screen_cant_share) {
             return userLog('warning', 'The moderator does not allow you to share the screen', 'top-end', 6000);
         }
-        rc.produce(RoomClient.mediaType.screen);
+        await rc.produce(RoomClient.mediaType.screen);
     };
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
@@ -1986,42 +1995,42 @@ function handleSelects() {
         rc.changeAudioDestination();
         refreshLsDevices();
     };
-    switchPushToTalk.onchange = (e) => {
+    switchPushToTalk.onchange = async (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
         if (!producerExist && !isPushToTalkActive) {
             console.log('Push-to-talk: start audio producer');
             setAudioButtonsDisabled(true);
             if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
-            rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
-            setTimeout(function () {
-                rc.pauseProducer(RoomClient.mediaType.audio);
+            await rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+            setTimeout(async function () {
+                await rc.pauseProducer(RoomClient.mediaType.audio);
                 rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
             }, 1000);
         }
         isPushToTalkActive = !isPushToTalkActive;
         if (producerExist && !isPushToTalkActive) {
             console.log('Push-to-talk: resume audio producer');
-            rc.resumeProducer(RoomClient.mediaType.audio);
+            await rc.resumeProducer(RoomClient.mediaType.audio);
             rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
         }
         e.target.blur(); // Removes focus from the element
         rc.roomMessage('ptt', isPushToTalkActive);
         console.log(`Push-to-talk enabled: ${isPushToTalkActive}`);
     };
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', async (e) => {
         if (!isPushToTalkActive) return;
         if (e.code === 'Space') {
             if (isSpaceDown) return;
-            rc.resumeProducer(RoomClient.mediaType.audio);
+            await rc.resumeProducer(RoomClient.mediaType.audio);
             rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
             isSpaceDown = true;
             console.log('Push-to-talk: audio resumed');
         }
     });
-    document.addEventListener('keyup', (e) => {
+    document.addEventListener('keyup', async (e) => {
         if (!isPushToTalkActive) return;
         if (e.code === 'Space') {
-            rc.pauseProducer(RoomClient.mediaType.audio);
+            await rc.pauseProducer(RoomClient.mediaType.audio);
             rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
             isSpaceDown = false;
             console.log('Push-to-talk: audio paused');
@@ -2531,11 +2540,14 @@ function handleRoomClientEvents() {
         console.log('Room event: Client pause audio');
         hide(stopAudioButton);
         show(startAudioButton);
+        setColor(startAudioButton, 'red');
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room event: Client resume audio');
         hide(startAudioButton);
         show(stopAudioButton);
+        setAudioButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
         console.log('Room event: Client stop audio');
@@ -2556,11 +2568,15 @@ function handleRoomClientEvents() {
         console.log('Room event: Client pause video');
         hide(stopVideoButton);
         show(startVideoButton);
+        setColor(startVideoButton, 'red');
+        setVideoButtonsDisabled(false);
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
         hide(startVideoButton);
         show(stopVideoButton);
+        setVideoButtonsDisabled(false);
+        isVideoPrivacyActive = false;
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -2578,9 +2594,13 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room event: Client pause screen');
+        hide(startScreenButton);
+        show(stopScreenButton);
     });
     rc.on(RoomClient.EVENTS.resumeScreen, () => {
         console.log('Room event: Client resume screen');
+        hide(stopScreenButton);
+        show(startScreenButton);
     });
     rc.on(RoomClient.EVENTS.stopScreen, () => {
         console.log('Room event: Client stop screen');
