@@ -1565,7 +1565,7 @@ function handleButtons() {
         setAudioButtonsDisabled(true);
 
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
-        console.log('START STOP producerExist --->', producerExist);
+        console.log('STOP AUDIO producerExist --->', producerExist);
 
         producerExist
             ? await rc.pauseProducer(RoomClient.mediaType.audio)
