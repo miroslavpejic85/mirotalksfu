@@ -980,18 +980,19 @@ class RoomClient {
     }
 
     getReconnectDirectJoinURL() {
+        const { peer_audio, peer_video, peer_screen, peer_token } = this.peer_info;
         const baseUrl = `${window.location.origin}/join`;
         const queryParams = {
             room: this.room_id,
             roomPassword: this.RoomPassword,
             name: this.peer_name,
-            audio: this.peer_info.peer_audio,
-            video: this.peer_info.peer_video,
-            screen: this.peer_info.peer_screen,
+            audio: peer_audio,
+            video: peer_video,
+            screen: peer_screen,
             notify: 0,
             isPresenter: isPresenter,
         };
-        if (this.peer_info.peer_token) queryParams.token = this.peer_info.peer_token;
+        if (peer_token) queryParams.token = peer_token;
         const url = `${baseUrl}?${Object.entries(queryParams)
             .map(([key, value]) => `${key}=${value}`)
             .join('&')}`;
@@ -1288,7 +1289,7 @@ class RoomClient {
                     au.parentNode.removeChild(au);
                     console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
                 }
-                this.producers.delete(producer.id);
+                this.closeProducer(type);
             });
 
             producer.on('close', () => {
@@ -1310,7 +1311,7 @@ class RoomClient {
                     au.parentNode.removeChild(au);
                     console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
                 }
-                this.producers.delete(producer.id);
+                this.closeProducer(type);
             });
 
             switch (type) {
@@ -1994,7 +1995,7 @@ class RoomClient {
                 });
                 sa.parentNode.removeChild(sa);
                 console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
-                this.producers.delete(producerSa.id);
+                this.closeProducer(mediaType.audioTab);
             });
 
             producerSa.on('close', () => {
@@ -2004,7 +2005,7 @@ class RoomClient {
                 });
                 sa.parentNode.removeChild(sa);
                 console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
-                this.producers.delete(producerSa.id);
+                this.closeProducer(mediaType.audioTab);
             });
         } catch (err) {
             console.error('Produce error:', err);
@@ -2326,10 +2327,7 @@ class RoomClient {
         //console.log('setVideoOff', peer_info);
         let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv;
 
-        const peer_id = peer_info.peer_id;
-        const peer_name = peer_info.peer_name;
-        const peer_audio = peer_info.peer_audio;
-        const peer_presenter = peer_info.peer_presenter;
+        const { peer_id, peer_name, peer_audio, peer_presenter } = peer_info;
 
         this.removeVideoOff(peer_id);
         d = document.createElement('div');
@@ -5953,7 +5951,8 @@ class RoomClient {
                     break;
                 case 'mute':
                     if (peerActionAllowed) {
-                        this.closeProducer(mediaType.audio);
+                        const producerExist = this.producerExist(mediaType.audio);
+                        producerExist ? await this.pauseProducer(mediaType.audio) : this.closeProducer(mediaType.audio);
                         this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
                         this.userLog(
                             'warning',
