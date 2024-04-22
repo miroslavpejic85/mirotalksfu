@@ -174,11 +174,13 @@ module.exports = class Room {
                 break;
             case 'video_start_hidden':
                 this._moderator.video_start_hidden = data.status;
+                break;
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;
                 break;
             case 'video_cant_unhide':
                 this._moderator.video_cant_unhide = data.status;
+                break;
             case 'screen_cant_share':
                 this._moderator.screen_cant_share = data.status;
                 break;
