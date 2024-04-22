@@ -5951,15 +5951,16 @@ class RoomClient {
                     break;
                 case 'mute':
                     if (peerActionAllowed) {
-                        const producerExist = this.producerExist(mediaType.audio);
-                        producerExist ? await this.pauseProducer(mediaType.audio) : this.closeProducer(mediaType.audio);
-                        this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
-                        this.userLog(
-                            'warning',
-                            from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
-                            'top-end',
-                            10000,
-                        );
+                        if (this.producerExist(mediaType.audio)) {
+                            await this.pauseProducer(mediaType.audio);
+                            this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
+                            this.userLog(
+                                'warning',
+                                from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
+                                'top-end',
+                                10000,
+                            );
+                        }
                     }
                     break;
                 case 'unmute':
