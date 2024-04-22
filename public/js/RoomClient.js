@@ -221,7 +221,7 @@ class RoomClient {
 
         this._isConnected = false;
         this.isVideoOnFullScreen = false;
-        this.isVideoFullScreenSupported = peer_info.is_mobile_device && peer_info.os_name === 'iOS' ? false : true;
+        this.isVideoFullScreenSupported = this.isFullScreenSupported();
         this.isVideoPictureInPictureSupported = document.pictureInPictureEnabled;
         this.isZoomCenterMode = false;
         this.isChatOpen = false;
@@ -3046,6 +3046,15 @@ class RoomClient {
     // ####################################################
     // FULL SCREEN
     // ####################################################
+
+    isFullScreenSupported() {
+        return (
+            document.fullscreenEnabled ||
+            document.webkitFullscreenEnabled ||
+            document.mozFullScreenEnabled ||
+            document.msFullscreenEnabled
+        );
+    }
 
     toggleFullScreen(elem = null) {
         let el = elem ? elem : document.documentElement;
