@@ -1084,27 +1084,15 @@ class RoomClient {
                 await this.produce(mediaType.audio, microphoneSelect.value);
                 console.log('09 ----> START AUDIO MEDIA');
             }
-        } else {
-            if (isEnumerateAudioDevices) {
-                if (!audioProducerExist) {
-                    await this.produce(mediaType.audio, microphoneSelect.value);
-                    console.log('09 ----> START AUDIO MEDIA');
-                    setColor(startAudioButton, 'red');
-                    this.setIsAudio(this.peer_id, false);
-                    if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
-                    await this.pauseProducer(mediaType.audio);
-                    console.log('09 ----> PAUSE AUDIO MEDIA');
-                    this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
-                }
+            if (this._moderator.audio_start_muted) {
+                await this.pauseAudioProducer();
             }
-        }
-        if (this.isAudioAllowed && this._moderator.audio_start_muted) {
-            setColor(startAudioButton, 'red');
-            this.setIsAudio(this.peer_id, false);
-            if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
-            await this.pauseProducer(mediaType.audio);
-            this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
-            console.log('09 ----> AUDIO IS OFF');
+        } else {
+            if (isEnumerateAudioDevices && !audioProducerExist) {
+                await this.produce(mediaType.audio, microphoneSelect.value);
+                console.log('09 ----> START AUDIO MEDIA');
+                await this.pauseAudioProducer();
+            }
         }
 
         if (this.isVideoAllowed && !this._moderator.video_start_hidden) {
@@ -1126,6 +1114,16 @@ class RoomClient {
         // if (this.isScreenAllowed) {
         //     this.shareScreen();
         // }
+        console.log('[startLocalMedia] - PRODUCER LABEL', this.producerLabel);
+    }
+
+    async pauseAudioProducer() {
+        setColor(startAudioButton, 'red');
+        this.setIsAudio(this.peer_id, false);
+        if (BUTTONS.main.startAudioButton) this.event(_EVENTS.stopAudio);
+        await this.pauseProducer(mediaType.audio);
+        console.log('09 ----> PAUSE AUDIO MEDIA');
+        this.updatePeerInfo(this.peer_name, this.peer_id, 'audio', false);
     }
 
     // ####################################################
@@ -1909,6 +1907,8 @@ class RoomClient {
         this.producers.delete(producer_id);
         this.producerLabel.delete(type);
 
+        console.log('[closeProducer] - PRODUCER LABEL', this.producerLabel);
+
         if (type !== mediaType.audio) {
             const elem = this.getId(producer_id);
             const d = this.getId(producer_id + '__video');
@@ -1980,6 +1980,8 @@ class RoomClient {
 
             this.producers.set(producerSa.id, producerSa);
             this.producerLabel.set(mediaType.audioTab, producerSa.id);
+
+            console.log('[produceScreenAudio] - PRODUCER LABEL', this.producerLabel);
 
             const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
