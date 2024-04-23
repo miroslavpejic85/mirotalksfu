@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.21
+ * @version 1.4.22
  *
  */
 
@@ -475,7 +475,15 @@ function startServer() {
                 authorized: authHost.isAuthorizedIP(ip),
                 authorizedIps: authHost.getAuthorizedIPs(),
             });
-            const token = encodeToken({ username: username, password: password, presenter: true });
+
+            const isPresenter =
+                config.presenters && config.presenters.join_first
+                    ? true
+                    : config.presenters &&
+                      config.presenters.list &&
+                      config.presenters.list.includes(username).toString();
+
+            const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             return res.status(200).json({ message: token });
         }
 
@@ -893,8 +901,6 @@ function startServer() {
 
             log.info('User joined', data);
 
-            let is_presenter = true;
-
             const { peer_token } = data.peer_info;
 
             const room = roomList.get(socket.room_id);
@@ -902,14 +908,21 @@ function startServer() {
             const { peer_name, peer_id, peer_uuid, os_name, os_version, browser_name, browser_version } =
                 data.peer_info;
 
-            // User Auth required, we check if peer valid
-            if (hostCfg.user_auth) {
+            let is_presenter = true;
+
+            // User Auth required or detect token, we check if peer valid
+            if (hostCfg.user_auth || peer_token) {
                 // Check JWT
                 if (peer_token) {
                     try {
                         const { username, password, presenter } = checkXSS(decodeToken(peer_token));
 
                         const isPeerValid = await isAuthPeer(username, password);
+
+                        if (!isPeerValid) {
+                            // redirect peer to login page
+                            return cb('unauthorized');
+                        }
 
                         is_presenter =
                             presenter === '1' ||
@@ -923,11 +936,6 @@ function startServer() {
                             peer_valid: isPeerValid,
                             peer_presenter: is_presenter,
                         });
-
-                        if (!isPeerValid) {
-                            // redirect peer to login page
-                            return cb('unauthorized');
-                        }
                     } catch (err) {
                         log.error('[Join] - JWT error', { error: err.message, token: peer_token });
                         return cb('unauthorized');

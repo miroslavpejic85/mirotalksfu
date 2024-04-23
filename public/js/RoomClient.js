@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.21
+ * @version 1.4.22
  *
  */
 
@@ -396,7 +396,7 @@ class RoomClient {
 
     async joinAllowed(room) {
         console.log('07 ----> Join Room allowed');
-        this.handleRoomInfo(room);
+        await this.handleRoomInfo(room);
         const routerRtpCapabilities = await this.socket.request('getRouterRtpCapabilities');
         routerRtpCapabilities.headerExtensions = routerRtpCapabilities.headerExtensions.filter(
             (ext) => ext.uri !== 'urn:3gpp:video-orientation',
@@ -414,7 +414,7 @@ class RoomClient {
         }
     }
 
-    handleRoomInfo(room) {
+    async handleRoomInfo(room) {
         console.log('07.0 ----> Room Survey', room.survey);
         survey = room.survey;
         console.log('07.0 ----> Room Leave Redirect', room.redirect);
@@ -1059,14 +1059,15 @@ class RoomClient {
             position: 'center',
             imageUrl: image.broadcasting,
             title: 'Room broadcasting Enabled',
-            text: 'Would you like to deactivate room broadcasting?',
+            text: 'Would you like to continue the room broadcast?',
             showDenyButton: true,
+            confirmButtonColor: '#18392B',
             confirmButtonText: `Yes`,
             denyButtonText: `No`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.isDenied) {
                 switchBroadcasting.click();
             }
         });
