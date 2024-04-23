@@ -184,6 +184,15 @@ function handleRules(isPresenter) {
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
     !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
+    if (BUTTONS.settings.host_only_recording) {
+        show(recordingImage);
+        show(roomRecordingOptions);
+        show(roomHostOnlyRecording);
+    } else {
+        show(recordingImage);
+        show(roomRecordingOptions);
+        hide(roomHostOnlyRecording);
+    }
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton
         ? elemDisplay('whiteboardLockButton', true)

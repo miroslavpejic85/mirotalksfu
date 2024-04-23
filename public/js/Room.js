@@ -1249,11 +1249,6 @@ function roomIsReady() {
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
-    if (BUTTONS.settings.host_only_recording) {
-        show(recordingImage);
-        show(roomHostOnlyRecording);
-        show(roomRecordingOptions);
-    }
     if (rc.recSyncServerRecording) show(roomRecordingServer);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
