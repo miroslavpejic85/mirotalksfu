@@ -410,10 +410,20 @@ module.exports = {
         webRtcServerActive: false,
         webRtcServerOptions: {
             listenInfos: [
-                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
-                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: 44444 },
-                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 44444, max: 44444 + numWorkers }},
-                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 44444, max: 44444 + numWorkers }},
+                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: 40000 },
+                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: 40000 },
+                {
+                    protocol: 'udp',
+                    ip: '0.0.0.0',
+                    announcedAddress: IPv4,
+                    portRange: { min: 40000, max: 40000 + numWorkers },
+                },
+                {
+                    protocol: 'tcp',
+                    ip: '0.0.0.0',
+                    announcedAddress: IPv4,
+                    portRange: { min: 40000, max: 40000 + numWorkers },
+                },
             ],
         },
         // WebRtcTransportOptions
