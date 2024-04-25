@@ -61,7 +61,9 @@ async function main() {
         const webRtcServerIpInfo = config.mediasoup.webRtcServerOptions.listenInfos[0];
         const webRtcServerIpAddress =
             webRtcServerIpInfo.ip !== '0.0.0.0' ? webRtcServerIpInfo.ip : webRtcServerIpInfo.announcedAddress;
-        const webRtcServerStartPort = webRtcServerIpInfo.port;
+        const webRtcServerStartPort = webRtcServerIpInfo.port
+            ? webRtcServerIpInfo.port
+            : webRtcServerIpInfo.portRange.min;
 
         await checkWebRtcServerPorts(webRtcServerIpAddress, webRtcServerStartPort, workers);
     }
