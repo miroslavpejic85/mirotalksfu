@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.22
+ * @version 1.4.23
  *
  */
 
@@ -364,6 +364,12 @@ function startServer() {
 
             if (token) {
                 try {
+                    const validToken = await isValidToken(token);
+
+                    if (!validToken) {
+                        return res.status(401).json({ message: 'Invalid Token' });
+                    }
+
                     const { username, password, presenter } = checkXSS(decodeToken(token));
                     peerUsername = username;
                     peerPassword = password;
@@ -915,6 +921,12 @@ function startServer() {
                 // Check JWT
                 if (peer_token) {
                     try {
+                        const validToken = await isValidToken(peer_token);
+
+                        if (!validToken) {
+                            return cb('unauthorized');
+                        }
+
                         const { username, password, presenter } = checkXSS(decodeToken(peer_token));
 
                         const isPeerValid = await isAuthPeer(username, password);
@@ -937,7 +949,10 @@ function startServer() {
                             peer_presenter: is_presenter,
                         });
                     } catch (err) {
-                        log.error('[Join] - JWT error', { error: err.message, token: peer_token });
+                        log.error('[Join] - JWT error', {
+                            error: err.message,
+                            token: peer_token,
+                        });
                         return cb('unauthorized');
                     }
                 } else {
@@ -1963,6 +1978,20 @@ function startServer() {
                 hostCfg.users && hostCfg.users.some((user) => user.username === username && user.password === password)
             );
         }
+    }
+
+    async function isValidToken(token) {
+        return new Promise((resolve, reject) => {
+            jwt.verify(token, jwtCfg.JWT_KEY, (err, decoded) => {
+                if (err) {
+                    // Token is invalid
+                    resolve(false);
+                } else {
+                    // Token is valid
+                    resolve(true);
+                }
+            });
+        });
     }
 
     function encodeToken(token) {

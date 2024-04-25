@@ -246,6 +246,8 @@ module.exports = class Peer {
 
             const { id, type, kind, rtpParameters, producerPaused } = consumer;
 
+            this.consumers.set(id, consumer);
+
             if (['simulcast', 'svc'].includes(type)) {
                 // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
                 const { scalabilityMode } = rtpParameters.encodings[0];
@@ -267,8 +269,6 @@ module.exports = class Peer {
             } else {
                 log.debug('Consumer ----->', { type: type, kind: kind });
             }
-
-            this.consumers.set(id, consumer);
 
             consumer.on('transportclose', () => {
                 log.debug('Consumer "transportclose" event');
