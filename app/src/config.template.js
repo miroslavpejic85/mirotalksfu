@@ -429,8 +429,18 @@ module.exports = {
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
-                { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 40000, max: 40100 } },
-                { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, portRange: { min: 40000, max: 40100 } },
+                {
+                    protocol: 'udp',
+                    ip: '0.0.0.0',
+                    announcedAddress: IPv4,
+                    portRange: { min: 40000, max: 40100 },
+                },
+                {
+                    protocol: 'tcp',
+                    ip: '0.0.0.0',
+                    announcedAddress: IPv4,
+                    portRange: { min: 40000, max: 40100 },
+                },
             ],
             initialAvailableOutgoingBitrate: 1000000,
             minimumAvailableOutgoingBitrate: 600000,
