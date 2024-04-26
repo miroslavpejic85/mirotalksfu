@@ -310,7 +310,7 @@ function startServer() {
 
     // main page
     app.get(['/'], (req, res) => {
-        log.debug('/ - hostCfg ----->', hostCfg);
+        //log.debug('/ - hostCfg ----->', hostCfg);
         if (hostCfg.protected && !hostCfg.authenticated) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
@@ -327,7 +327,7 @@ function startServer() {
 
     // set new room name and join
     app.get(['/newroom'], (req, res) => {
-        log.info('/newroom - hostCfg ----->', hostCfg);
+        //log.info('/newroom - hostCfg ----->', hostCfg);
 
         if (hostCfg.protected && !hostCfg.authenticated) {
             const ip = getIP(req);
@@ -346,7 +346,7 @@ function startServer() {
     // Handle Direct join room with params
     app.get('/join/', async (req, res) => {
         if (Object.keys(req.query).length > 0) {
-            log.debug('/join/params - hostCfg ----->', hostCfg);
+            //log.debug('/join/params - hostCfg ----->', hostCfg);
 
             log.debug('Direct Join', req.query);
 
@@ -404,7 +404,7 @@ function startServer() {
 
     // join room by id
     app.get('/join/:roomId', (req, res) => {
-        log.debug('/join/room - hostCfg ----->', hostCfg);
+        //log.debug('/join/room - hostCfg ----->', hostCfg);
         if (hostCfg.authenticated) {
             res.sendFile(views.room);
         } else {
