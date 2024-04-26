@@ -429,6 +429,8 @@ module.exports = {
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
+                // { protocol: 'udp', ip: IPv4, portRange: { min: 40000, max: 40100 } },
+                // { protocol: 'tcp', ip: IPv4, portRange: { min: 40000, max: 40100 } },
                 {
                     protocol: 'udp',
                     ip: '0.0.0.0',
