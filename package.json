@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.4.23",
+    "version": "1.4.24",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -41,8 +41,8 @@
         "node": ">=18"
     },
     "dependencies": {
-        "@sentry/integrations": "7.112.1",
-        "@sentry/node": "7.112.1",
+        "@sentry/integrations": "7.112.2",
+        "@sentry/node": "7.112.2",
         "axios": "^1.6.8",
         "body-parser": "1.20.2",
         "colors": "1.4.0",

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.23
+ * @version 1.4.24
  *
  */
 
@@ -1842,6 +1842,7 @@ function handleMediaError(mediaType, err) {
     sound('alert');
 
     let errMessage = err;
+    let getUserMediaError = true;
 
     switch (err.name) {
         case 'NotFoundError':
@@ -1864,24 +1865,30 @@ function handleMediaError(mediaType, err) {
             errMessage = 'Empty constraints object';
             break;
         default:
+            getUserMediaError = false;
             break;
     }
 
-    const $html = `
-        <ul style="text-align: left">
-            <li>Media type: ${mediaType}</li>
-            <li>Error name: ${err.name}</li>
-            <li>
-                <p>Error message:</p>
-                <p style="color: red">${errMessage}</p>
-            </li>
-            <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>
+    let html = `
+    <ul style="text-align: left">
+        <li>Media type: ${mediaType}</li>
+        <li>Error name: ${err.name}</li>
+        <li>
+            <p>Error message:</p>
+            <p style="color: red">${errMessage}</p>
+        </li>`;
+
+    if (getUserMediaError) {
+        html += `
+        <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>`;
+    }
+    html += `
         </ul>
     `;
 
-    const redirectURL = ['screen', 'screenType'].includes(mediaType) ? false : '/';
+    const redirectURL = ['screen', 'screenType'].includes(mediaType) || !getUserMediaError ? false : '/';
 
-    popupHtmlMessage(null, image.forbidden, 'Access denied', $html, 'center', redirectURL);
+    popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
 
     throw new Error(
         `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`,

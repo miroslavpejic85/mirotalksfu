@@ -41,7 +41,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.23
+ * @version 1.4.24
  *
  */
 
@@ -907,11 +907,9 @@ function startServer() {
 
             log.info('User joined', data);
 
-            const { peer_token } = data.peer_info;
-
             const room = roomList.get(socket.room_id);
 
-            const { peer_name, peer_id, peer_uuid, os_name, os_version, browser_name, browser_version } =
+            const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } =
                 data.peer_info;
 
             let is_presenter = true;
@@ -1063,7 +1061,7 @@ function startServer() {
 
                 callback(getRouterRtpCapabilities);
             } catch (err) {
-                log.error('Get RouterRtpCapabilities error', err.message);
+                log.error('Get RouterRtpCapabilities error', err);
                 callback({
                     error: err.message,
                 });
@@ -1086,7 +1084,7 @@ function startServer() {
 
                 callback(createWebRtcTransport);
             } catch (err) {
-                log.error('Create WebRtc Transport error', err.message);
+                log.error('Create WebRtc Transport error', err);
                 callback({
                     error: err.message,
                 });
@@ -1111,7 +1109,7 @@ function startServer() {
 
                 callback(connectTransport);
             } catch (err) {
-                log.error('Connect transport error', err.message);
+                log.error('Connect transport error', err);
                 callback({
                     error: err.message,
                 });
@@ -1134,7 +1132,9 @@ function startServer() {
             try {
                 const transport = peer.getTransport(transport_id);
 
-                if (!transport) throw new Error(`Restart ICE, transport with id "${transport_id}" not found`);
+                if (!transport) {
+                    throw new Error(`Restart ICE, transport with id "${transport_id}" not found`);
+                }
 
                 const iceParameters = await transport.restartIce();
 
@@ -1142,7 +1142,7 @@ function startServer() {
 
                 callback(iceParameters);
             } catch (err) {
-                log.error('Restart ICE error', err.message);
+                log.error('Restart ICE error', err);
                 callback({
                     error: err.message,
                 });
@@ -1200,7 +1200,7 @@ function startServer() {
                     producer_id,
                 });
             } catch (err) {
-                log.error('Producer transport error', err.message);
+                log.error('Producer transport error', err);
                 callback({
                     error: err.message,
                 });
@@ -1229,7 +1229,7 @@ function startServer() {
 
                 callback(params);
             } catch (err) {
-                log.error('Consumer transport error', err.message);
+                log.error('Consumer transport error', err);
                 callback({
                     error: err.message,
                 });

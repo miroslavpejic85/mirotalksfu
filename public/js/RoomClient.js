@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.23
+ * @version 1.4.24
  *
  */
 
@@ -592,11 +592,9 @@ class RoomClient {
                     appData,
                     rtpParameters,
                 });
-                if (producer_id.error) {
-                    errback(producer_id.error);
-                } else {
-                    callback({ id: producer_id });
-                }
+                callback({
+                    id: producer_id,
+                });
             } catch (err) {
                 errback(err);
             }
@@ -750,27 +748,27 @@ class RoomClient {
         console.log('Restart ICE...');
         try {
             if (this.producerTransport) {
-                console.log('Restarting producer transport ICE');
-
                 const iceParameters = await this.socket.request('restartIce', {
                     transport_id: this.producerTransport.id,
                 });
+
+                console.log('Restarting producer transport ICE', iceParameters);
 
                 await this.producerTransport.restartIce({ iceParameters });
             }
 
             if (this.consumerTransport) {
-                console.log('Restarting consumer transport ICE');
-
                 const iceParameters = await this.socket.request('restartIce', {
                     transport_id: this.consumerTransport.id,
                 });
+
+                console.log('Restarting consumer transport ICE', iceParameters);
 
                 await this.consumerTransport.restartIce({ iceParameters });
             }
             console.log('Restart ICE done');
         } catch (error) {
-            console.error('Restart ICE error', error.message);
+            console.error('Restart ICE error', error);
         }
     }
 
@@ -976,6 +974,7 @@ class RoomClient {
     }
 
     refreshBrowser() {
+        this.exit(true);
         getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
     }
 
@@ -1143,11 +1142,9 @@ class RoomClient {
                 break;
             case mediaType.video:
                 this.isVideoAllowed = true;
-                if (swapCamera) {
-                    mediaConstraints = this.getCameraConstraints();
-                } else {
-                    mediaConstraints = this.getVideoConstraints(deviceId);
-                }
+                swapCamera
+                    ? (mediaConstraints = this.getCameraConstraints())
+                    : (mediaConstraints = this.getVideoConstraints(deviceId));
                 break;
             case mediaType.screen:
                 mediaConstraints = this.getScreenConstraints();
@@ -1227,15 +1224,16 @@ class RoomClient {
                 };
             }
 
-            console.log('PRODUCER PARAMS', params);
+            console.log('PRODUCER TYPE AND PARAMS', {
+                type: type,
+                params: params,
+            });
 
             const producer = await this.producerTransport.produce(params);
 
             if (!producer) {
                 throw new Error('Producer not found!');
             }
-
-            console.log('PRODUCER', producer);
 
             this.producers.set(producer.id, producer);
             this.producerLabel.set(type, producer.id);
@@ -1329,6 +1327,7 @@ class RoomClient {
                 default:
                     break;
             }
+
             this.sound('joined');
             return producer;
         } catch (err) {
@@ -6741,5 +6740,9 @@ class RoomClient {
                 );
             }
         });
+    }
+
+    sleep(ms) {
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 } // End
