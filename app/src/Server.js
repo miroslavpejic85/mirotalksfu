@@ -311,7 +311,7 @@ function startServer() {
     // main page
     app.get(['/'], (req, res) => {
         //log.debug('/ - hostCfg ----->', hostCfg);
-        if (hostCfg.protected && !hostCfg.authenticated) {
+        if ((hostCfg.protected && !hostCfg.authenticated) || authHost.isRoomActive()) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
@@ -329,7 +329,7 @@ function startServer() {
     app.get(['/newroom'], (req, res) => {
         //log.info('/newroom - hostCfg ----->', hostCfg);
 
-        if (hostCfg.protected && !hostCfg.authenticated) {
+        if ((hostCfg.protected && !hostCfg.authenticated) || authHost.isRoomActive()) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.newRoom);
@@ -405,7 +405,7 @@ function startServer() {
     // join room by id
     app.get('/join/:roomId', (req, res) => {
         //log.debug('/join/room - hostCfg ----->', hostCfg);
-        if (hostCfg.authenticated) {
+        if (hostCfg.authenticated || authHost.isRoomActive()) {
             res.sendFile(views.room);
         } else {
             if (hostCfg.protected) {
@@ -2075,7 +2075,13 @@ function startServer() {
     function allowedIP(ip) {
         const authorizedIPs = authHost.getAuthorizedIPs();
         const authorizedIP = authHost.isAuthorizedIP(ip);
-        log.info('Allowed IPs', { ip: ip, authorizedIP: authorizedIP, authorizedIPs: authorizedIPs });
+        const isRoomActive = authHost.isRoomActive();
+        log.info('Allowed IPs', {
+            ip: ip,
+            authorizedIP: authorizedIP,
+            authorizedIPs: authorizedIPs,
+            isRoomActive: isRoomActive,
+        });
         return authHost != null && authorizedIP;
     }
 
@@ -2088,6 +2094,7 @@ function startServer() {
                 log.info('Remove IP from auth', {
                     ip: ip,
                     authorizedIps: authHost.getAuthorizedIPs(),
+                    roomActive: authHost.isRoomActive(),
                 });
             }
         }

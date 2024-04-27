@@ -3,6 +3,7 @@
 module.exports = class Host {
     constructor() {
         this.authorizedIPs = new Map();
+        this.roomActive = false;
     }
 
     /**
@@ -20,6 +21,7 @@ module.exports = class Host {
      */
     setAuthorizedIP(ip, authorized) {
         this.authorizedIPs.set(ip, authorized);
+        this.roomActive = true;
     }
 
     /**
@@ -32,11 +34,20 @@ module.exports = class Host {
     }
 
     /**
+     * Host room active
+     * @returns boolean
+     */
+    isRoomActive() {
+        return this.roomActive;
+    }
+
+    /**
      * Delete ip from authorized IPs
      * @param {string} ip
      * @returns boolean
      */
     deleteIP(ip) {
+        this.roomActive = false;
         return this.authorizedIPs.delete(ip);
     }
 };
