@@ -112,6 +112,18 @@ module.exports = class Peer {
             transport.close();
             this.delTransport(transport_id);
         });
+
+        const peerTransports = this.getTransports();
+        const peerProducers = this.getProducers();
+        const peerConsumers = this.getConsumers();
+
+        log.debug('CLOSE PEER', {
+            peer_id: this.id,
+            peer_name: this.peer_name,
+            peerTransports: peerTransports,
+            peerProducers: peerProducers,
+            peerConsumers: peerConsumers,
+        });
     }
 
     // ####################################################

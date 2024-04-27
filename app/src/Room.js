@@ -241,8 +241,6 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
 
-        const { id, peer_name } = peer;
-
         peer.close();
 
         this.peers.delete(socket_id);
@@ -250,18 +248,6 @@ module.exports = class Room {
         if (this.getPeers().size === 0) {
             this.closeRouter();
         }
-
-        const peerTransports = peer.getTransports();
-        const peerProducers = peer.getProducers();
-        const peerConsumers = peer.getConsumers();
-
-        log.debug('REMOVE PEER', {
-            peer_id: id,
-            peer_name: peer_name,
-            peerTransports: peerTransports,
-            peerProducers: peerProducers,
-            peerConsumers: peerConsumers,
-        });
     }
 
     // ####################################################
