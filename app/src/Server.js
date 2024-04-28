@@ -1769,15 +1769,13 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
+            const peer = room.getPeer(socket.id);
 
-            const peerName = peerInfo?.peer_name || '';
+            const { peer_name, peer_uuid } = peer;
 
-            const peerUuid = peerInfo?.peer_uuid || '';
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
-
-            log.debug('[Disconnect] - peer name', peerName);
+            log.debug('[Disconnect] - peer name', peer_name);
 
             room.removePeer(socket.id);
 
@@ -1785,15 +1783,16 @@ function startServer() {
                 //
                 roomList.delete(socket.room_id);
 
+                delete presenters[socket.room_id];
+
+                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
+
                 const activeRooms = getActiveRooms();
 
                 log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
-
-                delete presenters[socket.room_id];
-                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
             }
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             if (isPresenter) removeIP(socket);
 
@@ -1809,19 +1808,17 @@ function startServer() {
 
             const room = roomList.get(socket.room_id);
 
-            const peerInfo = room.getPeers()?.get(socket.id)?.peer_info || {};
+            const peer = room.getPeer(socket.id);
 
-            const peerName = peerInfo?.peer_name || '';
+            const { peer_name, peer_uuid } = peer;
 
-            const peerUuid = peerInfo?.peer_uuid || '';
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peerName, peerUuid);
-
-            log.debug('Exit room', peerName);
+            log.debug('Exit room', peer_name);
 
             room.removePeer(socket.id);
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peerName, isPresenter));
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             if (room.getPeers().size === 0) {
                 //
@@ -1846,26 +1843,29 @@ function startServer() {
         // common
         function getPeerName(room, json = true) {
             try {
-                const peer_name = (room && room.getPeers()?.get(socket.id)?.peer_info?.peer_name) || 'undefined';
-
+                const DEFAULT_PEER_NAME = 'undefined';
+                const peer = room.getPeer(socket.id);
+                const peerName = peer.peer_name || DEFAULT_PEER_NAME;
                 if (json) {
-                    return {
-                        peer_name: peer_name,
-                    };
+                    return { peer_name: peerName };
                 }
-                return peer_name;
+                return peerName;
             } catch (err) {
                 log.error('getPeerName', err);
-                return json ? { peer_name: 'undefined' } : 'undefined';
+                return json ? { peer_name: DEFAULT_PEER_NAME } : DEFAULT_PEER_NAME;
             }
         }
 
         function isRealPeer(name, id, roomId) {
+            if (!roomList.has(socket.room_id)) return false;
+
             const room = roomList.get(roomId);
 
-            const peerName = (room && room.getPeers()?.get(id)?.peer_info?.peer_name) || 'undefined';
+            const peer = room.getPeer(id);
 
-            return peerName == name;
+            const { peer_name } = peer;
+
+            return peer_name == name;
         }
 
         function isValidFileName(fileName) {
@@ -1896,7 +1896,7 @@ function startServer() {
                 peer_counts: peerCounts,
                 isPresenter: isPresenter,
             };
-            log.debug('[REMOVE ME] - DATA', data);
+            log.debug('[REMOVE ME DATA]', data);
             return data;
         }
 

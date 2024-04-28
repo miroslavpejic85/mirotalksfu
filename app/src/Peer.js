@@ -7,11 +7,20 @@ module.exports = class Peer {
     constructor(socket_id, data) {
         const { peer_info } = data;
 
-        const { peer_name, peer_presenter, peer_audio, peer_video, peer_video_privacy, peer_recording, peer_hand } =
-            peer_info;
+        const {
+            peer_uuid,
+            peer_name,
+            peer_presenter,
+            peer_audio,
+            peer_video,
+            peer_video_privacy,
+            peer_recording,
+            peer_hand,
+        } = peer_info;
 
         this.id = socket_id;
         this.peer_info = peer_info;
+        this.peer_uuid = peer_uuid;
         this.peer_name = peer_name;
         this.peer_presenter = peer_presenter;
         this.peer_audio = peer_audio;
@@ -117,7 +126,7 @@ module.exports = class Peer {
         const peerProducers = this.getProducers();
         const peerConsumers = this.getConsumers();
 
-        log.debug('CLOSE PEER', {
+        log.debug('CLOSE PEER - CHECK TRANSPORTS | PRODUCERS | CONSUMERS', {
             peer_id: this.id,
             peer_name: this.peer_name,
             peerTransports: peerTransports,
