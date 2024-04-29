@@ -185,4 +185,4 @@ function customizeOpenGraph() {
     }
 }
 
-await initialize();
+initialize();
