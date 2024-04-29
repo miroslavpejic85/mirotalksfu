@@ -15,6 +15,7 @@ const ogSiteName = document.getElementById('ogSiteName');
 const ogTitle = document.getElementById('ogTitle');
 const ogDescription = document.getElementById('ogDescription');
 const ogImage = document.getElementById('ogImage');
+const ogUrl = document.getElementById('ogUrl');
 
 const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
@@ -53,6 +54,7 @@ let BRAND = {
         title: 'Click the link to make a call.',
         description: 'MiroTalk SFU calling provides real-time video calls, messaging and screen sharing.',
         image: 'https://sfu.mirotalk.com/images/mirotalksfu.png',
+        url: 'https://sfu.mirotalk.com',
     },
     html: {
         features: true,
@@ -178,6 +180,9 @@ function customizeOpenGraph() {
     if (ogImage) {
         ogImage.content = BRAND.og.image;
     }
+    if (ogUrl) {
+        ogUrl.content = BRAND.og.url;
+    }
 }
 
-initialize();
+await initialize();
