@@ -1771,7 +1771,7 @@ function startServer() {
 
             const peer = room.getPeer(socket.id);
 
-            const { peer_name, peer_uuid } = peer;
+            const { peer_name, peer_uuid } = peer || {};
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
@@ -1810,7 +1810,7 @@ function startServer() {
 
             const peer = room.getPeer(socket.id);
 
-            const { peer_name, peer_uuid } = peer;
+            const { peer_name, peer_uuid } = peer || {};
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 

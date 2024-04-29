@@ -1899,7 +1899,7 @@ class RoomClient {
             type: type,
             status: false,
         };
-        console.log('Close producer', data);
+        console.log(`Close producer ${type}`, data);
 
         this.socket.emit('producerClosed', data);
 
