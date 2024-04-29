@@ -114,12 +114,13 @@ module.exports = class Peer {
 
     close() {
         this.transports.forEach((transport, transport_id) => {
+            transport.close();
+            this.delTransport(transport_id);
             log.debug('Close and delete peer transports', {
                 //transport_id: transport_id,
                 transportInternal: transport.internal,
+                transport_closed: transport.closed,
             });
-            transport.close();
-            this.delTransport(transport_id);
         });
 
         const peerTransports = this.getTransports();
@@ -208,6 +209,7 @@ module.exports = class Peer {
             type: type,
             appData: appData,
             producer_id: id,
+            producer_closed: producer.closed,
         });
     }
 
@@ -300,6 +302,7 @@ module.exports = class Peer {
             kind: kind,
             type: type,
             consumer_id: id,
+            consumer_closed: consumer.closed,
         });
     }
 };

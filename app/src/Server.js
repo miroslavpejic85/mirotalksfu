@@ -1269,13 +1269,13 @@ function startServer() {
                 return callback({ error: `producer with id "${producer_id}" not found` });
             }
 
-            log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
-
             try {
                 await producer.pause();
             } catch (error) {
                 return callback({ error: error.message });
             }
+
+            log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
 
             callback('successfully');
         });
@@ -1301,13 +1301,13 @@ function startServer() {
                 return callback({ error: `producer with id "${producer_id}" not found` });
             }
 
-            log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
-
             try {
                 await producer.resume();
             } catch (error) {
                 return callback({ error: error.message });
             }
+
+            log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
 
             callback('successfully');
         });

@@ -88,8 +88,11 @@ module.exports = class Room {
     }
 
     closeRouter() {
-        log.debug('Close Room router id', this.router.id);
         this.router.close();
+        log.debug('Close Room router', {
+            router_id: this.router.id,
+            router_closed: this.router.closed,
+        });
     }
 
     // ####################################################
