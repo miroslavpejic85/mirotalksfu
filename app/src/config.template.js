@@ -359,6 +359,8 @@ module.exports = {
         },
         // Router settings
         router: {
+            audioLevelObserverEnabled: true,
+            activeSpeakerObserverEnabled: false,
             mediaCodecs: [
                 {
                     kind: 'audio',

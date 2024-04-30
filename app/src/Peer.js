@@ -116,7 +116,7 @@ module.exports = class Peer {
         this.transports.forEach((transport, transport_id) => {
             transport.close();
             this.delTransport(transport_id);
-            log.debug('Close and delete peer transports', {
+            log.debug('Closed and deleted peer transport', {
                 //transport_id: transport_id,
                 transportInternal: transport.internal,
                 transport_closed: transport.closed,

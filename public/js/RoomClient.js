@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.25
+ * @version 1.4.26
  *
  */
 
@@ -796,6 +796,7 @@ class RoomClient {
         this.socket.on('wbCanvasToJson', this.handleWbCanvasToJson);
         this.socket.on('whiteboardAction', this.handleWhiteboardAction);
         this.socket.on('audioVolume', this.handleAudioVolumeData);
+        this.socket.on('dominantSpeaker', this.handleDominantSpeakerData);
         this.socket.on('updateRoomModerator', this.handleUpdateRoomModeratorData);
         this.socket.on('updateRoomModeratorALL', this.handleUpdateRoomModeratorALLData);
         this.socket.on('recordingAction', this.handleRecordingActionData);
@@ -918,6 +919,10 @@ class RoomClient {
 
     handleAudioVolumeData = (data) => {
         this.handleAudioVolume(data);
+    };
+
+    handleDominantSpeakerData = (data) => {
+        this.handleDominantSpeaker(data);
     };
 
     handleUpdateRoomModeratorData = (data) => {
@@ -5667,6 +5672,15 @@ class RoomClient {
     }
 
     // ####################################################
+    // HANDLE DOMINANT SPEAKER
+    // ###################################################
+
+    handleDominantSpeaker(data) {
+        console.log('Dominant Speaker', data);
+        //...
+    }
+
+    // ####################################################
     // HANDLE BAN
     // ###################################################
 
@@ -6236,9 +6250,11 @@ class RoomClient {
                                     case 'hide':
                                         let peerVideoButton = this.getId(data.peer_id + '___pVideo');
                                         if (peerVideoButton) peerVideoButton.innerHTML = _PEER.videoOff;
+                                        break;
                                     case 'stop':
                                         let peerScreenButton = this.getId(data.peer_id + '___pScreen');
                                         if (peerScreenButton) peerScreenButton.innerHTML = _PEER.screenOff;
+                                        break;
                                     default:
                                         break;
                                 }
@@ -6466,6 +6482,7 @@ class RoomClient {
                 this._moderator.video_cant_unhide = data.status;
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
                 rc.roomMessage('video_cant_unhide', data.status);
+                break;
             case 'screen_cant_share':
                 this._moderator.screen_cant_share = data.status;
                 rc.roomMessage('screen_cant_share', data.status);
@@ -6694,6 +6711,8 @@ class RoomClient {
                             break;
                         case error.UNKNOWN_ERROR:
                             geoError = 'An unknown error occurred';
+                            break;
+                        default:
                             break;
                     }
                     rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: ${geoError}`);

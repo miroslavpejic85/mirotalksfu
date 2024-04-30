@@ -4,6 +4,8 @@ const config = require('./config');
 const Logger = require('./Logger');
 const log = new Logger('Room');
 
+const { audioLevelObserverEnabled, activeSpeakerObserverEnabled } = config.mediasoup.router;
+
 module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
@@ -12,8 +14,11 @@ module.exports = class Room {
         this.webRtcServerActive = config.mediasoup.webRtcServerActive;
         this.io = io;
         this.audioLevelObserver = null;
-        this.audioLevelObserverEnabled = true;
+        this.audioLevelObserverEnabled = audioLevelObserverEnabled !== undefined ? audioLevelObserverEnabled : true;
         this.audioLastUpdateTime = 0;
+        this.activeSpeakerObserverEnabled =
+            activeSpeakerObserverEnabled !== undefined ? activeSpeakerObserverEnabled : false;
+        this.activeSpeakerObserver = null;
         // ##########################
         this._isBroadcasting = false;
         // ##########################
@@ -79,12 +84,19 @@ module.exports = class Room {
                 if (this.audioLevelObserverEnabled) {
                     this.startAudioLevelObservation();
                 }
+                if (this.activeSpeakerObserverEnabled) {
+                    this.startActiveSpeakerObserver();
+                }
                 this.router.observer.on('close', () => {
                     log.info('---------------> Router is now closed as the last peer has left the room', {
                         room: this.id,
                     });
                 });
             });
+    }
+
+    getRtpCapabilities() {
+        return this.router.rtpCapabilities;
     }
 
     closeRouter() {
@@ -157,8 +169,38 @@ module.exports = class Room {
         }
     }
 
-    getRtpCapabilities() {
-        return this.router.rtpCapabilities;
+    // ####################################################
+    // PRODUCER DOMINANT ACTIVE SPEAKER
+    // ####################################################
+
+    async startActiveSpeakerObserver() {
+        this.activeSpeakerObserver = await this.router.createActiveSpeakerObserver();
+        this.activeSpeakerObserver.on('dominantspeaker', (dominantSpeaker) => {
+            log.debug('activeSpeakerObserver "dominantspeaker" event', dominantSpeaker.producer.id);
+            this.peers.forEach((peer) => {
+                const { id, peer_audio, peer_name } = peer;
+                peer.producers.forEach((peerProducer) => {
+                    if (
+                        peerProducer.id === dominantSpeaker.producer.id &&
+                        peerProducer.kind === 'audio' &&
+                        peer_audio
+                    ) {
+                        const data = {
+                            peer_id: id,
+                            peer_name: peer_name,
+                        };
+                        // log.debug('Sending dominant speaker', data);
+                        this.sendToAll('dominantSpeaker', data);
+                    }
+                });
+            });
+        });
+    }
+
+    addProducerToActiveSpeakerObserver(producer) {
+        if (this.activeSpeakerObserverEnabled) {
+            this.activeSpeakerObserver.addProducer(producer);
+        }
     }
 
     // ####################################################
