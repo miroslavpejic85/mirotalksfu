@@ -5677,6 +5677,14 @@ class RoomClient {
 
     handleDominantSpeaker(data) {
         console.log('Dominant Speaker', data);
+        const { peer_id } = data;
+        const peerNameElement = this.getId(peer_id + '__name');
+        if (peerNameElement) {
+            peerNameElement.style.color = 'lime';
+            setTimeout(function () {
+                peerNameElement.style.color = '#FFFFFF';
+            }, 5000);
+        }
         //...
     }
 
