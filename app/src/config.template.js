@@ -91,6 +91,36 @@ module.exports = {
         key: 'mirotalksfu_jwt_secret',
         exp: '1h',
     },
+    oidc: {
+        /*
+            OIDC stands for OpenID Connect, which is an authentication protocol built on top of OAuth 2.0. 
+            It provides a simple identity layer on the OAuth 2.0 protocol, allowing clients to verify the identity of the end-user 
+            based on the authentication performed by an authorization server.
+            How to configure your own Provider:
+                1. Sign up for an account at https://auth0.com.
+                2. Navigate to https://manage.auth0.com/ to create a new application tailored to your specific requirements.
+            For those seeking an open-source solution, check out: https://github.com/panva/node-oidc-provider
+        */
+        enabled: false,
+        config: {
+            issuerBaseURL: 'issuerBaseURL',
+            clientID: 'clientID',
+            clientSecret: 'clientSecret',
+            baseURL: `http://localhost:${process.env.PORT ? process.env.PORT : 3010}`,
+            secret: 'mirotalksfu-oidc-secret',
+            authorizationParams: {
+                response_type: 'code',
+                scope: 'openid profile email',
+            },
+            authRequired: false, // Set to true if authentication is required for all routes
+            auth0Logout: true, // Set to true to enable logout with Auth0
+            routes: {
+                callback: '/auth/callback', // Indicating the endpoint where your application will handle the callback from the authentication provider after a user has been authenticated.
+                login: false, // Dedicated route in your application for user login.
+                logout: '/logout', // Indicating the endpoint where your application will handle user logout requests.
+            },
+        },
+    },
     host: {
         /*
             Host Protection (default: false)
