@@ -104,9 +104,9 @@ module.exports = {
         enabled: false,
         config: {
             issuerBaseURL: 'issuerBaseURL',
+            baseURL: `http://localhost:${process.env.PORT ? process.env.PORT : 3010}`, // https://sfu.mirotalk.com
             clientID: 'clientID',
             clientSecret: 'clientSecret',
-            baseURL: `http://localhost:${process.env.PORT ? process.env.PORT : 3010}`,
             secret: 'mirotalksfu-oidc-secret',
             authorizationParams: {
                 response_type: 'code',
