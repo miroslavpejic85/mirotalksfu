@@ -324,8 +324,10 @@ function startServer() {
 
     // Route to display user information
     app.get('/profile', OIDCAuth, (req, res) => {
-        const user = OIDC.enabled ? req.oidc.user : { message: 'Profile not found!' };
-        res.json(user); // Send user information as JSON
+        if (OIDC.enabled) {
+            return res.json(req.oidc.user); // Send user information as JSON
+        }
+        res.sendFile(views.notFound);
     });
 
     // Authentication Callback Route
