@@ -776,7 +776,7 @@ function startServer() {
             chatGPT_enabled: config.chatGPT.enabled,
             configUI: config.ui,
             serverRec: config?.server?.recording,
-            oidc: OIDC,
+            oidc: OIDC.enabled ? OIDC : false,
         };
     }
 
