@@ -248,6 +248,10 @@ let transcription;
 // INIT ROOM
 // ####################################################
 
+document.addEventListener('DOMContentLoaded', function () {
+    initClient();
+});
+
 function initClient() {
     setTheme();
 
@@ -344,6 +348,7 @@ function initClient() {
     }
     setupWhiteboard();
     initEnumerateDevices();
+    setupInitButtons();
 }
 
 // ####################################################
@@ -599,6 +604,31 @@ async function addChild(device, els) {
         }
         el.appendChild(option);
     });
+}
+
+// ####################################################
+// INIT AUDIO/VIDEO/SCREEN BUTTONS
+// ####################################################
+
+function setupInitButtons() {
+    initVideoAudioRefreshButton.onclick = () => {
+        refreshMyAudioVideoDevices();
+    };
+    initVideoButton.onclick = () => {
+        handleVideo();
+    };
+    initAudioButton.onclick = () => {
+        handleAudio();
+    };
+    initAudioVideoButton.onclick = async () => {
+        await handleAudioVideo(e);
+    };
+    initStartScreenButton.onclick = async () => {
+        await toggleScreenSharing();
+    };
+    initStopScreenButton.onclick = async () => {
+        await toggleScreenSharing();
+    };
 }
 
 // ####################################################
@@ -1349,6 +1379,19 @@ function stopRecordingTimer() {
 // ####################################################
 
 function handleButtons() {
+    // Lobby...
+    document.getElementById('lobbyUsers').addEventListener('click', function (event) {
+        switch (event.target.id) {
+            case 'lobbyAcceptAllBtn':
+                rc.lobbyAcceptAll();
+                break;
+            case 'lobbyRejectAllBtn':
+                rc.lobbyRejectAll();
+                break;
+            default:
+                break;
+        }
+    });
     control.onmouseover = () => {
         isButtonsBarOver = true;
     };

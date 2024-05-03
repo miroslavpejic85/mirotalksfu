@@ -118,7 +118,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
     </head>
-    <body onload="initClient()">
+    <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
 
         <div id="loadingDiv" class="center pulsate">
@@ -144,24 +144,12 @@ access to use this app.
                     ></video>
                 </div>
                 <div class="initComands">
-                    <button
-                        id="initVideoAudioRefreshButton"
-                        class="fas fa-rotate"
-                        onclick="refreshMyAudioVideoDevices()"
-                    ></button>
-                    <button id="initVideoButton" class="fas fa-video" onclick="handleVideo(event)"></button>
-                    <button id="initAudioButton" class="fas fa-microphone" onclick="handleAudio(event)"></button>
-                    <button id="initAudioVideoButton" class="fas fa-eye" onclick="handleAudioVideo(event)"></button>
-                    <button
-                        id="initStartScreenButton"
-                        class="fas fa-desktop hidden"
-                        onclick="toggleScreenSharing()"
-                    ></button>
-                    <button
-                        id="initStopScreenButton"
-                        class="fas fa-stop-circle hidden"
-                        onclick="toggleScreenSharing()"
-                    ></button>
+                    <button id="initVideoAudioRefreshButton" class="fas fa-rotate"></button>
+                    <button id="initVideoButton" class="fas fa-video"></button>
+                    <button id="initAudioButton" class="fas fa-microphone"></button>
+                    <button id="initAudioVideoButton" class="fas fa-eye"></button>
+                    <button id="initStartScreenButton" class="fas fa-desktop hidden"></button>
+                    <button id="initStopScreenButton" class="fas fa-stop-circle hidden"></button>
                     <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
                     <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
                     <select id="initSpeakerSelect" class="form-select text-light bg-dark"></select>
@@ -1408,16 +1396,8 @@ access to use this app.
                         <tr id="lobbyAll">
                             <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
                             <td>All</td>
-                            <td>
-                                <button id="lobbyAcceptAllBtn" onclick="rc.lobbyAcceptAll()">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                            </td>
-                            <td>
-                                <button id="lobbyRejectAllBtn" onclick="rc.lobbyRejectAll()">
-                                    <i class="fas fa-times"></i>
-                                </button>
-                            </td>
+                            <td><button id="lobbyAcceptAllBtn" class="fas fa-check"></button></td>
+                            <td><button id="lobbyRejectAllBtn" class="fas fa-times"></button></td>
                         </tr>
                     </table>
                 </div>
