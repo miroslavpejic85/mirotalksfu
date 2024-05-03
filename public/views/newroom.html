@@ -45,8 +45,8 @@
 
         <!-- Js scripts -->
 
-        <script defer src="../js/Brand.js"></script>
-        <script async src="../js/Umami.js"></script>
+        <script defer src="../js/scripts/Brand.js"></script>
+        <script async src="../js/scripts/Umami.js"></script>
 
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
@@ -137,61 +137,16 @@
                                         <button
                                             id="genRoomButton"
                                             class="button button-primary br-6 mr-8 mb-8 fas fa-arrows-rotate"
-                                            onclick="genRoom()"
                                         ></button>
-                                        <button
-                                            id="joinRoomButton"
-                                            class="button button-primary pulse"
-                                            onclick="joinRoom()"
-                                        >
+                                        <button id="joinRoomButton" class="button button-primary pulse">
                                             Join Room
                                         </button>
-                                        <script>
-                                            document.getElementById('roomName').onkeyup = (e) => {
-                                                if (e.keyCode === 13) {
-                                                    e.preventDefault();
-                                                    joinRoom();
-                                                }
-                                            };
-                                            function genRoom() {
-                                                document.getElementById('roomName').value = getUUID4();
-                                            }
-                                            function getUUID4() {
-                                                return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-                                                    (
-                                                        c ^
-                                                        (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
-                                                    ).toString(16),
-                                                );
-                                            }
-                                            function joinRoom() {
-                                                const roomName = filterXSS(document.getElementById('roomName').value);
-                                                if (roomName) {
-                                                    window.location.href = '/join/' + roomName;
-                                                    window.localStorage.lastRoom = roomName;
-                                                } else {
-                                                    alert('Room name empty!\nPlease pick a room name.');
-                                                }
-                                            }
-                                        </script>
                                     </div>
                                 </div>
                                 <div id="lastRoomContainer" class="last-room">
                                     <span>Your recent room:</span>
                                     <a id="lastRoom"></a>
                                 </div>
-                                <script>
-                                    const lastRoomContainer = document.getElementById('lastRoomContainer');
-                                    const lastRoom = document.getElementById('lastRoom');
-                                    const lastRoomName = window.localStorage.lastRoom
-                                        ? window.localStorage.lastRoom
-                                        : '';
-                                    if (lastRoomName) {
-                                        lastRoomContainer.style.display = 'inline-flex';
-                                        lastRoom.setAttribute('href', '/join/' + lastRoomName);
-                                        lastRoom.innerText = lastRoomName;
-                                    }
-                                </script>
                             </div>
                         </div>
                     </div>
@@ -293,8 +248,8 @@
             </footer>
         </div>
 
-        <script defer src="../js/landing.js"></script>
-        <script defer src="../js/newRoom.js"></script>
+        <script defer src="../js/scripts/Landing.js"></script>
+        <script defer src="../js/scripts/Common.js"></script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>

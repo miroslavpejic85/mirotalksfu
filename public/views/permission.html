@@ -44,8 +44,8 @@
 
         <!-- Js scripts -->
 
-        <script defer src="../js/Brand.js"></script>
-        <script async src="../js/Umami.js"></script>
+        <script defer src="../js/scripts/Brand.js"></script>
+        <script async src="../js/scripts/Umami.js"></script>
 
         <script src="https://unpkg.com/animejs@3.0.1/lib/anime.min.js"></script>
         <script src="https://unpkg.com/scrollreveal@4.0.0/dist/scrollreveal.min.js"></script>
@@ -91,16 +91,6 @@
                                     This app will not work without camera or microphone access. Please try again and
                                     allow it.
                                 </p>
-                                <script>
-                                    let qs = new URLSearchParams(window.location.search);
-                                    let room_id = filterXSS(qs.get('room_id'));
-                                    let message = filterXSS(qs.get('message'));
-                                    console.log('Allow Camera or Audio', {
-                                        room_id: room_id,
-                                        message: message,
-                                    });
-                                    document.getElementById('message').innerHTML = message;
-                                </script>
                                 <div class="hero-cta">
                                     <a
                                         class="button button-primary pulse"
@@ -224,7 +214,7 @@
             </footer>
         </div>
 
-        <script defer src="../js/landing.js"></script>
+        <script defer src="../js/scripts/Landing.js"></script>
         <script async defer src="https://buttons.github.io/buttons.js"></script>
     </body>
 </html>
