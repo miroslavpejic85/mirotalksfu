@@ -103,7 +103,7 @@ module.exports = {
         */
         enabled: false,
         config: {
-            issuerBaseURL: 'issuerBaseURL',
+            issuerBaseURL: 'https://server.example.com',
             baseURL: `http://localhost:${process.env.PORT ? process.env.PORT : 3010}`, // https://sfu.mirotalk.com
             clientID: 'clientID',
             clientSecret: 'clientSecret',
