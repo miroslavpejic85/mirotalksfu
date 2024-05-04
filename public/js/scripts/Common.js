@@ -138,7 +138,6 @@ let noun = nouns[Math.floor(Math.random() * nouns.length)];
 let num = getRandomNumber(5);
 noun = noun.charAt(0).toUpperCase() + noun.substring(1);
 adjective = adjective.charAt(0).toUpperCase() + adjective.substring(1);
-document.getElementById('roomName').value = '';
 
 // ####################################################################
 // TYPING EFFECT
@@ -150,13 +149,17 @@ let speed = 100;
 
 function typeWriter() {
     if (i < txt.length) {
-        document.getElementById('roomName').value += txt.charAt(i);
+        roomName.value += txt.charAt(i);
         i++;
         setTimeout(typeWriter, speed);
     }
 }
 
-typeWriter();
+const roomName = document.getElementById('roomName');
+if (roomName) {
+    roomName.value = '';
+    typeWriter();
+}
 
 // ####################################################################
 // LANDING | NEW ROOM
@@ -175,17 +178,23 @@ const genRoomButton = document.getElementById('genRoomButton');
 const joinRoomButton = document.getElementById('joinRoomButton');
 const adultCnt = document.getElementById('adultCnt');
 
-genRoomButton.onclick = (e) => {
-    genRoom();
-};
+if (genRoomButton) {
+    genRoomButton.onclick = () => {
+        genRoom();
+    };
+}
 
-joinRoomButton.onclick = (e) => {
-    joinRoom();
-};
+if (joinRoomButton) {
+    joinRoomButton.onclick = () => {
+        joinRoom();
+    };
+}
 
-adultCnt.onclick = (e) => {
-    adultContent();
-};
+if (adultCnt) {
+    adultCnt.onclick = () => {
+        adultContent();
+    };
+}
 
 document.getElementById('roomName').onkeyup = (e) => {
     if (e.keyCode === 13) {
