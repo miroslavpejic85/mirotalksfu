@@ -1109,6 +1109,10 @@ progress {
     float: right;
 }
 
+.whiteboard-header-title div {
+    margin-left: 8px;
+}
+
 .whiteboard-header button {
     /* padding: 10px; */
     border-radius: 5px;
@@ -1238,6 +1242,34 @@ progress {
 
 ::-webkit-scrollbar-track {
     background: #1a1b1f;
+}
+
+/*--------------------------------------------------------------
+# Common
+--------------------------------------------------------------*/
+
+hr {
+    background: #ffffff !important;
+}
+
+.wa {
+    width: auto;
+}
+
+.ml-5 {
+    margin: 5px;
+}
+
+.cp {
+    cursor: pointer;
+}
+
+.cr {
+    color: red;
+}
+
+#initVideo {
+    object-fit: contain;
 }
 
 /*--------------------------------------------------------------
