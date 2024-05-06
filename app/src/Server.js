@@ -257,17 +257,17 @@ function OIDCAuth(req, res, next) {
     if (OIDC.enabled) {
         // Apply requiresAuth() middleware conditionally
         requiresAuth()(req, res, function () {
-            log.debug('OIDC -------> requiresAuth');
+            log.debug('[OIDC] ------> requiresAuth');
             // Check if user is authenticated
             if (req.oidc.isAuthenticated()) {
-                log.debug('OIDC -------> User isAuthenticated');
+                log.debug('[OIDC] ------> User isAuthenticated');
                 // User is authenticated
                 if (hostCfg.protected) {
                     const ip = authHost.getIP(req);
                     hostCfg.authenticated = true;
                     authHost.setAuthorizedIP(ip, true);
                     // Check...
-                    log.debug('OIDC ------> Host protected', {
+                    log.debug('[OIDC] ------> Host protected', {
                         authenticated: hostCfg.authenticated,
                         authorizedIPs: authHost.getAuthorizedIPs(),
                         activeRoom: authHost.isRoomActive(),
@@ -369,7 +369,7 @@ function startServer() {
                 }
                 hostCfg.authenticated = false;
                 //
-                log.debug('OIDC ------> Logout', {
+                log.debug('[OIDC] ------> Logout', {
                     authenticated: hostCfg.authenticated,
                     authorizedIPs: authHost.getAuthorizedIPs(),
                     activeRoom: authHost.isRoomActive(),
