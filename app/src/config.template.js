@@ -126,6 +126,7 @@ module.exports = {
             Host Protection (default: false)
             To enhance host security, enable host protection - user auth and provide valid
             usernames and passwords in the users array or active users_from_db using users_api_endpoint for check.
+            When oidc.enabled is utilized alongside host protection, the authenticated user will be recognized as valid.
         */
         protected: false,
         user_auth: false,

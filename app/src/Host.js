@@ -7,6 +7,15 @@ module.exports = class Host {
     }
 
     /**
+     * Get IP from req
+     * @param {object} req
+     * @returns string IP
+     */
+    getIP(req) {
+        return req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;
+    }
+
+    /**
      * Get authorized IPs
      * @returns object
      */
@@ -21,7 +30,7 @@ module.exports = class Host {
      */
     setAuthorizedIP(ip, authorized) {
         this.authorizedIPs.set(ip, authorized);
-        this.roomActive = true;
+        this.setRoomActive();
     }
 
     /**
@@ -34,11 +43,25 @@ module.exports = class Host {
     }
 
     /**
-     * Host room active
+     * Host room status
      * @returns boolean
      */
     isRoomActive() {
         return this.roomActive;
+    }
+
+    /**
+     * Set host room activate
+     */
+    setRoomActive() {
+        this.roomActive = true;
+    }
+
+    /**
+     * Set host room deactivate
+     */
+    setRoomDeactivate() {
+        this.roomActive = false;
     }
 
     /**
@@ -47,7 +70,7 @@ module.exports = class Host {
      * @returns boolean
      */
     deleteIP(ip) {
-        this.roomActive = false;
+        this.setRoomDeactivate();
         return this.authorizedIPs.delete(ip);
     }
 };
