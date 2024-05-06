@@ -70,7 +70,9 @@ module.exports = class Host {
      * @returns boolean
      */
     deleteIP(ip) {
-        this.setRoomDeactivate();
+        if (this.isAuthorizedIP(ip)) {
+            this.setRoomDeactivate();
+        }
         return this.authorizedIPs.delete(ip);
     }
 };
