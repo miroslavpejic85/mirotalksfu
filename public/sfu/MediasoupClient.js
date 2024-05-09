@@ -2248,24 +2248,27 @@
                      */
                     async load({ routerRtpCapabilities }) {
                         logger.debug('load() [routerRtpCapabilities:%o]', routerRtpCapabilities);
-                        routerRtpCapabilities = utils.clone(routerRtpCapabilities);
                         // Temporal handler to get its capabilities.
                         let handler;
                         try {
                             if (this._loaded) {
                                 throw new errors_1.InvalidStateError('already loaded');
                             }
+                            // Clone given router RTP capabilities to not modify input data.
+                            const clonedRouterRtpCapabilities = utils.clone(routerRtpCapabilities);
                             // This may throw.
-                            ortc.validateRtpCapabilities(routerRtpCapabilities);
+                            ortc.validateRtpCapabilities(clonedRouterRtpCapabilities);
                             handler = this._handlerFactory();
                             const nativeRtpCapabilities = await handler.getNativeRtpCapabilities();
                             logger.debug('load() | got native RTP capabilities:%o', nativeRtpCapabilities);
+                            // Clone obtained native RTP capabilities to not modify input data.
+                            const clonedNativeRtpCapabilities = utils.clone(nativeRtpCapabilities);
                             // This may throw.
-                            ortc.validateRtpCapabilities(nativeRtpCapabilities);
+                            ortc.validateRtpCapabilities(clonedNativeRtpCapabilities);
                             // Get extended RTP capabilities.
                             this._extendedRtpCapabilities = ortc.getExtendedRtpCapabilities(
-                                nativeRtpCapabilities,
-                                routerRtpCapabilities,
+                                clonedNativeRtpCapabilities,
+                                clonedRouterRtpCapabilities,
                             );
                             logger.debug('load() | got extended RTP capabilities:%o', this._extendedRtpCapabilities);
                             // Check whether we can produce audio/video.
@@ -3012,12 +3015,12 @@
                         this._canProduceByKind = canProduceByKind;
                         this._maxSctpMessageSize = sctpParameters ? sctpParameters.maxMessageSize : null;
                         // Clone and sanitize additionalSettings.
-                        additionalSettings = utils.clone(additionalSettings) || {};
-                        delete additionalSettings.iceServers;
-                        delete additionalSettings.iceTransportPolicy;
-                        delete additionalSettings.bundlePolicy;
-                        delete additionalSettings.rtcpMuxPolicy;
-                        delete additionalSettings.sdpSemantics;
+                        const clonedAdditionalSettings = utils.clone(additionalSettings) || {};
+                        delete clonedAdditionalSettings.iceServers;
+                        delete clonedAdditionalSettings.iceTransportPolicy;
+                        delete clonedAdditionalSettings.bundlePolicy;
+                        delete clonedAdditionalSettings.rtcpMuxPolicy;
+                        delete clonedAdditionalSettings.sdpSemantics;
                         this._handler = handlerFactory();
                         this._handler.run({
                             direction,
@@ -3027,7 +3030,7 @@
                             sctpParameters,
                             iceServers,
                             iceTransportPolicy,
-                            additionalSettings,
+                            additionalSettings: clonedAdditionalSettings,
                             proprietaryConstraints,
                             extendedRtpCapabilities,
                         });
@@ -3300,7 +3303,6 @@
                      */
                     async consume({ id, producerId, kind, rtpParameters, streamId, appData = {} }) {
                         logger.debug('consume()');
-                        rtpParameters = utils.clone(rtpParameters);
                         if (this._closed) {
                             throw new errors_1.InvalidStateError('closed');
                         } else if (this._direction !== 'recv') {
@@ -3316,8 +3318,10 @@
                         } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
                         }
+                        // Clone given RTP parameters to not modify input data.
+                        const clonedRtpParameters = utils.clone(rtpParameters);
                         // Ensure the device can consume it.
-                        const canConsume = ortc.canReceive(rtpParameters, this._extendedRtpCapabilities);
+                        const canConsume = ortc.canReceive(clonedRtpParameters, this._extendedRtpCapabilities);
                         if (!canConsume) {
                             throw new errors_1.UnsupportedError('cannot consume this Producer');
                         }
@@ -3325,7 +3329,7 @@
                             id,
                             producerId,
                             kind,
-                            rtpParameters,
+                            rtpParameters: clonedRtpParameters,
                             streamId,
                             appData,
                         });
@@ -3419,7 +3423,6 @@
                         appData = {},
                     }) {
                         logger.debug('consumeData()');
-                        sctpStreamParameters = utils.clone(sctpStreamParameters);
                         if (this._closed) {
                             throw new errors_1.InvalidStateError('closed');
                         } else if (this._direction !== 'recv') {
@@ -3435,12 +3438,14 @@
                         } else if (appData && typeof appData !== 'object') {
                             throw new TypeError('if given, appData must be an object');
                         }
+                        // Clone given SCTP stream parameters to not modify input data.
+                        const clonedSctpStreamParameters = utils.clone(sctpStreamParameters);
                         // This may throw.
-                        ortc.validateSctpStreamParameters(sctpStreamParameters);
+                        ortc.validateSctpStreamParameters(clonedSctpStreamParameters);
                         // Enqueue command.
                         return this._awaitQueue.push(async () => {
                             const { dataChannel } = await this._handler.receiveDataChannel({
-                                sctpStreamParameters,
+                                sctpStreamParameters: clonedSctpStreamParameters,
                                 label,
                                 protocol,
                             });
@@ -3448,7 +3453,7 @@
                                 id,
                                 dataProducerId,
                                 dataChannel,
-                                sctpStreamParameters,
+                                sctpStreamParameters: clonedSctpStreamParameters,
                                 appData,
                             });
                             this._dataConsumers.set(dataConsumer.id, dataConsumer);
@@ -13857,7 +13862,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.6';
+                exports.version = '3.7.8';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -14377,7 +14382,7 @@
                     // Otherwise look for a compatible set of codecs.
                     else {
                         for (let idx = 0; idx < codecs.length; ++idx) {
-                            if (matchCodecs(codecs[idx], capCodec)) {
+                            if (matchCodecs(codecs[idx], capCodec, { strict: true })) {
                                 filteredCodecs.push(codecs[idx]);
                                 if (isRtxCodec(codecs[idx + 1])) {
                                     filteredCodecs.push(codecs[idx + 1]);
@@ -14897,7 +14902,7 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.generateRandomNumber = exports.clone = void 0;
+                exports.deepFreeze = exports.generateRandomNumber = exports.clone = void 0;
                 /**
                  * Clones the given value.
                  */
@@ -14921,6 +14926,23 @@
                     return Math.round(Math.random() * 10000000);
                 }
                 exports.generateRandomNumber = generateRandomNumber;
+                /**
+                 * Make an object or array recursively immutable.
+                 * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze.
+                 */
+                function deepFreeze(object) {
+                    // Retrieve the property names defined on object.
+                    const propNames = Reflect.ownKeys(object);
+                    // Freeze properties before freezing self.
+                    for (const name of propNames) {
+                        const value = object[name];
+                        if ((value && typeof value === 'object') || typeof value === 'function') {
+                            deepFreeze(value);
+                        }
+                    }
+                    return Object.freeze(object);
+                }
+                exports.deepFreeze = deepFreeze;
             },
             {},
         ],

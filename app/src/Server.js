@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.32
+ * @version 1.4.33
  *
  */
 
@@ -444,7 +444,7 @@ function startServer() {
             log.debug('Direct Join', {
                 OIDCUserAuthenticated: OIDCUserAuthenticated,
                 authenticated: hostCfg.authenticated,
-                host_protected: hostCfg.protected,
+                hostProtected: hostCfg.protected,
             });
 
             let peerUsername,
@@ -501,13 +501,26 @@ function startServer() {
 
         const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
 
-        if (OIDCUserAuthenticated || hostCfg.authenticated || authHost.isRoomActive()) {
-            log.debug('/join/room', {
-                OIDCUserAuthenticated: OIDCUserAuthenticated,
-                authenticated: hostCfg.authenticated,
-                host_protected: hostCfg.protected,
-                activeRoom: authHost.isRoomActive(),
-            });
+        const roomId = req.params.roomId;
+
+        const roomActive = authHost.isRoomActive();
+
+        const roomExist = roomList.has(roomId);
+
+        const roomCount = roomList.size;
+
+        log.debug('/join/:roomId', {
+            OIDCUserAuthenticated: OIDCUserAuthenticated,
+            hostProtected: hostCfg.protected,
+            hostAuthenticated: hostCfg.authenticated,
+            roomActive: roomActive,
+            roomExist: roomExist,
+            roomCount: roomCount,
+            roomId: roomId,
+        });
+
+        if (OIDCUserAuthenticated || hostCfg.authenticated || roomActive) {
+            //...
 
             if (hostCfg.protected) authHost.setRoomActive();
 
