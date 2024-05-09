@@ -880,7 +880,7 @@ function startServer() {
             'font-family:monospace',
         );
 
-        if (config.ngrok.authToken !== '') {
+        if (config.ngrok.enabled && config.ngrok.authToken !== '') {
             return ngrokStart();
         }
         log.info('Server config', getServerConfig());
