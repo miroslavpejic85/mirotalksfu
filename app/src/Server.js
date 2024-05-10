@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.33
+ * @version 1.4.34
  *
  */
 
@@ -439,13 +439,11 @@ function startServer() {
                 req.query,
             );
 
-            const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
+            const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, authHost, roomList, room);
 
-            log.debug('Direct Join', {
-                OIDCUserAuthenticated: OIDCUserAuthenticated,
-                authenticated: hostCfg.authenticated,
-                hostProtected: hostCfg.protected,
-            });
+            if (!allowRoomAccess) {
+                return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
+            }
 
             let peerUsername,
                 peerPassword = '';
@@ -473,6 +471,8 @@ function startServer() {
                 }
             }
 
+            const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
+
             if (
                 (hostCfg.protected && isPeerValid && isPeerPresenter && !hostCfg.authenticated) ||
                 OIDCUserAuthenticated
@@ -497,31 +497,17 @@ function startServer() {
 
     // join room by id
     app.get('/join/:roomId', (req, res) => {
-        //log.debug('/join/room - hostCfg ----->', hostCfg);
+        //
+        const allowRoomAccess = isAllowedRoomAccess(
+            '/join/:roomId',
+            req,
+            hostCfg,
+            authHost,
+            roomList,
+            req.params.roomId,
+        );
 
-        const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
-
-        const roomId = req.params.roomId;
-
-        const roomActive = authHost.isRoomActive();
-
-        const roomExist = roomList.has(roomId);
-
-        const roomCount = roomList.size;
-
-        log.debug('/join/:roomId', {
-            OIDCUserAuthenticated: OIDCUserAuthenticated,
-            hostProtected: hostCfg.protected,
-            hostAuthenticated: hostCfg.authenticated,
-            roomActive: roomActive,
-            roomExist: roomExist,
-            roomCount: roomCount,
-            roomId: roomId,
-        });
-
-        if (OIDCUserAuthenticated || hostCfg.authenticated || roomActive) {
-            //...
-
+        if (allowRoomAccess) {
             if (hostCfg.protected) authHost.setRoomActive();
 
             res.sendFile(views.room);
@@ -2169,6 +2155,35 @@ function startServer() {
             };
         });
         return roomPeersArray;
+    }
+
+    function isAllowedRoomAccess(logMessage, req, hostCfg, authHost, roomList, roomId) {
+        const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
+        const hostUserAuthenticated = hostCfg.protected && hostCfg.authenticated;
+        const roomActive = authHost.isRoomActive();
+        const roomExist = roomList.has(roomId);
+        const roomCount = roomList.size;
+
+        log.debug(logMessage, {
+            OIDCUserEnabled: OIDC.enabled,
+            OIDCUserAuthenticated: OIDCUserAuthenticated,
+            hostUserAuthenticated: hostUserAuthenticated,
+            hostProtected: hostCfg.protected,
+            hostAuthenticated: hostCfg.authenticated,
+            roomActive: roomActive,
+            roomExist: roomExist,
+            roomCount: roomCount,
+            roomId: roomId,
+        });
+
+        const allowRoomAccess =
+            (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
+            OIDCUserAuthenticated || // User authenticated via OIDC
+            hostUserAuthenticated || // User authenticated via Login
+            ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
+            roomExist; // User Or Guest join an existing Room
+
+        return allowRoomAccess;
     }
 
     async function getPeerGeoLocation(ip) {
