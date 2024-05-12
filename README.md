@@ -35,6 +35,7 @@
 -   Unlimited conference rooms with no time limitations.
 -   Live broadcasting streaming.
 -   Translated into 133 languages.
+-   Support for the OpenID Connect (OIDC) authentication layer.
 -   Host protection to prevent unauthorized access.
 -   User auth to prevent unauthorized access.
 -   JWT.io securely manages credentials for host configurations and user authentication, enhancing security and streamlining processes.
