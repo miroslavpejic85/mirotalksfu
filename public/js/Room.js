@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.36
+ * @version 1.4.40
  *
  */
 
@@ -243,6 +243,8 @@ let scriptProcessor = null;
 const RoomURL = window.location.origin + '/join/' + room_id; // window.location.origin + '/join/?room=' + roomId + '&token=' + myToken
 
 let transcription;
+
+let showFreeAvatars = true;
 
 // ####################################################
 // INIT ROOM
@@ -1443,6 +1445,20 @@ function handleButtons() {
     };
     tabLanguagesBtn.onclick = (e) => {
         rc.openTab(e, 'tabLanguages');
+    };
+    tabVideoAIBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVideoAI');
+        rc.getAvatarList();
+        rc.getVoiceList();
+    };
+    avatarVideoAIStart.onclick = (e) => {
+        rc.stopSession();
+        rc.handleVideoAI();
+        rc.toggleMySettings();
+    };
+    switchAvatars.onchange = (e) => {
+        showFreeAvatars = e.currentTarget.checked;
+        rc.getAvatarList();
     };
     refreshVideoDevices.onclick = async () => {
         await refreshMyVideoDevices();

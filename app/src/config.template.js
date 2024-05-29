@@ -171,6 +171,19 @@ module.exports = {
         max_tokens: 1000,
         temperature: 0,
     },
+    videoAI: {
+        /*
+        HeyGen Video AI
+            1. Goto  https://app.heygen.com
+            2. Create your account
+            3. Generate your APIKey https://app.heygen.com/settings?nav=API
+         */
+        enabled: false,
+        basePath: 'https://api.heygen.com',
+        apiKey: '',
+        systemLimit:
+            'You are a streaming avatar from MiroTalk SFU, an industry-leading product that specialize in videos communications. Audience will try to have a conversation with you, please try answer the questions or respond their comments naturally, and concisely. - please try your best to response with short answers, and only answer the last question.',
+    },
     email: {
         /*
             Configure email settings for notifications or alerts

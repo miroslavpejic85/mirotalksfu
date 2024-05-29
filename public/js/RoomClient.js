@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.36
+ * @version 1.4.40
  *
  */
 
@@ -149,6 +149,19 @@ const enums = {
     //...
 };
 
+// HeyGen config
+const VideoAI = {
+    enabled: true,
+    active: false,
+    info: {},
+    avatar: null,
+    avatarName: 'Monica',
+    avatarVoice: '',
+    quality: 'medium',
+    virtualBackground: true,
+    background: '../images/virtual/1.jpg',
+};
+
 // Recording
 let recordedBlobs = [];
 
@@ -204,6 +217,13 @@ class RoomClient {
         this.chatMessageNotifyDelay = 10000; // ms
         this.chatMessageSpamCount = 0;
         this.chatMessageSpamCountToBan = 10;
+
+        // HeyGen Video AI
+        this.videoAIContainer = null;
+        this.videoAIElement = null;
+        this.canvasAIElement = null;
+        this.renderAIToken = null;
+        this.peerConnection = null;
 
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
@@ -490,7 +510,13 @@ class RoomClient {
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
             }
+            // Check if VideoAI is enabled
+            if (!room.videoAIEnabled) {
+                VideoAI.enabled = false;
+                elemDisplay('tabVideoAIBtn', false);
+            }
         }
+
         // PARTICIPANTS
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
@@ -3682,6 +3708,7 @@ class RoomClient {
                     this.setMsgAvatar('right', 'ChatGPT');
                     this.appendMessage('right', image.chatgpt, 'ChatGPT', this.peer_id, message, 'ChatGPT', 'ChatGPT');
                     this.cleanMessage();
+                    this.streamingTask(message); // Video AI avatar speak
                     this.speechInMessages ? this.speechMessage(true, 'ChatGPT', message) : this.sound('message');
                 })
                 .catch((err) => {
@@ -3778,6 +3805,7 @@ class RoomClient {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
         this.speechInMessages ? this.speechMessage(true, data.peer_name, data.peer_msg) : this.sound('message');
+        //this.speechInMessages ? this.streamingTask(data.peer_msg) : this.sound('message');
 
         const participantsList = this.getId('participantsList');
         const participantsListItems = participantsList.getElementsByTagName('li');
@@ -6767,6 +6795,457 @@ class RoomClient {
                 );
             }
         });
+    }
+
+    // ##############################################
+    // HeyGen Video AI
+    // ##############################################
+
+    getAvatarList() {
+        this.socket
+            .request('getAvatarList')
+            .then(function (completion) {
+                const avatarVideoAIPreview = document.getElementById('avatarVideoAIPreview');
+                const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
+                avatarVideoAIcontainer.innerHTML = ''; // cleanup the avatar container
+
+                const excludedIds = [
+                    'josh_lite3_20230714',
+                    'josh_lite_20230714',
+                    'Lily_public_lite1_20230601',
+                    'Brian_public_lite1_20230601',
+                    'Brian_public_lite2_20230601',
+                    'Eric_public_lite1_20230601',
+                    'Mido-lite-20221128',
+                ];
+
+                const freeAvatars = [
+                    'Kristin in Black Suit',
+                    'Angela in Black Dress',
+                    'Kayla in Casual Suit',
+                    'Anna in Brown T-shirt',
+                    'Briana in Brown suit',
+                    'Justin in White Shirt',
+                    'Leah in Black Suit',
+                    'Wade in Black Jacket',
+                    'Tyler in Casual Suit',
+                    'Tyler in Shirt',
+                    'Tyler in Suit',
+                    'default',
+                ];
+
+                completion.response.avatars.forEach((avatar) => {
+                    avatar.avatar_states.forEach((avatarUi) => {
+                        if (
+                            !excludedIds.includes(avatarUi.id) &&
+                            (showFreeAvatars ? freeAvatars.includes(avatarUi.pose_name) : true)
+                        ) {
+                            const div = document.createElement('div');
+                            div.style.float = 'left';
+                            div.style.padding = '5px';
+                            div.style.width = '100px';
+                            div.style.height = '200px';
+                            const img = document.createElement('img');
+                            const hr = document.createElement('hr');
+                            const label = document.createElement('label');
+                            const textContent = document.createTextNode(avatarUi.pose_name);
+                            label.appendChild(textContent);
+                            //label.style.fontSize = '12px';
+                            img.setAttribute('id', avatarUi.id);
+                            img.setAttribute('class', 'avatarImg');
+                            img.setAttribute('src', avatarUi.normal_thumbnail_medium);
+                            img.setAttribute('width', '100%');
+                            img.setAttribute('height', 'auto');
+                            img.setAttribute('alt', avatarUi.pose_name);
+                            img.setAttribute('style', 'cursor:pointer; padding: 2px; border-radius: 5px;');
+                            img.setAttribute(
+                                'avatarData',
+                                avatarUi.id +
+                                    '|' +
+                                    avatar.name +
+                                    '|' +
+                                    avatarUi.default_voice.free.voice_id +
+                                    '|' +
+                                    avatarUi.video_url.grey,
+                            );
+                            img.onclick = () => {
+                                const avatarImages = document.querySelectorAll('.avatarImg');
+                                avatarImages.forEach((image) => {
+                                    image.style.border = 'none';
+                                });
+                                img.style.border = 'var(--border)';
+                                const avatarData = img.getAttribute('avatarData');
+                                const avatarDataArr = avatarData.split('|');
+                                VideoAI.avatar = avatarDataArr[0];
+                                VideoAI.avatarName = avatarDataArr[1];
+                                VideoAI.avatarVoice = avatarDataArr[2] ? avatarDataArr[2] : '';
+                                avatarVideoAIPreview.src = avatarUi.video_url.grey;
+                                avatarVideoAIPreview.play();
+                                console.log('Avatar image click event', {
+                                    avatar,
+                                    avatarUi,
+                                    avatarDataArr,
+                                });
+                            };
+                            div.append(img);
+                            div.append(hr);
+                            div.append(label);
+                            avatarVideoAIcontainer.append(div);
+                            // Show the first available free avatar
+                            if (showFreeAvatars && avatarUi.pose_name === 'Kristin in Black Suit') {
+                                avatarVideoAIPreview.src = avatarUi.video_url.grey;
+                                avatarVideoAIPreview.play();
+                            }
+                        }
+                    });
+                });
+            })
+            .catch((err) => {
+                console.error('Video AI getAvatarList error:', err);
+            });
+    }
+
+    getVoiceList() {
+        this.socket
+            .request('getVoiceList')
+            .then(function (completion) {
+                const selectElement = document.getElementById('avatarVoiceIDs');
+                selectElement.innerHTML = '<option value="">Select Avatar Voice</option>'; // Reset options with default
+
+                // Sort the list alphabetically by language
+                const sortedList = completion.response.list.sort((a, b) => a.language.localeCompare(b.language));
+
+                sortedList.forEach((flag) => {
+                    // console.log('flag', flag);
+                    const { is_paid, voice_id, language, display_name, gender } = flag;
+                    if (showFreeAvatars ? is_paid == false : true) {
+                        const option = document.createElement('option');
+                        option.value = voice_id;
+                        option.text = `${language}, ${display_name} (${gender})`; // You can customize the display text
+                        selectElement.appendChild(option);
+                    }
+                });
+
+                // Event listener for changes on select element
+                selectElement.addEventListener('change', (event) => {
+                    const selectedVoiceID = event.target.value;
+                    const selectedPreviewURL = completion.response.list.find(
+                        (flag) => flag.voice_id === selectedVoiceID,
+                    )?.preview?.movio;
+                    VideoAI.avatarVoice = selectedVoiceID;
+                    if (selectedPreviewURL) {
+                        const previewAudio = document.getElementById('previewAudio');
+                        previewAudio.src = selectedPreviewURL;
+                        previewAudio.play();
+                    }
+                });
+            })
+            .catch((err) => {
+                console.error('Video AI getVoiceList error:', err);
+            });
+    }
+
+    async handleVideoAI() {
+        const vb = document.createElement('div');
+        vb.setAttribute('id', 'avatar__vb');
+        vb.className = 'videoMenuBar fadein';
+
+        const fs = document.createElement('button');
+        fs.id = 'avatar__fs';
+        fs.className = html.fullScreen;
+
+        const pin = document.createElement('button');
+        pin.id = 'avatar__pin';
+        pin.className = html.pin;
+
+        const ss = document.createElement('button');
+        ss.id = 'avatar__stopSession';
+        ss.className = html.kickOut;
+
+        const avatarName = document.createElement('div');
+        const an = document.createElement('span');
+        an.id = 'avatar__name';
+        an.className = html.userName;
+        an.innerText = VideoAI.avatarName;
+
+        // Create video container element
+        this.videoAIContainer = document.createElement('div');
+        this.videoAIContainer.className = 'Camera';
+        this.videoAIContainer.id = 'videoAIContainer';
+
+        // Create canvas element for video rendering
+        this.canvasAIElement = document.createElement('canvas');
+        this.canvasAIElement.className = '';
+        this.canvasAIElement.id = 'canvasAIElement';
+        this.canvasAIElement.style.objectFit = this.isMobileDevice ? 'cover' : 'contain';
+
+        // Create video element for avatar
+        this.videoAIElement = document.createElement('video');
+        this.videoAIElement.id = 'videoAIElement';
+        this.videoAIElement.setAttribute('playsinline', true);
+        this.videoAIElement.autoplay = true;
+        this.videoAIElement.className = '';
+        this.videoAIElement.poster = image.poster;
+        this.videoAIElement.style.objectFit = this.isMobileDevice ? 'cover' : 'contain';
+
+        // Append elements to video container
+        vb.appendChild(ss);
+        this.isVideoFullScreenSupported && vb.appendChild(fs);
+        !this.isMobileDevice && vb.appendChild(pin);
+        avatarName.appendChild(an);
+
+        this.videoAIContainer.appendChild(this.videoAIElement);
+        VideoAI.virtualBackground && this.videoAIContainer.appendChild(this.canvasAIElement);
+        this.videoAIContainer.appendChild(vb);
+        this.videoAIContainer.appendChild(avatarName);
+        this.videoMediaContainer.appendChild(this.videoAIContainer);
+
+        // Hide canvas initially
+        this.canvasAIElement.hidden = true;
+
+        // Use video avatar virtual background
+        if (VideoAI.virtualBackground) {
+            this.isVideoFullScreenSupported && this.handleFS(this.canvasAIElement.id, fs.id);
+            this.handlePN(this.canvasAIElement.id, pin.id, this.videoAIContainer.id, true);
+        } else {
+            this.isVideoFullScreenSupported && this.handleFS(this.videoAIElement.id, fs.id);
+            this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true);
+        }
+
+        ss.onclick = () => {
+            this.stopSession();
+        };
+
+        if (!this.isMobileDevice) {
+            this.setTippy(pin.id, 'Toggle Pin', 'bottom');
+            this.setTippy(fs.id, 'Toggle full screen', 'bottom');
+            this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
+        }
+
+        handleAspectRatio();
+
+        await this.streamingNew();
+    }
+
+    async streamingNew() {
+        try {
+            const { quality, avatar, avatarVoice } = VideoAI;
+
+            const response = await this.socket.request('streamingNew', {
+                quality: quality,
+                avatar_name: avatar,
+                voice_id: avatarVoice,
+            });
+
+            if (!response || Object.keys(response).length === 0 || response.error) {
+                this.userLog('error', 'Error to creating the avatar', 'top-end');
+                this.stopSession();
+                return;
+            }
+
+            if (response.response.code !== 100) {
+                this.userLog('warning', response.response.message, 'top-end');
+                this.stopSession();
+                return;
+            }
+
+            VideoAI.info = response.response.data;
+
+            console.log('Video AI streamingNew', VideoAI);
+
+            const { sdp, ice_servers2 } = VideoAI.info;
+
+            await this.setupPeerConnection(sdp, ice_servers2);
+
+            await this.startSession();
+        } catch (error) {
+            this.userLog('error', error, 'top-end');
+            console.error('Video AI streamingNew error:', error);
+            this.stopSession();
+        }
+    }
+
+    async setupPeerConnection(sdp, iceServers) {
+        this.peerConnection = new RTCPeerConnection({ iceServers: iceServers });
+
+        this.peerConnection.ontrack = (event) => {
+            if (event.track.kind === 'audio' || event.track.kind === 'video') {
+                this.videoAIElement.srcObject = event.streams[0];
+            }
+        };
+
+        this.peerConnection.ondatachannel = (event) => {
+            event.channel.onmessage = this.handleVideoAIMessage;
+        };
+
+        const remoteDescription = new RTCSessionDescription(sdp);
+        this.peerConnection.setRemoteDescription(remoteDescription);
+    }
+
+    handleVideoAIMessage(event) {
+        console.log('handleVideoAIMessage', event.data);
+    }
+
+    async startSession() {
+        if (!VideoAI.info) {
+            this.userLog('warning', 'Please create a connection first', 'top-end');
+            return;
+        }
+        this.userLog('info', 'Starting session... please wait', 'top-end');
+        try {
+            const answer = await this.peerConnection.createAnswer();
+
+            await this.peerConnection.setLocalDescription(answer);
+
+            await this.streamingStart(VideoAI.info.session_id, answer);
+
+            this.peerConnection.onicecandidate = async ({ candidate }) => {
+                if (candidate) {
+                    await this.streamingICE(candidate);
+                }
+            };
+        } catch (error) {
+            this.userLog('error', error, 'top-end');
+            console.error('Video AI startSession error:', error);
+        }
+    }
+
+    async streamingICE(candidate) {
+        try {
+            const response = await this.socket.request('streamingICE', {
+                session_id: VideoAI.info.session_id,
+                candidate: candidate.toJSON(),
+            });
+
+            if (response && !response.error) {
+                return response.response;
+            }
+        } catch (error) {
+            console.error('Video AI streamingICE error:', error);
+        }
+    }
+
+    async streamingStart(sessionId, sdp) {
+        try {
+            const response = await this.socket.request('streamingStart', {
+                session_id: sessionId,
+                sdp: sdp,
+            });
+
+            if (!response || response.error) return;
+
+            this.startRendering();
+
+            VideoAI.active = true;
+
+            this.userLog('info', 'Video AI streaming started', 'top-end');
+        } catch (error) {
+            console.error('Video AI streamingStart error:', error);
+        }
+    }
+
+    streamingTask(message) {
+        if (VideoAI.enabled && VideoAI.active && message) {
+            const response = this.socket.request('streamingTask', {
+                session_id: VideoAI.info.session_id,
+                text: message,
+            });
+            console.log('Video AI streamingTask', response);
+        }
+    }
+
+    startRendering() {
+        if (!VideoAI.virtualBackground) return;
+
+        let frameCounter = 0;
+
+        this.renderAIToken = Math.trunc(1e9 * Math.random());
+        frameCounter = this.renderAIToken;
+
+        this.videoAIElement.hidden = true;
+        this.canvasAIElement.hidden = false;
+
+        const context = this.canvasAIElement.getContext('2d', { willReadFrequently: true });
+
+        const renderFrame = () => {
+            if (this.renderAIToken !== frameCounter) return;
+
+            this.canvasAIElement.width = this.videoAIElement.videoWidth;
+            this.canvasAIElement.height = this.videoAIElement.videoHeight;
+
+            context.drawImage(this.videoAIElement, 0, 0, this.canvasAIElement.width, this.canvasAIElement.height);
+
+            const imageData = context.getImageData(0, 0, this.canvasAIElement.width, this.canvasAIElement.height);
+            const pixels = imageData.data;
+
+            for (let i = 0; i < pixels.length; i += 4) {
+                if (shouldHidePixel([pixels[i], pixels[i + 1], pixels[i + 2]])) {
+                    pixels[i + 3] = 0; // Make pixel transparent
+                }
+            }
+
+            function shouldHidePixel([r, g, b]) {
+                // Adjust the thresholds to match the green screen background
+                const greenThreshold = 90;
+                const redThreshold = 90;
+                const blueThreshold = 90;
+                return g > greenThreshold && r < redThreshold && b < blueThreshold;
+            }
+
+            context.putImageData(imageData, 0, 0);
+            requestAnimationFrame(renderFrame);
+        };
+
+        // Set the background of the canvas' parent element to an image or color of your choice
+        this.canvasAIElement.parentElement.style.background = `url("${VideoAI.background}") center / cover no-repeat`;
+
+        setTimeout(renderFrame, 1000);
+    }
+
+    stopRendering() {
+        this.renderAIToken = null;
+    }
+
+    stopSession() {
+        const videoAIElement = this.getId('videoAIElement');
+        if (videoAIElement) {
+            videoAIElement.parentNode.removeChild(videoAIElement);
+        }
+        const videoAIContainer = this.getId('videoAIContainer');
+        if (videoAIContainer) {
+            videoAIContainer.parentNode.removeChild(videoAIContainer);
+            const removeVideoAI = ['videoAIElement', 'canvasAIElement'];
+            if (this.isVideoPinned && removeVideoAI.includes(this.pinnedVideoPlayerId)) {
+                this.removeVideoPinMediaContainer();
+            }
+        }
+
+        handleAspectRatio();
+
+        this.streamingStop();
+    }
+
+    streamingStop() {
+        if (this.peerConnection) {
+            console.info('Video AI streamingStop peerConnection close done!');
+            this.peerConnection.close();
+            this.peerConnection = null;
+        }
+        if (VideoAI.info && VideoAI.info.session_id) {
+            const sessionId = VideoAI.info.session_id;
+            this.socket
+                .request('streamingStop', { session_id: sessionId })
+                .then(() => {
+                    console.info('Video AI streamingStop done!');
+                })
+                .catch((error) => {
+                    console.error('Video AI streamingStop error:', error);
+                });
+        }
+
+        this.stopRendering();
+
+        VideoAI.active = false;
     }
 
     sleep(ms) {

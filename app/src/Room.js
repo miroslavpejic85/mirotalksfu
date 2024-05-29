@@ -40,6 +40,7 @@ module.exports = class Room {
         };
         this.survey = config.survey;
         this.redirect = config.redirect;
+        this.videoAIEnabled = config?.videoAI?.enabled || false;
         this.peers = new Map();
         this.bannedPeers = [];
         this.webRtcTransport = config.mediasoup.webRtcTransport;
@@ -65,6 +66,7 @@ module.exports = class Room {
             moderator: this._moderator,
             survey: this.survey,
             redirect: this.redirect,
+            videoAIEnabled: this.videoAIEnabled,
             peers: JSON.stringify([...this.peers]),
         };
     }

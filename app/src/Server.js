@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.36
+ * @version 1.4.40
  *
  */
 
@@ -1867,6 +1867,219 @@ function startServer() {
                     log.error('ChatGPT', error);
                     cb({ message: error.message });
                 }
+            }
+        });
+
+        // https://docs.heygen.com/reference/overview-copy
+
+        socket.on('getAvatarList', async ({}, cb) => {
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const response = await axios.get(`${config.videoAI.basePath}/v1/avatar.list`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Api-Key': config.videoAI.apiKey,
+                    },
+                });
+
+                const data = { response: response.data.data };
+
+                //log.debug('getAvatarList', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+            }
+        });
+
+        socket.on('getVoiceList', async ({}, cb) => {
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const response = await axios.get(`${config.videoAI.basePath}/v1/voice.list`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Api-Key': config.videoAI.apiKey,
+                    },
+                });
+
+                const data = { response: response.data.data };
+
+                //log.debug('getVoiceList', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+            }
+        });
+
+        socket.on('streamingNew', async ({ quality, avatar_name, voice_id }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.new`,
+                    {
+                        quality,
+                        avatar_name,
+                        voice: {
+                            voice_id: voice_id,
+                        },
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data };
+
+                log.debug('streamingNew', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
+            }
+        });
+
+        socket.on('streamingStart', async ({ session_id, sdp }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.start`,
+                    { session_id, sdp },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data.data };
+
+                log.debug('startSessionAi', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'server error' : error });
+            }
+        });
+
+        socket.on('streamingICE', async ({ session_id, candidate }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.ice`,
+                    { session_id, candidate },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data };
+
+                log.debug('streamingICE', data);
+
+                cb(data);
+            } catch (error) {
+                log.error('Error in streamingICE:', error.response?.data || error.message); // Log detailed error
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
+            }
+        });
+
+        socket.on('streamingTask', async ({ session_id, text }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.task`,
+                    {
+                        session_id,
+                        text,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data };
+
+                log.debug('streamingTask', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'server error' : error });
+            }
+        });
+
+        socket.on('talkToOpenAI', async ({ text, context }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const systemLimit = config.videoAI.systemLimit;
+                const arr = {
+                    messages: [...context, { role: 'system', content: systemLimit }, { role: 'user', content: text }],
+                    model: 'gpt-3.5-turbo',
+                };
+                const chatCompletion = await chatGPT.chat.completions.create(arr);
+                const chatText = chatCompletion.choices[0].message.content;
+                context.push({ role: 'system', content: chatText });
+                context.push({ role: 'assistant', content: chatText });
+
+                const data = { response: chatText, context: context };
+
+                log.debug('talkToOpenAI', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.message });
+            }
+        });
+
+        socket.on('streamingStop', async ({ session_id }, cb) => {
+            if (!roomList.has(socket.room_id)) return;
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.stop`,
+                    {
+                        session_id,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data };
+
+                log.debug('streamingStop', data);
+
+                cb(data);
+            } catch (error) {
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
             }
         });
 

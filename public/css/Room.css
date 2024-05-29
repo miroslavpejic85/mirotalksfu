@@ -1320,6 +1320,70 @@ hr {
     }
 }
 
+/*--------------------------------------------------------------
+# Video AI Avatars
+--------------------------------------------------------------*/
+
+.avatarsVideoAI {
+    min-height: 480px;
+    max-height: 600px;
+    color: white;
+    overflow: auto;
+    justify-content: center; /* Center horizontally */
+    align-items: center; /* Center vertically */
+}
+
+/* Custom avatar audio UI */
+
+#audio-container {
+    background: var(--select-bg);
+    color: #fff;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+#audio-container audio {
+    width: 100%;
+    outline: none;
+}
+
+#audio-container audio::-webkit-media-controls-panel {
+    background: var(--body-bg);
+    border-radius: 5px;
+    padding: 5px;
+}
+
+#audio-container audio::-webkit-media-controls-timeline {
+    background: var(--body-bg);
+    border-radius: 5px;
+}
+
+/* Styling for the audio volume controls */
+#audio-container audio::-webkit-media-controls-volume-slider-container {
+    color: #fff;
+}
+
+#audio-container audio::-webkit-media-controls-volume-slider {
+    background: var(--body-bg);
+    border-radius: 5px;
+}
+
+/* Styling for the play/pause button */
+#audio-container audio::-webkit-media-controls-play-button,
+#audio-container audio::-webkit-media-controls-pause-button {
+    background-color: #fff;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    margin: 0 10px;
+}
+
+/* Styling for the time display */
+#audio-container audio::-webkit-media-controls-current-time-display,
+#audio-container audio::-webkit-media-controls-time-remaining-display {
+    color: #fff;
+}
+
 /*
 z-index:
     - 1 videoMediaContainer

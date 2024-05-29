@@ -57,6 +57,7 @@
 -   Snapshot video frames and save them as PNG images.
 -   Chat with an Emoji Picker for expressing feelings, private messages, Markdown support, and conversation saving.
 -   ChatGPT (powered by OpenAI) for answering questions, providing information, and connecting users to relevant resources.
+-   VideoAI enables users to customize AI avatars to deliver messages, perform tasks, or act out scripts.
 -   Speech recognition, execute the app features simply with your voice.
 -   Push-to-talk functionality, similar to a walkie-talkie.
 -   Advanced collaborative whiteboard for teachers.
