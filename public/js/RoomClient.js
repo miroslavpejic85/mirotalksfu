@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.40
+ * @version 1.4.41
  *
  */
 
@@ -4304,9 +4304,12 @@ class RoomClient {
         const audioElements = document.querySelectorAll('audio');
         const audioTracks = [];
         audioElements.forEach((audio) => {
-            const audioTrack = audio.srcObject.getAudioTracks()[0];
-            if (audioTrack) {
-                audioTracks.push(audioTrack);
+            // Exclude avatar Preview Audio
+            if (audio.id !== 'avatarPreviewAudio') {
+                const audioTrack = audio.srcObject.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioTracks.push(audioTrack);
+                }
             }
         });
         return audioTracks;
@@ -4316,9 +4319,12 @@ class RoomClient {
         const audioElements = document.querySelectorAll('audio');
         const audioStream = new MediaStream();
         audioElements.forEach((audio) => {
-            const audioTrack = audio.srcObject.getAudioTracks()[0];
-            if (audioTrack) {
-                audioStream.addTrack(audioTrack);
+            // Exclude avatar Preview Audio
+            if (audio.id !== 'avatarPreviewAudio') {
+                const audioTrack = audio.srcObject.getAudioTracks()[0];
+                if (audioTrack) {
+                    audioStream.addTrack(audioTrack);
+                }
             }
         });
         return audioStream;
@@ -6934,9 +6940,9 @@ class RoomClient {
                     )?.preview?.movio;
                     VideoAI.avatarVoice = selectedVoiceID;
                     if (selectedPreviewURL) {
-                        const previewAudio = document.getElementById('previewAudio');
-                        previewAudio.src = selectedPreviewURL;
-                        previewAudio.play();
+                        const avatarPreviewAudio = document.getElementById('avatarPreviewAudio');
+                        avatarPreviewAudio.src = selectedPreviewURL;
+                        avatarPreviewAudio.play();
                     }
                 });
             })
