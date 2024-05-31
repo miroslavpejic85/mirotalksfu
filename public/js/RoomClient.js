@@ -3709,7 +3709,9 @@ class RoomClient {
                     this.appendMessage('right', image.chatgpt, 'ChatGPT', this.peer_id, message, 'ChatGPT', 'ChatGPT');
                     this.cleanMessage();
                     this.streamingTask(message); // Video AI avatar speak
-                    this.speechInMessages ? this.speechMessage(true, 'ChatGPT', message) : this.sound('message');
+                    this.speechInMessages && !VideoAI.active
+                        ? this.speechMessage(true, 'ChatGPT', message)
+                        : this.sound('message');
                 })
                 .catch((err) => {
                     console.log('ChatGPT error:', err);
@@ -3804,8 +3806,14 @@ class RoomClient {
         if (!this.showChatOnMessage) {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
-        this.speechInMessages ? this.speechMessage(true, data.peer_name, data.peer_msg) : this.sound('message');
-        //this.speechInMessages ? this.streamingTask(data.peer_msg) : this.sound('message');
+
+        if (this.speechInMessages) {
+            VideoAI.active
+                ? this.streamingTask(`New message from: ${data.peer_name}, the message is: ${data.peer_msg}`)
+                : this.speechMessage(true, data.peer_name, data.peer_msg);
+        } else {
+            this.sound('message');
+        }
 
         const participantsList = this.getId('participantsList');
         const participantsListItems = participantsList.getElementsByTagName('li');
