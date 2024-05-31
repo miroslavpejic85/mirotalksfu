@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.41
+ * @version 1.4.42
  *
  */
 
@@ -3852,11 +3852,13 @@ class RoomClient {
             ? `<span class="message-data-time">${time}, ${getFromName} ( me ) </span>`
             : `<span class="message-data-time">${time}, ${getFromName} </span>`;
 
+        const formatMessage = this.formatMsg(getMsg);
+        console.log('FormatMessage', formatMessage);
         const speechButton = this.isSpeechSynthesisSupported
             ? `<button 
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
-                    onclick="rc.speechMessage(false, '${getFromName}', '${this.formatMsg(getMsg)}')">
+                    onclick="rc.speechText('${formatMessage}')">
                     <i class="fas fa-volume-high"></i>
                 </button>`
             : '';
@@ -4097,10 +4099,14 @@ class RoomClient {
     }
 
     speechText(msg) {
-        const speech = new SpeechSynthesisUtterance();
-        speech.text = msg;
-        speech.rate = 0.9;
-        window.speechSynthesis.speak(speech);
+        if (VideoAI.active) {
+            this.streamingTask(msg);
+        } else {
+            const speech = new SpeechSynthesisUtterance();
+            speech.text = msg;
+            speech.rate = 0.9;
+            window.speechSynthesis.speak(speech);
+        }
     }
 
     chatToggleBg() {

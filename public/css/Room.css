@@ -1333,6 +1333,11 @@ hr {
     align-items: center; /* Center vertically */
 }
 
+.container-flex {
+    display: flex;
+    flex-direction: column;
+}
+
 /* Custom avatar audio UI */
 
 #audio-container {
