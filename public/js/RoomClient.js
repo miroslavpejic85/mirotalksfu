@@ -7190,6 +7190,11 @@ class RoomClient {
         const renderFrame = () => {
             if (this.renderAIToken !== frameCounter) return;
 
+            if (this.videoAIElement.videoWidth === 0 || this.videoAIElement.videoHeight === 0) {
+                requestAnimationFrame(renderFrame);
+                return;
+            }
+
             this.canvasAIElement.width = this.videoAIElement.videoWidth;
             this.canvasAIElement.height = this.videoAIElement.videoHeight;
 
@@ -7205,7 +7210,6 @@ class RoomClient {
             }
 
             function shouldHidePixel([r, g, b]) {
-                // Adjust the thresholds to match the green screen background
                 const greenThreshold = 90;
                 const redThreshold = 90;
                 const blueThreshold = 90;
@@ -7216,10 +7220,20 @@ class RoomClient {
             requestAnimationFrame(renderFrame);
         };
 
+        // Ensure the video element is ready before starting rendering
+        const startRenderingWhenReady = () => {
+            if (this.videoAIElement.readyState >= 2) {
+                // HAVE_CURRENT_DATA
+                renderFrame();
+            } else {
+                this.videoAIElement.addEventListener('loadeddata', renderFrame, { once: true });
+            }
+        };
+
         // Set the background of the canvas' parent element to an image or color of your choice
         this.canvasAIElement.parentElement.style.background = `url("${VideoAI.background}") center / cover no-repeat`;
 
-        setTimeout(renderFrame, 1000);
+        setTimeout(startRenderingWhenReady, 1000);
     }
 
     stopRendering() {
