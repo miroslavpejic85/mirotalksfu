@@ -3972,7 +3972,7 @@ function showAbout() {
                 <i class="fas fa-heart"></i> 
                 Support
             </button>
-            <br /><br />
+            <br /><br /><br />
             Author: <a 
                 id="linkedin-button" 
                 data-umami-event="Linkedin button" 
