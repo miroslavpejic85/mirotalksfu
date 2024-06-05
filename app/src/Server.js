@@ -20,6 +20,7 @@ dependencies: {
     express-openid-connect  : https://www.npmjs.com/package/express-openid-connect
     httpolyglot             : https://www.npmjs.com/package/httpolyglot
     jsonwebtoken            : https://www.npmjs.com/package/jsonwebtoken
+    js-yaml                 : https://www.npmjs.com/package/js-yaml
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
     ngrok                   : https://www.npmjs.com/package/ngrok
@@ -29,7 +30,6 @@ dependencies: {
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
     xss                     : https://www.npmjs.com/package/xss
-    yamljs                  : https://www.npmjs.com/package/yamljs
 }
 */
 
@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.44
+ * @version 1.4.45
  *
  */
 
@@ -67,9 +67,9 @@ const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const log = new Logger('Server');
-const yamlJS = require('yamljs');
+const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
-const swaggerDocument = yamlJS.load(path.join(__dirname + '/../api/swagger.yaml'));
+const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
 const Sentry = require('@sentry/node');
 const { CaptureConsole } = require('@sentry/integrations');
 const restrictAccessByIP = require('./middleware/IpWhitelist.js');
