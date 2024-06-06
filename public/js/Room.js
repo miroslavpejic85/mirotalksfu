@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.45
+ * @version 1.4.46
  *
  */
 
@@ -1281,7 +1281,7 @@ function roomIsReady() {
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
-    if (rc.recSyncServerRecording) show(roomRecordingServer);
+    if (rc.recording.recSyncServerRecording) show(roomRecordingServer);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
@@ -2196,9 +2196,9 @@ function handleSelects() {
         e.target.blur();
     };
     switchServerRecording.onchange = (e) => {
-        rc.recSyncServerRecording = e.currentTarget.checked;
-        rc.roomMessage('recSyncServer', rc.recSyncServerRecording);
-        localStorageSettings.rec_server = rc.recSyncServerRecording;
+        rc.recording.recSyncServerRecording = e.currentTarget.checked;
+        rc.roomMessage('recSyncServer', rc.recording.recSyncServerRecording);
+        localStorageSettings.rec_server = rc.recording.recSyncServerRecording;
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };

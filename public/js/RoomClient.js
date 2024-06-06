@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.45
+ * @version 1.4.46
  *
  */
 
@@ -290,7 +290,10 @@ class RoomClient {
         this.mediaRecorder = null;
         this.audioRecorder = null;
         this.recScreenStream = null;
-        this.recSyncServerRecording = false;
+        this.recording = {
+            recSyncServerRecording: false,
+            recSyncServerEndpoint: '',
+        };
         this.recSyncTime = 4000; // 4 sec
         this.recSyncChunkSize = 1000000; // 1MB
 
@@ -464,15 +467,16 @@ class RoomClient {
             }
 
             // ###################################################################################################
-            if (room.recSyncServerRecording) {
+            if (room.recording) this.recording = room.recording;
+            if (room.recording && room.recording.recSyncServerRecording) {
                 console.log('07.1 WARNING ----> SERVER SYNC RECORDING ENABLED!');
-                this.recSyncServerRecording = localStorageSettings.rec_server;
+                this.recording.recSyncServerRecording = localStorageSettings.rec_server;
                 if (BUTTONS.settings.tabRecording && !room.config.hostOnlyRecording) {
                     show(roomRecordingServer);
                 }
-                switchServerRecording.checked = this.recSyncServerRecording;
+                switchServerRecording.checked = this.recording.recSyncServerRecording;
             }
-            console.log('07.1 ----> SERVER SYNC RECORDING', this.recSyncServerRecording);
+            console.log('07.1 ----> SERVER SYNC RECORDING', this.recording);
             // ###################################################################################################
 
             // Handle Room moderator rules
@@ -4349,7 +4353,9 @@ class RoomClient {
     handleMediaRecorder() {
         if (this.mediaRecorder) {
             this.recServerFileName = this.getServerRecFileName();
-            rc.recSyncServerRecording ? this.mediaRecorder.start(this.recSyncTime) : this.mediaRecorder.start();
+            rc.recording.recSyncServerRecording
+                ? this.mediaRecorder.start(this.recSyncTime)
+                : this.mediaRecorder.start();
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
             this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
             this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
@@ -4371,7 +4377,7 @@ class RoomClient {
     handleMediaRecorderData(evt) {
         // console.log('MediaRecorder data: ', evt);
         if (evt.data && evt.data.size > 0) {
-            rc.recSyncServerRecording ? rc.syncRecordingInCloud(evt.data) : recordedBlobs.push(evt.data);
+            rc.recording.recSyncServerRecording ? rc.syncRecordingInCloud(evt.data) : recordedBlobs.push(evt.data);
         }
     }
 
@@ -4382,11 +4388,15 @@ class RoomClient {
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
             const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
             try {
-                await axios.post('/recSync?fileName=' + rc.recServerFileName, chunk, {
-                    headers: {
-                        'Content-Type': 'application/octet-stream',
+                await axios.post(
+                    `${this.recording.recSyncServerEndpoint}/recSync?fileName=` + rc.recServerFileName,
+                    chunk,
+                    {
+                        headers: {
+                            'Content-Type': 'application/octet-stream',
+                        },
                     },
-                });
+                );
             } catch (error) {
                 console.error('Error syncing chunk:', error.message);
             }
@@ -4396,7 +4406,7 @@ class RoomClient {
     handleMediaRecorderStop(evt) {
         try {
             console.log('MediaRecorder stopped: ', evt);
-            rc.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
+            rc.recording.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
             rc.disableRecordingOptions(false);
         } catch (err) {
             console.error('Recording save failed', err);

@@ -55,8 +55,9 @@ module.exports = {
                 Note: if you use Docker: Create the "app/rec" directory, configure it as a volume in docker-compose.yml, 
                 ensure proper permissions, and start the Docker container.
             */
+            enabled: true,
+            endpoint: '', // Change the URL if you want to save the recording to a different server or cloud service (http://localhost:8080), otherwise leave it as is (empty).
             dir: 'rec',
-            enabled: false,
         },
     },
     middleware: {
