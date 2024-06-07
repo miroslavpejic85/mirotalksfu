@@ -238,7 +238,7 @@ module.exports = class Peer {
             producerId: producer_id,
             rtpCapabilities,
             enableRtx: true, // Enable NACK for OPUS.
-            paused: false,
+            paused: true,
         });
 
         const { id, type, kind, rtpParameters, producerPaused } = consumer;

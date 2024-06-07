@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.46
+ * @version 1.4.47
  *
  */
 
@@ -1414,6 +1414,38 @@ function startServer() {
             }
 
             log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
+
+            callback('successfully');
+        });
+
+        socket.on('resumeConsumer', async ({ consumer_id }, callback) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            const peer_name = getPeerName(room, false);
+
+            const peer = room.getPeer(socket.id);
+
+            if (!peer) {
+                return callback({
+                    error: `peer with ID: "${socket.id}" for consumer with id "${consumer_id}" not found`,
+                });
+            }
+
+            const consumer = peer.getConsumer(consumer_id);
+
+            if (!consumer) {
+                return callback({ error: `consumer with id "${consumer_id}" not found` });
+            }
+
+            try {
+                await consumer.resume();
+            } catch (error) {
+                return callback({ error: error.message });
+            }
+
+            log.debug('Consumer resumed', { peer_name: peer_name, consumer_id: consumer_id });
 
             callback('successfully');
         });

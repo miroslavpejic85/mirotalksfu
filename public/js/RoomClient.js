@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.46
+ * @version 1.4.47
  *
  */
 
@@ -2063,6 +2063,14 @@ class RoomClient {
             console.log('CONSUMER', consumer);
 
             this.consumers.set(consumer.id, consumer);
+
+            // https://mediasoup.discourse.group/t/create-server-side-consumers-with-paused-true/244
+            try {
+                const response = await this.socket.request('resumeConsumer', { consumer_id: consumer.id });
+                console.log('Consumer resumed', response);
+            } catch (error) {
+                console.error('Error resuming consumer', error);
+            }
 
             consumer.on('trackended', () => {
                 console.log('Consumer track end', { id: consumer.id });
