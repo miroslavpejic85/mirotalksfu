@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.47
+ * @version 1.4.48
  *
  */
 
@@ -379,6 +379,12 @@ class RoomClient {
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+                if (room === 'notAllowed') {
+                    console.log(
+                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user',
+                    );
+                    return this.userRoomNotAllowed();
+                }
                 if (room === 'unauthorized') {
                     console.log(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
@@ -5571,6 +5577,23 @@ class RoomClient {
     // ####################################################
     // HANDLE ROOM ACTION
     // ####################################################
+
+    userRoomNotAllowed() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Oops, Room not allowed',
+            text: 'This room is not allowed for this user',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL(`/`); // Select the new allowed room name for this user and login to join
+        });
+    }
 
     userUnauthorized() {
         this.sound('alert');

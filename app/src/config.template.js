@@ -139,10 +139,16 @@ module.exports = {
             {
                 username: 'username',
                 password: 'password',
+                allowed_rooms: ['*'],
             },
             {
                 username: 'username2',
                 password: 'password2',
+                allowed_rooms: ['room1', 'room2'],
+            },
+            {
+                username: 'username3',
+                password: 'password3',
             },
             //...
         ],

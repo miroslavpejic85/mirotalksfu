@@ -42,7 +42,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.47
+ * @version 1.4.48
  *
  */
 
@@ -439,14 +439,8 @@ function startServer() {
                 req.query,
             );
 
-            const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, authHost, roomList, room);
-
-            if (!allowRoomAccess) {
-                return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
-            }
-
-            let peerUsername,
-                peerPassword = '';
+            let peerUsername = '';
+            let peerPassword = '';
             let isPeerValid = false;
             let isPeerPresenter = false;
 
@@ -459,15 +453,29 @@ function startServer() {
                     }
 
                     const { username, password, presenter } = checkXSS(decodeToken(token));
+
                     peerUsername = username;
                     peerPassword = password;
                     isPeerValid = await isAuthPeer(username, password);
                     isPeerPresenter = presenter === '1' || presenter === 'true';
+
+                    if (isPeerPresenter) {
+                        const roomAllowedForUser = isRoomAllowedForUser('Direct Join with token', username, room);
+                        if (!roomAllowedForUser) {
+                            return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
+                        }
+                    }
                 } catch (err) {
                     log.error('Direct Join JWT error', { error: err.message, token: token });
                     return hostCfg.protected || hostCfg.user_auth
                         ? res.sendFile(views.login)
                         : res.sendFile(views.landing);
+                }
+            } else {
+                const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, authHost, roomList, room);
+                const roomAllowedForUser = isRoomAllowedForUser('Direct Join with token', name, room);
+                if (!allowRoomAccess && !roomAllowedForUser) {
+                    return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
                 }
             }
 
@@ -1061,6 +1069,11 @@ function startServer() {
                 } else {
                     return cb('unauthorized');
                 }
+
+                const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
+                if (!roomAllowedForUser) {
+                    return cb('notAllowed');
+                }
             }
 
             // check if banned...
@@ -1135,6 +1148,13 @@ function startServer() {
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
+            }
+
+            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter) {
+                const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
+                if (!roomAllowedForUser) {
+                    return cb('notAllowed');
+                }
             }
 
             // SCENARIO: Notify when the first user join room and is awaiting assistance...
@@ -2409,6 +2429,13 @@ function startServer() {
         const roomExist = roomList.has(roomId);
         const roomCount = roomList.size;
 
+        const allowRoomAccess =
+            (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
+            OIDCUserAuthenticated || // User authenticated via OIDC
+            hostUserAuthenticated || // User authenticated via Login
+            ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
+            roomExist; // User Or Guest join an existing Room
+
         log.debug(logMessage, {
             OIDCUserEnabled: OIDC.enabled,
             OIDCUserAuthenticated: OIDCUserAuthenticated,
@@ -2419,16 +2446,41 @@ function startServer() {
             roomExist: roomExist,
             roomCount: roomCount,
             roomId: roomId,
+            allowRoomAccess: allowRoomAccess,
         });
 
-        const allowRoomAccess =
-            (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
-            OIDCUserAuthenticated || // User authenticated via OIDC
-            hostUserAuthenticated || // User authenticated via Login
-            ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
-            roomExist; // User Or Guest join an existing Room
-
         return allowRoomAccess;
+    }
+
+    function isRoomAllowedForUser(message, username, room) {
+        log.debug('isRoomAllowedForUser ------>', { message, username, room });
+
+        if (hostCfg.protected || hostCfg.user_auth) {
+            const isInPresenterLists = config.presenters.list.includes(username);
+
+            if (isInPresenterLists) {
+                log.debug('isRoomAllowedForUser - user in presenters list room allowed', room);
+                return true;
+            }
+
+            const user = hostCfg.users.find((user) => user.username === username);
+
+            if (!user) {
+                log.debug('isRoomAllowedForUser - user not found', username);
+                return false;
+            }
+
+            if (!user.allowed_rooms || user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room)) {
+                log.debug('isRoomAllowedForUser - user room allowed', room);
+                return true;
+            }
+
+            log.debug('isRoomAllowedForUser - user room not allowed', room);
+            return false;
+        }
+
+        log.debug('isRoomAllowedForUser - No host protected or user_auth enabled, user room allowed', room);
+        return true;
     }
 
     async function getPeerGeoLocation(ip) {
