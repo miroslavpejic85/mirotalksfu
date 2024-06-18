@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.50
+ * @version 1.4.51
  *
  */
 
@@ -3194,7 +3194,7 @@ class RoomClient {
         }
     }
 
-    handlePN(elemId, pnId, camId, isScreen = false) {
+    handlePN(elemId, pnId, camId, isScreen = false, isAvatar = false) {
         let videoPlayer = this.getId(elemId);
         let btnPn = this.getId(pnId);
         let cam = this.getId(camId);
@@ -3230,6 +3230,8 @@ class RoomClient {
                 }
                 handleAspectRatio();
             });
+
+            if (isAvatar && !this.isMobileDevice) btnPn.click();
         }
     }
 
@@ -7117,10 +7119,10 @@ class RoomClient {
         // Use video avatar virtual background
         if (VideoAI.virtualBackground) {
             this.isVideoFullScreenSupported && this.handleFS(this.canvasAIElement.id, fs.id);
-            this.handlePN(this.canvasAIElement.id, pin.id, this.videoAIContainer.id, true);
+            this.handlePN(this.canvasAIElement.id, pin.id, this.videoAIContainer.id, true, true);
         } else {
             this.isVideoFullScreenSupported && this.handleFS(this.videoAIElement.id, fs.id);
-            this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true);
+            this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true, true);
         }
 
         ss.onclick = () => {
