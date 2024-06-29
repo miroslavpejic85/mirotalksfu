@@ -38,6 +38,7 @@
         <meta id="ogUrl" property="og:url" content="https://sfu.mirotalk.com" />
 
         <!-- StyleSheet -->
+        <link rel="stylesheet" href="../css/Root.css" />
         <link rel="stylesheet" href="../css/Room.css" />
         <link rel="stylesheet" href="../css/VideoGrid.css" />
         <link rel="stylesheet" href="../css/GroupChat.css" />
@@ -214,6 +215,9 @@ access to use this app.
                     </button>
                     <button id="tabVideoShareBtn" class="fab fa-youtube tablinks">
                         <p class="tabButtonText">Media</p>
+                    </button>
+                    <button id="tabRTMPStreamingBtn" class="fa-solid fa-satellite-dish tablinks">
+                        <p class="tabButtonText">RTMP</p>
                     </button>
                     <button id="tabProfileBtn" class="fas fa-user tablinks">
                         <p class="tabButtonText">Profile</p>
@@ -941,7 +945,64 @@ access to use this app.
                             <i class="fas fa-times"></i>
                             <p>Close Video or Audio</p>
                         </button>
-                        <br />
+                    </div>
+
+                    <div id="tabRTMPStreaming" class="tabcontent">
+                        <div id="rtmpUrlLive">
+                            <div class="input-container">
+                                <input
+                                    id="rtmp-url"
+                                    type="text"
+                                    value=""
+                                    placeholder="rtmp://server:port/app/streamKey"
+                                    readonly
+                                />
+                                <button id="copyRtmpUrlButton" class="fas fa-paste"></button>
+                            </div>
+                            <div id="rtmpFromFile">
+                                <table class="file-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Video Files:</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="file-list">
+                                        <!-- File items will be dynamically added here -->
+                                    </tbody>
+                                </table>
+                                <div id="file-name"></div>
+                                <!-- <hr /> -->
+                                <button id="startRtmpButton" class="hidden">
+                                    <i class="fa-solid fa-play"></i>&nbsp;Start RTMP File Streaming
+                                </button>
+                                <button id="stopRtmpButton" class="hidden">
+                                    <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP File Streaming
+                                </button>
+                                <hr />
+                            </div>
+                            <div id="rtmpFromUrl">
+                                <p>Stream from URL:</p>
+                                <input
+                                    id="rtmpStreamURL"
+                                    type="text"
+                                    value=""
+                                    placeholder="https://domain/path/file.mp4"
+                                />
+                                <button id="startRtmpURLButton" class="hidden">
+                                    <i class="fa-solid fa-play"></i>&nbsp;Start RTMP URL Streaming
+                                </button>
+                                <button id="stopRtmpURLButton" class="hidden">
+                                    <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP URL Streaming
+                                </button>
+                                <hr />
+                            </div>
+                            <div id="rtmpFromStream">
+                                <button id="streamerRtmpButton" class="hidden">
+                                    <i class="fa-solid fa-satellite-dish"></i>&nbsp;RTMP Streamer
+                                </button>
+                                <hr />
+                            </div>
+                        </div>
                     </div>
 
                     <div id="tabProfile" class="tabcontent">

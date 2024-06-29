@@ -38,6 +38,7 @@ let BUTTONS = {
         lobbyButton: true, // presenter
         sendEmailInvitation: true, // presenter
         micOptionsButton: true, // presenter
+        tabRTMPStreamingBtn: true, // presenter
         tabModerator: true, // presenter
         tabRecording: true,
         host_only_recording: true, // presenter
@@ -113,6 +114,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.lobbyButton = false;
         BUTTONS.settings.sendEmailInvitation = false;
         BUTTONS.settings.micOptionsButton = false;
+        BUTTONS.settings.tabRTMPStreamingBtn = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.geolocationButton = false;
@@ -130,6 +132,7 @@ function handleRules(isPresenter) {
         // PRESENTER
         // ##################################
         BUTTONS.main.shareButton = true;
+        BUTTONS.settings.tabRTMPStreamingBtn = true;
         BUTTONS.settings.lockRoomButton = BUTTONS.settings.lockRoomButton && !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = BUTTONS.settings.lockRoomButton && isRoomLocked;
         BUTTONS.settings.sendEmailInvitation = true;
@@ -177,6 +180,14 @@ function handleRules(isPresenter) {
     }
     // main. settings...
     BUTTONS.main.shareButton ? show(shareButton) : hide(shareButton);
+    if (BUTTONS.settings.tabRTMPStreamingBtn) {
+        show(tabRTMPStreamingBtn);
+        show(startRtmpButton);
+        show(startRtmpURLButton);
+        show(streamerRtmpButton);
+    } else {
+        hide(tabRTMPStreamingBtn);
+    }
     BUTTONS.settings.lockRoomButton ? show(lockRoomButton) : hide(lockRoomButton);
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
@@ -217,6 +228,7 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.lockRoomButton = false;
     BUTTONS.settings.unlockRoomButton = false;
     BUTTONS.settings.lobbyButton = false;
+    BUTTONS.settings.tabRTMPStreamingBtn = false;
     BUTTONS.videoOff.muteAudioButton = false;
     BUTTONS.videoOff.geolocationButton = false;
     BUTTONS.videoOff.banButton = false;
@@ -248,5 +260,6 @@ function handleRulesBroadcasting() {
     elemDisplay('unlockRoomButton', false);
     elemDisplay('lobbyButton', false);
     elemDisplay('settingsButton', false);
+    elemDisplay('tabRTMPStreamingBtn', false);
     //...
 }

@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>MiroTalk RTMP Streamer</title>
+        <link id="icon" rel="shortcut icon" href="./logo.svg" />
+        <link id="appleTouchIcon" rel="apple-touch-icon" href="./logo.svg" />
+        <link rel="stylesheet" href="./style.css" />
+        <script defer src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+        <script defer src="./client.js"></script>
+    </head>
+    <body>
+        <div id="popup" class="popup hidden">
+            <span id="popupMessage"></span>
+            <button id="closePopup">X</button>
+        </div>
+        <div class="container">
+            <h1>MiroTalk RTMP Streamer</h1>
+            <div class="input-group-inline">
+                <input
+                    id="apiSecret"
+                    type="password"
+                    value="mirotalkRtmpApiSecret"
+                    placeholder="API Secret"
+                    title="Enter the API secret here"
+                />
+            </div>
+            <div class="input-group-inline">
+                <input
+                    id="rtmp"
+                    type="text"
+                    value=""
+                    placeholder="rtmp://server:port/app/streamKey"
+                    readonly
+                    title="This is your RTMP live URL. It cannot be edited."
+                />
+                <button id="copy" title="Click to copy the RTMP URL">Copy</button>
+            </div>
+            <video id="video" width="640" height="480" autoplay></video>
+            <div class="button-group">
+                <button id="startCamera" title="Click to start camera streaming">Start Camera Streaming</button>
+                <button id="startScreen" title="Click to start screen streaming">Start Screen Streaming</button>
+                <button id="stop" disabled title="Click to stop streaming">Stop Streaming</button>
+            </div>
+        </div>
+        <footer>
+            <p>&copy; 2024 MiroTalk SFU, all rights reserved</p>
+        </footer>
+    </body>
+</html>

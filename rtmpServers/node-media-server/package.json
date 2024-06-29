@@ -1,0 +1,26 @@
+{
+    "name": "mirotalk-rtmp-nms",
+    "version": "1.0.0",
+    "description": "MiroTalk RTMP Node Media Server",
+    "main": "server.js",
+    "scripts": {
+        "start": "node src/server.js",
+        "start-dev": "nodemon src/server.js"
+    },
+    "keywords": [
+        "rtmp",
+        "node",
+        "media",
+        "server"
+    ],
+    "author": "Miroslav Pejic",
+    "license": "AGPLv3",
+    "dependencies": {
+        "crypto": "^1.0.1",
+        "node-media-server": "^2.7.0"
+    },
+    "devDependencies": {
+        "uuid": "10.0.0",
+        "nodemon": "^3.1.4"
+    }
+}

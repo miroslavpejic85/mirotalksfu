@@ -1,0 +1,205 @@
+@import url('https://fonts.googleapis.com/css?family=Comfortaa:wght@500&display=swap');
+
+body {
+    font-family: 'Comfortaa'; /*, Arial, sans-serif;*/
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+    background: radial-gradient(#393939, #000000);
+    color: #fff;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 20px;
+    background: radial-gradient(#393939, #000000);
+    color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    margin-top: 10px;
+    color: #ffffff;
+}
+
+video {
+    border: 0.1px solid #ccc;
+    margin: 10px 0;
+    border-radius: 8px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+}
+
+.input-group-inline {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#apiSecret {
+    flex: 1;
+}
+
+#rtmp {
+    flex: 1;
+}
+
+#copyButton {
+    flex: 1;
+    max-width: 100px;
+}
+
+.input-group-inline > * {
+    margin-bottom: 20px;
+}
+input,
+button {
+    padding: 10px;
+    font-size: 16px;
+    border: none;
+    border-radius: 4px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+input[type='text'],
+input[type='password'] {
+    flex: 1;
+    background: #2c2c2c;
+    color: #fff;
+}
+
+input[type='text'][readonly] {
+    background: #2c2c2c;
+}
+
+button {
+    cursor: pointer;
+    background-color: #007bff;
+    color: #fff;
+    transition: background-color 0.3s ease;
+}
+
+button:disabled {
+    background: #2c2c2c;
+    cursor: not-allowed;
+}
+button:hover {
+    background-color: #0056b3;
+}
+
+.button-group {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.button-group button {
+    width: 100%;
+}
+
+.popup {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: indianred;
+    color: white;
+    padding: 15px;
+    border-radius: 5px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-width: 300px;
+    max-width: 600px;
+    width: 80%;
+}
+
+.popup.success {
+    background-color: mediumseagreen;
+    color: white;
+}
+
+.popup.error {
+    background-color: indianred;
+    color: white;
+}
+
+.popup.warning {
+    background-color: gold;
+    color: white;
+}
+
+.popup.info {
+    background-color: cornflowerblue;
+    color: white;
+}
+
+.popup.hidden {
+    display: none;
+}
+
+#closePopup {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-left: 20px;
+}
+
+footer {
+    color: grey;
+}
+
+/* Media Queries for Responsiveness */
+@media (max-width: 1024px) {
+    .container {
+        padding: 15px;
+    }
+    input,
+    button {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 768px) {
+    .input-group-inline {
+        flex-direction: column;
+    }
+    input,
+    button {
+        width: 100%;
+        font-size: 14px;
+        margin-bottom: 10px;
+    }
+    video {
+        width: 100%;
+        height: auto;
+    }
+    #copyButton {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .container {
+        padding: 10px;
+    }
+    h1 {
+        font-size: 24px;
+    }
+    input,
+    button {
+        font-size: 12px;
+        padding: 8px;
+    }
+}

@@ -31,56 +31,6 @@
     }
 }
 
-:root {
-    --body-bg: radial-gradient(#393939, #000000);
-    --border: 1px solid rgb(255 255 255 / 32%);
-    --border-radius: 1rem;
-    --msger-width: 800px;
-    --msger-height: 700px;
-    --msger-bubble-width: 85%;
-    --msger-bg: radial-gradient(#393939, #000000);
-    --wb-width: 800px;
-    --wb-height: 600px;
-    --wb-bg: radial-gradient(#393939, #000000);
-    --select-bg: #2c2c2c;
-    --left-msg-bg: #252d31;
-    --right-msg-bg: #056162;
-    --private-msg-bg: #6b1226;
-    --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
-    --btns-hover-scale: scale(1.1);
-    --settings-bg: radial-gradient(#393939, #000000);
-    --tab-btn-active: rgb(42 42 42 / 70%);
-    --btns-bg-color: rgba(0, 0, 0, 0.7);
-    /* buttons bar horizontal */
-    --btns-top: 50%;
-    --btns-right: 0%;
-    --btns-left: 10px;
-    --btns-margin-left: 0px;
-    --btns-width: 60px;
-    --btns-flex-direction: column;
-    /* buttons bar horizontal
-    --btns-top: 95%;
-    --btns-right: 25%;
-    --btns-left: 50%;
-    --btns-margin-left: -160px;
-    --btns-width: 320px;
-    --btns-flex-direction: row;
-    */
-
-    --transcription-height: 680px;
-    --transcription-width: 420px;
-    --transcription-bg: radial-gradient(#393939, #000000);
-
-    --vmi-wh: 15vw;
-    /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
-    --videoObjFit: cover;
-}
-
-* {
-    outline: none;
-    font-family: 'Comfortaa';
-}
-
 html,
 body {
     top: 0 !important;
@@ -439,6 +389,77 @@ th {
 
 .microphone-table-width {
     width: 180px;
+}
+
+/*--------------------------------------------------------------
+# RTMP settings
+--------------------------------------------------------------*/
+
+.file-table {
+    margin-top: 10px;
+    color: #fff;
+    width: 100%;
+    border-collapse: collapse;
+    border: var(--border);
+    table-layout: fixed; /* Ensures equal column width */
+}
+.file-table th,
+.file-table td {
+    border: none;
+    padding: 8px;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.file-table th {
+    background: var(--select-bg);
+}
+.file-table tbody {
+    display: block;
+    max-height: 80px;
+    overflow-y: auto;
+}
+.file-table tbody::-webkit-scrollbar {
+    width: 8px;
+}
+.file-table tbody::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 4px;
+}
+.file-item {
+    cursor: pointer;
+}
+.file-item:hover,
+.file-item.selected {
+    background: var(--body-bg);
+}
+
+#file-name {
+    margin-top: 20px;
+    margin-left: 5px;
+    font-weight: bold;
+    color: #888;
+}
+
+.input-container {
+    display: flex;
+    align-items: center;
+}
+
+#rtmpStreamURL,
+#rtmp-url {
+    margin-top: 5px;
+    padding: 10px;
+    width: 100%;
+    color: #fff;
+    border: none;
+    background: var(--select-bg) !important;
+}
+
+.input-container button {
+    flex: 1;
+    width: 20px;
 }
 
 /*--------------------------------------------------------------

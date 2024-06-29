@@ -1,0 +1,13 @@
+version: '3'
+
+services:
+    mirotalk-nms:
+        container_name: mirotalk-nms
+        image: mirotalk/nms:latest
+        volumes:
+            - ./src/config.js/:/app/src/config.js/:ro
+        ports:
+            - '1935:1935'
+            - '8081:8081'
+            - '8043:8043'
+        restart: unless-stopped

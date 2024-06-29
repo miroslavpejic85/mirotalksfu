@@ -1,0 +1,30 @@
+{
+    "name": "mirotalk-rtmp-server-streamer",
+    "version": "1.0.0",
+    "description": "MiroTalk RTMP Server Streamer",
+    "main": "server.js",
+    "scripts": {
+        "start": "node server.js",
+        "start-dev": "nodemon server.js",
+        "nms-start": "docker-compose -f ../../../node-media-server/docker-compose.yml up -d",
+        "nms-stop": "docker-compose -f ../../../node-media-server/docker-compose.yml down",
+        "nms-restart": "docker-compose -f ../../../node-media-server/docker-compose.yml down && docker-compose -f ../../node-media-server/docker-compose.yml up -d",
+        "nms-logs": "docker logs -f mirotalk-nms"
+    },
+    "keywords": [
+        "rtmp",
+        "server",
+        "streaming"
+    ],
+    "author": "Miroslav Pejic",
+    "license": "AGPLv3",
+    "dependencies": {
+        "body-parser": "1.20.2",
+        "cors": "2.8.5",
+        "socket.io": "4.7.5"
+    },
+    "devDependencies": {
+        "uuid": "10.0.0",
+        "nodemon": "^3.1.3"
+    }
+}

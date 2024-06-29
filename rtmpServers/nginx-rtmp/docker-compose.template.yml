@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+    mirotalk-rtmp:
+        container_name: mirotalk-rtmp
+        #image: tiangolo/nginx-rtmp
+        image: mirotalk/rtmp:latest
+        volumes:
+            - ./nginx.conf/:/etc/nginx/nginx.conf/:ro
+            - ./stat.xsl/:/usr/share/nginx/html/stat.xsl/:ro
+        ports:
+            - '1935:1935'
+            - '8081:8081'
+        restart: unless-stopped

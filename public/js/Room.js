@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.51
+ * @version 1.4.70
  *
  */
 
@@ -1130,6 +1130,17 @@ function copyRoomURL() {
     userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
 }
 
+function copyToClipboard(txt) {
+    let tmpInput = document.createElement('input');
+    document.body.appendChild(tmpInput);
+    tmpInput.value = txt;
+    tmpInput.select();
+    tmpInput.setSelectionRange(0, 99999); // For mobile devices
+    navigator.clipboard.writeText(tmpInput.value);
+    document.body.removeChild(tmpInput);
+    userLog('info', `${txt} copied to clipboard 👍`, 'top-end');
+}
+
 function shareRoomByEmail() {
     Swal.fire({
         allowOutsideClick: false,
@@ -1265,6 +1276,11 @@ function roomIsReady() {
         BUTTONS.chat.chatPinButton && show(chatTogglePin);
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
+        BUTTONS.settings.tabRTMPStreamingBtn &&
+            show(tabRTMPStreamingBtn) &&
+            show(startRtmpButton) &&
+            show(startRtmpURLButton) &&
+            show(streamerRtmpButton);
     }
     if (DetectRTC.browser.name != 'Safari') {
         document.onfullscreenchange = () => {
@@ -1430,6 +1446,10 @@ function handleButtons() {
     };
     tabVideoShareBtn.onclick = (e) => {
         rc.openTab(e, 'tabVideoShare');
+    };
+    tabRTMPStreamingBtn.onclick = (e) => {
+        rc.getRTMP();
+        rc.openTab(e, 'tabRTMPStreaming');
     };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
@@ -1654,6 +1674,28 @@ function handleButtons() {
     };
     stopScreenButton.onclick = () => {
         rc.closeProducer(RoomClient.mediaType.screen);
+    };
+    copyRtmpUrlButton.onclick = () => {
+        rc.copyRTMPUrl(rtmpStreamURL.value);
+    };
+    startRtmpButton.onclick = () => {
+        if (rc.selectedRtmpFilename == '') {
+            userLog('warning', 'Please select the Video file to stream', 'top-end', 6000);
+            return;
+        }
+        rc.startRTMP();
+    };
+    stopRtmpButton.onclick = () => {
+        rc.stopRTMP();
+    };
+    streamerRtmpButton.onclick = () => {
+        openURL('/rtmp', true);
+    };
+    startRtmpURLButton.onclick = () => {
+        rc.startRTMPfromURL(rtmpStreamURL.value);
+    };
+    stopRtmpURLButton.onclick = () => {
+        rc.stopRTMPfromURL();
     };
     fileShareButton.onclick = () => {
         rc.selectFileToShare(socket.id, true);
@@ -2722,6 +2764,36 @@ function handleRoomClientEvents() {
             hide(recordingMessage);
             hostOnlyRecording = false;
         }
+    });
+    rc.on(RoomClient.EVENTS.startRTMP, () => {
+        console.log('Room event: RTMP started');
+        hide(startRtmpButton);
+        show(stopRtmpButton);
+    });
+    rc.on(RoomClient.EVENTS.stopRTMP, () => {
+        console.log('Room event: RTMP stopped');
+        hide(stopRtmpButton);
+        show(startRtmpButton);
+    });
+    rc.on(RoomClient.EVENTS.endRTMP, () => {
+        console.log('Room event: RTMP ended');
+        hide(stopRtmpButton);
+        show(startRtmpButton);
+    });
+    rc.on(RoomClient.EVENTS.startRTMPfromURL, () => {
+        console.log('Room event: RTMP from URL started');
+        hide(startRtmpURLButton);
+        show(stopRtmpURLButton);
+    });
+    rc.on(RoomClient.EVENTS.stopRTMPfromURL, () => {
+        console.log('Room event: RTMP from URL stopped');
+        hide(stopRtmpURLButton);
+        show(startRtmpURLButton);
+    });
+    rc.on(RoomClient.EVENTS.endRTMPfromURL, () => {
+        console.log('Room event: RTMP from URL ended');
+        hide(stopRtmpURLButton);
+        show(startRtmpURLButton);
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room event: Client leave room');
@@ -3960,7 +4032,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.51',
+        title: 'WebRTC SFU v1.4.60',
         html: `
         <br />
         <div id="about">

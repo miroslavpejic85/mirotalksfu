@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.51
+ * @version 1.4.70
  *
  */
 
@@ -99,6 +99,7 @@ const image = {
     broadcasting: '../images/broadcasting.png',
     geolocation: '../images/geolocation.png',
     network: '../images/network.gif',
+    rtmp: '../images/rtmp.png',
 };
 
 const mediaType = {
@@ -137,6 +138,12 @@ const _EVENTS = {
     roomUnlock: 'roomUnlock',
     hostOnlyRecordingOn: 'hostOnlyRecordingOn',
     hostOnlyRecordingOff: 'hostOnlyRecordingOff',
+    startRTMP: 'startRTMP',
+    stopRTMP: 'stopRTMP',
+    endRTMP: 'endRTMP',
+    startRTMPfromURL: 'startRTMPfromURL',
+    stopRTMPfromURL: 'stopRTMPfromURL',
+    endRTMPfromURL: 'endRTMPfromURL',
 };
 
 // Enums
@@ -197,6 +204,9 @@ class RoomClient {
         this.peer_name = peer_name;
         this.peer_uuid = peer_uuid;
         this.peer_info = peer_info;
+
+        // RTMP selected file name
+        this.selectedRtmpFilename = '';
 
         // Moderator
         this._moderator = {
@@ -272,6 +282,10 @@ class RoomClient {
         this.RoomPassword = false;
 
         this.transcription = transcription;
+
+        // RTMP Streamer
+        this.rtmpFileStreamer = false;
+        this.rtmpUrltSreamer = false;
 
         // File transfer settings
         this.fileToSend = null;
@@ -524,6 +538,18 @@ class RoomClient {
             if (!room.videoAIEnabled) {
                 VideoAI.enabled = false;
                 elemDisplay('tabVideoAIBtn', false);
+            }
+            // Check che RTMP config
+            if (room.rtmp) {
+                console.log('RTMP config', room.rtmp);
+                const { enabled, fromFile, fromUrl, fromStream } = room.rtmp;
+                elemDisplay('tabRTMPStreamingBtn', enabled);
+                elemDisplay('rtmpFromFile', fromFile);
+                elemDisplay('rtmpFromUrl', fromUrl);
+                elemDisplay('rtmpFromStream', fromStream);
+                if (!fromFile && !fromUrl && !fromStream) {
+                    elemDisplay('tabRTMPStreamingBtn', false);
+                }
             }
         }
 
@@ -838,6 +864,10 @@ class RoomClient {
         this.socket.on('recordingAction', this.handleRecordingActionData);
         this.socket.on('connect', this.handleSocketConnect);
         this.socket.on('disconnect', this.handleSocketDisconnect);
+        this.socket.on('endRTMP', this.handleEndRTMP);
+        this.socket.on('errorRTMP', this.handleErrorRTMP);
+        this.socket.on('endRTMPfromURL', this.handleEndRTMPfromURL);
+        this.socket.on('errorRTMPfromURL', this.handleErrorRTMPfromURL);
     }
 
     // ####################################################
@@ -986,6 +1016,22 @@ class RoomClient {
         this.exit(true);
         this.ServerAway();
         this.saveRecording('Socket disconnected');
+    };
+
+    handleEndRTMP = (data) => {
+        this.endRTMP(data);
+    };
+
+    handleErrorRTMP = (data) => {
+        this.errorRTMP(data);
+    };
+
+    handleEndRTMPfromURL = (data) => {
+        this.endRTMPfromURL(data);
+    };
+
+    handleErrorRTMPfromURL = (data) => {
+        this.errorRTMPfromURL(data);
     };
 
     // ####################################################
@@ -2533,6 +2579,8 @@ class RoomClient {
 
     exit(offline = false) {
         if (VideoAI.active) this.stopSession();
+        if (this.rtmpFilestreamer) this.stopRTMP();
+        if (this.rtmpUrlstreamer) this.stopRTMPfromURL();
 
         const clean = () => {
             this._isConnected = false;
@@ -4707,7 +4755,7 @@ class RoomClient {
         function handleDragEnter(e) {
             e.preventDefault();
             e.stopPropagation();
-            e.target.style.background = '#f0f0f0';
+            e.target.style.background = 'var(--body-bg)';
         }
 
         function handleDragOver(e) {
@@ -7373,6 +7421,222 @@ class RoomClient {
         this.stopRendering();
 
         VideoAI.active = false;
+    }
+
+    // ##############################################
+    // RTMP from FILE
+    // ##############################################
+
+    getRTMP() {
+        this.socket.request('getRTMP').then(function (filenames) {
+            console.log('RTMP files', filenames);
+            if (filenames.length === 0) {
+                const fileNameDiv = rc.getId('file-name');
+                fileNameDiv.textContent = 'No file found to stream';
+                //elemDisplay('startRtmpButton', false);
+            }
+
+            //const f = Array.from({ length: 20 }, (_, index) => `My-file-video-to-stream-to-rtmp-server ${index + 1}`);
+
+            const fileListTbody = rc.getId('file-list');
+            fileListTbody.innerHTML = '';
+
+            filenames.forEach((filename) => {
+                const fileRow = document.createElement('tr');
+                const fileCell = document.createElement('td');
+                fileCell.textContent = filename;
+                fileCell.className = 'file-item';
+                fileCell.onclick = () => showFilename(fileCell, filename);
+                fileRow.appendChild(fileCell);
+                fileListTbody.appendChild(fileRow);
+            });
+
+            function showFilename(clickedItem, filename) {
+                const fileNameDiv = rc.getId('file-name');
+                fileNameDiv.textContent = `Selected file: ${filename}`;
+                rc.selectedRtmpFilename = filename;
+                const fileItems = document.querySelectorAll('.file-item');
+                fileItems.forEach((item) => item.classList.remove('selected'));
+
+                if (clickedItem) {
+                    clickedItem.classList.add('selected');
+                }
+            }
+        });
+    }
+
+    async startRTMP() {
+        if (!this.isRTMPVideoSupported(this.selectedRtmpFilename)) {
+            this.getId('file-name').textContent = '';
+            return this.userLog(
+                'warning',
+                "The provided File is not valid. Please ensure it's .mp4, webm or ogg video file",
+                'top-end',
+            );
+        }
+
+        this.socket
+            .request('startRTMP', {
+                file: this.selectedRtmpFilename,
+                peer_name: this.peer_name,
+                peer_uuid: this.peer_uuid,
+            })
+            .then(function (rtmp) {
+                rc.event(_EVENTS.startRTMP);
+                rc.showRTMP(rtmp, 'file');
+                rc.rtmpFileStreamer = true;
+            });
+    }
+
+    stopRTMP() {
+        if (this.rtmpFileStreamer) {
+            this.socket.request('stopRTMP');
+            this.rtmpFileStreamer = false;
+            this.cleanRTMPUrl();
+            console.log('RTMP STOP');
+            this.event(_EVENTS.stopRTMP);
+        }
+    }
+
+    endRTMP(data) {
+        const rtmpMessage = `${data.rtmpUrl} processing finished!`;
+        this.rtmpFileStreamer = false;
+        this.userLog('info', rtmpMessage, 'top-end');
+        console.log(rtmpMessage);
+        this.cleanRTMPUrl();
+        this.socket.request('endOrErrorRTMP');
+        this.event(_EVENTS.endRTMP);
+    }
+
+    errorRTMP(data) {
+        const rtmpError = `${data.message}`;
+        this.rtmpFileStreamer = false;
+        this.userLog('error', rtmpError, 'top-end');
+        console.error(rtmpError);
+        this.cleanRTMPUrl();
+        this.socket.request('endOrErrorRTMP');
+        this.event(_EVENTS.endRTMP);
+    }
+
+    // ##############################################
+    // RTMP from URL
+    // ##############################################
+
+    startRTMPfromURL(inputVideoURL) {
+        if (!this.isRTMPVideoSupported(inputVideoURL)) {
+            this.getId('rtmpStreamURL').value = '';
+            return this.userLog(
+                'warning',
+                'The provided URL is not valid. Please ensure it links to an .mp4 video file',
+                'top-end',
+            );
+        }
+
+        this.socket
+            .request('startRTMPfromURL', {
+                inputVideoURL: inputVideoURL,
+                peer_name: this.peer_name,
+                peer_uuid: this.peer_uuid,
+            })
+            .then(function (rtmp) {
+                rc.event(_EVENTS.startRTMPfromURL);
+                rc.showRTMP(rtmp, 'url');
+                rc.rtmpUrlStreamer = true;
+            });
+    }
+
+    stopRTMPfromURL() {
+        if (this.rtmpUrlStreamer) {
+            this.socket.request('stopRTMPfromURL');
+            this.rtmpUrlStreamer = false;
+            this.cleanRTMPUrl();
+            console.log('RTMP from URL STOP');
+            this.event(_EVENTS.stopRTMPfromURL);
+        }
+    }
+
+    endRTMPfromURL(data) {
+        const rtmpMessage = `${data.rtmpUrl} processing finished!`;
+        this.rtmpUrlStreamer = false;
+        this.userLog('info', rtmpMessage, 'top-end');
+        console.log(rtmpMessage);
+        this.cleanRTMPUrl();
+        this.socket.request('endOrErrorRTMPfromURL');
+        this.event(_EVENTS.endRTMPfromURL);
+    }
+
+    errorRTMPfromURL(data) {
+        const rtmpError = `${data.message}`;
+        this.rtmpUrlStreamer = false;
+        this.userLog('error', rtmpError, 'top-end');
+        console.error(rtmpError);
+        this.cleanRTMPUrl();
+        this.socket.request('endOrErrorRTMPfromURL');
+        this.event(_EVENTS.endRTMPfromURL);
+    }
+
+    // ##############################################
+    // RTMP common
+    // ##############################################
+
+    isRTMPVideoSupported(video) {
+        if (video.endsWith('.mp4') || video.endsWith('.webm')) return true;
+        return false;
+    }
+
+    copyRTMPUrl(url) {
+        if (!url) return this.userLog('info', 'No RTMP URL detected', 'top-end');
+        copyToClipboard(url);
+    }
+
+    cleanRTMPUrl() {
+        const rtmpUrl = rc.getId('rtmp-url');
+        rtmpUrl.value = '';
+    }
+
+    showRTMP(rtmp, type = 'file') {
+        console.log('rtmp', rtmp);
+
+        if (!rtmp) {
+            switch (type) {
+                case 'file':
+                    this.event(_EVENTS.endRTMP);
+                    break;
+                case 'url':
+                    this.event(_EVENTS.endRTMPfromURL);
+                    break;
+                default:
+                    break;
+            }
+            return this.userLog(
+                'warning',
+                'Unable to start the RTMP stream. Please ensure the RTMP server is running. If the problem persists, contact the administrator',
+                'top-end',
+                6000,
+            );
+        }
+
+        const rtmpUrl = rc.getId('rtmp-url');
+        rtmpUrl.value = rtmp;
+
+        Swal.fire({
+            background: swalBackground,
+            imageUrl: image.rtmp,
+            position: 'center',
+            title: 'LIVE',
+            html: `
+                <p style="background:transparent; color:rgb(8, 189, 89);">${rtmp}</p>
+                `,
+            showDenyButton: false,
+            showCancelButton: false,
+            confirmButtonText: `Copy URL`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                copyToClipboard(rtmp);
+            }
+        });
     }
 
     sleep(ms) {

@@ -13,6 +13,8 @@ services:
             - ./app/src/config.js:/src/app/src/config.js:ro
             # These volume is mandatory if server.recording.enabled in the app/src/config.js
             # - ./app/rec:/src/app/rec
+            # These volume is mandatory if server.rtmp.enabled fromFile in the app/src/config.js
+            # - ./app/rtmp:/src/app/rtmp
             # These volumes are not mandatory, comment if you want to use it
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro

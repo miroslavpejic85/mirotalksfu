@@ -1944,7 +1944,8 @@
                         return result;
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.Device = exports.detectDevice = void 0;
+                exports.Device = void 0;
+                exports.detectDevice = detectDevice;
                 const ua_parser_js_1 = require('ua-parser-js');
                 const Logger_1 = require('./Logger');
                 const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
@@ -2097,7 +2098,6 @@
                         return undefined;
                     }
                 }
-                exports.detectDevice = detectDevice;
                 class Device {
                     /**
                      * Create a new Device to connect to mediasoup server.
@@ -12226,7 +12226,8 @@
                         return result;
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.mangleRtpParameters = exports.getCapabilities = void 0;
+                exports.getCapabilities = getCapabilities;
+                exports.mangleRtpParameters = mangleRtpParameters;
                 const utils = __importStar(require('../../utils'));
                 /**
                  * Normalize ORTC based Edge's RTCRtpReceiver.getCapabilities() to produce a full
@@ -12263,7 +12264,6 @@
                     }
                     return caps;
                 }
-                exports.getCapabilities = getCapabilities;
                 /**
                  * Generate RTCRtpParameters as ORTC based Edge likes.
                  */
@@ -12294,7 +12294,6 @@
                     }
                     return params;
                 }
-                exports.mangleRtpParameters = mangleRtpParameters;
             },
             { '../../utils': 42 },
         ],
@@ -12302,7 +12301,7 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.addNackSuppportForOpus = void 0;
+                exports.addNackSuppportForOpus = addNackSuppportForOpus;
                 /**
                  * This function adds RTCP NACK support for OPUS codec in given capabilities.
                  */
@@ -12320,7 +12319,6 @@
                         }
                     }
                 }
-                exports.addNackSuppportForOpus = addNackSuppportForOpus;
             },
             {},
         ],
@@ -13346,11 +13344,10 @@
                         return result;
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.applyCodecParameters =
-                    exports.getCname =
-                    exports.extractDtlsParameters =
-                    exports.extractRtpCapabilities =
-                        void 0;
+                exports.extractRtpCapabilities = extractRtpCapabilities;
+                exports.extractDtlsParameters = extractDtlsParameters;
+                exports.getCname = getCname;
+                exports.applyCodecParameters = applyCodecParameters;
                 const sdpTransform = __importStar(require('sdp-transform'));
                 /**
                  * This function must be called with an SDP with 1 m=audio and 1 m=video
@@ -13459,7 +13456,6 @@
                     };
                     return rtpCapabilities;
                 }
-                exports.extractRtpCapabilities = extractRtpCapabilities;
                 function extractDtlsParameters({ sdpObject }) {
                     let setup = sdpObject.setup;
                     let fingerprint = sdpObject.fingerprint;
@@ -13501,7 +13497,6 @@
                     };
                     return dtlsParameters;
                 }
-                exports.extractDtlsParameters = extractDtlsParameters;
                 function getCname({ offerMediaObject }) {
                     const ssrcCnameLine = (offerMediaObject.ssrcs || []).find((line) => line.attribute === 'cname');
                     if (!ssrcCnameLine) {
@@ -13509,7 +13504,6 @@
                     }
                     return ssrcCnameLine.value;
                 }
-                exports.getCname = getCname;
                 /**
                  * Apply codec parameters in the given SDP m= section answer based on the
                  * given RTP parameters of an offer.
@@ -13552,7 +13546,6 @@
                         }
                     }
                 }
-                exports.applyCodecParameters = applyCodecParameters;
             },
             { 'sdp-transform': 47 },
         ],
@@ -13560,7 +13553,8 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.addLegacySimulcast = exports.getRtpEncodings = void 0;
+                exports.getRtpEncodings = getRtpEncodings;
+                exports.addLegacySimulcast = addLegacySimulcast;
                 function getRtpEncodings({ offerMediaObject, track }) {
                     // First media SSRC (or the only one).
                     let firstSsrc;
@@ -13615,7 +13609,6 @@
                     }
                     return encodings;
                 }
-                exports.getRtpEncodings = getRtpEncodings;
                 /**
                  * Adds multi-ssrc based simulcast into the given SDP media section offer.
                  */
@@ -13709,7 +13702,6 @@
                         });
                     }
                 }
-                exports.addLegacySimulcast = addLegacySimulcast;
             },
             {},
         ],
@@ -13717,7 +13709,8 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.addLegacySimulcast = exports.getRtpEncodings = void 0;
+                exports.getRtpEncodings = getRtpEncodings;
+                exports.addLegacySimulcast = addLegacySimulcast;
                 function getRtpEncodings({ offerMediaObject }) {
                     const ssrcs = new Set();
                     for (const line of offerMediaObject.ssrcs || []) {
@@ -13761,7 +13754,6 @@
                     }
                     return encodings;
                 }
-                exports.getRtpEncodings = getRtpEncodings;
                 /**
                  * Adds multi-ssrc based simulcast into the given SDP media section offer.
                  */
@@ -13841,7 +13833,6 @@
                         });
                     }
                 }
-                exports.addLegacySimulcast = addLegacySimulcast;
             },
             {},
         ],
@@ -13922,7 +13913,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.10';
+                exports.version = '3.7.12';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13981,19 +13972,18 @@
                         return result;
                     };
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.canReceive =
-                    exports.canSend =
-                    exports.generateProbatorRtpParameters =
-                    exports.reduceCodecs =
-                    exports.getSendingRemoteRtpParameters =
-                    exports.getSendingRtpParameters =
-                    exports.getRecvRtpCapabilities =
-                    exports.getExtendedRtpCapabilities =
-                    exports.validateSctpCapabilities =
-                    exports.validateSctpStreamParameters =
-                    exports.validateRtpParameters =
-                    exports.validateRtpCapabilities =
-                        void 0;
+                exports.validateRtpCapabilities = validateRtpCapabilities;
+                exports.validateRtpParameters = validateRtpParameters;
+                exports.validateSctpStreamParameters = validateSctpStreamParameters;
+                exports.validateSctpCapabilities = validateSctpCapabilities;
+                exports.getExtendedRtpCapabilities = getExtendedRtpCapabilities;
+                exports.getRecvRtpCapabilities = getRecvRtpCapabilities;
+                exports.getSendingRtpParameters = getSendingRtpParameters;
+                exports.getSendingRemoteRtpParameters = getSendingRemoteRtpParameters;
+                exports.reduceCodecs = reduceCodecs;
+                exports.generateProbatorRtpParameters = generateProbatorRtpParameters;
+                exports.canSend = canSend;
+                exports.canReceive = canReceive;
                 const h264 = __importStar(require('h264-profile-level-id'));
                 const utils = __importStar(require('./utils'));
                 const RTP_PROBATOR_MID = 'probator';
@@ -14027,7 +14017,6 @@
                         validateRtpHeaderExtension(ext);
                     }
                 }
-                exports.validateRtpCapabilities = validateRtpCapabilities;
                 /**
                  * Validates RtpParameters. It may modify given data by adding missing
                  * fields with default values.
@@ -14074,7 +14063,6 @@
                     }
                     validateRtcpParameters(params.rtcp);
                 }
-                exports.validateRtpParameters = validateRtpParameters;
                 /**
                  * Validates SctpStreamParameters. It may modify given data by adding missing
                  * fields with default values.
@@ -14120,7 +14108,6 @@
                         throw new TypeError('invalid params.protocol');
                     }
                 }
-                exports.validateSctpStreamParameters = validateSctpStreamParameters;
                 /**
                  * Validates SctpCapabilities. It may modify given data by adding missing
                  * fields with default values.
@@ -14136,7 +14123,6 @@
                     }
                     validateNumSctpStreams(caps.numStreams);
                 }
-                exports.validateSctpCapabilities = validateSctpCapabilities;
                 /**
                  * Generate extended RTP capabilities for sending and receiving.
                  */
@@ -14225,7 +14211,6 @@
                     }
                     return extendedRtpCapabilities;
                 }
-                exports.getExtendedRtpCapabilities = getExtendedRtpCapabilities;
                 /**
                  * Generate RTP capabilities for receiving media based on the given extended
                  * RTP capabilities.
@@ -14279,7 +14264,6 @@
                     }
                     return rtpCapabilities;
                 }
-                exports.getRecvRtpCapabilities = getRecvRtpCapabilities;
                 /**
                  * Generate RTP parameters of the given kind for sending media.
                  * NOTE: mid, encodings and rtcp fields are left empty.
@@ -14337,7 +14321,6 @@
                     }
                     return rtpParameters;
                 }
-                exports.getSendingRtpParameters = getSendingRtpParameters;
                 /**
                  * Generate RTP parameters of the given kind suitable for the remote SDP answer.
                  */
@@ -14419,7 +14402,6 @@
                     }
                     return rtpParameters;
                 }
-                exports.getSendingRemoteRtpParameters = getSendingRemoteRtpParameters;
                 /**
                  * Reduce given codecs by returning an array of codecs "compatible" with the
                  * given capability codec. If no capability codec is given, take the first
@@ -14456,7 +14438,6 @@
                     }
                     return filteredCodecs;
                 }
-                exports.reduceCodecs = reduceCodecs;
                 /**
                  * Create RTP parameters for a Consumer for the RTP probator.
                  */
@@ -14477,14 +14458,12 @@
                     rtpParameters.headerExtensions = videoRtpParameters.headerExtensions;
                     return rtpParameters;
                 }
-                exports.generateProbatorRtpParameters = generateProbatorRtpParameters;
                 /**
                  * Whether media can be sent based on the given RTP capabilities.
                  */
                 function canSend(kind, extendedRtpCapabilities) {
                     return extendedRtpCapabilities.codecs.some((codec) => codec.kind === kind);
                 }
-                exports.canSend = canSend;
                 /**
                  * Whether the given RTP parameters can be received with the given RTP
                  * capabilities.
@@ -14500,7 +14479,6 @@
                         (codec) => codec.remotePayloadType === firstMediaCodec.payloadType,
                     );
                 }
-                exports.canReceive = canReceive;
                 /**
                  * Validates RtpCodecCapability. It may modify given data by adding missing
                  * fields with default values.
@@ -14883,7 +14861,7 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.parse = void 0;
+                exports.parse = parse;
                 const ScalabilityModeRegex = new RegExp('^[LS]([1-9]\\d{0,1})T([1-9]\\d{0,1})');
                 function parse(scalabilityMode) {
                     const match = ScalabilityModeRegex.exec(scalabilityMode || '');
@@ -14899,7 +14877,6 @@
                         };
                     }
                 }
-                exports.parse = parse;
             },
             {},
         ],
@@ -14962,7 +14939,9 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.deepFreeze = exports.generateRandomNumber = exports.clone = void 0;
+                exports.clone = clone;
+                exports.generateRandomNumber = generateRandomNumber;
+                exports.deepFreeze = deepFreeze;
                 /**
                  * Clones the given value.
                  */
@@ -14978,14 +14957,12 @@
                         return JSON.parse(JSON.stringify(value));
                     }
                 }
-                exports.clone = clone;
                 /**
                  * Generates a random positive integer.
                  */
                 function generateRandomNumber() {
                     return Math.round(Math.random() * 10000000);
                 }
-                exports.generateRandomNumber = generateRandomNumber;
                 /**
                  * Make an object or array recursively immutable.
                  * https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/freeze.
@@ -15002,7 +14979,6 @@
                     }
                     return Object.freeze(object);
                 }
-                exports.deepFreeze = deepFreeze;
             },
             {},
         ],

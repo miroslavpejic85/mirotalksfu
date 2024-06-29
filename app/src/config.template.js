@@ -59,6 +59,42 @@ module.exports = {
             endpoint: '', // Change the URL if you want to save the recording to a different server or cloud service (http://localhost:8080), otherwise leave it as is (empty).
             dir: 'rec',
         },
+        rtmp: {
+            /*
+                Real-Time Messaging Protocol (RTMP) is a communication protocol for streaming audio, video, and data over the Internet. (beta)
+
+                Configuration:
+                - enabled: Enable or disable the RTMP streaming feature. Set to 'true' to enable, 'false' to disable.
+                - fromFile: Enable or disable the RTMP streaming from File. Set to 'true' to enable, 'false' to disable.
+                - fromUrl: Enable or disable the RTMP streaming from Url. Set to 'true' to enable, 'false' to disable.
+                - fromStream: Enable or disable the RTMP Streamer. Set to 'true' to enable, 'false' to disable.
+                - maxStreams: Specifies the maximum number of simultaneous streams permitted for File, URL, and Stream. The default value is 1.
+                - server: The URL of the RTMP server. Leave empty to use the built-in MiroTalk RTMP server (rtmp://localhost:1935). Change the URL to connect to a different RTMP server.
+                - appName: The application name for the RTMP stream. Default is 'mirotalk'.
+                - streamKey: The stream key for the RTMP stream. Leave empty if not required.
+                - secret: The secret key for RTMP streaming. Must match the secret in rtmpServers/node-media-server/src/config.js. Leave empty if no authentication is needed.
+                - apiSecret: The API secret for streaming WebRTC to RTMP through the MiroTalk API.
+                - expirationHours: The number of hours before the RTMP URL expires. Default is 4 hours.
+                - dir: Directory where your video files are stored to be streamed via RTMP.
+
+                Important: Ensure your RTMP server is operational before proceeding. You can start the server by running the following command:
+                - Start: npm run nms-start - Start the RTMP server.
+                - Stop: npm run npm-stop - Stop the RTMP server.
+                - Logs: npm run npm-logs - View the logs of the RTMP server.
+            */
+            enabled: false,
+            fromFile: true,
+            fromUrl: true,
+            fromStream: true,
+            maxStreams: 1,
+            server: 'rtmp://localhost:1935',
+            appName: 'mirotalk',
+            streamKey: '',
+            secret: 'mirotalkRtmpSecret',
+            apiSecret: 'mirotalkRtmpApiSecret',
+            expirationHours: 4,
+            dir: 'rtmp',
+        },
     },
     middleware: {
         /*
@@ -333,6 +369,7 @@ module.exports = {
                 lobbyButton: true, // presenter
                 sendEmailInvitation: true, // presenter
                 micOptionsButton: true, // presenter
+                tabRTMPStreamingBtn: true, // presenter
                 tabModerator: true, // presenter
                 tabRecording: true,
                 host_only_recording: true, // presenter
