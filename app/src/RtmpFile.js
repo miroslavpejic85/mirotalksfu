@@ -42,9 +42,9 @@ class RtmpFile {
                     /* log.debug('Processing', progress); */
                 })
                 .on('error', (err, stdout, stderr) => {
-                    log.debug('Error: ' + err.message);
                     this.ffmpegProcess = null;
                     if (!err.message.includes('Exiting normally')) {
+                        log.error('Error: ' + err.message);
                         this.handleError(err.message);
                     }
                 })

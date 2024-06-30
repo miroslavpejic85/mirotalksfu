@@ -100,16 +100,18 @@ module.exports = class Room {
     }
 
     async getRTMP(dir = 'rtmp') {
-        const folderPath = path.join(__dirname, '..', dir);
-
-        // Create dir if not exists
-        if (!fs.existsSync(folderPath)) {
-            fs.mkdirSync(folderPath, { recursive: true });
-        }
+        //
+        const folderPath = path.join(__dirname, '../', dir);
+        log.debug('[getRTMP] Files from dir', folderPath);
 
         try {
+            // Create dir if not exists
+            if (!fs.existsSync(folderPath)) {
+                log.debug('[getRTMP] Dir not exist going to create', folderPath);
+                fs.mkdirSync(folderPath, { recursive: true });
+            }
             const files = fs.readdirSync(folderPath);
-            log.info('RTMP files', files);
+            log.info('[getRTMP] Files', files);
             return files;
         } catch (error) {
             log.error(`[getRTMP] Error reading directory: ${error.message}`);
@@ -119,21 +121,23 @@ module.exports = class Room {
 
     async startRTMP(socket_id, room, host = 'localhost', port = 1935, file = '../rtmp/BigBuckBunny.mp4') {
         if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('RTMP server is not enabled or missing the config');
+            log.debug('[startRTMP] Server is not enabled or missing the config');
             return false;
         }
 
         if (this.rtmpFileStreamer) {
-            log.debug('RtmpFile is already in progress');
+            log.debug('[startRTMP] Already in progress');
             return false;
         }
 
         const inputFilePath = path.join(__dirname, file);
 
         if (!fs.existsSync(inputFilePath)) {
-            log.error(`File not found: ${inputFilePath}`);
+            log.error(`[startRTMP] File not found: ${inputFilePath}`);
             return false;
         }
+
+        log.debug('[startRTMP] Read all stream from file', inputFilePath);
 
         this.rtmpFileStreamer = new RtmpFile(socket_id, room);
 
@@ -152,16 +156,16 @@ module.exports = class Room {
 
     stopRTMP() {
         if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('RTMP server is not enabled or missing the config');
+            log.debug('[stopRTMP] Server is not enabled or missing the config');
             return false;
         }
         if (this.rtmpFileStreamer) {
             this.rtmpFileStreamer.stop();
             this.rtmpFileStreamer = null;
-            log.debug('RTMP File Streamer Stopped successfully!');
+            log.debug('[stopRTMP] Streamer Stopped successfully!');
             return true;
         } else {
-            log.debug('No RtmpFile process to stop');
+            log.debug('[stopRTMP] No process to stop');
             return false;
         }
     }
@@ -182,14 +186,16 @@ module.exports = class Room {
         inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
     ) {
         if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('RTMP server is not enabled or missing the config');
+            log.debug('[startRTMPfromURL] Server is not enabled or missing the config');
             return false;
         }
 
         if (this.rtmpUrlStreamer) {
-            log.debug('RtmpFile is already in progress');
+            log.debug('[startRTMPfromURL] Already in progress');
             return false;
         }
+
+        log.debug('[startRTMPfromURL] Input video URL', inputVideoURL);
 
         this.rtmpUrlStreamer = new RtmpUrl(socket_id, room);
 
@@ -206,16 +212,16 @@ module.exports = class Room {
 
     stopRTMPfromURL() {
         if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('RTMP server is not enabled or missing the config');
+            log.debug('[stopRTMPfromURL] Server is not enabled or missing the config');
             return false;
         }
         if (this.rtmpUrlStreamer) {
             this.rtmpUrlStreamer.stop();
             this.rtmpUrlStreamer = null;
-            log.debug('RTMP Url Streamer Stopped successfully!');
+            log.debug('[stopRTMPfromURL] Streamer Stopped successfully!');
             return true;
         } else {
-            log.debug('No RtmpUrl process to stop');
+            log.debug('[stopRTMPfromURL] No process to stop');
             return false;
         }
     }
