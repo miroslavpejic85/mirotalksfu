@@ -27,7 +27,7 @@ function generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours = 8) {
     const rtmpUrl = `${baseURL}${streamPath}?sign=${expirationTime}-${hashValue}`;
 
     // Print some log
-    log.debug('generateRTMPUrl', {
+    console.debug('generateRTMPUrl', {
         currentTime: currentTime,
         expirationTime: expirationTime,
         hashValue: hashValue,
@@ -38,10 +38,10 @@ function generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours = 8) {
 }
 
 // Example usage
-const baseURL = 'rtmp://localhost:1935';
-const streamKey = uuidv4();
-const streamPath = '/live/' + streamKey; // path/stream-key
-const secretKey = 'mirotalkRtmpSecret';
+const baseURL = 'rtmp://localhost:1935'; // Rtmp server
+const streamKey = uuidv4(); // Generate random stream key
+const streamPath = '/live/' + streamKey; // Path/stream-key
+const secretKey = 'mirotalkRtmpSecret'; // Must be the same as in config.js auth.secret
 const expirationHours = 8;
 
 // Run: node sign.js

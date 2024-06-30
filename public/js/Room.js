@@ -4032,7 +4032,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.60',
+        title: 'WebRTC SFU 1.4.71',
         html: `
         <br />
         <div id="about">
