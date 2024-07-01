@@ -235,23 +235,27 @@ access to use this app.
 
                 <div class="tabActions">
                     <div id="tabRoom" class="tabcontent">
-                        <button id="fullScreenButton" class="hidden">
+                        <button id="fullScreenButton" class="hidden btn-custom">
                             <i class="fas fa-expand-alt"></i>
                             <p>Full screen mode</p>
                         </button>
                         <br />
-                        <button id="fileShareButton" class="hidden">
+                        <button id="fileShareButton" class="hidden btn-custom">
                             <i class="fas fa-folder-open"></i>
                             <p>File sharing</p>
                         </button>
                         <br />
-                        <button id="lockRoomButton" class="hidden">
+                        <button id="lockRoomButton" class="hidden btn-custom">
                             <i class="fas fa-lock-open"></i>
                             <p>Lock room</p>
                         </button>
-                        <button id="unlockRoomButton" class="hidden">
+                        <button id="unlockRoomButton" class="hidden btn-custom">
                             <i class="fas fa-lock"></i>
                             <p>Unlock room</p>
+                        </button>
+                        <button id="sendEmailInvitation" class="hidden btn-custom">
+                            <i class="fas fa-envelope-circle-check"></i>
+                            <p id="roomSendEmail" class="cp">Send email invitation</p>
                         </button>
                         <hr />
                         <table class="settingsTable">
@@ -333,16 +337,6 @@ access to use this app.
                             </tr>
                             <tr>
                                 <td>
-                                    <div id="sendEmailInvitation" class="hidden">
-                                        <div class="title">
-                                            <i class="fas fa-envelope-circle-check"></i>
-                                            <p id="roomSendEmail" class="cp">Send email invitation</p>
-                                        </div>
-                                    </div>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
                                     <div class="title">
                                         <i class="fas fa-clock"></i>
                                         <p id="sessionTime">00:00:00</p>
@@ -353,12 +347,11 @@ access to use this app.
                     </div>
 
                     <div id="tabVideoDevices" class="tabcontent">
-                        <br />
-                        <div id="refreshVideoDevices" class="title">
+                        <button id="refreshVideoDevices" class="btn-custom">
                             <i class="fas fa-rotate"></i>
                             <p>Refresh video devices</p>
-                        </div>
-                        <br />
+                        </button>
+                        <br /><br />
                         <div class="title">
                             <i class="fas fa-video"></i>
                             <p>Video Source:</p>
@@ -407,12 +400,11 @@ access to use this app.
                     </div>
 
                     <div id="tabAudioDevices" class="tabcontent">
-                        <br />
-                        <div id="refreshAudioDevices" class="title">
+                        <button id="refreshAudioDevices" class="btn-custom">
                             <i class="fas fa-rotate"></i>
                             <p>Refresh audio devices</p>
-                        </div>
-                        <br />
+                        </button>
+                        <br /><br />
                         <div class="title">
                             <i class="fas fa-microphone"></i>
                             <p>Microphone:</p>
@@ -434,7 +426,7 @@ access to use this app.
                         <br />
                         <div class="dropdown">
                             <button
-                                class="dropdown-toggle"
+                                class="dropdown-toggle btn-custom"
                                 type="button"
                                 id="micOptionsButton"
                                 data-bs-toggle="dropdown"
@@ -614,7 +606,7 @@ access to use this app.
                             </div>
                             <select id="speakerSelect" class="form-select text-light bg-dark"></select>
                             <hr />
-                            <button id="speakerTestBtn">
+                            <button id="speakerTestBtn" class="btn-custom">
                                 <i class="fa-solid fa-circle-play"></i>
                                 <p>Test speaker</p>
                             </button>
@@ -853,11 +845,11 @@ access to use this app.
                             </table>
                             <hr />
                         </div>
-                        <button id="pauseRecButton" class="hidden">
+                        <button id="pauseRecButton" class="hidden btn-custom">
                             <i class="far fa-pause-circle"></i>
                             <p>Pause recording</p>
                         </button>
-                        <button id="resumeRecButton" class="hidden">
+                        <button id="resumeRecButton" class="hidden btn-custom">
                             <i class="far fa-play-circle"></i>
                             <p>Resume recording</p>
                         </button>
@@ -928,7 +920,7 @@ access to use this app.
                                     <audio id="avatarPreviewAudio" controls></audio>
                                 </div>
                                 <br />
-                                <button id="avatarVideoAIStart" class="btn-primary">
+                                <button id="avatarVideoAIStart" class="btn-custom">
                                     <i class="fas fa-play"></i> Start Avatar Session
                                 </button>
                             </div>
@@ -936,7 +928,7 @@ access to use this app.
                     </div>
 
                     <div id="tabVideoShare" class="tabcontent">
-                        <button id="videoShareButton">
+                        <button id="videoShareButton" class="btn-custom">
                             <i class="fab fa-youtube"></i>
                             <p>Share a Video or Audio</p>
                         </button>
