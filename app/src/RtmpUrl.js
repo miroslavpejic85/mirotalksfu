@@ -1,8 +1,9 @@
 'use strict';
 
+const config = require('./config');
+const ffmpegPath = config.server.rtmp && config.server.rtmp.ffmpeg ? config.server.rtmp.ffmpeg : '/usr/bin/ffmpeg';
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 const Logger = require('./Logger');
 const log = new Logger('RtmpUrl');

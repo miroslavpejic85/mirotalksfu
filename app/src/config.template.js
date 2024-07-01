@@ -76,6 +76,7 @@ module.exports = {
                 - apiSecret: The API secret for streaming WebRTC to RTMP through the MiroTalk API.
                 - expirationHours: The number of hours before the RTMP URL expires. Default is 4 hours.
                 - dir: Directory where your video files are stored to be streamed via RTMP.
+                - ffmpeg: Path of the ffmpeg installation on the system (which ffmpeg)
 
                 Important: Ensure your RTMP server is operational before proceeding. You can start the server by running the following command:
                 - Start: npm run nms-start - Start the RTMP server.
@@ -94,6 +95,7 @@ module.exports = {
             apiSecret: 'mirotalkRtmpApiSecret',
             expirationHours: 4,
             dir: 'rtmp',
+            ffmpeg: '/usr/bin/ffmpeg',
         },
     },
     middleware: {
