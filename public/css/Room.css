@@ -462,6 +462,15 @@ th {
     width: 20px;
 }
 
+.btn-custom {
+    width: 100%;
+    background: var(--body-bg);
+    padding: 10px;
+}
+.btn-custom:hover {
+    background: var(--select-bg);
+}
+
 /*--------------------------------------------------------------
 # Dropdown menu
 --------------------------------------------------------------*/
