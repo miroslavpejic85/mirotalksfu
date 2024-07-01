@@ -38,10 +38,9 @@ class RtmpUrl {
                     /* log.debug('Processing', progress); */
                 })
                 .on('error', (err, stdout, stderr) => {
-                    log.debug('Error: ' + err.message);
                     this.ffmpegProcess = null;
                     if (!err.message.includes('Exiting normally')) {
-                        this.handleError(err.message);
+                        this.handleError(err.message, stdout, stderr);
                     }
                 })
                 .on('end', () => {
@@ -82,11 +81,11 @@ class RtmpUrl {
         this.room.rtmpUrlStreamer = false;
     }
 
-    handleError(message) {
+    handleError(message, stdout, stderr) {
         if (!this.room) return;
         this.room.send(this.socketId, 'errorRTMPfromURL', { message });
         this.room.rtmpUrlStreamer = false;
-        log.error('Error: ' + message);
+        log.error('Error: ' + message, { stdout, stderr });
     }
 }
 

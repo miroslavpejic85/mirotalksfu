@@ -37,7 +37,7 @@ class RtmpStreamer {
             })
             .on('error', (err, stdout, stderr) => {
                 if (!err.message.includes('Exiting normally')) {
-                    this.log.error('FFmpeg error:', { id: this.rtmpKey, error: err.message });
+                    this.log.error(`Error: ${err.message}`, { stdout, stderr });
                 }
                 this.end();
             })

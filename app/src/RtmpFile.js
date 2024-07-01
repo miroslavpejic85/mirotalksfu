@@ -44,8 +44,7 @@ class RtmpFile {
                 .on('error', (err, stdout, stderr) => {
                     this.ffmpegProcess = null;
                     if (!err.message.includes('Exiting normally')) {
-                        log.error('Error: ' + err.message);
-                        this.handleError(err.message);
+                        this.handleError(err.message, stdout, stderr);
                     }
                 })
                 .on('end', () => {
@@ -86,11 +85,11 @@ class RtmpFile {
         this.room.rtmpFileStreamer = false;
     }
 
-    handleError(message) {
+    handleError(message, stdout, stderr) {
         if (!this.room) return;
         this.room.send(this.socketId, 'errorRTMP', { message });
         this.room.rtmpFileStreamer = false;
-        log.error('Error: ' + message);
+        log.error('Error: ' + message, { stdout, stderr });
     }
 }
 
