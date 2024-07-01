@@ -13,6 +13,7 @@ RUN apt-get update \
         build-essential \
         python3 \
         python3-pip \
+        ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy package.json and install npm dependencies

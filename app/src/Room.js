@@ -107,7 +107,7 @@ module.exports = class Room {
         try {
             // Create dir if not exists
             if (!fs.existsSync(folderPath)) {
-                log.debug('[getRTMP] Dir not exist going to create', folderPath);
+                log.debug('[getRTMP] Dir not exists going to create', folderPath);
                 fs.mkdirSync(folderPath, { recursive: true });
             }
             const files = fs.readdirSync(folderPath);
