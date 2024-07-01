@@ -6,6 +6,8 @@ services:
         image: mirotalk/nms:latest
         volumes:
             - ./src/config.js/:/app/src/config.js/:ro
+            # - /etc/letsencrypt/live/your-domain-name/fullchain.pem/:/app/src/cert.pem/:ro
+            # - /etc/letsencrypt/live/your-domain-name/privkey.pem/:/app/src/key.pem/:ro
         ports:
             - '1935:1935'
             - '8081:8081'

@@ -37,7 +37,7 @@ function generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours = 8) {
     return rtmpUrl;
 }
 
-// Example usage
+// Example usage (change it for your server setup)
 const baseURL = 'rtmp://localhost:1935'; // Rtmp server
 const streamKey = uuidv4(); // Generate random stream key
 const streamPath = '/live/' + streamKey; // Path/stream-key

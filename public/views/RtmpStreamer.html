@@ -49,8 +49,11 @@
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
-        <!-- JS scripts -->
+        <!-- UAParser -->
 
+        <script defer src="https://cdn.jsdelivr.net/npm/ua-parser-js@latest/dist/ua-parser.min.js"></script>
+
+        <!-- JS scripts -->
         <script defer src="../js/Brand.js"></script>
         <script defer src="../js/RtmpStreamer.js"></script>
     </head>
@@ -82,7 +85,7 @@
                 <button id="copy" title="Click to copy the RTMP URL">Copy</button>
             </div>
 
-            <video id="video" width="640" height="480" autoplay></video>
+            <video id="video" width="640" height="480"></video>
 
             <div class="button-group">
                 <button id="startCamera" title="Click to start camera streaming">Start Camera Streaming</button>

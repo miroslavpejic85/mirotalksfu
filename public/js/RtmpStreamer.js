@@ -45,12 +45,23 @@ function showError(message) {
     showPopup(message, 'error');
 }
 
+function isChromeBased() {
+    const parser = new UAParser();
+    const browser = parser.getBrowser();
+    const browserName = browser.name.toLowerCase();
+
+    // List of known Chrome-based browser names
+    const chromeBasedBrowsers = ['chrome', 'chromium', 'opera', 'edge', 'brave', 'samsung internet'];
+
+    return chromeBasedBrowsers.includes(browserName);
+}
+
 function checkBrowserSupport() {
     const userAgent = navigator.userAgent.toLowerCase();
 
     console.log('UserAgent', userAgent);
 
-    if (userAgent.includes('chrome') && !userAgent.includes('edge') && !userAgent.includes('opr')) {
+    if (isChromeBased()) {
         console.log('Browser is Chrome-based. Proceed with functionality.');
     } else {
         toggleButtons(true);
@@ -85,7 +96,7 @@ window.onload = function () {
 async function startCapture(constraints) {
     try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoElement.srcObject = stream;
+        attachMediaStream(stream);
         return stream;
     } catch (err) {
         console.error('Error accessing media devices.', err);
@@ -96,12 +107,21 @@ async function startCapture(constraints) {
 async function startScreenCapture(constraints) {
     try {
         const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
-        videoElement.srcObject = stream;
+        attachMediaStream(stream);
         return stream;
     } catch (err) {
         console.error('Error accessing screen media.', err);
         showError('Error accessing screen sharing. Please try again or check your screen sharing permissions.');
     }
+}
+
+function attachMediaStream(stream) {
+    videoElement.srcObject = stream;
+    videoElement.playsInline = true;
+    videoElement.autoplay = true;
+    videoElement.muted = true;
+    videoElement.volume = 0;
+    videoElement.controls = false;
 }
 
 async function initRTMP(stream) {
