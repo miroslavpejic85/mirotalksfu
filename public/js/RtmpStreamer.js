@@ -12,8 +12,8 @@ const popupMessage = document.getElementById('popupMessage');
 const closePopup = document.getElementById('closePopup');
 
 const qs = new URLSearchParams(window.location.search);
-const videoId = qs.get('v');
-const audioId = qs.get('a');
+const videoId = filterXSS(qs.get('v'));
+const audioId = filterXSS(qs.get('a'));
 
 console.log('Video/Audio id', {
     video: videoId,

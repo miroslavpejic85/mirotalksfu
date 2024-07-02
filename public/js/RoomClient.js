@@ -7466,7 +7466,7 @@ class RoomClient {
     }
 
     async startRTMP() {
-        if (!this.isRTMPVideoSupported(this.selectedRtmpFilename)) {
+        if (!this.isRTMPVideoSupported(filterXSS(this.selectedRtmpFilename))) {
             this.getId('file-name').textContent = '';
             return this.userLog(
                 'warning',
@@ -7477,9 +7477,9 @@ class RoomClient {
 
         this.socket
             .request('startRTMP', {
-                file: this.selectedRtmpFilename,
-                peer_name: this.peer_name,
-                peer_uuid: this.peer_uuid,
+                file: filterXSS(this.selectedRtmpFilename),
+                peer_name: filterXSS(this.peer_name),
+                peer_uuid: filterXSS(this.peer_uuid),
             })
             .then(function (rtmp) {
                 rc.event(_EVENTS.startRTMP);
@@ -7523,7 +7523,7 @@ class RoomClient {
     // ##############################################
 
     startRTMPfromURL(inputVideoURL) {
-        if (!this.isRTMPVideoSupported(inputVideoURL)) {
+        if (!this.isRTMPVideoSupported(filterXSS(inputVideoURL))) {
             this.getId('rtmpStreamURL').value = '';
             return this.userLog(
                 'warning',
@@ -7534,9 +7534,9 @@ class RoomClient {
 
         this.socket
             .request('startRTMPfromURL', {
-                inputVideoURL: inputVideoURL,
-                peer_name: this.peer_name,
-                peer_uuid: this.peer_uuid,
+                inputVideoURL: filterXSS(inputVideoURL),
+                peer_name: filterXSS(this.peer_name),
+                peer_uuid: filterXSS(this.peer_uuid),
             })
             .then(function (rtmp) {
                 rc.event(_EVENTS.startRTMPfromURL);
@@ -7617,7 +7617,7 @@ class RoomClient {
         }
 
         const rtmpUrl = rc.getId('rtmp-url');
-        rtmpUrl.value = rtmp;
+        rtmpUrl.value = filterXSS(rtmp);
 
         Swal.fire({
             background: swalBackground,
