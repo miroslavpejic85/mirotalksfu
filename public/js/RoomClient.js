@@ -7596,7 +7596,7 @@ class RoomClient {
     }
 
     cleanRTMPUrl() {
-        const rtmpUrl = rc.getId('rtmp-url');
+        const rtmpUrl = rc.getId('rtmpLiveUrl');
         rtmpUrl.value = '';
     }
 
@@ -7622,7 +7622,7 @@ class RoomClient {
             );
         }
 
-        const rtmpUrl = rc.getId('rtmp-url');
+        const rtmpUrl = rc.getId('rtmpLiveUrl');
         rtmpUrl.value = filterXSS(rtmp);
 
         Swal.fire({

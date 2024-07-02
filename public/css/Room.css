@@ -342,6 +342,7 @@ body {
 }
 
 #extraInfo {
+    margin-left: 5px;
     max-height: 400px;
 }
 
@@ -440,12 +441,22 @@ th {
 }
 
 #rtmpStreamURL,
-#rtmp-url {
+#rtmpLiveUrl {
     margin-top: 5px;
     padding: 10px;
     width: 100%;
     color: #fff;
     border: none;
+    background: var(--select-bg) !important;
+}
+
+#refreshVideoFiles {
+    float: right;
+    cursor: pointer;
+    border-radius: 5px;
+    background: var(--body-bg) !important;
+}
+#refreshVideoFiles:hover {
     background: var(--select-bg) !important;
 }
 

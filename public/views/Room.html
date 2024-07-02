@@ -828,6 +828,7 @@ access to use this app.
                                 </tr>
                             </table>
                         </div>
+                        <hr />
                         <div id="roomRecordingServer" class="hidden">
                             <table class="settingsTable">
                                 <tr>
@@ -948,7 +949,7 @@ access to use this app.
                         <div id="rtmpUrlLive">
                             <div class="input-container">
                                 <input
-                                    id="rtmp-url"
+                                    id="rtmpLiveUrl"
                                     type="text"
                                     value=""
                                     placeholder="rtmp://server:port/app/streamKey"
@@ -960,7 +961,9 @@ access to use this app.
                                 <table class="file-table">
                                     <thead>
                                         <tr>
-                                            <th>Video Files:</th>
+                                            <th>
+                                                Video Files: <i id="refreshVideoFiles" class="fa-solid fa-rotate"></i>
+                                            </th>
                                         </tr>
                                     </thead>
                                     <tbody id="file-list">

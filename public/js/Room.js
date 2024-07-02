@@ -300,6 +300,7 @@ function initClient() {
             'Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs',
             'right',
         );
+        setTippy('refreshVideoFiles', 'Refresh', 'left');
         setTippy('switchServerRecording', 'The recording will be stored on the server rather than locally', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
@@ -1490,6 +1491,9 @@ function handleButtons() {
         rc.getRTMP();
         rc.openTab(e, 'tabRTMPStreaming');
     };
+    refreshVideoFiles.onclick = () => {
+        rc.getRTMP();
+    };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
     };
@@ -1715,7 +1719,7 @@ function handleButtons() {
         rc.closeProducer(RoomClient.mediaType.screen);
     };
     copyRtmpUrlButton.onclick = () => {
-        rc.copyRTMPUrl(rtmpStreamURL.value);
+        rc.copyRTMPUrl(rtmpLiveUrl.value);
     };
     startRtmpButton.onclick = () => {
         if (rc.selectedRtmpFilename == '') {
