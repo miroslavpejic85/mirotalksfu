@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.79
+ * @version 1.4.80
  *
  */
 
@@ -7040,8 +7040,10 @@ class RoomClient {
                                 VideoAI.avatar = avatarDataArr[0];
                                 VideoAI.avatarName = avatarDataArr[1];
                                 VideoAI.avatarVoice = avatarDataArr[2] ? avatarDataArr[2] : '';
-                                avatarVideoAIPreview.src = avatarUi.video_url.grey;
+
+                                avatarVideoAIPreview.setAttribute('src', avatarUi.video_url.grey);
                                 avatarVideoAIPreview.play();
+
                                 console.log('Avatar image click event', {
                                     avatar,
                                     avatarUi,
@@ -7052,10 +7054,14 @@ class RoomClient {
                             div.append(hr);
                             div.append(label);
                             avatarVideoAIcontainer.append(div);
+
                             // Show the first available free avatar
                             if (showFreeAvatars && avatarUi.pose_name === 'Kristin in Black Suit') {
-                                avatarVideoAIPreview.src = avatarUi.video_url.grey;
-                                avatarVideoAIPreview.play();
+                                avatarVideoAIPreview.setAttribute('src', avatarUi.video_url.grey);
+                                avatarVideoAIPreview.playsInline = true;
+                                avatarVideoAIPreview.autoplay = true;
+                                avatarVideoAIPreview.controls = true;
+                                avatarVideoAIPreview.volume = 0.5;
                             }
                         }
                     });
