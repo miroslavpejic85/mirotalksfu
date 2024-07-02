@@ -11,6 +11,15 @@ const popup = document.getElementById('popup');
 const popupMessage = document.getElementById('popupMessage');
 const closePopup = document.getElementById('closePopup');
 
+const qs = new URLSearchParams(window.location.search);
+const videoId = qs.get('v');
+const audioId = qs.get('a');
+
+console.log('Video/Audio id', {
+    video: videoId,
+    audio: audioId,
+});
+
 /* 
 Low Latency: 1-2 seconds
 Standard Use Case: 5 seconds
@@ -243,7 +252,9 @@ function stopTracks(stream) {
 }
 
 async function startCameraStreaming() {
-    const stream = await startCapture({ video: true, audio: true });
+    const videoConstraints = videoId ? { deviceId: videoId } : true;
+    const audioConstraints = audioId ? { deviceId: audioId } : true;
+    const stream = await startCapture({ video: videoConstraints, audio: audioConstraints });
     await startStreaming(stream);
 }
 
