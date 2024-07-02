@@ -90,6 +90,10 @@
 
         <script async src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
+        <!-- UAParser -->
+
+        <script defer src="https://cdn.jsdelivr.net/npm/ua-parser-js@latest/dist/ua-parser.min.js"></script>
+
         <script async src="../js/Umami.js"></script>
         <script async src="../js/Translate.js"></script>
 
@@ -1018,6 +1022,19 @@ access to use this app.
                                         <p>Presenter:</p>
                                         <p id="isUserPresenter">true</p>
                                     </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-circle-info"></i>
+                                        <p>Extra info:</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <pre id="extraInfo"></pre>
                                 </td>
                             </tr>
                         </table>
