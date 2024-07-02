@@ -1493,6 +1493,7 @@ function handleButtons() {
     };
     refreshVideoFiles.onclick = () => {
         rc.getRTMP();
+        userLog('info', 'Refreshed video files', 'top-end');
     };
     tabAspectBtn.onclick = (e) => {
         rc.openTab(e, 'tabAspect');
