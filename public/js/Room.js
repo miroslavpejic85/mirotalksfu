@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.80
+ * @version 1.4.81
  *
  */
 
@@ -309,17 +309,6 @@ function initClient() {
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
-        setTippy('whiteboardImgFileBtn', 'Add image file', 'bottom');
-        setTippy('whiteboardPdfFileBtn', 'Add pdf file', 'bottom');
-        setTippy('whiteboardImgUrlBtn', 'Add image url', 'bottom');
-        setTippy('whiteboardTextBtn', 'Add text', 'bottom');
-        setTippy('whiteboardLineBtn', 'Add line', 'bottom');
-        setTippy('whiteboardRectBtn', 'Add rectangle', 'bottom');
-        setTippy('whiteboardTriangleBtn', 'Add triangle', 'bottom');
-        setTippy('whiteboardCircleBtn', 'Add circle', 'bottom');
-        setTippy('whiteboardSaveBtn', 'Save', 'bottom');
-        setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
-        setTippy('whiteboardCleanBtn', 'Clean', 'bottom');
         setTippy('whiteboardLockButton', 'If enabled, participants cannot interact', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
         setTippy('chatCleanTextButton', 'Clean', 'top');
@@ -4076,7 +4065,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.80',
+        title: 'WebRTC SFU v1.4.81',
         html: `
         <br />
         <div id="about">

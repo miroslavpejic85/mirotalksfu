@@ -1178,14 +1178,25 @@ progress {
 }
 
 .whiteboard-header-options .dropdown-menu {
-    display: none;
-    width: 100vw;
-    padding: 10px;
     background: var(--body-bg);
+    border: none;
+    max-height: calc(var(--wb-height) * 1px); /* Set a maximum height */
+    overflow-y: auto; /* Enable vertical scrolling */
 }
 
 .whiteboard-header-options .dropdown-menu button {
-    display: inline-flex;
+    background: none;
+    border: none;
+    color: #ffffff;
+    width: 100%;
+    text-align: left;
+    padding: 10px;
+    font-size: 0.8em;
+    cursor: pointer;
+}
+
+.whiteboard-header-options .dropdown-menu button:hover {
+    background: var(--select-bg);
 }
 
 .whiteboardColorPicker {
