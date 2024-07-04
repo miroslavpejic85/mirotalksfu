@@ -1132,8 +1132,8 @@ progress {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: var(--wb-width);
-    height: var(--wb-height);
+    width: calc(var(--wb-width) * 1px);
+    height: calc(var(--wb-height) * 1px);
     background: var(--wb-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
@@ -1160,6 +1160,11 @@ progress {
     margin-left: 8px;
 }
 
+.whiteboard-header-title button {
+    font-size: 1.5em;
+    margin-right: 5px;
+}
+
 .whiteboard-header button {
     /* padding: 10px; */
     border-radius: 5px;
@@ -1180,23 +1185,30 @@ progress {
 .whiteboard-header-options .dropdown-menu {
     background: var(--body-bg);
     border: none;
-    max-height: calc(var(--wb-height) * 1px); /* Set a maximum height */
-    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: calc(var(--wb-height) * 1px);
+    overflow-y: auto;
 }
 
 .whiteboard-header-options .dropdown-menu button {
-    background: none;
-    border: none;
-    color: #ffffff;
-    width: 100%;
-    text-align: left;
-    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 160px;
     font-size: 0.8em;
+    text-align: left;
+    padding: 8px 16px;
+    border: none;
+    background: none;
     cursor: pointer;
 }
 
 .whiteboard-header-options .dropdown-menu button:hover {
     background: var(--select-bg);
+}
+
+.whiteboard-header-options .dropdown-menu button i,
+.whiteboard-header-options .dropdown-menu button svg {
+    margin-right: 8px;
 }
 
 .whiteboardColorPicker {

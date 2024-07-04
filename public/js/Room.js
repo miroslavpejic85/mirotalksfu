@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.81
+ * @version 1.4.82
  *
  */
 
@@ -69,8 +69,8 @@ const Base64Prefix = 'data:application/pdf;base64,';
 
 const wbImageInput = 'image/*';
 const wbPdfInput = 'application/pdf';
-const wbWidth = 1200;
-const wbHeight = 600;
+const wbWidth = 1280;
+const wbHeight = 768;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
@@ -3165,75 +3165,10 @@ function whiteboardAddObj(type) {
             });
             break;
         case 'imgFile':
-            Swal.fire({
-                allowOutsideClick: false,
-                background: swalBackground,
-                position: 'center',
-                title: 'Select the image',
-                input: 'file',
-                inputAttributes: {
-                    accept: wbImageInput,
-                    'aria-label': 'Select the image',
-                },
-                showDenyButton: true,
-                confirmButtonText: `OK`,
-                denyButtonText: `Cancel`,
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let wbCanvasImg = result.value;
-                    if (wbCanvasImg && wbCanvasImg.size > 0) {
-                        let reader = new FileReader();
-                        reader.onload = function (event) {
-                            let imgObj = new Image();
-                            imgObj.src = event.target.result;
-                            imgObj.onload = function () {
-                                let image = new fabric.Image(imgObj);
-                                image.set({ top: 0, left: 0 }).scale(0.3);
-                                addWbCanvasObj(image);
-                            };
-                        };
-                        reader.readAsDataURL(wbCanvasImg);
-                    } else {
-                        userLog('error', 'File not selected or empty', 'top-end');
-                    }
-                }
-            });
+            setupFileSelection('Select the image', wbImageInput, renderImageToCanvas);
             break;
         case 'pdfFile':
-            Swal.fire({
-                allowOutsideClick: false,
-                background: swalBackground,
-                position: 'center',
-                title: 'Select the PDF',
-                input: 'file',
-                inputAttributes: {
-                    accept: wbPdfInput,
-                    'aria-label': 'Select the PDF',
-                },
-                showDenyButton: true,
-                confirmButtonText: `OK`,
-                denyButtonText: `Cancel`,
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    let wbCanvasPdf = result.value;
-                    if (wbCanvasPdf && wbCanvasPdf.size > 0) {
-                        let reader = new FileReader();
-                        reader.onload = async function (event) {
-                            wbCanvas.requestRenderAll();
-                            await pdfToImage(event.target.result, wbCanvas);
-                            whiteboardIsDrawingMode(false);
-                            wbCanvasToJson();
-                        };
-                        reader.readAsDataURL(wbCanvasPdf);
-                    } else {
-                        userLog('error', 'File not selected or empty', 'top-end');
-                    }
-                }
-            });
+            setupFileSelection('Select the PDF', wbPdfInput, renderPdfToCanvas);
             break;
         case 'text':
             const text = new fabric.IText('Lorem Ipsum', {
@@ -3291,6 +3226,106 @@ function whiteboardAddObj(type) {
             break;
         default:
             break;
+    }
+}
+
+function setupFileSelection(title, accept, renderToCanvas) {
+    Swal.fire({
+        allowOutsideClick: false,
+        background: swalBackground,
+        position: 'center',
+        title: title,
+        input: 'file',
+        html: `
+        <div id="dropArea">
+            <p>Drag and drop your file here</p>
+        </div>
+        `,
+        inputAttributes: {
+            accept: accept,
+            'aria-label': title,
+        },
+        didOpen: () => {
+            const dropArea = document.getElementById('dropArea');
+            dropArea.addEventListener('dragenter', handleDragEnter);
+            dropArea.addEventListener('dragover', handleDragOver);
+            dropArea.addEventListener('dragleave', handleDragLeave);
+            dropArea.addEventListener('drop', handleDrop);
+        },
+        showDenyButton: true,
+        confirmButtonText: `OK`,
+        denyButtonText: `Cancel`,
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            renderToCanvas(result.value);
+        }
+    });
+
+    function handleDragEnter(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.style.background = 'var(--body-bg)';
+    }
+
+    function handleDragOver(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.dataTransfer.dropEffect = 'copy';
+    }
+
+    function handleDragLeave(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        e.target.style.background = '';
+    }
+
+    function handleDrop(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        const dt = e.dataTransfer;
+        const files = dt.files;
+        handleFiles(files);
+        e.target.style.background = '';
+    }
+
+    function handleFiles(files) {
+        if (files.length > 0) {
+            const file = files[0];
+            console.log('Selected file:', file);
+            Swal.close();
+            renderToCanvas(file);
+        }
+    }
+}
+
+function renderImageToCanvas(wbCanvasImg) {
+    if (wbCanvasImg && wbCanvasImg.size > 0) {
+        let reader = new FileReader();
+        reader.onload = function (event) {
+            let imgObj = new Image();
+            imgObj.src = event.target.result;
+            imgObj.onload = function () {
+                let image = new fabric.Image(imgObj);
+                image.set({ top: 0, left: 0 }).scale(0.3);
+                addWbCanvasObj(image);
+            };
+        };
+        reader.readAsDataURL(wbCanvasImg);
+    }
+}
+
+async function renderPdfToCanvas(wbCanvasPdf) {
+    if (wbCanvasPdf && wbCanvasPdf.size > 0) {
+        let reader = new FileReader();
+        reader.onload = async function (event) {
+            wbCanvas.requestRenderAll();
+            await pdfToImage(event.target.result, wbCanvas);
+            whiteboardIsDrawingMode(false);
+            wbCanvasToJson();
+        };
+        reader.readAsDataURL(wbCanvasPdf);
     }
 }
 
@@ -4065,7 +4100,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.81',
+        title: 'WebRTC SFU v1.4.82',
         html: `
         <br />
         <div id="about">
