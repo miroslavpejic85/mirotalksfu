@@ -480,12 +480,32 @@ th {
 
 .dropdown-menu {
     background: var(--body-bg);
+    border: none;
+    overflow-y: auto;
+}
+
+.dropdown-menu button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 220px;
+    font-size: 0.8em;
+    text-align: left;
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    cursor: pointer;
 }
 
 .dropdown-menu button:hover {
-    background-color: var(--body-bg);
-    color: white;
+    background: var(--select-bg);
+    color: #ffffff;
     transform: scale(1);
+}
+
+.dropdown-menu button i,
+.dropdown-menu button svg {
+    margin-right: 8px;
 }
 
 .dropdown-menu li:hover {
@@ -1183,32 +1203,11 @@ progress {
 }
 
 .whiteboard-header-options .dropdown-menu {
-    background: var(--body-bg);
-    border: none;
     max-height: calc(var(--wb-height) * 1px);
-    overflow-y: auto;
 }
 
 .whiteboard-header-options .dropdown-menu button {
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
     width: 160px;
-    font-size: 0.8em;
-    text-align: left;
-    padding: 8px 16px;
-    border: none;
-    background: none;
-    cursor: pointer;
-}
-
-.whiteboard-header-options .dropdown-menu button:hover {
-    background: var(--select-bg);
-}
-
-.whiteboard-header-options .dropdown-menu button i,
-.whiteboard-header-options .dropdown-menu button svg {
-    margin-right: 8px;
 }
 
 .whiteboardColorPicker {
