@@ -346,6 +346,19 @@ body {
     max-height: 400px;
 }
 
+#applyAudioOptionsButton {
+    background: #2632ff;
+    width: 180px;
+    padding: 10px;
+    margin-left: 10px;
+    font-size: 1rem;
+    transition: 0.3s;
+}
+#applyAudioOptionsButton:hover {
+    background: var(--select-bg);
+    transform: scale(0.95);
+}
+
 /*--------------------------------------------------------------
 # Settings Table
 --------------------------------------------------------------*/
