@@ -492,8 +492,8 @@ th {
 --------------------------------------------------------------*/
 
 .dropdown-menu {
-    /* background: var(--body-bg); */
-    background: var(--select-bg) !important;
+    background: var(--body-bg) !important;
+    /* background: var(--select-bg) !important; */
     border: none;
     overflow-y: auto;
 }
