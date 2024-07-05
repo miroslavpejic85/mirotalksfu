@@ -1127,6 +1127,7 @@ button:hover {
 }
 
 #sendAbortBtn,
+#receiveAbortBtn,
 #receiveHideBtn {
     padding: 5px;
     border-radius: 5px;
@@ -1135,6 +1136,7 @@ button:hover {
 }
 
 #sendAbortBtn:hover,
+#receiveAbortBtn:hover,
 #receiveHideBtn:hover {
     color: rgb(255, 0, 0);
     transform: var(--btns-hover-scale);

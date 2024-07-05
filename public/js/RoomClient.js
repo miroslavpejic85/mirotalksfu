@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.84
+ * @version 1.4.85
  *
  */
 
@@ -855,6 +855,7 @@ class RoomClient {
         this.socket.on('file', this.handleFileData);
         this.socket.on('shareVideoAction', this.handleShareVideoAction);
         this.socket.on('fileAbort', this.handleFileAbortData);
+        this.socket.on('receiveFileAbort', this.handleReceiveFileAbortData);
         this.socket.on('wbCanvasToJson', this.handleWbCanvasToJson);
         this.socket.on('whiteboardAction', this.handleWhiteboardAction);
         this.socket.on('audioVolume', this.handleAudioVolumeData);
@@ -971,6 +972,10 @@ class RoomClient {
 
     handleFileAbortData = (data) => {
         this.handleFileAbort(data);
+    };
+
+    handleReceiveFileAbortData = (data) => {
+        this.handleReceiveFileAbort(data);
     };
 
     handleWbCanvasToJson = (data) => {
@@ -3187,7 +3192,7 @@ class RoomClient {
             this.setTippy(fsId, 'Full screen', 'bottom');
             btnFs.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
-                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                    return this.userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
                 }
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
@@ -3197,7 +3202,7 @@ class RoomClient {
         if (videoPlayer) {
             videoPlayer.addEventListener('click', () => {
                 if (videoPlayer.classList.contains('videoCircle')) {
-                    return userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+                    return this.userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
                 }
                 if (!videoPlayer.hasAttribute('controls')) {
                     if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
@@ -4790,6 +4795,9 @@ class RoomClient {
     }
 
     sendFileInformations(file, peer_id, broadcast = false) {
+        if (this.isFileReaderRunning()) {
+            return this.userLog('warning', 'File transfer in progress. Please wait until it completes', 'top-end');
+        }
         this.fileToSend = file;
         //
         if (this.fileToSend && this.fileToSend.size > 0) {
@@ -4860,6 +4868,7 @@ class RoomClient {
             <br/> 
             <ul>
                 <li>From: ${this.incomingFileInfo.peer_name}</li>
+                <li>Id: ${this.incomingFileInfo.peer_id}</li>
                 <li>Name: ${this.incomingFileInfo.fileName}</li>
                 <li>Size: ${this.bytesToSize(this.incomingFileInfo.fileSize)}</li>
             </ul>`,
@@ -4936,7 +4945,7 @@ class RoomClient {
     }
 
     abortFileTransfer() {
-        if (this.fileReader && this.fileReader.readyState === 1) {
+        if (this.isFileReaderRunning()) {
             this.fileReader.abort();
             sendFileDiv.style.display = 'none';
             this.sendInProgress = false;
@@ -4946,8 +4955,31 @@ class RoomClient {
         }
     }
 
+    abortReceiveFileTransfer() {
+        const data = { peer_name: this.peer_name };
+        this.socket.emit('receiveFileAbort', data);
+        setTimeout(() => {
+            this.handleFileAbort(data);
+        }, 1000);
+    }
+
     hideFileTransfer() {
         receiveFileDiv.style.display = 'none';
+    }
+
+    isFileReaderRunning() {
+        return this.fileReader && this.fileReader.readyState === 1;
+    }
+
+    handleReceiveFileAbort(data) {
+        if (this.isFileReaderRunning()) {
+            this.userLog('info', data.peer_name + ' ⚠️ aborted file transfer', 'top-end');
+            this.fileReader.abort();
+            sendFileDiv.style.display = 'none';
+            this.sendInProgress = false;
+        } else {
+            this.handleFileAbort(data);
+        }
     }
 
     handleFileAbort(data) {
@@ -4957,7 +4989,7 @@ class RoomClient {
         this.receiveInProgress = false;
         receiveFileDiv.style.display = 'none';
         console.log(data.peer_name + ' aborted the file transfer');
-        userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
+        this.userLog('info', data.peer_name + ' ⚠️ aborted the file transfer', 'top-end');
     }
 
     handleFile(data) {
@@ -5400,20 +5432,24 @@ class RoomClient {
                 break;
             case 'showChat':
                 active
-                    ? userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
-                    : userLog('info', `${icons.chat} Chat not will be shown, when you receive a message`, 'top-end');
+                    ? this.userLog('info', `${icons.chat} Chat will be shown, when you receive a message`, 'top-end')
+                    : this.userLog(
+                          'info',
+                          `${icons.chat} Chat not will be shown, when you receive a message`,
+                          'top-end',
+                      );
                 break;
             case 'speechMessages':
                 this.userLog('info', `${icons.speech} Speech incoming messages ${status}`, 'top-end');
                 break;
             case 'transcriptShowOnMsg':
                 active
-                    ? userLog(
+                    ? this.userLog(
                           'info',
                           `${icons.transcript} Transcript will be shown, when you receive a message`,
                           'top-end',
                       )
-                    : userLog(
+                    : this.userLog(
                           'info',
                           `${icons.transcript} Transcript not will be shown, when you receive a message`,
                           'top-end',
