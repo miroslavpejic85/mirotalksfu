@@ -355,7 +355,7 @@ body {
     transition: 0.3s;
 }
 #applyAudioOptionsButton:hover {
-    background: var(--select-bg);
+    background: var(--body-bg);
     transform: scale(0.95);
 }
 
@@ -492,7 +492,8 @@ th {
 --------------------------------------------------------------*/
 
 .dropdown-menu {
-    background: var(--body-bg);
+    /* background: var(--body-bg); */
+    background: var(--select-bg) !important;
     border: none;
     overflow-y: auto;
 }
