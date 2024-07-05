@@ -511,7 +511,7 @@ th {
 }
 
 .dropdown-menu button:hover {
-    background: var(--select-bg);
+    background: transparent;
     color: #ffffff;
     transform: scale(1);
 }
@@ -521,8 +521,16 @@ th {
     margin-right: 8px;
 }
 
+.dropdown-menu li {
+    padding: 8px 16px;
+}
+
 .dropdown-menu li:hover {
-    background: var(--btns-bg-color);
+    background: var(--body-bg);
+}
+
+.dropdown-menu li button {
+    background: transparent;
 }
 
 /* Hide the default Bootstrap dropdown icon */
@@ -1221,6 +1229,9 @@ progress {
 
 .whiteboard-header-options .dropdown-menu button {
     width: 160px;
+}
+.whiteboard-header-options .dropdown-menu button:hover {
+    background: var(--body-bg);
 }
 
 .whiteboardColorPicker {

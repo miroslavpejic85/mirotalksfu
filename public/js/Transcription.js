@@ -84,7 +84,7 @@ class Transcription {
         this.isBgTransparent = false;
         this.isPinned = false;
         this.isHidden = true;
-        this.isPersistentMode = false;
+        this.isPersistentMode = true; // Prevent stopping due to extended periods of silence
         this.isPersistent = false;
         this.showOnMessage = true;
     }
@@ -427,6 +427,5 @@ class Transcription {
     selectDisabled(disabled = false) {
         transcriptionLanguage.disabled = disabled;
         transcriptionDialect.disabled = disabled;
-        transcriptPersistentMode.disabled = disabled;
     }
 }

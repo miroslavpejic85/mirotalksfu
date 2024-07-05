@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.83
+ * @version 1.4.84
  *
  */
 
@@ -335,7 +335,6 @@ function initClient() {
         setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
         setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
         setTippy('transcriptShowOnMsg', 'Show transcript on new message comes', 'bottom');
-        setTippy('transcriptPersistentMode', 'Prevent stopping in the absence of speech', 'bottom');
         setTippy('transcriptionSpeechStart', 'Start transcription', 'top');
         setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
     }
@@ -2333,14 +2332,6 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
-    // transcript
-    transcriptPersistentMode.onchange = (e) => {
-        transcription.isPersistentMode = e.currentTarget.checked;
-        rc.roomMessage('transcriptIsPersistentMode', transcription.isPersistentMode);
-        localStorageSettings.transcript_persistent_mode = transcription.isPersistentMode;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
     transcriptShowOnMsg.onchange = (e) => {
         transcription.showOnMessage = e.currentTarget.checked;
         rc.roomMessage('transcriptShowOnMsg', transcription.showOnMessage);
@@ -2572,13 +2563,11 @@ function handleRoomEmojiPicker() {
 
 function loadSettingsFromLocalStorage() {
     rc.showChatOnMessage = localStorageSettings.show_chat_on_msg;
-    transcription.isPersistentMode = localStorageSettings.transcript_persistent_mode;
     transcription.showOnMessage = localStorageSettings.transcript_show_on_msg;
     rc.speechInMessages = localStorageSettings.speech_in_msg;
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
     showChatOnMsg.checked = rc.showChatOnMessage;
-    transcriptPersistentMode.checked = transcription.isPersistentMode;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
@@ -4100,7 +4089,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.83',
+        title: 'WebRTC SFU v1.4.84',
         html: `
         <br />
         <div id="about">

@@ -18,7 +18,6 @@ class LocalStorage {
         this.SFU_SETTINGS = {
             share_on_join: true, // popup message on join
             show_chat_on_msg: true, // show chat on new message
-            transcript_persistent_mode: false, // Prevent stop transcript in case of no-speech
             transcript_show_on_msg: true, // show transcript on new message
             speech_in_msg: false, // speech incoming message
             moderator_audio_start_muted: false, // Everyone starts muted in the room
