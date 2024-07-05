@@ -7336,13 +7336,7 @@ class RoomClient {
 
             this.startRendering();
 
-            if (!this.isMobileDevice) {
-                // Handle desktop or non-mobile device
-                this.handleDesktopChat();
-            } else {
-                // Handle mobile device
-                this.handleMobileChat();
-            }
+            this.isMobileDevice ? this.handleMobileVideoAiChat() : this.handleDesktopVideoAiChat();
 
             VideoAI.active = true;
 
@@ -7352,16 +7346,14 @@ class RoomClient {
         }
     }
 
-    // Method for handling desktop or non-mobile device chat logic
-    handleDesktopChat() {
+    handleDesktopVideoAiChat() {
         if (!this.isChatOpen) {
             this.toggleChat();
         }
         this.sendMessageToVideoAi();
     }
 
-    // Method for handling mobile device chat logic
-    handleMobileChat() {
+    handleMobileVideoAiChat() {
         if (this.videoMediaContainer.childElementCount <= 2) {
             isHideMeActive = !isHideMeActive;
             this.handleHideMe();
