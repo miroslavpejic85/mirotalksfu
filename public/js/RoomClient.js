@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.85
+ * @version 1.4.86
  *
  */
 
@@ -7336,12 +7336,72 @@ class RoomClient {
 
             this.startRendering();
 
+            if (!this.isMobileDevice) {
+                // Handle desktop or non-mobile device
+                this.handleDesktopChat();
+            } else {
+                // Handle mobile device
+                this.handleMobileChat();
+            }
+
             VideoAI.active = true;
 
             this.userLog('info', 'Video AI streaming started', 'top-end');
         } catch (error) {
             console.error('Video AI streamingStart error:', error);
         }
+    }
+
+    // Method for handling desktop or non-mobile device chat logic
+    handleDesktopChat() {
+        if (!this.isChatOpen) {
+            this.toggleChat();
+        }
+        this.sendMessageToVideoAi();
+    }
+
+    // Method for handling mobile device chat logic
+    handleMobileChat() {
+        if (this.videoMediaContainer.childElementCount <= 2) {
+            isHideMeActive = !isHideMeActive;
+            this.handleHideMe();
+        }
+        setTimeout(() => {
+            this.streamingTask(
+                `Welcome to ${BRAND.app.name}! Please Open the Chat and navigate to the ChatGPT section. Feel free to ask me any questions you have.`,
+            );
+        }, 2000);
+    }
+
+    sendMessageToVideoAi() {
+        const tasks = [
+            { delay: 1000, action: () => this.chatPin() },
+            { delay: 1200, action: () => this.toggleShowParticipants() },
+            { delay: 1400, action: () => this.showPeerAboutAndMessages('ChatGPT', 'ChatGPT') },
+            { delay: 1600, action: () => this.streamingTask(`Welcome to ${BRAND.app.name}!`) },
+            {
+                delay: 2000,
+                action: () => {
+                    chatMessage.value = 'Hello!';
+                    this.sendMessage();
+                },
+            },
+        ];
+        this.executeTasksSequentially(tasks);
+    }
+
+    executeTasksSequentially(tasks) {
+        tasks.reduce((promise, task) => {
+            return promise.then(
+                () =>
+                    new Promise((resolve) => {
+                        setTimeout(() => {
+                            task.action();
+                            resolve();
+                        }, task.delay);
+                    }),
+            );
+        }, Promise.resolve());
     }
 
     streamingTask(message) {
