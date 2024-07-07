@@ -54,33 +54,6 @@ function showError(message) {
     showPopup(message, 'error');
 }
 
-function isChromeBased() {
-    const parser = new UAParser();
-    const browser = parser.getBrowser();
-    const browserName = browser.name.toLowerCase();
-
-    // List of known Chrome-based browser names
-    const chromeBasedBrowsers = ['chrome', 'chromium', 'opera', 'edge', 'brave', 'samsung internet'];
-
-    return chromeBasedBrowsers.includes(browserName);
-}
-
-function checkBrowserSupport() {
-    const userAgent = navigator.userAgent.toLowerCase();
-
-    console.log('UserAgent', userAgent);
-
-    if (isChromeBased()) {
-        console.log('Browser is Chrome-based. Proceed with functionality.');
-    } else {
-        toggleButtons(true);
-        alert(
-            'This application requires a Chrome-based browser (Chrome, Edge Chromium, etc.). Please switch to a supported browser.',
-        );
-        // window.open('about:blank', '_self').close();
-    }
-}
-
 function checkRTMPEnabled() {
     axios
         .get('/rtmpEnabled')
@@ -97,10 +70,7 @@ function checkRTMPEnabled() {
         });
 }
 
-window.onload = function () {
-    checkBrowserSupport();
-    checkRTMPEnabled();
-};
+window.onload = checkRTMPEnabled;
 
 async function startCapture(constraints) {
     try {
@@ -219,6 +189,13 @@ function stopStreaming() {
     stopButton.disabled = true;
 }
 
+function getSupportedMimeTypes() {
+    const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/mp4'];
+    return possibleTypes.filter((mimeType) => {
+        return MediaRecorder.isTypeSupported(mimeType);
+    });
+}
+
 async function startStreaming(stream) {
     if (!stream) return;
 
@@ -228,7 +205,9 @@ async function startStreaming(stream) {
         return;
     }
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
+    const supportedMimeTypes = getSupportedMimeTypes();
+    console.log('MediaRecorder supported options', supportedMimeTypes);
+    mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMimeTypes[0] });
 
     mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {

@@ -19,7 +19,6 @@ class RtmpStreamer {
         this.ffmpegStream = ffmpeg()
             .input(this.stream)
             .inputOptions('-re')
-            .inputFormat('webm')
             .videoCodec('libx264')
             .videoBitrate('3000k')
             .size('1280x720')

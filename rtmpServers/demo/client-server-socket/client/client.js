@@ -46,24 +46,10 @@ function showError(message) {
     showPopup(message, 'error');
 }
 
-function checkBrowserSupport() {
-    const userAgent = navigator.userAgent.toLowerCase();
-    if (userAgent.includes('chrome') && !userAgent.includes('edge') && !userAgent.includes('opr')) {
-        console.log('Browser is Chrome-based. Proceed with functionality.');
-    } else {
-        showError(
-            'This application requires a Chrome-based browser (Chrome, Edge Chromium, etc.). Please switch to a supported browser.',
-        );
-        toggleButtons(true);
-    }
-}
-
-window.onload = checkBrowserSupport;
-
 async function startCapture(constraints) {
     try {
         const stream = await navigator.mediaDevices.getUserMedia(constraints);
-        videoElement.srcObject = stream;
+        attachMediaStream(stream);
         return stream;
     } catch (err) {
         console.error('Error accessing media devices.', err);
@@ -74,12 +60,21 @@ async function startCapture(constraints) {
 async function startScreenCapture(constraints) {
     try {
         const stream = await navigator.mediaDevices.getDisplayMedia(constraints);
-        videoElement.srcObject = stream;
+        attachMediaStream(stream);
         return stream;
     } catch (err) {
         console.error('Error accessing screen media.', err);
         showError('Error accessing screen sharing. Please try again or check your screen sharing permissions.');
     }
+}
+
+function attachMediaStream(stream) {
+    videoElement.srcObject = stream;
+    videoElement.playsInline = true;
+    videoElement.autoplay = true;
+    videoElement.muted = true;
+    videoElement.volume = 0;
+    videoElement.controls = false;
 }
 
 async function initRTMP() {
@@ -154,10 +149,19 @@ async function startStreaming(stream) {
     }
 }
 
+function getSupportedMimeTypes() {
+    const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/mp4'];
+    return possibleTypes.filter((mimeType) => {
+        return MediaRecorder.isTypeSupported(mimeType);
+    });
+}
+
 async function startMediaRecorder(stream) {
     if (!stream) return;
 
-    mediaRecorder = new MediaRecorder(stream, { mimeType: 'video/webm; codecs=vp8,opus' });
+    const supportedMimeTypes = getSupportedMimeTypes();
+    console.log('MediaRecorder supported options', supportedMimeTypes);
+    mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMimeTypes[0] });
 
     mediaRecorder.ondataavailable = async (event) => {
         if (event.data.size > 0) {
