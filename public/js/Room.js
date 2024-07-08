@@ -3939,7 +3939,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
             // document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#000000, #393939)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.3)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
             document.body.style.background = 'radial-gradient(#393939, #000000)';
             selectTheme.selectedIndex = 0;
             break;
