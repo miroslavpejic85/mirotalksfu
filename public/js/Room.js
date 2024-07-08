@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.88
+ * @version 1.4.89
  *
  */
 
@@ -3938,7 +3938,8 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#393939');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            // document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#000000, #393939)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.3)');
             document.body.style.background = 'radial-gradient(#393939, #000000)';
             selectTheme.selectedIndex = 0;
             break;
@@ -3953,7 +3954,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#666');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#333, #666)');
             document.body.style.background = 'radial-gradient(#666, #333)';
             selectTheme.selectedIndex = 1;
             break;
@@ -3968,7 +3969,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#003934');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#003934, #001E1A)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#001E1A, #003934)');
             document.body.style.background = 'radial-gradient(#003934, #001E1A)';
             selectTheme.selectedIndex = 2;
             break;
@@ -3998,7 +3999,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
             document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
             document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#69140E, #3C1518)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(3C1518, #69140E)');
             document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
             selectTheme.selectedIndex = 4;
             break;
@@ -4092,7 +4093,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.88',
+        title: 'WebRTC SFU v1.4.89',
         html: `
         <br />
         <div id="about">

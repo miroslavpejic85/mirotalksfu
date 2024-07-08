@@ -484,7 +484,7 @@ th {
     padding: 10px;
 }
 .btn-custom:hover {
-    background: var(--select-bg);
+    background: var(--btns-bg-color) !important;
 }
 
 /*--------------------------------------------------------------
