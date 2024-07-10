@@ -205,9 +205,7 @@ function handleRules(isPresenter) {
         hide(roomHostOnlyRecording);
     }
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
-    BUTTONS.whiteboard.whiteboardLockButton
-        ? elemDisplay('whiteboardLockButton', true)
-        : elemDisplay('whiteboardLockButton', false, 'flex');
+    BUTTONS.whiteboard.whiteboardLockButton ? show(whiteboardUnlockBtn) : hide(whiteboardUnlockBtn);
     //...
 }
 

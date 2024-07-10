@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.90
+ * @version 1.4.91
  *
  */
 
@@ -309,7 +309,8 @@ function initClient() {
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
-        setTippy('whiteboardLockButton', 'If enabled, participants cannot interact', 'right');
+        setTippy('whiteboardLockBtn', 'If Locked, participants cannot interact', 'right');
+        setTippy('whiteboardUnlockBtn', 'If Locked, participants cannot interact', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
@@ -1795,12 +1796,14 @@ function handleButtons() {
     whiteboardCleanBtn.onclick = () => {
         confirmClearBoard();
     };
-    whiteboardLockButton.onchange = () => {
-        wbIsLock = !wbIsLock;
-        whiteboardAction(getWhiteboardAction(wbIsLock ? 'lock' : 'unlock'));
-    };
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
+    };
+    whiteboardLockBtn.onclick = () => {
+        toggleLockUnlockWhiteboard();
+    };
+    whiteboardUnlockBtn.onclick = () => {
+        toggleLockUnlockWhiteboard();
     };
     participantsSaveBtn.onclick = () => {
         saveRoomPeers();
@@ -3520,6 +3523,21 @@ function confirmClearBoard() {
     });
 }
 
+function toggleLockUnlockWhiteboard() {
+    wbIsLock = !wbIsLock;
+
+    const btnToShow = wbIsLock ? whiteboardLockBtn : whiteboardUnlockBtn;
+    const btnToHide = wbIsLock ? whiteboardUnlockBtn : whiteboardLockBtn;
+    const btnColor = wbIsLock ? 'red' : 'white';
+    const action = wbIsLock ? 'lock' : 'unlock';
+
+    show(btnToShow);
+    hide(btnToHide);
+    setColor(whiteboardLockBtn, btnColor);
+
+    whiteboardAction(getWhiteboardAction(action));
+}
+
 function whiteboardAction(data, emit = true) {
     if (emit) {
         if (rc.thereAreParticipants()) {
@@ -4093,7 +4111,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.90',
+        title: 'WebRTC SFU v1.4.91',
         html: `
         <br />
         <div id="about">
