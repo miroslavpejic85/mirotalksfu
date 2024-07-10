@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.91
+ * @version 1.4.92
  *
  */
 
@@ -2756,6 +2756,8 @@ function startServer() {
     function isRoomAllowedForUser(message, username, room) {
         log.debug('isRoomAllowedForUser ------>', { message, username, room });
 
+        const isOIDCEnabled = config.oidc && config.oidc.enabled;
+
         if (hostCfg.protected || hostCfg.user_auth) {
             const isInPresenterLists = config.presenters.list.includes(username);
 
@@ -2766,12 +2768,12 @@ function startServer() {
 
             const user = hostCfg.users.find((user) => user.username === username);
 
-            if (!user) {
+            if (!isOIDCEnabled && !user) {
                 log.debug('isRoomAllowedForUser - user not found', username);
                 return false;
             }
 
-            if (!user.allowed_rooms || user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room)) {
+            if (isOIDCEnabled || !user.allowed_rooms || user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room)) {
                 log.debug('isRoomAllowedForUser - user room allowed', room);
                 return true;
             }
