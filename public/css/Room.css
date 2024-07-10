@@ -1189,36 +1189,34 @@ progress {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
     border-radius: 10px;
-    padding: 10px;
+    padding: 5px;
     color: #fff;
     cursor: move;
 }
 
-.whiteboard-header-title {
-    display: inline-flex;
-    align-items: center;
-    float: right;
+.whiteboard-header button {
+    padding: 8px;
+    border-radius: 5px;
+    border: none !important;
 }
 
-.whiteboard-header-title div {
-    margin-left: 8px;
+.whiteboard-header-title {
+    display: inline;
+    align-items: center;
+    float: left;
 }
 
 .whiteboard-header-title button {
-    font-size: 1.5em;
-    margin-right: 5px;
-}
-
-.whiteboard-header button {
-    /* padding: 10px; */
-    border-radius: 5px;
-    /* border: var(--border); */
-    border: none !important;
+    font-size: 1.2rem;
 }
 
 .whiteboard-header-options {
     position: absolute;
-    right: 20px;
+    right: 10px;
+}
+
+.whiteboard-header-options button {
+    height: 36px;
 }
 
 .whiteboard-header-options .dropdown {
