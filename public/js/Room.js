@@ -3536,6 +3536,8 @@ function toggleLockUnlockWhiteboard() {
     setColor(whiteboardLockBtn, btnColor);
 
     whiteboardAction(getWhiteboardAction(action));
+
+    if (wbIsLock) sound('locked');
 }
 
 function whiteboardAction(data, emit = true) {
