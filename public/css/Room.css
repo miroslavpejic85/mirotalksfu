@@ -1182,7 +1182,7 @@ progress {
     border: var(--border);
     box-shadow: var(--box-shadow);
     border-radius: 10px;
-    overflow: hidden;
+    /* overflow: hidden; */
 }
 
 .whiteboard-header {
