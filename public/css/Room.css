@@ -1176,14 +1176,18 @@ progress {
     position: absolute;
     margin: auto;
     padding: 10px;
-    width: calc(var(--wb-width) * 1px);
-    height: calc(var(--wb-height) * 1px);
+    width: var(--wb-width);
+    height: var(--wb-height);
     background: var(--wb-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
     border-radius: 10px;
     /* overflow: hidden; */
 }
+
+/* #wbCanvas {
+    border: var(--border);
+} */
 
 .whiteboard-header {
     display: flex;
@@ -1225,7 +1229,7 @@ progress {
 }
 
 .whiteboard-header-options .dropdown-menu {
-    max-height: calc(var(--wb-height) * 1px);
+    max-height: var(--wb-height);
 }
 
 .whiteboard-header-options .dropdown-menu button {

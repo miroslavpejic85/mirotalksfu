@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.94
+ * @version 1.4.95
  *
  */
 
@@ -67,10 +67,15 @@ const thisInfo = getInfo();
 
 const Base64Prefix = 'data:application/pdf;base64,';
 
+// Whiteboard
 const wbImageInput = 'image/*';
 const wbPdfInput = 'application/pdf';
-const wbWidth = 1280;
+const wbWidth = 1366;
 const wbHeight = 768;
+const wbGridSize = 20;
+const wbStroke = '#cccccc63';
+let wbGridLines = [];
+let wbGridVisible = false;
 
 const swalImageUrl = '../images/pricing-illustration.svg';
 
@@ -303,6 +308,7 @@ function initClient() {
         setTippy('refreshVideoFiles', 'Refresh', 'left');
         setTippy('switchServerRecording', 'The recording will be stored on the server rather than locally', 'right');
         setTippy('whiteboardGhostButton', 'Toggle transparent background', 'bottom');
+        setTippy('whiteboardGridBtn', 'Toggle whiteboard grid', 'bottom');
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
@@ -1138,6 +1144,10 @@ async function shareRoom(useNavigator = false) {
 // ROOM UTILITY
 // ####################################################
 
+function isDesktopDevice() {
+    return !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
+}
+
 function makeRoomQR() {
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
@@ -1274,6 +1284,9 @@ function roomIsReady() {
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
+    if (isDesktopDevice()) {
+        show(whiteboardGridBtn);
+    }
     if (DetectRTC.isMobileDevice) {
         hide(initVideoAudioRefreshButton);
         hide(refreshVideoDevices);
@@ -2097,8 +2110,7 @@ async function toggleScreenSharing() {
 }
 
 function handleCameraMirror(video) {
-    const isDesktopDevice = !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
-    if (isDesktopDevice) {
+    if (isDesktopDevice()) {
         // Desktop devices...
         if (!video.classList.contains('mirror')) {
             video.classList.toggle('mirror');
@@ -2356,6 +2368,9 @@ function handleSelects() {
     whiteboardGhostButton.onclick = (e) => {
         wbIsBgTransparent = !wbIsBgTransparent;
         wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
+    };
+    whiteboardGridBtn.onclick = (e) => {
+        toggleCanvasGrid();
     };
     // room moderator rules
     switchEveryoneMute.onchange = (e) => {
@@ -3079,25 +3094,19 @@ function setupWhiteboardCanvas() {
 }
 
 function setupWhiteboardCanvasSize() {
-    let optimalSize = [wbWidth, wbHeight];
-    let scaleFactorX = window.innerWidth / optimalSize[0];
-    let scaleFactorY = window.innerHeight / optimalSize[1];
-    if (scaleFactorX < scaleFactorY && scaleFactorX < 1) {
-        wbCanvas.setWidth(optimalSize[0] * scaleFactorX);
-        wbCanvas.setHeight(optimalSize[1] * scaleFactorX);
-        wbCanvas.setZoom(scaleFactorX);
-        setWhiteboardSize(optimalSize[0] * scaleFactorX, optimalSize[1] * scaleFactorX);
-    } else if (scaleFactorX > scaleFactorY && scaleFactorY < 1) {
-        wbCanvas.setWidth(optimalSize[0] * scaleFactorY);
-        wbCanvas.setHeight(optimalSize[1] * scaleFactorY);
-        wbCanvas.setZoom(scaleFactorY);
-        setWhiteboardSize(optimalSize[0] * scaleFactorY, optimalSize[1] * scaleFactorY);
-    } else {
-        wbCanvas.setWidth(optimalSize[0]);
-        wbCanvas.setHeight(optimalSize[1]);
-        wbCanvas.setZoom(1);
-        setWhiteboardSize(optimalSize[0], optimalSize[1]);
-    }
+    const optimalSize = [wbWidth, wbHeight];
+    const scaleFactorX = window.innerWidth / optimalSize[0];
+    const scaleFactorY = window.innerHeight / optimalSize[1];
+    const scaleFactor = Math.min(scaleFactorX, scaleFactorY, 1);
+
+    const newWidth = optimalSize[0] * scaleFactor;
+    const newHeight = optimalSize[1] * scaleFactor;
+
+    wbCanvas.setWidth(newWidth);
+    wbCanvas.setHeight(newHeight);
+    wbCanvas.setZoom(scaleFactor);
+    setWhiteboardSize(newWidth, newHeight);
+
     wbCanvas.calcOffset();
     wbCanvas.renderAll();
 }
@@ -3105,6 +3114,51 @@ function setupWhiteboardCanvasSize() {
 function setWhiteboardSize(w, h) {
     document.documentElement.style.setProperty('--wb-width', w);
     document.documentElement.style.setProperty('--wb-height', h);
+}
+
+function drawCanvasGrid() {
+    const width = wbCanvas.getWidth();
+    const height = wbCanvas.getHeight();
+
+    removeCanvasGrid();
+
+    // Draw vertical lines
+    for (let i = 0; i <= width; i += wbGridSize) {
+        wbGridLines.push(createGridLine(i, 0, i, height));
+    }
+    // Draw horizontal lines
+    for (let i = 0; i <= height; i += wbGridSize) {
+        wbGridLines.push(createGridLine(0, i, width, i));
+    }
+
+    // Create a group for grid lines and send it to the back
+    const gridGroup = new fabric.Group(wbGridLines, { selectable: false, evented: false });
+    wbCanvas.add(gridGroup);
+    gridGroup.sendToBack();
+    wbCanvas.renderAll();
+}
+
+function createGridLine(x1, y1, x2, y2) {
+    return new fabric.Line([x1, y1, x2, y2], {
+        stroke: wbStroke,
+        selectable: false,
+        evented: false,
+    });
+}
+
+function removeCanvasGrid() {
+    wbGridLines.forEach((line) => {
+        line.set({ stroke: wbGridVisible ? wbStroke : 'rgba(255, 255, 255, 0)' });
+        wbCanvas.remove(line);
+    });
+    wbGridLines = [];
+    wbCanvas.renderAll();
+}
+
+function toggleCanvasGrid() {
+    wbGridVisible = !wbGridVisible;
+    wbGridVisible ? drawCanvasGrid() : removeCanvasGrid();
+    wbCanvasToJson();
 }
 
 function setWhiteboardBgColor(color) {
@@ -4171,7 +4225,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.94',
+        title: 'WebRTC SFU v1.4.95',
         html: `
         <br />
         <div id="about">
