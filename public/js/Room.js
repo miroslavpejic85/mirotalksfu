@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.93
+ * @version 1.4.94
  *
  */
 
@@ -3948,84 +3948,169 @@ function setTheme() {
     const theme = selectTheme.value;
     switch (theme) {
         case 'dark':
-            swalBackground = 'radial-gradient(#393939, #000000)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#056162');
-            document.documentElement.style.setProperty('--right-msg-bg', '#252d31');
-            document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
-            document.documentElement.style.setProperty('--tab-btn-active', '#393939');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#393939, #000000)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#393939, #000000)');
-            // document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#000000, #393939)');
+            swalBackground = 'linear-gradient(135deg, #000000, #434343)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #000000, #434343)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #000000, #434343)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #000000, #434343)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#1a1a1a');
+            document.documentElement.style.setProperty('--right-msg-bg', '#2e2e2e');
+            document.documentElement.style.setProperty('--select-bg', '#333333');
+            document.documentElement.style.setProperty('--tab-btn-active', '#434343');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #000000, #434343)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #000000, #434343)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
-            document.body.style.background = 'radial-gradient(#393939, #000000)';
+            document.body.style.background = 'linear-gradient(135deg, #000000, #434343)';
             selectTheme.selectedIndex = 0;
             break;
         case 'grey':
-            swalBackground = 'radial-gradient(#666, #333)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#666, #333)');
-            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#666, #333)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#666, #333)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#056162');
-            document.documentElement.style.setProperty('--right-msg-bg', '#252d31');
-            document.documentElement.style.setProperty('--select-bg', '#2c2c2c');
-            document.documentElement.style.setProperty('--tab-btn-active', '#666');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#666, #333)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#797979, #000)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#333, #666)');
-            document.body.style.background = 'radial-gradient(#666, #333)';
+            swalBackground = 'linear-gradient(135deg, #1a1a1a, #4f4f4f)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #1a1a1a, #4f4f4f)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#2c2c2c');
+            document.documentElement.style.setProperty('--right-msg-bg', '#3f3f3f');
+            document.documentElement.style.setProperty('--select-bg', '#2a2a2a');
+            document.documentElement.style.setProperty('--tab-btn-active', '#4f4f4f');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #4f4f4f)';
             selectTheme.selectedIndex = 1;
             break;
         case 'green':
-            swalBackground = 'radial-gradient(#003934, #001E1A)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#001E1A');
-            document.documentElement.style.setProperty('--right-msg-bg', '#003934');
-            document.documentElement.style.setProperty('--select-bg', '#001E1A');
-            document.documentElement.style.setProperty('--tab-btn-active', '#003934');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#003934, #001E1A)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#001E1A, #003934)');
-            document.body.style.background = 'radial-gradient(#003934, #001E1A)';
+            swalBackground = 'linear-gradient(135deg, #002a22, #004d40)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #002a22, #004d40)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#001d1a');
+            document.documentElement.style.setProperty('--right-msg-bg', '#003d2e');
+            document.documentElement.style.setProperty('--select-bg', '#002a22');
+            document.documentElement.style.setProperty('--tab-btn-active', '#004d40');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 42, 34, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #002a22, #004d40)';
             selectTheme.selectedIndex = 2;
             break;
         case 'blue':
-            swalBackground = 'radial-gradient(#306bac, #141B41)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#141B41');
-            document.documentElement.style.setProperty('--right-msg-bg', '#306bac');
-            document.documentElement.style.setProperty('--select-bg', '#141B41');
-            document.documentElement.style.setProperty('--tab-btn-active', '#306bac');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#306bac, #141B41)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(#141B41, #306bac)');
-            document.body.style.background = 'radial-gradient(#306bac, #141B41)';
+            swalBackground = 'linear-gradient(135deg, #00274d, #004d80)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #00274d, #004d80)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #00274d, #004d80)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #00274d, #004d80)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#001f3f');
+            document.documentElement.style.setProperty('--right-msg-bg', '#003366');
+            document.documentElement.style.setProperty('--select-bg', '#00274d');
+            document.documentElement.style.setProperty('--tab-btn-active', '#004d80');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #00274d, #004d80)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #00274d, #004d80)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 39, 77, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #00274d, #004d80)';
             selectTheme.selectedIndex = 3;
             break;
         case 'red':
-            swalBackground = 'radial-gradient(#69140E, #3C1518)';
-            document.documentElement.style.setProperty('--body-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--transcription-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--msger-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--left-msg-bg', '#3C1518');
-            document.documentElement.style.setProperty('--right-msg-bg', '#69140E');
-            document.documentElement.style.setProperty('--select-bg', '#3C1518');
-            document.documentElement.style.setProperty('--tab-btn-active', '#69140E');
-            document.documentElement.style.setProperty('--settings-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--wb-bg', 'radial-gradient(#69140E, #3C1518)');
-            document.documentElement.style.setProperty('--btns-bg-color', 'radial-gradient(3C1518, #69140E)');
-            document.body.style.background = 'radial-gradient(#69140E, #3C1518)';
+            swalBackground = 'linear-gradient(135deg, #2a0d0d, #4d1a1a)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #2a0d0d, #4d1a1a)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#2b0f0f');
+            document.documentElement.style.setProperty('--right-msg-bg', '#4d1a1a');
+            document.documentElement.style.setProperty('--select-bg', '#2a0d0d');
+            document.documentElement.style.setProperty('--tab-btn-active', '#4d1a1a');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 13, 13, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #2a0d0d, #4d1a1a)';
             selectTheme.selectedIndex = 4;
+            break;
+        case 'purple':
+            swalBackground = 'linear-gradient(135deg, #2a001d, #4d004a)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #2a001d, #4d004a)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#1b0014');
+            document.documentElement.style.setProperty('--right-msg-bg', '#3e002a');
+            document.documentElement.style.setProperty('--select-bg', '#2a001d');
+            document.documentElement.style.setProperty('--tab-btn-active', '#4d004a');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 0, 29, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #2a001d, #4d004a)';
+            selectTheme.selectedIndex = 5;
+            break;
+        case 'orange':
+            swalBackground = 'linear-gradient(135deg, #3d1a00, #ff8c00)'; // Darker gradient
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #3d1a00, #ff8c00)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#2c0f00');
+            document.documentElement.style.setProperty('--right-msg-bg', '#ff8c00');
+            document.documentElement.style.setProperty('--select-bg', '#3d1a00');
+            document.documentElement.style.setProperty('--tab-btn-active', '#ff8c00');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(61, 26, 0, 0.7)'); // Darker button color
+            document.body.style.background = 'linear-gradient(135deg, #3d1a00, #ff8c00)';
+            selectTheme.selectedIndex = 6;
+            break;
+        case 'pink':
+            swalBackground = 'linear-gradient(135deg, #4d001d, #ff66b2)';
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #4d001d, #ff66b2)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#3e0016');
+            document.documentElement.style.setProperty('--right-msg-bg', '#ff66b2');
+            document.documentElement.style.setProperty('--select-bg', '#4d001d');
+            document.documentElement.style.setProperty('--tab-btn-active', '#ff66b2');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(77, 0, 29, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #4d001d, #ff66b2)';
+            selectTheme.selectedIndex = 7;
+            break;
+        case 'yellow':
+            swalBackground = 'linear-gradient(135deg, #4d3b00, #ffc107)'; // Darker gradient
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
+            document.documentElement.style.setProperty(
+                '--transcription-bg',
+                'linear-gradient(135deg, #4d3b00, #ffc107)',
+            );
+            document.documentElement.style.setProperty('--msger-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
+            document.documentElement.style.setProperty('--left-msg-bg', '#3b2d00');
+            document.documentElement.style.setProperty('--right-msg-bg', '#ffc107');
+            document.documentElement.style.setProperty('--select-bg', '#4d3b00');
+            document.documentElement.style.setProperty('--tab-btn-active', '#ffc107');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(77, 59, 0, 0.7)'); // Darker button color
+            document.body.style.background = 'linear-gradient(135deg, #4d3b00, #ffc107)';
+            selectTheme.selectedIndex = 8;
             break;
         default:
             break;
-        //...
     }
     wbIsBgTransparent = false;
     if (rc) rc.isChatBgTransparent = false;
@@ -4113,7 +4198,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.93',
+        title: 'WebRTC SFU v1.4.94',
         html: `
         <br />
         <div id="about">
