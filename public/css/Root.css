@@ -38,7 +38,7 @@
 
     --transcription-height: 680px;
     --transcription-width: 420px;
-    --transcription-bg: radial-gradient(#393939, #000000);
+    --trx-bg: radial-gradient(#393939, #000000);
 
     --vmi-wh: 15vw;
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */

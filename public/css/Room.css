@@ -720,7 +720,7 @@ th {
     width: var(--transcription-width);
     min-height: var(--transcription-height);
     min-width: var(--transcription-width);
-    background: var(--transcription-bg);
+    background: var(--trx-bg);
     border: var(--border);
     border-radius: 10px;
     box-shadow: var(--box-shadow);
@@ -734,7 +734,7 @@ th {
     display: flex;
     flex-flow: column wrap;
     justify-content: space-between;
-    background: var(--transcription-bg);
+    background: var(--trx-bg);
 }
 
 /*--------------------------------------------------------------
@@ -768,7 +768,7 @@ th {
     flex: 1;
     overflow-y: auto;
     padding: 10px;
-    background: var(--transcription-bg);
+    background: var(--trx-bg);
     max-width: 100%;
 }
 

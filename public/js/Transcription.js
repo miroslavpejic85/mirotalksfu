@@ -250,7 +250,7 @@ class Transcription {
     toggleBg() {
         this.isBgTransparent = !this.isBgTransparent;
         this.isBgTransparent
-            ? document.documentElement.style.setProperty('--transcription-bg', 'rgba(0, 0, 0, 0.100)')
+            ? document.documentElement.style.setProperty('--trx-bg', 'rgba(0, 0, 0, 0.100)')
             : setTheme();
     }
 
