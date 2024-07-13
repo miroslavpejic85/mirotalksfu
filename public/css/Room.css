@@ -1370,49 +1370,6 @@ hr {
     object-fit: contain;
 }
 
-.color-option {
-    display: flex;
-    align-items: center;
-}
-
-.color-circle {
-    width: 15px;
-    height: 15px;
-    border-radius: 50%;
-    margin-right: 5px;
-}
-
-.dark {
-    background-color: black;
-}
-.elegant {
-    background-color: gray;
-}
-.grey {
-    background-color: lightgray;
-}
-.green {
-    background-color: green;
-}
-.blue {
-    background-color: blue;
-}
-.red {
-    background-color: red;
-}
-.purple {
-    background-color: purple;
-}
-.orange {
-    background-color: orange;
-}
-.pink {
-    background-color: pink;
-}
-.yellow {
-    background-color: yellow;
-}
-
 /*--------------------------------------------------------------
 # Pulse class effect
 --------------------------------------------------------------*/
