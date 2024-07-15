@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.4.96",
+    "version": "1.4.97",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -83,6 +83,6 @@
     "devDependencies": {
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.4",
-        "prettier": "3.3.2"
+        "prettier": "3.3.3"
     }
 }
