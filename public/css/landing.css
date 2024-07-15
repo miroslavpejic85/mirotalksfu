@@ -1096,6 +1096,21 @@ label {
         max-width: 280px;
     }
 }
+
+.header-logo-image {
+    display: inline-block;
+    transition:
+        transform 0.3s,
+        filter 0.3s,
+        box-shadow 0.3s;
+}
+
+.header-logo-image:hover {
+    filter: brightness(1.5) saturate(1.2);
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 255, 0.6);
+}
+
 .site-header {
     padding: 24px 0;
 }
