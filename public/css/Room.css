@@ -969,19 +969,21 @@ th {
 }
 
 #about button {
-    border: none;
     width: 170px;
     height: 40px;
-    font-size: 1.2rem;
-    background: linear-gradient(100deg, #376df9 0, #4b4547 75%, #222222 100%);
-    box-shadow: 0 0 6px 0 rgb(251 255 0 / 82%);
     color: #ffffff;
+    font-size: 1.2rem;
+    border-radius: 6px;
+    background: linear-gradient(65deg, #0270d7 0, #0f8afd 100%);
     transition: background 0.23s;
     cursor: pointer;
 }
 
 #about button:hover {
     font-weight: bold;
+    filter: brightness(1.1) saturate(1.2);
+    transform: scale(1.05);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 
 /*--------------------------------------------------------------
@@ -1371,7 +1373,7 @@ hr {
 }
 
 /*--------------------------------------------------------------
-# Pulse class effect
+# Pulsate class effect
 --------------------------------------------------------------*/
 
 .pulsate {

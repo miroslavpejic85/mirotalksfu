@@ -1074,12 +1074,10 @@ label {
     height: 32px;
 }
 .button-primary {
-    background: #097dea;
     background: linear-gradient(65deg, #0270d7 0, #0f8afd 100%);
     border-radius: 6px;
 }
 .button-primary:hover {
-    background: #0982f4;
     background: linear-gradient(65deg, #0275e1 0%, #198ffd 100%);
     border-radius: 6px;
     filter: brightness(1.1) saturate(1.2);
