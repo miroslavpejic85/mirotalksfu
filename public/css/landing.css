@@ -1081,7 +1081,6 @@ label {
     background: linear-gradient(65deg, #0275e1 0%, #198ffd 100%);
     border-radius: 6px;
     filter: brightness(1.1) saturate(1.2);
-    transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
 }
 .button-block {
@@ -1108,7 +1107,6 @@ label {
 
 .header-logo-image:hover {
     filter: brightness(1.5) saturate(1.2);
-    transform: scale(1.05);
     box-shadow: 0 4px 15px rgba(0, 0, 255, 0.6);
 }
 

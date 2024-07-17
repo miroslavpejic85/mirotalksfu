@@ -969,6 +969,7 @@ th {
 }
 
 #about button {
+    border: none;
     width: 170px;
     height: 40px;
     color: #ffffff;
