@@ -28,6 +28,8 @@ const commands = {
     chatOn: 'open the chat',
     chatSend: 'send',
     chatOff: 'close the chat',
+    pollOn: 'open the poll',
+    pollOff: 'close the poll',
     toggleTr: 'toggle transcription',
     whiteboardOn: 'open the whiteboard',
     whiteboardOff: 'close the whiteboard',
@@ -185,6 +187,14 @@ function execVoiceCommands(transcript) {
         case commands.chatOn:
             printCommand(commands.chatOn);
             chatButton.click();
+            break;
+        case commands.pollOn:
+            printCommand(commands.pollOn);
+            pollButton.click();
+            break;
+        case commands.pollOff:
+            printCommand(commands.pollOff);
+            pollCloseBtn.click();
             break;
         case commands.chatSend:
             printCommand(commands.chatSend);

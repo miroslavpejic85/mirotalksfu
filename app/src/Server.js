@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.99
+ * @version 1.5.10
  *
  */
 
@@ -2383,6 +2383,97 @@ function startServer() {
             if (!roomList.has(socket.room_id)) return;
             rtmpUrlStreamsCount--;
             log.debug('endRTMPfromURL - rtmpUrlStreamsCount ---->', rtmpUrlStreamsCount);
+        });
+
+        socket.on('createPoll', (dataObject) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
+
+            const { question, options } = data;
+
+            const room = roomList.get(socket.room_id);
+
+            const newPoll = {
+                question: question,
+                options: options,
+                voters: new Map(),
+            };
+
+            const roomPolls = room.getPolls();
+
+            roomPolls.push(newPoll);
+            room.sendToAll('updatePolls', room.convertPolls(roomPolls));
+            log.debug('[Poll] createPoll', roomPolls);
+        });
+
+        socket.on('vote', (dataObject) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
+
+            const room = roomList.get(socket.room_id);
+
+            const roomPolls = room.getPolls();
+
+            const poll = roomPolls[data.pollIndex];
+            if (poll) {
+                const peer_name = getPeerName(room, false) || socket.id;
+                poll.voters.set(peer_name, data.option);
+                room.sendToAll('updatePolls', room.convertPolls(roomPolls));
+                log.debug('[Poll] vote', roomPolls);
+            }
+        });
+
+        socket.on('updatePoll', () => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const room = roomList.get(socket.room_id);
+
+            const roomPolls = room.getPolls();
+
+            if (roomPolls.length > 0) {
+                room.sendToAll('updatePolls', room.convertPolls(roomPolls));
+                log.debug('[Poll] updatePoll', roomPolls);
+            }
+        });
+
+        socket.on('editPoll', (dataObject) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const data = checkXSS(dataObject);
+
+            const { index, question, options } = data;
+
+            const room = roomList.get(socket.room_id);
+
+            const roomPolls = room.getPolls();
+
+            if (roomPolls[index]) {
+                roomPolls[index].question = question;
+                roomPolls[index].options = options;
+                room.sendToAll('updatePolls', roomPolls);
+                log.debug('[Poll] editPoll', roomPolls);
+            }
+        });
+
+        socket.on('deletePoll', async (data) => {
+            if (!roomList.has(socket.room_id)) return;
+
+            const { index, peer_name, peer_uuid } = checkXSS(data);
+
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            if (!isPresenter) return;
+
+            const room = roomList.get(socket.room_id);
+
+            const roomPolls = room.getPolls();
+
+            if (roomPolls[index]) {
+                roomPolls.splice(index, 1);
+                room.sendToAll('updatePolls', roomPolls);
+            }
         });
 
         socket.on('disconnect', async () => {

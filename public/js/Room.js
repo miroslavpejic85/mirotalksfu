@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.4.99
+ * @version 1.5.10
  *
  */
 
@@ -177,6 +177,18 @@ const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
 
 // ####################################################
+// POLLS
+// ####################################################
+
+const createPollForm = getId('createPollForm');
+const pollsContainer = getId('pollsContainer');
+const addOptionButton = getId('addOptionButton');
+const delOptionButton = getId('delOptionButton');
+const optionsContainer = getId('optionsContainer');
+const selectedOptions = {};
+let pollOpen = false;
+
+// ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
 
@@ -333,6 +345,7 @@ function initClient() {
         setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
+        setTippy('pollCloseBtn', 'Close', 'bottom');
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
         setTippy('participantsRaiseHandBtn', 'Toggle raise hands', 'bottom');
         setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
@@ -372,6 +385,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
         setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
+        setTippy('pollButton', 'Toggle the poll', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
@@ -1267,6 +1281,7 @@ function roomIsReady() {
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
+    BUTTONS.main.pollButton && show(pollButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
@@ -1300,9 +1315,11 @@ function roomIsReady() {
         hide(transcriptionTogglePinBtn);
         hide(transcriptionMaxBtn);
         hide(transcriptionMinBtn);
+        rc.pollMaximize();
     } else {
         rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
+        rc.makeDraggable(pollRoom, pollHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
         rc.makeDraggable(sendFileDiv, imgShareSend);
@@ -1554,6 +1571,22 @@ function handleButtons() {
         if (DetectRTC.isMobileDevice) {
             rc.toggleShowParticipants();
         }
+    };
+    // Polls
+    pollButton.onclick = () => {
+        rc.togglePoll();
+    };
+    pollCloseBtn.onclick = () => {
+        rc.togglePoll();
+    };
+    addOptionButton.onclick = () => {
+        rc.pollAddOptions();
+    };
+    delOptionButton.onclick = () => {
+        rc.pollDeleteOptions();
+    };
+    createPollForm.onsubmit = (e) => {
+        rc.pollCreateForm(e);
     };
     transcriptionButton.onclick = () => {
         transcription.toggle();
@@ -4240,7 +4273,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.4.99',
+        title: 'WebRTC SFU v1.5.10',
         html: `
         <br />
         <div id="about">

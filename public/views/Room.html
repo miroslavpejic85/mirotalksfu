@@ -42,6 +42,7 @@
         <link rel="stylesheet" href="../css/Room.css" />
         <link rel="stylesheet" href="../css/VideoGrid.css" />
         <link rel="stylesheet" href="../css/GroupChat.css" />
+        <link rel="stylesheet" href="../css/Polls.css" />
 
         <!-- https://cdnjs.com/libraries/font-awesome -->
 
@@ -178,6 +179,7 @@ access to use this app.
             <button id="lowerHandButton" class="hidden"><i id="lowerHandIcon" class="fas fa-hand-paper"></i></button>
             <button id="emojiRoomButton" class="hidden"><i class="fas fa-face-smile"></i></button>
             <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
+            <button id="pollButton" class="hidden"><i class="fas fa-square-poll-horizontal"></i></button>
             <button id="transcriptionButton" class="hidden"><i class="fas fa-closed-captioning"></i></button>
             <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
             <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
@@ -1434,6 +1436,40 @@ access to use this app.
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section id="pollRoom" class="pls-container fadein hidden">
+            <div id="pollHeader" class="poll-header">
+                <h2 class="poll-h2">Create a Poll</h2>
+                <button id="pollCloseBtn" class="fas fa-times"></button>
+            </div>
+            <div id="pollForm" class="poll-creation">
+                <form id="createPollForm" class="form">
+                    <div class="form-group">
+                        <label for="question">Question:</label>
+                        <input type="text" id="question" name="question" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="options">Options:</label>
+                        <div id="optionsContainer">
+                            <input type="text" name="option" class="option-input" required />
+                        </div>
+                        <br />
+                        <div class="poll-btns">
+                            <button type="button" id="addOptionButton" class="poll-btn">
+                                <i class="fas fa-plus"></i> Add Option
+                            </button>
+                            <button type="button" id="delOptionButton" class="del-btn">
+                                <i class="fas fa-minus"></i> Delete Option
+                            </button>
+                            <button type="submit" id="addPollButton" class="poll-btn">
+                                <i class="fas fa-square-poll-horizontal"></i> Create Poll
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div id="pollsContainer" class="polls-container"></div>
         </section>
 
         <section id="transcriptionRoom" class="transcription-room fadein">

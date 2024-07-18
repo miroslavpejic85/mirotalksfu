@@ -61,6 +61,9 @@ module.exports = class Room {
         this.rtmpFileStreamer = null;
         this.rtmpUrlStreamer = null;
         this.rtmp = config.server.rtmp || false;
+
+        // Polls
+        this.polls = [];
     }
 
     // ####################################################
@@ -87,8 +90,28 @@ module.exports = class Room {
             survey: this.survey,
             redirect: this.redirect,
             videoAIEnabled: this.videoAIEnabled,
+            thereIsPolls: this.thereIsPolls(),
             peers: JSON.stringify([...this.peers]),
         };
+    }
+
+    // ##############################################
+    // POLLS
+    // ##############################################
+
+    thereIsPolls() {
+        return this.polls.length > 0;
+    }
+
+    getPolls() {
+        return this.polls;
+    }
+
+    convertPolls(polls) {
+        return polls.map((poll) => {
+            const voters = poll.voters ? Object.fromEntries(poll.voters.entries()) : {};
+            return { ...poll, voters };
+        });
     }
 
     // ##############################################
