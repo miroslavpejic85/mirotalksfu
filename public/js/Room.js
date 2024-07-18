@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.12
+ * @version 1.5.13
  *
  */
 
@@ -185,6 +185,7 @@ const pollsContainer = getId('pollsContainer');
 const addOptionButton = getId('addOptionButton');
 const delOptionButton = getId('delOptionButton');
 const optionsContainer = getId('optionsContainer');
+const pollSaveResultsButton = getId('pollSaveResultsButton');
 const selectedOptions = {};
 let pollOpen = false;
 
@@ -345,6 +346,7 @@ function initClient() {
         setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
+        setTippy('pollSaveResultsButton', 'Save results', 'left');
         setTippy('pollCloseBtn', 'Close', 'bottom');
         setTippy('addOptionButton', 'Add option', 'top');
         setTippy('delOptionButton', 'Delete option', 'top');
@@ -1580,6 +1582,9 @@ function handleButtons() {
     };
     pollCloseBtn.onclick = () => {
         rc.togglePoll();
+    };
+    pollSaveResultsButton.onclick = () => {
+        rc.pollSaveResults();
     };
     addOptionButton.onclick = () => {
         rc.pollAddOptions();
@@ -2956,7 +2961,6 @@ function saveObjToJsonFile(dataObj, name) {
     a.click();
     setTimeout(() => {
         document.body.removeChild(a);
-        window.URL.revokeObjectURL(url);
     }, 100);
     sound('download');
 }
@@ -4275,7 +4279,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.12',
+        title: 'WebRTC SFU v1.5.13',
         html: `
         <br />
         <div id="about">

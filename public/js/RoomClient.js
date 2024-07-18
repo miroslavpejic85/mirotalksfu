@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.12
+ * @version 1.5.13
  *
  */
 
@@ -7953,6 +7953,41 @@ class RoomClient {
             options.push(document.getElementById(`swal-input-option${i}`).value);
         }
         return options;
+    }
+
+    pollSaveResults() {
+        const polls = document.querySelectorAll('.poll');
+        const results = [];
+
+        polls.forEach((poll, index) => {
+            const question = poll.querySelector('.poll-h3').textContent;
+            const options = poll.querySelectorAll('.options div label');
+            const optionsText = Array.from(options)
+                .map((option) => option.textContent)
+                .join(', ');
+
+            const votersList = poll.querySelector('ul');
+            const voters = Array.from(votersList.querySelectorAll('li'))
+                .map((li) => li.textContent)
+                .join('\n');
+
+            results.push({
+                Poll: `${index + 1}`,
+                question: question,
+                options: optionsText,
+                voters: voters,
+            });
+        });
+
+        results.lengh > 0
+            ? saveObjToJsonFile(results, 'Poll')
+            : this.userLog('info', 'No polling data available to save', 'top-end');
+    }
+
+    getPollFileName() {
+        const dateTime = getDataTimeStringFormat();
+        const roomName = this.room_id.trim();
+        return `Poll_${roomName}_${dateTime}.txt`;
     }
 
     sleep(ms) {
