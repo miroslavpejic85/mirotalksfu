@@ -10,7 +10,7 @@
     height: 100%;
     max-width: 600px;
     max-height: 700px;
-    overflow-x: hidden;
+    overflow: hidden;
 }
 
 .poll-header {
@@ -19,6 +19,12 @@
     margin-bottom: 20px;
     width: 100%;
     cursor: move;
+}
+
+.polls {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
 }
 
 .poll-creation {
@@ -103,6 +109,7 @@
 
 .polls-container {
     margin-top: 20px;
+    margin-bottom: 70px;
 }
 
 .poll {
