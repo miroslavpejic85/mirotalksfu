@@ -7979,7 +7979,7 @@ class RoomClient {
             });
         });
 
-        results.lengh > 0
+        results.length > 0
             ? saveObjToJsonFile(results, 'Poll')
             : this.userLog('info', 'No polling data available to save', 'top-end');
     }
