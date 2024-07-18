@@ -3,7 +3,7 @@
     position: absolute;
     background: var(--body-bg);
     padding: 20px;
-    border-radius: 8px;
+    border-radius: var(--border-radius);
     border: var(--border);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -22,6 +22,7 @@
 }
 
 .poll-creation {
+    border-radius: var(--border-radius);
     margin-bottom: 20px;
     max-height: 480px;
     overflow: hidden;
