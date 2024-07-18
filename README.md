@@ -62,6 +62,7 @@
 -   Push-to-talk functionality, similar to a walkie-talkie.
 -   Advanced collaborative whiteboard for teachers.
 -   Real-time sharing of YouTube embed videos, video files (MP4, WebM, OGG), and audio files (MP3).
+-   Real-time polls, allows users to create and participate in live polls, providing instant feedback and results.
 -   Integrated RTMP server, fully compatible with **[OBS](https://obsproject.com)**.
 -   Supports RTMP streaming from files, URLs, webcams, screens, and windows.
 -   Full-screen mode with one-click video element zooming and pin/unpin.

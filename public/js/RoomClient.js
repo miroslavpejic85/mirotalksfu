@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.11
+ * @version 1.5.12
  *
  */
 
@@ -7816,7 +7816,7 @@ class RoomClient {
             const toggleButton = document.createElement('button');
             const toggleButtonIcon = document.createElement('i');
             toggleButtonIcon.className = 'fas fa-users';
-            toggleButton.textContent = ' Toggle Voters';
+            toggleButton.id = 'toggleVoters';
             toggleButton.className = 'view-btn';
             // Append the icon to the button
             toggleButton.insertBefore(toggleButtonIcon, toggleButton.firstChild);
@@ -7831,7 +7831,7 @@ class RoomClient {
             const editPollButton = document.createElement('button');
             const editPollButtonIcon = document.createElement('i');
             editPollButtonIcon.className = 'fas fa-pen-to-square';
-            editPollButton.textContent = ' Edit Poll';
+            editPollButton.id = 'editPoll';
             editPollButton.className = 'poll-btn';
             editPollButton.insertBefore(editPollButtonIcon, editPollButton.firstChild);
             editPollButton.addEventListener('click', () => {
@@ -7867,7 +7867,7 @@ class RoomClient {
             const deletePollButton = document.createElement('button');
             const deletePollButtonIcon = document.createElement('i');
             deletePollButtonIcon.className = 'fas fa-minus';
-            deletePollButton.textContent = ' Delete Poll';
+            deletePollButton.id = 'delPoll';
             deletePollButton.className = 'del-btn';
             deletePollButton.insertBefore(deletePollButtonIcon, deletePollButton.firstChild);
             deletePollButton.addEventListener('click', () => {
@@ -7890,6 +7890,12 @@ class RoomClient {
             // }
 
             pollsContainer.appendChild(pollDiv);
+
+            if (!this.isMobileDevice) {
+                setTippy('toggleVoters', 'Toggle voters', 'top');
+                setTippy('delPoll', 'Delete poll', 'top');
+                setTippy('editPoll', 'Edit poll', 'top');
+            }
         });
     }
 
