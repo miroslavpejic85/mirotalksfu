@@ -1457,33 +1457,33 @@ access to use this app.
                     <button id="pollCloseBtn" class="fas fa-times"></button>
                 </div>
             </div>
+            <div id="pollForm" class="poll-creation">
+                <form id="pollCreateForm" class="form">
+                    <div class="form-group">
+                        <label for="question">Question:</label>
+                        <input type="text" id="question" name="question" required />
+                    </div>
+                    <div class="form-group">
+                        <label for="options">Options:</label>
+                        <div id="optionsContainer">
+                            <input type="text" name="option" class="option-input" required />
+                        </div>
+                        <br />
+                        <div class="poll-btns">
+                            <button type="button" id="pollAddOptionBtn" class="poll-btn">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button type="button" id="pollDelOptionBtn" class="del-btn">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="submit" id="addPollButton" class="poll-btn">
+                                <i class="fas fa-square-poll-horizontal"></i> Create Poll
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
             <div class="polls">
-                <div id="pollForm" class="poll-creation">
-                    <form id="pollCreateForm" class="form">
-                        <div class="form-group">
-                            <label for="question">Question:</label>
-                            <input type="text" id="question" name="question" required />
-                        </div>
-                        <div class="form-group">
-                            <label for="options">Options:</label>
-                            <div id="optionsContainer">
-                                <input type="text" name="option" class="option-input" required />
-                            </div>
-                            <br />
-                            <div class="poll-btns">
-                                <button type="button" id="pollAddOptionBtn" class="poll-btn">
-                                    <i class="fas fa-plus"></i>
-                                </button>
-                                <button type="button" id="pollDelOptionBtn" class="del-btn">
-                                    <i class="fas fa-minus"></i>
-                                </button>
-                                <button type="submit" id="addPollButton" class="poll-btn">
-                                    <i class="fas fa-square-poll-horizontal"></i> Create Poll
-                                </button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
                 <div id="pollsContainer" class="polls-container"></div>
             </div>
         </section>
