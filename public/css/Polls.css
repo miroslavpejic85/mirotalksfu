@@ -147,6 +147,10 @@
     cursor: pointer;
 }
 
+.option-input {
+    margin-bottom: 5px;
+}
+
 .options label {
     margin-left: 5px;
     color: #fff;
