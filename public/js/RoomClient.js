@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.14
+ * @version 1.5.15
  *
  */
 
@@ -7937,13 +7937,8 @@ class RoomClient {
     createPollInputs(poll) {
         const questionInput = `<input id="swal-input-question" class="swal2-input" value="${poll.question}">`;
         const optionsInputs = poll.options
-            .map(
-                (option, i) => `
-            <input id="swal-input-option${i}" class="swal2-input" value="${option}">
-        `,
-            )
+            .map((option, i) => `<input id="swal-input-option${i}" class="swal2-input" value="${option}">`)
             .join('');
-
         return questionInput + optionsInputs;
     }
 
@@ -7962,14 +7957,18 @@ class RoomClient {
         polls.forEach((poll, index) => {
             const question = poll.querySelector('.poll-h3').textContent;
             const options = poll.querySelectorAll('.options div label');
-            const optionsText = Array.from(options)
-                .map((option) => option.textContent)
-                .join(', ');
+
+            const optionsText = Array.from(options).reduce((acc, option, index) => {
+                acc[index + 1] = option.textContent.trim();
+                return acc;
+            }, {});
 
             const votersList = poll.querySelector('ul');
-            const voters = Array.from(votersList.querySelectorAll('li'))
-                .map((li) => li.textContent)
-                .join('\n');
+            const voters = Array.from(votersList.querySelectorAll('li')).reduce((acc, li) => {
+                const [name, vote] = li.textContent.split(':').map((item) => item.trim());
+                acc[name] = vote;
+                return acc;
+            }, {});
 
             results.push({
                 Poll: `${index + 1}`,
