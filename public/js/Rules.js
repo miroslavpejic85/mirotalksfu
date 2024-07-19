@@ -85,6 +85,11 @@ let BUTTONS = {
         chatSpeechStartButton: true,
         chatGPT: true,
     },
+    poll: {
+        pollPinButton: true,
+        pollMaxButton: true,
+        pollSaveButton: true,
+    },
     participantsList: {
         saveInfoButton: true, // presenter
         sendFileAllButton: true, // presenter
@@ -221,6 +226,7 @@ function handleRulesBroadcasting() {
     //BUTTONS.main.raiseHandButton = false;
     BUTTONS.main.whiteboardButton = false;
     //BUTTONS.main.emojiRoomButton = false,
+    //BUTTONS.main.pollButton = false;
     BUTTONS.main.transcriptionButton = false;
     BUTTONS.main.settingsButton = false;
     BUTTONS.participantsList.saveInfoButton = false;
@@ -254,6 +260,7 @@ function handleRulesBroadcasting() {
     //elemDisplay('raiseHandButton', false);
     elemDisplay('whiteboardButton', false);
     //elemDisplay('emojiRoomButton', false);
+    //elemDisplay('pollButton', false);
     elemDisplay('transcriptionButton', false);
     elemDisplay('lockRoomButton', false);
     elemDisplay('unlockRoomButton', false);

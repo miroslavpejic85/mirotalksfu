@@ -1440,15 +1440,26 @@ access to use this app.
 
         <section id="pollRoom" class="pls-container fadein hidden">
             <div id="pollHeader" class="poll-header">
-                <h2 class="poll-h2">Create a Poll</h2>
+                <h2 class="poll-h2">Polls</h2>
                 <div class="poll-header-btns">
-                    <button id="pollSaveResultsButton" class="fas fa-floppy-disk"></button>
+                    <button id="pollTogglePin" class="hidden">
+                        <i class="fas fa-map-pin"></i>
+                    </button>
+                    <button id="pollMaxButton" class="hidden">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button id="pollMinButton" class="hidden">
+                        <i class="fas fa-compress"></i>
+                    </button>
+                    <button id="pollSaveButton">
+                        <i class="fas fa-floppy-disk"></i>
+                    </button>
                     <button id="pollCloseBtn" class="fas fa-times"></button>
                 </div>
             </div>
             <div class="polls">
                 <div id="pollForm" class="poll-creation">
-                    <form id="createPollForm" class="form">
+                    <form id="pollCreateForm" class="form">
                         <div class="form-group">
                             <label for="question">Question:</label>
                             <input type="text" id="question" name="question" required />
@@ -1460,10 +1471,10 @@ access to use this app.
                             </div>
                             <br />
                             <div class="poll-btns">
-                                <button type="button" id="addOptionButton" class="poll-btn">
+                                <button type="button" id="pollAddOptionBtn" class="poll-btn">
                                     <i class="fas fa-plus"></i>
                                 </button>
-                                <button type="button" id="delOptionButton" class="del-btn">
+                                <button type="button" id="pollDelOptionBtn" class="del-btn">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <button type="submit" id="addPollButton" class="poll-btn">

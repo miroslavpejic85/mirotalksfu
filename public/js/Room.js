@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.15
+ * @version 1.5.16
  *
  */
 
@@ -177,19 +177,6 @@ const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
 
 // ####################################################
-// POLLS
-// ####################################################
-
-const createPollForm = getId('createPollForm');
-const pollsContainer = getId('pollsContainer');
-const addOptionButton = getId('addOptionButton');
-const delOptionButton = getId('delOptionButton');
-const optionsContainer = getId('optionsContainer');
-const pollSaveResultsButton = getId('pollSaveResultsButton');
-const selectedOptions = {};
-let pollOpen = false;
-
-// ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
 
@@ -346,10 +333,11 @@ function initClient() {
         setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
-        setTippy('pollSaveResultsButton', 'Save results', 'left');
+        setTippy('pollTogglePin', 'Toggle pin', 'bottom');
+        setTippy('pollSaveButton', 'Save results', 'left');
         setTippy('pollCloseBtn', 'Close', 'bottom');
-        setTippy('addOptionButton', 'Add option', 'top');
-        setTippy('delOptionButton', 'Delete option', 'top');
+        setTippy('pollAddOptionBtn', 'Add option', 'top');
+        setTippy('pollDelOptionBtn', 'Delete option', 'top');
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
         setTippy('participantsRaiseHandBtn', 'Toggle raise hands', 'bottom');
         setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
@@ -1292,6 +1280,8 @@ function roomIsReady() {
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
 
+    !BUTTONS.poll.pollSaveButton && hide(pollSaveButton);
+
     isWebkitSpeechRecognitionSupported && BUTTONS.chat.chatSpeechStartButton
         ? show(chatSpeechStartButton)
         : (BUTTONS.chat.chatSpeechStartButton = false);
@@ -1315,11 +1305,14 @@ function roomIsReady() {
         hide(chatTogglePin);
         hide(chatMaxButton);
         hide(chatMinButton);
+        rc.pollMaximize();
+        hide(pollTogglePin);
+        hide(pollMaxButton);
+        hide(pollMinButton);
         transcription.maximize();
         hide(transcriptionTogglePinBtn);
         hide(transcriptionMaxBtn);
         hide(transcriptionMinBtn);
-        rc.pollMaximize();
     } else {
         rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
@@ -1338,6 +1331,8 @@ function roomIsReady() {
         }
         BUTTONS.chat.chatPinButton && show(chatTogglePin);
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
+        BUTTONS.poll.pollPinButton && show(pollTogglePin);
+        BUTTONS.poll.pollMaxButton && show(pollMaxButton);
         BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
         BUTTONS.settings.tabRTMPStreamingBtn &&
             show(tabRTMPStreamingBtn) &&
@@ -1580,20 +1575,29 @@ function handleButtons() {
     pollButton.onclick = () => {
         rc.togglePoll();
     };
+    pollMaxButton.onclick = () => {
+        rc.pollMaximize();
+    };
+    pollMinButton.onclick = () => {
+        rc.pollMinimize();
+    };
     pollCloseBtn.onclick = () => {
         rc.togglePoll();
     };
-    pollSaveResultsButton.onclick = () => {
+    pollTogglePin.onclick = () => {
+        rc.togglePollPin();
+    };
+    pollSaveButton.onclick = () => {
         rc.pollSaveResults();
     };
-    addOptionButton.onclick = () => {
+    pollAddOptionBtn.onclick = () => {
         rc.pollAddOptions();
     };
-    delOptionButton.onclick = () => {
+    pollDelOptionBtn.onclick = () => {
         rc.pollDeleteOptions();
     };
-    createPollForm.onsubmit = (e) => {
-        rc.pollCreateForm(e);
+    pollCreateForm.onsubmit = (e) => {
+        rc.pollCreateNewForm(e);
     };
     transcriptionButton.onclick = () => {
         transcription.toggle();

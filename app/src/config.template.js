@@ -418,6 +418,11 @@ module.exports = {
                 chatSpeechStartButton: true,
                 chatGPT: true,
             },
+            poll: {
+                pollPinButton: true,
+                pollMaxButton: true,
+                pollSaveButton: true,
+            },
             participantsList: {
                 saveInfoButton: true, // presenter
                 sendFileAllButton: true, // presenter

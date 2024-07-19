@@ -3,7 +3,7 @@
     position: absolute;
     background: var(--body-bg);
     padding: 20px;
-    border-radius: var(--border-radius);
+    border-radius: 10px;
     border: var(--border);
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
@@ -41,6 +41,10 @@
     color: #fff !important;
 }
 
+.poll-question {
+    font-weight: bold;
+}
+
 .form {
     display: flex;
     flex-direction: column;
@@ -73,8 +77,6 @@
 .poll-btns {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 15px;
 }
 
 .poll-btn {
@@ -174,10 +176,7 @@
 .poll-header-btns {
     display: flex;
     gap: 10px;
-    margin-top: 15px;
-    margin-bottom: 15px;
     position: absolute;
     float: right;
     right: 20px;
-    font-size: 1.3rem;
 }
