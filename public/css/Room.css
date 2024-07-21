@@ -164,7 +164,7 @@ body {
 #control {
     z-index: 3;
     position: absolute;
-    display: flex;
+    display: none;
     padding: 5px;
 
     top: var(--btns-top);
@@ -189,12 +189,12 @@ body {
 #control button {
     font-size: 1rem;
     padding: 10px;
-    transition: all 0.3s ease-in-out;
     background: var(--btns-bg-color);
     border-radius: 10px;
     border: none !important;
     /* border: var(--border); */
     /* box-shadow: var(--box-shadow); */
+    transition: all 0.3s ease-in-out;
 }
 
 #control button i {
