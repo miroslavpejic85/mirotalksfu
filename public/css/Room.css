@@ -182,7 +182,7 @@ body {
     transform: translate(0%, -50%);
 
     /* border: var(--border); */
-    box-shadow: var(--box-shadow);
+    /* box-shadow: var(--box-shadow); */
     border-radius: 10px;
 }
 
@@ -225,7 +225,7 @@ body {
     gap: 0.5rem;
     border-radius: 10px;
     border: none !important;
-    box-shadow: var(--box-shadow);
+    /* box-shadow: var(--box-shadow); */
 }
 
 #bottomButtons button {
@@ -916,6 +916,8 @@ th {
     display: none;
     top: 50%;
     left: 50%;
+    background: #151616;
+    border-radius: 10px;
     transform: translate(-50%, -50%);
 }
 
@@ -930,7 +932,8 @@ th {
     display: flex;
     justify-content: flex-start;
     background: #151616;
-    border-radius: 10px;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     padding: 10px;
     color: #fff;
     cursor: move;
