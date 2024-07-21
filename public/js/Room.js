@@ -377,7 +377,6 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('aboutButton', 'About this project', placement);
-        setTippy('exitButton', 'Leave room', placement);
 
         // Bottom buttons
         setTippy('startAudioButton', 'Start the audio', bPlacement);
@@ -390,6 +389,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('stopScreenButton', 'Stop screen share', bPlacement);
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
+        setTippy('exitButton', 'Leave room', bPlacement);
     }
 }
 

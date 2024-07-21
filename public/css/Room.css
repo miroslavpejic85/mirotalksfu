@@ -229,8 +229,8 @@ body {
 }
 
 #bottomButtons button {
-    width: 55px;
-    font-size: 1.5rem;
+    width: 48px;
+    font-size: 1.4rem;
     padding: 10px;
     background: var(--btns-bg-color);
     border-radius: 10px;
