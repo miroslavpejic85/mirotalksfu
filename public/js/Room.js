@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.17
+ * @version 1.5.18
  *
  */
 
@@ -361,21 +361,16 @@ function initClient() {
 
 function refreshMainButtonsToolTipPlacement() {
     if (!DetectRTC.isMobileDevice) {
-        const placement = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'right' : 'top';
+        //
+        const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
+        const placement = position == 'vertical' ? 'right' : 'top';
+        const bPlacement = position == 'vertical' ? 'top' : 'right';
+
+        // Control buttons
         setTippy('shareButton', 'Share room', placement);
-        setTippy('hideMeButton', 'Toggle hide self view', placement);
-        setTippy('startAudioButton', 'Start the audio', placement);
-        setTippy('stopAudioButton', 'Stop the audio', placement);
-        setTippy('startVideoButton', 'Start the video', placement);
-        setTippy('stopVideoButton', 'Stop the video', placement);
-        setTippy('startScreenButton', 'Start screen share', placement);
-        setTippy('stopScreenButton', 'Stop screen share', placement);
         setTippy('startRecButton', 'Start recording', placement);
         setTippy('stopRecButton', 'Stop recording', placement);
-        setTippy('raiseHandButton', 'Raise your hand', placement);
-        setTippy('lowerHandButton', 'Lower your hand', placement);
         setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
-        setTippy('swapCameraButton', 'Swap the camera', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('pollButton', 'Toggle the poll', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
@@ -383,6 +378,18 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('aboutButton', 'About this project', placement);
         setTippy('exitButton', 'Leave room', placement);
+
+        // Bottom buttons
+        setTippy('startAudioButton', 'Start the audio', bPlacement);
+        setTippy('stopAudioButton', 'Stop the audio', bPlacement);
+        setTippy('startVideoButton', 'Start the video', bPlacement);
+        setTippy('stopVideoButton', 'Stop the video', bPlacement);
+        setTippy('swapCameraButton', 'Swap the camera', bPlacement);
+        setTippy('hideMeButton', 'Toggle hide self view', bPlacement);
+        setTippy('startScreenButton', 'Start screen share', bPlacement);
+        setTippy('stopScreenButton', 'Stop screen share', bPlacement);
+        setTippy('raiseHandButton', 'Raise your hand', bPlacement);
+        setTippy('lowerHandButton', 'Lower your hand', bPlacement);
     }
 }
 
@@ -1472,6 +1479,12 @@ function handleButtons() {
         isButtonsBarOver = true;
     };
     control.onmouseout = () => {
+        isButtonsBarOver = false;
+    };
+    bottomButtons.onmouseover = () => {
+        isButtonsBarOver = true;
+    };
+    bottomButtons.onmouseout = () => {
         isButtonsBarOver = false;
     };
     exitButton.onclick = () => {
@@ -3004,6 +3017,7 @@ function showButtons() {
         return;
     toggleClassElements('videoMenuBar', 'inline');
     control.style.display = 'flex';
+    bottomButtons.style.display = 'flex';
     isButtonsVisible = true;
 }
 
@@ -3011,6 +3025,7 @@ function checkButtonsBar() {
     if (!isButtonsBarOver) {
         toggleClassElements('videoMenuBar', 'none');
         control.style.display = 'none';
+        bottomButtons.style.display = 'none';
         isButtonsVisible = false;
     }
     setTimeout(() => {
@@ -4034,6 +4049,7 @@ function setCustomTheme() {
     document.documentElement.style.setProperty('--tab-btn-active', `${color}`);
     document.documentElement.style.setProperty('--settings-bg', `radial-gradient(${color}, ${color})`);
     document.documentElement.style.setProperty('--wb-bg', `radial-gradient(${color}, ${color})`);
+    // document.documentElement.style.setProperty('--btns-bg-color', `${color}`);
     document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
     document.body.style.background = `radial-gradient(${color}, ${color})`;
 }

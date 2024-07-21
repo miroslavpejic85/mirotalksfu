@@ -175,13 +175,14 @@ body {
     flex-direction: var(--btns-flex-direction);
 
     justify-content: center;
-    grid-gap: 0.4rem;
+    grid-gap: 0.5rem;
 
     -webkit-transform: translate(0%, -50%);
     -ms-transform: translate(0%, -50%);
     transform: translate(0%, -50%);
 
     /* border: var(--border); */
+    box-shadow: var(--box-shadow);
     border-radius: 10px;
 }
 
@@ -191,7 +192,8 @@ body {
     transition: all 0.3s ease-in-out;
     background: var(--btns-bg-color);
     border-radius: 10px;
-    border: var(--border);
+    border: none !important;
+    /* border: var(--border); */
     /* box-shadow: var(--box-shadow); */
 }
 
@@ -201,6 +203,43 @@ body {
 
 #exitButton {
     color: red;
+}
+
+/*--------------------------------------------------------------
+# Bottom buttons
+--------------------------------------------------------------*/
+
+#bottomButtons {
+    z-index: 3;
+    position: fixed;
+    display: none;
+    padding: 5px;
+    top: var(--bottom-btns-top);
+    left: var(--bottom-btns-left);
+    bottom: var(--bottom-btns-bottom);
+    transform: translate(var(--bottom-btns-translate-X), var(--bottom-btns-translate-Y));
+    flex-direction: var(--bottom-btns-flex-direction);
+    margin-bottom: var(--bottom-btns-margin-bottom);
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 10px;
+    border: none !important;
+    box-shadow: var(--box-shadow);
+}
+
+#bottomButtons button {
+    width: 55px;
+    font-size: 1.5rem;
+    padding: 10px;
+    background: var(--btns-bg-color);
+    border-radius: 10px;
+    border: none !important;
+    transition: all 0.3s ease-in-out;
+}
+
+#bottomButtons button:hover {
+    transform: var(--btns-hover-scale);
 }
 
 /*--------------------------------------------------------------
@@ -1502,6 +1541,7 @@ z-index:
     - 1 videoMediaContainer
     - 2 Video menu bar
     - 3 control buttons
+    - 3 bottom buttons
     - 4 whiteboard
     - 5 chat group
     - 5 polls

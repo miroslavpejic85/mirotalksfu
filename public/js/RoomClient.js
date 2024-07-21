@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.17
+ * @version 1.5.18
  *
  */
 
@@ -3123,14 +3123,30 @@ class RoomClient {
                 document.documentElement.style.setProperty('--btns-margin-left', '0px');
                 document.documentElement.style.setProperty('--btns-width', '60px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'column');
+                // bottomButtons horizontally
+                document.documentElement.style.setProperty('--bottom-btns-top', 'auto');
+                document.documentElement.style.setProperty('--bottom-btns-left', '50%');
+                document.documentElement.style.setProperty('--bottom-btns-bottom', '0');
+                document.documentElement.style.setProperty('--bottom-btns-translate-X', '-50%');
+                document.documentElement.style.setProperty('--bottom-btns-translate-Y', '0%');
+                document.documentElement.style.setProperty('--bottom-btns-margin-bottom', '16px');
+                document.documentElement.style.setProperty('--bottom-btns-flex-direction', 'row');
                 break;
             case 'horizontal':
                 document.documentElement.style.setProperty('--btns-top', '95%');
                 document.documentElement.style.setProperty('--btns-right', '25%');
                 document.documentElement.style.setProperty('--btns-left', '50%');
-                document.documentElement.style.setProperty('--btns-margin-left', '-160px');
-                document.documentElement.style.setProperty('--btns-width', '320px');
+                document.documentElement.style.setProperty('--btns-margin-left', '-240px');
+                document.documentElement.style.setProperty('--btns-width', '480px');
                 document.documentElement.style.setProperty('--btns-flex-direction', 'row');
+                // bottomButtons vertically
+                document.documentElement.style.setProperty('--bottom-btns-top', '50%');
+                document.documentElement.style.setProperty('--bottom-btns-left', '15px');
+                document.documentElement.style.setProperty('--bottom-btns-bottom', 'auto');
+                document.documentElement.style.setProperty('--bottom-btns-translate-X', '0%');
+                document.documentElement.style.setProperty('--bottom-btns-translate-Y', '-50%');
+                document.documentElement.style.setProperty('--bottom-btns-margin-bottom', '0');
+                document.documentElement.style.setProperty('--bottom-btns-flex-direction', 'column');
                 break;
             default:
                 break;
@@ -5906,6 +5922,7 @@ class RoomClient {
             case 'accept':
                 await this.joinAllowed(data.room);
                 control.style.display = 'flex';
+                bottomButtons.style.display = 'flex';
                 this.msgPopup('info', 'Your join meeting was be accepted by moderator');
                 break;
             case 'reject':
@@ -6152,6 +6169,7 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) {
                 control.style.display = 'none';
+                bottomButtons.style.display = 'none';
             } else {
                 this.exit();
             }
