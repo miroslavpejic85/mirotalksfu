@@ -197,6 +197,10 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+#control button:hover {
+    transform: translateY(-3px);
+}
+
 #control button i {
     font-size: 1.2rem;
 }
@@ -642,7 +646,7 @@ th {
 /* Change background color of buttons on hover */
 .tab button:hover {
     background-color: transparent;
-    transform: scale(0.95);
+    transform: translateY(-3px);
 }
 
 /* Create an active/current tablink class */
