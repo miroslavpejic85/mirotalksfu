@@ -1781,20 +1781,20 @@ class RoomClient {
     // ####################################################
 
     handleHideMe() {
-        //const myScreenWrap = this.getId(this.screenProducerId + '__video');
+        const myScreenWrap = this.getId(this.screenProducerId + '__video');
         const myVideoWrap = this.getId(this.videoProducerId + '__video');
         const myVideoWrapOff = this.getId(this.peer_id + '__videoOff');
         const myVideoPinBtn = this.getId(this.videoProducerId + '__pin');
         const myScreenPinBtn = this.getId(this.screenProducerId + '__pin');
         console.log('handleHideMe', {
             isHideMeActive: isHideMeActive,
-            //myScreenWrap: myScreenWrap ? myScreenWrap.id : null,
+            myScreenWrap: myScreenWrap ? myScreenWrap.id : null,
             myVideoWrap: myVideoWrap ? myVideoWrap.id : null,
             myVideoWrapOff: myVideoWrapOff ? myVideoWrapOff.id : null,
             myVideoPinBtn: myVideoPinBtn ? myVideoPinBtn.id : null,
             myScreenPinBtn: myScreenPinBtn ? myScreenPinBtn.id : null,
         });
-        //if (myScreenWrap) myScreenWrap.style.display = isHideMeActive ? 'none' : 'block';
+        if (myScreenWrap) myScreenWrap.style.display = isHideMeActive ? 'none' : 'block';
         if (isHideMeActive && this.isVideoPinned && myVideoPinBtn) myVideoPinBtn.click();
         if (isHideMeActive && this.isVideoPinned && myScreenPinBtn) myScreenPinBtn.click();
         if (myVideoWrap) myVideoWrap.style.display = isHideMeActive ? 'none' : 'block';
