@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.19
+ * @version 1.5.20
  *
  */
 
@@ -488,7 +488,7 @@ function startServer() {
                     isPeerValid = await isAuthPeer(username, password);
                     isPeerPresenter = presenter === '1' || presenter === 'true';
 
-                    if (isPeerPresenter) {
+                    if (isPeerPresenter && !hostCfg.users_from_db) {
                         const roomAllowedForUser = isRoomAllowedForUser('Direct Join with token', username, room);
                         if (!roomAllowedForUser) {
                             return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
@@ -1221,9 +1221,11 @@ function startServer() {
                     return cb('unauthorized');
                 }
 
-                const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
-                if (!roomAllowedForUser) {
-                    return cb('notAllowed');
+                if (!hostCfg.users_from_db) {
+                    const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
+                    if (!roomAllowedForUser) {
+                        return cb('notAllowed');
+                    }
                 }
             }
 
@@ -1305,7 +1307,7 @@ function startServer() {
                 return cb('isLobby');
             }
 
-            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter) {
+            if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
                 const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
                 if (!roomAllowedForUser) {
                     return cb('notAllowed');
