@@ -632,7 +632,7 @@ function setupInitButtons() {
     initAudioButton.onclick = () => {
         handleAudio();
     };
-    initAudioVideoButton.onclick = async () => {
+    initAudioVideoButton.onclick = async (e) => {
         await handleAudioVideo(e);
     };
     initStartScreenButton.onclick = async () => {

@@ -139,7 +139,7 @@
 }
 
 .all-participants-img:hover {
-    background-color: lime;
+    background-color: #86c541;
     transition: all 0.3s ease-in-out;
 }
 

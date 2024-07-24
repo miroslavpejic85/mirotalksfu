@@ -153,7 +153,7 @@ body {
 
 .init-user button:hover {
     color: white;
-    background-color: rgb(35, 35, 35);
+    background: var(--btns-bg-color);
     transform: scale(1);
 }
 
@@ -676,8 +676,7 @@ th {
 }
 
 .tabcontent button:hover {
-    background-color: rgba(0, 0, 0, 0.2);
-    transform: scale(1);
+    background: var(--body-bg);
 }
 
 /* on open display devices tab */
@@ -1087,9 +1086,8 @@ button {
 }
 
 button:hover {
-    color: grey;
-    /* background: var(--body-bg) !important; */
-    /* transform: var(--btns-hover-scale); */
+    background: var(--body-bg);
+    border-radius: 5px;
 }
 
 .red {
