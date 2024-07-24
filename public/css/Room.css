@@ -199,6 +199,7 @@ body {
 
 #control button:hover {
     transform: translateY(-3px);
+    background: var(--body-bg) !important;
 }
 
 #control button i {
@@ -236,14 +237,15 @@ body {
     width: 48px;
     font-size: 1.4rem;
     padding: 10px;
-    background: var(--btns-bg-color);
     border-radius: 10px;
+    background: var(--btns-bg-color);
     border: none !important;
     transition: all 0.3s ease-in-out;
 }
 
 #bottomButtons button:hover {
     transform: var(--btns-hover-scale);
+    background: var(--body-bg) !important;
 }
 
 /*--------------------------------------------------------------
@@ -1086,7 +1088,8 @@ button {
 
 button:hover {
     color: grey;
-    transform: var(--btns-hover-scale);
+    /* background: var(--body-bg) !important; */
+    /* transform: var(--btns-hover-scale); */
 }
 
 .red {
@@ -1188,7 +1191,7 @@ button:hover {
 #receiveAbortBtn:hover,
 #receiveHideBtn:hover {
     color: rgb(255, 0, 0);
-    transform: var(--btns-hover-scale);
+    transform: translateY(-3px);
     transition: all 0.3s ease-in-out;
 }
 
@@ -1300,7 +1303,7 @@ progress {
     border: solid 0.5px #afadad38;
 }
 .whiteboardColorPicker:hover {
-    transform: var(--btns-hover-scale);
+    transform: translateY(-3px);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
 }
