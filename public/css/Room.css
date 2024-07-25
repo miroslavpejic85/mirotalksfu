@@ -153,8 +153,7 @@ body {
 
 .init-user button:hover {
     color: white;
-    background: var(--btns-bg-color);
-    transform: scale(1);
+    background: var(--body-bg);
 }
 
 /*--------------------------------------------------------------
@@ -557,9 +556,8 @@ th {
 }
 
 .dropdown-menu button:hover {
-    background: transparent;
+    background: var(--body-bg);
     color: #ffffff;
-    transform: scale(1);
 }
 
 .dropdown-menu button i,
