@@ -798,7 +798,7 @@ th {
 .transcription-header-options button {
     border: none;
     transition: all 0.3s ease-in-out;
-    background: rgba(0, 0, 0, 0.2);
+    background: transparent;
     color: #fff;
     border-radius: 5px;
     transition: background 0.23s;
@@ -895,6 +895,7 @@ th {
 
 .transcription-inputarea select {
     margin: 0 5px;
+    background-color: var(--select-bg) !important;
     cursor: pointer;
 }
 
