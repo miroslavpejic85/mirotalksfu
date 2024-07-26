@@ -200,7 +200,7 @@ video {
 }
 
 video:hover {
-    opacity: 0.9;
+    filter: contrast(105%);
 }
 
 video:fullscreen {
