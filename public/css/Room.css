@@ -391,15 +391,16 @@ body {
 }
 
 #applyAudioOptionsButton {
-    background: var(--select-bg);
     width: 180px;
     padding: 10px;
     margin-left: 10px;
     font-size: 1rem;
+    background: var(--body-bg);
+    border: var(--border);
     transition: 0.3s;
 }
 #applyAudioOptionsButton:hover {
-    background: var(--body-bg);
+    background: var(--select-bg);
     transform: scale(0.95);
 }
 
