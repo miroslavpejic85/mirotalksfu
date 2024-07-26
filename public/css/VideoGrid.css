@@ -205,7 +205,6 @@ video:hover {
 
 video:fullscreen {
     object-fit: contain;
-    opacity: 1;
 }
 
 .mirror {
