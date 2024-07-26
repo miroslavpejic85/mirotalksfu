@@ -334,7 +334,9 @@ function initClient() {
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
-        setTippy('pollSaveButton', 'Save results', 'left');
+        setTippy('pollMaxButton', 'Maximize', 'bottom');
+        setTippy('pollMinButton', 'Minimize', 'bottom');
+        setTippy('pollSaveButton', 'Save results', 'bottom');
         setTippy('pollCloseBtn', 'Close', 'bottom');
         setTippy('pollAddOptionBtn', 'Add option', 'top');
         setTippy('pollDelOptionBtn', 'Delete option', 'top');
