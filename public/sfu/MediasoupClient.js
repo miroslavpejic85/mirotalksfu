@@ -13913,7 +13913,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.12';
+                exports.version = '3.7.14';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
