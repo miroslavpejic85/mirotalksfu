@@ -391,7 +391,7 @@ body {
 }
 
 #applyAudioOptionsButton {
-    background: #2632ff;
+    background: var(--select-bg);
     width: 180px;
     padding: 10px;
     margin-left: 10px;
