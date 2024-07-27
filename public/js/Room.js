@@ -40,16 +40,16 @@ const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
     guest: '<i class="fa-solid fa-signal"></i>',
     audioOn: '<i class="fas fa-microphone"></i>',
-    audioOff: '<i style="color: red;" class="fas fa-microphone-slash"></i>',
+    audioOff: '<i class="fas fa-microphone-slash red"></i>',
     videoOn: '<i class="fas fa-video"></i>',
-    videoOff: '<i style="color: red;" class="fas fa-video-slash"></i>',
+    videoOff: '<i class="fas fa-video-slash red"></i>',
     screenOn: '<i class="fas fa-desktop"></i>',
-    screenOff: '<i style="color: red;" class="fas fa-desktop"></i>',
+    screenOff: '<i class="fas fa-desktop red"></i>',
     raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
-    banPeer: '<i class="fas fa-ban"></i>',
-    ejectPeer: '<i class="fas fa-times"></i>',
+    banPeer: '<i class="fas fa-ban red"></i>',
+    ejectPeer: '<i class="fas fa-right-from-bracket red"></i>',
     geoLocation: '<i class="fas fa-location-dot"></i>',
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
@@ -3823,6 +3823,10 @@ function getParticipantsList(peers) {
             <i class="fas fa-ellipsis-vertical"></i>
             </button>
             <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">`;
+
+        li += `<li><button class="ml5" id="muteAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff} Mute all participants</button></li>`;
+        li += `<li><button class="ml5" id="hideAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff} Hide all participants</button></li>`;
+        li += `<li><button class="ml5" id="stopAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff} Stop all screen</button></li>`;
 
         if (BUTTONS.participantsList.sendFileAllButton) {
             li += `<li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>`;
