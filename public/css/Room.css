@@ -608,6 +608,7 @@ th {
     width: 65%;
     background-color: var(--body-bg);
     min-height: 480px;
+    max-height: 680px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -1042,6 +1043,12 @@ th {
 # Common
 --------------------------------------------------------------*/
 
+h1,
+h2,
+h3 {
+    color: #c2c2c2;
+}
+
 select {
     height: 40px;
     line-height: 40px;
@@ -1405,7 +1412,8 @@ hr {
 }
 
 .wa {
-    width: auto;
+    /* width: auto; */
+    width: 320px;
 }
 
 .ml-5 {

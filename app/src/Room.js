@@ -39,6 +39,7 @@ module.exports = class Room {
         };
         // ##########################
         this._moderator = {
+            video_start_privacy: false,
             audio_start_muted: false,
             video_start_hidden: false,
             audio_cant_unmute: false,
@@ -424,6 +425,9 @@ module.exports = class Room {
     updateRoomModerator(data) {
         log.debug('Update room moderator', data);
         switch (data.type) {
+            case 'video_start_privacy':
+                this._moderator.video_start_privacy = data.status;
+                break;
             case 'audio_start_muted':
                 this._moderator.audio_start_muted = data.status;
                 break;

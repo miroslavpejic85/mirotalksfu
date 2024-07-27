@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.26
+ * @version 1.5.27
  *
  */
 
@@ -210,6 +210,7 @@ class RoomClient {
 
         // Moderator
         this._moderator = {
+            video_start_privacy: false,
             audio_start_muted: false,
             video_start_hidden: false,
             audio_cant_unmute: false,
@@ -506,6 +507,7 @@ class RoomClient {
             if (room.moderator && (!isRulesActive || !isPresenter)) {
                 console.log('07.2 ----> ROOM MODERATOR', room.moderator);
                 const {
+                    video_start_privacy,
                     audio_start_muted,
                     video_start_hidden,
                     audio_cant_unmute,
@@ -515,6 +517,7 @@ class RoomClient {
                     chat_cant_chatgpt,
                 } = room.moderator;
 
+                this._moderator.video_start_privacy = video_start_privacy;
                 this._moderator.audio_start_muted = audio_start_muted;
                 this._moderator.video_start_hidden = video_start_hidden;
                 this._moderator.audio_cant_unmute = audio_cant_unmute;
@@ -522,7 +525,18 @@ class RoomClient {
                 this._moderator.screen_cant_share = screen_cant_share;
                 this._moderator.chat_cant_privately = chat_cant_privately;
                 this._moderator.chat_cant_chatgpt = chat_cant_chatgpt;
+
                 //
+                if (this._moderator.video_start_privacy || localStorageSettings.moderator_video_start_privacy) {
+                    this.peer_info.peer_video_privacy = true;
+                    this.emitCmd({
+                        type: 'privacy',
+                        peer_id: this.peer_id,
+                        active: true,
+                        broadcast: true,
+                    });
+                    this.userLog('warning', 'The Moderator starts video in privacy mode', 'top-end');
+                }
                 if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
                 } else {
@@ -1853,7 +1867,7 @@ class RoomClient {
                 pn.id = id + '__pin';
                 pn.className = html.pin;
                 vp = document.createElement('button');
-                vp.id = this.peer_id + +'__vp';
+                vp.id = this.peer_id + '__vp';
                 vp.className = html.videoPrivacy;
                 au = document.createElement('button');
                 au.id = this.peer_id + '__audio';
@@ -1888,7 +1902,7 @@ class RoomClient {
                 d.appendChild(p);
                 d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
-                this.attachMediaStream(elem, stream, type, 'Producer');
+                await this.attachMediaStream(elem, stream, type, 'Producer');
                 this.myVideoEl = elem;
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
@@ -1919,7 +1933,7 @@ class RoomClient {
                 elem.volume = 0;
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
-                this.attachMediaStream(elem, stream, type, 'Producer');
+                await this.attachMediaStream(elem, stream, type, 'Producer');
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
             default:
@@ -2194,7 +2208,7 @@ class RoomClient {
         };
     }
 
-    handleConsumer(id, type, stream, peer_name, peer_info) {
+    async handleConsumer(id, type, stream, peer_name, peer_info) {
         let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn;
 
         let eDiv, eBtn, eVc; // expand buttons
@@ -2318,7 +2332,7 @@ class RoomClient {
                 d.appendChild(pm);
                 d.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
-                this.attachMediaStream(elem, stream, type, 'Consumer');
+                await this.attachMediaStream(elem, stream, type, 'Consumer');
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, remotePeerId);
@@ -2363,7 +2377,7 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.audio = 1.0;
                 this.remoteAudioEl.appendChild(elem);
-                this.attachMediaStream(elem, stream, type, 'Consumer');
+                await this.attachMediaStream(elem, stream, type, 'Consumer');
                 let audioConsumerId = remotePeerId + '___pVolume';
                 this.audioConsumers.set(audioConsumerId, id);
                 let inputPv = this.getId(audioConsumerId);
@@ -2648,7 +2662,7 @@ class RoomClient {
     // HELPERS
     // ####################################################
 
-    attachMediaStream(elem, stream, type, who) {
+    async attachMediaStream(elem, stream, type, who) {
         let track;
         switch (type) {
             case mediaType.audio:
@@ -3473,21 +3487,31 @@ class RoomClient {
     // ####################################################
 
     handleVP(elemId, vpId) {
+        const startVideoInPrivacyMode =
+            this._moderator.video_start_privacy || localStorageSettings.moderator_video_start_privacy;
         let videoPlayer = this.getId(elemId);
         let btnVp = this.getId(vpId);
         if (btnVp && videoPlayer) {
             btnVp.addEventListener('click', () => {
                 this.sound('click');
-                isVideoPrivacyActive = !isVideoPrivacyActive;
-                this.setVideoPrivacyStatus(this.peer_id, isVideoPrivacyActive);
-                this.emitCmd({
-                    type: 'privacy',
-                    peer_id: this.peer_id,
-                    active: isVideoPrivacyActive,
-                    broadcast: true,
-                });
+                this.toggleVideoPrivacyMode();
             });
+
+            if (startVideoInPrivacyMode) {
+                btnVp.click();
+            }
         }
+    }
+
+    toggleVideoPrivacyMode() {
+        isVideoPrivacyActive = !isVideoPrivacyActive;
+        this.setVideoPrivacyStatus(this.peer_id, isVideoPrivacyActive);
+        this.emitCmd({
+            type: 'privacy',
+            peer_id: this.peer_id,
+            active: isVideoPrivacyActive,
+            broadcast: true,
+        });
     }
 
     setVideoPrivacyStatus(elemName, privacy) {
@@ -5806,6 +5830,13 @@ class RoomClient {
                           `${icons.transcript} Transcript not will be shown, when you receive a message`,
                           'top-end',
                       );
+                break;
+            case 'video_start_privacy':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone starts in privacy mode ${status}`,
+                    'top-end',
+                );
                 break;
             case 'audio_start_muted':
                 this.userLog('info', `${icons.moderator} Moderator: everyone starts muted ${status}`, 'top-end');

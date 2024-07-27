@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.26
+ * @version 1.5.27
  *
  */
 
@@ -2432,6 +2432,16 @@ function handleSelects() {
         toggleCanvasGrid();
     };
     // room moderator rules
+    switchEveryonePrivacy.onchange = (e) => {
+        const videoStartPrivacy = e.currentTarget.checked;
+        isVideoPrivacyActive = !videoStartPrivacy;
+        rc.toggleVideoPrivacyMode();
+        rc.updateRoomModerator({ type: 'video_start_privacy', status: videoStartPrivacy });
+        rc.roomMessage('video_start_privacy', videoStartPrivacy);
+        localStorageSettings.moderator_video_start_privacy = videoStartPrivacy;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     switchEveryoneMute.onchange = (e) => {
         const audioStartMuted = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'audio_start_muted', status: audioStartMuted });
@@ -4304,7 +4314,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.26',
+        title: 'WebRTC SFU v1.5.27',
         html: `
         <br />
         <div id="about">

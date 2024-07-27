@@ -162,6 +162,7 @@ function handleRules(isPresenter) {
         switchHostOnlyRecording.checked = hostOnlyRecording;
         rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
         // Room moderator
+        switchEveryonePrivacy.checked = localStorageSettings.moderator_video_start_privacy;
         switchEveryoneMute.checked = localStorageSettings.moderator_audio_start_muted;
         switchEveryoneHidden.checked = localStorageSettings.moderator_video_start_hidden;
         switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
@@ -173,6 +174,7 @@ function handleRules(isPresenter) {
 
         // Update moderator settings...
         const moderatorData = {
+            video_start_privacy: switchEveryonePrivacy.checked,
             audio_start_muted: switchEveryoneMute.checked,
             video_start_hidden: switchEveryoneHidden.checked,
             audio_cant_unmute: switchEveryoneCantUnmute.checked,
