@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.25
+ * @version 1.5.26
  *
  */
 
@@ -3651,7 +3651,10 @@ function toggleLockUnlockWhiteboard() {
 
     whiteboardAction(getWhiteboardAction(action));
 
-    if (wbIsLock) sound('locked');
+    if (wbIsLock) {
+        userLog('info', 'The whiteboard is locked. \n The participants cannot interact with it.', 'top-right');
+        sound('locked');
+    }
 }
 
 function whiteboardAction(data, emit = true) {
@@ -4301,7 +4304,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.25',
+        title: 'WebRTC SFU v1.5.26',
         html: `
         <br />
         <div id="about">

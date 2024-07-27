@@ -537,10 +537,14 @@ th {
 --------------------------------------------------------------*/
 
 .dropdown-menu {
-    background: var(--body-bg) !important;
+    right: 0;
     /* background: var(--select-bg) !important; */
     border: none;
+    border-radius: 5px;
+    background: var(--body-bg) !important;
+    box-shadow: var(--box-shadow);
     overflow-y: auto;
+    overflow-x: hidden;
 }
 
 .dropdown-menu button {
@@ -1279,7 +1283,7 @@ progress {
 }
 
 .whiteboard-header-options .dropdown-menu {
-    max-height: var(--wb-height);
+    max-height: calc(var(--wb-height) * 1px) !important;
 }
 
 .whiteboard-header-options .dropdown-menu button {
