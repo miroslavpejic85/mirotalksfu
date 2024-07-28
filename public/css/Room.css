@@ -701,8 +701,8 @@ th {
     padding: 10px;
     text-align: center;
     color: white;
-    background: black;
-    border: none;
+    background: var(--body-bg);
+    border: var(--border);
     border-radius: 5px;
 }
 
