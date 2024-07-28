@@ -2108,7 +2108,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+                log.error('getAvatarList', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2129,7 +2130,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+                log.error('getVoiceList', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2155,13 +2157,16 @@ function startServer() {
                     },
                 );
 
+                log.warn('STREAMING NEW', response);
+
                 const data = { response: response.data };
 
                 log.debug('streamingNew', data);
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
+                log.error('streamingNew', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2188,7 +2193,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'server error' : error });
+                log.error('streamingStart', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2215,8 +2221,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                log.error('Error in streamingICE:', error.response?.data || error.message); // Log detailed error
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
+                log.error('streamingICE', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2245,7 +2251,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'server error' : error });
+                log.error('streamingTask', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2270,7 +2277,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.message });
+                log.error('talkToOpenAI', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
@@ -2298,7 +2306,8 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error });
+                log.error('streamingStop', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
 
