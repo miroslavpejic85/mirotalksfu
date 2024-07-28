@@ -1,15 +1,15 @@
 .pls-container {
     z-index: 5;
     position: absolute;
-    background: var(--body-bg);
     padding: 20px;
-    border-radius: 10px;
-    border: var(--border);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     width: 100%;
     height: 100%;
     max-width: 600px;
     max-height: 700px;
+    border-radius: 10px;
+    background: var(--body-bg);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
     overflow: hidden;
 }
 
