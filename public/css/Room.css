@@ -926,8 +926,12 @@ th {
     display: none;
     top: 50%;
     left: 50%;
-    background: #151616;
+    background: var(--body-bg);
     border-radius: 10px;
+    border: var(--border);
+    --rgb-background: var(--body-bg);
+    --color-border-over: var(--body-bg);
+    --font-family: 'Comfortaa';
     transform: translate(-50%, -50%);
 }
 
@@ -936,16 +940,19 @@ th {
     position: absolute;
     left: 80px;
     bottom: 60px;
+    --rgb-background: var(--body-bg);
+    --color-border-over: var(--body-bg);
+    --font-family: 'Comfortaa';
 }
 
 .emojiPickerHeader {
     display: flex;
+    padding: 10px;
     justify-content: flex-start;
-    background: #151616;
+    color: #fff;
+    background: var(--body-bg);
     border-top-left-radius: 10px;
     border-top-right-radius: 10px;
-    padding: 10px;
-    color: #fff;
     cursor: move;
 }
 

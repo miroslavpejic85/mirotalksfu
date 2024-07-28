@@ -277,6 +277,11 @@
     position: absolute;
     left: 5px;
     bottom: 135px;
+    border: var(--border);
+    border-radius: 5px;
+    --rgb-background: var(--body-bg);
+    --color-border-over: var(--body-bg);
+    --font-family: 'Comfortaa';
 }
 
 /* status */
