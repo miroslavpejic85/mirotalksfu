@@ -359,3 +359,16 @@ input[type='text'] {
 .form-check-input {
     cursor: pointer;
 }
+
+#chatShareRoomBtn {
+    padding: 8px 16px;
+    background: var(--body-bg);
+    border-radius: 5px;
+    border: var(--border);
+    transition: all 0.3s ease-in-out;
+}
+
+#chatShareRoomBtn:hover {
+    background: var(--select-bg);
+    transform: translateY(-3px);
+}
