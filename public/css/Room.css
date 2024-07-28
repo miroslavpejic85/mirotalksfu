@@ -926,9 +926,10 @@ th {
     display: none;
     top: 50%;
     left: 50%;
-    background: var(--body-bg);
     border-radius: 10px;
     border: var(--border);
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
     --rgb-background: var(--body-bg);
     --color-border-over: var(--body-bg);
     --font-family: 'Comfortaa';
@@ -961,6 +962,16 @@ th {
 # swal2
 --------------------------------------------------------------*/
 
+.swal2-popup {
+    /* border: var(--border) !important; */
+    border: 0.5px solid rgb(255 255 255 / 32%) !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+.swal2-popup .swal2-styled:focus {
+    box-shadow: none !important;
+}
+
 .swal2-validation-message,
 .swal2-title,
 .swal2-content,
@@ -977,15 +988,6 @@ th {
 
 .swal2-input {
     border: var(--border) !important;
-    box-shadow: none !important;
-}
-
-.swal2-popup {
-    /* border: var(--border) !important; */
-    border: 0.5px solid rgb(255 255 255 / 32%) !important;
-}
-
-.swal2-popup .swal2-styled:focus {
     box-shadow: none !important;
 }
 
