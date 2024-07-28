@@ -6436,10 +6436,11 @@ class RoomClient {
             const emojiDisplay = document.createElement('div');
             emojiDisplay.className = 'animate__animated animate__backInUp';
             emojiDisplay.style.padding = '10px';
-            emojiDisplay.style.fontSize = '3vh';
+            emojiDisplay.style.fontSize = '2vh';
             emojiDisplay.style.color = '#FFF';
             emojiDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
             emojiDisplay.style.borderRadius = '10px';
+            emojiDisplay.style.marginBottom = '5px';
             emojiDisplay.innerText = `${cmd.emoji} ${cmd.peer_name}`;
             userEmoji.appendChild(emojiDisplay);
             setTimeout(() => {
