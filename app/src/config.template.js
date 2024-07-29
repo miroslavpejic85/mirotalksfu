@@ -17,7 +17,7 @@ function getIPv4() {
     return '0.0.0.0'; // Default to 0.0.0.0 if no external IPv4 address found
 }
 
-const IPv4 = getIPv4();
+const IPv4 = getIPv4(); // Replace it with the Server Public IPv4 in production.
 
 const numWorkers = require('os').cpus().length;
 
