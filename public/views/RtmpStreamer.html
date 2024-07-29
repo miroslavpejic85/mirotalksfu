@@ -45,6 +45,10 @@
         <link rel="stylesheet" href="../css/Root.css" />
         <link rel="stylesheet" href="../css/RtmpStreamer.css" />
 
+        <!-- https://cdnjs.com/libraries/font-awesome -->
+
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+
         <!-- Axios -->
 
         <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
@@ -60,7 +64,7 @@
             <span id="popupMessage"></span>
             <button id="closePopup">X</button>
         </div>
-        <div class="container">
+        <div class="container fadein">
             <h1>MiroTalk RTMP Streamer</h1>
             <div class="input-group-inline">
                 <input
@@ -80,15 +84,21 @@
                     readonly
                     title="This is your RTMP live URL. It cannot be edited."
                 />
-                <button id="copy" title="Click to copy the RTMP URL">Copy</button>
+                <button id="copy" title="Click to copy the RTMP URL"><i class="fas fa-paste"></i> Copy</button>
             </div>
 
             <video id="video" width="640" height="480"></video>
 
             <div class="button-group">
-                <button id="startCamera" title="Click to start camera streaming">Start Camera Streaming</button>
-                <button id="startScreen" title="Click to start screen streaming">Start Screen Streaming</button>
-                <button id="stop" disabled title="Click to stop streaming">Stop Streaming</button>
+                <button id="startCamera" title="Click to start camera streaming">
+                    <i class="fas fa-video"></i> Start Streaming
+                </button>
+                <button id="startScreen" title="Click to start screen streaming">
+                    <i class="fas fa-desktop"></i> Start Streaming
+                </button>
+                <button id="stop" disabled title="Click to stop streaming">
+                    <i class="fas fa-stop-circle"></i> Stop Streaming
+                </button>
             </div>
         </div>
         <footer>

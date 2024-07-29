@@ -14,6 +14,8 @@ const closePopup = document.getElementById('closePopup');
 const qs = new URLSearchParams(window.location.search);
 const videoId = filterXSS(qs.get('v'));
 const audioId = filterXSS(qs.get('a'));
+const theme = filterXSS(qs.get('t'));
+const color = filterXSS(qs.get('c'));
 
 console.log('Video/Audio id', {
     video: videoId,
@@ -252,11 +254,89 @@ function copyRTMP() {
     showPopup('Copied: ' + rtmpInput.value, 'success');
 }
 
+function setCustomTheme() {
+    document.documentElement.style.setProperty('--body-bg', `radial-gradient(${color}, ${color})`);
+    document.documentElement.style.setProperty('--select-bg', `${color}`);
+    document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+    document.body.style.background = `radial-gradient(${color}, ${color})`;
+}
+
+function setTheme() {
+    switch (theme) {
+        case 'elegant':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #000000, #434343)');
+            document.documentElement.style.setProperty('--select-bg', '#333333');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #000000, #434343)';
+            break;
+        case 'dark':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #000000, #1a1a1a)');
+            document.documentElement.style.setProperty('--select-bg', '#1a1a1a');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.85)');
+            document.body.style.background = 'linear-gradient(135deg, #000000, #1a1a1a)';
+            break;
+        case 'grey':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
+            document.documentElement.style.setProperty('--select-bg', '#2a2a2a');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #4f4f4f)';
+            break;
+        case 'green':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty('--select-bg', '#002a22');
+            document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #002a22, #004d40)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 42, 34, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #002a22, #004d40)';
+            break;
+        case 'blue':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #00274d, #004d80)');
+            document.documentElement.style.setProperty('--select-bg', '#00274d');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 39, 77, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #00274d, #004d80)';
+            break;
+        case 'red':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
+            document.documentElement.style.setProperty('--select-bg', '#2a0d0d');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 13, 13, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #2a0d0d, #4d1a1a)';
+            break;
+        case 'purple':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
+            document.documentElement.style.setProperty('--select-bg', '#2a001d');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 0, 29, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #2a001d, #4d004a)';
+            break;
+        case 'orange':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty('--select-bg', '#3d1a00');
+            document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(61, 26, 0, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #3d1a00, #ff8c00)';
+            break;
+        case 'pink':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
+            document.documentElement.style.setProperty('--select-bg', '#4d001d');
+            document.documentElement.style.setProperty('--tab-btn-active', '#ff66b2');
+            document.body.style.background = 'linear-gradient(135deg, #4d001d, #ff66b2)';
+            break;
+        case 'yellow':
+            document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
+            document.documentElement.style.setProperty('--select-bg', '#4d3b00');
+            document.documentElement.style.setProperty('--btns-bg-color', 'rgba(77, 59, 0, 0.7)');
+            document.body.style.background = 'linear-gradient(135deg, #4d3b00, #ffc107)';
+            break;
+        default:
+            break;
+    }
+}
+
 startCameraButton.addEventListener('click', startCameraStreaming);
 startScreenButton.addEventListener('click', startScreenStreaming);
 stopButton.addEventListener('click', stopRTMP);
 copyButton.addEventListener('click', copyRTMP);
 closePopup.addEventListener('click', hidePopup);
+
+window.addEventListener('load', color ? setCustomTheme : setTheme);
 
 // Stop RTMP streaming when the browser tab is closed
 window.addEventListener('beforeunload', async (event) => {
