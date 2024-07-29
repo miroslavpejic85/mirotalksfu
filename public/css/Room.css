@@ -971,7 +971,7 @@ th {
 .swal2-popup {
     /* border: var(--border) !important; */
     border: 0.5px solid rgb(255 255 255 / 32%) !important;
-    box-shadow: var(--box-shadow) !important;
+    /* box-shadow: var(--box-shadow) !important; */
 }
 
 .swal2-popup .swal2-styled:focus {
