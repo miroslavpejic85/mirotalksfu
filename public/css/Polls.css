@@ -29,7 +29,6 @@
 }
 
 .poll-creation {
-    border-radius: var(--border-radius);
     margin-bottom: 20px;
     max-height: 480px;
     overflow: hidden;
