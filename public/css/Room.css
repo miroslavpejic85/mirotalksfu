@@ -509,10 +509,10 @@ th {
 }
 
 #refreshVideoFiles {
-    float: right;
     cursor: pointer;
     border-radius: 5px;
-    background: var(--body-bg) !important;
+    border: var(--border);
+    background: var(--btns-bg-color) !important;
 }
 #refreshVideoFiles:hover {
     background: var(--select-bg) !important;
@@ -530,6 +530,12 @@ th {
 }
 .btn-custom:hover {
     background: var(--btns-bg-color) !important;
+}
+
+#copyRtmpUrlButton {
+    height: 40px;
+    margin-left: 5px;
+    border: var(--border);
 }
 
 /*--------------------------------------------------------------
@@ -992,7 +998,7 @@ th {
 }
 
 .swal2-timer-progress-bar-container {
-    background: #376df9;
+    background: var(--body-bg);
 }
 
 .img-about {
