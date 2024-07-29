@@ -30,7 +30,6 @@ h1 {
 }
 
 video {
-    margin: 10px 0;
     border-radius: 10px;
     border: var(--border);
     box-shadow: var(--box-shadow);
@@ -52,6 +51,7 @@ video {
 
 #copyButton {
     flex: 1;
+    padding: 15px;
     max-width: 100px;
 }
 
@@ -111,22 +111,19 @@ button:hover {
 }
 
 .popup {
+    z-index: 1000;
     position: fixed;
-    top: 10px;
+    display: flex;
+    padding: 10px;
+    width: 100%;
+    top: 0px;
     left: 50%;
     transform: translateX(-50%);
-    background-color: indianred;
-    color: white;
-    padding: 15px;
-    border-radius: 5px;
-    box-shadow: var(--box-shadow);
-    z-index: 1000;
-    display: flex;
     align-items: center;
-    justify-content: space-between;
-    min-width: 300px;
-    max-width: 600px;
-    width: 80%;
+    justify-content: center;
+    color: white;
+    background-color: var(--body-bg);
+    box-shadow: var(--box-shadow);
 }
 
 .popup.success {
@@ -157,13 +154,21 @@ button:hover {
     background: none;
     border: none;
     color: white;
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
-    margin-left: 20px;
+}
+
+#closePopup:hover {
+    color: var(--select-bg);
 }
 
 footer {
+    width: 100%;
+    margin-top: 10px;
     color: grey;
+    justify-content: center;
+    text-align: center;
+    background: var(--body-bg);
 }
 
 /* Media Queries for Responsiveness */
