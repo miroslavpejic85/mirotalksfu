@@ -3516,6 +3516,7 @@ class RoomClient {
 
     setVideoPrivacyStatus(elemName, privacy) {
         let videoPlayer = this.getName(elemName)[0];
+        if (!videoPlayer) return;
         if (privacy) {
             videoPlayer.classList.remove('videoDefault');
             videoPlayer.classList.add('videoCircle');
