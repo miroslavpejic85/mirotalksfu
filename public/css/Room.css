@@ -1502,7 +1502,7 @@ hr {
     left: 0;
     padding: 10px;
     width: 100%;
-    /* height: 100%; */
+    height: 100%;
     color: #ffffff;
     justify-content: center; /* Center horizontally */
     align-items: center; /* Center vertically */
