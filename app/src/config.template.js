@@ -389,6 +389,7 @@ module.exports = {
                 videoPictureInPicture: true,
                 fullScreenButton: true,
                 snapShotButton: true,
+                focusVideoButton: true,
                 sendMessageButton: true,
                 sendFileButton: true,
                 sendVideoButton: true,

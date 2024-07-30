@@ -5,6 +5,7 @@
 // ####################################################
 
 let customRatio = true;
+let isHideALLVideosActive = false;
 
 // aspect       0      1      2      3       4
 let ratios = ['0:0', '4:3', '16:9', '1:1', '1:2'];
@@ -42,6 +43,8 @@ function Area(Increment, Count, Width, Height, Margin = 10) {
 }
 
 function resizeVideoMedia() {
+    if (isHideALLVideosActive) return;
+
     let Margin = 5;
     let videoMediaContainer = document.getElementById('videoMediaContainer');
     let Cameras = document.getElementsByClassName('Camera');

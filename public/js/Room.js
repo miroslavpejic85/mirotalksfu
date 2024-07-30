@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.30
+ * @version 1.5.31
  *
  */
 
@@ -315,8 +315,8 @@ function initClient() {
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
-        setTippy('whiteboardLockBtn', 'If Locked, participants cannot interact', 'right');
-        setTippy('whiteboardUnlockBtn', 'If Locked, participants cannot interact', 'right');
+        setTippy('whiteboardLockBtn', 'Toggle Lock whiteboard', 'right');
+        setTippy('whiteboardUnlockBtn', 'Toggle Lock whiteboard', 'right');
         setTippy('whiteboardCloseBtn', 'Close', 'right');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
@@ -1496,6 +1496,9 @@ function handleButtons() {
         shareRoom(true);
     };
     hideMeButton.onclick = (e) => {
+        if (isHideALLVideosActive) {
+            return userLog('warning', 'To use this feature, please toggle video focus mode', 'top-end', 6000);
+        }
         isHideMeActive = !isHideMeActive;
         rc.handleHideMe();
     };

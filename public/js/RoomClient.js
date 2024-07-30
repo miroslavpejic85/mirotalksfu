@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.30
+ * @version 1.5.31
  *
  */
 
@@ -42,6 +42,7 @@ const html = {
     pin: 'fas fa-map-pin',
     videoPrivacy: 'far fa-circle',
     expand: 'fas fa-ellipsis-vertical',
+    hideALL: 'fas fa-eye',
 };
 
 const icons = {
@@ -2209,7 +2210,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -2267,6 +2268,9 @@ class RoomClient {
                 pn = document.createElement('button');
                 pn.id = id + '__pin';
                 pn.className = html.pin;
+                ha = document.createElement('button');
+                ha.id = id + '__hideALL';
+                ha.className = html.hideALL;
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
@@ -2306,7 +2310,6 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
-
                 BUTTONS.consumerVideo.sendMessageButton && eVc.appendChild(sm);
                 BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(sf);
                 BUTTONS.consumerVideo.sendVideoButton && eVc.appendChild(sv);
@@ -2325,6 +2328,7 @@ class RoomClient {
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
                 BUTTONS.consumerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
+                BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
                 d.appendChild(i);
@@ -2338,6 +2342,7 @@ class RoomClient {
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleSF(sf.id);
+                this.handleHA(ha.id, d.id);
                 this.handleSM(sm.id, peer_name);
                 this.handleSV(sv.id);
                 BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
@@ -2357,6 +2362,7 @@ class RoomClient {
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
+                    this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(sf.id, 'Send file', 'bottom');
@@ -6350,6 +6356,37 @@ class RoomClient {
     // ####################################################
     // HANDLE VIDEO
     // ###################################################
+
+    handleHA(uid, myVideoContainerId) {
+        let btnHa = this.getId(uid);
+        if (btnHa) {
+            btnHa.addEventListener('click', (e) => {
+                if (isHideMeActive) {
+                    return this.userLog(
+                        'warning',
+                        'To use this feature, please toggle Hide self view before',
+                        'top-end',
+                        6000,
+                    );
+                }
+                isHideALLVideosActive = !isHideALLVideosActive;
+                e.target.style.color = isHideALLVideosActive ? 'lime' : 'white';
+                if (isHideALLVideosActive) {
+                    const myVideoContainer = this.getId(myVideoContainerId);
+                    myVideoContainer.style.width = '100%';
+                    myVideoContainer.style.height = '100%';
+                } else {
+                    resizeVideoMedia();
+                }
+                const children = this.videoMediaContainer.children;
+                for (let child of children) {
+                    if (child.id != myVideoContainerId) {
+                        child.style.display = isHideALLVideosActive ? 'none' : 'block';
+                    }
+                }
+            });
+        }
+    }
 
     handleCM(uid) {
         const words = uid.split('___');
