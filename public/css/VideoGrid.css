@@ -73,6 +73,7 @@
     width: var(--vmi-wh);
     height: var(--vmi-wh);
     border-radius: 50%;
+    transition: box-shadow 0.3s ease;
 }
 
 .audio {

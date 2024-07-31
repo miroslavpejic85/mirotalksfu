@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.31
+ * @version 1.5.32
  *
  */
 
@@ -6239,28 +6239,39 @@ class RoomClient {
     // ####################################################
 
     handleAudioVolume(data) {
-        if (!isPitchBarEnabled) return;
-        let peerId = data.peer_id;
-        let peerName = data.peer_name;
-        let producerAudioBtn = this.getId(peerId + '_audio');
-        let consumerAudioBtn = this.getId(peerId + '__audio');
-        let pbProducer = this.getId(peerId + '_pitchBar');
-        let pbConsumer = this.getId(peerId + '__pitchBar');
-        let audioVolume = data.audioVolume * 10; //10-100
-        let audioColor = 'lime';
-        //console.log('Active speaker', { peer_name: peerName, peer_id: peerId, audioVolume: audioVolume });
-        if ([50, 60, 70].includes(audioVolume)) audioColor = 'orange';
-        if ([80, 90, 100].includes(audioVolume)) audioColor = 'red';
-        if (producerAudioBtn) producerAudioBtn.style.color = audioColor;
-        if (consumerAudioBtn) consumerAudioBtn.style.color = audioColor;
-        if (pbProducer) pbProducer.style.backgroundColor = audioColor;
-        if (pbConsumer) pbConsumer.style.backgroundColor = audioColor;
-        if (pbProducer) pbProducer.style.height = audioVolume + '%';
-        if (pbConsumer) pbConsumer.style.height = audioVolume + '%';
+        //console.log('Active speaker', data);
+
+        const { peer_id, peer_name, audioVolume } = data;
+        const audioVolumeTmp = audioVolume * 10; //10-100
+
+        let audioColorTmp = 'lime';
+        if ([50, 60, 70].includes(audioVolumeTmp)) audioColorTmp = 'orange';
+        if ([80, 90, 100].includes(audioVolumeTmp)) audioColorTmp = 'red';
+
+        if (!isPitchBarEnabled) {
+            const peerAvatarImg = this.getId(peer_id + '__img');
+            if (peerAvatarImg) {
+                peerAvatarImg.style.boxShadow = `0 0 20px ${audioColorTmp}`;
+                setTimeout(function () {
+                    peerAvatarImg.style.boxShadow = 'none';
+                }, 200);
+            }
+            return;
+        }
+        const producerAudioBtn = this.getId(peer_id + '_audio');
+        const consumerAudioBtn = this.getId(peer_id + '__audio');
+        const pbProducer = this.getId(peer_id + '_pitchBar');
+        const pbConsumer = this.getId(peer_id + '__pitchBar');
+        if (producerAudioBtn) producerAudioBtn.style.color = audioColorTmp;
+        if (consumerAudioBtn) consumerAudioBtn.style.color = audioColorTmp;
+        if (pbProducer) pbProducer.style.backgroundColor = audioColorTmp;
+        if (pbConsumer) pbConsumer.style.backgroundColor = audioColorTmp;
+        if (pbProducer) pbProducer.style.height = audioVolumeTmp + '%';
+        if (pbConsumer) pbConsumer.style.height = audioVolumeTmp + '%';
         setTimeout(function () {
-            audioColor = 'white';
-            if (producerAudioBtn) producerAudioBtn.style.color = audioColor;
-            if (consumerAudioBtn) consumerAudioBtn.style.color = audioColor;
+            audioColorTmp = 'white';
+            if (producerAudioBtn) producerAudioBtn.style.color = audioColorTmp;
+            if (consumerAudioBtn) consumerAudioBtn.style.color = audioColorTmp;
             if (pbProducer) pbProducer.style.height = '0%';
             if (pbConsumer) pbConsumer.style.height = '0%';
         }, 200);
