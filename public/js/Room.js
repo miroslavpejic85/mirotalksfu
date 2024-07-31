@@ -976,7 +976,7 @@ async function whoAreYou() {
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (name) => {
-            if (!name) return 'Please enter your name';
+            if (!name) return 'Please enter your email or name';
             if (name.length > 30) return 'Name must be max 30 char';
             name = filterXSS(name);
             if (isHtml(name)) return 'Invalid name!';
