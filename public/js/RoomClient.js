@@ -6249,12 +6249,13 @@ class RoomClient {
         if ([80, 90, 100].includes(audioVolumeTmp)) audioColorTmp = 'red';
 
         if (!isPitchBarEnabled) {
+            const peerVideo = this.getName(peer_id)[0];
             const peerAvatarImg = this.getId(peer_id + '__img');
             if (peerAvatarImg) {
-                peerAvatarImg.style.boxShadow = `0 0 20px ${audioColorTmp}`;
-                setTimeout(function () {
-                    peerAvatarImg.style.boxShadow = 'none';
-                }, 200);
+                this.applyBoxShadowEffect(peerAvatarImg, audioColorTmp, 200);
+            }
+            if (peerVideo && peerVideo.classList.contains('videoCircle')) {
+                this.applyBoxShadowEffect(peerVideo, audioColorTmp, 200);
             }
             return;
         }
@@ -6275,6 +6276,15 @@ class RoomClient {
             if (pbProducer) pbProducer.style.height = '0%';
             if (pbConsumer) pbConsumer.style.height = '0%';
         }, 200);
+    }
+
+    applyBoxShadowEffect(element, color, delay = 200) {
+        if (element) {
+            element.style.boxShadow = `0 0 20px ${color}`;
+            setTimeout(() => {
+                element.style.boxShadow = 'none';
+            }, delay);
+        }
     }
 
     // ####################################################
