@@ -2357,7 +2357,7 @@ class RoomClient {
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
-                if (remoteIsScreen) pn.click();
+                if (remoteIsScreen && !isHideALLVideosActive) pn.click();
                 this.sound('joined');
                 handleAspectRatio();
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
