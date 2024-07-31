@@ -2229,6 +2229,7 @@ class RoomClient {
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
+                d.style.display = isHideALLVideosActive ? 'none' : 'block';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 !remoteIsScreen && elem.setAttribute('name', remotePeerId);
