@@ -2093,3 +2093,12 @@ main {
 .loading-img {
     width: 400px;
 }
+
+.c-pointer {
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.c-pointer:hover {
+    box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 1);
+}
