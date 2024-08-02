@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.34
+ * @version 1.5.35
  *
  */
 
@@ -57,6 +57,7 @@ const icons = {
     lock: '<i class="fa-solid fa-lock"></i>',
     unlock: '<i class="fa-solid fa-lock-open"></i>',
     pitchBar: '<i class="fas fa-microphone-lines"></i>',
+    mirror: '<i class="fas fa-arrow-right-arrow-left"></i>',
     sounds: '<i class="fas fa-music"></i>',
     fileSend: '<i class="fa-solid fa-file-export"></i>',
     fileReceive: '<i class="fa-solid fa-file-import"></i>',
@@ -5799,6 +5800,9 @@ class RoomClient {
         const status = active ? 'ON' : 'OFF';
         this.sound('switch');
         switch (action) {
+            case 'toggleVideoMirror':
+                this.userLog('info', `${icons.mirror} Video mirror ${status}`, 'top-end');
+                break;
             case 'pitchBar':
                 this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
                 break;
@@ -8181,6 +8185,11 @@ class RoomClient {
                 copyToClipboard(rtmp);
             }
         });
+    }
+
+    toggleVideoMirror() {
+        const peerVideo = this.getName(this.peer_id)[0];
+        if (peerVideo) peerVideo.classList.toggle('mirror');
     }
 
     sleep(ms) {
