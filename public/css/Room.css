@@ -545,7 +545,6 @@ th {
 .dropdown-menu {
     position: fixed;
     right: 0;
-    width: 240px;
     /* max-height: 300px; */
     border: none;
     border-radius: 5px;
@@ -556,7 +555,7 @@ th {
 }
 
 .dropdown-menu button {
-    width: 100%;
+    width: 240px;
     padding: 8px 16px;
     align-items: center;
     justify-content: flex-start;
