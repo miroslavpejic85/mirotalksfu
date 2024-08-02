@@ -543,8 +543,10 @@ th {
 --------------------------------------------------------------*/
 
 .dropdown-menu {
+    position: fixed;
     right: 0;
-    /* background: var(--select-bg) !important; */
+    width: 240px;
+    /* max-height: 300px; */
     border: none;
     border-radius: 5px;
     background: var(--body-bg) !important;
@@ -554,13 +556,12 @@ th {
 }
 
 .dropdown-menu button {
-    display: flex;
+    width: 100%;
+    padding: 8px 16px;
     align-items: center;
     justify-content: flex-start;
-    width: 220px;
     font-size: 0.8em;
     text-align: left;
-    padding: 8px 16px;
     border: none;
     background: none;
     cursor: pointer;
