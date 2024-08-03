@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.35
+ * @version 1.5.36
  *
  */
 
@@ -309,7 +309,6 @@ function startServer() {
     app.use(express.static(dir.public));
     app.use(bodyParser.urlencoded({ extended: true }));
     app.use(bodyParser.raw({ type: 'video/webm', limit: '50mb' })); // handle raw binary data
-    app.use(bodyParser.raw({ type: 'application/octet-stream', limit: '50mb' })); // handle raw binary data
     app.use(restApi.basePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
     // IP Whitelist check ...
