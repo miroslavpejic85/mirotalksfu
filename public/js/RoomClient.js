@@ -704,6 +704,8 @@ class RoomClient {
                         'Producer Transport disconnected',
                         'Check Your Network Connectivity (Restarted ICE)',
                         'center',
+                        false,
+                        true
                     );
                     */
                     break;
@@ -718,6 +720,8 @@ class RoomClient {
                         'Producer Transport failed',
                         'Check Your Network Connectivity',
                         'center',
+                        false,
+                        true,
                     );
                     break;
                 default:
@@ -787,6 +791,8 @@ class RoomClient {
                         'Consumer Transport disconnected',
                         'Check Your Network Connectivity (Restarted ICE)',
                         'center',
+                        false,
+                        true
                     );
                     */
                 case 'failed':
@@ -800,6 +806,8 @@ class RoomClient {
                         'Consumer Transport failed',
                         'Check Your Network Connectivity',
                         'center',
+                        false,
+                        true,
                     );
                     break;
                 default:

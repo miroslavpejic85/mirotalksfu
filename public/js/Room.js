@@ -2110,7 +2110,7 @@ function handleMediaError(mediaType, err, redirectURL = false) {
     );
 }
 
-function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false) {
+function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false, reloadPage = false) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -2123,8 +2123,13 @@ function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = f
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
-        if (result.isConfirmed && redirectURL) {
-            openURL(redirectURL);
+        if (result.isConfirmed) {
+            if (redirectURL) {
+                return openURL(redirectURL);
+            }
+            if (reloadPage) {
+                location.href = location.href;
+            }
         }
     });
 }
