@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.36
+ * @version 1.5.37
  *
  */
 
@@ -1626,6 +1626,30 @@ class RoomClient {
                     },
                 }; // video cam constraints ultra high bandwidth
                 break;
+            case '6k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 6144 },
+                        height: { exact: 3456 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints Very ultra high bandwidth
+                break;
+            case '8k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 7680 },
+                        height: { exact: 4320 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints Very ultra high bandwidth
+                break;
             default:
                 break;
         }
@@ -2230,7 +2254,6 @@ class RoomClient {
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
-                d.style.display = isHideALLVideosActive ? 'none' : 'block';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 !remoteIsScreen && elem.setAttribute('name', remotePeerId);
@@ -2272,7 +2295,7 @@ class RoomClient {
                 pn.className = html.pin;
                 ha = document.createElement('button');
                 ha.id = id + '__hideALL';
-                ha.className = html.hideALL;
+                ha.className = html.hideALL + ' focusMode';
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
@@ -2359,8 +2382,17 @@ class RoomClient {
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
                 if (remoteIsScreen && !isHideALLVideosActive) pn.click();
-                this.sound('joined');
-                handleAspectRatio();
+                if (isHideALLVideosActive) {
+                    isHideALLVideosActive = false;
+                    const children = this.videoMediaContainer.children;
+                    const btnsHA = document.querySelectorAll('.focusMode');
+                    for (let child of children) {
+                        child.style.display = 'block';
+                    }
+                    btnsHA.forEach((btn) => {
+                        btn.style.color = 'white';
+                    });
+                }
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
@@ -2378,6 +2410,8 @@ class RoomClient {
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
+                handleAspectRatio();
+                this.sound('joined');
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
@@ -6383,7 +6417,7 @@ class RoomClient {
     // HANDLE VIDEO
     // ###################################################
 
-    handleHA(uid, myVideoContainerId) {
+    handleHA(uid, videoContainerId) {
         let btnHa = this.getId(uid);
         if (btnHa) {
             btnHa.addEventListener('click', (e) => {
@@ -6398,15 +6432,15 @@ class RoomClient {
                 isHideALLVideosActive = !isHideALLVideosActive;
                 e.target.style.color = isHideALLVideosActive ? 'lime' : 'white';
                 if (isHideALLVideosActive) {
-                    const myVideoContainer = this.getId(myVideoContainerId);
-                    myVideoContainer.style.width = '100%';
-                    myVideoContainer.style.height = '100%';
+                    const videoContainer = this.getId(videoContainerId);
+                    videoContainer.style.width = '100%';
+                    videoContainer.style.height = '100%';
                 } else {
                     resizeVideoMedia();
                 }
                 const children = this.videoMediaContainer.children;
                 for (let child of children) {
-                    if (child.id != myVideoContainerId) {
+                    if (child.id != videoContainerId) {
                         child.style.display = isHideALLVideosActive ? 'none' : 'block';
                     }
                 }
