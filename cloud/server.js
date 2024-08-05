@@ -9,6 +9,7 @@ const port = process.env.PORT || 8080;
 
 // Replace with your actual logging mechanism
 const log = {
+    warn: console.warn,
     error: console.error,
     debug: console.log,
 };
@@ -38,41 +39,47 @@ function ensureRecordingDirectoryExists() {
 
 // Endpoint to handle recording uploads
 app.post('/recSync', (req, res) => {
-    if (!isServerRecordingEnabled) {
-        return res.status(403).send('Server recording is disabled');
-    }
+    try {
+        if (!isServerRecordingEnabled) {
+            return res.status(403).send('Server recording is disabled');
+        }
 
-    const { fileName } = req.query;
+        const { fileName } = req.query;
 
-    if (!fileName) {
-        return res.status(400).send('Filename not provided');
-    }
+        if (!fileName) {
+            return res.status(400).send('Filename not provided');
+        }
 
-    if (!isValidVideo(fileName)) {
-        return res.status(400).send('Invalid file name');
-    }
+        if (!isValidRecFileNameFormat(fileName)) {
+            log.warn('Invalid file name', fileName);
+            return res.status(400).send('Invalid file name');
+        }
 
-    ensureRecordingDirectoryExists();
+        ensureRecordingDirectoryExists();
 
-    const filePath = path.join(recordingDirectory, fileName);
-    const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+        const filePath = path.join(recordingDirectory, fileName);
+        const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
 
-    req.pipe(writeStream);
+        req.pipe(writeStream);
 
-    writeStream.on('error', (err) => {
-        log.error('Error writing to file:', err.message);
+        writeStream.on('error', (err) => {
+            log.error('Error writing to file:', err.message);
+            res.status(500).send('Internal Server Error');
+        });
+
+        writeStream.on('finish', () => {
+            log.debug('File saved successfully:', fileName);
+            res.status(200).send('File uploaded successfully');
+        });
+
+        req.on('error', (err) => {
+            log.error('Error processing request:', err.message);
+            res.status(500).send('Internal Server Error');
+        });
+    } catch (err) {
+        log.error('Error processing upload', err.message);
         res.status(500).send('Internal Server Error');
-    });
-
-    writeStream.on('finish', () => {
-        log.debug('File saved successfully:', fileName);
-        res.status(200).send('File uploaded successfully');
-    });
-
-    req.on('error', (err) => {
-        log.error('Error processing request:', err.message);
-        res.status(500).send('Internal Server Error');
-    });
+    }
 });
 
 // Start the server
@@ -80,7 +87,7 @@ app.listen(port, () => {
     log.debug(`Server is running on http://localhost:${port}`);
 });
 
-function isValidVideo(input) {
-    if (input.endsWith('.mp4') || input.endsWith('.webm') || input.endsWith('.ogg')) return true;
-    return false;
+function isValidRecFileNameFormat(input) {
+    const pattern = /^Rec_(?:[A-Za-z0-9-_]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.(webm)$/;
+    return pattern.test(input);
 }

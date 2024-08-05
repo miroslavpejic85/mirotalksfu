@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.38
+ * @version 1.5.39
  *
  */
 
@@ -652,22 +652,28 @@ function startServer() {
         // Store recording...
         if (serverRecordingEnabled) {
             //
-            const { fileName } = req.query;
-
-            if (!fileName) {
-                return res.status(400).send('Filename not provided');
-            }
-
-            // Rec_test_2024_08_03_16_17_01.webm
-
-            const parts = fileName.split('_');
-            const roomId = parts[1];
-
-            if (!isValidVideo(fileName) || !roomList.has(roomId)) {
-                return res.status(400).send('Invalid file name');
-            }
-
             try {
+                const { fileName } = req.query;
+
+                if (!fileName) {
+                    return res.status(400).send('Filename not provided');
+                }
+
+                // Rec_test_2024_08_03_16_17_01.webm
+
+                if (!isValidRecFileNameFormat(fileName)) {
+                    log.warn('[RecSync] - Invalid file name', fileName);
+                    return res.status(400).send('Invalid file name');
+                }
+
+                const parts = fileName.split('_');
+                const roomId = parts[1];
+
+                if (!roomList.has(roomId)) {
+                    log.warn('[RecSync] - ROomID not exists in filename', fileName);
+                    return res.status(400).send('Invalid file name');
+                }
+
                 if (!fs.existsSync(dir.rec)) {
                     fs.mkdirSync(dir.rec, { recursive: true });
                 }
@@ -2957,8 +2963,8 @@ function startServer() {
 
     // Utils...
 
-    function isValidVideo(input) {
-        if (input.endsWith('.mp4') || input.endsWith('.webm') || input.endsWith('.ogg')) return true;
-        return false;
+    function isValidRecFileNameFormat(input) {
+        const pattern = /^Rec_(?:[A-Za-z0-9-_]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.(webm)$/;
+        return pattern.test(input);
     }
 }
