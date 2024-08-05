@@ -469,12 +469,10 @@ function startServer() {
             );
 
             if (!Validator.isValidRoomName(room)) {
-                return res
-                    .status(401)
-                    .json({
-                        message:
-                            'Invalid Room name! Must be a UUID4 or an alphanumeric string without special characters or spaces.',
-                    });
+                return res.status(401).json({
+                    message:
+                        'Invalid Room name! Must be a UUID4 or an alphanumeric string without special characters or spaces.',
+                });
             }
 
             let peerUsername = '';
