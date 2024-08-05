@@ -50,7 +50,7 @@ app.post('/recSync', (req, res) => {
             return res.status(400).send('Filename not provided');
         }
 
-        if (!isValidRecFileNameFormat(fileName)) {
+        if (!fileName.startsWith('Rec_') && !fileName.endsWith('.webm')) {
             log.warn('[RecSync] - Invalid file name', fileName);
             return res.status(400).send('Invalid file name');
         }
@@ -86,9 +86,3 @@ app.post('/recSync', (req, res) => {
 app.listen(port, () => {
     log.debug(`Server is running on http://localhost:${port}`);
 });
-
-function isValidRecFileNameFormat(input) {
-    const pattern =
-        /^Rec_(?:[A-Za-z0-9-_]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.(webm)$/;
-    return pattern.test(input);
-}
