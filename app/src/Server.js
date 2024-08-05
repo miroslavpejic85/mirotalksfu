@@ -658,7 +658,12 @@ function startServer() {
                 return res.status(400).send('Filename not provided');
             }
 
-            if (!isValidVideo(fileName)) {
+            // Rec_test_2024_08_03_16_17_01.webm
+
+            const parts = fileName.split('_');
+            const roomId = parts[1];
+
+            if (!isValidVideo(fileName) || !roomList.has(roomId)) {
                 return res.status(400).send('Invalid file name');
             }
 
