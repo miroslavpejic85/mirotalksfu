@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.39
+ * @version 1.5.40
  *
  */
 
@@ -69,6 +69,7 @@ const Room = require('./Room');
 const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
+const Validator = require('./Validator');
 const log = new Logger('Server');
 const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
@@ -467,6 +468,15 @@ function startServer() {
                 req.query,
             );
 
+            if (!Validator.isValidRoomName(room)) {
+                return res
+                    .status(401)
+                    .json({
+                        message:
+                            'Invalid Room name! Must be a UUID4 or an alphanumeric string without special characters or spaces.',
+                    });
+            }
+
             let peerUsername = '';
             let peerPassword = '';
             let isPeerValid = false;
@@ -534,14 +544,14 @@ function startServer() {
     // join room by id
     app.get('/join/:roomId', (req, res) => {
         //
-        const allowRoomAccess = isAllowedRoomAccess(
-            '/join/:roomId',
-            req,
-            hostCfg,
-            authHost,
-            roomList,
-            req.params.roomId,
-        );
+        const roomId = req.params.roomId;
+
+        if (!Validator.isValidRoomName(roomId)) {
+            log.warn('/join/:roomId invalid', roomId);
+            return res.redirect('/');
+        }
+
+        const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, authHost, roomList, roomId);
 
         if (allowRoomAccess) {
             if (hostCfg.protected) authHost.setRoomActive();
@@ -659,9 +669,7 @@ function startServer() {
                     return res.status(400).send('Filename not provided');
                 }
 
-                // Rec_test_2024_08_03_16_17_01.webm
-
-                if (!fileName.startsWith('Rec_') && !fileName.endsWith('.webm')) {
+                if (!Validator.isValidRecFileNameFormat(fileName)) {
                     log.warn('[RecSync] - Invalid file name', fileName);
                     return res.status(400).send('Invalid file name');
                 }
@@ -1184,6 +1192,11 @@ function startServer() {
             const data = checkXSS(dataObject);
 
             log.info('User joined', data);
+
+            if (!Validator.isValidRoomName(socket.room_id)) {
+                log.warn('[Join] - Invalid room name', socket.room_id);
+                return cb('invalid');
+            }
 
             const room = roomList.get(socket.room_id);
 

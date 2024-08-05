@@ -214,13 +214,28 @@ function getUUID4() {
 }
 
 function joinRoom() {
-    const roomName = filterXSS(document.getElementById('roomName').value);
-    if (roomName) {
-        window.location.href = '/join/' + roomName;
-        window.localStorage.lastRoom = roomName;
-    } else {
+    const roomName = filterXSS(document.getElementById('roomName').value).trim();
+    const roomValid = isValidRoomName(roomName);
+
+    if (!roomName) {
         alert('Room name empty!\nPlease pick a room name.');
+        return;
     }
+    if (!roomValid) {
+        alert('Invalid Room name!\nMust be a UUID4 or an alphanumeric string without special characters or spaces.');
+        return;
+    }
+    window.location.href = '/join/' + roomName;
+    window.localStorage.lastRoom = roomName;
+}
+
+function isValidRoomName(input) {
+    if (typeof input !== 'string') {
+        return false;
+    }
+    const pattern =
+        /^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|[A-Za-z0-9-_]+)$/;
+    return pattern.test(input);
 }
 
 function adultContent() {

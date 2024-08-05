@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.39
+ * @version 1.5.40
  *
  */
 
@@ -399,6 +399,12 @@ class RoomClient {
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+                if (room === 'invalid') {
+                    console.log(
+                        '00-WARNING ----> Room is Invalid! Must be a UUID4 or an alphanumeric string without special characters or spaces',
+                    );
+                    return this.roomInvalid();
+                }
                 if (room === 'notAllowed') {
                     console.log(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user',
@@ -6146,6 +6152,23 @@ class RoomClient {
     // ####################################################
     // HANDLE ROOM ACTION
     // ####################################################
+
+    roomInvalid() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Oops, Room not valid',
+            text: 'Invalid room name! Must be a UUID4 or an alphanumeric string without special characters or spaces',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL(`/`);
+        });
+    }
 
     userRoomNotAllowed() {
         this.sound('alert');
