@@ -51,7 +51,7 @@ app.post('/recSync', (req, res) => {
         }
 
         if (!isValidRecFileNameFormat(fileName)) {
-            log.warn('Invalid file name', fileName);
+            log.warn('[RecSync] - Invalid file name', fileName);
             return res.status(400).send('Invalid file name');
         }
 
@@ -63,21 +63,21 @@ app.post('/recSync', (req, res) => {
         req.pipe(writeStream);
 
         writeStream.on('error', (err) => {
-            log.error('Error writing to file:', err.message);
+            log.error('[RecSync] - Error writing to file:', err.message);
             res.status(500).send('Internal Server Error');
         });
 
         writeStream.on('finish', () => {
-            log.debug('File saved successfully:', fileName);
+            log.debug('[RecSync] - File saved successfully:', fileName);
             res.status(200).send('File uploaded successfully');
         });
 
         req.on('error', (err) => {
-            log.error('Error processing request:', err.message);
+            log.error('[RecSync] - Error processing request:', err.message);
             res.status(500).send('Internal Server Error');
         });
     } catch (err) {
-        log.error('Error processing upload', err.message);
+        log.error('[RecSync] - Error processing upload', err.message);
         res.status(500).send('Internal Server Error');
     }
 });
@@ -88,6 +88,7 @@ app.listen(port, () => {
 });
 
 function isValidRecFileNameFormat(input) {
-    const pattern = /^Rec_(?:[A-Za-z0-9-_]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.(webm)$/;
+    const pattern =
+        /^Rec_(?:[A-Za-z0-9-_]+|[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})_\d{4}_\d{2}_\d{2}_\d{2}_\d{2}_\d{2}\.(webm)$/;
     return pattern.test(input);
 }
