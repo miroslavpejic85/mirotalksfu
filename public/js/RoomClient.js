@@ -790,7 +790,7 @@ class RoomClient {
                     */
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
-
+                    /*
                     this.consumerTransport.close();
 
                     popupHtmlMessage(
@@ -800,6 +800,7 @@ class RoomClient {
                         'Check Your Network Connectivity',
                         'center',
                     );
+                    */
                     break;
                 default:
                     console.log('Consumer transport connection state changes', {
