@@ -48,6 +48,10 @@ app.post('/recSync', (req, res) => {
         return res.status(400).send('Filename not provided');
     }
 
+    if (!isValidVideo(fileName)) {
+        return res.status(400).send('Invalid file name');
+    }
+
     ensureRecordingDirectoryExists();
 
     const filePath = path.join(recordingDirectory, fileName);
@@ -75,3 +79,8 @@ app.post('/recSync', (req, res) => {
 app.listen(port, () => {
     log.debug(`Server is running on http://localhost:${port}`);
 });
+
+function isValidVideo(input) {
+    if (input.endsWith('.mp4') || input.endsWith('.webm') || input.endsWith('.ogg')) return true;
+    return false;
+}
