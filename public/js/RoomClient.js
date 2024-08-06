@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.32
+ * @version 1.5.42
  *
  */
 
@@ -57,6 +57,7 @@ const icons = {
     lock: '<i class="fa-solid fa-lock"></i>',
     unlock: '<i class="fa-solid fa-lock-open"></i>',
     pitchBar: '<i class="fas fa-microphone-lines"></i>',
+    mirror: '<i class="fas fa-arrow-right-arrow-left"></i>',
     sounds: '<i class="fas fa-music"></i>',
     fileSend: '<i class="fa-solid fa-file-export"></i>',
     fileReceive: '<i class="fa-solid fa-file-import"></i>',
@@ -398,6 +399,10 @@ class RoomClient {
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+                if (room === 'invalid') {
+                    console.log('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
+                    return this.roomInvalid();
+                }
                 if (room === 'notAllowed') {
                     console.log(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user',
@@ -703,6 +708,8 @@ class RoomClient {
                         'Producer Transport disconnected',
                         'Check Your Network Connectivity (Restarted ICE)',
                         'center',
+                        false,
+                        true
                     );
                     */
                     break;
@@ -717,6 +724,8 @@ class RoomClient {
                         'Producer Transport failed',
                         'Check Your Network Connectivity',
                         'center',
+                        false,
+                        true,
                     );
                     break;
                 default:
@@ -786,6 +795,8 @@ class RoomClient {
                         'Consumer Transport disconnected',
                         'Check Your Network Connectivity (Restarted ICE)',
                         'center',
+                        false,
+                        true
                     );
                     */
                 case 'failed':
@@ -799,6 +810,8 @@ class RoomClient {
                         'Consumer Transport failed',
                         'Check Your Network Connectivity',
                         'center',
+                        false,
+                        true,
                     );
                     */
                     break;
@@ -1626,6 +1639,30 @@ class RoomClient {
                     },
                 }; // video cam constraints ultra high bandwidth
                 break;
+            case '6k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 6144 },
+                        height: { exact: 3456 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints Very ultra high bandwidth
+                break;
+            case '8k':
+                videoConstraints = {
+                    audio: false,
+                    video: {
+                        width: { exact: 7680 },
+                        height: { exact: 4320 },
+                        deviceId: deviceId,
+                        aspectRatio: 1.777,
+                        frameRate: frameRate,
+                    },
+                }; // video cam constraints Very ultra high bandwidth
+                break;
             default:
                 break;
         }
@@ -2230,7 +2267,6 @@ class RoomClient {
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
-                d.style.display = isHideALLVideosActive ? 'none' : 'block';
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 !remoteIsScreen && elem.setAttribute('name', remotePeerId);
@@ -2272,7 +2308,7 @@ class RoomClient {
                 pn.className = html.pin;
                 ha = document.createElement('button');
                 ha.id = id + '__hideALL';
-                ha.className = html.hideALL;
+                ha.className = html.hideALL + ' focusMode';
                 sf = document.createElement('button');
                 sf.id = id + '___' + remotePeerId + '___sendFile';
                 sf.className = html.sendFile;
@@ -2359,8 +2395,17 @@ class RoomClient {
                 this.checkPeerInfoStatus(peer_info);
                 if (!remoteIsScreen && remotePrivacyOn) this.setVideoPrivacyStatus(remotePeerId, remotePrivacyOn);
                 if (remoteIsScreen && !isHideALLVideosActive) pn.click();
-                this.sound('joined');
-                handleAspectRatio();
+                if (isHideALLVideosActive) {
+                    isHideALLVideosActive = false;
+                    const children = this.videoMediaContainer.children;
+                    const btnsHA = document.querySelectorAll('.focusMode');
+                    for (let child of children) {
+                        child.style.display = 'block';
+                    }
+                    btnsHA.forEach((btn) => {
+                        btn.style.color = 'white';
+                    });
+                }
                 console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
@@ -2378,6 +2423,8 @@ class RoomClient {
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
+                handleAspectRatio();
+                this.sound('joined');
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
@@ -4842,7 +4889,7 @@ class RoomClient {
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
             const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
             try {
-                await axios.post(
+                const response = await axios.post(
                     `${this.recording.recSyncServerEndpoint}/recSync?fileName=` + rc.recServerFileName,
                     chunk,
                     {
@@ -4851,8 +4898,25 @@ class RoomClient {
                         },
                     },
                 );
+                console.log('Chunk synced successfully:', response.data);
             } catch (error) {
-                console.error('Error syncing chunk:', error.message);
+                let errorMessage = 'Recording stopped! ';
+                if (error.response) {
+                    errorMessage += error.response.data.message;
+                    console.error('Error syncing chunk', {
+                        status_code: error.response.status,
+                        response_data: error.response.data,
+                        response_headers: error.response.headers,
+                    });
+                } else if (error.request) {
+                    console.error('Error syncing chunk: No response received', { request_details: error.request });
+                } else {
+                    errorMessage += error.message;
+                    console.error('Error syncing chunk:', error.message);
+                }
+                userLog('warning', errorMessage, 'top-end', 3000);
+                rc.stopRecording();
+                rc.saveLastRecordingInfo('<br/><span class="red">' + errorMessage + '.</span>');
             }
         }
     }
@@ -5800,6 +5864,9 @@ class RoomClient {
         const status = active ? 'ON' : 'OFF';
         this.sound('switch');
         switch (action) {
+            case 'toggleVideoMirror':
+                this.userLog('info', `${icons.mirror} Video mirror ${status}`, 'top-end');
+                break;
             case 'pitchBar':
                 this.userLog('info', `${icons.pitchBar} Audio pitch bar ${status}`, 'top-end');
                 break;
@@ -6102,6 +6169,23 @@ class RoomClient {
     // HANDLE ROOM ACTION
     // ####################################################
 
+    roomInvalid() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.forbidden,
+            title: 'Oops, Room not valid',
+            text: 'Invalid Room name! Path traversal pattern detected!',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL(`/`);
+        });
+    }
+
     userRoomNotAllowed() {
         this.sound('alert');
         Swal.fire({
@@ -6380,7 +6464,7 @@ class RoomClient {
     // HANDLE VIDEO
     // ###################################################
 
-    handleHA(uid, myVideoContainerId) {
+    handleHA(uid, videoContainerId) {
         let btnHa = this.getId(uid);
         if (btnHa) {
             btnHa.addEventListener('click', (e) => {
@@ -6395,15 +6479,15 @@ class RoomClient {
                 isHideALLVideosActive = !isHideALLVideosActive;
                 e.target.style.color = isHideALLVideosActive ? 'lime' : 'white';
                 if (isHideALLVideosActive) {
-                    const myVideoContainer = this.getId(myVideoContainerId);
-                    myVideoContainer.style.width = '100%';
-                    myVideoContainer.style.height = '100%';
+                    const videoContainer = this.getId(videoContainerId);
+                    videoContainer.style.width = '100%';
+                    videoContainer.style.height = '100%';
                 } else {
                     resizeVideoMedia();
                 }
                 const children = this.videoMediaContainer.children;
                 for (let child of children) {
-                    if (child.id != myVideoContainerId) {
+                    if (child.id != videoContainerId) {
                         child.style.display = isHideALLVideosActive ? 'none' : 'block';
                     }
                 }
@@ -7549,6 +7633,10 @@ class RoomClient {
             })
             .catch((err) => {
                 console.error('Video AI getAvatarList error:', err);
+                this.userLog('warning', 'Video AI getAvatarList error:\n' + err, 'top-end', 6000);
+                this.getId('tabVideoAI').style.display = 'none';
+                this.getId('tabVideoAIBtn').style.display = 'none';
+                this.getId('tabRoomBtn').click();
             });
     }
 
@@ -8182,6 +8270,11 @@ class RoomClient {
                 copyToClipboard(rtmp);
             }
         });
+    }
+
+    toggleVideoMirror() {
+        const peerVideo = this.getName(this.peer_id)[0];
+        if (peerVideo) peerVideo.classList.toggle('mirror');
     }
 
     sleep(ms) {

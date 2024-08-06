@@ -9,6 +9,7 @@ const port = process.env.PORT || 8080;
 
 // Replace with your actual logging mechanism
 const log = {
+    warn: console.warn,
     error: console.error,
     debug: console.log,
 };
@@ -38,40 +39,66 @@ function ensureRecordingDirectoryExists() {
 
 // Endpoint to handle recording uploads
 app.post('/recSync', (req, res) => {
-    if (!isServerRecordingEnabled) {
-        return res.status(403).send('Server recording is disabled');
-    }
+    try {
+        if (!isServerRecordingEnabled) {
+            return res.status(403).send('Server recording is disabled');
+        }
 
-    const { fileName } = req.query;
+        const { fileName } = req.query;
 
-    if (!fileName) {
-        return res.status(400).send('Filename not provided');
-    }
+        if (!fileName) {
+            return res.status(400).send('Filename not provided');
+        }
 
-    ensureRecordingDirectoryExists();
+        if (!isValidRecFileNameFormat(fileName)) {
+            log.warn('[RecSync] - Invalid file name', fileName);
+            return res.status(400).send('Invalid file name');
+        }
 
-    const filePath = path.join(recordingDirectory, fileName);
-    const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+        ensureRecordingDirectoryExists();
 
-    req.pipe(writeStream);
+        const filePath = path.join(recordingDirectory, fileName);
+        const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
 
-    writeStream.on('error', (err) => {
-        log.error('Error writing to file:', err.message);
+        req.pipe(writeStream);
+
+        writeStream.on('error', (err) => {
+            log.error('[RecSync] - Error writing to file:', err.message);
+            res.status(500).send('Internal Server Error');
+        });
+
+        writeStream.on('finish', () => {
+            log.debug('[RecSync] - File saved successfully:', fileName);
+            res.status(200).send('File uploaded successfully');
+        });
+
+        req.on('error', (err) => {
+            log.error('[RecSync] - Error processing request:', err.message);
+            res.status(500).send('Internal Server Error');
+        });
+    } catch (err) {
+        log.error('[RecSync] - Error processing upload', err.message);
         res.status(500).send('Internal Server Error');
-    });
-
-    writeStream.on('finish', () => {
-        log.debug('File saved successfully:', fileName);
-        res.status(200).send('File uploaded successfully');
-    });
-
-    req.on('error', (err) => {
-        log.error('Error processing request:', err.message);
-        res.status(500).send('Internal Server Error');
-    });
+    }
 });
 
 // Start the server
 app.listen(port, () => {
     log.debug(`Server is running on http://localhost:${port}`);
 });
+
+// Utils
+function isValidRecFileNameFormat(input) {
+    if (typeof input !== 'string') {
+        return false;
+    }
+    if (!input.startsWith('Rec_') || !input.endsWith('.webm')) {
+        return false;
+    }
+    return !hasPathTraversal(input);
+}
+
+function hasPathTraversal(input) {
+    const pathTraversalPattern = /(\.\.(\/|\\))+/;
+    return pathTraversalPattern.test(input);
+}

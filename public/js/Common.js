@@ -246,13 +246,28 @@ function createRandomWordsString(dictionary) {
 //}
 
 function joinRoom() {
-    const roomName = filterXSS(document.getElementById('roomName').value);
-    if (roomName) {
-        window.location.href = '/join/' + roomName;
-        window.localStorage.lastRoom = roomName;
-    } else {
+    const roomName = filterXSS(document.getElementById('roomName').value).trim().replace(/\s+/g, '-');
+    const roomValid = isValidRoomName(roomName);
+
+    if (!roomName) {
         alert('Room name empty!\nPlease pick a room name.');
+        return;
     }
+    if (!roomValid) {
+        alert('Invalid Room name!\nPath traversal pattern detected!');
+        return;
+    }
+
+    window.location.href = '/join/' + roomName;
+    window.localStorage.lastRoom = roomName;
+}
+
+function isValidRoomName(input) {
+    if (typeof input !== 'string') {
+        return false;
+    }
+    const pathTraversalPattern = /(\.\.(\/|\\))+/;
+    return !pathTraversalPattern.test(input);
 }
 
 function adultContent() {

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.32
+ * @version 1.5.42
  *
  */
 
@@ -2047,7 +2047,7 @@ async function changeCamera(deviceId) {
         })
         .catch((error) => {
             console.error('[Error] changeCamera', error);
-            handleMediaError('video/audio', error);
+            handleMediaError('video/audio', error, '/');
         });
 }
 
@@ -2055,7 +2055,7 @@ async function changeCamera(deviceId) {
 // HANDLE MEDIA ERROR
 // ####################################################
 
-function handleMediaError(mediaType, err) {
+function handleMediaError(mediaType, err, redirectURL = false) {
     sound('alert');
 
     let errMessage = err;
@@ -2103,8 +2103,6 @@ function handleMediaError(mediaType, err) {
         </ul>
     `;
 
-    const redirectURL = ['screen', 'screenType'].includes(mediaType) || !getUserMediaError ? false : '/';
-
     popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
 
     throw new Error(
@@ -2112,7 +2110,7 @@ function handleMediaError(mediaType, err) {
     );
 }
 
-function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false) {
+function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = false, reloadPage = false) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -2125,8 +2123,13 @@ function popupHtmlMessage(icon, imageUrl, title, html, position, redirectURL = f
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
-        if (result.isConfirmed && redirectURL) {
-            openURL(redirectURL);
+        if (result.isConfirmed) {
+            if (redirectURL) {
+                return openURL(redirectURL);
+            }
+            if (reloadPage) {
+                location.href = location.href;
+            }
         }
     });
 }
@@ -2275,6 +2278,11 @@ function handleSelects() {
         rc.roomMessage('pitchBar', isPitchBarEnabled);
         localStorageSettings.pitch_bar = isPitchBarEnabled;
         lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
+    switchVideoMirror.onchange = (e) => {
+        rc.toggleVideoMirror();
+        rc.roomMessage('toggleVideoMirror', e.currentTarget.checked);
         e.target.blur();
     };
     switchSounds.onchange = (e) => {
@@ -2783,6 +2791,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
+        switchVideoMirror.disabled = false;
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
@@ -2805,6 +2814,7 @@ function handleRoomClientEvents() {
         show(startVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
+        switchVideoMirror.disabled = true;
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
@@ -3909,6 +3919,10 @@ function getParticipantsList(peers) {
                         </button>
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
 
+                li += `<li><button class="ml5" id='${peer_id}___pAudioMute' onclick="rc.peerAction('me',this.id,'mute')">${_PEER.audioOn} Toggle audio</button></li>`;
+                li += `<li><button class="ml5" id='${peer_id}___pVideoHide' onclick="rc.peerAction('me',this.id,'hide')">${_PEER.videoOn} Toggle video</button></li>`;
+                li += `<li><button class="ml5" id='${peer_id}___pScreenStop' onclick="rc.peerAction('me',this.id,'stop')">${_PEER.screenOn} Toggle screen</button></li>`;
+
                 if (BUTTONS.participantsList.sendFileButton) {
                     li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>`;
                 }
@@ -4321,7 +4335,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.32',
+        title: 'WebRTC SFU v1.5.42',
         html: `
         <br />
         <div id="about">
