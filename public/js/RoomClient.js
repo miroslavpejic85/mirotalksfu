@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.40
+ * @version 1.5.41
  *
  */
 
@@ -401,7 +401,7 @@ class RoomClient {
                 console.log('##### JOIN ROOM #####', room);
                 if (room === 'invalid') {
                     console.log(
-                        '00-WARNING ----> Room is Invalid! Must be a UUID4 or an alphanumeric string without special characters or spaces',
+                        '00-WARNING ----> Room is Invalid! Must be a UUID4 or an ALPHANUMERIC string without special characters or spaces',
                     );
                     return this.roomInvalid();
                 }
@@ -4890,7 +4890,7 @@ class RoomClient {
         for (let chunkIndex = 0; chunkIndex < totalChunks; chunkIndex++) {
             const chunk = arrayBuffer.slice(chunkIndex * chunkSize, (chunkIndex + 1) * chunkSize);
             try {
-                await axios.post(
+                const response = await axios.post(
                     `${this.recording.recSyncServerEndpoint}/recSync?fileName=` + rc.recServerFileName,
                     chunk,
                     {
@@ -4899,8 +4899,25 @@ class RoomClient {
                         },
                     },
                 );
+                console.log('Chunk synced successfully:', response.data);
             } catch (error) {
-                console.error('Error syncing chunk:', error.message);
+                let errorMessage = 'Recording stopped! ';
+                if (error.response) {
+                    errorMessage += error.response.data.message;
+                    console.error('Error syncing chunk', {
+                        status_code: error.response.status,
+                        response_data: error.response.data,
+                        response_headers: error.response.headers,
+                    });
+                } else if (error.request) {
+                    console.error('Error syncing chunk: No response received', { request_details: error.request });
+                } else {
+                    errorMessage += error.message;
+                    console.error('Error syncing chunk:', error.message);
+                }
+                userLog('warning', errorMessage, 'top-end', 3000);
+                rc.stopRecording();
+                rc.saveLastRecordingInfo('<br/><span class="red">' + errorMessage + '.</span>');
             }
         }
     }
@@ -6161,7 +6178,7 @@ class RoomClient {
             background: swalBackground,
             imageUrl: image.forbidden,
             title: 'Oops, Room not valid',
-            text: 'Invalid room name! Must be a UUID4 or an alphanumeric string without special characters or spaces',
+            text: 'Invalid room name! Must be a UUID4 or an ALPHANUMERIC string without special characters or spaces',
             confirmButtonText: `OK`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },

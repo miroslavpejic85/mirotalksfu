@@ -214,7 +214,7 @@ function getUUID4() {
 }
 
 function joinRoom() {
-    const roomName = filterXSS(document.getElementById('roomName').value).trim();
+    const roomName = filterXSS(document.getElementById('roomName').value).trim().replace(/\s+/g, '-');
     const roomValid = isValidRoomName(roomName);
 
     if (!roomName) {
@@ -222,7 +222,7 @@ function joinRoom() {
         return;
     }
     if (!roomValid) {
-        alert('Invalid Room name!\nMust be a UUID4 or an alphanumeric string without special characters or spaces.');
+        alert('Invalid Room name!\nMust be a UUID4 or an ALPHANUMERIC string without special characters.');
         return;
     }
     window.location.href = '/join/' + roomName;
