@@ -7634,6 +7634,10 @@ class RoomClient {
             })
             .catch((err) => {
                 console.error('Video AI getAvatarList error:', err);
+                this.userLog('warning', 'Video AI getAvatarList error:\n' + err, 'top-end', 6000);
+                this.getId('tabVideoAI').style.display = 'none';
+                this.getId('tabVideoAIBtn').style.display = 'none';
+                this.getId('tabRoomBtn').click();
             });
     }
 
