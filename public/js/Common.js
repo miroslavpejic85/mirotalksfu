@@ -222,9 +222,10 @@ function joinRoom() {
         return;
     }
     if (!roomValid) {
-        alert('Invalid Room name!\nMust be a UUID4 or an ALPHANUMERIC string without special characters.');
+        alert('Invalid Room name!\nPath traversal pattern detected!');
         return;
     }
+
     window.location.href = '/join/' + roomName;
     window.localStorage.lastRoom = roomName;
 }
@@ -233,9 +234,8 @@ function isValidRoomName(input) {
     if (typeof input !== 'string') {
         return false;
     }
-    const pattern =
-        /^(?:[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-4[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|[A-Za-z0-9-_]+)$/;
-    return pattern.test(input);
+    const pathTraversalPattern = /(\.\.(\/|\\))+/;
+    return !pathTraversalPattern.test(input);
 }
 
 function adultContent() {

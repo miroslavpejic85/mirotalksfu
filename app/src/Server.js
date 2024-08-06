@@ -44,7 +44,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.41
+ * @version 1.5.42
  *
  */
 
@@ -470,8 +470,7 @@ function startServer() {
 
             if (!Validator.isValidRoomName(room)) {
                 return res.status(400).json({
-                    message:
-                        'Invalid Room name! Must be a UUID4 or an ALPHANUMERIC string without special characters or spaces.',
+                    message: 'Invalid Room name! Invalid Room name!\nPath traversal pattern detected!',
                 });
             }
 

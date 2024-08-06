@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.41
+ * @version 1.5.42
  *
  */
 
@@ -400,9 +400,7 @@ class RoomClient {
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
                 if (room === 'invalid') {
-                    console.log(
-                        '00-WARNING ----> Room is Invalid! Must be a UUID4 or an ALPHANUMERIC string without special characters or spaces',
-                    );
+                    console.log('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
                     return this.roomInvalid();
                 }
                 if (room === 'notAllowed') {
@@ -6178,7 +6176,7 @@ class RoomClient {
             background: swalBackground,
             imageUrl: image.forbidden,
             title: 'Oops, Room not valid',
-            text: 'Invalid room name! Must be a UUID4 or an ALPHANUMERIC string without special characters or spaces',
+            text: 'Invalid Room name! Path traversal pattern detected!',
             confirmButtonText: `OK`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
