@@ -157,11 +157,13 @@ if (sentryEnabled) {
         ],
         tracesSampleRate: sentryTracesSampleRate,
     });
+    /*
     log.log('test-log');
     log.info('test-info');
     log.warn('test-warning');
     log.error('test-error');
     log.debug('test-debug');
+    */
 }
 
 // Stats
