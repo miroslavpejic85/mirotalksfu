@@ -470,7 +470,7 @@ function startServer() {
 
             if (!Validator.isValidRoomName(room)) {
                 return res.status(400).json({
-                    message: 'Invalid Room name! Invalid Room name!\nPath traversal pattern detected!',
+                    message: 'Invalid Room name!\nPath traversal pattern detected!',
                 });
             }
 
