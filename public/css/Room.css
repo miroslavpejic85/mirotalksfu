@@ -548,10 +548,9 @@ th {
 
 .dropdown-menu {
     position: fixed;
-    right: 0;
     /* max-height: 300px; */
     border: none;
-    border-radius: 5px;
+    border-radius: 10px !important;
     background: var(--body-bg) !important;
     box-shadow: var(--box-shadow);
     overflow-y: auto;

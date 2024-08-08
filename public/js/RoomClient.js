@@ -2468,7 +2468,7 @@ class RoomClient {
                 // Check if video is in focus-mode...
                 if (d.hasAttribute('focus-mode')) {
                     const dhaBtn = this.getId(consumer_id + '__hideALL');
-                    if (dhaBtn) { 
+                    if (dhaBtn) {
                         dhaBtn.click();
                     }
                 }
