@@ -263,7 +263,7 @@ function setCustomTheme() {
 
 function setTheme() {
     switch (theme) {
-        case 'elegant':
+        case 'default':
             document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #000000, #434343)');
             document.documentElement.style.setProperty('--select-bg', '#333333');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');

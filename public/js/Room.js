@@ -4096,7 +4096,7 @@ function setTheme() {
     selectTheme.selectedIndex = localStorageSettings.theme;
     const theme = selectTheme.value;
     switch (theme) {
-        case 'elegant':
+        case 'default':
             swalBackground = 'linear-gradient(135deg, #000000, #434343)';
             document.documentElement.style.setProperty('--body-bg', 'linear-gradient(135deg, #000000, #434343)');
             document.documentElement.style.setProperty('--trx-bg', 'linear-gradient(135deg, #000000, #434343)');
