@@ -10,7 +10,6 @@
 dependencies: {
     @ffmpeg-installer/ffmpeg: https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
-    @sentry/integrations    : https://www.npmjs.com/package/@sentry/integrations
     axios                   : https://www.npmjs.com/package/axios
     body-parser             : https://www.npmjs.com/package/body-parser
     compression             : https://www.npmjs.com/package/compression
@@ -44,7 +43,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.44
+ * @version 1.5.45
  *
  */
 
@@ -75,7 +74,6 @@ const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
 const Sentry = require('@sentry/node');
-const { CaptureConsole } = require('@sentry/integrations');
 const restrictAccessByIP = require('./middleware/IpWhitelist.js');
 const packageJson = require('../../package.json');
 
@@ -150,7 +148,7 @@ if (sentryEnabled) {
     Sentry.init({
         dsn: sentryDSN,
         integrations: [
-            new CaptureConsole({
+            Sentry.captureConsoleIntegration({
                 // ['log', 'info', 'warn', 'error', 'debug', 'assert']
                 levels: ['error'],
             }),
@@ -163,7 +161,7 @@ if (sentryEnabled) {
     log.warn('test-warning');
     log.error('test-error');
     log.debug('test-debug');
-    */
+*/
 }
 
 // Stats
