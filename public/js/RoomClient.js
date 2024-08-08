@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.43
+ * @version 1.5.44
  *
  */
 
@@ -2465,6 +2465,13 @@ class RoomClient {
         if (consumer_kind === 'video') {
             const d = this.getId(consumer_id + '__video');
             if (d) {
+                // Check if video is in focus-mode...
+                if (d.hasAttribute('focus-mode')) {
+                    const dhaBtn = this.getId(consumer_id + '__hideALL');
+                    if (dhaBtn) { 
+                        dhaBtn.click();
+                    }
+                }
                 d.parentNode.removeChild(d);
                 //alert(this.pinnedVideoPlayerId + '==' + consumer_id);
                 if (this.isVideoPinned && this.pinnedVideoPlayerId == consumer_id) {
@@ -6475,14 +6482,16 @@ class RoomClient {
                         6000,
                     );
                 }
+                const videoContainer = this.getId(videoContainerId);
                 isHideALLVideosActive = !isHideALLVideosActive;
                 e.target.style.color = isHideALLVideosActive ? 'lime' : 'white';
                 if (isHideALLVideosActive) {
-                    const videoContainer = this.getId(videoContainerId);
                     videoContainer.style.width = '100%';
                     videoContainer.style.height = '100%';
+                    videoContainer.setAttribute('focus-mode', 'true');
                 } else {
                     resizeVideoMedia();
+                    videoContainer.removeAttribute('focus-mode');
                 }
                 const children = this.videoMediaContainer.children;
                 for (let child of children) {
