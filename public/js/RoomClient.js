@@ -8290,7 +8290,6 @@ class RoomClient {
         const video = document.createElement('video');
 
         try {
-            this.sound('snapshot');
             const captureStream = await navigator.mediaDevices.getDisplayMedia({
                 video: true,
             });
@@ -8302,6 +8301,8 @@ class RoomClient {
 
             // Wait for the video to start playing
             video.onplay = async () => {
+                this.sound('snapshot');
+
                 // Sleep some ms
                 await this.sleep(1000);
 
