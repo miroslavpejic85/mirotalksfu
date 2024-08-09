@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.45
+ * @version 1.5.46
  *
  */
 
@@ -8278,6 +8278,55 @@ class RoomClient {
                 copyToClipboard(rtmp);
             }
         });
+    }
+
+    // ####################################################
+    // ROOM SNAPSHOT WINDOW/SCREEN/TAB
+    // ####################################################
+
+    async snapshotRoom() {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        const video = document.createElement('video');
+
+        try {
+            this.sound('snapshot');
+            const captureStream = await navigator.mediaDevices.getDisplayMedia({
+                video: true,
+            });
+
+            video.srcObject = captureStream;
+            video.onloadedmetadata = () => {
+                video.play();
+            };
+
+            // Wait for the video to start playing
+            video.onplay = async () => {
+                // Sleep some ms
+                await this.sleep(1000);
+
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+                // Create a link element to download the image
+                const link = document.createElement('a');
+                link.href = canvas.toDataURL('image/png');
+                link.download = 'Room_' + this.room_id + '_' + getDataTimeString() + '_snapshot.png';
+                link.click();
+
+                // Stop all video tracks to release the capture stream
+                captureStream.getTracks().forEach((track) => track.stop());
+
+                // Clean up: remove references to avoid memory leaks
+                video.srcObject = null;
+                canvas.width = 0;
+                canvas.height = 0;
+            };
+        } catch (err) {
+            console.error('Error: ' + err);
+            this.userLog('error', 'Snapshot room error ' + err.message, 'top-end', 6000);
+        }
     }
 
     toggleVideoMirror() {

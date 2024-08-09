@@ -33,6 +33,7 @@ const commands = {
     toggleTr: 'toggle transcription',
     whiteboardOn: 'open the whiteboard',
     whiteboardOff: 'close the whiteboard',
+    snapshotRoom: 'Snapshot room',
     recordingOn: 'start the recording',
     recordingPause: 'pause the recording',
     recordingResume: 'resume the recording',
@@ -214,6 +215,10 @@ function execVoiceCommands(transcript) {
         case commands.whiteboardOff:
             printCommand(commands.whiteboardOff);
             whiteboardCloseBtn.click();
+            break;
+        case commands.snapshotRoom:
+            printCommand(commands.snapshotRoom);
+            snapshotRoomButton.click();
             break;
         case commands.recordingOn:
             printCommand(commands.recordingOn);

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.45
+ * @version 1.5.46
  *
  */
 
@@ -377,6 +377,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('pollButton', 'Toggle the poll', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+        setTippy('snapshotRoomButton', 'Snapshot the room', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('aboutButton', 'About this project', placement);
 
@@ -1337,6 +1338,7 @@ function roomIsReady() {
                 show(startScreenButton);
                 show(ScreenFpsDiv);
             }
+            BUTTONS.main.snapshotRoomButton && show(snapshotRoomButton);
         }
         BUTTONS.chat.chatPinButton && show(chatTogglePin);
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
@@ -1825,6 +1827,9 @@ function handleButtons() {
     };
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
+    };
+    snapshotRoomButton.onclick = () => {
+        rc.snapshotRoom();
     };
     whiteboardPencilBtn.onclick = () => {
         whiteboardIsDrawingMode(true);
@@ -4335,7 +4340,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.45',
+        title: 'WebRTC SFU v1.5.46',
         html: `
         <br />
         <div id="about">

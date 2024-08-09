@@ -359,6 +359,7 @@ module.exports = {
                 raiseHandButton: true,
                 transcriptionButton: true,
                 whiteboardButton: true,
+                snapshotRoomButton: true,
                 emojiRoomButton: true,
                 settingsButton: true,
                 aboutButton: true, // Please keep me always visible, thank you!
