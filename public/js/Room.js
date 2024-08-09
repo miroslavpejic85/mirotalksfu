@@ -377,7 +377,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('pollButton', 'Toggle the poll', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
-        setTippy('snapshotRoomButton', 'Snapshot Screen, Window, or Tab', placement);
+        setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('aboutButton', 'About this project', placement);
 
