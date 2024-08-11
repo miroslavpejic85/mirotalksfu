@@ -356,6 +356,7 @@ module.exports = {
                 swapCameraButton: true,
                 chatButton: true,
                 pollButton: true,
+                editorButton: true,
                 raiseHandButton: true,
                 transcriptionButton: true,
                 whiteboardButton: true,

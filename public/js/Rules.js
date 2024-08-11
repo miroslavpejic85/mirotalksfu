@@ -134,6 +134,7 @@ function handleRules(isPresenter) {
         //BUTTONS.consumerVideo.muteAudioButton = false;
         //BUTTONS.consumerVideo.muteVideoButton = false;
         BUTTONS.whiteboard.whiteboardLockButton = false;
+
         //...
     } else {
         // ##################################
@@ -144,6 +145,8 @@ function handleRules(isPresenter) {
         BUTTONS.settings.lockRoomButton = BUTTONS.settings.lockRoomButton && !isRoomLocked;
         BUTTONS.settings.unlockRoomButton = BUTTONS.settings.lockRoomButton && isRoomLocked;
         BUTTONS.settings.sendEmailInvitation = true;
+
+        show(editorUnlockBtn);
         //...
 
         // ##################################
@@ -267,6 +270,7 @@ function handleRulesBroadcasting() {
     //elemDisplay('snapshotRoomButton', false);
     //elemDisplay('emojiRoomButton', false);
     //elemDisplay('pollButton', false);
+    //elemDisplay('editorButton', false);
     elemDisplay('transcriptionButton', false);
     elemDisplay('lockRoomButton', false);
     elemDisplay('unlockRoomButton', false);

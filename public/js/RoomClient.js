@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.47
+ * @version 1.5.50
  *
  */
 
@@ -68,6 +68,7 @@ const icons = {
     theme: '<i class="fas fa-fill-drip"></i>',
     recSync: '<i class="fa-solid fa-cloud-arrow-up"></i>',
     refresh: '<i class="fas fa-rotate"></i>',
+    editor: '<i class="fas fa-pen-to-square"></i>',
 };
 
 const image = {
@@ -261,6 +262,8 @@ class RoomClient {
         this.isChatEmojiOpen = false;
         this.isPollOpen = false;
         this.isPollPinned = false;
+        this.isEditorOpen = false;
+        this.isEditorLocked = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.speechInMessages = false;
         this.showChatOnMessage = true;
@@ -905,6 +908,9 @@ class RoomClient {
         this.socket.on('endRTMPfromURL', this.handleEndRTMPfromURL);
         this.socket.on('errorRTMPfromURL', this.handleErrorRTMPfromURL);
         this.socket.on('updatePolls', this.handleUpdatePolls);
+        this.socket.on('editorChange', this.handleEditorChange);
+        this.socket.on('editorActions', this.handleEditorActions);
+        this.socket.on('editorUpdate', this.handleEditorUpdate);
     }
 
     // ####################################################
@@ -944,6 +950,7 @@ class RoomClient {
         if (isBroadcastingEnabled) {
             if (isParticipantsListOpen) getRoomParticipants();
             wbUpdate();
+            this.editorUpdate();
         } else {
             adaptAspectRatio(participantsCount);
         }
@@ -1077,6 +1084,18 @@ class RoomClient {
 
     handleUpdatePolls = (data) => {
         this.pollsUpdate(data);
+    };
+
+    handleEditorChange = (data) => {
+        this.handleEditorData(data);
+    };
+
+    handleEditorActions = (data) => {
+        this.handleEditorActionsData(data);
+    };
+
+    handleEditorUpdate = (data) => {
+        this.handleEditorUpdateData(data);
     };
 
     // ####################################################
@@ -2166,6 +2185,8 @@ class RoomClient {
         try {
             wbUpdate();
 
+            this.editorUpdate();
+
             const { consumer, stream, kind } = await this.getConsumeStream(producer_id, peer_info.peer_id, type);
 
             console.log('CONSUMER MEDIA TYPE ----> ' + type);
@@ -2607,6 +2628,8 @@ class RoomClient {
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
         //
         wbUpdate();
+
+        this.editorUpdate();
 
         this.handleHideMe();
     }
@@ -4654,6 +4677,160 @@ class RoomClient {
         const dateTime = getDataTimeStringFormat();
         const roomName = this.room_id.trim();
         return `Poll_${roomName}_${dateTime}.txt`;
+    }
+
+    // ####################################################
+    // EDITOR
+    // ####################################################
+
+    toggleEditor() {
+        editorRoom.classList.toggle('show');
+        if (!this.isEditorOpen) {
+            this.sound('open');
+        }
+        this.isEditorOpen = !this.isEditorOpen;
+    }
+
+    toggleLockUnlockEditor() {
+        this.isEditorLocked = !this.isEditorLocked;
+
+        const btnToShow = this.isEditorLocked ? editorLockBtn : editorUnlockBtn;
+        const btnToHide = this.isEditorLocked ? editorUnlockBtn : editorLockBtn;
+        const btnColor = this.isEditorLocked ? 'red' : 'white';
+        const action = this.isEditorLocked ? 'lock' : 'unlock';
+
+        show(btnToShow);
+        hide(btnToHide);
+        setColor(editorLockBtn, btnColor);
+
+        this.editorSendAction(action);
+
+        if (this.isEditorLocked) {
+            userLog('info', 'The Editor is locked. \n The participants cannot interact with it.', 'top-right');
+            sound('locked');
+        }
+    }
+
+    editorCenter() {
+        editorRoom.style.position = 'fixed';
+        editorRoom.style.transform = 'translate(-50%, -50%)';
+        editorRoom.style.top = '50%';
+        editorRoom.style.left = '50%';
+    }
+
+    editorUpdate() {
+        if (this.isEditorOpen && (!isRulesActive || isPresenter)) {
+            console.log('IsPresenter: update editor content to the participants in the room');
+            const content = quill.getContents(); // Get content in Delta format
+            this.socket.emit('editorUpdate', content);
+            const action = this.isEditorLocked ? 'lock' : 'unlock';
+            this.editorSendAction(action);
+        }
+    }
+
+    handleEditorUpdateData(data) {
+        this.editorOpen();
+        quill.setContents(data);
+    }
+
+    handleEditorData(data) {
+        this.editorOpen();
+        quill.updateContents(data);
+    }
+
+    editorOpen() {
+        if (!this.isEditorOpen) {
+            this.sound('open');
+            this.toggleEditor();
+        }
+    }
+
+    handleEditorActionsData(data) {
+        const { peer_name, action } = data;
+        switch (action) {
+            case 'toggle':
+                this.toggleEditor();
+                this.userLog('info', `${icons.editor} ${peer_name} toggle editor`, 'top-end', 6000);
+                break;
+            case 'clean':
+                quill.setText('');
+                this.userLog('info', `${icons.editor} ${peer_name} cleared editor`, 'top-end', 6000);
+                break;
+            case 'lock':
+                this.isEditorLocked = true;
+                quill.enable(false);
+                this.userLog('info', `${icons.editor} ${peer_name} locked the editor`, 'top-end', 6000);
+                break;
+            case 'unlock':
+                this.isEditorLocked = false;
+                quill.enable(true);
+                this.userLog('info', `${icons.editor} ${peer_name} unlocked the editor`, 'top-end', 6000);
+                break;
+            default:
+                break;
+        }
+    }
+
+    editorIsLocked() {
+        return this.isEditorLocked;
+    }
+
+    editorUndo() {
+        quill.history.undo();
+    }
+
+    editorRedo() {
+        quill.history.redo();
+    }
+
+    editorCopy() {
+        const content = quill.getText();
+        if (content.trim().length === 0) {
+            return this.userLog('info', 'Nothing to copy', 'top-end');
+        }
+        copyToClipboard(content, false);
+    }
+
+    editorClean() {
+        if (!isPresenter && this.editorIsLocked()) {
+            userLog('info', 'The Editor is locked. \n You cannot interact with it.', 'top-right');
+            return;
+        }
+        const content = quill.getText();
+        if (content.trim().length === 0) {
+            return this.userLog('info', 'Nothing to clear', 'top-end');
+        }
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            title: 'Clear the editor content?',
+            imageUrl: image.delete,
+            showDenyButton: true,
+            confirmButtonText: `Yes`,
+            denyButtonText: `No`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                quill.setText('');
+                this.editorSendAction('clean');
+                this.sound('delete');
+            }
+        });
+    }
+
+    editorSave() {
+        const content = quill.getText();
+        if (content.trim().length === 0) {
+            return this.userLog('info', 'No data to save!', 'top-end');
+        }
+        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+        const file = 'Room_' + this.room_id + getDataTimeString() + '_editor.txt';
+        this.saveBlobToFile(blob, file);
+    }
+
+    editorSendAction(action) {
+        this.socket.emit('editorActions', { peer_name: this.peer_name, action: action });
     }
 
     // ####################################################

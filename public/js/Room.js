@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.47
+ * @version 1.5.50
  *
  */
 
@@ -252,6 +252,8 @@ let transcription;
 
 let showFreeAvatars = true;
 
+let quill = null;
+
 // ####################################################
 // INIT ROOM
 // ####################################################
@@ -338,6 +340,14 @@ function initClient() {
         setTippy('pollMinButton', 'Minimize', 'bottom');
         setTippy('pollSaveButton', 'Save results', 'bottom');
         setTippy('pollCloseBtn', 'Close', 'bottom');
+        setTippy('editorLockBtn', 'Toggle Lock editor', 'bottom');
+        setTippy('editorUnlockBtn', 'Toggle Lock editor', 'bottom');
+        setTippy('editorUndoBtn', 'Undo', 'bottom');
+        setTippy('editorRedoBtn', 'Redo', 'bottom');
+        setTippy('editorCopyBtn', 'Copy', 'bottom');
+        setTippy('editorSaveBtn', 'Save', 'bottom');
+        setTippy('editorCloseBtn', 'Close', 'bottom');
+        setTippy('editorCleanBtn', 'Clean', 'bottom');
         setTippy('pollAddOptionBtn', 'Add option', 'top');
         setTippy('pollDelOptionBtn', 'Delete option', 'top');
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
@@ -375,6 +385,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('pollButton', 'Toggle the poll', placement);
+        setTippy('editorButton', 'Toggle the editor', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
@@ -1185,7 +1196,7 @@ function copyRoomURL() {
     userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
 }
 
-function copyToClipboard(txt) {
+function copyToClipboard(txt, showTxt = true) {
     let tmpInput = document.createElement('input');
     document.body.appendChild(tmpInput);
     tmpInput.value = txt;
@@ -1193,7 +1204,9 @@ function copyToClipboard(txt) {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', `${txt} copied to clipboard 👍`, 'top-end');
+    showTxt
+        ? userLog('info', `${txt} copied to clipboard 👍`, 'top-end')
+        : userLog('info', `Copied to clipboard 👍`, 'top-end');
 }
 
 function shareRoomByEmail() {
@@ -1284,6 +1297,7 @@ function roomIsReady() {
     }
     BUTTONS.main.chatButton && show(chatButton);
     BUTTONS.main.pollButton && show(pollButton);
+    BUTTONS.main.editorButton && show(editorButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
@@ -1375,6 +1389,7 @@ function roomIsReady() {
     handleInputs();
     handleChatEmojiPicker();
     handleRoomEmojiPicker();
+    handleEditor();
     loadSettingsFromLocalStorage();
     startSessionTimer();
     document.body.addEventListener('mousemove', (e) => {
@@ -1618,6 +1633,39 @@ function handleButtons() {
     };
     pollCreateForm.onsubmit = (e) => {
         rc.pollCreateNewForm(e);
+    };
+    editorButton.onclick = () => {
+        rc.toggleEditor();
+        if (isPresenter && !rc.editorIsLocked()) {
+            rc.editorSendAction('toggle');
+        }
+    };
+    editorCloseBtn.onclick = () => {
+        rc.toggleEditor();
+        if (isPresenter && !rc.editorIsLocked()) {
+            rc.editorSendAction('toggle');
+        }
+    };
+    editorLockBtn.onclick = () => {
+        rc.toggleLockUnlockEditor();
+    };
+    editorUnlockBtn.onclick = () => {
+        rc.toggleLockUnlockEditor();
+    };
+    editorCleanBtn.onclick = () => {
+        rc.editorClean();
+    };
+    editorCopyBtn.onclick = () => {
+        rc.editorCopy();
+    };
+    editorSaveBtn.onclick = () => {
+        rc.editorSave();
+    };
+    editorUndoBtn.onclick = () => {
+        rc.editorUndo();
+    };
+    editorRedoBtn.onclick = () => {
+        rc.editorRedo();
     };
     transcriptionButton.onclick = () => {
         transcription.toggle();
@@ -2665,6 +2713,50 @@ function handleRoomEmojiPicker() {
             setColor(emojiRoomButton, 'yellow');
         }
     }
+}
+
+// ####################################################
+// ROOM EDITOR
+// ####################################################
+
+function handleEditor() {
+    const toolbarOptions = [
+        [{ header: [1, 2, 3, false] }],
+        ['bold', 'italic', 'underline', 'link', 'code-block'],
+        [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
+        [{ indent: '+1' }, { indent: '-1' }], //  { align: [] }
+        //...
+    ];
+
+    quill = new Quill('#editor', {
+        modules: {
+            toolbar: {
+                container: toolbarOptions,
+            },
+            syntax: true,
+        },
+        theme: 'snow',
+    });
+
+    applySyntaxHighlighting();
+
+    quill.on('text-change', (delta, oldDelta, source) => {
+        if (!isPresenter && rc.editorIsLocked()) {
+            return;
+        }
+        console.log('text-change', { delta, oldDelta, source });
+        applySyntaxHighlighting();
+        if (rc.thereAreParticipants() && source === 'user') {
+            socket.emit('editorChange', delta);
+        }
+    });
+}
+
+function applySyntaxHighlighting() {
+    const codeBlocks = document.querySelectorAll('.ql-syntax');
+    codeBlocks.forEach((block) => {
+        hljs.highlightElement(block);
+    });
 }
 
 // ####################################################
@@ -4344,7 +4436,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.47',
+        title: 'WebRTC SFU v1.5.50',
         html: `
         <br />
         <div id="about">

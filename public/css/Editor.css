@@ -1,0 +1,79 @@
+.editor-container {
+    z-index: 5;
+    position: absolute;
+    padding: 20px;
+    width: 100%;
+    height: 100%;
+    border-radius: 10px;
+    background: var(--body-bg);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
+    overflow-x: hidden;
+    overflow-y: auto;
+}
+
+.editor-header {
+    display: inline-flex;
+    text-align: left;
+    margin-bottom: 30px;
+    width: 100%;
+    cursor: move;
+}
+
+.editor-header-btns {
+    display: flex;
+    gap: 10px;
+    position: absolute;
+    float: right;
+    right: 20px;
+}
+
+.editor {
+    height: 85vh !important;
+    color: white !important;
+    border-radius: 0px 0px 10px 10px; /* Top-left, top-right, bottom-right, bottom-left */
+    border: var(--border) !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+.ql-toolbar {
+    background: rgba(0, 0, 0, 0.4) !important;
+    color: white !important;
+    border-radius: 10px 10px 0px 0px; /* Top-left, top-right, bottom-right, bottom-left */
+    border: var(--border) !important;
+}
+
+/* Optional: Customize code block appearance */
+.ql-snow .ql-code-block-container {
+    padding: 4px !important;
+    font-family: monospace;
+    margin-bottom: 20px !important;
+    border-radius: 4px !important;
+    /* border: var(--border) !important; */
+    background: var(--select-bg) !important;
+    box-shadow: var(--box-shadow) !important;
+}
+
+.ql-snow .ql-code-block {
+    font-family: monospace;
+}
+
+.ql-toolbar button:hover {
+    background: var(--body-bg) !important;
+}
+
+.ql-picker-options {
+    color: white;
+    border: none !important;
+    border-radius: 10px;
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow) !important;
+}
+
+.ql-ui {
+    padding: 5px;
+    height: 30px;
+    color: white;
+    border-radius: 10px;
+    background: var(--body-bg);
+}
