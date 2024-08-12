@@ -2943,7 +2943,7 @@ function startServer() {
             if (
                 isOIDCEnabled ||
                 !user.allowed_rooms ||
-                (user.allowed_rooms && (!user.allowed_rooms.includes('*') || !user.allowed_rooms.includes(room)))
+                (user.allowed_rooms && (user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room)))
             ) {
                 log.debug('isRoomAllowedForUser - user room allowed', room);
                 return true;
