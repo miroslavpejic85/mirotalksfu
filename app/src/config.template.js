@@ -177,16 +177,19 @@ module.exports = {
             {
                 username: 'username',
                 password: 'password',
+                displayname: 'username displayname',
                 allowed_rooms: ['*'],
             },
             {
                 username: 'username2',
                 password: 'password2',
+                displayname: 'username2 displayname',
                 allowed_rooms: ['room1', 'room2'],
             },
             {
                 username: 'username3',
                 password: 'password3',
+                displayname: 'username3 displayname',
             },
             //...
         ],
