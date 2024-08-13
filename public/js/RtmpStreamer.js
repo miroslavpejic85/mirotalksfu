@@ -13,13 +13,19 @@ const closePopup = document.getElementById('closePopup');
 
 const qs = new URLSearchParams(window.location.search);
 const videoId = filterXSS(qs.get('v'));
+const videoResolution = filterXSS(qs.get('vr'));
+const videoFrameRate = filterXSS(qs.get('vf'));
 const audioId = filterXSS(qs.get('a'));
-const theme = filterXSS(qs.get('t'));
-const color = filterXSS(qs.get('c'));
+const screenFrameRate = filterXSS(qs.get('sf'));
+const theme = filterXSS(qs.get('ts'));
+const color = filterXSS(qs.get('tc'));
 
-console.log('Video/Audio id', {
-    video: videoId,
-    audio: audioId,
+console.log('RTMP settings', {
+    videoId: videoId,
+    videoRes: videoResolution,
+    videoFps: videoFrameRate,
+    audioId: audioId,
+    screenFps: screenFrameRate,
 });
 
 /* 
@@ -233,15 +239,58 @@ function stopTracks(stream) {
 }
 
 async function startCameraStreaming() {
-    const videoConstraints = videoId ? { deviceId: videoId } : true;
+    const videoConstraints = videoId ? getRTMPVideoConstraints(videoId, videoResolution, videoFrameRate) : true;
     const audioConstraints = audioId ? { deviceId: audioId } : true;
     const stream = await startCapture({ video: videoConstraints, audio: audioConstraints });
     await startStreaming(stream);
 }
 
 async function startScreenStreaming() {
-    const stream = await startScreenCapture({ video: true, audio: true });
+    const screenConstraints = getRTMPScreenConstraints(screenFrameRate);
+    const stream = await startScreenCapture(screenConstraints);
     await startStreaming(stream);
+}
+
+function getRTMPVideoConstraints(videoId, videoResolution, videoFrameRate) {
+    const defaultFrameRate = { ideal: 30 };
+    const customFrameRate = videoFrameRate ? parseInt(videoFrameRate, 10) : 30;
+    const frameRate = videoFrameRate === 'max' ? defaultFrameRate : customFrameRate;
+
+    const baseConstraints = {
+        deviceId: videoId,
+        aspectRatio: 1.777, // 16:9
+        frameRate: frameRate,
+    };
+
+    const resolutionConstraints = {
+        default: { width: { ideal: 1280 }, height: { ideal: 720 } },
+        qvga: { width: { exact: 320 }, height: { exact: 240 } },
+        vga: { width: { exact: 640 }, height: { exact: 480 } },
+        hd: { width: { exact: 1280 }, height: { exact: 720 } },
+        fhd: { width: { exact: 1920 }, height: { exact: 1080 } },
+        '2k': { width: { exact: 2560 }, height: { exact: 1440 } },
+        '4k': { width: { exact: 3840 }, height: { exact: 2160 } },
+        '6k': { width: { exact: 6144 }, height: { exact: 3456 } },
+        '8k': { width: { exact: 7680 }, height: { exact: 4320 } },
+    };
+
+    const resolution = resolutionConstraints[videoResolution] || resolutionConstraints['default'];
+
+    return { ...baseConstraints, ...resolution };
+}
+
+function getRTMPScreenConstraints(screenFrameRate) {
+    const defaultFrameRate = { ideal: 30 };
+    const customFrameRate = screenFrameRate ? parseInt(screenFrameRate, 10) : 30;
+    const frameRate = screenFrameRate === 'max' ? defaultFrameRate : customFrameRate;
+    return {
+        audio: true,
+        video: {
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+            frameRate: frameRate,
+        },
+    };
 }
 
 function copyRTMP() {
