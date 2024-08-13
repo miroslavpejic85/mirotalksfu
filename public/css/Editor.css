@@ -69,13 +69,3 @@
     background: var(--body-bg);
     box-shadow: var(--box-shadow) !important;
 }
-
-/* select {
-    padding: 5px 10px !important;
-    color: #fff !important;
-    height: 30px;
-    border: var(--border);
-    border-radius: 4px;
-    background: var(--body-bg);
-    background-color: var(--select-bg) !important;
-} */
