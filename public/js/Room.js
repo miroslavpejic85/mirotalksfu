@@ -2721,7 +2721,7 @@ function handleRoomEmojiPicker() {
 
 function handleEditor() {
     const toolbarOptions = [
-        [{ header: [1, 2, 3, false] }, { align: [] }],
+        [{ header: [1, 2, 3, false] }, { align: [] }, { background: [] }],
         ['bold', 'italic', 'underline', 'strike', 'link', 'image', 'code-block'],
         [{ list: 'ordered' }, { list: 'bullet' }, { list: 'check' }],
         [{ indent: '+1' }, { indent: '-1' }],
