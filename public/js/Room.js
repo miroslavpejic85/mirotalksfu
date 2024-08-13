@@ -2745,7 +2745,7 @@ function handleEditor() {
         if (!isPresenter && rc.editorIsLocked()) {
             return;
         }
-        console.log('text-change', { delta, oldDelta, source });
+        // console.log('text-change', { delta, oldDelta, source });
         applySyntaxHighlighting();
         if (rc.thereAreParticipants() && source === 'user') {
             socket.emit('editorChange', delta);
