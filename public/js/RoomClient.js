@@ -4749,9 +4749,15 @@ class RoomClient {
     handleEditorActionsData(data) {
         const { peer_name, action } = data;
         switch (action) {
-            case 'toggle':
+            case 'open':
+                if (this.isEditorOpen) return;
                 this.toggleEditor();
-                this.userLog('info', `${icons.editor} ${peer_name} toggle editor`, 'top-end', 6000);
+                this.userLog('info', `${icons.editor} ${peer_name} open editor`, 'top-end', 6000);
+                break;
+            case 'close':
+                if (!this.isEditorOpen) return;
+                this.toggleEditor();
+                this.userLog('info', `${icons.editor} ${peer_name} close editor`, 'top-end', 6000);
                 break;
             case 'clean':
                 quill.setText('');

@@ -1637,13 +1637,13 @@ function handleButtons() {
     editorButton.onclick = () => {
         rc.toggleEditor();
         if (isPresenter && !rc.editorIsLocked()) {
-            rc.editorSendAction('toggle');
+            rc.editorSendAction('open');
         }
     };
     editorCloseBtn.onclick = () => {
         rc.toggleEditor();
         if (isPresenter && !rc.editorIsLocked()) {
-            rc.editorSendAction('toggle');
+            rc.editorSendAction('close');
         }
     };
     editorLockBtn.onclick = () => {
