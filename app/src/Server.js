@@ -43,7 +43,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.55
+ * @version 1.5.56
  *
  */
 
@@ -1077,7 +1077,7 @@ function startServer() {
     async function createWorkers() {
         const { numWorkers } = config.mediasoup;
 
-        const { logLevel, logTags, rtcMinPort, rtcMaxPort } = config.mediasoup.worker;
+        const { logLevel, logTags, rtcMinPort, rtcMaxPort, disableLiburing } = config.mediasoup.worker;
 
         log.info('WORKERS:', numWorkers);
 
@@ -1088,6 +1088,7 @@ function startServer() {
                 logTags: logTags,
                 rtcMinPort: rtcMinPort,
                 rtcMaxPort: rtcMaxPort,
+                disableLiburing: disableLiburing,
             });
 
             if (webRtcServerActive) {

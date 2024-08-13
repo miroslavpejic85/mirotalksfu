@@ -457,6 +457,9 @@ module.exports = {
         // Worker settings
         numWorkers: numWorkers,
         worker: {
+            rtcMinPort: 40000,
+            rtcMaxPort: 40100,
+            disableLiburing: false, // https://github.com/axboe/liburing
             logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
         },

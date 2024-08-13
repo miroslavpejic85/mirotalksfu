@@ -1355,16 +1355,16 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Consumer = void 0;
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Consumer');
-                class Consumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                class Consumer extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor({ id, localId, producerId, rtpReceiver, track, rtpParameters, appData }) {
                         super();
                         // Closed flag.
                         this._closed = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
                         this._id = id;
                         this._localId = localId;
@@ -1373,7 +1373,7 @@
                         this._track = track;
                         this._rtpParameters = rtpParameters;
                         this._paused = !track.enabled;
-                        this._appData = appData || {};
+                        this._appData = appData ?? {};
                         this.onTrackEnded = this.onTrackEnded.bind(this);
                         this.handleTrack();
                     }
@@ -1541,7 +1541,7 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
+            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
         ],
         8: [
             function (require, module, exports) {
@@ -1549,21 +1549,21 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.DataConsumer = void 0;
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const logger = new Logger_1.Logger('DataConsumer');
-                class DataConsumer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                class DataConsumer extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor({ id, dataProducerId, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
                         this._closed = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
                         this._id = id;
                         this._dataProducerId = dataProducerId;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData || {};
+                        this._appData = appData ?? {};
                         this.handleDataChannel();
                     }
                     /**
@@ -1711,7 +1711,7 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './EnhancedEventEmitter': 11, './Logger': 12 },
+            { './Logger': 11, './enhancedEvents': 16 },
         ],
         9: [
             function (require, module, exports) {
@@ -1719,21 +1719,21 @@
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.DataProducer = void 0;
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('DataProducer');
-                class DataProducer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                class DataProducer extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor({ id, dataChannel, sctpStreamParameters, appData }) {
                         super();
                         // Closed flag.
                         this._closed = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
                         this._id = id;
                         this._dataChannel = dataChannel;
                         this._sctpStreamParameters = sctpStreamParameters;
-                        this._appData = appData || {};
+                        this._appData = appData ?? {};
                         this.handleDataChannel();
                     }
                     /**
@@ -1899,7 +1899,7 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
+            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
         ],
         10: [
             function (require, module, exports) {
@@ -1950,7 +1950,7 @@
                 exports.detectDevice = detectDevice;
                 const ua_parser_js_1 = require('ua-parser-js');
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const errors_1 = require('./errors');
                 const utils = __importStar(require('./utils'));
                 const ortc = __importStar(require('./ortc'));
@@ -2066,6 +2066,7 @@
                         }
                         // Best effort for Chromium based browsers.
                         else if (engineName === 'blink') {
+                            // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
                             const match = ua.match(/(?:(?:Chrome|Chromium))[ /](\w+)/i);
                             if (match) {
                                 const version = Number(match[1]);
@@ -2110,7 +2111,7 @@
                         // Loaded flag.
                         this._loaded = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
                         // Handle deprecated option.
                         if (Handler) {
@@ -2429,9 +2430,9 @@
                 exports.Device = Device;
             },
             {
-                './EnhancedEventEmitter': 11,
-                './Logger': 12,
-                './Transport': 16,
+                './Logger': 11,
+                './Transport': 15,
+                './enhancedEvents': 16,
                 './errors': 17,
                 './handlers/Chrome111': 18,
                 './handlers/Chrome55': 19,
@@ -2451,84 +2452,6 @@
             },
         ],
         11: [
-            function (require, module, exports) {
-                'use strict';
-                Object.defineProperty(exports, '__esModule', { value: true });
-                exports.EnhancedEventEmitter = void 0;
-                const npm_events_package_1 = require('npm-events-package');
-                const Logger_1 = require('./Logger');
-                const logger = new Logger_1.Logger('EnhancedEventEmitter');
-                class EnhancedEventEmitter extends npm_events_package_1.EventEmitter {
-                    constructor() {
-                        super();
-                        this.setMaxListeners(Infinity);
-                    }
-                    emit(eventName, ...args) {
-                        return super.emit(eventName, ...args);
-                    }
-                    /**
-                     * Special addition to the EventEmitter API.
-                     */
-                    safeEmit(eventName, ...args) {
-                        const numListeners = super.listenerCount(eventName);
-                        try {
-                            return super.emit(eventName, ...args);
-                        } catch (error) {
-                            logger.error(
-                                'safeEmit() | event listener threw an error [eventName:%s]:%o',
-                                eventName,
-                                error,
-                            );
-                            return Boolean(numListeners);
-                        }
-                    }
-                    on(eventName, listener) {
-                        super.on(eventName, listener);
-                        return this;
-                    }
-                    off(eventName, listener) {
-                        super.off(eventName, listener);
-                        return this;
-                    }
-                    addListener(eventName, listener) {
-                        super.on(eventName, listener);
-                        return this;
-                    }
-                    prependListener(eventName, listener) {
-                        super.prependListener(eventName, listener);
-                        return this;
-                    }
-                    once(eventName, listener) {
-                        super.once(eventName, listener);
-                        return this;
-                    }
-                    prependOnceListener(eventName, listener) {
-                        super.prependOnceListener(eventName, listener);
-                        return this;
-                    }
-                    removeListener(eventName, listener) {
-                        super.off(eventName, listener);
-                        return this;
-                    }
-                    removeAllListeners(eventName) {
-                        super.removeAllListeners(eventName);
-                        return this;
-                    }
-                    listenerCount(eventName) {
-                        return super.listenerCount(eventName);
-                    }
-                    listeners(eventName) {
-                        return super.listeners(eventName);
-                    }
-                    rawListeners(eventName) {
-                        return super.rawListeners(eventName);
-                    }
-                }
-                exports.EnhancedEventEmitter = EnhancedEventEmitter;
-            },
-            { './Logger': 12, 'npm-events-package': 44 },
-        ],
-        12: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -2571,16 +2494,16 @@
             },
             { debug: 3 },
         ],
-        13: [
+        12: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Producer = void 0;
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const errors_1 = require('./errors');
                 const logger = new Logger_1.Logger('Producer');
-                class Producer extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                class Producer extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor({
                         id,
                         localId,
@@ -2596,7 +2519,7 @@
                         // Closed flag.
                         this._closed = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
                         this._id = id;
                         this._localId = localId;
@@ -2609,7 +2532,7 @@
                         this._stopTracks = stopTracks;
                         this._disableTrackOnPause = disableTrackOnPause;
                         this._zeroRtpOnPause = zeroRtpOnPause;
-                        this._appData = appData || {};
+                        this._appData = appData ?? {};
                         this.onTrackEnded = this.onTrackEnded.bind(this);
                         // NOTE: Minor issue. If zeroRtpOnPause is true, we cannot emit the
                         // '@replacetrack' event here, so RTCRtpSender.track won't be null.
@@ -2864,9 +2787,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './EnhancedEventEmitter': 11, './Logger': 12, './errors': 17 },
+            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
         ],
-        14: [
+        13: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -2877,14 +2800,14 @@
             },
             {},
         ],
-        15: [
+        14: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        16: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -2938,7 +2861,7 @@
                 const awaitqueue_1 = require('awaitqueue');
                 const queue_microtask_1 = __importDefault(require('queue-microtask'));
                 const Logger_1 = require('./Logger');
-                const EnhancedEventEmitter_1 = require('./EnhancedEventEmitter');
+                const enhancedEvents_1 = require('./enhancedEvents');
                 const errors_1 = require('./errors');
                 const utils = __importStar(require('./utils'));
                 const ortc = __importStar(require('./ortc'));
@@ -2956,7 +2879,7 @@
                         });
                     }
                 }
-                class Transport extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                class Transport extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor({
                         direction,
                         id,
@@ -3009,7 +2932,7 @@
                         // Consumer close in progress flag.
                         this._consumerCloseInProgress = false;
                         // Observer instance.
-                        this._observer = new EnhancedEventEmitter_1.EnhancedEventEmitter();
+                        this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor() [id:%s, direction:%s]', id, direction);
                         this._id = id;
                         this._direction = direction;
@@ -3017,7 +2940,7 @@
                         this._canProduceByKind = canProduceByKind;
                         this._maxSctpMessageSize = sctpParameters ? sctpParameters.maxMessageSize : null;
                         // Clone and sanitize additionalSettings.
-                        const clonedAdditionalSettings = utils.clone(additionalSettings) || {};
+                        const clonedAdditionalSettings = utils.clone(additionalSettings) ?? {};
                         delete clonedAdditionalSettings.iceServers;
                         delete clonedAdditionalSettings.iceTransportPolicy;
                         delete clonedAdditionalSettings.bundlePolicy;
@@ -3036,7 +2959,7 @@
                             proprietaryConstraints,
                             extendedRtpCapabilities,
                         });
-                        this._appData = appData || {};
+                        this._appData = appData ?? {};
                         this.handleHandler();
                     }
                     /**
@@ -3346,7 +3269,7 @@
                                 return;
                             }
                             if (this._consumerCreationInProgress === false) {
-                                this.createPendingConsumers();
+                                void this.createPendingConsumers();
                             }
                         });
                         return consumerCreationTask.promise;
@@ -3557,7 +3480,7 @@
                                 this._consumerCreationInProgress = false;
                                 // There are pending Consumer tasks, enqueue their creation.
                                 if (this._pendingConsumerTasks.length > 0) {
-                                    this.createPendingConsumers();
+                                    void this.createPendingConsumers();
                                 }
                             })
                             // NOTE: We only get here when the await queue is closed.
@@ -3816,15 +3739,97 @@
                 './Consumer': 7,
                 './DataConsumer': 8,
                 './DataProducer': 9,
-                './EnhancedEventEmitter': 11,
-                './Logger': 12,
-                './Producer': 13,
+                './Logger': 11,
+                './Producer': 12,
+                './enhancedEvents': 16,
                 './errors': 17,
                 './ortc': 39,
                 './utils': 42,
                 awaitqueue: 2,
                 'queue-microtask': 45,
             },
+        ],
+        16: [
+            function (require, module, exports) {
+                'use strict';
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.EnhancedEventEmitter = void 0;
+                const npm_events_package_1 = require('npm-events-package');
+                const Logger_1 = require('./Logger');
+                const enhancedEventEmitterLogger = new Logger_1.Logger('EnhancedEventEmitter');
+                class EnhancedEventEmitter extends npm_events_package_1.EventEmitter {
+                    constructor() {
+                        super();
+                        this.setMaxListeners(Infinity);
+                    }
+                    emit(eventName, ...args) {
+                        return super.emit(eventName, ...args);
+                    }
+                    /**
+                     * Special addition to the EventEmitter API.
+                     */
+                    safeEmit(eventName, ...args) {
+                        try {
+                            return super.emit(eventName, ...args);
+                        } catch (error) {
+                            enhancedEventEmitterLogger.error(
+                                'safeEmit() | event listener threw an error [eventName:%s]:%o',
+                                eventName,
+                                error,
+                            );
+                            try {
+                                super.emit('listenererror', eventName, error);
+                            } catch (error2) {
+                                // Ignore it.
+                            }
+                            return Boolean(super.listenerCount(eventName));
+                        }
+                    }
+                    on(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    off(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    addListener(eventName, listener) {
+                        super.on(eventName, listener);
+                        return this;
+                    }
+                    prependListener(eventName, listener) {
+                        super.prependListener(eventName, listener);
+                        return this;
+                    }
+                    once(eventName, listener) {
+                        super.once(eventName, listener);
+                        return this;
+                    }
+                    prependOnceListener(eventName, listener) {
+                        super.prependOnceListener(eventName, listener);
+                        return this;
+                    }
+                    removeListener(eventName, listener) {
+                        super.off(eventName, listener);
+                        return this;
+                    }
+                    removeAllListeners(eventName) {
+                        super.removeAllListeners(eventName);
+                        return this;
+                    }
+                    listenerCount(eventName) {
+                        return super.listenerCount(eventName);
+                    }
+                    listeners(eventName) {
+                        return super.listeners(eventName);
+                    }
+                    rawListeners(eventName) {
+                        return super.rawListeners(eventName);
+                    }
+                }
+                exports.EnhancedEventEmitter = EnhancedEventEmitter;
+            },
+            { './Logger': 11, 'npm-events-package': 44 },
         ],
         17: [
             function (require, module, exports) {
@@ -3839,8 +3844,6 @@
                         super(message);
                         this.name = 'UnsupportedError';
                         if (Error.hasOwnProperty('captureStackTrace')) {
-                            // Just in V8.
-                            // @ts-ignore
                             Error.captureStackTrace(this, UnsupportedError);
                         } else {
                             this.stack = new Error(message).stack;
@@ -3857,7 +3860,6 @@
                         this.name = 'InvalidStateError';
                         if (Error.hasOwnProperty('captureStackTrace')) {
                             // Just in V8.
-                            // @ts-ignore
                             Error.captureStackTrace(this, InvalidStateError);
                         } else {
                             this.stack = new Error(message).stack;
@@ -3926,6 +3928,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Chrome111');
+                const NAME = 'Chrome111';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Chrome111 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -3950,7 +3953,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Chrome111';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -4036,8 +4039,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'unified-plan',
@@ -4225,7 +4228,7 @@
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         this._pc.removeTrack(transceiver.sender);
                         const mediaSectionClosed = this._remoteSdp.closeMediaSection(transceiver.mid);
                         if (mediaSectionClosed) {
@@ -4398,13 +4401,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -4607,7 +4610,7 @@
                 exports.Chrome111 = Chrome111;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -4676,6 +4679,7 @@
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const logger = new Logger_1.Logger('Chrome55');
+                const NAME = 'Chrome55';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Chrome55 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -4703,7 +4707,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Chrome55';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -4784,8 +4788,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'plan-b',
@@ -5063,7 +5067,7 @@
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -5096,7 +5100,7 @@
                             const { kind, trackId, rtpParameters } = options;
                             const mid = kind;
                             const localId = trackId;
-                            const streamId = options.streamId || rtpParameters.rtcp.cname;
+                            const streamId = options.streamId ?? rtpParameters.rtcp.cname;
                             const stream = this._pc.getRemoteStreams().find((s) => s.id === streamId);
                             const track = stream.getTrackById(localId);
                             if (!track) {
@@ -5112,7 +5116,7 @@
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
-                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
                             this._remoteSdp.planBStopReceiving({
@@ -5213,7 +5217,7 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../utils': 42,
@@ -5279,6 +5283,7 @@
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const logger = new Logger_1.Logger('Chrome67');
+                const NAME = 'Chrome67';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Chrome67 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -5306,7 +5311,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Chrome67';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -5387,8 +5392,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'plan-b',
@@ -5706,7 +5711,7 @@
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -5761,7 +5766,7 @@
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
-                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
                             this._remoteSdp.planBStopReceiving({
@@ -5790,7 +5795,7 @@
                     }
                     async getReceiverStats(localId) {
                         this.assertRecvDirection();
-                        const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) || {};
+                        const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                         if (!rtpReceiver) {
                             throw new Error('associated RTCRtpReceiver not found');
                         }
@@ -5866,7 +5871,7 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../ortc': 39,
                 '../utils': 42,
                 './HandlerInterface': 26,
@@ -5932,6 +5937,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Chrome70');
+                const NAME = 'Chrome70';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Chrome70 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -5954,7 +5960,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Chrome70';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -6033,8 +6039,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'unified-plan',
@@ -6147,7 +6153,7 @@
                         }
                         // Special case for VP9 with SVC.
                         let hackVp9Svc = false;
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         if (
                             encodings &&
                             encodings.length === 1 &&
@@ -6170,7 +6176,7 @@
                         if (encodings) {
                             logger.debug('send() | applying given encodings');
                             const parameters = transceiver.sender.getParameters();
-                            for (let idx = 0; idx < (parameters.encodings || []).length; ++idx) {
+                            for (let idx = 0; idx < (parameters.encodings ?? []).length; ++idx) {
                                 const encoding = parameters.encodings[idx];
                                 const desiredEncoding = encodings[idx];
                                 // Should not happen but just in case.
@@ -6243,7 +6249,7 @@
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         this._pc.removeTrack(transceiver.sender);
                         const mediaSectionClosed = this._remoteSdp.closeMediaSection(transceiver.mid);
                         if (mediaSectionClosed) {
@@ -6385,13 +6391,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -6547,7 +6553,7 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
                 '../utils': 42,
@@ -6616,6 +6622,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Chrome74');
+                const NAME = 'Chrome74';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Chrome74 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -6640,7 +6647,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Chrome74';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -6725,8 +6732,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'unified-plan',
@@ -6839,7 +6846,7 @@
                         }
                         // Special case for VP9 with SVC.
                         let hackVp9Svc = false;
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         if (
                             encodings &&
                             encodings.length === 1 &&
@@ -6935,7 +6942,7 @@
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         this._pc.removeTrack(transceiver.sender);
                         const mediaSectionClosed = this._remoteSdp.closeMediaSection(transceiver.mid);
                         if (mediaSectionClosed) {
@@ -7108,13 +7115,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -7306,7 +7313,7 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -7372,6 +7379,7 @@
                 const edgeUtils = __importStar(require('./ortc/edgeUtils'));
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const logger = new Logger_1.Logger('Edge11');
+                const NAME = 'Edge11';
                 class Edge11 extends HandlerInterface_1.HandlerInterface {
                     /**
                      * Creates a factory function.
@@ -7391,7 +7399,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Edge11';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -7668,10 +7676,10 @@
                         throw new errors_1.UnsupportedError('not implemented');
                     }
                     setIceGatherer({ iceServers, iceTransportPolicy }) {
-                        // @ts-ignore
+                        // @ts-expect-error --- On purpose
                         const iceGatherer = new RTCIceGatherer({
-                            iceServers: iceServers || [],
-                            gatherPolicy: iceTransportPolicy || 'all',
+                            iceServers: iceServers ?? [],
+                            gatherPolicy: iceTransportPolicy ?? 'all',
                         });
                         iceGatherer.addEventListener('error', (event) => {
                             logger.error('iceGatherer "error" event [event:%o]', event);
@@ -7799,7 +7807,7 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../utils': 42,
@@ -7864,6 +7872,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Firefox120');
+                const NAME = 'Firefox120';
                 const SCTP_NUM_STREAMS = { OS: 16, MIS: 2048 };
                 class Firefox120 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -7888,7 +7897,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Firefox120';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -7993,8 +8002,8 @@
                         };
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 ...additionalSettings,
@@ -8108,7 +8117,7 @@
                         if (!this._transportReady) {
                             await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                         }
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         logger.debug('send() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
                         // We can now get the transceiver.mid.
@@ -8183,7 +8192,7 @@
                         if (!transceiver) {
                             throw new Error('associated transceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         // NOTE: Cannot use stop() the transceiver due to the the note above in
                         // send() method.
                         // try
@@ -8205,7 +8214,6 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -8223,7 +8231,6 @@
                         logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -8353,10 +8360,7 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        optionsList,
-                    ) {
+                    async receive(optionsList) {
                         this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
@@ -8364,13 +8368,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -8565,7 +8569,7 @@
                 exports.Firefox120 = Firefox120;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -8634,6 +8638,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Firefox60');
+                const NAME = 'Firefox60';
                 const SCTP_NUM_STREAMS = { OS: 16, MIS: 2048 };
                 class Firefox60 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -8658,7 +8663,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Firefox60';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -8765,8 +8770,8 @@
                         };
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 ...additionalSettings,
@@ -8849,14 +8854,12 @@
                         logger.debug('send() [kind:%s, track.id:%s]', track.kind, track.id);
                         if (encodings) {
                             encodings = utils.clone(encodings);
-                            if (encodings.length > 1) {
-                                encodings.forEach((encoding, idx) => {
-                                    encoding.rid = `r${idx}`;
-                                });
-                                // Clone the encodings and reverse them because Firefox likes them
-                                // from high to low.
-                                encodings.reverse();
-                            }
+                            encodings.forEach((encoding, idx) => {
+                                encoding.rid = `r${idx}`;
+                            });
+                            // Clone the encodings and reverse them because Firefox likes them
+                            // from high to low.
+                            encodings.reverse();
                         }
                         const sendingRtpParameters = utils.clone(this._sendingRtpParametersByKind[track.kind]);
                         // This may throw.
@@ -8889,7 +8892,7 @@
                         if (!this._transportReady) {
                             await this.setupTransport({ localDtlsRole: 'client', localSdpObject });
                         }
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         logger.debug('send() | calling pc.setLocalDescription() [offer:%o]', offer);
                         await this._pc.setLocalDescription(offer);
                         // We can now get the transceiver.mid.
@@ -8965,7 +8968,7 @@
                         if (!transceiver) {
                             throw new Error('associated transceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         // NOTE: Cannot use stop() the transceiver due to the the note above in
                         // send() method.
                         // try
@@ -8987,7 +8990,6 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -9005,7 +9007,6 @@
                         logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -9138,10 +9139,7 @@
                         };
                         return { dataChannel, sctpStreamParameters };
                     }
-                    async receive(
-                        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                        optionsList,
-                    ) {
+                    async receive(optionsList) {
                         this.assertNotClosed();
                         this.assertRecvDirection();
                         const results = [];
@@ -9149,13 +9147,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -9339,7 +9337,7 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -9356,15 +9354,15 @@
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.HandlerInterface = void 0;
-                const EnhancedEventEmitter_1 = require('../EnhancedEventEmitter');
-                class HandlerInterface extends EnhancedEventEmitter_1.EnhancedEventEmitter {
+                const enhancedEvents_1 = require('../enhancedEvents');
+                class HandlerInterface extends enhancedEvents_1.EnhancedEventEmitter {
                     constructor() {
                         super();
                     }
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../EnhancedEventEmitter': 11 },
+            { '../enhancedEvents': 16 },
         ],
         27: [
             function (require, module, exports) {
@@ -9422,6 +9420,7 @@
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const logger = new Logger_1.Logger('ReactNative');
+                const NAME = 'ReactNative';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class ReactNative extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -9449,13 +9448,13 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'ReactNative';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
                         // Free/dispose native MediaStream but DO NOT free/dispose native
                         // MediaStreamTracks (that is parent's business).
-                        // @ts-ignore (proprietary API in react-native-webrtc).
+                        // @ts-expect-error --- Proprietary API in react-native-webrtc.
                         this._sendStream.release(/* releaseTracks */ false);
                         // Close RTCPeerConnection.
                         if (this._pc) {
@@ -9534,8 +9533,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'plan-b',
@@ -9811,7 +9810,7 @@
                             const { trackId, kind, rtpParameters } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
                             const mid = kind;
-                            let streamId = options.streamId || rtpParameters.rtcp.cname;
+                            let streamId = options.streamId ?? rtpParameters.rtcp.cname;
                             // NOTE: In React-Native we cannot reuse the same remote MediaStream for new
                             // remote tracks. This is because react-native-webrtc does not react on new
                             // tracks generated within already existing streams, so force the streamId
@@ -9875,7 +9874,7 @@
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
-                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
                             this._remoteSdp.planBStopReceiving({
@@ -9976,7 +9975,7 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../utils': 42,
@@ -10045,6 +10044,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('ReactNativeUnifiedPlan');
+                const NAME = 'ReactNativeUnifiedPlan';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class ReactNativeUnifiedPlan extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -10069,7 +10069,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'ReactNativeUnifiedPlan';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -10079,7 +10079,7 @@
                         this._closed = true;
                         // Free/dispose native MediaStream but DO NOT free/dispose native
                         // MediaStreamTracks (that is parent's business).
-                        // @ts-ignore (proprietary API in react-native-webrtc).
+                        // @ts-expect-error --- Proprietary API in react-native-webrtc.
                         this._sendStream.release(/* releaseTracks */ false);
                         // Close RTCPeerConnection.
                         if (this._pc) {
@@ -10159,8 +10159,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 sdpSemantics: 'unified-plan',
@@ -10276,7 +10276,7 @@
                         }
                         // Special case for VP9 with SVC.
                         let hackVp9Svc = false;
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         if (
                             encodings &&
                             encodings.length === 1 &&
@@ -10392,7 +10392,7 @@
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         this._pc.removeTrack(transceiver.sender);
                         const mediaSectionClosed = this._remoteSdp.closeMediaSection(transceiver.mid);
                         if (mediaSectionClosed) {
@@ -10565,13 +10565,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -10774,7 +10774,7 @@
                 exports.ReactNativeUnifiedPlan = ReactNativeUnifiedPlan;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -10842,6 +10842,7 @@
                 const HandlerInterface_1 = require('./HandlerInterface');
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const logger = new Logger_1.Logger('Safari11');
+                const NAME = 'Safari11';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Safari11 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -10869,7 +10870,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Safari11';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -10950,8 +10951,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 ...additionalSettings,
@@ -11265,7 +11266,7 @@
                                 mid,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -11320,7 +11321,7 @@
                         this.assertRecvDirection();
                         for (const localId of localIds) {
                             logger.debug('stopReceiving() [localId:%s]', localId);
-                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) || {};
+                            const { mid, rtpParameters } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                             // Remove from the map.
                             this._mapRecvLocalIdInfo.delete(localId);
                             this._remoteSdp.planBStopReceiving({
@@ -11337,7 +11338,7 @@
                     }
                     async getReceiverStats(localId) {
                         this.assertRecvDirection();
-                        const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) || {};
+                        const { rtpReceiver } = this._mapRecvLocalIdInfo.get(localId) ?? {};
                         if (!rtpReceiver) {
                             throw new Error('associated RTCRtpReceiver not found');
                         }
@@ -11424,7 +11425,7 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../ortc': 39,
                 '../utils': 42,
                 './HandlerInterface': 26,
@@ -11492,6 +11493,7 @@
                 const RemoteSdp_1 = require('./sdp/RemoteSdp');
                 const scalabilityModes_1 = require('../scalabilityModes');
                 const logger = new Logger_1.Logger('Safari12');
+                const NAME = 'Safari12';
                 const SCTP_NUM_STREAMS = { OS: 1024, MIS: 1024 };
                 class Safari12 extends HandlerInterface_1.HandlerInterface {
                     /**
@@ -11516,7 +11518,7 @@
                         this._transportReady = false;
                     }
                     get name() {
-                        return 'Safari12';
+                        return NAME;
                     }
                     close() {
                         logger.debug('close()');
@@ -11601,8 +11603,8 @@
                         }
                         this._pc = new RTCPeerConnection(
                             {
-                                iceServers: iceServers || [],
-                                iceTransportPolicy: iceTransportPolicy || 'all',
+                                iceServers: iceServers ?? [],
+                                iceTransportPolicy: iceTransportPolicy ?? 'all',
                                 bundlePolicy: 'max-bundle',
                                 rtcpMuxPolicy: 'require',
                                 ...additionalSettings,
@@ -11709,7 +11711,7 @@
                                 localSdpObject,
                             });
                         }
-                        const layers = (0, scalabilityModes_1.parse)((encodings || [{}])[0].scalabilityMode);
+                        const layers = (0, scalabilityModes_1.parse)((encodings ?? [{}])[0].scalabilityMode);
                         if (encodings && encodings.length > 1) {
                             logger.debug('send() | enabling legacy simulcast');
                             localSdpObject = sdpTransform.parse(offer.sdp);
@@ -11787,7 +11789,7 @@
                         if (!transceiver) {
                             throw new Error('associated RTCRtpTransceiver not found');
                         }
-                        transceiver.sender.replaceTrack(null);
+                        void transceiver.sender.replaceTrack(null);
                         this._pc.removeTrack(transceiver.sender);
                         const mediaSectionClosed = this._remoteSdp.closeMediaSection(transceiver.mid);
                         if (mediaSectionClosed) {
@@ -11803,7 +11805,6 @@
                         await this._pc.setRemoteDescription(answer);
                         this._mapMidTransceiver.delete(localId);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async pauseSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -11821,7 +11822,6 @@
                         logger.debug('pauseSending() | calling pc.setRemoteDescription() [answer:%o]', answer);
                         await this._pc.setRemoteDescription(answer);
                     }
-                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
                     async resumeSending(localId) {
                         this.assertNotClosed();
                         this.assertSendDirection();
@@ -11962,13 +11962,13 @@
                         for (const options of optionsList) {
                             const { trackId, kind, rtpParameters, streamId } = options;
                             logger.debug('receive() [trackId:%s, kind:%s]', trackId, kind);
-                            const localId = rtpParameters.mid || String(this._mapMidTransceiver.size);
+                            const localId = rtpParameters.mid ?? String(this._mapMidTransceiver.size);
                             mapLocalId.set(trackId, localId);
                             this._remoteSdp.receive({
                                 mid: localId,
                                 kind,
                                 offerRtpParameters: rtpParameters,
-                                streamId: streamId || rtpParameters.rtcp.cname,
+                                streamId: streamId ?? rtpParameters.rtcp.cname,
                                 trackId,
                             });
                         }
@@ -12170,7 +12170,7 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 12,
+                '../Logger': 11,
                 '../errors': 17,
                 '../ortc': 39,
                 '../scalabilityModes': 40,
@@ -12240,13 +12240,13 @@
                     const caps = utils.clone(nativeCaps);
                     for (const codec of caps.codecs ?? []) {
                         // Rename numChannels to channels.
-                        // @ts-ignore
+                        // @ts-expect-error --- On purpose.
                         codec.channels = codec.numChannels;
-                        // @ts-ignore
+                        // @ts-expect-error --- On purpose.
                         delete codec.numChannels;
                         // Add mimeType.
-                        // @ts-ignore (due to codec.name).
-                        codec.mimeType = codec.mimeType || `${codec.kind}/${codec.name}`;
+                        // @ts-expect-error --- On purpose (due to codec.name).
+                        codec.mimeType = codec.mimeType ?? `${codec.kind}/${codec.name}`;
                         // NOTE: Edge sets some numeric parameters as string rather than number. Fix them.
                         if (codec.parameters) {
                             const parameters = codec.parameters;
@@ -12258,7 +12258,7 @@
                             }
                         }
                         // Delete emty parameter String in rtcpFeedback.
-                        for (const feedback of codec.rtcpFeedback || []) {
+                        for (const feedback of codec.rtcpFeedback ?? []) {
                             if (!feedback.parameter) {
                                 feedback.parameter = '';
                             }
@@ -12273,25 +12273,25 @@
                     const params = utils.clone(rtpParameters);
                     // Rename mid to muxId.
                     if (params.mid) {
-                        // @ts-ignore (due to muxId).
+                        // @ts-expect-error --- On purpose (due to muxId).
                         params.muxId = params.mid;
                         delete params.mid;
                     }
                     for (const codec of params.codecs) {
                         // Rename channels to numChannels.
                         if (codec.channels) {
-                            // @ts-ignore.
+                            // @ts-expect-error --- On purpose.
                             codec.numChannels = codec.channels;
                             delete codec.channels;
                         }
                         // Add codec.name (requried by Edge).
-                        // @ts-ignore (due to name).
+                        // @ts-expect-error --- On purpose (due to name).
                         if (codec.mimeType && !codec.name) {
-                            // @ts-ignore (due to name).
+                            // @ts-expect-error --- On purpose (due to name).
                             codec.name = codec.mimeType.split('/')[1];
                         }
                         // Remove mimeType.
-                        // @ts-ignore
+                        // @ts-expect-error --- On purpose.
                         delete codec.mimeType;
                     }
                     return params;
@@ -12308,7 +12308,7 @@
                  * This function adds RTCP NACK support for OPUS codec in given capabilities.
                  */
                 function addNackSuppportForOpus(rtpCapabilities) {
-                    for (const codec of rtpCapabilities.codecs || []) {
+                    for (const codec of rtpCapabilities.codecs ?? []) {
                         if (
                             (codec.mimeType.toLowerCase() === 'audio/opus' ||
                                 codec.mimeType.toLowerCase() === 'audio/multiopus') &&
@@ -12583,7 +12583,7 @@
                                 this._mediaObject.ext = [];
                                 for (const ext of answerRtpParameters.headerExtensions) {
                                     // Don't add a header extension if not present in the offer.
-                                    const found = (offerMediaObject.ext || []).some(
+                                    const found = (offerMediaObject.ext ?? []).some(
                                         (localExt) => localExt.uri === ext.uri,
                                     );
                                     if (!found) {
@@ -12605,7 +12605,7 @@
                                         list1: offerMediaObject.simulcast.list1,
                                     };
                                     this._mediaObject.rids = [];
-                                    for (const rid of offerMediaObject.rids || []) {
+                                    for (const rid of offerMediaObject.rids ?? []) {
                                         if (rid.direction !== 'send') {
                                             continue;
                                         }
@@ -12617,12 +12617,11 @@
                                 }
                                 // Simulcast (draft version 03).
                                 else if (offerMediaObject.simulcast_03) {
-                                    // eslint-disable-next-line camelcase
                                     this._mediaObject.simulcast_03 = {
                                         value: offerMediaObject.simulcast_03.value.replace(/send/g, 'recv'),
                                     };
                                     this._mediaObject.rids = [];
-                                    for (const rid of offerMediaObject.rids || []) {
+                                    for (const rid of offerMediaObject.rids ?? []) {
                                         if (rid.direction !== 'send') {
                                             continue;
                                         }
@@ -12679,7 +12678,7 @@
                         this._mediaObject.direction = 'recvonly';
                     }
                     muxSimulcastStreams(encodings) {
-                        if (!this._mediaObject.simulcast || !this._mediaObject.simulcast.list1) {
+                        if (!this._mediaObject.simulcast?.list1) {
                             return;
                         }
                         const layers = {};
@@ -12745,7 +12744,7 @@
                                 this._mediaObject.rtcpFb = [];
                                 this._mediaObject.fmtp = [];
                                 if (!this._planB) {
-                                    this._mediaObject.msid = `${streamId || '-'} ${trackId}`;
+                                    this._mediaObject.msid = `${streamId ?? '-'} ${trackId}`;
                                 }
                                 for (const codec of offerRtpParameters.codecs) {
                                     const rtp = {
@@ -12792,7 +12791,7 @@
                                 this._mediaObject.rtcpRsize = 'rtcp-rsize';
                                 const encoding = offerRtpParameters.encodings[0];
                                 const ssrc = encoding.ssrc;
-                                const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
+                                const rtxSsrc = encoding.rtx?.ssrc;
                                 this._mediaObject.ssrcs = [];
                                 this._mediaObject.ssrcGroups = [];
                                 if (offerRtpParameters.rtcp.cname) {
@@ -12806,7 +12805,7 @@
                                     this._mediaObject.ssrcs.push({
                                         id: ssrc,
                                         attribute: 'msid',
-                                        value: `${streamId || '-'} ${trackId}`,
+                                        value: `${streamId ?? '-'} ${trackId}`,
                                     });
                                 }
                                 if (rtxSsrc) {
@@ -12821,7 +12820,7 @@
                                         this._mediaObject.ssrcs.push({
                                             id: rtxSsrc,
                                             attribute: 'msid',
-                                            value: `${streamId || '-'} ${trackId}`,
+                                            value: `${streamId ?? '-'} ${trackId}`,
                                         });
                                     }
                                     // Associate original and retransmission SSRCs.
@@ -12863,7 +12862,7 @@
                     planBReceive({ offerRtpParameters, streamId, trackId }) {
                         const encoding = offerRtpParameters.encodings[0];
                         const ssrc = encoding.ssrc;
-                        const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
+                        const rtxSsrc = encoding.rtx?.ssrc;
                         const payloads = this._mediaObject.payloads.split(' ');
                         for (const codec of offerRtpParameters.codecs) {
                             if (payloads.includes(String(codec.payloadType))) {
@@ -12914,7 +12913,7 @@
                         this._mediaObject.ssrcs.push({
                             id: ssrc,
                             attribute: 'msid',
-                            value: `${streamId || '-'} ${trackId}`,
+                            value: `${streamId ?? '-'} ${trackId}`,
                         });
                         if (rtxSsrc) {
                             if (offerRtpParameters.rtcp.cname) {
@@ -12927,7 +12926,7 @@
                             this._mediaObject.ssrcs.push({
                                 id: rtxSsrc,
                                 attribute: 'msid',
-                                value: `${streamId || '-'} ${trackId}`,
+                                value: `${streamId ?? '-'} ${trackId}`,
                             });
                             // Associate original and retransmission SSRCs.
                             this._mediaObject.ssrcGroups.push({
@@ -12939,7 +12938,7 @@
                     planBStopReceiving({ offerRtpParameters }) {
                         const encoding = offerRtpParameters.encodings[0];
                         const ssrc = encoding.ssrc;
-                        const rtxSsrc = encoding.rtx && encoding.rtx.ssrc ? encoding.rtx.ssrc : undefined;
+                        const rtxSsrc = encoding.rtx?.ssrc;
                         this._mediaObject.ssrcs = this._mediaObject.ssrcs.filter(
                             (s) => s.id !== ssrc && s.id !== rtxSsrc,
                         );
@@ -13046,7 +13045,7 @@
                             media: [],
                         };
                         // If ICE parameters are given, add ICE-Lite indicator.
-                        if (iceParameters && iceParameters.iceLite) {
+                        if (iceParameters?.iceLite) {
                             this._sdpObject.icelite = 'ice-lite';
                         }
                         // If DTLS parameters are given, assume WebRTC and BUNDLE.
@@ -13299,7 +13298,7 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 12, './MediaSection': 33, 'sdp-transform': 47 },
+            { '../../Logger': 11, './MediaSection': 33, 'sdp-transform': 47 },
         ],
         35: [
             function (require, module, exports) {
@@ -13405,7 +13404,7 @@
                                 continue;
                             }
                             // Specials case to convert parameter value to string.
-                            if (parameters && parameters.hasOwnProperty('profile-level-id')) {
+                            if (parameters?.hasOwnProperty('profile-level-id')) {
                                 parameters['profile-level-id'] = String(parameters['profile-level-id']);
                             }
                             codec.parameters = parameters;
@@ -13672,8 +13671,7 @@
                         semantics: 'SIM',
                         ssrcs: ssrcs.join(' '),
                     });
-                    for (let i = 0; i < ssrcs.length; ++i) {
-                        const ssrc = ssrcs[i];
+                    for (const ssrc of ssrcs) {
                         offerMediaObject.ssrcs.push({
                             id: ssrc,
                             attribute: 'cname',
@@ -13769,7 +13767,7 @@
                         throw new Error('a=ssrc line with msid information not found');
                     }
                     const [streamId, trackId] = ssrcMsidLine.value.split(' ');
-                    const firstSsrc = ssrcMsidLine.id;
+                    const firstSsrc = Number(ssrcMsidLine.id);
                     let firstRtxSsrc;
                     // Get the SSRC for RTX.
                     (offerMediaObject.ssrcGroups || []).some((line) => {
@@ -13803,8 +13801,7 @@
                         semantics: 'SIM',
                         ssrcs: ssrcs.join(' '),
                     });
-                    for (let i = 0; i < ssrcs.length; ++i) {
-                        const ssrc = ssrcs[i];
+                    for (const ssrc of ssrcs) {
                         offerMediaObject.ssrcs.push({
                             id: ssrc,
                             attribute: 'cname',
@@ -13915,7 +13912,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.14';
+                exports.version = '3.7.16';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -14134,11 +14131,11 @@
                         headerExtensions: [],
                     };
                     // Match media codecs and keep the order preferred by remoteCaps.
-                    for (const remoteCodec of remoteCaps.codecs || []) {
+                    for (const remoteCodec of remoteCaps.codecs ?? []) {
                         if (isRtxCodec(remoteCodec)) {
                             continue;
                         }
-                        const matchingLocalCodec = (localCaps.codecs || []).find((localCodec) =>
+                        const matchingLocalCodec = (localCaps.codecs ?? []).find((localCodec) =>
                             matchCodecs(localCodec, remoteCodec, { strict: true, modify: true }),
                         );
                         if (!matchingLocalCodec) {
@@ -14385,7 +14382,7 @@
                         )
                     ) {
                         for (const codec of rtpParameters.codecs) {
-                            codec.rtcpFeedback = (codec.rtcpFeedback || []).filter((fb) => fb.type !== 'goog-remb');
+                            codec.rtcpFeedback = (codec.rtcpFeedback ?? []).filter((fb) => fb.type !== 'goog-remb');
                         }
                     } else if (
                         rtpParameters.headerExtensions.some(
@@ -14393,11 +14390,11 @@
                         )
                     ) {
                         for (const codec of rtpParameters.codecs) {
-                            codec.rtcpFeedback = (codec.rtcpFeedback || []).filter((fb) => fb.type !== 'transport-cc');
+                            codec.rtcpFeedback = (codec.rtcpFeedback ?? []).filter((fb) => fb.type !== 'transport-cc');
                         }
                     } else {
                         for (const codec of rtpParameters.codecs) {
-                            codec.rtcpFeedback = (codec.rtcpFeedback || []).filter(
+                            codec.rtcpFeedback = (codec.rtcpFeedback ?? []).filter(
                                 (fb) => fb.type !== 'transport-cc' && fb.type !== 'goog-remb',
                             );
                         }
@@ -14844,8 +14841,8 @@
                 }
                 function reduceRtcpFeedback(codecA, codecB) {
                     const reducedRtcpFeedback = [];
-                    for (const aFb of codecA.rtcpFeedback || []) {
-                        const matchingBFb = (codecB.rtcpFeedback || []).find(
+                    for (const aFb of codecA.rtcpFeedback ?? []) {
+                        const matchingBFb = (codecB.rtcpFeedback ?? []).find(
                             (bFb) =>
                                 bFb.type === aFb.type &&
                                 (bFb.parameter === aFb.parameter || (!bFb.parameter && !aFb.parameter)),
@@ -14866,7 +14863,7 @@
                 exports.parse = parse;
                 const ScalabilityModeRegex = new RegExp('^[LS]([1-9]\\d{0,1})T([1-9]\\d{0,1})');
                 function parse(scalabilityMode) {
-                    const match = ScalabilityModeRegex.exec(scalabilityMode || '');
+                    const match = ScalabilityModeRegex.exec(scalabilityMode ?? '');
                     if (match) {
                         return {
                             spatialLayers: Number(match[1]),
@@ -14929,10 +14926,10 @@
                 './DataConsumer': 8,
                 './DataProducer': 9,
                 './Device': 10,
-                './Producer': 13,
-                './RtpParameters': 14,
-                './SctpParameters': 15,
-                './Transport': 16,
+                './Producer': 12,
+                './RtpParameters': 13,
+                './SctpParameters': 14,
+                './Transport': 15,
                 './errors': 17,
                 './handlers/HandlerInterface': 26,
             },
