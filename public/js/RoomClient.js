@@ -4870,7 +4870,7 @@ class RoomClient {
     }
 
     generateFileName(extension) {
-        return `Room_${this.room_id}${getDataTimeString()}_${extension}`;
+        return `Room_${this.room_id}_${getDataTimeString()}_${extension}`;
     }
 
     saveAsHtml(content, file) {
