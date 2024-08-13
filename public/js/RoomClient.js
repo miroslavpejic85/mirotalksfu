@@ -103,6 +103,7 @@ const image = {
     geolocation: '../images/geolocation.png',
     network: '../images/network.gif',
     rtmp: '../images/rtmp.png',
+    save: '../images/save.png',
 };
 
 const mediaType = {
@@ -4820,13 +4821,70 @@ class RoomClient {
     }
 
     editorSave() {
-        const content = quill.getText();
-        if (content.trim().length === 0) {
+        Swal.fire({
+            background: swalBackground,
+            position: 'top',
+            imageUrl: image.save,
+            title: 'Editor save options',
+            showDenyButton: true,
+            showCancelButton: true,
+            cancelButtonColor: 'red',
+            denyButtonColor: 'green',
+            confirmButtonText: `Text`,
+            denyButtonText: `Html`,
+            cancelButtonText: `Cancel`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            this.handleEditorSaveResult(result);
+        });
+    }
+
+    handleEditorSaveResult(result) {
+        if (result.isConfirmed) {
+            this.saveEditorAsText();
+        } else if (result.isDenied) {
+            this.saveEditorAsHtml();
+        }
+    }
+
+    saveEditorAsText() {
+        const content = quill.getText().trim();
+        if (content.length === 0) {
             return this.userLog('info', 'No data to save!', 'top-end');
         }
         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-        const file = 'Room_' + this.room_id + getDataTimeString() + '_editor.txt';
-        this.saveBlobToFile(blob, file);
+        const fileName = this.generateFileName('editor.txt');
+        this.saveBlobToFile(blob, fileName);
+        this.sound('download');
+    }
+
+    saveEditorAsHtml() {
+        const content = quill.root.innerHTML.trim();
+        if (content === '<p><br></p>') {
+            return this.userLog('info', 'No data to save!', 'top-end');
+        }
+        const fileName = this.generateFileName('editor.html');
+        this.saveAsHtml(content, fileName);
+        this.sound('download');
+    }
+
+    generateFileName(extension) {
+        return `Room_${this.room_id}${getDataTimeString()}_${extension}`;
+    }
+
+    saveAsHtml(content, file) {
+        const blob = new Blob([content], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = file;
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => {
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }, 100);
     }
 
     editorSendAction(action) {
