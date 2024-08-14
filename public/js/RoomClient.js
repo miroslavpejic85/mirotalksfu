@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.57
+ * @version 1.5.58
  *
  */
 
@@ -265,6 +265,7 @@ class RoomClient {
         this.isPollPinned = false;
         this.isEditorOpen = false;
         this.isEditorLocked = false;
+        this.isEditorPinned = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.speechInMessages = false;
         this.showChatOnMessage = true;
@@ -3516,6 +3517,9 @@ class RoomClient {
         if (this.isPollPinned) {
             this.pollPin();
         }
+        if (this.isEditorPinned) {
+            this.editorPin();
+        }
         if (this.transcription.isPin()) {
             this.transcription.pinned();
         }
@@ -3715,6 +3719,9 @@ class RoomClient {
         }
         if (this.isPollPinned) {
             return userLog('info', 'Please unpin the poll that appears to be currently pinned', 'top-end');
+        }
+        if (this.isEditorPinned) {
+            return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
         }
         this.isChatPinned ? this.chatUnpin() : this.chatPin();
         this.sound('click');
@@ -4387,6 +4394,9 @@ class RoomClient {
         if (this.isChatPinned) {
             return userLog('info', 'Please unpin the chat that appears to be currently pinned', 'top-end');
         }
+        if (this.isEditorPinned) {
+            return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
+        }
         this.isPollPinned ? this.pollUnpin() : this.pollPin();
         this.sound('click');
     }
@@ -4401,7 +4411,7 @@ class RoomClient {
         this.isPollPinned = true;
         setColor(pollTogglePin, 'lime');
         resizeVideoMedia();
-        chatRoom.style.resize = 'none';
+        pollRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(pollRoom, pollHeader);
     }
 
@@ -4687,9 +4697,11 @@ class RoomClient {
     toggleEditor() {
         editorRoom.classList.toggle('show');
         if (!this.isEditorOpen) {
+            this.editorCenter();
             this.sound('open');
         }
         this.isEditorOpen = !this.isEditorOpen;
+        if (this.isEditorPinned) this.editorUnpin();
     }
 
     toggleLockUnlockEditor() {
@@ -4717,6 +4729,61 @@ class RoomClient {
         editorRoom.style.transform = 'translate(-50%, -50%)';
         editorRoom.style.top = '50%';
         editorRoom.style.left = '50%';
+    }
+
+    toggleEditorPin() {
+        if (transcription.isPin()) {
+            return userLog('info', 'Please unpin the transcription that appears to be currently pinned', 'top-end');
+        }
+        if (this.isPollPinned) {
+            return userLog('info', 'Please unpin the poll that appears to be currently pinned', 'top-end');
+        }
+        if (this.isChatPinned) {
+            return userLog('info', 'Please unpin the chat that appears to be currently pinned', 'top-end');
+        }
+        this.isEditorPinned ? this.editorUnpin() : this.editorPin();
+        this.sound('click');
+    }
+
+    editorPin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.width = '70%';
+            this.videoMediaContainer.style.height = '100%';
+        }
+        this.editorPinned();
+        this.isEditorPinned = true;
+        setColor(editorTogglePin, 'lime');
+        resizeVideoMedia();
+        document.documentElement.style.setProperty('--editor-height', '80vh');
+        //if (!this.isMobileDevice) this.makeUnDraggable(editorRoom, editorHeader);
+    }
+
+    editorUnpin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.right = null;
+            this.videoMediaContainer.style.width = '100%';
+            this.videoMediaContainer.style.height = '100%';
+        }
+        editorRoom.style.maxWidth = '100%';
+        editorRoom.style.maxHeight = '100%';
+        this.pollCenter();
+        this.isEditorPinned = false;
+        setColor(editorTogglePin, 'white');
+        resizeVideoMedia();
+        document.documentElement.style.setProperty('--editor-height', '85vh');
+        //if (!this.isMobileDevice) this.makeDraggable(editorRoom, editorHeader);
+    }
+
+    editorPinned() {
+        editorRoom.style.position = 'absolute';
+        editorRoom.style.top = 0;
+        editorRoom.style.right = 0;
+        editorRoom.style.left = null;
+        editorRoom.style.transform = null;
+        editorRoom.style.maxWidth = '30%';
+        editorRoom.style.maxHeight = '100%';
     }
 
     editorUpdate() {

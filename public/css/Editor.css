@@ -2,11 +2,11 @@
     z-index: 5;
     position: absolute;
     padding: 20px;
-    width: 100%;
-    height: 100%;
+    width: var(--editor-container-width);
+    height: var(--editor-container-height);
+    border: var(--border);
     border-radius: 10px;
     background: var(--body-bg);
-    border: var(--border);
     box-shadow: var(--box-shadow);
     overflow-x: hidden;
     overflow-y: auto;
@@ -29,7 +29,7 @@
 }
 
 .editor {
-    height: 85vh !important;
+    height: var(--editor-height) !important;
     color: white !important;
     border-radius: 0px 0px 10px 10px; /* Top-left, top-right, bottom-right, bottom-left */
     border: var(--border) !important;

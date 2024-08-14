@@ -285,6 +285,9 @@ class Transcription {
         if (rc.isChatPinned) {
             return userLog('info', 'Please unpin the chat that appears to be currently pinned', 'top-end');
         }
+        if (rc.isEditorPinned) {
+            return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
+        }
         this.isPinned ? this.unpinned() : this.pinned();
         rc.sound('click');
     }

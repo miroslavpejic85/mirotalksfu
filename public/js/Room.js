@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.57
+ * @version 1.5.58
  *
  */
 
@@ -342,6 +342,7 @@ function initClient() {
         setTippy('pollCloseBtn', 'Close', 'bottom');
         setTippy('editorLockBtn', 'Toggle Lock editor', 'bottom');
         setTippy('editorUnlockBtn', 'Toggle Lock editor', 'bottom');
+        setTippy('editorTogglePin', 'Toggle pin', 'bottom');
         setTippy('editorUndoBtn', 'Undo', 'bottom');
         setTippy('editorRedoBtn', 'Redo', 'bottom');
         setTippy('editorCopyBtn', 'Copy', 'bottom');
@@ -1331,6 +1332,7 @@ function roomIsReady() {
         hide(chatMinButton);
         rc.pollMaximize();
         hide(pollTogglePin);
+        hide(editorTogglePin);
         hide(pollMaxButton);
         hide(pollMinButton);
         transcription.maximize();
@@ -1341,6 +1343,7 @@ function roomIsReady() {
         rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(pollRoom, pollHeader);
+        //rc.makeDraggable(editorRoom, editorHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
         rc.makeDraggable(sendFileDiv, imgShareSend);
@@ -1357,6 +1360,7 @@ function roomIsReady() {
         BUTTONS.chat.chatPinButton && show(chatTogglePin);
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.poll.pollPinButton && show(pollTogglePin);
+        show(editorTogglePin);
         BUTTONS.poll.pollMaxButton && show(pollMaxButton);
         BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
         BUTTONS.settings.tabRTMPStreamingBtn &&
@@ -1645,6 +1649,9 @@ function handleButtons() {
         if (isPresenter && !rc.editorIsLocked()) {
             rc.editorSendAction('close');
         }
+    };
+    editorTogglePin.onclick = () => {
+        rc.toggleEditorPin();
     };
     editorLockBtn.onclick = () => {
         rc.toggleLockUnlockEditor();
@@ -4437,7 +4444,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.57',
+        title: 'WebRTC SFU v1.5.58',
         html: `
         <br />
         <div id="about">

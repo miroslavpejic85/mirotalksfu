@@ -48,6 +48,10 @@
     --transcription-width: 420px;
     --trx-bg: radial-gradient(#393939, #000000);
 
+    --editor-container-width: 100%;
+    --editor-container-height: 100%;
+    --editor-height: 85vh;
+
     --vmi-wh: 15vw;
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
