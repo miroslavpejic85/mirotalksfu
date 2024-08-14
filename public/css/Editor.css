@@ -22,7 +22,7 @@
 
 .editor-header-btns {
     display: flex;
-    gap: 10px;
+    gap: 5px;
     position: absolute;
     float: right;
     right: 20px;
