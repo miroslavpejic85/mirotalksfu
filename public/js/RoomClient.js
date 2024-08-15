@@ -3277,28 +3277,36 @@ class RoomClient {
     }
 
     toggleFullScreen(elem = null) {
-        let el = elem ? elem : document.documentElement;
-        document.fullscreenEnabled =
-            document.fullscreenEnabled ||
-            document.webkitFullscreenEnabled ||
-            document.mozFullScreenEnabled ||
-            document.msFullscreenEnabled;
-        document.exitFullscreen =
-            document.exitFullscreen ||
-            document.webkitExitFullscreen ||
-            document.mozCancelFullScreen ||
-            document.msExitFullscreen;
-        el.requestFullscreen =
-            el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullScreen;
-        if (document.fullscreenEnabled) {
+        const element = elem ? elem : document.documentElement;
+        const fullScreen = this.isFullScreen();
+        fullScreen ? this.goOutFullscreen(element) : this.goInFullscreen(element);
+        if (elem === null) this.isVideoOnFullScreen = fullScreen;
+    }
+
+    isFullScreen() {
+        const elementFullScreen =
             document.fullscreenElement ||
             document.webkitFullscreenElement ||
             document.mozFullScreenElement ||
-            document.msFullscreenElement
-                ? document.exitFullscreen()
-                : el.requestFullscreen();
-        }
-        if (elem == null) this.isVideoOnFullScreen = document.fullscreenEnabled;
+            document.msFullscreenElement ||
+            null;
+        if (elementFullScreen === null) return false;
+        return true;
+    }
+
+    goInFullscreen(element) {
+        if (element.requestFullscreen) element.requestFullscreen();
+        else if (element.mozRequestFullScreen) element.mozRequestFullScreen();
+        else if (element.webkitRequestFullscreen) element.webkitRequestFullscreen();
+        else if (element.msRequestFullscreen) element.msRequestFullscreen();
+        else this.userLog('warning', 'Full screen mode not supported by this browser on this device', 'top-end');
+    }
+
+    goOutFullscreen(element) {
+        if (element.exitFullscreen) element.exitFullscreen();
+        else if (element.mozCancelFullScreen) element.mozCancelFullScreen();
+        else if (element.webkitExitFullscreen) element.webkitExitFullscreen();
+        else if (element.msExitFullscreen) element.msExitFullscreen();
     }
 
     handleFS(elemId, fsId) {
@@ -3312,7 +3320,6 @@ class RoomClient {
                 }
                 videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                 this.toggleFullScreen(videoPlayer);
-                this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
             });
         }
         if (videoPlayer) {
@@ -3324,7 +3331,6 @@ class RoomClient {
                     if ((this.isMobileDevice && this.isVideoOnFullScreen) || !this.isMobileDevice) {
                         videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
                         this.toggleFullScreen(videoPlayer);
-                        this.isVideoOnFullScreen = this.isVideoOnFullScreen ? false : true;
                     }
                 }
             });
