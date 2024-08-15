@@ -4582,6 +4582,10 @@ class RoomClient {
             });
             pollButtonsDiv.appendChild(deletePollButton);
 
+            // Add thematic break
+            const hr = document.createElement('hr');
+            pollDiv.appendChild(hr);
+
             // Append buttons to poll
             pollDiv.appendChild(pollButtonsDiv);
 
