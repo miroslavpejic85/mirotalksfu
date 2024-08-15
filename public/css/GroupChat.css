@@ -21,6 +21,7 @@
     border-radius: 10px;
     box-shadow: var(--box-shadow);
     transition: background 1s;
+    transition: width 0.5s ease-in-out;
     /* border: 1px solid lime; */
 }
 

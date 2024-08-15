@@ -10,12 +10,13 @@
     box-shadow: var(--box-shadow);
     overflow-x: hidden;
     overflow-y: auto;
+    transition: width 0.5s ease-in-out;
 }
 
 .editor-header {
     display: inline-flex;
     text-align: left;
-    margin-bottom: 30px;
+    margin-bottom: 35px;
     width: 100%;
     cursor: move;
 }

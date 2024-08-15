@@ -783,6 +783,7 @@ th {
     box-shadow: var(--box-shadow);
     resize: both;
     overflow: hidden;
+    transition: width 0.5s ease-in-out;
 }
 
 .transcription {

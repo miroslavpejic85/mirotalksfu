@@ -11,6 +11,7 @@
     border: var(--border);
     box-shadow: var(--box-shadow);
     overflow: hidden;
+    transition: max-width 0.5s ease-in-out;
 }
 
 .poll-header {
