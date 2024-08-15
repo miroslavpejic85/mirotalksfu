@@ -1,8 +1,5 @@
 .container {
     padding: 2px !important;
-    transition:
-        width 0.5s,
-        background 2s ease !important;
     /* overflow-y: auto;
     overflow-x: hidden; */
 }

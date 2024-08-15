@@ -10,7 +10,7 @@
     box-shadow: var(--box-shadow);
     overflow-x: hidden;
     overflow-y: auto;
-    transition: width 0.5s ease-in-out;
+    transition: max-width 0.5s ease-in-out;
 }
 
 .editor-header {
