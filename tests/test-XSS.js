@@ -1,12 +1,12 @@
 'use strict';
 
-// npx mocha checkXSS.js
+// npx mocha test-XSS.js
 
 require('should');
 
 const checkXSS = require('../app/src/XSS');
 
-describe('checkXSS', () => {
+describe('test-XSS', () => {
     describe('1. Basic Data Types Handling', () => {
         it('should return numbers and booleans unchanged', () => {
             checkXSS(42).should.equal(42);

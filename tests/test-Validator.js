@@ -1,12 +1,12 @@
 'use strict';
 
-// npx mocha checkValidator.js
+// npx mocha test-Validator.js
 
 require('should');
 
 const checkValidator = require('../app/src/Validator');
 
-describe('checkValidator', () => {
+describe('test-Validator', () => {
     describe('1. Handling invalid room name', () => {
         it('should return false for non-string inputs', () => {
             checkValidator.isValidRoomName(123).should.be.false();

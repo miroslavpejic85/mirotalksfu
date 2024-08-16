@@ -1,6 +1,6 @@
 'use strict';
 
-// npx mocha checkServerApi.js
+// npx mocha test-ServerApi.js
 
 require('should');
 
@@ -11,7 +11,7 @@ const CryptoJS = require('crypto-js');
 const ServerApi = require('../app/src/ServerApi');
 const config = require('../app/src/config');
 
-describe('checkServerAPI', () => {
+describe('test-ServerAPI', () => {
     let serverApi;
     const host = 'example.com';
     const authorization = 'secret-key';
