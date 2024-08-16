@@ -1,10 +1,13 @@
 'use strict';
 
+const checkXSS = require('./XSS.js');
+
 function isValidRoomName(input) {
     if (typeof input !== 'string') {
         return false;
     }
-    return !hasPathTraversal(input);
+    const room = checkXSS(input);
+    return !room ? false : !hasPathTraversal(room);
 }
 
 function isValidRecFileNameFormat(input) {

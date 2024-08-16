@@ -66,11 +66,16 @@ const checkXSS = (dataObject) => {
     }
 };
 
+function needsDecoding(str) {
+    const urlEncodedPattern = /%[0-9A-Fa-f]{2}/g;
+    return urlEncodedPattern.test(str);
+}
+
 // Recursively sanitize data based on its type
 function sanitizeData(data) {
     if (typeof data === 'string') {
         // Decode HTML entities and URL encoded content
-        const decodedData = he.decode(decodeURIComponent(data));
+        const decodedData = needsDecoding(data) ? he.decode(decodeURIComponent(data)) : he.decode(data);
         return purify.sanitize(decodedData);
     }
 

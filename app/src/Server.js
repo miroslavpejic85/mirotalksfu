@@ -7,7 +7,7 @@
      ██ ██      ██   ██  ██  ██  ██      ██   ██ 
 ███████ ███████ ██   ██   ████   ███████ ██   ██                                           
 
-dependencies: {
+prod dependencies: {
     @ffmpeg-installer/ffmpeg: https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
@@ -16,12 +16,15 @@ dependencies: {
     colors                  : https://www.npmjs.com/package/colors
     cors                    : https://www.npmjs.com/package/cors
     crypto-js               : https://www.npmjs.com/package/crypto-js
+    dompurify               : https://www.npmjs.com/package/dompurify
     express                 : https://www.npmjs.com/package/express
     express-openid-connect  : https://www.npmjs.com/package/express-openid-connect
     fluent-ffmpeg           : https://www.npmjs.com/package/fluent-ffmpeg
+    he                      : https://www.npmjs.com/package/he
     httpolyglot             : https://www.npmjs.com/package/httpolyglot
-    jsonwebtoken            : https://www.npmjs.com/package/jsonwebtoken
     js-yaml                 : https://www.npmjs.com/package/js-yaml
+    jsdom                   : https://www.npmjs.com/package/jsdom
+    jsonwebtoken            : https://www.npmjs.com/package/jsonwebtoken
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
     ngrok                   : https://www.npmjs.com/package/ngrok
@@ -30,7 +33,16 @@ dependencies: {
     socket.io               : https://www.npmjs.com/package/socket.io
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
-    xss                     : https://www.npmjs.com/package/xss
+}
+
+dev dependencies: {
+    mocha                   : https://www.npmjs.com/package/mocha
+    node-fetch              : https://www.npmjs.com/package/node-fetch
+    nodemon                 : https://www.npmjs.com/package/nodemon
+    prettier                : https://www.npmjs.com/package/prettier
+    proxyquire              : https://www.npmjs.com/package/proxyquire
+    should                  : https://www.npmjs.com/package/should
+    sinon                   : https://www.npmjs.com/package/sinon
 }
 */
 
@@ -43,7 +55,7 @@ dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.60
+ * @version 1.5.61
  *
  */
 

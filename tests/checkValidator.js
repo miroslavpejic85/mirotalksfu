@@ -7,13 +7,17 @@ require('should');
 const checkValidator = require('../app/src/Validator');
 
 describe('checkValidator', () => {
-    describe('1. Handling valid room name', () => {
+    describe('1. Handling invalid room name', () => {
         it('should return false for non-string inputs', () => {
             checkValidator.isValidRoomName(123).should.be.false();
             checkValidator.isValidRoomName({}).should.be.false();
             checkValidator.isValidRoomName([]).should.be.false();
             checkValidator.isValidRoomName(null).should.be.false();
             checkValidator.isValidRoomName(undefined).should.be.false();
+        });
+
+        it('should return false for xss injection inputs', () => {
+            checkValidator.isValidRoomName('<script>alert("xss")</script>').should.be.false();
         });
 
         it('should return true for valid room name', () => {

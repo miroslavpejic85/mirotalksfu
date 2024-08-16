@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.5.60",
+    "version": "1.5.61",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -28,7 +28,7 @@
         "nms-stop": "docker-compose -f rtmpServers/node-media-server/docker-compose.yml down",
         "nms-restart": "docker-compose -f rtmpServers/node-media-server/docker-compose.yml down && docker-compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
         "nms-logs": "docker logs -f mirotalk-nms",
-        "unit-test": "npx mocha tests/checkXSS.js"
+        "unit-tests": "npx mocha tests"
     },
     "repository": {
         "type": "git",
@@ -89,6 +89,8 @@
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.4",
         "prettier": "3.3.3",
-        "should": "^13.2.3"
+        "proxyquire": "^2.1.3",
+        "should": "^13.2.3",
+        "sinon": "^18.0.0"
     }
 }
