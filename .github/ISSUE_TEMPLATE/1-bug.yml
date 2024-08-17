@@ -60,19 +60,21 @@ body:
   - type: textarea
     attributes:
       label: Relevant log output
-      description: Please copy and paste any relevant log output. The browser console logs (if applicable) is a good start. This will be automatically formatted into code, so no need for backticks.
+      description: Please copy and paste any relevant log output. The browser console logs (if applicable) are a good start. This will be automatically formatted into code, so no need for backticks.
       render: shell
   - type: markdown
     attributes:
       value: "**Please indicate whether the problem is reproducible on sfu.mirotalk.com.**"
 
-  - type: checkboxes
+  - type: dropdown
     attributes:
       label: Reproducibility
       description: Is the bug reproducible on sfu.mirotalk.com?
       options:
-        - label: Yes
-        - label: No
+        - Yes
+        - No
+    validations:
+      required: true
   - type: textarea
     attributes:
       label: Additional context
