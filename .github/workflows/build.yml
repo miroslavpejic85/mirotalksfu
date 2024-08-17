@@ -6,8 +6,28 @@ on:
       - main
 
 jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.20.4'  # Specify exact Node.js LTS version
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run unit tests
+        run: npx mocha unit-tests
+
   publish:
     runs-on: ubuntu-latest
+    needs: test  # Ensure the test job passes before running this job
+
     steps:
       - name: Checkout
         uses: actions/checkout@v3
