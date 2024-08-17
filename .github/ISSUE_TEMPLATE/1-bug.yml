@@ -71,6 +71,7 @@ body:
       label: Reproducibility
       description: Is the bug reproducible on sfu.mirotalk.com?
       options:
+        - '--'
         - 'Yes'
         - 'No'
     validations:
