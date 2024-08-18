@@ -1,4 +1,4 @@
-name: build
+name: CI
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - main
 
 jobs:
-  publish:
+  test:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -15,7 +15,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18.20.4' # LTS
+          node-version: '18.20.4'  # LTS
 
       - name: Install dependencies
         run: npm install
@@ -25,6 +25,13 @@ jobs:
 
       - name: Run unit tests
         run: npm test
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test  # This ensures the build job only runs if the test job succeeds
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
