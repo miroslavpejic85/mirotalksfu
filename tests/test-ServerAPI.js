@@ -9,17 +9,14 @@ const proxyquire = require('proxyquire');
 const jwt = require('jsonwebtoken');
 const CryptoJS = require('crypto-js');
 const ServerApi = require('../app/src/ServerApi');
-const config = require('../app/src/config');
+const config = require('../app/src/config.template.js');
 
 describe('test-ServerAPI', () => {
     let serverApi;
     const host = 'example.com';
-    const authorization = 'secret-key';
-    const apiKeySecret = 'secret-key';
+    const authorization = 'mirotalksfu_default_secret';
 
     beforeEach(() => {
-        // Mocking config values
-        sinon.stub(config.api, 'keySecret').value(apiKeySecret);
         serverApi = new ServerApi(host, authorization);
     });
 
