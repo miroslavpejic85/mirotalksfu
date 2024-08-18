@@ -12,6 +12,17 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.20.4' # LTS
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run unit tests
+        run: npm test
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 

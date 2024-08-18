@@ -1,10 +1,10 @@
 {
     "name": "mirotalksfu",
-    "version": "1.5.61",
+    "version": "1.5.62",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
-        "test": "echo \"Error: no test specified\" && exit 1",
+        "test": "mocha tests/*.js",
         "start": "node app/src/Server.js",
         "start-dev": "nodemon app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
@@ -27,8 +27,7 @@
         "nms-start": "docker-compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
         "nms-stop": "docker-compose -f rtmpServers/node-media-server/docker-compose.yml down",
         "nms-restart": "docker-compose -f rtmpServers/node-media-server/docker-compose.yml down && docker-compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
-        "nms-logs": "docker logs -f mirotalk-nms",
-        "unit-tests": "npx mocha tests"
+        "nms-logs": "docker logs -f mirotalk-nms"
     },
     "repository": {
         "type": "git",
@@ -78,7 +77,7 @@
         "mediasoup-client": "3.7.16",
         "ngrok": "^5.0.0-beta.2",
         "nodemailer": "^6.9.14",
-        "openai": "^4.55.7",
+        "openai": "^4.56.0",
         "qs": "6.13.0",
         "socket.io": "4.7.5",
         "swagger-ui-express": "5.0.1",
