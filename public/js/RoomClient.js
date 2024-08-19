@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.62
+ * @version 1.5.63
  *
  */
 
@@ -3511,10 +3511,7 @@ class RoomClient {
 
     removeVideoPinMediaContainer() {
         this.videoPinMediaContainer.style.display = 'none';
-        this.videoMediaContainer.style.top = 0;
-        this.videoMediaContainer.style.right = null;
-        this.videoMediaContainer.style.width = '100%';
-        this.videoMediaContainer.style.height = '100%';
+        this.videoMediaContainerUnpin();
         this.pinnedVideoPlayerId = null;
         this.isVideoPinned = false;
         if (this.isChatPinned) {
@@ -3529,6 +3526,19 @@ class RoomClient {
         if (this.transcription.isPin()) {
             this.transcription.pinned();
         }
+    }
+
+    videoMediaContainerPin() {
+        this.videoMediaContainer.style.top = 0;
+        this.videoMediaContainer.style.width = '75%';
+        this.videoMediaContainer.style.height = '100%';
+    }
+
+    videoMediaContainerUnpin() {
+        this.videoMediaContainer.style.top = 0;
+        this.videoMediaContainer.style.right = null;
+        this.videoMediaContainer.style.width = '100%';
+        this.videoMediaContainer.style.height = '100%';
     }
 
     adaptVideoObjectFit(index) {
@@ -3759,9 +3769,7 @@ class RoomClient {
 
     chatPin() {
         if (!this.isVideoPinned) {
-            this.videoMediaContainer.style.top = 0;
-            this.videoMediaContainer.style.width = '75%';
-            this.videoMediaContainer.style.height = '100%';
+            this.videoMediaContainerPin();
         }
         this.chatPinned();
         this.isChatPinned = true;
@@ -3775,10 +3783,7 @@ class RoomClient {
 
     chatUnpin() {
         if (!this.isVideoPinned) {
-            this.videoMediaContainer.style.top = 0;
-            this.videoMediaContainer.style.right = null;
-            this.videoMediaContainer.style.width = '100%';
-            this.videoMediaContainer.style.height = '100%';
+            this.videoMediaContainerUnpin();
         }
         document.documentElement.style.setProperty('--msger-width', '800px');
         document.documentElement.style.setProperty('--msger-height', '700px');
@@ -4409,9 +4414,7 @@ class RoomClient {
 
     pollPin() {
         if (!this.isVideoPinned) {
-            this.videoMediaContainer.style.top = 0;
-            this.videoMediaContainer.style.width = '75%';
-            this.videoMediaContainer.style.height = '100%';
+            this.videoMediaContainerPin();
         }
         this.pollPinned();
         this.isPollPinned = true;
@@ -4423,10 +4426,7 @@ class RoomClient {
 
     pollUnpin() {
         if (!this.isVideoPinned) {
-            this.videoMediaContainer.style.top = 0;
-            this.videoMediaContainer.style.right = null;
-            this.videoMediaContainer.style.width = '100%';
-            this.videoMediaContainer.style.height = '100%';
+            this.videoMediaContainerUnpin();
         }
         pollRoom.style.maxWidth = '600px';
         pollRoom.style.maxHeight = '700px';
@@ -4771,10 +4771,7 @@ class RoomClient {
 
     editorUnpin() {
         if (!this.isVideoPinned) {
-            this.videoMediaContainer.style.top = 0;
-            this.videoMediaContainer.style.right = null;
-            this.videoMediaContainer.style.width = '100%';
-            this.videoMediaContainer.style.height = '100%';
+            this.videoMediaContainerUnpin();
         }
         editorRoom.style.maxWidth = '100%';
         editorRoom.style.maxHeight = '100%';
