@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.63
+ * @version 1.5.64
  *
  */
 
@@ -4196,6 +4196,7 @@ function setCustomTheme() {
     document.documentElement.style.setProperty('--wb-bg', `radial-gradient(${color}, ${color})`);
     // document.documentElement.style.setProperty('--btns-bg-color', `${color}`);
     document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+    document.documentElement.style.setProperty('--dd-color', '#FFFFFF');
     document.body.style.background = `radial-gradient(${color}, ${color})`;
 }
 
@@ -4217,6 +4218,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #000000, #434343)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #000000, #434343)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FFFFFF');
             document.body.style.background = 'linear-gradient(135deg, #000000, #434343)';
             selectTheme.selectedIndex = 0;
             break;
@@ -4232,6 +4234,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #000000, #1a1a1a)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #000000, #1a1a1a)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.85)');
+            document.documentElement.style.setProperty('--dd-color', '#FFFFFF');
             document.body.style.background = 'linear-gradient(135deg, #000000, #1a1a1a)';
             selectTheme.selectedIndex = 1;
             break;
@@ -4247,6 +4250,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1a1a1a, #4f4f4f)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 0, 0, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FFFFFF');
             document.body.style.background = 'linear-gradient(135deg, #1a1a1a, #4f4f4f)';
             selectTheme.selectedIndex = 2;
             break;
@@ -4262,6 +4266,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #002a22, #004d40)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #002a22, #004d40)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 42, 34, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#00FF00');
             document.body.style.background = 'linear-gradient(135deg, #002a22, #004d40)';
             selectTheme.selectedIndex = 3;
             break;
@@ -4277,6 +4282,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #00274d, #004d80)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #00274d, #004d80)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(0, 39, 77, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#1E90FF');
             document.body.style.background = 'linear-gradient(135deg, #00274d, #004d80)';
             selectTheme.selectedIndex = 4;
             break;
@@ -4292,6 +4298,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #2a0d0d, #4d1a1a)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 13, 13, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FF4500');
             document.body.style.background = 'linear-gradient(135deg, #2a0d0d, #4d1a1a)';
             selectTheme.selectedIndex = 5;
             break;
@@ -4307,6 +4314,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #2a001d, #4d004a)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(42, 0, 29, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#BF00FF');
             document.body.style.background = 'linear-gradient(135deg, #2a001d, #4d004a)';
             selectTheme.selectedIndex = 6;
             break;
@@ -4322,6 +4330,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #3d1a00, #ff8c00)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(61, 26, 0, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FFA500');
             document.body.style.background = 'linear-gradient(135deg, #3d1a00, #ff8c00)';
             selectTheme.selectedIndex = 7;
             break;
@@ -4337,6 +4346,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #4d001d, #ff66b2)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(77, 0, 29, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FF1493');
             document.body.style.background = 'linear-gradient(135deg, #4d001d, #ff66b2)';
             selectTheme.selectedIndex = 8;
             break;
@@ -4352,6 +4362,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #4d3b00, #ffc107)');
             document.documentElement.style.setProperty('--btns-bg-color', 'rgba(77, 59, 0, 0.7)');
+            document.documentElement.style.setProperty('--dd-color', '#FFD700');
             document.body.style.background = 'linear-gradient(135deg, #4d3b00, #ffc107)';
             selectTheme.selectedIndex = 9;
             break;
@@ -4444,7 +4455,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.63',
+        title: 'WebRTC SFU v1.5.64',
         html: `
         <br />
         <div id="about">

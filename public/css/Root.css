@@ -55,6 +55,8 @@
     --vmi-wh: 15vw;
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
+
+    --dd-color: #ffffff;
 }
 
 * {
