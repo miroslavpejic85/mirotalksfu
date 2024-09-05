@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css?family=Comfortaa:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 /*--------------------------------------------------------------
 # Keyframes
@@ -70,7 +70,7 @@ body {
 #loadingDiv h1 {
     padding: 10px;
     font-size: 60px;
-    font-family: 'Comfortaa';
+    font-family: 'Montserrat';
     border-radius: 10px;
 }
 #loadingDiv img {
@@ -80,7 +80,7 @@ body {
 }
 #loadingDiv pre {
     padding: 10px;
-    font-family: 'Comfortaa';
+    font-family: 'Montserrat';
     border-radius: 10px;
 }
 
@@ -942,7 +942,7 @@ th {
     box-shadow: var(--box-shadow);
     --rgb-background: var(--body-bg);
     --color-border-over: var(--body-bg);
-    --font-family: 'Comfortaa';
+    --font-family: 'Montserrat';
     transform: translate(-50%, -50%);
 }
 

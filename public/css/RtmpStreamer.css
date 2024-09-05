@@ -1,7 +1,7 @@
-@import url('https://fonts.googleapis.com/css?family=Comfortaa:wght@500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 body {
-    font-family: 'Comfortaa'; /*, Arial, sans-serif;*/
+    font-family: 'Montserrat';
     display: flex;
     flex-direction: column;
     align-items: center;

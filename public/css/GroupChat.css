@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
+
 .container {
     padding: 2px !important;
     /* overflow-y: auto;
@@ -275,11 +277,12 @@
     position: absolute;
     left: 5px;
     bottom: 135px;
+    background: var(--body-bg);
     border: var(--border);
     border-radius: 5px;
     --rgb-background: var(--body-bg);
     --color-border-over: var(--body-bg);
-    --font-family: 'Comfortaa';
+    --font-family: 'Montserrat';
 }
 
 /* status */

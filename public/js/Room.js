@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.65
+ * @version 1.5.66
  *
  */
 
@@ -3415,7 +3415,7 @@ function whiteboardAddObj(type) {
             const text = new fabric.IText('Lorem Ipsum', {
                 top: 0,
                 left: 0,
-                fontFamily: 'Comfortaa',
+                fontFamily: 'Montserrat',
                 fill: wbCanvas.freeDrawingBrush.color,
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
                 stroke: wbCanvas.freeDrawingBrush.color,
@@ -4455,7 +4455,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.65',
+        title: 'WebRTC SFU v1.5.66',
         html: `
         <br />
         <div id="about">
