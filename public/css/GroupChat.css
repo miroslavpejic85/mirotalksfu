@@ -373,3 +373,10 @@ input[type='text'] {
     background: var(--select-bg);
     transform: translateY(-3px);
 }
+
+/* handle screen sizes */
+@media screen and (max-width: 600px) {
+    .people-list {
+        width: 100% !important;
+    }
+}
