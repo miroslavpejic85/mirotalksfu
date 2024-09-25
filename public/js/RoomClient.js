@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.71
+ * @version 1.5.72
  *
  */
 
@@ -793,19 +793,19 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.log('Consumer Transport disconnected', { id: this.consumerTransport.id });
-                /*
+
                     this.restartIce();
 
                     popupHtmlMessage(
                         null,
                         image.network,
                         'Consumer Transport disconnected',
-                        'Check Your Network Connectivity (Restarted ICE)',
+                        'Network connection may have dropped or changed (Restarted ICE)',
                         'center',
                         false,
-                        true
+                        false,
                     );
-                    */
+                    break;
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
 
@@ -1418,12 +1418,12 @@ class RoomClient {
             }
 
             producer.on('trackended', () => {
-                console.log('Producer track ended', { id: producer.id });
+                console.log('Producer track ended', { id: producer.id, type });
                 this.closeProducer(type);
             });
 
             producer.on('transportclose', () => {
-                console.log('Producer transport close', { id: producer.id });
+                console.log('Producer transport close', { id: producer.id, type });
                 if (!audio) {
                     const d = this.getId(producer.id + '__video');
                     elem.srcObject.getTracks().forEach(function (track) {
@@ -1445,7 +1445,7 @@ class RoomClient {
             });
 
             producer.on('close', () => {
-                console.log('Closing producer', { id: producer.id });
+                console.log('Closing producer', { id: producer.id, type });
                 if (!audio) {
                     const d = this.getId(producer.id + '__video');
                     elem.srcObject.getTracks().forEach(function (track) {
@@ -2207,12 +2207,12 @@ class RoomClient {
             }
 
             consumer.on('trackended', () => {
-                console.log('Consumer track end', { id: consumer.id });
+                console.log('Consumer track end', { id: consumer.id, type });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
 
             consumer.on('transportclose', () => {
-                console.log('Consumer transport close', { id: consumer.id });
+                console.log('Consumer transport close', { id: consumer.id, type });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
 
@@ -2517,6 +2517,7 @@ class RoomClient {
             }
         }
 
+        this.consumers.get(consumer_id).close();
         this.consumers.delete(consumer_id);
         this.sound('left');
     }
