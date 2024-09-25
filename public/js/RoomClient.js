@@ -3274,19 +3274,18 @@ class RoomClient {
     // ####################################################
 
     isFullScreenSupported() {
-        const fsSupported = (
+        const fsSupported =
             document.fullscreenEnabled ||
             document.webkitFullscreenEnabled ||
             document.mozFullScreenEnabled ||
-            document.msFullscreenEnabled
-        );
-        if (fsSupported){
-            this.handleFullScreenEvents()
+            document.msFullscreenEnabled;
+        if (fsSupported) {
+            this.handleFullScreenEvents();
         }
         return fsSupported;
     }
 
-    handleFullScreenEvents(){
+    handleFullScreenEvents() {
         document.addEventListener('fullscreenchange', (e) => {
             const fullscreenElement = document.fullscreenElement;
             if (!fullscreenElement) {
