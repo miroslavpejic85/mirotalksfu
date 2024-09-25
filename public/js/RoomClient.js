@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.72
+ * @version 1.5.73
  *
  */
 
@@ -29,6 +29,8 @@ const html = {
     userHand: 'fas fa-hand-paper pulsate',
     pip: 'fas fa-images',
     fullScreen: 'fas fa-expand',
+    fullScreenOn: 'fas fa-compress-alt',
+    fullScreenOff: 'fas fa-expand-alt',
     snapshot: 'fas fa-camera-retro',
     sendFile: 'fas fa-upload',
     sendMsg: 'fas fa-paper-plane',
@@ -255,6 +257,7 @@ class RoomClient {
         this.isMySettingsOpen = false;
 
         this._isConnected = false;
+        this.isDocumentOnFullScreen = false;
         this.isVideoOnFullScreen = false;
         this.isVideoFullScreenSupported = this.isFullScreenSupported();
         this.isVideoPictureInPictureSupported = document.pictureInPictureEnabled;
@@ -3271,15 +3274,46 @@ class RoomClient {
     // ####################################################
 
     isFullScreenSupported() {
-        return (
+        const fsSupported = (
             document.fullscreenEnabled ||
             document.webkitFullscreenEnabled ||
             document.mozFullScreenEnabled ||
             document.msFullscreenEnabled
         );
+        if (fsSupported){
+            this.handleFullScreenEvents()
+        }
+        return fsSupported;
+    }
+
+    handleFullScreenEvents(){
+        document.addEventListener('fullscreenchange', (e) => {
+            const fullscreenElement = document.fullscreenElement;
+            if (!fullscreenElement) {
+                const fullScreenIcon = this.getId('fullScreenIcon');
+                fullScreenIcon.className = html.fullScreenOff;
+                this.isDocumentOnFullScreen = false;
+            }
+        });
+    }
+
+    toggleRoomFullScreen() {
+        const fullScreenIcon = this.getId('fullScreenIcon');
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen();
+            fullScreenIcon.className = html.fullScreenOn;
+            this.isDocumentOnFullScreen = true;
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+                fullScreenIcon.className = html.fullScreenOff;
+                this.isDocumentOnFullScreen = false;
+            }
+        }
     }
 
     toggleFullScreen(elem = null) {
+        if (this.isDocumentOnFullScreen) return;
         const element = elem ? elem : document.documentElement;
         const fullScreen = this.isFullScreen();
         fullScreen ? this.goOutFullscreen(element) : this.goInFullscreen(element);

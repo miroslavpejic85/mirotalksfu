@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.72
+ * @version 1.5.73
  *
  */
 
@@ -383,6 +383,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('shareButton', 'Share room', placement);
         setTippy('startRecButton', 'Start recording', placement);
         setTippy('stopRecButton', 'Stop recording', placement);
+        setTippy('fullScreenButton', 'Toggle full screen', placement);
         setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
         setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('pollButton', 'Toggle the poll', placement);
@@ -391,6 +392,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
+        setTippy('restartICEButton', 'Restart ICE', placement);
         setTippy('aboutButton', 'About this project', placement);
 
         // Bottom buttons
@@ -1758,7 +1760,7 @@ function handleButtons() {
         transcription.stop();
     };
     fullScreenButton.onclick = () => {
-        rc.toggleFullScreen();
+        rc.toggleRoomFullScreen();
     };
     recordingImage.onclick = () => {
         isRecording ? stopRecButton.click() : startRecButton.click();
@@ -4456,7 +4458,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.72',
+        title: 'WebRTC SFU v1.5.73',
         html: `
         <br />
         <div id="about">
