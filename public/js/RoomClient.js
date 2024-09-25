@@ -709,19 +709,18 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.log('Producer Transport disconnected', { id: this.producerTransport.id });
-                    /*
+
                     this.restartIce();
 
                     popupHtmlMessage(
                         null,
                         image.network,
                         'Producer Transport disconnected',
-                        'Check Your Network Connectivity (Restarted ICE)',
+                        'Network connection may have dropped or changed (Restarted ICE)',
                         'center',
                         false,
-                        true
+                        false,
                     );
-                    */
                     break;
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
