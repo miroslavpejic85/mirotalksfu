@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.74
+ * @version 1.5.75
  *
  */
 
@@ -45,6 +45,7 @@ const html = {
     videoPrivacy: 'far fa-circle',
     expand: 'fas fa-ellipsis-vertical',
     hideALL: 'fas fa-eye',
+    mirror: 'fas fa-arrow-right-arrow-left',
 };
 
 const icons = {
@@ -1406,6 +1407,10 @@ class RoomClient {
                 if (type == mediaType.video) this.videoProducerId = producer.id;
                 if (type == mediaType.screen) this.screenProducerId = producer.id;
                 elem = await this.handleProducer(producer.id, type, stream);
+                // No mirror effect for producer
+                if (!isInitVideoMirror && elem.classList.contains('mirror')) {
+                    elem.classList.toggle('mirror');
+                }
                 //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
@@ -1882,7 +1887,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn;
+        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn, mv;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -1914,6 +1919,9 @@ class RoomClient {
                 ts = document.createElement('button');
                 ts.id = id + '__snapshot';
                 ts.className = html.snapshot;
+                mv = document.createElement('button');
+                mv.id = id + '__mirror';
+                mv.className = html.mirror;
                 pn = document.createElement('button');
                 pn.id = id + '__pin';
                 pn.className = html.pin;
@@ -1945,6 +1953,7 @@ class RoomClient {
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
+                BUTTONS.producerVideo.videoMirrorButton && vb.appendChild(mv);
                 BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 if (!this.isMobileDevice) vb.appendChild(pn);
                 d.appendChild(elem);
@@ -1959,6 +1968,7 @@ class RoomClient {
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
+                this.handleMV(elem.id, mv.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.handleZV(elem.id, d.id, this.peer_id);
                 if (!isScreen) this.handleVP(elem.id, vp.id);
@@ -1968,6 +1978,7 @@ class RoomClient {
                 handleAspectRatio();
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
+                    this.setTippy(mv.id, 'Toggle mirror', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
@@ -2262,7 +2273,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -2311,6 +2322,9 @@ class RoomClient {
                 pip = document.createElement('button');
                 pip.id = id + '__pictureInPicture';
                 pip.className = html.pip;
+                mv = document.createElement('button');
+                mv.id = id + '__videoMirror';
+                mv.className = html.mirror;
                 fs = document.createElement('button');
                 fs.id = id + '__fullScreen';
                 fs.className = html.fullScreen;
@@ -2379,6 +2393,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
+                BUTTONS.consumerVideo.videoMirrorButton && vb.appendChild(mv);
                 BUTTONS.consumerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
                 if (!this.isMobileDevice) vb.appendChild(pn);
@@ -2393,6 +2408,7 @@ class RoomClient {
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
+                this.handleMV(elem.id, mv.id);
                 this.handleSF(sf.id);
                 this.handleHA(ha.id, d.id);
                 this.handleSM(sm.id, peer_name);
@@ -2425,6 +2441,7 @@ class RoomClient {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
                     this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
+                    this.setTippy(mv.id, 'Toggle mirror', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
                     this.setTippy(sf.id, 'Send file', 'bottom');
                     this.setTippy(sm.id, 'Send message', 'bottom');
@@ -3606,6 +3623,21 @@ class RoomClient {
                 dataURL = canvas.toDataURL('image/png');
                 // console.log(dataURL);
                 saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
+            });
+        }
+    }
+
+    // ####################################################
+    // HANDLE VIDEO MIRROR
+    // ####################################################
+
+    handleMV(elemId, tsId) {
+        let videoPlayer = this.getId(elemId);
+        let btnMv = this.getId(tsId);
+        if (btnMv && videoPlayer) {
+            btnMv.addEventListener('click', () => {
+                videoPlayer.classList.toggle('mirror');
+                //rc.roomMessage('toggleVideoMirror', videoPlayer.classList.contains('mirror'));
             });
         }
     }

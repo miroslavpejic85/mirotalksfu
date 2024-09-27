@@ -48,6 +48,7 @@ let BUTTONS = {
     },
     producerVideo: {
         videoPictureInPicture: true,
+        videoMirrorButton: true,
         fullScreenButton: true,
         snapShotButton: true,
         muteAudioButton: true,
@@ -55,6 +56,7 @@ let BUTTONS = {
     },
     consumerVideo: {
         videoPictureInPicture: true,
+        videoMirrorButton: true,
         fullScreenButton: true,
         snapShotButton: true,
         focusVideoButton: true,

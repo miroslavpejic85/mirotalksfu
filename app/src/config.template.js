@@ -385,6 +385,7 @@ module.exports = {
             },
             producerVideo: {
                 videoPictureInPicture: true,
+                videoMirrorButton: true,
                 fullScreenButton: true,
                 snapShotButton: true,
                 muteAudioButton: true,
@@ -392,6 +393,7 @@ module.exports = {
             },
             consumerVideo: {
                 videoPictureInPicture: true,
+                videoMirrorButton: true,
                 fullScreenButton: true,
                 snapShotButton: true,
                 focusVideoButton: true,

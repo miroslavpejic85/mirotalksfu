@@ -192,6 +192,7 @@ video {
     object-fit: var(--videoObjFit);
     border-radius: 10px;
     cursor: pointer;
+    transition: transform 0.3s ease-in-out;
 }
 
 #canvasAIElement {
