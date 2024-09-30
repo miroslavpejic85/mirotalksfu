@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.75
+ * @version 1.5.76
  *
  */
 
@@ -1407,10 +1407,6 @@ class RoomClient {
                 if (type == mediaType.video) this.videoProducerId = producer.id;
                 if (type == mediaType.screen) this.screenProducerId = producer.id;
                 elem = await this.handleProducer(producer.id, type, stream);
-                // No mirror effect for producer
-                if (!isInitVideoMirror && elem.classList.contains('mirror')) {
-                    elem.classList.toggle('mirror');
-                }
                 //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
