@@ -1407,6 +1407,10 @@ class RoomClient {
                 if (type == mediaType.video) this.videoProducerId = producer.id;
                 if (type == mediaType.screen) this.screenProducerId = producer.id;
                 elem = await this.handleProducer(producer.id, type, stream);
+                // No mirror effect for producer
+                if (!isInitVideoMirror && elem.classList.contains('mirror')) {
+                    elem.classList.remove('mirror');
+                }
                 //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
