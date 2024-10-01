@@ -1015,6 +1015,9 @@ async function whoAreYou() {
             peer_name = name;
         },
     }).then(async () => {
+        if (!usernameEmoji.classList.contains('hidden')) {
+            usernameEmoji.classList.add('hidden');
+        }
         if (initStream && !joinRoomWithScreen) {
             await stopTracks(initStream);
             elemDisplay('initVideo', false);
