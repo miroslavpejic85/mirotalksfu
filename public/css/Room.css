@@ -926,6 +926,17 @@ th {
 # Room/user emoji picker
 --------------------------------------------------------------*/
 
+#usernameEmoji {
+    position: absolute;
+    z-index: 9999;
+    border-radius: 10px;
+    border: var(--border);
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
+    --rgb-background: var(--body-bg);
+    --color-border-over: var(--body-bg);
+}
+
 .roomEmoji {
     z-index: 9;
     position: absolute;

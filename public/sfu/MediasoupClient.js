@@ -1968,11 +1968,11 @@
                 const ReactNativeUnifiedPlan_1 = require('./handlers/ReactNativeUnifiedPlan');
                 const ReactNative_1 = require('./handlers/ReactNative');
                 const logger = new Logger_1.Logger('Device');
-                function detectDevice() {
+                function detectDevice(userAgent) {
                     // React-Native.
                     // NOTE: react-native-webrtc >= 1.75.0 is required.
                     // NOTE: react-native-webrtc with Unified Plan requires version >= 106.0.0.
-                    if (typeof navigator === 'object' && navigator.product === 'ReactNative') {
+                    if (!userAgent && typeof navigator === 'object' && navigator.product === 'ReactNative') {
                         logger.debug('detectDevice() | React-Native detected');
                         if (typeof RTCPeerConnection === 'undefined') {
                             logger.warn(
@@ -1989,10 +1989,14 @@
                         }
                     }
                     // Browser.
-                    else if (typeof navigator === 'object' && typeof navigator.userAgent === 'string') {
-                        const ua = navigator.userAgent;
-                        const uaParser = new ua_parser_js_1.UAParser(ua);
-                        logger.debug('detectDevice() | browser detected [ua:%s, parsed:%o]', ua, uaParser.getResult());
+                    else if (userAgent || (typeof navigator === 'object' && typeof navigator.userAgent === 'string')) {
+                        userAgent ?? (userAgent = navigator.userAgent);
+                        const uaParser = new ua_parser_js_1.UAParser(userAgent);
+                        logger.debug(
+                            'detectDevice() | browser detected [userAgent:%s, parsed:%o]',
+                            userAgent,
+                            uaParser.getResult(),
+                        );
                         const browser = uaParser.getBrowser();
                         const browserName = browser.name?.toLowerCase();
                         const browserVersion = parseInt(browser.major ?? '0');
@@ -2067,7 +2071,7 @@
                         // Best effort for Chromium based browsers.
                         else if (engineName === 'blink') {
                             // eslint-disable-next-line @typescript-eslint/prefer-regexp-exec
-                            const match = ua.match(/(?:(?:Chrome|Chromium))[ /](\w+)/i);
+                            const match = userAgent.match(/(?:(?:Chrome|Chromium))[ /](\w+)/i);
                             if (match) {
                                 const version = Number(match[1]);
                                 if (version >= 111) {
@@ -2107,25 +2111,12 @@
                      *
                      * @throws {UnsupportedError} if device is not supported.
                      */
-                    constructor({ handlerName, handlerFactory, Handler } = {}) {
+                    constructor({ handlerName, handlerFactory } = {}) {
                         // Loaded flag.
                         this._loaded = false;
                         // Observer instance.
                         this._observer = new enhancedEvents_1.EnhancedEventEmitter();
                         logger.debug('constructor()');
-                        // Handle deprecated option.
-                        if (Handler) {
-                            logger.warn(
-                                'constructor() | Handler option is DEPRECATED, use handlerName or handlerFactory instead',
-                            );
-                            if (typeof Handler === 'string') {
-                                handlerName = Handler;
-                            } else {
-                                throw new TypeError(
-                                    'non string Handler option no longer supported, use handlerFactory instead',
-                                );
-                            }
-                        }
                         if (handlerName && handlerFactory) {
                             throw new TypeError('just one of handlerName or handlerInterface can be given');
                         }
@@ -13912,7 +13903,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.16';
+                exports.version = '3.7.17';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -16445,7 +16436,7 @@
         50: [
             function (require, module, exports) {
                 /////////////////////////////////////////////////////////////////////////////////
-                /* UAParser.js v1.0.38
+                /* UAParser.js v1.0.39
    Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
    MIT License */ /*
    Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
@@ -16461,7 +16452,7 @@
                     // Constants
                     /////////////
 
-                    var LIBVERSION = '1.0.38',
+                    var LIBVERSION = '1.0.39',
                         EMPTY = '',
                         UNKNOWN = '?',
                         FUNC_TYPE = 'function',
@@ -16504,7 +16495,8 @@
                         ZEBRA = 'Zebra',
                         FACEBOOK = 'Facebook',
                         CHROMIUM_OS = 'Chromium OS',
-                        MAC_OS = 'Mac OS';
+                        MAC_OS = 'Mac OS',
+                        SUFFIX_BROWSER = ' Browser';
 
                     ///////////
                     // Helper
@@ -16622,7 +16614,7 @@
                                     return i === UNKNOWN ? undefined : i;
                                 }
                             }
-                            return str;
+                            return map.hasOwnProperty('*') ? map['*'] : str;
                         };
 
                     ///////////////
@@ -16694,18 +16686,23 @@
                             [VERSION, [NAME, 'Baidu']],
                             [
                                 /(kindle)\/([\w\.]+)/i, // Kindle
-                                /(lunascape|maxthon|netfront|jasmine|blazer)[\/ ]?([\w\.]*)/i, // Lunascape/Maxthon/Netfront/Jasmine/Blazer
+                                /(lunascape|maxthon|netfront|jasmine|blazer|sleipnir)[\/ ]?([\w\.]*)/i,
+                                // Lunascape/Maxthon/Netfront/Jasmine/Blazer/Sleipnir
                                 // Trident based
                                 /(avant|iemobile|slim)\s?(?:browser)?[\/ ]?([\w\.]*)/i, // Avant/IEMobile/SlimBrowser
                                 /(?:ms|\()(ie) ([\w\.]+)/i, // Internet Explorer
 
                                 // Webkit/KHTML based                                               // Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS/Bowser/QupZilla/Falkon
-                                /(flock|rockmelt|midori|epiphany|silk|skyfire|bolt|iron|vivaldi|iridium|phantomjs|bowser|quark|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|qq|duckduckgo)\/([-\w\.]+)/i,
-                                // Rekonq/Puffin/Brave/Whale/QQBrowserLite/QQ, aka ShouQ
-                                /(heytap|ovi)browser\/([\d\.]+)/i, // Heytap/Ovi
+                                /(flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|duckduckgo|klar|helio)\/([-\w\.]+)/i,
+                                // Rekonq/Puffin/Brave/Whale/QQBrowserLite/QQ//Vivaldi/DuckDuckGo/Klar/Helio
+                                /(heytap|ovi)browser\/([\d\.]+)/i, // HeyTap/Ovi
                                 /(weibo)__([\d\.]+)/i, // Weibo
                             ],
                             [NAME, VERSION],
+                            [
+                                /quark(?:pc)?\/([-\w\.]+)/i, // Quark
+                            ],
+                            [VERSION, [NAME, 'Quark']],
                             [
                                 /\bddg\/([\w\.]+)/i, // DuckDuckGo
                             ],
@@ -16771,11 +16768,15 @@
                             [
                                 /\bqihu|(qi?ho?o?|360)browser/i, // 360
                             ],
-                            [[NAME, '360 ' + BROWSER]],
-                            [/(oculus|sailfish|huawei|vivo)browser\/([\w\.]+)/i],
-                            [[NAME, /(.+)/, '$1 ' + BROWSER], VERSION],
+                            [[NAME, '360' + SUFFIX_BROWSER]],
                             [
-                                // Oculus/Sailfish/HuaweiBrowser/VivoBrowser
+                                /\b(qq)\/([\w\.]+)/i, // QQ
+                            ],
+                            [[NAME, /(.+)/, '$1Browser'], VERSION],
+                            [/(oculus|sailfish|huawei|vivo|pico)browser\/([\w\.]+)/i],
+                            [[NAME, /(.+)/, '$1' + SUFFIX_BROWSER], VERSION],
+                            [
+                                // Oculus/Sailfish/HuaweiBrowser/VivoBrowser/PicoBrowser
                                 /samsungbrowser\/([\w\.]+)/i, // Samsung Internet
                             ],
                             [VERSION, [NAME, SAMSUNG + ' Internet']],
@@ -16798,7 +16799,7 @@
                             ],
                             [NAME, VERSION],
                             [
-                                /(lbbrowser)/i, // LieBao Browser
+                                /(lbbrowser|rekonq)/i, // LieBao Browser/Rekonq
                                 /\[(linkedin)app\]/i, // LinkedIn App for iOS & Android
                             ],
                             [NAME],
@@ -16862,26 +16863,29 @@
                             ],
                             [[NAME, 'Netscape'], VERSION],
                             [
+                                /(wolvic)\/([\w\.]+)/i, // Wolvic
+                            ],
+                            [NAME, VERSION],
+                            [
                                 /mobile vr; rv:([\w\.]+)\).+firefox/i, // Firefox Reality
                             ],
                             [VERSION, [NAME, FIREFOX + ' Reality']],
                             [
                                 /ekiohf.+(flow)\/([\w\.]+)/i, // Flow
                                 /(swiftfox)/i, // Swiftfox
-                                /(icedragon|iceweasel|camino|chimera|fennec|maemo browser|minimo|conkeror|klar)[\/ ]?([\w\.\+]+)/i,
-                                // IceDragon/Iceweasel/Camino/Chimera/Fennec/Maemo/Minimo/Conkeror/Klar
+                                /(icedragon|iceweasel|camino|chimera|fennec|maemo browser|minimo|conkeror)[\/ ]?([\w\.\+]+)/i,
+                                // IceDragon/Iceweasel/Camino/Chimera/Fennec/Maemo/Minimo/Conkeror
                                 /(seamonkey|k-meleon|icecat|iceape|firebird|phoenix|palemoon|basilisk|waterfox)\/([-\w\.]+)$/i,
                                 // Firefox/SeaMonkey/K-Meleon/IceCat/IceApe/Firebird/Phoenix
                                 /(firefox)\/([\w\.]+)/i, // Other Firefox-based
                                 /(mozilla)\/([\w\.]+) .+rv\:.+gecko\/\d+/i, // Mozilla
 
                                 // Other
-                                /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf|sleipnir|obigo|mosaic|(?:go|ice|up)[\. ]?browser)[-\/ ]?v?([\w\.]+)/i,
-                                // Polaris/Lynx/Dillo/iCab/Doris/Amaya/w3m/NetSurf/Sleipnir/Obigo/Mosaic/Go/ICE/UP.Browser
+                                /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf|obigo|mosaic|(?:go|ice|up)[\. ]?browser)[-\/ ]?v?([\w\.]+)/i,
+                                // Polaris/Lynx/Dillo/iCab/Doris/Amaya/w3m/NetSurf/Obigo/Mosaic/Go/ICE/UP.Browser
                                 /(links) \(([\w\.]+)/i, // Links
-                                /panasonic;(viera)/i, // Panasonic Viera
                             ],
-                            [NAME, VERSION],
+                            [NAME, [VERSION, /_/g, '.']],
                             [
                                 /(cobalt)\/([\w\.]+)/i, // Cobalt
                             ],
@@ -16940,8 +16944,8 @@
                             ],
                             [MODEL, [VENDOR, SAMSUNG], [TYPE, TABLET]],
                             [
-                                /\b((?:s[cgp]h|gt|sm)-\w+|sc[g-]?[\d]+a?|galaxy nexus)/i,
-                                /samsung[- ]([-\w]+)/i,
+                                /\b((?:s[cgp]h|gt|sm)-(?![lr])\w+|sc[g-]?[\d]+a?|galaxy nexus)/i,
+                                /samsung[- ]((?!sm-[lr])[-\w]+)/i,
                                 /sec-(sgh\w+)/i,
                             ],
                             [MODEL, [VENDOR, SAMSUNG], [TYPE, MOBILE]],
@@ -16980,7 +16984,7 @@
                                 /\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui/i, // Xiaomi Hongmi
                                 /\b(redmi[\-_ ]?(?:note|k)?[\w_ ]+)(?: bui|\))/i, // Xiaomi Redmi
                                 /oid[^\)]+; (m?[12][0-389][01]\w{3,6}[c-y])( bui|; wv|\))/i, // Xiaomi Redmi 'numeric' models
-                                /\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note lte|max|cc)?[_ ]?(?:\d?\w?)[_ ]?(?:plus|se|lite)?)(?: bui|\))/i, // Xiaomi Mi
+                                /\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note lte|max|cc)?[_ ]?(?:\d?\w?)[_ ]?(?:plus|se|lite|pro)?)(?: bui|\))/i, // Xiaomi Mi
                             ],
                             [
                                 [MODEL, /_/g, ' '],
@@ -17080,7 +17084,7 @@
                             [
                                 // Amazon
                                 /(alexa)webm/i,
-                                /(kf[a-z]{2}wi|aeo[c-r]{2})( bui|\))/i, // Kindle Fire without Silk / Echo Show
+                                /(kf[a-z]{2}wi|aeo(?!bc)\w\w)( bui|\))/i, // Kindle Fire without Silk / Echo Show
                                 /(kf[a-z]+)( bui|\)).+silk\//i, // Kindle Fire HD
                             ],
                             [MODEL, [VENDOR, AMAZON], [TYPE, TABLET]],
@@ -17123,6 +17127,20 @@
                             ],
                             [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]],
                             [
+                                // TCL
+                                /droid [\w\.]+; ((?:8[14]9[16]|9(?:0(?:48|60|8[01])|1(?:3[27]|66)|2(?:6[69]|9[56])|466))[gqswx])\w*(\)| bui)/i,
+                            ],
+                            [MODEL, [VENDOR, 'TCL'], [TYPE, TABLET]],
+                            [
+                                // itel
+                                /(itel) ((\w+))/i,
+                            ],
+                            [
+                                [VENDOR, lowerize],
+                                MODEL,
+                                [TYPE, strMapper, { tablet: ['p10001l', 'w7001'], '*': 'mobile' }],
+                            ],
+                            [
                                 // Acer
                                 /droid.+; ([ab][1-7]-?[0178a]\d\d?)/i,
                             ],
@@ -17138,6 +17156,11 @@
                                 /; ((?:power )?armor(?:[\w ]{0,8}))(?: bui|\))/i,
                             ],
                             [MODEL, [VENDOR, 'Ulefone'], [TYPE, MOBILE]],
+                            [
+                                // Nothing
+                                /droid.+; (a(?:015|06[35]|142p?))/i,
+                            ],
+                            [MODEL, [VENDOR, 'Nothing'], [TYPE, MOBILE]],
                             [
                                 // MIXED
                                 /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron|infinix|tecno)[-_ ]?([-\w]*)/i,
@@ -17369,6 +17392,10 @@
                                 // WEARABLES
                                 ///////////////////
 
+                                /\b(sm-[lr]\d\d[05][fnuw]?s?)\b/i, // Samsung Galaxy Watch
+                            ],
+                            [MODEL, [VENDOR, SAMSUNG], [TYPE, WEARABLE]],
+                            [
                                 /((pebble))app/i, // Pebble
                             ],
                             [VENDOR, MODEL, [TYPE, WEARABLE]],

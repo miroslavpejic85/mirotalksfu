@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.76
+ * @version 1.5.77
  *
  */
 
@@ -471,6 +471,7 @@ async function initRoom() {
     } else {
         setButtonsInit();
         handleSelectsInit();
+        handleUsernameEmojiPicker();
         await whoAreYou();
         await setSelectsInit();
     }
@@ -662,6 +663,9 @@ function setupInitButtons() {
     initVideoMirrorButton.onclick = () => {
         initVideo.classList.toggle('mirror');
         isInitVideoMirror = initVideo.classList.contains('mirror');
+    };
+    initUsernameEmojiButton.onclick = () => {
+        toggleUsernameEmoji();
     };
 }
 
@@ -992,7 +996,7 @@ async function whoAreYou() {
         title: BRAND.app.name,
         input: 'text',
         inputPlaceholder: 'Enter your email or name',
-        inputAttributes: { maxlength: 32 },
+        inputAttributes: { maxlength: 32, id: 'usernameInput' },
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
@@ -1990,6 +1994,7 @@ function setButtonsInit() {
         setTippy('initStartScreenButton', 'Toggle screen sharing', 'top');
         setTippy('initStopScreenButton', 'Toggle screen sharing', 'top');
         setTippy('initVideoMirrorButton', 'Toggle video mirror', 'top');
+        setTippy('initUsernameEmojiButton', 'Toggle username emoji', 'top');
     }
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
@@ -2674,6 +2679,24 @@ function handleInputs() {
 // ####################################################
 // EMOJI PIKER
 // ####################################################
+
+function toggleUsernameEmoji() {
+    getId('usernameEmoji').classList.toggle('hidden');
+}
+
+function handleUsernameEmojiPicker() {
+    const pickerOptions = {
+        theme: 'dark',
+        onEmojiSelect: addEmojiToUsername,
+    };
+    const emojiUsernamePicker = new EmojiMart.Picker(pickerOptions);
+    getId('usernameEmoji').appendChild(emojiUsernamePicker);
+
+    function addEmojiToUsername(data) {
+        getId('usernameInput').value += data.native;
+        toggleUsernameEmoji();
+    }
+}
 
 function handleChatEmojiPicker() {
     const pickerOptions = {
@@ -4463,7 +4486,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.5.76',
+        title: 'WebRTC SFU v1.5.77',
         html: `
         <br />
         <div id="about">
