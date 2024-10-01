@@ -665,6 +665,7 @@ function setupInitButtons() {
         isInitVideoMirror = initVideo.classList.contains('mirror');
     };
     initUsernameEmojiButton.onclick = () => {
+        getId('usernameInput').value = '';
         toggleUsernameEmoji();
     };
 }
