@@ -7014,7 +7014,6 @@ class RoomClient {
                         const audioMessage =
                             'The participant has been muted, and only they have the ability to unmute themselves';
                         if (isBroadcastingEnabled) {
-                            alert('isBroadcastingEnabled');
                             const peerAudioButton = this.getId(data.peer_id + '___pAudio');
                             if (peerAudioButton) {
                                 const peerAudioIcon = peerAudioButton.querySelector('i');
