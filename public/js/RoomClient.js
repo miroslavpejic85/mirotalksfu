@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.77
+ * @version 1.5.78
  *
  */
 
@@ -7014,10 +7014,11 @@ class RoomClient {
                         const audioMessage =
                             'The participant has been muted, and only they have the ability to unmute themselves';
                         if (isBroadcastingEnabled) {
+                            alert('isBroadcastingEnabled');
                             const peerAudioButton = this.getId(data.peer_id + '___pAudio');
                             if (peerAudioButton) {
                                 const peerAudioIcon = peerAudioButton.querySelector('i');
-                                if (peerAudioIcon && peerAudioIcon.style.color == 'red') {
+                                if (peerAudioIcon && peerAudioIcon.classList.contains('red')) {
                                     if (isRulesActive && isPresenter) {
                                         data.action = 'unmute';
                                         return this.confirmPeerAction(data.action, data);
@@ -7043,7 +7044,7 @@ class RoomClient {
                             const peerVideoButton = this.getId(data.peer_id + '___pVideo');
                             if (peerVideoButton) {
                                 const peerVideoIcon = peerVideoButton.querySelector('i');
-                                if (peerVideoIcon && peerVideoIcon.style.color == 'red') {
+                                if (peerVideoIcon && peerVideoIcon.classList.contains('red')) {
                                     if (isRulesActive && isPresenter) {
                                         data.action = 'unhide';
                                         return this.confirmPeerAction(data.action, data);
@@ -7067,7 +7068,7 @@ class RoomClient {
                         const peerScreenButton = this.getId(id);
                         if (peerScreenButton) {
                             const peerScreenStatus = peerScreenButton.querySelector('i');
-                            if (peerScreenStatus && peerScreenStatus.style.color == 'red') {
+                            if (peerScreenStatus && peerScreenStatus.classList.contains('red')) {
                                 if (isRulesActive && isPresenter) {
                                     data.action = 'start';
                                     return this.confirmPeerAction(data.action, data);
