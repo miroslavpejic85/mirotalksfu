@@ -78,7 +78,9 @@ module.exports = {
                 - dir: Directory where your video files are stored to be streamed via RTMP.
                 - ffmpeg: Path of the ffmpeg installation on the system (which ffmpeg)
 
-                Important: Ensure your RTMP server is operational before proceeding. You can start the server by running the following command:
+                Important: Before proceeding, make sure your RTMP server is up and running. 
+                For more information, refer to the documentation here: https://docs.mirotalk.com/mirotalk-sfu/rtmp/.
+                You can start the server by running the following command:
                 - Start: npm run nms-start - Start the RTMP server.
                 - Stop: npm run npm-stop - Stop the RTMP server.
                 - Logs: npm run npm-logs - View the logs of the RTMP server.
