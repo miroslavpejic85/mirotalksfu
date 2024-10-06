@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.78
+ * @version 1.5.79
  *
  */
 
@@ -431,7 +431,7 @@ function startServer() {
                 hostCfg.authenticated = true;
             } else {
                 hostCfg.authenticated = false;
-                res.sendFile(views.login);
+                res.redirect('/login');
             }
         } else {
             res.sendFile(views.landing);
@@ -453,11 +453,11 @@ function startServer() {
         if ((!OIDC.enabled && hostCfg.protected && !hostCfg.authenticated) || authHost.isRoomActive()) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
-                res.sendFile(views.newRoom);
+                res.redirect('/');
                 hostCfg.authenticated = true;
             } else {
                 hostCfg.authenticated = false;
-                res.sendFile(views.login);
+                res.redirect('/login');
             }
         } else {
             res.sendFile(views.newRoom);
@@ -608,11 +608,11 @@ function startServer() {
     app.get(['/logged'], (req, res) => {
         const ip = getIP(req);
         if (allowedIP(ip)) {
-            res.sendFile(views.landing);
+            res.redirect('/');
             hostCfg.authenticated = true;
         } else {
             hostCfg.authenticated = false;
-            res.sendFile(views.login);
+            res.redirect('/login');
         }
     });
 
@@ -1221,6 +1221,7 @@ function startServer() {
                         const validToken = await isValidToken(peer_token);
 
                         if (!validToken) {
+                            log.warn('[Join] - Invalid token', peer_token);
                             return cb('unauthorized');
                         }
 
@@ -1230,6 +1231,7 @@ function startServer() {
 
                         if (!isPeerValid) {
                             // redirect peer to login page
+                            log.warn('[Join] - Invalid peer not authenticated', isPeerValid);
                             return cb('unauthorized');
                         }
 
@@ -1252,13 +1254,15 @@ function startServer() {
                         });
                         return cb('unauthorized');
                     }
-                } else {
-                    return cb('unauthorized');
                 }
+                // else {
+                //     return cb('unauthorized');
+                // }
 
                 if (!hostCfg.users_from_db) {
                     const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
                     if (!roomAllowedForUser) {
+                        log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
                         return cb('notAllowed');
                     }
                 }
@@ -1345,6 +1349,7 @@ function startServer() {
             if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
                 const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
                 if (!roomAllowedForUser) {
+                    log.warn('[Join] - Room not allowed for this peer', { peer_name, room_id: room.id });
                     return cb('notAllowed');
                 }
             }
@@ -2813,11 +2818,19 @@ function startServer() {
     async function isAuthPeer(username, password) {
         if (hostCfg.users_from_db && hostCfg.users_api_endpoint) {
             try {
-                const response = await axios.post(hostCfg.users_api_endpoint, {
-                    email: username,
-                    password: password,
-                    api_secret_key: hostCfg.users_api_secret_key,
-                });
+                // Using either email or username, as the username can also be an email here.
+                const response = await axios.post(
+                    hostCfg.users_api_endpoint,
+                    {
+                        email: username,
+                        username: username,
+                        password: password,
+                        api_secret_key: hostCfg.users_api_secret_key,
+                    },
+                    {
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
+                    },
+                );
                 return response.data && response.data.message === true;
             } catch (error) {
                 log.error('AXIOS isAuthPeer error', error.message);
