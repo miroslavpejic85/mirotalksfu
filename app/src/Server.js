@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.81
+ * @version 1.5.82
  *
  */
 
@@ -140,6 +140,7 @@ const hostCfg = {
     protected: config.host.protected,
     user_auth: config.host.user_auth,
     users_from_db: config.host.users_from_db,
+    users_api_room_allowed: config.host.users_api_room_allowed,
     users_api_endpoint: config.host.users_api_endpoint,
     users_api_secret_key: config.host.users_api_secret_key,
     users: config.host.users,
@@ -505,7 +506,7 @@ function startServer() {
                     isPeerPresenter = presenter === '1' || presenter === 'true';
 
                     if (isPeerPresenter && !hostCfg.users_from_db) {
-                        const roomAllowedForUser = isRoomAllowedForUser('Direct Join with token', username, room);
+                        const roomAllowedForUser = await isRoomAllowedForUser('Direct Join with token', username, room);
                         if (!roomAllowedForUser) {
                             return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
                         }
@@ -518,7 +519,7 @@ function startServer() {
                 }
             } else {
                 const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, authHost, roomList, room);
-                const roomAllowedForUser = isRoomAllowedForUser('Direct Join with token', name, room);
+                const roomAllowedForUser = await isRoomAllowedForUser('Direct Join without token', name, room);
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
                 }
@@ -2140,6 +2141,7 @@ function startServer() {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
                     },
+                    timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                 });
 
                 const data = { response: response.data.data };
@@ -2162,6 +2164,7 @@ function startServer() {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
                     },
+                    timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                 });
 
                 const data = { response: response.data.data };
@@ -2194,6 +2197,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2224,6 +2228,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2252,6 +2257,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2282,6 +2288,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2337,6 +2344,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2944,7 +2952,7 @@ function startServer() {
         return allowRoomAccess;
     }
 
-    function isRoomAllowedForUser(message, username, room) {
+    async function isRoomAllowedForUser(message, username, room) {
         const logData = { message, username, room };
 
         log.debug('isRoomAllowedForUser ------>', logData);
@@ -2952,6 +2960,30 @@ function startServer() {
         const isOIDCEnabled = config.oidc && config.oidc.enabled;
 
         if (hostCfg.protected || hostCfg.user_auth) {
+            // Check if allowed room for user from DB...
+            if (hostCfg.users_from_db && hostCfg.users_api_room_allowed) {
+                try {
+                    // Using either email or username, as the username can also be an email here.
+                    const response = await axios.post(
+                        hostCfg.users_api_room_allowed,
+                        {
+                            email: username,
+                            username: username,
+                            room: room,
+                            api_secret_key: hostCfg.users_api_secret_key,
+                        },
+                        {
+                            timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
+                        },
+                    );
+
+                    return response.data && response.data.message === true;
+                } catch (error) {
+                    log.error('AXIOS isRoomAllowedForUserDb error', error.message);
+                    return false;
+                }
+            }
+
             const isInPresenterLists = config.presenters.list.includes(username);
 
             if (isInPresenterLists) {
