@@ -424,7 +424,7 @@ function startServer() {
     // main page
     app.get(['/'], OIDCAuth, (req, res) => {
         //log.debug('/ - hostCfg ----->', hostCfg);
-        if ((!OIDC.enabled && hostCfg.protected && !hostCfg.authenticated) || authHost.isRoomActive()) {
+        if ((!OIDC.enabled && hostCfg.protected) || authHost.isRoomActive()) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
