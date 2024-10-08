@@ -235,6 +235,10 @@ $ PORT=3011 npm start
 -   Install [docker engine](https://docs.docker.com/engine/install/) and [docker compose](https://docs.docker.com/compose/install/)
 
 ```bash
+# Clone this repo
+$ git clone https://github.com/miroslavpejic85/mirotalksfu.git
+# Go to to dir mirotalksfu
+$ cd mirotalksfu
 # Copy app/src/config.template.js in app/src/config.js IMPORTANT (edit it according to your needs)
 $ cp app/src/config.template.js app/src/config.js
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
