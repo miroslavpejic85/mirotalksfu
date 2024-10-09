@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.82
+ * @version 1.5.83
  *
  */
 
@@ -299,7 +299,6 @@ function OIDCAuth(req, res, next) {
                     log.debug('[OIDC] ------> Host protected', {
                         authenticated: hostCfg.authenticated,
                         authorizedIPs: authHost.getAuthorizedIPs(),
-                        activeRoom: authHost.isRoomActive(),
                     });
                 }
                 next();
@@ -404,7 +403,6 @@ function startServer() {
                 log.debug('[OIDC] ------> Logout', {
                     authenticated: hostCfg.authenticated,
                     authorizedIPs: authHost.getAuthorizedIPs(),
-                    activeRoom: authHost.isRoomActive(),
                 });
             }
             req.logout(); // Logout user
@@ -425,7 +423,8 @@ function startServer() {
     // main page
     app.get(['/'], OIDCAuth, (req, res) => {
         //log.debug('/ - hostCfg ----->', hostCfg);
-        if ((!OIDC.enabled && hostCfg.protected) || authHost.isRoomActive()) {
+
+        if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.sendFile(views.landing);
@@ -451,7 +450,7 @@ function startServer() {
     app.get(['/newroom'], OIDCAuth, (req, res) => {
         //log.info('/newroom - hostCfg ----->', hostCfg);
 
-        if ((!OIDC.enabled && hostCfg.protected) || authHost.isRoomActive()) {
+        if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 res.redirect('/');
@@ -518,7 +517,7 @@ function startServer() {
                         : res.sendFile(views.landing);
                 }
             } else {
-                const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, authHost, roomList, room);
+                const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, roomList, room);
                 const roomAllowedForUser = await isRoomAllowedForUser('Direct Join without token', name, room);
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
@@ -552,24 +551,24 @@ function startServer() {
     // join room by id
     app.get('/join/:roomId', (req, res) => {
         //
-        const roomId = req.params.roomId;
+        const { roomId } = req.params;
+
+        if (!roomId) {
+            log.warn('/join/:roomId empty', roomId);
+            return res.redirect('/');
+        }
 
         if (!Validator.isValidRoomName(roomId)) {
             log.warn('/join/:roomId invalid', roomId);
             return res.redirect('/');
         }
 
-        const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, authHost, roomList, roomId);
+        const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, roomList, roomId);
 
         if (allowRoomAccess) {
-            if (hostCfg.protected) authHost.setRoomActive();
-
             res.sendFile(views.room);
         } else {
-            if (!OIDC.enabled && hostCfg.protected) {
-                return res.sendFile(views.login);
-            }
-            res.redirect('/');
+            !OIDC.enabled && hostCfg.protected ? res.redirect('/login') : res.redirect('/');
         }
     });
 
@@ -2922,30 +2921,30 @@ function startServer() {
         return roomPeersArray;
     }
 
-    function isAllowedRoomAccess(logMessage, req, hostCfg, authHost, roomList, roomId) {
+    function isAllowedRoomAccess(logMessage, req, hostCfg, roomList, roomId) {
         const OIDCUserAuthenticated = OIDC.enabled && req.oidc.isAuthenticated();
         const hostUserAuthenticated = hostCfg.protected && hostCfg.authenticated;
-        const roomActive = authHost.isRoomActive();
         const roomExist = roomList.has(roomId);
         const roomCount = roomList.size;
 
         const allowRoomAccess =
             (!hostCfg.protected && !OIDC.enabled) || // No host protection and OIDC mode enabled (default)
-            OIDCUserAuthenticated || // User authenticated via OIDC
-            hostUserAuthenticated || // User authenticated via Login
+            (OIDCUserAuthenticated && roomExist) || // User authenticated via OIDC and room Exist
+            (hostUserAuthenticated && roomExist) || // User authenticated via Login and room Exist
             ((OIDCUserAuthenticated || hostUserAuthenticated) && roomCount === 0) || // User authenticated joins the first room
             roomExist; // User Or Guest join an existing Room
 
         log.debug(logMessage, {
-            OIDCUserEnabled: OIDC.enabled,
             OIDCUserAuthenticated: OIDCUserAuthenticated,
             hostUserAuthenticated: hostUserAuthenticated,
-            hostProtected: hostCfg.protected,
-            hostAuthenticated: hostCfg.authenticated,
-            roomActive: roomActive,
             roomExist: roomExist,
             roomCount: roomCount,
-            roomId: roomId,
+            extraInfo: {
+                roomId: roomId,
+                OIDCUserEnabled: OIDC.enabled,
+                hostProtected: hostCfg.protected,
+                hostAuthenticated: hostCfg.authenticated,
+            },
             allowRoomAccess: allowRoomAccess,
         });
 
@@ -3039,12 +3038,10 @@ function startServer() {
     function allowedIP(ip) {
         const authorizedIPs = authHost.getAuthorizedIPs();
         const authorizedIP = authHost.isAuthorizedIP(ip);
-        const isRoomActive = authHost.isRoomActive();
         log.info('Allowed IPs', {
             ip: ip,
             authorizedIP: authorizedIP,
             authorizedIPs: authorizedIPs,
-            isRoomActive: isRoomActive,
         });
         return authHost != null && authorizedIP;
     }
@@ -3058,7 +3055,6 @@ function startServer() {
                 log.info('Remove IP from auth', {
                     ip: ip,
                     authorizedIps: authHost.getAuthorizedIPs(),
-                    roomActive: authHost.isRoomActive(),
                 });
             }
         }
