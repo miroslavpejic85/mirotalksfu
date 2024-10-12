@@ -28,7 +28,7 @@ We would like to extend our gratitude to the following individuals for their res
 | Name              | Contact                         |
 | ----------------- | ------------------------------- |
 | `Hendrik Siewert` | hendrik.siewert@upb.de          |
-| `Caio Fook`       | caio.fook@gmail.com             |
+| `Caio Fook`       | https://github.com/caiofook     |
 | `Nishant Jain`    | https://twitter.com/realArcherL |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
