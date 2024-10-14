@@ -4260,7 +4260,6 @@ class RoomClient {
             if (this.isImageURL(message)) return this.getImage(message);
             //if (this.isVideoTypeSupported(message)) return this.getIframe(message);
             return this.getLink(message);
-            return message;
         }
         if (isChatMarkdownOn) return marked.parse(message);
         if (isChatPasteTxt && this.getLineBreaks(message) > 1) {
