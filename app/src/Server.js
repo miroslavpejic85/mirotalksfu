@@ -2140,7 +2140,6 @@ function startServer() {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
                     },
-                    timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                 });
 
                 const data = { response: response.data.data };
@@ -2163,7 +2162,6 @@ function startServer() {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
                     },
-                    timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                 });
 
                 const data = { response: response.data.data };
@@ -2196,7 +2194,6 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
-                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2227,7 +2224,6 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
-                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2256,7 +2252,6 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
-                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2287,7 +2282,6 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
-                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
@@ -2343,7 +2337,6 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config.videoAI.apiKey,
                         },
-                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                     },
                 );
 
