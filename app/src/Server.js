@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.86
+ * @version 1,5,87
  *
  */
 
@@ -2129,8 +2129,7 @@ function startServer() {
             }
         });
 
-        // https://docs.heygen.com/reference/overview-copy
-
+        // https://docs.heygen.com/reference/avatar-list
         socket.on('getAvatarList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
@@ -2153,6 +2152,7 @@ function startServer() {
             }
         });
 
+        // https://docs.heygen.com/reference/get-voices
         socket.on('getVoiceList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
@@ -2175,24 +2175,25 @@ function startServer() {
             }
         });
 
-        socket.on('streamingNew', async ({ quality, avatar_name, voice_id }, cb) => {
+        // https://docs.heygen.com/reference/new-session
+        socket.on('streamingNew', async ({ quality, avatar_id, voice_id }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
+                const voice = voice_id ? { voice_id: voice_id } : {};
                 const response = await axios.post(
                     `${config.videoAI.basePath}/v1/streaming.new`,
                     {
                         quality,
-                        avatar_name,
-                        voice: {
-                            voice_id: voice_id,
-                        },
+                        avatar_id,
+                        voice: voice,
                     },
                     {
                         headers: {
-                            'Content-Type': 'application/json',
-                            'X-Api-Key': config.videoAI.apiKey,
+                            'accept': 'application/json',
+                            'content-type': 'application/json',
+                            'x-api-key': config.videoAI.apiKey,
                         },
                     },
                 );
@@ -2210,6 +2211,7 @@ function startServer() {
             }
         });
 
+        // https://docs.heygen.com/reference/start-session
         socket.on('streamingStart', async ({ session_id, sdp }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
@@ -2238,6 +2240,7 @@ function startServer() {
             }
         });
 
+        // https://docs.heygen.com/reference/submit-ice-information
         socket.on('streamingICE', async ({ session_id, candidate }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
@@ -2266,6 +2269,7 @@ function startServer() {
             }
         });
 
+        // https://docs.heygen.com/reference/send-task
         socket.on('streamingTask', async ({ session_id, text }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
@@ -2322,6 +2326,7 @@ function startServer() {
             }
         });
 
+        // https://docs.heygen.com/reference/close-session
         socket.on('streamingStop', async ({ session_id }, cb) => {
             if (!roomList.has(socket.room_id)) return;
             if (!config.videoAI.enabled || !config.videoAI.apiKey)

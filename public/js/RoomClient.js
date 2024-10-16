@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.86
+ * @version 1,5,87
  *
  */
 
@@ -168,9 +168,9 @@ const VideoAI = {
     enabled: true,
     active: false,
     info: {},
-    avatar: null,
+    avatarId: null,
     avatarName: 'Monica',
-    avatarVoice: '',
+    avatarVoice: null,
     quality: 'medium',
     virtualBackground: true,
     background: '../images/virtual/1.jpg',
@@ -7885,7 +7885,7 @@ class RoomClient {
                     'default',
                 ];
 
-                //console.log('AVATARS LISTS', completion.response.avatars);
+                console.log('AVATARS LISTS', completion.response.avatars);
                 completion.response.avatars.forEach((avatar) => {
                     avatar.avatar_states.forEach((avatarUi) => {
                         if (
@@ -7928,9 +7928,9 @@ class RoomClient {
                                 img.style.border = 'var(--border)';
                                 const avatarData = img.getAttribute('avatarData');
                                 const avatarDataArr = avatarData.split('|');
-                                VideoAI.avatar = avatarDataArr[0];
+                                VideoAI.avatarId = avatarDataArr[0];
                                 VideoAI.avatarName = avatarDataArr[1];
-                                VideoAI.avatarVoice = avatarDataArr[2] ? avatarDataArr[2] : '';
+                                //VideoAI.avatarVoice = avatarDataArr[2] ? avatarDataArr[2] : ''; use the default one
 
                                 avatarVideoAIPreview.setAttribute('src', avatarUi.video_url.grey);
                                 avatarVideoAIPreview.play();
@@ -8091,11 +8091,11 @@ class RoomClient {
 
     async streamingNew() {
         try {
-            const { quality, avatar, avatarVoice } = VideoAI;
+            const { quality, avatarId, avatarVoice } = VideoAI;
 
             const response = await this.socket.request('streamingNew', {
                 quality: quality,
-                avatar_name: avatar,
+                avatar_id: avatarId,
                 voice_id: avatarVoice,
             });
 
