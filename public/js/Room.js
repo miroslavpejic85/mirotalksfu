@@ -1372,6 +1372,7 @@ function roomIsReady() {
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             if (BUTTONS.main.startScreenButton) {
                 show(startScreenButton);
+                show(ScreenQualityDiv);
                 show(ScreenFpsDiv);
             }
             BUTTONS.main.snapshotRoomButton && show(snapshotRoomButton);
