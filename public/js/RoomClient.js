@@ -7885,7 +7885,7 @@ class RoomClient {
                     'default',
                 ];
 
-                console.log('AVATARS LISTS', completion.response.avatars);
+                //console.log('AVATARS LISTS', completion.response.avatars);
                 completion.response.avatars.forEach((avatar) => {
                     avatar.avatar_states.forEach((avatarUi) => {
                         if (
