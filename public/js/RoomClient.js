@@ -3003,7 +3003,7 @@ class RoomClient {
         }
     }
 
-    msgPopup(type, message) {
+    msgPopup(type, message, timer = 3000) {
         switch (type) {
             case 'warning':
             case 'error':
@@ -3048,7 +3048,7 @@ class RoomClient {
                     showConfirmButton: false,
                     timerProgressBar: true,
                     toast: true,
-                    timer: 3000,
+                    timer: timer,
                 });
                 Toast.fire({
                     icon: 'info',
@@ -7853,6 +7853,7 @@ class RoomClient {
     // ##############################################
 
     getAvatarList() {
+        this.msgPopup('toast', 'Please hold on, we are processing the avatar lists...', 10000);
         this.socket
             .request('getAvatarList')
             .then(function (completion) {
@@ -7885,7 +7886,7 @@ class RoomClient {
                     'default',
                 ];
 
-                console.log('AVATARS LISTS', completion.response.avatars);
+                //console.log('AVATARS LISTS', completion.response.avatars);
                 completion.response.avatars.forEach((avatar) => {
                     avatar.avatar_states.forEach((avatarUi) => {
                         if (
@@ -7994,7 +7995,7 @@ class RoomClient {
                     const selectedPreviewURL = completion.response.list.find(
                         (flag) => flag.voice_id === selectedVoiceID,
                     )?.preview?.movio;
-                    VideoAI.avatarVoice = selectedVoiceID;
+                    VideoAI.avatarVoice = selectedVoiceID ? selectedVoiceID : null;
                     if (selectedPreviewURL) {
                         const avatarPreviewAudio = document.getElementById('avatarPreviewAudio');
                         avatarPreviewAudio.src = selectedPreviewURL;

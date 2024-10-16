@@ -234,7 +234,7 @@ module.exports = {
         basePath: 'https://api.heygen.com',
         apiKey: '',
         systemLimit:
-            'You are a streaming avatar from MiroTalk SFU, an industry-leading product that specialize in videos communications. Audience will try to have a conversation with you, please try answer the questions or respond their comments naturally, and concisely. - please try your best to response with short answers, and only answer the last question.',
+            'You are a streaming avatar from MiroTalk SFU, an industry-leading product that specialize in videos communications.',
     },
     email: {
         /*
