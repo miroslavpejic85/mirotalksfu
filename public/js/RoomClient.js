@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.87
+ * @version 1.5.88
  *
  */
 
@@ -235,6 +235,8 @@ class RoomClient {
         this.chatMessageNotifyDelay = 10000; // ms
         this.chatMessageSpamCount = 0;
         this.chatMessageSpamCountToBan = 10;
+        this.chatPeerId = 'all';
+        this.chatPeerName = 'all';
 
         // HeyGen Video AI
         this.videoAIContainer = null;
@@ -3704,7 +3706,7 @@ class RoomClient {
             }
             this.chatCenter();
             this.sound('open');
-            this.showPeerAboutAndMessages('all', 'all');
+            this.showPeerAboutAndMessages(this.chatPeerId, this.chatPeerName);
         }
         isParticipantsListOpen = !isParticipantsListOpen;
         this.isChatOpen = !this.isChatOpen;
@@ -7441,6 +7443,9 @@ class RoomClient {
 
     showPeerAboutAndMessages(peer_id, peer_name, event = null) {
         this.hidePeerMessages();
+
+        this.chatPeerId = peer_id;
+        this.chatPeerName = peer_name;
 
         const chatAbout = this.getId('chatAbout');
         const participant = this.getId(peer_id);
