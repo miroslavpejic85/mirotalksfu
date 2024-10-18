@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.88
+ * @version 1.5.89
  *
  */
 
@@ -141,6 +141,7 @@ const hostCfg = {
     user_auth: config.host.user_auth,
     users_from_db: config.host.users_from_db,
     users_api_room_allowed: config.host.users_api_room_allowed,
+    users_api_rooms_allowed: config.host.users_api_rooms_allowed,
     users_api_endpoint: config.host.users_api_endpoint,
     users_api_secret_key: config.host.users_api_secret_key,
     users: config.host.users,
@@ -647,7 +648,9 @@ function startServer() {
                       config.presenters.list.includes(username).toString();
 
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
-            return res.status(200).json({ message: token });
+            const allowedRooms = await getUserAllowedRooms(username, password);
+
+            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
         }
 
         if (isPeerValid) {
@@ -655,7 +658,8 @@ function startServer() {
             const isPresenter =
                 config.presenters && config.presenters.list && config.presenters.list.includes(username).toString();
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
-            return res.status(200).json({ message: token });
+            const allowedRooms = await getUserAllowedRooms(username, password);
+            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
         } else {
             return res.status(401).json({ message: 'unauthorized' });
         }
@@ -1254,10 +1258,9 @@ function startServer() {
                         });
                         return cb('unauthorized');
                     }
+                } else {
+                    if (!hostCfg.users_from_db) return cb('unauthorized');
                 }
-                // else {
-                //     return cb('unauthorized');
-                // }
 
                 if (!hostCfg.users_from_db) {
                     const roomAllowedForUser = isRoomAllowedForUser('[Join]', peer_name, room.id);
@@ -2947,6 +2950,48 @@ function startServer() {
         });
 
         return allowRoomAccess;
+    }
+
+    async function getUserAllowedRooms(username, password) {
+        // Gel user allowed rooms from db...
+        if (hostCfg.protected && hostCfg.users_from_db && hostCfg.users_api_rooms_allowed) {
+            try {
+                // Using either email or username, as the username can also be an email here.
+                const response = await axios.post(
+                    hostCfg.users_api_rooms_allowed,
+                    {
+                        email: username,
+                        username: username,
+                        password: password,
+                        api_secret_key: hostCfg.users_api_secret_key,
+                    },
+                    {
+                        timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
+                    },
+                );
+                const allowedRooms = response.data ? response.data.message : {};
+                log.debug('AXIOS getUserAllowedRooms', allowedRooms);
+                return allowedRooms;
+            } catch (error) {
+                log.error('AXIOS getUserAllowedRooms error', error.message);
+                return {};
+            }
+        }
+
+        // Get allowed rooms for user from config.js file
+        if (hostCfg.protected && !hostCfg.users_from_db) {
+            const isOIDCEnabled = config.oidc && config.oidc.enabled;
+
+            const user = hostCfg.users.find((user) => user.displayname === username || user.username === username);
+
+            if (!isOIDCEnabled && !user) {
+                log.debug('getUserAllowedRooms - user not found', username);
+                return false;
+            }
+            return user.allowed_rooms;
+        }
+
+        return ['*'];
     }
 
     async function isRoomAllowedForUser(message, username, room) {
