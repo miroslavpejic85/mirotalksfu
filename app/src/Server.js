@@ -139,6 +139,7 @@ const jwtCfg = {
 const hostCfg = {
     protected: config.host.protected,
     user_auth: config.host.user_auth,
+    users: config.host.users,
     users_from_db: config.host.users_from_db,
     users_api_room_allowed: config.host.users_api_room_allowed,
     users_api_rooms_allowed: config.host.users_api_rooms_allowed,
@@ -569,10 +570,17 @@ function startServer() {
         const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, roomList, roomId);
 
         if (allowRoomAccess) {
-            // Protect unauthorized room access...
+            // Protect unauthorized room access check from db...
             if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
                 const roomExists = await roomExistsForUser(roomId);
+                log.debug('/join/:roomId exists from api endpoint', roomExists);
                 return roomExists ? res.sendFile(views.room) : res.redirect('/login');
+            }
+            // Protect unauthorized room access check from config file...
+            if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
+                const roomExists = hostCfg.users.some((user) => user.allowed_rooms.includes(roomId));
+                log.debug('/join/:roomId exists from config allowed rooms', roomExists);
+                return roomExists ? res.sendFile(views.room) : res.redirect('/whoAreYou/' + roomId);
             }
             res.sendFile(views.room);
         } else {
