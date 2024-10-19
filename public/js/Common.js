@@ -226,7 +226,8 @@ function joinRoom() {
         return;
     }
 
-    window.location.href = '/join/' + roomName;
+    //window.location.href = '/join/' + roomName;
+    window.location.href = '/join/?room=' + roomName;
     window.localStorage.lastRoom = roomName;
 }
 

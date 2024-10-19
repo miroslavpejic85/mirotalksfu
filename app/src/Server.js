@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.92
+ * @version 1.5.93
  *
  */
 
@@ -511,7 +511,12 @@ function startServer() {
                     if (isPeerPresenter && !hostCfg.users_from_db) {
                         const roomAllowedForUser = await isRoomAllowedForUser('Direct Join with token', username, room);
                         if (!roomAllowedForUser) {
-                            return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
+                            log.warn('Direct Room Join for this User is Unauthorized', {
+                                username: username,
+                                room: room,
+                            });
+                            return res.redirect('/whoAreYou/' + room);
+                            //return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
                         }
                     }
                 } catch (err) {
@@ -524,7 +529,9 @@ function startServer() {
                 const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, roomList, room);
                 const roomAllowedForUser = await isRoomAllowedForUser('Direct Join without token', name, room);
                 if (!allowRoomAccess && !roomAllowedForUser) {
-                    return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
+                    log.warn('Direct Room Join Unauthorized', room);
+                    return res.redirect('/whoAreYou/' + room);
+                    //return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
                 }
             }
 
@@ -578,9 +585,9 @@ function startServer() {
             }
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
-                const roomExists = hostCfg.users.some(user => 
-                    user.allowed_rooms && user.allowed_rooms.includes(roomId)
-                );                
+                const roomExists = hostCfg.users.some(
+                    (user) => user.allowed_rooms && user.allowed_rooms.includes(roomId),
+                );
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
                 return roomExists ? res.sendFile(views.room) : res.redirect('/whoAreYou/' + roomId);
             }
