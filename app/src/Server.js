@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.90
+ * @version 1.5.91
  *
  */
 
@@ -144,6 +144,7 @@ const hostCfg = {
     users_api_rooms_allowed: config.host.users_api_rooms_allowed,
     users_api_endpoint: config.host.users_api_endpoint,
     users_api_secret_key: config.host.users_api_secret_key,
+    api_room_exists: config.host.api_room_exists,
     users: config.host.users,
     authenticated: !config.host.protected,
 };
@@ -228,6 +229,7 @@ const views = {
     privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
     rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
+    whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
 };
 
 const authHost = new Host(); // Authenticated IP by Login
@@ -550,7 +552,7 @@ function startServer() {
     });
 
     // join room by id
-    app.get('/join/:roomId', (req, res) => {
+    app.get('/join/:roomId', async (req, res) => {
         //
         const { roomId } = req.params;
 
@@ -567,8 +569,17 @@ function startServer() {
         const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, roomList, roomId);
 
         if (allowRoomAccess) {
+            // Protect unauthorized room access...
+            if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
+                const roomExists = await roomExistsForUser(roomId);
+                return roomExists ? res.sendFile(views.room) : res.redirect('/login');
+            }
             res.sendFile(views.room);
         } else {
+            // Who are you?
+            if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
+                return res.redirect('/whoAreYou/' + roomId);
+            }
             !OIDC.enabled && hostCfg.protected ? res.redirect('/login') : res.redirect('/');
         }
     });
@@ -598,6 +609,11 @@ function startServer() {
         const stats = config.stats ? config.stats : defaultStats;
         // log.debug('Send stats', stats);
         res.send(stats);
+    });
+
+    // handle who are you: Presenter or Guest
+    app.get(['/whoAreYou/:roomId'], (req, res) => {
+        res.sendFile(views.whoAreYou);
     });
 
     // handle login if user_auth enabled
@@ -2952,6 +2968,31 @@ function startServer() {
         return allowRoomAccess;
     }
 
+    async function roomExistsForUser(room) {
+        if (hostCfg.protected || hostCfg.user_auth) {
+            // Check if passed room exists
+            if (hostCfg.users_from_db && hostCfg.api_room_exists) {
+                try {
+                    const response = await axios.post(
+                        hostCfg.api_room_exists,
+                        {
+                            room: room,
+                            api_secret_key: hostCfg.users_api_secret_key,
+                        },
+                        {
+                            timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
+                        },
+                    );
+                    log.debug('AXIOS roomExistsForUser', { room: room, exists: true });
+                    return response.data && response.data.message === true;
+                } catch (error) {
+                    log.error('AXIOS roomExistsForUser error', error.message);
+                    return false;
+                }
+            }
+        }
+    }
+
     async function getUserAllowedRooms(username, password) {
         // Gel user allowed rooms from db...
         if (hostCfg.protected && hostCfg.users_from_db && hostCfg.users_api_rooms_allowed) {
@@ -3018,10 +3059,10 @@ function startServer() {
                             timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
                         },
                     );
-
+                    log.debug('AXIOS isRoomAllowedForUser', { room: room, allowed: true });
                     return response.data && response.data.message === true;
                 } catch (error) {
-                    log.error('AXIOS isRoomAllowedForUserDb error', error.message);
+                    log.error('AXIOS isRoomAllowedForUser error', error.message);
                     return false;
                 }
             }

@@ -175,9 +175,11 @@ module.exports = {
         users_api_endpoint: 'http://localhost:9000/api/v1/user/isAuth',
         users_api_room_allowed: 'http://localhost:9000/api/v1/user/isRoomAllowed',
         users_api_rooms_allowed: 'http://localhost:9000/api/v1/user/roomsAllowed',
+        api_room_exists: 'http://localhost:9000/api/v1/room/exists',
         //users_api_endpoint: 'https://webrtc.mirotalk.com/api/v1/user/isAuth',
         //users_api_room_allowed: 'https://webrtc.mirotalk.com/api/v1/user/isRoomAllowed',
         //users_api_rooms_allowed: 'https://webrtc.mirotalk.com/api/v1/user/roomsAllowed',
+        //api_room_exists: 'https://webrtc.mirotalk.com//api/v1/room/exists',
         users_api_secret_key: 'mirotalkweb_default_secret',
         users: [
             {

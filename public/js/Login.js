@@ -44,7 +44,7 @@ function login() {
 
     // http://localhost:3010/join/test
     const pathParts = window.location.pathname.split('/');
-    const roomPath = pathParts[pathParts.length - 1];
+    const roomPath = filterXSS(pathParts[pathParts.length - 1]);
 
     if (username && password) {
         axios
