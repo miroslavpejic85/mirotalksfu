@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.91
+ * @version 1.5.92
  *
  */
 
@@ -570,25 +570,24 @@ function startServer() {
         const allowRoomAccess = isAllowedRoomAccess('/join/:roomId', req, hostCfg, roomList, roomId);
 
         if (allowRoomAccess) {
-            // Protect unauthorized room access check from db...
+            // 1. Protect room access with database check
             if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
                 const roomExists = await roomExistsForUser(roomId);
-                log.debug('/join/:roomId exists from api endpoint', roomExists);
+                log.debug('/join/:roomId exists from API endpoint', roomExists);
                 return roomExists ? res.sendFile(views.room) : res.redirect('/login');
             }
-            // Protect unauthorized room access check from config file...
+            // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
-                const roomExists = hostCfg.users.some((user) => user.allowed_rooms.includes(roomId));
+                const roomExists = hostCfg.users.some(user => 
+                    user.allowed_rooms && user.allowed_rooms.includes(roomId)
+                );                
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
                 return roomExists ? res.sendFile(views.room) : res.redirect('/whoAreYou/' + roomId);
             }
             res.sendFile(views.room);
         } else {
             // Who are you?
-            if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
-                return res.redirect('/whoAreYou/' + roomId);
-            }
-            !OIDC.enabled && hostCfg.protected ? res.redirect('/login') : res.redirect('/');
+            !OIDC.enabled && hostCfg.protected ? res.redirect('/whoAreYou/' + roomId) : res.redirect('/');
         }
     });
 
