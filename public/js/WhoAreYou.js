@@ -2,6 +2,10 @@
 
 console.log(window.location);
 
+const settings = JSON.parse(localStorage.getItem('SFU_SETTINGS'));
+
+console.log('Settings', settings);
+
 const autoJoinRoom = false; // automatically join the guest to the meeting
 
 const presenterLoginBtn = document.getElementById('presenterLoginButton');
@@ -20,6 +24,16 @@ guestJoinRoomBtn.onclick = () => {
     window.location.href = '/join/' + roomId;
 };
 
+function sound(name) {
+    if (!settings.sounds) return;
+    const sound = '../sounds/' + name + '.wav';
+    const audio = new Audio(sound);
+    audio.volume = 0.5;
+    audio.play().catch((err) => {
+        return false;
+    });
+}
+
 function checkRoomStatus(roomId) {
     if (!roomId) {
         console.warn('Room ID empty!');
@@ -31,6 +45,7 @@ function checkRoomStatus(roomId) {
             console.log('isRoomActive', response.data);
             const roomActive = response.data.message;
             if (roomActive) {
+                sound('roomActive');
                 guestJoinRoomBtn.classList.remove('disabled');
                 presenterLoginBtn.style.display = 'none';
                 if (autoJoinRoom) guestJoinRoomBtn.click();
@@ -43,5 +58,7 @@ function checkRoomStatus(roomId) {
             console.error('Error checking room status', error);
         });
 }
+
+checkRoomStatus(roomId);
 
 setInterval(() => checkRoomStatus(roomId), 5000); // Start checking room status every 5 seconds
