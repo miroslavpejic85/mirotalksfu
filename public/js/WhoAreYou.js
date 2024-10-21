@@ -2,6 +2,8 @@
 
 console.log(window.location);
 
+const mediaQuery = window.matchMedia('(max-width: 640px)');
+
 const settings = JSON.parse(localStorage.getItem('SFU_SETTINGS'));
 
 console.log('Settings', settings);
@@ -15,6 +17,8 @@ guestJoinRoomBtn.classList.add('disabled');
 
 const pathParts = window.location.pathname.split('/');
 const roomId = filterXSS(pathParts[pathParts.length - 1]);
+
+let roomActive = false;
 
 presenterLoginBtn.onclick = () => {
     window.location.href = '/login';
@@ -34,6 +38,11 @@ function sound(name) {
     });
 }
 
+function handleScreenResize(e) {
+    if (roomActive) return;
+    presenterLoginBtn.style.display = e.matches ? 'flex' : 'inline-flex';
+}
+
 function checkRoomStatus(roomId) {
     if (!roomId) {
         console.warn('Room ID empty!');
@@ -43,7 +52,7 @@ function checkRoomStatus(roomId) {
         .post('/isRoomActive', { roomId })
         .then((response) => {
             console.log('isRoomActive', response.data);
-            const roomActive = response.data.message;
+            roomActive = response.data.message;
             if (roomActive) {
                 sound('roomActive');
                 guestJoinRoomBtn.classList.remove('disabled');
@@ -51,7 +60,7 @@ function checkRoomStatus(roomId) {
                 if (autoJoinRoom) guestJoinRoomBtn.click();
             } else {
                 guestJoinRoomBtn.classList.add('disabled');
-                presenterLoginBtn.style.display = 'inline-flex';
+                handleScreenResize(mediaQuery);
             }
         })
         .catch((error) => {
@@ -59,6 +68,10 @@ function checkRoomStatus(roomId) {
         });
 }
 
+handleScreenResize(mediaQuery);
+
 checkRoomStatus(roomId);
+
+mediaQuery.addEventListener('change', handleScreenResize);
 
 setInterval(() => checkRoomStatus(roomId), 5000); // Start checking room status every 5 seconds
