@@ -4,81 +4,86 @@ console.log(window.location);
 
 const mediaQuery = window.matchMedia('(max-width: 640px)');
 
-const settings = JSON.parse(localStorage.getItem('SFU_SETTINGS'));
+const settings = JSON.parse(localStorage.getItem('SFU_SETTINGS')) || {};
+console.log('Settings:', settings);
 
-console.log('Settings', settings);
-
-const autoJoinRoom = false; // automatically join the guest to the meeting
-
-const intervalTime = 5000; // check room status every 5 seconds
+const autoJoinRoom = false; // Automatically join the guest to the meeting
+const intervalTime = 5000; // Interval to check room status
 
 const presenterLoginBtn = document.getElementById('presenterLoginButton');
 const guestJoinRoomBtn = document.getElementById('guestJoinRoomButton');
 
+// Disable the guest join button initially
 guestJoinRoomBtn.classList.add('disabled');
 
+// Extract room ID from URL path using XSS filtering
 const pathParts = window.location.pathname.split('/');
 const roomId = filterXSS(pathParts[pathParts.length - 1]);
 
-let intervalId;
+let intervalId = null;
 let roomActive = false;
 
-presenterLoginBtn.onclick = () => {
+// Button event handlers
+presenterLoginBtn.addEventListener('click', () => {
     window.location.href = '/login';
-};
+});
 
-guestJoinRoomBtn.onclick = () => {
-    window.location.href = '/join/' + roomId;
-};
+guestJoinRoomBtn.addEventListener('click', () => {
+    window.location.href = `/join/${roomId}`;
+});
 
-function sound(name) {
+// Function to play sound
+function playSound(name) {
     if (!settings.sounds) return;
-    const sound = '../sounds/' + name + '.wav';
-    const audio = new Audio(sound);
+    
+    const soundSrc = `../sounds/${name}.wav`;
+    const audio = new Audio(soundSrc);
     audio.volume = 0.5;
+    
     audio.play().catch((err) => {
-        return false;
+        console.error(`Error playing sound: ${err}`);
     });
 }
 
+// Handle screen resize to adjust presenter login button visibility
 function handleScreenResize(e) {
-    if (roomActive) return;
-    presenterLoginBtn.style.display = e.matches ? 'flex' : 'inline-flex';
+    if (!roomActive) {
+        presenterLoginBtn.style.display = e.matches ? 'flex' : 'inline-flex';
+    }
 }
 
-function checkRoomStatus(roomId) {
+// Function to check room status from the server
+async function checkRoomStatus(roomId) {
     if (!roomId) {
-        console.warn('Room ID empty!');
+        console.warn('Room ID is empty!');
         return;
     }
-    axios
-        .post('/isRoomActive', { roomId })
-        .then((response) => {
-            console.log('isRoomActive', response.data);
-            roomActive = response.data.message;
-            if (roomActive) {
-                sound('roomActive');
-                guestJoinRoomBtn.classList.remove('disabled');
-                presenterLoginBtn.style.display = 'none';
-                if (autoJoinRoom) guestJoinRoomBtn.click();
-            } else {
-                guestJoinRoomBtn.classList.add('disabled');
-                handleScreenResize(mediaQuery);
+
+    try {
+        const response = await axios.post('/isRoomActive', { roomId });
+        const isActive = response.data.message;
+        console.log('Room active status:', isActive);
+        
+        roomActive = isActive;
+        if (roomActive) {
+            playSound('roomActive');
+            guestJoinRoomBtn.classList.remove('disabled');
+            presenterLoginBtn.style.display = 'none';
+            
+            if (autoJoinRoom) {
+                guestJoinRoomBtn.click();
             }
-        })
-        .catch((error) => {
-            console.error('Error checking room status', error);
-        });
+        } else {
+            guestJoinRoomBtn.classList.add('disabled');
+            handleScreenResize(mediaQuery);
+        }
+    } catch (error) {
+        console.error('Error checking room status:', error);
+    }
 }
 
-handleScreenResize(mediaQuery);
-
-checkRoomStatus(roomId);
-
-mediaQuery.addEventListener('change', handleScreenResize);
-
-function startCheckingRoomStatus() {
-    // Function to run every 5 seconds
+// Start interval to check room status every 5 seconds
+function startRoomStatusCheck() {
     intervalId = setInterval(() => {
         if (document.visibilityState === 'visible') {
             checkRoomStatus(roomId);
@@ -86,27 +91,33 @@ function startCheckingRoomStatus() {
     }, intervalTime);
 }
 
-// Fallback to setTimeout if needed for better control
-function fallbackCheckRoomStatus() {
+// Fallback to setTimeout for room status checks
+function fallbackRoomStatusCheck() {
     if (document.visibilityState === 'visible') {
         checkRoomStatus(roomId);
     }
-    setTimeout(fallbackCheckRoomStatus, intervalTime);
+    setTimeout(fallbackRoomStatusCheck, intervalTime);
 }
 
-// Use Page Visibility API to pause/resume the checks
-document.addEventListener('visibilitychange', () => {
-    checkRoomStatus(roomId);
-    //
+// Page visibility change handler to pause or resume status checks
+function handleVisibilityChange() {
     if (document.visibilityState === 'visible') {
         console.log('Page is visible. Resuming room status checks.');
-        if (!intervalId) startCheckingRoomStatus();
+        checkRoomStatus(roomId);
+        if (!intervalId) startRoomStatusCheck();
     } else {
         console.log('Page is hidden. Pausing room status checks.');
         clearInterval(intervalId);
         intervalId = null;
     }
-});
+}
 
-// Start checking room status when the page is first loaded
-startCheckingRoomStatus();
+// Initialize event listeners
+mediaQuery.addEventListener('change', handleScreenResize);
+document.addEventListener('visibilitychange', handleVisibilityChange);
+
+// Start checking room status on page load
+handleScreenResize(mediaQuery);
+checkRoomStatus(roomId);
+startRoomStatusCheck();
+
