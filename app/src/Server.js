@@ -471,9 +471,14 @@ function startServer() {
     // Check if room active (exists)
     app.post(['/isRoomActive'], (req, res) => {
         const { roomId } = checkXSS(req.body);
-        const roomActive = roomList.has(roomId);
-        if (roomActive) log.debug('isRoomActive', { roomId, roomActive });
-        res.status(200).json({ message: roomActive });
+
+        if (roomId && (hostCfg.protected || hostCfg.user_auth)) {
+            const roomActive = roomList.has(roomId);
+            if (roomActive) log.debug('isRoomActive', { roomId, roomActive });
+            res.status(200).json({ message: roomActive });
+        } else {
+            res.status(400).json({ message: 'Unauthorized' });
+        }
     });
 
     // Handle Direct join room with params
@@ -2943,10 +2948,6 @@ function startServer() {
         const payload = JSON.parse(decryptedPayload);
 
         return payload;
-    }
-
-    function isRoomActive(roomId) {
-        return roomList.has(roomId);
     }
 
     function getActiveRooms() {

@@ -2119,13 +2119,6 @@ main {
 # Who are you
 --------------------------------------------------------------*/
 
-#whoAreYouDiv {
-    display: inline-flex;
-}
-#roomActiveDiv {
-    display: none;
-}
-
 .disabled {
     pointer-events: none;
     opacity: 0.5;
