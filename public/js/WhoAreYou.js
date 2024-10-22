@@ -35,11 +35,11 @@ guestJoinRoomBtn.addEventListener('click', () => {
 // Function to play sound
 function playSound(name) {
     if (!settings.sounds) return;
-    
+
     const soundSrc = `../sounds/${name}.wav`;
     const audio = new Audio(soundSrc);
     audio.volume = 0.5;
-    
+
     audio.play().catch((err) => {
         console.error(`Error playing sound: ${err}`);
     });
@@ -63,13 +63,13 @@ async function checkRoomStatus(roomId) {
         const response = await axios.post('/isRoomActive', { roomId });
         const isActive = response.data.message;
         console.log('Room active status:', isActive);
-        
+
         roomActive = isActive;
         if (roomActive) {
             playSound('roomActive');
             guestJoinRoomBtn.classList.remove('disabled');
             presenterLoginBtn.style.display = 'none';
-            
+
             if (autoJoinRoom) {
                 guestJoinRoomBtn.click();
             }
@@ -120,4 +120,3 @@ document.addEventListener('visibilitychange', handleVisibilityChange);
 handleScreenResize(mediaQuery);
 checkRoomStatus(roomId);
 startRoomStatusCheck();
-
