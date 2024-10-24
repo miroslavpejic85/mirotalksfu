@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.99
+ * @version 1.6.00
  *
  */
 
@@ -86,6 +86,7 @@ const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
 const Sentry = require('@sentry/node');
+const Discord = require('./Discord.js');
 const restrictAccessByIP = require('./middleware/IpWhitelist.js');
 const packageJson = require('../../package.json');
 
@@ -178,6 +179,14 @@ if (sentryEnabled) {
     log.error('test-error');
     log.debug('test-debug');
 */
+}
+
+// Discord Bot
+const { enabled, commands, token } = config.discord || {};
+
+if (enabled && commands.length > 0 && token) {
+    const discordBot = new Discord(token, commands);
+    log.info('Discord bot is enabled and starting');
 }
 
 // Stats
@@ -2236,7 +2245,7 @@ function startServer() {
         // https://docs.heygen.com/reference/new-session
         socket.on('streamingNew', async ({ quality, avatar_id, voice_id }, cb) => {
             if (!roomExists(socket)) return;
-    
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {

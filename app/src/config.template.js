@@ -284,6 +284,28 @@ module.exports = {
         enabled: false,
         signingSecret: '',
     },
+    discord: {
+        /*
+        Discord
+            1. Go to the Discord Developer Portal: https://discord.com/developers/.
+            2. Create a new application and name it whatever you like.
+            3. Under the Bot section, click Add Bot and confirm.
+            4. Copy your bot token (this will be used later).
+            5. Under OAuth2 -> URL Generator, select bot scope, and under Bot Permissions, select the permissions you need (e.g., Send Messages and Read Messages).
+            6. Copy the generated invite URL, open it in a browser, and invite the bot to your Discord server.
+            7. Add the Bot in the Server channel permissions
+            8. Type /sfu (commands.name) in the channel, the response will return a URL for the meeting
+        */
+        enabled: false,
+        token: '',
+        commands: [
+            {
+                name: '/sfu',
+                message: 'Here is your SFU meeting room:',
+                baseUrl: 'https://sfu.mirotalk.com/join/',
+            },
+        ],
+    },
     IPLookup: {
         /*
         GeoJS
