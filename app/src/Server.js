@@ -16,6 +16,7 @@ prod dependencies: {
     colors                  : https://www.npmjs.com/package/colors
     cors                    : https://www.npmjs.com/package/cors
     crypto-js               : https://www.npmjs.com/package/crypto-js
+    discord.js              : https://www.npmjs.com/package/discord.js
     dompurify               : https://www.npmjs.com/package/dompurify
     express                 : https://www.npmjs.com/package/express
     express-openid-connect  : https://www.npmjs.com/package/express-openid-connect
