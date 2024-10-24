@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.5.98
+ * @version 1.5.99
  *
  */
 
@@ -1230,7 +1230,7 @@ function startServer() {
         });
 
         socket.on('join', async (dataObject, cb) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return cb({
                     error: 'Room does not exist',
                 });
@@ -1253,7 +1253,7 @@ function startServer() {
                 return cb('invalid');
             }
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } =
                 data.peer_info;
@@ -1415,7 +1415,7 @@ function startServer() {
         });
 
         socket.on('getRouterRtpCapabilities', (_, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
@@ -1440,7 +1440,7 @@ function startServer() {
         });
 
         socket.on('createWebRtcTransport', async (_, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
@@ -1465,7 +1465,7 @@ function startServer() {
         });
 
         socket.on('connectTransport', async ({ transport_id, dtlsParameters }, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
@@ -1490,11 +1490,11 @@ function startServer() {
         });
 
         socket.on('restartIce', async ({ transport_id }, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
-            const { peer } = getRoomAndPeer(socket);
+            const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({ error: 'Peer not found' });
@@ -1525,7 +1525,7 @@ function startServer() {
         });
 
         socket.on('produce', async ({ producerTransportId, kind, appData, rtpParameters }, callback, errback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
@@ -1586,7 +1586,7 @@ function startServer() {
         });
 
         socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities }, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
 
@@ -1615,7 +1615,7 @@ function startServer() {
         });
 
         socket.on('producerClosed', (data) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -1627,9 +1627,9 @@ function startServer() {
         });
 
         socket.on('pauseProducer', async ({ producer_id }, callback) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const { peer } = getRoomAndPeer(socket);
+            const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
@@ -1657,9 +1657,9 @@ function startServer() {
         });
 
         socket.on('resumeProducer', async ({ producer_id }, callback) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const { peer } = getRoomAndPeer(socket);
+            const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
@@ -1687,9 +1687,9 @@ function startServer() {
         });
 
         socket.on('resumeConsumer', async ({ consumer_id }, callback) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const { peer } = getRoomAndPeer(socket);
+            const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
@@ -1717,7 +1717,7 @@ function startServer() {
         });
 
         socket.on('getProducers', () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -1732,9 +1732,9 @@ function startServer() {
         });
 
         socket.on('getPeerCounts', async ({}, callback) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const peerCounts = room.getPeersCount();
 
@@ -1744,13 +1744,13 @@ function startServer() {
         });
 
         socket.on('cmd', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             log.debug('cmd', data);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             switch (data.type) {
                 case 'privacy':
@@ -1771,13 +1771,13 @@ function startServer() {
         });
 
         socket.on('roomAction', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             log.debug('Room action:', data);
 
@@ -1846,11 +1846,11 @@ function startServer() {
         });
 
         socket.on('roomLobby', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             data.room = room.toJson();
 
@@ -1872,7 +1872,7 @@ function startServer() {
         });
 
         socket.on('peerAction', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -1900,7 +1900,7 @@ function startServer() {
                 if (!isPresenter) return;
             }
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             if (data.action === 'ban') room.addBannedPeer(data.to_peer_uuid);
 
@@ -1910,7 +1910,7 @@ function startServer() {
         });
 
         socket.on('updatePeerInfo', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -1927,11 +1927,11 @@ function startServer() {
         });
 
         socket.on('updateRoomModerator', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
@@ -1955,11 +1955,11 @@ function startServer() {
         });
 
         socket.on('updateRoomModeratorALL', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
@@ -1973,7 +1973,7 @@ function startServer() {
         });
 
         socket.on('getRoomInfo', async (_, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -1985,7 +1985,7 @@ function startServer() {
         });
 
         socket.on('fileInfo', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -1996,37 +1996,41 @@ function startServer() {
 
             log.debug('Send File Info', data);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             data.broadcast ? room.broadCast(socket.id, 'fileInfo', data) : room.sendTo(data.peer_id, 'fileInfo', data);
         });
 
         socket.on('file', (data) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             data.broadcast ? room.broadCast(socket.id, 'file', data) : room.sendTo(data.peer_id, 'file', data);
         });
 
         socket.on('fileAbort', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            roomList.get(socket.room_id).broadCast(socket.id, 'fileAbort', data);
+            const room = getRoom(socket);
+
+            room.broadCast(socket.id, 'fileAbort', data);
         });
 
         socket.on('receiveFileAbort', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            roomList.get(socket.room_id).broadCast(socket.id, 'receiveFileAbort', data);
+            const room = getRoom(socket);
+
+            room.broadCast(socket.id, 'receiveFileAbort', data);
         });
 
         socket.on('shareVideoAction', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -2037,7 +2041,7 @@ function startServer() {
 
             log.debug('Share video: ', data);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             data.peer_id == 'all'
                 ? room.broadCast(socket.id, 'shareVideoAction', data)
@@ -2045,11 +2049,11 @@ function startServer() {
         });
 
         socket.on('wbCanvasToJson', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             // const objLength = bytesToSize(Object.keys(data).length);
 
@@ -2059,44 +2063,44 @@ function startServer() {
         });
 
         socket.on('whiteboardAction', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             log.debug('Whiteboard', data);
             room.broadCast(socket.id, 'whiteboardAction', data);
         });
 
         socket.on('setVideoOff', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             log.debug('Video off data', data.peer_name);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             room.broadCast(socket.id, 'setVideoOff', data);
         });
 
         socket.on('recordingAction', async (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             log.debug('Recording action', data);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             room.broadCast(socket.id, 'recordingAction', data);
         });
 
         socket.on('refreshParticipantsCount', () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const peerCounts = room.getPeers().size;
 
@@ -2109,7 +2113,7 @@ function startServer() {
         });
 
         socket.on('message', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -2137,8 +2141,10 @@ function startServer() {
         });
 
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.chatGPT.enabled) return cb({ message: 'ChatGPT seems disabled, try later!' });
+
             // https://platform.openai.com/docs/api-reference/completions/create
             try {
                 // Add the prompt to the context
@@ -2229,7 +2235,8 @@ function startServer() {
 
         // https://docs.heygen.com/reference/new-session
         socket.on('streamingNew', async ({ quality, avatar_id, voice_id }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+    
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
@@ -2265,7 +2272,8 @@ function startServer() {
 
         // https://docs.heygen.com/reference/start-session
         socket.on('streamingStart', async ({ session_id, sdp }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
@@ -2294,7 +2302,8 @@ function startServer() {
 
         // https://docs.heygen.com/reference/submit-ice-information
         socket.on('streamingICE', async ({ session_id, candidate }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
@@ -2323,7 +2332,8 @@ function startServer() {
 
         // https://docs.heygen.com/reference/send-task
         socket.on('streamingTask', async ({ session_id, text }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
@@ -2353,7 +2363,8 @@ function startServer() {
         });
 
         socket.on('talkToOpenAI', async ({ text, context }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
@@ -2380,7 +2391,8 @@ function startServer() {
 
         // https://docs.heygen.com/reference/close-session
         socket.on('streamingStop', async ({ session_id }, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
@@ -2409,14 +2421,17 @@ function startServer() {
         });
 
         socket.on('getRTMP', async ({}, cb) => {
-            if (!roomList.has(socket.room_id)) return;
-            const room = roomList.get(socket.room_id);
+            if (!roomExists(socket)) return;
+
+            const room = getRoom(socket);
+
             const rtmpFiles = await room.getRTMP(rtmpDir);
+
             cb(rtmpFiles);
         });
 
         socket.on('startRTMP', async (dataObject, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             if (rtmpCfg && rtmpFileStreamsCount >= rtmpCfg.maxStreams) {
                 log.warn('RTMP max file streams reached', rtmpFileStreamsCount);
@@ -2428,7 +2443,7 @@ function startServer() {
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
             const host = config.ngrok.enabled ? 'localhost' : socket.handshake.headers.host.split(':')[0];
             const rtmp = await room.startRTMP(socket.id, room, host, 1935, `../${rtmpDir}/${file}`);
 
@@ -2440,9 +2455,9 @@ function startServer() {
         });
 
         socket.on('stopRTMP', async () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             rtmpFileStreamsCount--;
 
@@ -2452,13 +2467,15 @@ function startServer() {
         });
 
         socket.on('endOrErrorRTMP', async () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
+
             rtmpFileStreamsCount--;
+
             log.debug('endRTMP - rtmpFileStreamsCount ---->', rtmpFileStreamsCount);
         });
 
         socket.on('startRTMPfromURL', async (dataObject, cb) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             if (rtmpCfg && rtmpUrlStreamsCount >= rtmpCfg.maxStreams) {
                 log.warn('RTMP max Url streams reached', rtmpUrlStreamsCount);
@@ -2470,7 +2487,7 @@ function startServer() {
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
             const host = config.ngrok.enabled ? 'localhost' : socket.handshake.headers.host.split(':')[0];
             const rtmp = await room.startRTMPfromURL(socket.id, room, host, 1935, inputVideoURL);
 
@@ -2482,9 +2499,9 @@ function startServer() {
         });
 
         socket.on('stopRTMPfromURL', async () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             rtmpUrlStreamsCount--;
 
@@ -2494,7 +2511,7 @@ function startServer() {
         });
 
         socket.on('endOrErrorRTMPfromURL', async () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             rtmpUrlStreamsCount--;
 
@@ -2502,13 +2519,13 @@ function startServer() {
         });
 
         socket.on('createPoll', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             const { question, options } = data;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const newPoll = {
                 question: question,
@@ -2524,7 +2541,7 @@ function startServer() {
         });
 
         socket.on('vote', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
@@ -2543,9 +2560,9 @@ function startServer() {
         });
 
         socket.on('updatePoll', () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const roomPolls = room.getPolls();
 
@@ -2556,13 +2573,13 @@ function startServer() {
         });
 
         socket.on('editPoll', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             const { index, question, options } = data;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const roomPolls = room.getPolls();
 
@@ -2575,7 +2592,7 @@ function startServer() {
         });
 
         socket.on('deletePoll', async (data) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { index, peer_name, peer_uuid } = checkXSS(data);
 
@@ -2583,7 +2600,7 @@ function startServer() {
             // const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             // if (!isPresenter) return;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             const roomPolls = room.getPolls();
 
@@ -2597,22 +2614,22 @@ function startServer() {
         // Room collaborative editor
 
         socket.on('editorChange', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             //const data = checkXSS(dataObject);
             const data = dataObject;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             room.broadCast(socket.id, 'editorChange', data);
         });
 
         socket.on('editorActions', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             log.debug('editorActions', data);
 
@@ -2620,18 +2637,18 @@ function startServer() {
         });
 
         socket.on('editorUpdate', (dataObject) => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             //const data = checkXSS(dataObject);
             const data = dataObject;
 
-            const room = roomList.get(socket.room_id);
+            const room = getRoom(socket);
 
             room.broadCast(socket.id, 'editorUpdate', data);
         });
 
         socket.on('disconnect', async () => {
-            if (!roomList.has(socket.room_id)) return;
+            if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -2670,7 +2687,7 @@ function startServer() {
         });
 
         socket.on('exitRoom', async (_, callback) => {
-            if (!roomList.has(socket.room_id)) {
+            if (!roomExists(socket)) {
                 return callback({
                     error: 'Not currently in a room',
                 });
@@ -2717,11 +2734,25 @@ function startServer() {
         // common
 
         function getRoomAndPeer(socket) {
-            const room = roomList.get(socket.room_id) || {};
+            const room = getRoom(socket);
 
-            const peer = room.getPeer ? room.getPeer(socket.id) || {} : {};
+            const peer = getPeer(socket);
 
             return { room, peer };
+        }
+
+        function getRoom(socket) {
+            return roomList.get(socket.room_id) || {};
+        }
+
+        function getPeer(socket) {
+            const room = getRoom(socket); // Reusing getRoom to retrieve the room
+
+            return room.getPeer ? room.getPeer(socket.id) || {} : {};
+        }
+
+        function roomExists(socket) {
+            return roomList.has(socket.room_id);
         }
 
         function isValidFileName(fileName) {
