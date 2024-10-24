@@ -2,6 +2,8 @@
 
 const { Client, GatewayIntentBits } = require('discord.js');
 
+const { v4: uuidV4 } = require('uuid');
+
 const Logger = require('./Logger');
 
 const log = new Logger('Discord');
@@ -57,7 +59,7 @@ class Discord {
     }
 
     generateMeetingRoom(baseUrl) {
-        const roomId = Math.random().toString(36).substring(2, 10);
+        const roomId = uuidV4();
         return `${baseUrl}${roomId}`;
     }
 
