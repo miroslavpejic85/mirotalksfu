@@ -279,13 +279,13 @@ module.exports = {
         Mattermost: https://mattermost.com
             1. Navigate to Main Menu > Integrations > Slash Commands in Mattermost.
             2. Click on Add Slash Command and configure the following settings:
-                - Title: Enter a descriptive title (e.g., `P2P Command`).
-                - Command Trigger Word: Set the trigger word to `p2p`.
+                - Title: Enter a descriptive title (e.g., `SFU Command`).
+                - Command Trigger Word: Set the trigger word to `sfu`.
                 - Callback URLs: Enter the URL for your Express server (e.g., `https://yourserver.com/mattermost`).
                 - Request Method: Select POST.
-                - Enable Autocomplete: Check the box for **Autocomplete**.
-                - Autocomplete Description: Provide a brief description (e.g., `Get MiroTalk P2P meeting room`).
-            3. Save the slash command and copy the generated token here as MATTERMOST_TOKEN.    
+                - Enable Autocomplete: Check the box for Autocomplete.
+                - Autocomplete Description: Provide a brief description (e.g., `Get MiroTalk SFU meeting room`).
+            3. Save the slash command and copy the generated token (YourMattermostToken).   
         */
         enabled: false,
         serverUrl: 'YourMattermostServerUrl',
