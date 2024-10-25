@@ -8,7 +8,7 @@
 ███████ ███████ ██   ██   ████   ███████ ██   ██                                           
 
 prod dependencies: {
-    @ffmpeg-installer/ffmpeg: https://www.npmjs.com/package/@ffmpeg-installer/ffmpeg
+    @mattermost/client      : https://www.npmjs.com/package/@mattermost/client
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
     body-parser             : https://www.npmjs.com/package/body-parser
@@ -56,7 +56,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.00
+ * @version 1.6.10
  *
  */
 
@@ -88,6 +88,7 @@ const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
 const Sentry = require('@sentry/node');
 const Discord = require('./Discord.js');
+const Mattermost = require('./Mattermost.js');
 const restrictAccessByIP = require('./middleware/IpWhitelist.js');
 const packageJson = require('../../package.json');
 
@@ -110,7 +111,6 @@ const CryptoJS = require('crypto-js');
 const qS = require('qs');
 const slackEnabled = config.slack.enabled;
 const slackSigningSecret = config.slack.signingSecret;
-const bodyParser = require('body-parser');
 
 const app = express();
 
@@ -328,12 +328,12 @@ function OIDCAuth(req, res, next) {
 
 function startServer() {
     // Start the app
+    app.use(express.static(dir.public));
     app.use(cors(corsOptions));
     app.use(compression());
-    app.use(express.json({ limit: '50mb' })); // Ensure the body parser can handle large files
-    app.use(express.static(dir.public));
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.raw({ type: 'video/webm', limit: '50mb' })); // handle raw binary data
+    app.use(express.json({ limit: '50mb' })); // Handles JSON payloads
+    app.use(express.urlencoded({ extended: true, limit: '50mb' })); // Handles URL-encoded payloads
+    app.use(express.raw({ type: 'video/webm', limit: '50mb' })); // Handles raw binary data
     app.use(restApi.basePath + '/docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument)); // api docs
 
     // IP Whitelist check ...
@@ -351,6 +351,9 @@ function startServer() {
         next();
     });
     */
+
+    // Mattermost
+    const mattermost = new Mattermost(app);
 
     // POST start from here...
     app.post('*', function (next) {

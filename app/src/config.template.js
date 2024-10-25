@@ -121,6 +121,7 @@ module.exports = {
             join: true,
             token: false,
             slack: true,
+            mattermost: true,
             //...
         },
     },
@@ -272,6 +273,39 @@ module.exports = {
         enabled: false,
         DSN: '',
         tracesSampleRate: 0.5,
+    },
+    mattermost: {
+        /*
+        Mattermost: https://mattermost.com
+            1. Navigate to Main Menu > Integrations > Slash Commands in Mattermost.
+            2. Click on Add Slash Command and configure the following settings:
+                - Title: Enter a descriptive title (e.g., `P2P Command`).
+                - Command Trigger Word: Set the trigger word to `p2p`.
+                - Callback URLs: Enter the URL for your Express server (e.g., `https://yourserver.com/mattermost`).
+                - Request Method: Select POST.
+                - Enable Autocomplete: Check the box for **Autocomplete**.
+                - Autocomplete Description: Provide a brief description (e.g., `Get MiroTalk P2P meeting room`).
+            3. Save the slash command and copy the generated token here as MATTERMOST_TOKEN.    
+        */
+        enabled: false,
+        serverUrl: 'YourMattermostServerUrl',
+        username: 'YourMattermostUsername',
+        password: 'YourMattermostPassword',
+        token: 'YourMattermostToken',
+        commands: [
+            {
+                name: '/sfu',
+                message: 'Here is your meeting room:',
+            },
+            //....
+        ],
+        texts: [
+            {
+                name: '/sfu',
+                message: 'Here is your meeting room:',
+            },
+            //....
+        ],
     },
     slack: {
         /*

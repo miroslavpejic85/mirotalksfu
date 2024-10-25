@@ -80,6 +80,7 @@
 -   Supports [REST API](app/api/README.md) (Application Programming Interface).
 -   Integration with [Slack](https://api.slack.com/apps/) for enhanced communication.
 -   Integration with [Discord](https://discord.com) for enhanced communication.
+-   Integration with [Mattermost](https://mattermost.com/) for enhanced communication.
 -   Utilizes [Sentry](https://sentry.io/) for error reporting.
 -   And much more...
 
