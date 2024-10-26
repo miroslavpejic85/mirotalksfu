@@ -2270,8 +2270,6 @@ function startServer() {
                     },
                 );
 
-                log.warn('STREAMING NEW', response);
-
                 const data = { response: response.data };
 
                 log.debug('streamingNew', data);
