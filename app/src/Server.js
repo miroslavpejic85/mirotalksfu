@@ -1063,29 +1063,53 @@ function startServer() {
 
     function getServerConfig(tunnel = false) {
         return {
-            app_version: packageJson.version,
-            node_version: process.versions.node,
-            cors_options: corsOptions,
-            middleware: config.middleware,
+            // General Server Information
             server_listen: host,
             server_tunnel: tunnel,
-            hostConfig: hostCfg,
+
+            // Core Configurations
+            cors_options: corsOptions,
             jwtCfg: jwtCfg,
-            presenters: config.presenters,
             rest_api: restApi,
+
+            // Middleware and UI
+            middleware: config.middleware,
+            configUI: config.ui,
+
+            // Security, Authorization, and User Management
+            oidc: OIDC.enabled ? OIDC : false,
+            hostProtected: hostCfg.protected || hostCfg.user_auth ? hostCfg : false,
+            ip_lookup_enabled: config.IPLookup?.enabled ? config.IPLookup : false,
+            presenters: config.presenters,
+
+            // Communication Integrations
+            discord_enabled: config.discord?.enabled ? config.discord : false,
+            mattermost_enabled: config.mattermost?.enabled ? config.mattermost : false,
+            slack_enabled: slackEnabled ? config.slack : false,
+            chatGPT_enabled: config.chatGPT?.enabled ? config.chatGPT : false,
+
+            // Media and Video Configurations
+            mediasoup_listenInfos: config.mediasoup.webRtcTransport.listenInfos,
             mediasoup_worker_bin: mediasoup.workerBin,
+            rtmp_enabled: rtmpCfg.enabled ? rtmpCfg : false,
+            videAI_enabled: config.videoAI.enabled ? config.videoAI : false,
+            serverRec: config?.server?.recording,
+
+            // Centralized Logging
+            sentry_enabled: sentryEnabled ? config.sentry : false,
+
+            // Additional Configurations and Features
+            survey_enabled: config.survey?.enabled ? config.survey : false,
+            redirect_enabled: config.redirect?.enabled ? config.redirect : false,
+            stats_enabled: config.stats?.enabled ? config.stats : false,
+            ngrok_enabled: config.ngrok?.enabled ? config.ngrok : false,
+            email_alerts: config.email?.alert ? config.email : false,
+
+            // Version Information
+            app_version: packageJson.version,
+            node_version: process.versions.node,
             mediasoup_server_version: mediasoup.version,
             mediasoup_client_version: mediasoupClient.version,
-            mediasoup_listenInfos: config.mediasoup.webRtcTransport.listenInfos,
-            ip_lookup_enabled: config.IPLookup.enabled,
-            sentry_enabled: sentryEnabled,
-            redirect_enabled: config.redirect.enabled,
-            slack_enabled: slackEnabled,
-            stats_enabled: config.stats.enabled,
-            chatGPT_enabled: config.chatGPT.enabled,
-            configUI: config.ui,
-            serverRec: config?.server?.recording,
-            oidc: OIDC.enabled ? OIDC : false,
         };
     }
 
