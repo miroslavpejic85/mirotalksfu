@@ -3532,6 +3532,7 @@ class RoomClient {
                     }
                 }
 
+                rc.resizeVideoMenuBar();
                 setCamerasBorderNone();
 
                 if (videoBar.classList.contains('hidden')) {
@@ -3546,6 +3547,22 @@ class RoomClient {
                     videoPlayer.style.border = 'none';
                 }
             });
+        }
+    }
+
+    resizeVideoMenuBar() {
+        const somethingPinned =
+            this.isVideoPinned ||
+            this.isChatPinned ||
+            this.isEditorPinned ||
+            this.isPollPinned ||
+            transcription.isPin();
+        const menuBarWidth =
+            this.isVideoPinned || this.isChatPinned || this.isPollPinned || transcription.isPin() ? '75%' : '70%';
+        const videoMenuBar = rc.getEcN('videoMenuBar');
+        for (let i = 0; i < videoMenuBar.length; i++) {
+            const menuBar = videoMenuBar[i];
+            menuBar.style.width = somethingPinned ? menuBarWidth : '100%';
         }
     }
 
@@ -3586,6 +3603,7 @@ class RoomClient {
         this.videoMediaContainer.style.top = 0;
         this.videoMediaContainer.style.width = '75%';
         this.videoMediaContainer.style.height = '100%';
+        this.resizeVideoMenuBar();
     }
 
     videoMediaContainerUnpin() {
@@ -3593,6 +3611,7 @@ class RoomClient {
         this.videoMediaContainer.style.right = null;
         this.videoMediaContainer.style.width = '100%';
         this.videoMediaContainer.style.height = '100%';
+        this.resizeVideoMenuBar();
     }
 
     adaptVideoObjectFit(index) {
@@ -3843,6 +3862,7 @@ class RoomClient {
         this.chatPinned();
         this.isChatPinned = true;
         setColor(chatTogglePin, 'lime');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         chatRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
@@ -3861,6 +3881,7 @@ class RoomClient {
         this.chatCenter();
         this.isChatPinned = false;
         setColor(chatTogglePin, 'white');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
         if (!this.isPlistOpen()) this.toggleShowParticipants();
@@ -4489,6 +4510,7 @@ class RoomClient {
         this.pollPinned();
         this.isPollPinned = true;
         setColor(pollTogglePin, 'lime');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         pollRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(pollRoom, pollHeader);
@@ -4503,6 +4525,7 @@ class RoomClient {
         this.pollCenter();
         this.isPollPinned = false;
         setColor(pollTogglePin, 'white');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(pollRoom, pollHeader);
     }
@@ -4834,6 +4857,7 @@ class RoomClient {
         this.editorPinned();
         this.isEditorPinned = true;
         setColor(editorTogglePin, 'lime');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '80vh');
         //if (!this.isMobileDevice) this.makeUnDraggable(editorRoom, editorHeader);
@@ -4848,6 +4872,7 @@ class RoomClient {
         this.pollCenter();
         this.isEditorPinned = false;
         setColor(editorTogglePin, 'white');
+        this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '85vh');
         //if (!this.isMobileDevice) this.makeDraggable(editorRoom, editorHeader);

@@ -318,6 +318,7 @@ class Transcription {
         transcriptionRoom.style.transform = null;
         document.documentElement.style.setProperty('--transcription-width', '25%');
         document.documentElement.style.setProperty('--transcription-height', '100%');
+        rc.resizeVideoMenuBar();
     }
 
     unpinned() {
@@ -334,6 +335,7 @@ class Transcription {
         this.center();
         this.isPinned = false;
         setColor(transcriptionTogglePinBtn, 'white');
+        rc.resizeVideoMenuBar();
         resizeVideoMedia();
         resizeTranscriptionRoom();
         transcriptionRoom.style.resize = 'both';
