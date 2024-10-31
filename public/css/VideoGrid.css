@@ -132,6 +132,25 @@
     overflow: hidden;
 }
 
+.videoMenuBarClose {
+    position: absolute;
+    display: flex;
+    top: 30px;
+    right: 30px;
+    padding: 10px;
+    border-radius: 50%;
+    color: white;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+    background: var(--body-bg);
+}
+
+.videoMenuBarClose:hover {
+    background: var(--btns-bg-color);
+}
+
 .videoMenuBarShare {
     z-index: 2;
     position: absolute;
@@ -166,15 +185,97 @@
     transition: all 0.3s ease-in-out;
 }
 
+.expand-video {
+    position: fixed;
+    left: 10px;
+}
+
+.expand-video .dropdown-button {
+    cursor: pointer;
+}
+
 .expand-video-content {
-    position: relative;
+    z-index: 1;
     display: none;
-    float: right;
-    width: auto;
+    position: fixed;
+    min-width: 50%;
+    padding: 20px;
+    border-radius: 5px;
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
 }
 
 .expand-video:hover .expand-video-content {
-    display: inline-flex;
+    z-index: 1;
+    display: grid !important;
+    grid-gap: 5px 5px;
+    grid-template-columns: 50%;
+    grid-template-areas:
+        'header header'
+        'controls controls';
+    align-content: start;
+    justify-items: start;
+    overflow-y: auto;
+}
+
+.peer-name-container {
+    display: row;
+    width: 100%;
+    height: 100%;
+    padding: 10px;
+    margin: 10px;
+}
+
+.expand-video-content .peer-name-header {
+    grid-area: header;
+    width: 100%;
+    padding: 40px;
+    height: 120px;
+    background: var(--btns-bg-color);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.expand-video-content .peer-name {
+    font-size: 18px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    background-color: rgba(36, 36, 36, 0.8);
+    border-radius: 10px;
+    padding: 6px;
+    width: 100%;
+}
+
+.expand-video-content input[type='range'] {
+    display: inline !important;
+    width: 100%;
+    margin: 16px 0;
+    background: rgba(255, 255, 255, 0.1);
+    height: 6px;
+}
+
+.expand-video-content button {
+    display: flex !important;
+    font-size: 16px;
+    color: #fff;
+    background: var(--btns-bg-color);
+    width: 100%;
+    height: 45px;
+    justify-content: center;
+    align-items: center;
+    border-radius: 10px;
+}
+
+.expand-video-content button:hover {
+    color: white;
+    background: var(--body-bg);
 }
 
 #videoMediaContainer video {
@@ -262,16 +363,6 @@ input[type='range'] {
     }
 }
 
-@media screen and (max-width: 600px) {
-    .username {
-        font-size: 12px;
-    }
-    .videoMenuBar input,
-    .videoMenuBar button,
-    .videoMenuBarShare button {
-        font-size: 1rem;
-    }
-}
 @media screen and (max-width: 500px) {
     .username {
         font-size: 10px;
@@ -279,6 +370,13 @@ input[type='range'] {
     .videoMenuBar input,
     .videoMenuBar button,
     .videoMenuBarShare button {
-        font-size: 0.8rem;
+        font-size: 1rem;
+    }
+    .expand-video-content {
+        min-width: 100%;
+        left: 0px;
+    }
+    .expand-video-content .peer-name {
+        font-size: 10px;
     }
 }

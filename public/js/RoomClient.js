@@ -43,9 +43,10 @@ const html = {
     bg: 'fas fa-circle-half-stroke',
     pin: 'fas fa-map-pin',
     videoPrivacy: 'far fa-circle',
-    expand: 'fas fa-ellipsis-vertical',
+    expand: 'fas fa-bars dropdown-button',
     hideALL: 'fas fa-eye',
     mirror: 'fas fa-arrow-right-arrow-left',
+    close: 'fas fa-times',
 };
 
 const icons = {
@@ -2307,17 +2308,38 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
+
+                const peerNameHeader = document.createElement('div');
+                peerNameHeader.className = 'peer-name-header';
+
+                const peerNameContainer = document.createElement('div');
+                peerNameContainer.className = 'peer-name-container';
+
+                const peerNameSpan = document.createElement('span');
+                peerNameSpan.className = 'peer-name';
+                peerNameSpan.textContent = peer_name;
+
+                this.addCloseVBButton(peerNameHeader);
+
+                peerNameContainer.appendChild(peerNameSpan);
+
+                BUTTONS.consumerVideo.audioVolumeInput && peerNameContainer.appendChild(pv);
+                peerNameHeader.appendChild(peerNameContainer);
+
+                vb.appendChild(peerNameHeader);
+                eVc.appendChild(peerNameHeader);
+
                 BUTTONS.consumerVideo.sendMessageButton && eVc.appendChild(sm);
                 BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(sf);
                 BUTTONS.consumerVideo.sendVideoButton && eVc.appendChild(sv);
                 BUTTONS.consumerVideo.geolocationButton && eVc.appendChild(gl);
                 BUTTONS.consumerVideo.banButton && eVc.appendChild(ban);
                 BUTTONS.consumerVideo.ejectButton && eVc.appendChild(ko);
+
                 eDiv.appendChild(eBtn);
                 eDiv.appendChild(eVc);
-
                 vb.appendChild(eDiv);
-                BUTTONS.consumerVideo.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
+
                 vb.appendChild(au);
                 vb.appendChild(cm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
@@ -3513,9 +3535,10 @@ class RoomClient {
                 setCamerasBorderNone();
 
                 if (videoBar.classList.contains('hidden')) {
+                    rc.sound('open');
                     show(videoBar);
                     animateCSS(videoBar, 'fadeInDown');
-                    videoPlayer.style.border = '3px solid #2a7aef';
+                    videoPlayer.style.border = '1px solid #2a7aef';
                 } else {
                     animateCSS(videoBar, 'fadeOutUp').then((msg) => {
                         hide(videoBar);
@@ -3524,6 +3547,16 @@ class RoomClient {
                 }
             });
         }
+    }
+
+    addCloseVBButton(containerElement) {
+        const closeBtn = document.createElement('div');
+        closeBtn.className = `${html.close} videoMenuBarClose`;
+        closeBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            hideClassElements('videoMenuBar');
+        });
+        containerElement.appendChild(closeBtn);
     }
 
     // ####################################################
