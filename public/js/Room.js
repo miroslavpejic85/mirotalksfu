@@ -3224,6 +3224,14 @@ function hideClassElements(className) {
     for (let i = 0; i < elements.length; i++) {
         hide(elements[i]);
     }
+    setCamerasBorderNone();
+}
+
+function setCamerasBorderNone() {
+    const cameras = rc.getEcN('Camera');
+    for (let i = 0; i < cameras.length; i++) {
+        cameras[i].style.border = 'none';
+    }
 }
 
 function toggleExtraButtons() {

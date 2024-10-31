@@ -3510,10 +3510,7 @@ class RoomClient {
                     }
                 }
 
-                const cameras = rc.getEcN('Camera');
-                for (let i = 0; i < cameras.length; i++) {
-                    cameras[i].style.border = 'none';
-                }
+                setCamerasBorderNone();
 
                 if (videoBar.classList.contains('hidden')) {
                     show(videoBar);

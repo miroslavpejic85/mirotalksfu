@@ -279,6 +279,6 @@ input[type='range'] {
     .videoMenuBar input,
     .videoMenuBar button,
     .videoMenuBarShare button {
-        font-size: 0.9rem;
+        font-size: 0.8rem;
     }
 }
