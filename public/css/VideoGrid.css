@@ -96,12 +96,12 @@
     font-size: 10px;
     display: flex;
     align-items: center;
-    padding: 5px;
-    margin: 5px;
+    padding: 10px;
+    margin: 10px;
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--body-bg);
 }
 
 .fscreen {
@@ -246,8 +246,7 @@
     font-size: 18px;
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
-    background-color: rgba(36, 36, 36, 0.8);
+    background: var(--body-bg);
     border-radius: 10px;
     padding: 6px;
     width: 100%;
