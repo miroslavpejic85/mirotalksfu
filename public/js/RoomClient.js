@@ -6751,6 +6751,22 @@ class RoomClient {
         }
     }
 
+    setAudioVolume(audioConsumerPlayer, volume) {
+        if (audioConsumerPlayer) {
+            if (this.isMobileDevice) {
+                // On mobile, we'll use a different approach
+                audioConsumerPlayer.muted = volume === 0;
+                if (!audioConsumerPlayer.muted) {
+                    // We can only set volume to 1 on mobile, so we'll adjust playback rate instead
+                    audioConsumerPlayer.playbackRate = Math.max(0.1, volume);
+                }
+            } else {
+                // On desktop, we can directly set the volume
+                audioConsumerPlayer.volume = volume;
+            }
+        }
+    }
+
     // ####################################################
     // HANDLE DOMINANT SPEAKER
     // ###################################################
