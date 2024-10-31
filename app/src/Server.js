@@ -11,7 +11,6 @@ prod dependencies: {
     @mattermost/client      : https://www.npmjs.com/package/@mattermost/client
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
-    body-parser             : https://www.npmjs.com/package/body-parser
     compression             : https://www.npmjs.com/package/compression
     colors                  : https://www.npmjs.com/package/colors
     cors                    : https://www.npmjs.com/package/cors
@@ -56,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.10
+ * @version 1.6.11
  *
  */
 

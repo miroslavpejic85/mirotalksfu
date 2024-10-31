@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.10
+ * @version 1.6.11
  *
  */
 
@@ -397,6 +397,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('aboutButton', 'About this project', placement);
 
         // Bottom buttons
+        setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
         setTippy('startAudioButton', 'Start the audio', bPlacement);
         setTippy('stopAudioButton', 'Stop the audio', bPlacement);
         setTippy('startVideoButton', 'Start the video', bPlacement);
@@ -1306,6 +1307,7 @@ function roomIsReady() {
     } else {
         myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
     }
+    show(toggleExtraButton); //*
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
@@ -1543,6 +1545,7 @@ function handleButtons() {
         }
         isHideMeActive = !isHideMeActive;
         rc.handleHideMe();
+        hideClassElements('videoMenuBar');
     };
     settingsButton.onclick = () => {
         rc.toggleMySettings();
@@ -1801,9 +1804,13 @@ function handleButtons() {
     };
     raiseHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', true);
+        hideClassElements('videoMenuBar');
     };
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
+    };
+    toggleExtraButton.onclick = async () => {
+        toggleExtraButtons();
     };
     startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
@@ -2941,6 +2948,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
+        hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
@@ -2949,6 +2957,7 @@ function handleRoomClientEvents() {
         show(startVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
+        hideClassElements('videoMenuBar');
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
@@ -2956,6 +2965,7 @@ function handleRoomClientEvents() {
         show(stopVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
+        hideClassElements('videoMenuBar');
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -2963,28 +2973,33 @@ function handleRoomClientEvents() {
         show(startVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
+        hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
         hide(startScreenButton);
         show(stopScreenButton);
+        hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room event: Client pause screen');
         hide(startScreenButton);
         show(stopScreenButton);
+        hideClassElements('videoMenuBar');
     });
     rc.on(RoomClient.EVENTS.resumeScreen, () => {
         console.log('Room event: Client resume screen');
         hide(stopScreenButton);
         show(startScreenButton);
+        hideClassElements('videoMenuBar');
     });
     rc.on(RoomClient.EVENTS.stopScreen, () => {
         console.log('Room event: Client stop screen');
         hide(stopScreenButton);
         show(startScreenButton);
+        hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
@@ -3188,16 +3203,14 @@ function showButtons() {
         (rc.isMobileDevice && rc.isMySettingsOpen)
     )
         return;
-    toggleClassElements('videoMenuBar', 'inline');
-    control.style.display = 'flex';
     bottomButtons.style.display = 'flex';
     isButtonsVisible = true;
 }
 
 function checkButtonsBar() {
     if (!isButtonsBarOver) {
-        toggleClassElements('videoMenuBar', 'none');
-        control.style.display = 'none';
+        // hideClassElements('videoMenuBar');
+        hide(control);
         bottomButtons.style.display = 'none';
         isButtonsVisible = false;
     }
@@ -3206,11 +3219,31 @@ function checkButtonsBar() {
     }, 10000);
 }
 
-function toggleClassElements(className, displayState) {
-    let elements = rc.getEcN(className);
+function hideClassElements(className) {
+    const elements = rc.getEcN(className);
     for (let i = 0; i < elements.length; i++) {
-        elements[i].style.display = displayState;
+        hide(elements[i]);
     }
+}
+
+function toggleExtraButtons() {
+    control.classList.contains('hidden') ? show(control) : hide(control);
+    hideClassElements('videoMenuBar');
+}
+
+// https://animate.style
+
+function animateCSS(element, animation, prefix = 'animate__') {
+    return new Promise((resolve, reject) => {
+        const animationName = `${prefix}${animation}`;
+        element.classList.add(`${prefix}animated`, animationName);
+        function handleAnimationEnd(event) {
+            event.stopPropagation();
+            element.classList.remove(`${prefix}animated`, animationName);
+            resolve('Animation ended');
+        }
+        element.addEventListener('animationend', handleAnimationEnd, { once: true });
+    });
 }
 
 function setAudioButtonsDisabled(disabled) {
@@ -4500,7 +4533,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.10',
+        title: 'WebRTC SFU v1.6.11',
         html: `
         <br />
         <div id="about">

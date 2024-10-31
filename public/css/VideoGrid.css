@@ -118,6 +118,22 @@
 
 .videoMenuBar {
     z-index: 2;
+    position: fixed;
+    display: inline;
+    top: 0;
+    left: 0;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.9);
+    font-size: small;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+    cursor: default;
+    overflow: hidden;
+}
+
+.videoMenuBarShare {
+    z-index: 2;
     position: absolute;
     display: inline;
     top: 0;
@@ -133,7 +149,9 @@
 }
 
 .videoMenuBar input,
-.videoMenuBar button {
+.videoMenuBar button,
+.videoMenuBarShare button {
+    font-size: 1.2rem;
     float: right;
     color: #fff;
     background: transparent;
@@ -142,6 +160,7 @@
     border: none;
 }
 
+.videoMenuBarShare button:hover,
 .videoMenuBar button:hover {
     color: grey;
     transition: all 0.3s ease-in-out;
@@ -247,9 +266,19 @@ input[type='range'] {
     .username {
         font-size: 12px;
     }
+    .videoMenuBar input,
+    .videoMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 1rem;
+    }
 }
 @media screen and (max-width: 500px) {
     .username {
         font-size: 10px;
+    }
+    .videoMenuBar input,
+    .videoMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.9rem;
     }
 }
