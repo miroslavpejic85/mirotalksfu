@@ -122,12 +122,13 @@
     display: inline;
     top: 0;
     left: 0;
-    padding: 20px;
-    background: rgba(0, 0, 0, 0.9);
+    padding: 15px;
+    width: 100%;
     font-size: small;
     font-weight: bold;
     text-align: center;
-    width: 100%;
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
     cursor: default;
     overflow: hidden;
 }
@@ -376,6 +377,6 @@ input[type='range'] {
         left: 0px;
     }
     .expand-video-content .peer-name {
-        font-size: 10px;
+        font-size: 12px;
     }
 }
