@@ -3518,11 +3518,12 @@ class RoomClient {
                 if (videoBar.classList.contains('hidden')) {
                     show(videoBar);
                     animateCSS(videoBar, 'fadeInDown');
-                    videoPlayer.style.border = '2px solid #2a7aef';
+                    videoPlayer.style.border = '3px solid #2a7aef';
                 } else {
                     animateCSS(videoBar, 'fadeOutUp').then((msg) => {
                         hide(videoBar);
                     });
+                    videoPlayer.style.border = 'none';
                 }
             });
         }
