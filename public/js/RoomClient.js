@@ -3539,7 +3539,7 @@ class RoomClient {
                     rc.sound('open');
                     show(videoBar);
                     animateCSS(videoBar, 'fadeInDown');
-                    videoPlayer.style.border = '1px solid #2a7aef';
+                    if (participantsCount > 1) videoPlayer.style.border = '0.1px solid #2a7aef';
                 } else {
                     animateCSS(videoBar, 'fadeOutUp').then((msg) => {
                         hide(videoBar);
