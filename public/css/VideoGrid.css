@@ -128,7 +128,6 @@
     font-weight: bold;
     text-align: center;
     background: var(--body-bg);
-    box-shadow: var(--box-shadow);
     cursor: default;
     overflow: hidden;
 }
