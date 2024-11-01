@@ -35,6 +35,7 @@ let redirect = {
 
 let recCodecs = null;
 let recPrioritizeH264 = false;
+let isToggleExtraBtnClicked = false;
 
 const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
@@ -1811,9 +1812,15 @@ function handleButtons() {
     };
     toggleExtraButton.onclick = () => {
         toggleExtraButtons();
+        if (!DetectRTC.isMobileDevice) {
+            isToggleExtraBtnClicked = true;
+            setTimeout(() => {
+                isToggleExtraBtnClicked = false;
+            }, 2000);
+        }
     };
     toggleExtraButton.onmouseover = () => {
-        if (DetectRTC.isMobileDevice) return;
+        if (isToggleExtraBtnClicked || DetectRTC.isMobileDevice) return;
         if (control.style.display === 'none') {
             toggleExtraButtons();
         }
