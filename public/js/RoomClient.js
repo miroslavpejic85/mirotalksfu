@@ -3413,6 +3413,7 @@ class RoomClient {
                     this.removeVideoPinMediaContainer();
                     setColor(btnPn, 'white');
                 }
+                this.resizeVideoMenuBar();
                 handleAspectRatio();
             });
 
