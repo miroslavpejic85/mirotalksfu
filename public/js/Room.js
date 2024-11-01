@@ -1814,6 +1814,7 @@ function handleButtons() {
     };
     toggleExtraButton.onmouseover = () => {
         show(control);
+        hideClassElements('videoMenuBar');
     };
     startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
