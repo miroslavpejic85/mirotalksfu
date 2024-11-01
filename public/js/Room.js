@@ -1812,6 +1812,9 @@ function handleButtons() {
     toggleExtraButton.onclick = async () => {
         toggleExtraButtons();
     };
+    toggleExtraButton.onmouseover = () => {
+        show(control);
+    };
     startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
         if (moderator.audio_cant_unmute) {
