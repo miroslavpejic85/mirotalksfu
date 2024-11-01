@@ -163,7 +163,7 @@ body {
 #control {
     z-index: 3;
     position: absolute;
-    display: flex;
+    display: none;
     padding: 5px;
 
     top: var(--btns-top);

@@ -1809,12 +1809,14 @@ function handleButtons() {
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
     };
-    toggleExtraButton.onclick = async () => {
+    toggleExtraButton.onclick = () => {
         toggleExtraButtons();
     };
     toggleExtraButton.onmouseover = () => {
-        show(control);
-        hideClassElements('videoMenuBar');
+        if (DetectRTC.isMobileDevice) return;
+        if (control.style.display === 'none') {
+            toggleExtraButtons();
+        }
     };
     startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
@@ -3213,14 +3215,20 @@ function showButtons() {
 
 function checkButtonsBar() {
     if (!isButtonsBarOver) {
-        // hideClassElements('videoMenuBar');
-        hide(control);
+        control.style.display = 'none';
         bottomButtons.style.display = 'none';
         isButtonsVisible = false;
     }
     setTimeout(() => {
         checkButtonsBar();
     }, 10000);
+}
+
+function toggleExtraButtons() {
+    control.style.display === 'none' || control.style.display === ''
+        ? elemDisplay('control', true, 'flex')
+        : elemDisplay('control', false);
+    hideClassElements('videoMenuBar');
 }
 
 function hideClassElements(className) {
@@ -3236,11 +3244,6 @@ function setCamerasBorderNone() {
     for (let i = 0; i < cameras.length; i++) {
         cameras[i].style.border = 'none';
     }
-}
-
-function toggleExtraButtons() {
-    control.classList.contains('hidden') ? show(control) : hide(control);
-    hideClassElements('videoMenuBar');
 }
 
 // https://animate.style
