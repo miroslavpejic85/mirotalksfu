@@ -51,6 +51,11 @@
     border: 3px solid rgb(113, 157, 239);
 } */
 
+.Camera .fa-hand-paper {
+    margin: 10px !important;
+    font-size: 1.5rem !important;
+}
+
 #videoMediaContainer i {
     position: absolute;
     display: none;
