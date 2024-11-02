@@ -6017,6 +6017,24 @@ class RoomClient {
                 }
             }
         });
+
+        // Take URL from clipboard ex:
+        // https://www.youtube.com/watch?v=1ZYbU82GVz4
+
+        navigator.clipboard
+            .readText()
+            .then((clipboardText) => {
+                if (!clipboardText) return false;
+                const sanitizedText = filterXSS(clipboardText);
+                const inputElement = Swal.getInput();
+                if (this.isVideoTypeSupported(sanitizedText) && inputElement) {
+                    inputElement.value = sanitizedText;
+                }
+                return false;
+            })
+            .catch(() => {
+                return false;
+            });
     }
 
     getVideoType(url) {
