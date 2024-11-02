@@ -255,6 +255,8 @@ class RoomClient {
         this.device = null;
 
         this.isMobileDevice = DetectRTC.isMobileDevice;
+        this.isMobileSafari = this.isMobileDevice && DetectRTC.browser.name === 'Safari';
+
         this.isScreenShareSupported =
             navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia ? true : false;
 
@@ -6063,7 +6065,7 @@ class RoomClient {
     openVideo(data) {
         let d, vb, e, video, pn;
         let peer_name = data.peer_name;
-        let video_url = data.video_url;
+        let video_url = data.video_url + (this.isMobileSafari ? '&enablejsapi=1&mute=1' : ''); // Safari need user interaction
         let is_youtube = data.is_youtube;
         let video_type = this.getVideoType(video_url);
         this.closeVideo();
@@ -6085,6 +6087,34 @@ class RoomClient {
             );
             video.setAttribute('frameborder', '0');
             video.setAttribute('allowfullscreen', true);
+
+            // Safari on Mobile needs user interaction to unmute video
+            if (this.isMobileSafari) {
+                Swal.fire({
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    background: swalBackground,
+                    position: 'top',
+                    // icon: 'info',
+                    imageUrl: image.videoShare,
+                    title: 'Unmute Video',
+                    text: 'Tap the button below to unmute and play the video with sound.',
+                    confirmButtonText: 'Unmute',
+                    didOpen: () => {
+                        // Focus on the button when the popup opens
+                        const unmuteButton = Swal.getConfirmButton();
+                        if (unmuteButton) unmuteButton.focus();
+                    },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        if (video && video.contentWindow) {
+                            // Unmute the video and play
+                            video.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+                            video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                        }
+                    }
+                });
+            }
         } else {
             video = document.createElement('video');
             video.type = video_type;
