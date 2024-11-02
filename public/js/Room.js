@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.16
+ * @version 1.6.17
  *
  */
 
@@ -3216,6 +3216,7 @@ function showButtons() {
         (rc.isMobileDevice && rc.isMySettingsOpen)
     )
         return;
+    toggleExtraButton.innerHTML = icons.down;
     bottomButtons.style.display = 'flex';
     isButtonsVisible = true;
 }
@@ -3223,6 +3224,7 @@ function showButtons() {
 function checkButtonsBar() {
     if (!isButtonsBarOver) {
         control.style.display = 'none';
+        toggleExtraButton.innerHTML = icons.up;
         bottomButtons.style.display = 'none';
         isButtonsVisible = false;
     }
@@ -3232,9 +3234,12 @@ function checkButtonsBar() {
 }
 
 function toggleExtraButtons() {
-    control.style.display === 'none' || control.style.display === ''
-        ? elemDisplay('control', true, 'flex')
-        : elemDisplay('control', false);
+    const isControlHidden = control.style.display === 'none' || control.style.display === '';
+    const displayValue = isControlHidden ? 'flex' : 'none';
+    const iconHtml = isControlHidden ? icons.up : icons.down;
+
+    elemDisplay('control', isControlHidden, displayValue);
+    toggleExtraButton.innerHTML = iconHtml;
     hideClassElements('videoMenuBar');
 }
 
@@ -4555,7 +4560,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.16',
+        title: 'WebRTC SFU v1.6.17',
         html: `
         <br />
         <div id="about">

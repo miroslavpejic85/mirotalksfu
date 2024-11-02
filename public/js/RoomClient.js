@@ -73,6 +73,8 @@ const icons = {
     recSync: '<i class="fa-solid fa-cloud-arrow-up"></i>',
     refresh: '<i class="fas fa-rotate"></i>',
     editor: '<i class="fas fa-pen-to-square"></i>',
+    up: '<i class="fas fa-chevron-up"></i>',
+    down: '<i class="fas fa-chevron-down"></i>',
 };
 
 const image = {
