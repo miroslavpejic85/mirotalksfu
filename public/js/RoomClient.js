@@ -342,7 +342,7 @@ class RoomClient {
 
         this.myVideoEl = null;
         this.myAudioEl = null;
-        this.showPeerInfo = false; // on peerName mouse hover
+        this.showPeerInfo = false; // on peerName mouse hover show additional info
 
         this.videoProducerId = null;
         this.screenProducerId = null;
@@ -7795,33 +7795,44 @@ class RoomClient {
 
     popupPeerInfo(id, peer_info) {
         if (this.showPeerInfo && !this.isMobileDevice) {
+            //console.log('POPUP_PEER_INFO', peer_info);
+
+            // Destructuring peer_info
+            const {
+                join_data_time,
+                peer_name,
+                peer_presenter,
+                is_desktop_device,
+                is_mobile_device,
+                is_tablet_device,
+                is_ipad_pro_device,
+                os_name,
+                os_version,
+                browser_name,
+                browser_version,
+            } = peer_info;
+
+            const emojiPeerInfo = [
+                { label: 'Join Time', value: join_data_time, emoji: '⏰' },
+                { label: 'Name', value: peer_name, emoji: '👤' },
+                { label: 'Presenter', value: peer_presenter ? 'Yes' : 'No', emoji: peer_presenter ? '⭐' : '🎤' },
+                { label: 'Desktop Device', value: is_desktop_device ? 'Yes' : 'No', emoji: '💻' },
+                { label: 'Mobile Device', value: is_mobile_device ? 'Yes' : 'No', emoji: '📱' },
+                { label: 'Tablet Device', value: is_tablet_device ? 'Yes' : 'No', emoji: '📲' },
+                { label: 'iPad Pro', value: is_ipad_pro_device ? 'Yes' : 'No', emoji: '📱' },
+                { label: 'OS', value: `${os_name} ${os_version}`, emoji: '🖥️' },
+                { label: 'Browser', value: `${browser_name} ${browser_version}`, emoji: '🌐' },
+            ];
+
+            // Format the peer info into a structured string
+            const peerInfoFormatted = emojiPeerInfo
+                .map((item) => `${item.emoji} <b>${item.label}:</b> ${item.value}`)
+                .join('<br/>');
+
+            // Apply the improved Tippy.js tooltip
             this.setTippy(
                 id,
-                '<pre>' +
-                    JSON.stringify(
-                        peer_info,
-                        [
-                            'join_data_time',
-                            'peer_id',
-                            'peer_name',
-                            'peer_audio',
-                            'peer_video',
-                            'peer_video_privacy',
-                            'peer_screen',
-                            'peer_hand',
-                            'is_desktop_device',
-                            'is_mobile_device',
-                            'is_tablet_device',
-                            'is_ipad_pro_device',
-                            'os_name',
-                            'os_version',
-                            'browser_name',
-                            'browser_version',
-                            //'user_agent',
-                        ],
-                        2,
-                    ) +
-                    '<pre/>',
+                `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;">${peerInfoFormatted}</div>`,
                 'top-start',
                 true,
             );
