@@ -2596,6 +2596,7 @@ class RoomClient {
         this.handleVB(d.id, vb.id);
         this.handleDD(d.id, peer_id, !remotePeer);
         this.popupPeerInfo(p.id, peer_info);
+        this.checkPeerInfoStatus(peer_info);
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
 
