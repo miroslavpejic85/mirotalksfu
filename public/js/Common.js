@@ -170,7 +170,7 @@ const lastRoom = document.getElementById('lastRoom');
 const lastRoomName = window.localStorage.lastRoom ? window.localStorage.lastRoom : '';
 if (lastRoomContainer && lastRoom && lastRoomName) {
     lastRoomContainer.style.display = 'inline-flex';
-    lastRoom.setAttribute('href', '/join/' + lastRoomName);
+    lastRoom.setAttribute('href', '/join/?room=' + lastRoomName);
     lastRoom.innerText = lastRoomName;
 }
 
