@@ -594,6 +594,10 @@ class RoomClient {
             if (room.thereIsPolls) {
                 this.socket.emit('updatePoll');
             }
+            // Host protected enabled in the server side
+            if (room.hostProtected) {
+                RoomURL = window.location.origin + '/join/?room=' + room_id;
+            }
         }
 
         // PARTICIPANTS

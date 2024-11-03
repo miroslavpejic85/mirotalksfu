@@ -65,6 +65,8 @@ module.exports = class Room {
 
         // Polls
         this.polls = [];
+
+        this.isHostProtected = config.host.protected;
     }
 
     // ####################################################
@@ -87,6 +89,7 @@ module.exports = class Room {
                 fromUrl: this.rtmp && this.rtmp.fromUrl,
                 fromStream: this.rtmp && this.rtmp.fromStream,
             },
+            hostProtected: this.isHostProtected,
             moderator: this._moderator,
             survey: this.survey,
             redirect: this.redirect,
