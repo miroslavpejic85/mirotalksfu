@@ -1801,12 +1801,12 @@ class RoomClient {
     // HELPERS
     // ####################################################
 
-    createButton = (id, className) => {
+    createButton(id, className) {
         const button = document.createElement('button');
         button.id = id;
         button.className = className;
         return button;
-    };
+    }
 
     // ####################################################
     // PRODUCER
@@ -2275,13 +2275,6 @@ class RoomClient {
                 eVc = document.createElement('div');
                 eVc.className = 'expand-video-content';
 
-                pv = document.createElement('input');
-                pv.id = remotePeerId + '___pVolume';
-                pv.type = 'range';
-                pv.min = 0;
-                pv.max = 100;
-                pv.value = 100;
-
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 mv = this.createButton(id + '__videoMirror', html.mirror);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
@@ -2326,6 +2319,13 @@ class RoomClient {
                 this.addCloseVBButton(peerNameHeader);
 
                 peerNameContainer.appendChild(peerNameSpan);
+
+                pv = document.createElement('input');
+                pv.id = remotePeerId + '___pVolume';
+                pv.type = 'range';
+                pv.min = 0;
+                pv.max = 100;
+                pv.value = 100;
 
                 BUTTONS.consumerVideo.audioVolumeInput && peerNameContainer.appendChild(pv);
                 peerNameHeader.appendChild(peerNameContainer);
@@ -3545,7 +3545,7 @@ class RoomClient {
                     rc.sound('open');
                     show(videoBar);
                     animateCSS(videoBar, 'fadeInDown');
-                    if (participantsCount > 1) videoPlayer.style.border = '0.1px solid #2a7aef';
+                    if (participantsCount > 1) videoPlayer.style.border = 'var(--videoBar-active)';
                 } else {
                     animateCSS(videoBar, 'fadeOutUp').then((msg) => {
                         hide(videoBar);

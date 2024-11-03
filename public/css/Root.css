@@ -57,6 +57,8 @@
     --videoObjFit: cover;
 
     --dd-color: #ffffff;
+
+    --videoBar-active: 0.1px solid rgba(102, 190, 255, 0.32);
 }
 
 * {
