@@ -2306,9 +2306,11 @@ class RoomClient {
             case mediaType.video:
             case mediaType.screen:
                 this.removeVideoOff(remotePeerId);
+
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
+
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
                 !remoteIsScreen && elem.setAttribute('name', remotePeerId);
@@ -2318,13 +2320,16 @@ class RoomClient {
                 elem.className = '';
                 elem.poster = image.poster;
                 elem.style.objectFit = remoteIsScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
+
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
                 vb.className = 'videoMenuBar hidden';
 
                 eDiv = document.createElement('div');
                 eDiv.className = 'expand-video';
+
                 eBtn = this.createButton(remotePeerId + '_videoExpandBtn', html.expand);
+
                 eVc = document.createElement('div');
                 eVc.className = 'expand-video-content';
 
@@ -2346,10 +2351,12 @@ class RoomClient {
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
                 i.className = html.userHand;
+
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
                 p.innerText = (remotePeerPresenter ? '⭐️ ' : '') + peer_name;
+
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', remotePeerId + '__pitchMeter');
@@ -2588,12 +2595,15 @@ class RoomClient {
         const { peer_id, peer_name, peer_audio, peer_presenter } = peer_info;
 
         this.removeVideoOff(peer_id);
+
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
+
         vb = document.createElement('div');
         vb.id = peer_id + '__vb';
         vb.className = 'videoMenuBar hidden';
+
         au = this.createButton(peer_id + '__audio', peer_audio ? html.audioOn : html.audioOff);
 
         if (remotePeer) {
@@ -2616,13 +2626,16 @@ class RoomClient {
         i = document.createElement('img');
         i.className = 'videoAvatarImage center'; // pulsate
         i.id = peer_id + '__img';
+
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
         p.innerText = (peer_presenter ? '⭐️ ' : '') + peer_name + (remotePeer ? '' : ' (me) ');
+
         h = document.createElement('i');
         h.id = peer_id + '__hand';
         h.className = html.userHand;
+
         pm = document.createElement('div');
         pb = document.createElement('div');
         pm.setAttribute('id', peer_id + '__pitchMeter');
@@ -2967,7 +2980,9 @@ class RoomClient {
             console.log('Set local audio enabled: ' + status);
             this.peer_info.peer_audio = status;
             const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
+            const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
             if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
+            if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
         }
     }
 
