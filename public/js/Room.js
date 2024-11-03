@@ -869,6 +869,7 @@ function getPeerInfo() {
         peer_token: peer_token,
         peer_presenter: isPresenter,
         peer_audio: isAudioAllowed,
+        peer_audio_volume: 100,
         peer_video: isVideoAllowed,
         peer_screen: isScreenAllowed,
         peer_recording: isRecording,

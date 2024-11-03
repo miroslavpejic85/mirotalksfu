@@ -12,6 +12,7 @@ module.exports = class Peer {
             peer_name,
             peer_presenter,
             peer_audio,
+            peer_audio_volume,
             peer_video,
             peer_video_privacy,
             peer_recording,
@@ -25,6 +26,7 @@ module.exports = class Peer {
         this.peer_presenter = peer_presenter;
         this.peer_audio = peer_audio;
         this.peer_video = peer_video;
+        this.peer_audio_volume = peer_audio_volume;
         this.peer_video_privacy = peer_video_privacy;
         this.peer_recording = peer_recording;
         this.peer_hand = peer_hand;
@@ -74,6 +76,10 @@ module.exports = class Peer {
             case 'recording':
                 this.peer_info.peer_recording = data.status;
                 this.peer_recording = data.status;
+                break;
+            case 'peerAudio':
+                this.peer_info.peer_audio_volume = data.volume;
+                this.peer_audio_volume = data.volume;
                 break;
             default:
                 break;

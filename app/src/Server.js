@@ -1788,15 +1788,22 @@ function startServer() {
 
             const room = getRoom(socket);
 
+            const peer = getPeer(socket);
+
             switch (data.type) {
                 case 'privacy':
-                    const peer = room.getPeer(socket.id);
                     peer.updatePeerInfo({ type: data.type, status: data.active });
                     break;
                 case 'ejectAll':
                     const { peer_name, peer_uuid } = data;
                     const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
                     if (!isPresenter) return;
+                    break;
+                case 'peerAudio':
+                    // Keep producer volume to update consumer on join room...
+                    if (data.audioProducerId) {
+                        peer.updatePeerInfo({ type: data.type, volume: data.volume * 100 });
+                    }
                     break;
                 default:
                     break;

@@ -604,17 +604,20 @@ class RoomClient {
         for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = peers.get(peer).peer_info;
             // console.log('07.1 ----> Remote Peer info', peer_info);
-            const canSetVideoOff = !isBroadcastingEnabled || (isBroadcastingEnabled && peer_info.peer_presenter);
 
-            if (!peer_info.peer_video && canSetVideoOff) {
-                console.log('Detected peer video off ' + peer_info.peer_name);
+            const { peer_id, peer_name, peer_presenter, peer_video, peer_recording } = peer_info;
+
+            const canSetVideoOff = !isBroadcastingEnabled || (isBroadcastingEnabled && peer_presenter);
+
+            if (!peer_video && canSetVideoOff) {
+                console.log('Detected peer video off ' + peer_name);
                 this.setVideoOff(peer_info, true);
             }
 
-            if (peer_info.peer_recording) {
+            if (peer_recording) {
                 this.handleRecordingAction({
-                    peer_id: peer_info.id,
-                    peer_name: peer_info.peer_name,
+                    peer_id: peer_id,
+                    peer_name: peer_name,
                     action: enums.recording.started,
                 });
             }
@@ -2281,8 +2284,23 @@ class RoomClient {
         const remotePeerId = peer_info.peer_id;
         const remoteIsScreen = type == mediaType.screen;
         const remotePeerAudio = peer_info.peer_audio;
+        const remotePeerAudioVolume = peer_info.peer_audio_volume;
         const remotePrivacyOn = peer_info.peer_video_privacy;
         const remotePeerPresenter = peer_info.peer_presenter;
+
+        // Helper function to handle audio volume setup
+        const setAudioVolume = (audioElementId, volumeElementId, volumeValue) => {
+            const volumeInput = this.getId(volumeElementId);
+            const audioPlayer = this.getId(audioElementId);
+            const volume = volumeValue / 100;
+
+            if (volumeInput && audioPlayer) {
+                console.log('Setting audio volume:', volumeValue);
+                volumeInput.value = volumeValue;
+                volumeInput.disabled = volumeValue < 100;
+                this.setAudioVolume(audioPlayer, volume);
+            }
+        };
 
         switch (type) {
             case mediaType.video:
@@ -2455,7 +2473,15 @@ class RoomClient {
                     this.setTippy(ko.id, 'Eject', 'bottom');
                 }
 
+                // Use helper function to set audio volume
+                setAudioVolume(
+                    this.audioConsumers.get(remotePeerId + '___pVolume'),
+                    remotePeerId + '___pVolume',
+                    remotePeerAudioVolume,
+                );
+
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
+
                 handleAspectRatio();
                 this.sound('joined');
                 break;
@@ -2466,14 +2492,15 @@ class RoomClient {
                 elem.audio = 1.0;
                 this.remoteAudioEl.appendChild(elem);
                 await this.attachMediaStream(elem, stream, type, 'Consumer');
-                let audioConsumerId = remotePeerId + '___pVolume';
-                this.audioConsumers.set(audioConsumerId, id);
-                let inputPv = this.getId(audioConsumerId);
 
-                if (inputPv) {
-                    this.handleCV(id + '___' + audioConsumerId);
-                    this.setPeerAudio(remotePeerId, remotePeerAudio);
-                }
+                // Store audio consumer and set volume
+                const audioConsumerId = remotePeerId + '___pVolume';
+                this.audioConsumers.set(audioConsumerId, id);
+
+                // Use helper function to set audio volume
+                setAudioVolume(id, audioConsumerId, remotePeerAudioVolume);
+
+                this.setPeerAudio(remotePeerId, remotePeerAudio);
 
                 if (sinkId && speakerSelect.value) {
                     this.changeAudioDestination(elem);
@@ -2937,7 +2964,7 @@ class RoomClient {
 
     setIsAudio(peer_id, status) {
         if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
-            console.log('Set audio enabled: ' + status);
+            console.log('Set local audio enabled: ' + status);
             this.peer_info.peer_audio = status;
             const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
             if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
@@ -6900,6 +6927,9 @@ class RoomClient {
             const updateVolume = () => {
                 const volume = inputElement.value / 100;
                 this.setAudioVolume(audioPlayer, volume);
+
+                // Update producer audio volume
+                if (!isConsumer) this.peer_info.peer_audio_volume = inputElement.value;
 
                 // Clear any existing timeout to prevent sending too frequently
                 if (volumeUpdateTimeout) {
