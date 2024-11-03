@@ -1404,6 +1404,9 @@ class RoomClient {
                 throw new Error('Producer not found!');
             }
 
+            console.log('PRODUCER MEDIA TYPE ----> ' + type);
+            console.log('PRODUCER', producer);
+
             this.producers.set(producer.id, producer);
             this.producerLabel.set(type, producer.id);
 
@@ -1812,6 +1815,23 @@ class RoomClient {
         return button;
     }
 
+    getConsumerIdByProducerId(producerId) {
+        for (let [consumerId, consumer] of this.consumers.entries()) {
+            if (consumer._producerId === producerId) {
+                return consumerId;
+            }
+        }
+        return null;
+    }
+
+    getProducerIdByConsumerId(consumerId) {
+        const consumer = this.consumers.get(consumerId);
+        if (consumer) {
+            return consumer._producerId;
+        }
+        return null;
+    }
+
     // ####################################################
     // PRODUCER
     // ####################################################
@@ -1853,7 +1873,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn, mv;
+        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn, pv, mv;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -1902,6 +1922,15 @@ class RoomClient {
                 pb.className = 'bar';
                 pb.style.height = '1%';
                 pm.appendChild(pb);
+
+                pv = document.createElement('input');
+                pv.id = this.peer_id + '___pVolume';
+                pv.type = 'range';
+                pv.min = 0;
+                pv.max = 100;
+                pv.value = 100;
+
+                BUTTONS.producerVideo.audioVolumeInput && vb.appendChild(pv);
                 BUTTONS.producerVideo.muteAudioButton && vb.appendChild(au);
                 BUTTONS.producerVideo.videoPrivacyButton && !isScreen && vb.appendChild(vp);
                 BUTTONS.producerVideo.snapShotButton && vb.appendChild(ts);
@@ -1931,6 +1960,7 @@ class RoomClient {
                 this.handleMV(elem.id, mv.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.handleZV(elem.id, d.id, this.peer_id);
+                this.handlePV(id + '___' + pv.id);
 
                 if (!isScreen) this.handleVP(elem.id, vp.id);
 
@@ -1962,6 +1992,7 @@ class RoomClient {
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
                 await this.attachMediaStream(elem, stream, type, 'Producer');
+                this.handlePV(elem.id + '___' + this.peer_id + '___pVolume');
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
             default:
@@ -2380,7 +2411,7 @@ class RoomClient {
                 this.handleSV(sv.id);
                 BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
                 BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
-                this.handlePV(id + '___' + pv.id);
+                this.handleCV(id + '___' + pv.id);
                 this.handleGL(gl.id);
                 this.handleBAN(ban.id);
                 this.handleKO(ko.id);
@@ -2440,7 +2471,7 @@ class RoomClient {
                 let inputPv = this.getId(audioConsumerId);
 
                 if (inputPv) {
-                    this.handlePV(id + '___' + audioConsumerId);
+                    this.handleCV(id + '___' + audioConsumerId);
                     this.setPeerAudio(remotePeerId, remotePeerAudio);
                 }
 
@@ -2539,12 +2570,14 @@ class RoomClient {
         au = this.createButton(peer_id + '__audio', peer_audio ? html.audioOn : html.audioOff);
 
         if (remotePeer) {
+            //
             pv = document.createElement('input');
             pv.id = peer_id + '___pVolume';
             pv.type = 'range';
             pv.min = 0;
             pv.max = 100;
             pv.value = 100;
+
             sf = this.createButton('remotePeer___' + peer_id + '___sendFile', html.sendFile);
             sm = this.createButton('remotePeer___' + peer_id + '___sendMsg', html.sendMsg);
             sv = this.createButton('remotePeer___' + peer_id + '___sendVideo', html.sendVideo);
@@ -2579,8 +2612,9 @@ class RoomClient {
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
-            BUTTONS.videoOff.audioVolumeInput && !this.isMobileDevice && vb.appendChild(pv);
+            BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         }
+
         vb.appendChild(au);
         d.appendChild(i);
         d.appendChild(p);
@@ -2592,7 +2626,7 @@ class RoomClient {
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
 
         if (remotePeer) {
-            this.handlePV('remotePeer___' + pv.id);
+            this.handleCV(peer_id + '___' + pv.id);
             this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSV(sv.id);
@@ -6840,44 +6874,129 @@ class RoomClient {
     }
 
     // ####################################################
-    // HANDLE PEER VOLUME
-    // ###################################################
+    // HANDLE PEERS AUDIO VOLUME
+    // ####################################################
+
+    handleCV(uid) {
+        this.handleVolumeControl(uid, true);
+    }
 
     handlePV(uid) {
+        this.handleVolumeControl(uid, false);
+    }
+
+    handleVolumeControl(uid, isConsumer = true) {
         const words = uid.split('___');
-        let peer_id = words[1] + '___pVolume';
-        let audioConsumerId = this.audioConsumers.get(peer_id);
-        let audioConsumerPlayer = this.getId(audioConsumerId);
-        let inputPv = this.getId(peer_id);
-        if (inputPv && audioConsumerPlayer) {
-            inputPv.style.display = 'inline';
-            inputPv.value = 100;
+        const peer_id = `${words[1]}___pVolume`;
+        const audioPlayer = this.getId(isConsumer ? this.audioConsumers.get(peer_id) : words[0]);
+        const inputElement = this.getId(peer_id);
+
+        if (inputElement && audioPlayer) {
+            inputElement.style.display = 'inline';
+            inputElement.value = 100;
+
+            let volumeUpdateTimeout;
+
             const updateVolume = () => {
-                const volume = inputPv.value / 100;
-                this.setAudioVolume(audioConsumerPlayer, volume);
+                const volume = inputElement.value / 100;
+                this.setAudioVolume(audioPlayer, volume);
+
+                // Clear any existing timeout to prevent sending too frequently
+                if (volumeUpdateTimeout) {
+                    clearTimeout(volumeUpdateTimeout);
+                }
+
+                // Set a timeout to send the update after 0.5 second
+                volumeUpdateTimeout = setTimeout(() => {
+                    // Prepare the command to update peer volume
+                    const cmd = {
+                        type: 'peerAudio',
+                        peer_name: this.peer_name,
+                        [isConsumer ? 'audioConsumerId' : 'audioProducerId']: isConsumer
+                            ? this.audioConsumers.get(peer_id)
+                            : this.audioProducerId,
+                        peer_id: peer_id,
+                        volume: volume,
+                        broadcast: true,
+                    };
+                    this.emitCmd(cmd);
+                }, 500); // 0.5 second delay
             };
-            inputPv.addEventListener('input', updateVolume);
-            inputPv.addEventListener('change', updateVolume);
+
+            this.addVolumeEventListeners(inputElement, updateVolume);
+        }
+    }
+
+    setAudioVolume(audioPlayer, volume) {
+        if (audioPlayer) {
             if (this.isMobileDevice) {
-                inputPv.addEventListener('touchstart', updateVolume);
-                inputPv.addEventListener('touchmove', updateVolume);
+                audioPlayer.muted = volume === 0;
+                if (!audioPlayer.muted) {
+                    // Adjust playback rate as volume on mobile devices
+                    audioPlayer.playbackRate = Math.max(0.1, volume);
+                }
+            } else {
+                // Set volume directly on desktop devices
+                audioPlayer.volume = volume;
             }
         }
     }
 
-    setAudioVolume(audioConsumerPlayer, volume) {
-        if (audioConsumerPlayer) {
-            if (this.isMobileDevice) {
-                // On mobile, we'll use a different approach
-                audioConsumerPlayer.muted = volume === 0;
-                if (!audioConsumerPlayer.muted) {
-                    // We can only set volume to 1 on mobile, so we'll adjust playback rate instead
-                    audioConsumerPlayer.playbackRate = Math.max(0.1, volume);
-                }
-            } else {
-                // On desktop, we can directly set the volume
-                audioConsumerPlayer.volume = volume;
-            }
+    handlePeerAudio(cmd) {
+        console.log('handlePeerAudio', { cmd });
+
+        const { peer_id, audioProducerId, audioConsumerId, volume } = cmd;
+
+        const inputPV = this.getId(peer_id);
+
+        if (!inputPV) return;
+
+        inputPV.value = volume * 100;
+
+        if (audioProducerId) {
+            this.handleConsumerAudio(audioProducerId, volume);
+            /* 
+                If the producer has changed the volume from the default value of 100,
+                disable the volume input control on the consumer side to prevent further adjustments.
+                Otherwise, keep the input enabled if the volume is still at 100.
+            */
+            inputPV.disabled = inputPV.value < 100 ? true : false;
+        }
+
+        if (audioConsumerId) this.handleProducerAudio(audioConsumerId, volume);
+    }
+
+    handleConsumerAudio(audioProducerId, volume) {
+        const consumerAudioId = this.getConsumerIdByProducerId(audioProducerId);
+        if (!consumerAudioId) return;
+
+        const consumerAudioPlayer = this.getId(consumerAudioId);
+        if (!consumerAudioPlayer) return;
+
+        this.setAudioVolume(consumerAudioPlayer, volume);
+
+        console.log('handleConsumerPeerAudio', { consumerAudioId, consumerAudioPlayer });
+    }
+
+    handleProducerAudio(audioConsumerId, volume) {
+        const producerAudioId = this.getProducerIdByConsumerId(audioConsumerId);
+        if (!producerAudioId) return;
+
+        const producerAudioPlayer = this.getId(producerAudioId);
+        if (!producerAudioPlayer) return;
+
+        this.setAudioVolume(producerAudioPlayer, volume);
+
+        console.log('handleProducerPeerAudio', { producerAudioId, producerAudioPlayer });
+    }
+
+    addVolumeEventListeners(inputElement, updateVolumeCallback) {
+        inputElement.addEventListener('input', updateVolumeCallback);
+        inputElement.addEventListener('change', updateVolumeCallback);
+
+        if (this.isMobileDevice) {
+            inputElement.addEventListener('touchstart', updateVolumeCallback);
+            inputElement.addEventListener('touchmove', updateVolumeCallback);
         }
     }
 
@@ -7059,6 +7178,9 @@ class RoomClient {
                 break;
             case 'ejectAll':
                 this.exit();
+                break;
+            case 'peerAudio':
+                this.handlePeerAudio(cmd);
                 break;
             default:
                 break;

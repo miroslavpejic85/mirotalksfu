@@ -454,6 +454,7 @@ module.exports = {
                 snapShotButton: true,
                 muteAudioButton: true,
                 videoPrivacyButton: true,
+                audioVolumeInput: true,
             },
             consumerVideo: {
                 videoPictureInPicture: true,
@@ -466,7 +467,7 @@ module.exports = {
                 sendVideoButton: true,
                 muteVideoButton: true,
                 muteAudioButton: true,
-                audioVolumeInput: true, // Disabled for mobile
+                audioVolumeInput: true,
                 geolocationButton: true, // Presenter
                 banButton: true, // presenter
                 ejectButton: true, // presenter
@@ -476,7 +477,7 @@ module.exports = {
                 sendFileButton: true,
                 sendVideoButton: true,
                 muteAudioButton: true,
-                audioVolumeInput: true, // Disabled for mobile
+                audioVolumeInput: true,
                 geolocationButton: true, // Presenter
                 banButton: true, // presenter
                 ejectButton: true, // presenter

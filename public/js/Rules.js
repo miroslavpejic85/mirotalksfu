@@ -53,6 +53,7 @@ let BUTTONS = {
         snapShotButton: true,
         muteAudioButton: true,
         videoPrivacyButton: true,
+        audioVolumeInput: true,
     },
     consumerVideo: {
         videoPictureInPicture: true,
@@ -65,7 +66,7 @@ let BUTTONS = {
         sendVideoButton: true,
         muteVideoButton: true,
         muteAudioButton: true,
-        audioVolumeInput: true, // Disabled for mobile
+        audioVolumeInput: true,
         geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
@@ -75,7 +76,7 @@ let BUTTONS = {
         sendFileButton: true,
         sendVideoButton: true,
         muteAudioButton: true,
-        audioVolumeInput: true, // Disabled for mobile
+        audioVolumeInput: true,
         geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
