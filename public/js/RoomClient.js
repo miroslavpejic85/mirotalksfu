@@ -2495,6 +2495,7 @@ class RoomClient {
                     this.audioConsumers.get(remotePeerId + '___pVolume'),
                     remotePeerId + '___pVolume',
                     remotePeerAudioVolume,
+                    true,
                 );
 
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
@@ -2516,7 +2517,7 @@ class RoomClient {
                 this.audioConsumers.set(audioConsumerId, id);
 
                 // Use helper function to set audio volume
-                this.setAV(id, audioConsumerId, remotePeerAudioVolume);
+                this.setAV(id, audioConsumerId, remotePeerAudioVolume, true);
                 this.handleCV(id + '___' + audioConsumerId);
 
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
@@ -6941,7 +6942,7 @@ class RoomClient {
         this.handleVolumeControl(uid, false); // Producer
     }
 
-    setAV(audioElementId, volumeElementId, volumeValue) {
+    setAV(audioElementId, volumeElementId, volumeValue, isConsumer = false) {
         const volumeInput = this.getId(volumeElementId);
         const audioPlayer = this.getId(audioElementId);
         const volume = volumeValue / 100;
@@ -6949,9 +6950,20 @@ class RoomClient {
         if (volumeInput && audioPlayer) {
             console.log('Setting audio volume:', volumeValue);
             volumeInput.value = volumeValue;
-            volumeInput.disabled = volumeValue < 100;
+            if (isConsumer) {
+                this.toggleVolumeInput(volumeInput, volumeValue);
+            }
             this.setAudioVolume(audioPlayer, volume);
         }
+    }
+
+    toggleVolumeInput(volumeInput, volumeValue) {
+        /* 
+            If the producer has changed the volume from the default value of 100,
+            disable the volume input control on the consumer side to prevent further adjustments.
+            Otherwise, keep the input enabled if the volume is still at 100.
+        */
+        volumeInput.disabled = volumeValue < 100;
     }
 
     handleVolumeControl(uid, isConsumer = true) {
@@ -7027,12 +7039,7 @@ class RoomClient {
 
         if (audioProducerId) {
             this.handleConsumerAudio(audioProducerId, volume);
-            /* 
-                If the producer has changed the volume from the default value of 100,
-                disable the volume input control on the consumer side to prevent further adjustments.
-                Otherwise, keep the input enabled if the volume is still at 100.
-            */
-            volumeInput.disabled = volumeInput.value < 100;
+            this.toggleVolumeInput(volumeInput, volumeInput.value);
         }
 
         if (audioConsumerId) this.handleProducerAudio(audioConsumerId, volume);
