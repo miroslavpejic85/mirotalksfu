@@ -353,6 +353,7 @@ class RoomClient {
         this.audioProducerId = null;
         this.audioConsumers = new Map();
 
+        this.peers = new Map();
         this.consumers = new Map();
         this.producers = new Map();
         this.producerLabel = new Map();
@@ -445,11 +446,11 @@ class RoomClient {
                     console.log('00-WARNING ----> You are Banned from the Room!');
                     return this.isBanned();
                 }
-                const peers = new Map(JSON.parse(room.peers));
+                this.peers = new Map(JSON.parse(room.peers));
                 if (!peer_info.peer_token) {
                     // hack...
-                    for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-                        let peer_info = peers.get(peer).peer_info;
+                    for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
+                        let peer_info = this.peers.get(peer).peer_info;
                         if (peer_info.peer_name == this.peer_name) {
                             console.log('00-WARNING ----> Username already in use');
                             return this.userNameAlreadyInRoom();
@@ -488,11 +489,10 @@ class RoomClient {
         survey = room.survey;
         console.log('07.0 ----> Room Leave Redirect', room.redirect);
         redirect = room.redirect;
-        let peers = new Map(JSON.parse(room.peers));
-        participantsCount = peers.size;
+        participantsCount = this.peers.size;
         // ME
-        for (let peer of Array.from(peers.keys()).filter((id) => id == this.peer_id)) {
-            let my_peer_info = peers.get(peer).peer_info;
+        for (let peer of Array.from(this.peers.keys()).filter((id) => id == this.peer_id)) {
+            let my_peer_info = this.peers.get(peer).peer_info;
             console.log('07.1 ----> My Peer info', my_peer_info);
             isPresenter = window.localStorage.isReconnected === 'true' ? isPresenter : my_peer_info.peer_presenter;
             this.peer_info.peer_presenter = isPresenter;
@@ -601,8 +601,8 @@ class RoomClient {
         }
 
         // PARTICIPANTS
-        for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-            let peer_info = peers.get(peer).peer_info;
+        for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
+            let peer_info = this.peers.get(peer).peer_info;
             // console.log('07.1 ----> Remote Peer info', peer_info);
 
             const { peer_id, peer_name, peer_presenter, peer_video, peer_recording } = peer_info;
@@ -1882,11 +1882,14 @@ class RoomClient {
             case mediaType.screen:
                 let isScreen = type === mediaType.screen;
                 this.removeVideoOff(this.peer_id);
+
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
+
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
+                elem.setAttribute('volume', this.peer_id + '___pVolume');
                 !isScreen && elem.setAttribute('name', this.peer_id);
                 elem.setAttribute('playsinline', true);
                 elem.controls = isVideoControlsOn;
@@ -1896,9 +1899,11 @@ class RoomClient {
                 elem.poster = image.poster;
                 elem.style.objectFit = isScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
                 elem.className = this.isMobileDevice || isScreen ? '' : 'mirror';
+
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
                 vb.className = 'videoMenuBar hidden';
+
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
@@ -1910,13 +1915,16 @@ class RoomClient {
                     this.peer_info.peer_audio ? html.audioOn : html.audioOff,
                 );
                 au.style.cursor = 'default';
+
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
                 p.innerText = (isPresenter ? '⭐️ ' : '') + this.peer_name + ' (me)';
+
                 i = document.createElement('i');
                 i.id = this.peer_id + '__hand';
                 i.className = html.userHand;
+
                 pm = document.createElement('div');
                 pb = document.createElement('div');
                 pm.setAttribute('id', this.peer_id + '_pitchMeter');
@@ -1965,6 +1973,13 @@ class RoomClient {
                 this.handleZV(elem.id, d.id, this.peer_id);
                 this.handlePV(id + '___' + pv.id);
 
+                // Use helper function to set audio volume
+                this.setAV(
+                    this.audioConsumers.get(this.peer_id + '___pVolume'),
+                    this.peer_id + '___pVolume',
+                    this.peer_info.peer_audio_volume,
+                );
+
                 if (!isScreen) this.handleVP(elem.id, vp.id);
 
                 this.popupPeerInfo(p.id, this.peer_info);
@@ -1987,7 +2002,8 @@ class RoomClient {
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
-                elem.id = id + '__localAudio';
+                elem.setAttribute('id', id);
+                elem.setAttribute('volume', this.peer_id + '___pVolume');
                 elem.controls = false;
                 elem.autoplay = true;
                 elem.muted = true;
@@ -1995,7 +2011,14 @@ class RoomClient {
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
                 await this.attachMediaStream(elem, stream, type, 'Producer');
-                this.handlePV(elem.id + '___' + this.peer_id + '___pVolume');
+
+                const audioConsumerId = this.peer_id + '___pVolume';
+                this.audioConsumers.set(audioConsumerId, elem.id);
+
+                // Use helper function to set audio volume
+                this.setAV(elem.id, audioConsumerId, this.peer_info.peer_audio_volume);
+                this.handlePV(elem.id + '___' + audioConsumerId);
+
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
             default:
@@ -2114,7 +2137,7 @@ class RoomClient {
         }
 
         if (type === mediaType.audio) {
-            const au = this.getId(producer_id + '__localAudio');
+            const au = this.getName(producer_id + '__localAudio');
             au.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -2288,20 +2311,6 @@ class RoomClient {
         const remotePrivacyOn = peer_info.peer_video_privacy;
         const remotePeerPresenter = peer_info.peer_presenter;
 
-        // Helper function to handle audio volume setup
-        const setAudioVolume = (audioElementId, volumeElementId, volumeValue) => {
-            const volumeInput = this.getId(volumeElementId);
-            const audioPlayer = this.getId(audioElementId);
-            const volume = volumeValue / 100;
-
-            if (volumeInput && audioPlayer) {
-                console.log('Setting audio volume:', volumeValue);
-                volumeInput.value = volumeValue;
-                volumeInput.disabled = volumeValue < 100;
-                this.setAudioVolume(audioPlayer, volume);
-            }
-        };
-
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -2313,6 +2322,7 @@ class RoomClient {
 
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
+                elem.setAttribute('volumeBar', remotePeerId + '___pVolume');
                 !remoteIsScreen && elem.setAttribute('name', remotePeerId);
                 elem.setAttribute('playsinline', true);
                 elem.controls = isVideoControlsOn;
@@ -2481,7 +2491,7 @@ class RoomClient {
                 }
 
                 // Use helper function to set audio volume
-                setAudioVolume(
+                this.setAV(
                     this.audioConsumers.get(remotePeerId + '___pVolume'),
                     remotePeerId + '___pVolume',
                     remotePeerAudioVolume,
@@ -2494,7 +2504,8 @@ class RoomClient {
                 break;
             case mediaType.audio:
                 elem = document.createElement('audio');
-                elem.id = id;
+                elem.setAttribute('id', id);
+                elem.setAttribute('volumeBar', remotePeerId + '___pVolume');
                 elem.autoplay = true;
                 elem.audio = 1.0;
                 this.remoteAudioEl.appendChild(elem);
@@ -2505,7 +2516,8 @@ class RoomClient {
                 this.audioConsumers.set(audioConsumerId, id);
 
                 // Use helper function to set audio volume
-                setAudioVolume(id, audioConsumerId, remotePeerAudioVolume);
+                this.setAV(id, audioConsumerId, remotePeerAudioVolume);
+                this.handleCV(id + '___' + audioConsumerId);
 
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
 
@@ -2666,7 +2678,7 @@ class RoomClient {
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
 
         if (remotePeer) {
-            this.handleCV(peer_id + '___' + pv.id);
+            this.handleCV('remotePeer___' + pv.id);
             this.handleSM(sm.id);
             this.handleSF(sf.id);
             this.handleSV(sv.id);
@@ -6920,18 +6932,31 @@ class RoomClient {
     // ####################################################
 
     handleCV(uid) {
-        this.handleVolumeControl(uid, true);
+        this.handleVolumeControl(uid, true); // Consumer
     }
 
     handlePV(uid) {
-        this.handleVolumeControl(uid, false);
+        this.handleVolumeControl(uid, false); // Producer
+    }
+
+    setAV(audioElementId, volumeElementId, volumeValue) {
+        const volumeInput = this.getId(volumeElementId);
+        const audioPlayer = this.getId(audioElementId);
+        const volume = volumeValue / 100;
+
+        if (volumeInput && audioPlayer) {
+            console.log('Setting audio volume:', volumeValue);
+            volumeInput.value = volumeValue;
+            volumeInput.disabled = volumeValue < 100;
+            this.setAudioVolume(audioPlayer, volume);
+        }
     }
 
     handleVolumeControl(uid, isConsumer = true) {
         const words = uid.split('___');
-        const peer_id = `${words[1]}___pVolume`;
-        const audioPlayer = this.getId(isConsumer ? this.audioConsumers.get(peer_id) : words[0]);
-        const inputElement = this.getId(peer_id);
+        const volumeInputId = `${words[1]}___pVolume`;
+        const audioPlayer = this.getId(isConsumer ? this.audioConsumers.get(volumeInputId) : words[0]);
+        const inputElement = this.getId(volumeInputId);
 
         if (inputElement && audioPlayer) {
             inputElement.style.display = 'inline';
@@ -6958,9 +6983,9 @@ class RoomClient {
                         type: 'peerAudio',
                         peer_name: this.peer_name,
                         [isConsumer ? 'audioConsumerId' : 'audioProducerId']: isConsumer
-                            ? this.audioConsumers.get(peer_id)
+                            ? this.audioConsumers.get(volumeInputId)
                             : this.audioProducerId,
-                        peer_id: peer_id,
+                        volumeInputId: volumeInputId,
                         volume: volume,
                         broadcast: true,
                     };
@@ -6990,13 +7015,13 @@ class RoomClient {
     handlePeerAudio(cmd) {
         console.log('handlePeerAudio', { cmd });
 
-        const { peer_id, audioProducerId, audioConsumerId, volume } = cmd;
+        const { volumeInputId, audioProducerId, audioConsumerId, volume } = cmd;
 
-        const inputPV = this.getId(peer_id);
+        const volumeInput = this.getId(volumeInputId);
 
-        if (!inputPV) return;
+        if (!volumeInput) return;
 
-        inputPV.value = volume * 100;
+        volumeInput.value = volume * 100;
 
         if (audioProducerId) {
             this.handleConsumerAudio(audioProducerId, volume);
@@ -7005,7 +7030,7 @@ class RoomClient {
                 disable the volume input control on the consumer side to prevent further adjustments.
                 Otherwise, keep the input enabled if the volume is still at 100.
             */
-            inputPV.disabled = inputPV.value < 100 ? true : false;
+            volumeInput.disabled = volumeInput.value < 100;
         }
 
         if (audioConsumerId) this.handleProducerAudio(audioConsumerId, volume);
