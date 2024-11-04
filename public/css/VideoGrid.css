@@ -190,20 +190,22 @@
     transition: all 0.3s ease-in-out;
 }
 
-.expand-video {
-    position: fixed;
-    left: 10px;
+.expand-video .fa-bars {
+    color: #66beff !important;
 }
 
 .expand-video .dropdown-button {
     cursor: pointer;
+    position: relative;
 }
 
 .expand-video-content {
     z-index: 1;
     display: none;
     position: fixed;
-    min-width: 50%;
+    right: 10px;
+    width: calc(100% - 20px);
+    max-width: 500px;
     padding: 20px;
     border-radius: 5px;
     background: var(--body-bg);
