@@ -2618,15 +2618,14 @@ class RoomClient {
 
         au = this.createButton(peer_id + '__audio', peer_audio ? html.audioOn : html.audioOff);
 
-        if (remotePeer) {
-            //
-            pv = document.createElement('input');
-            pv.id = peer_id + '___pVolume';
-            pv.type = 'range';
-            pv.min = 0;
-            pv.max = 100;
-            pv.value = 100;
+        pv = document.createElement('input');
+        pv.id = peer_id + '___pVolume';
+        pv.type = 'range';
+        pv.min = 0;
+        pv.max = 100;
+        pv.value = 100;
 
+        if (remotePeer) {
             sf = this.createButton('remotePeer___' + peer_id + '___sendFile', html.sendFile);
             sm = this.createButton('remotePeer___' + peer_id + '___sendMsg', html.sendMsg);
             sv = this.createButton('remotePeer___' + peer_id + '___sendVideo', html.sendVideo);
@@ -2664,8 +2663,8 @@ class RoomClient {
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
-            BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         }
+        BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
 
         vb.appendChild(au);
         d.appendChild(i);
@@ -2673,6 +2672,7 @@ class RoomClient {
         d.appendChild(h);
         d.appendChild(pm);
         //d.appendChild(vb);
+
         document.body.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
@@ -2685,6 +2685,8 @@ class RoomClient {
             this.handleGL(gl.id);
             this.handleBAN(ban.id);
             this.handleKO(ko.id);
+        } else {
+            this.handlePV(this.audioConsumers.get(pv.id) + '___' + pv.id);
         }
 
         this.handleVB(d.id, vb.id);
