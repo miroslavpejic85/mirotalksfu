@@ -3005,7 +3005,7 @@ class RoomClient {
         if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
             this.peer_info.peer_video = status;
             if (!this.peer_info.peer_video) {
-                console.log('Set video enabled: ' + status);
+                console.log('Set local video enabled: ' + status);
                 this.setVideoOff(this.peer_info, false);
                 this.sendVideoOff();
             }
@@ -3016,7 +3016,7 @@ class RoomClient {
         if (!isBroadcastingEnabled || (isBroadcastingEnabled && isPresenter)) {
             this.peer_info.peer_screen = status;
             if (!this.peer_info.peer_screen && !this.peer_info.peer_video) {
-                console.log('Set screen enabled: ' + status);
+                console.log('Set local screen enabled: ' + status);
                 this.setVideoOff(this.peer_info, false);
                 this.sendVideoOff();
             }

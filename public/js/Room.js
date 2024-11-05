@@ -386,11 +386,11 @@ function refreshMainButtonsToolTipPlacement() {
 
         // Control buttons
         setTippy('shareButton', 'Share room', placement);
+        setTippy('hideMeButton', 'Toggle hide self view', placement);
         setTippy('startRecButton', 'Start recording', placement);
         setTippy('stopRecButton', 'Stop recording', placement);
         setTippy('fullScreenButton', 'Toggle full screen', placement);
         setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
-        setTippy('chatButton', 'Toggle the chat', placement);
         setTippy('pollButton', 'Toggle the poll', placement);
         setTippy('editorButton', 'Toggle the editor', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
@@ -407,11 +407,11 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('startVideoButton', 'Start the video', bPlacement);
         setTippy('stopVideoButton', 'Stop the video', bPlacement);
         setTippy('swapCameraButton', 'Swap the camera', bPlacement);
-        setTippy('hideMeButton', 'Toggle hide self view', bPlacement);
         setTippy('startScreenButton', 'Start screen share', bPlacement);
         setTippy('stopScreenButton', 'Stop screen share', bPlacement);
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
+        setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
 }
