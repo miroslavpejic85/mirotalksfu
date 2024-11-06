@@ -1973,7 +1973,6 @@ class RoomClient {
                 this.handleZV(elem.id, d.id, this.peer_id);
                 this.handlePV(id + '___' + pv.id);
 
-                // Use helper function to set audio volume
                 this.setAV(
                     this.audioConsumers.get(this.peer_id + '___pVolume'),
                     this.peer_id + '___pVolume',
@@ -2016,7 +2015,6 @@ class RoomClient {
                 const audioConsumerId = this.peer_id + '___pVolume';
                 this.audioConsumers.set(audioConsumerId, elem.id);
 
-                // Use helper function to set audio volume
                 this.setAV(elem.id, audioConsumerId, this.peer_info.peer_audio_volume);
                 this.handlePV(elem.id + '___' + audioConsumerId);
 
