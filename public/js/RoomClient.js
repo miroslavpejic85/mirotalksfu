@@ -2003,6 +2003,7 @@ class RoomClient {
             case mediaType.audio:
                 elem = document.createElement('audio');
                 elem.setAttribute('id', id);
+                elem.setAttribute('name', id + '__localAudio');
                 elem.setAttribute('volume', this.peer_id + '___pVolume');
                 elem.controls = false;
                 elem.autoplay = true;
@@ -2137,7 +2138,7 @@ class RoomClient {
         }
 
         if (type === mediaType.audio) {
-            const au = this.getName(producer_id + '__localAudio');
+            const au = this.getName(producer_id + '__localAudio')[0];
             au.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -2985,7 +2986,7 @@ class RoomClient {
     setPeerAudio(peer_id, status) {
         console.log('Set peer audio enabled: ' + status);
         const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
-        const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
+        const audioVolume = this.getPeerAudioVolumeBar(peer_id); // consumers
         if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
         if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
     }
@@ -2995,7 +2996,7 @@ class RoomClient {
             console.log('Set local audio enabled: ' + status);
             this.peer_info.peer_audio = status;
             const audioStatus = this.getPeerAudioBtn(peer_id); // producer, consumers
-            const audioVolume = this.getPeerAudioVolumeBtn(peer_id); // consumers
+            const audioVolume = this.getPeerAudioVolumeBar(peer_id); // consumers
             if (audioStatus) audioStatus.className = status ? html.audioOn : html.audioOff;
             if (audioVolume) status ? show(audioVolume) : hide(audioVolume);
         }
@@ -3076,7 +3077,7 @@ class RoomClient {
         return this.getId(peer_id + '__audio');
     }
 
-    getPeerAudioVolumeBtn(peer_id) {
+    getPeerAudioVolumeBar(peer_id) {
         return this.getId(peer_id + '___pVolume');
     }
 
@@ -6973,7 +6974,7 @@ class RoomClient {
         const inputElement = this.getId(volumeInputId);
 
         if (inputElement && audioPlayer) {
-            inputElement.style.display = 'inline';
+            show(inputElement);
             inputElement.value = 100;
 
             let volumeUpdateTimeout;
