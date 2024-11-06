@@ -2138,7 +2138,7 @@ class RoomClient {
         }
 
         if (type === mediaType.audio) {
-            const au = this.getName(producer_id + '__localAudio')[0];
+            const au = this.getName(producer_id + '__localAudio');
             au.srcObject.getTracks().forEach(function (track) {
                 track.stop();
             });
@@ -3057,7 +3057,7 @@ class RoomClient {
     }
 
     getName(name) {
-        return document.getElementsByName(name);
+        return document.getElementsByName(name)[0];
     }
 
     getEcN(cn) {
@@ -3798,7 +3798,7 @@ class RoomClient {
     }
 
     setVideoPrivacyStatus(elemName, privacy) {
-        let videoPlayer = this.getName(elemName)[0];
+        let videoPlayer = this.getName(elemName);
         if (!videoPlayer) return;
         if (privacy) {
             videoPlayer.classList.remove('videoDefault');
@@ -6893,7 +6893,7 @@ class RoomClient {
         if ([80, 90, 100].includes(audioVolumeTmp)) audioColorTmp = 'red';
 
         if (!isPitchBarEnabled) {
-            const peerVideo = this.getName(peer_id)[0];
+            const peerVideo = this.getName(peer_id);
             const peerAvatarImg = this.getId(peer_id + '__img');
             if (peerAvatarImg) {
                 this.applyBoxShadowEffect(peerAvatarImg, audioColorTmp, 200);
@@ -9032,7 +9032,7 @@ class RoomClient {
     }
 
     toggleVideoMirror() {
-        const peerVideo = this.getName(this.peer_id)[0];
+        const peerVideo = this.getName(this.peer_id);
         if (peerVideo) peerVideo.classList.toggle('mirror');
     }
 
