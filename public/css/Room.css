@@ -720,9 +720,10 @@ th {
     display: block;
 }
 
+/* moderator title */
 .mod-title {
-    margin-top: 5px;
-    color: grey;
+    font-size: 1.1rem;
+    color: #c2c2c2;
 }
 
 /*--------------------------------------------------------------
