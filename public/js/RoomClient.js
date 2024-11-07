@@ -446,7 +446,10 @@ class RoomClient {
                     console.log('00-WARNING ----> You are Banned from the Room!');
                     return this.isBanned();
                 }
+                // ##########################################
                 this.peers = new Map(JSON.parse(room.peers));
+                // ##########################################
+
                 if (!peer_info.peer_token) {
                     // hack...
                     for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
@@ -1961,7 +1964,9 @@ class RoomClient {
                 //d.appendChild(vb);
                 document.body.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
+
                 await this.attachMediaStream(elem, stream, type, 'Producer');
+
                 this.myVideoEl = elem;
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
@@ -2010,6 +2015,7 @@ class RoomClient {
                 elem.volume = 0;
                 this.myAudioEl = elem;
                 this.localAudioEl.appendChild(elem);
+
                 await this.attachMediaStream(elem, stream, type, 'Producer');
 
                 const audioConsumerId = this.peer_id + '___pVolume';
@@ -2432,7 +2438,9 @@ class RoomClient {
                 //d.appendChild(vb);
                 document.body.appendChild(vb);
                 this.videoMediaContainer.appendChild(d);
+
                 await this.attachMediaStream(elem, stream, type, 'Consumer');
+
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
                 this.handleVB(d.id, vb.id);
@@ -2509,6 +2517,7 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.audio = 1.0;
                 this.remoteAudioEl.appendChild(elem);
+
                 await this.attachMediaStream(elem, stream, type, 'Consumer');
 
                 // Store audio consumer and set volume

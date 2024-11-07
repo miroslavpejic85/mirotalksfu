@@ -431,17 +431,19 @@ body {
     color: #fff;
     table-layout: fixed;
     border-collapse: collapse;
+    border-radius: 10px;
     border-style: hidden;
+    background: var(--body-bg);
 }
 .settingsTable td,
 th {
     text-align: left;
-    padding: 5px;
+    padding: 10px;
     /* border: 1px solid grey; */
 }
-.settingsTable tr:nth-child(even) {
-    /* background-color: #121212; */
-}
+/* .settingsTable tr:nth-child(even) {
+    background: var(--select-bg);
+} */
 .settingsTable i {
     border: none;
     border-radius: 5px;
@@ -1453,8 +1455,19 @@ hr {
 }
 
 .wa {
-    /* width: auto; */
     width: 320px;
+}
+
+@media screen and (max-width: 500px) {
+    .wa {
+        width: 310px;
+    }
+}
+
+@media screen and (max-width: 420px) {
+    .wa {
+        width: 200px;
+    }
 }
 
 .ml-5 {
