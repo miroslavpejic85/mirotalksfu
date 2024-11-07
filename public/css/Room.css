@@ -379,6 +379,13 @@ body {
     color: white;
 }
 
+/* Responsive adjustments */
+@media screen and (max-width: 500px) {
+    .title p {
+        font-size: 0.8em;
+    }
+}
+
 .inline-check-box {
     margin-bottom: 20px;
     display: inline-flex;
@@ -1088,7 +1095,8 @@ th {
 
 h1,
 h2,
-h3 {
+h3,
+h4 {
     color: #c2c2c2;
 }
 
@@ -1455,18 +1463,12 @@ hr {
 }
 
 .wa {
-    width: 320px;
+    width: 260px;
 }
 
 @media screen and (max-width: 500px) {
     .wa {
-        width: 310px;
-    }
-}
-
-@media screen and (max-width: 420px) {
-    .wa {
-        width: 200px;
+        width: 220px;
     }
 }
 
