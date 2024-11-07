@@ -601,6 +601,15 @@ class RoomClient {
             if (room.hostProtected) {
                 RoomURL = window.location.origin + '/join/?room=' + room_id;
             }
+
+            // Share Media Data on Join
+            if (
+                room.shareMediaData &&
+                Object.keys(room.shareMediaData).length !== 0 &&
+                room.shareMediaData.action === 'open'
+            ) {
+                this.shareVideoAction(room.shareMediaData);
+            }
         }
 
         // PARTICIPANTS
@@ -6093,9 +6102,9 @@ class RoomClient {
         }).then((result) => {
             if (result.value) {
                 result.value = filterXSS(result.value);
-                if (!this.thereAreParticipants()) {
-                    return userLog('info', 'No participants detected', 'top-end');
-                }
+                // if (!this.thereAreParticipants()) {
+                //     return userLog('info', 'No participants detected', 'top-end');
+                // }
                 if (!this.isVideoTypeSupported(result.value)) {
                     return userLog('warning', 'Something wrong, try with another Video or audio URL');
                 }
@@ -6169,8 +6178,8 @@ class RoomClient {
     }
 
     shareVideoAction(data) {
-        let peer_name = data.peer_name;
-        let action = data.action;
+        const { peer_name, action } = data;
+
         switch (action) {
             case 'open':
                 this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top-end');

@@ -67,6 +67,9 @@ module.exports = class Room {
         this.polls = [];
 
         this.isHostProtected = config.host.protected;
+
+        // Share Media
+        this.shareMediaData = {};
     }
 
     // ####################################################
@@ -95,8 +98,17 @@ module.exports = class Room {
             redirect: this.redirect,
             videoAIEnabled: this.videoAIEnabled,
             thereIsPolls: this.thereIsPolls(),
+            shareMediaData: this.shareMediaData,
             peers: JSON.stringify([...this.peers]),
         };
+    }
+
+    // ##############################################
+    // SHARE MEDIA
+    // ##############################################
+
+    updateShareMedia(data) {
+        this.shareMediaData = data;
     }
 
     // ##############################################
