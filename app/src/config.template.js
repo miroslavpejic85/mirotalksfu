@@ -144,6 +144,11 @@ module.exports = {
             For those seeking an open-source solution, check out: https://github.com/panva/node-oidc-provider
         */
         enabled: false,
+        peer_name: {
+            force: true, // Enforce using profile data for peer_name
+            email: true, // Use email as peer_name
+            name: false, // Don't use full name (family_name + given_name)
+        },
         config: {
             issuerBaseURL: 'https://server.example.com',
             baseURL: `http://localhost:${process.env.PORT ? process.env.PORT : 3010}`, // https://sfu.mirotalk.com

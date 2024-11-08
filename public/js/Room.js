@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.27
+ * @version 1.6.28
  *
  */
 
@@ -996,6 +996,34 @@ async function whoAreYou() {
 
     initUser.classList.toggle('hidden');
 
+    // Fetch the OIDC profile and manage peer_name
+    let force_peer_name = false;
+
+    try {
+        const { data: profile } = await axios.get('/profile', { timeout: 5000 });
+
+        if (profile) {
+            console.log('AXIOS GET OIDC Profile retrieved successfully', profile);
+
+            // Define peer_name based on the profile properties and preferences
+            const peerNamePreference = profile.peer_name || {};
+            default_name =
+                (peerNamePreference.email && profile.email) || (peerNamePreference.name && profile.name) || null;
+
+            // Set localStorage and force_peer_name if applicable
+            if (default_name && peerNamePreference.force) {
+                window.localStorage.peer_name = default_name;
+                force_peer_name = true;
+            } else {
+                console.warn('AXIOS GET Profile retrieved but missing required peer name fields');
+            }
+        } else {
+            console.warn('AXIOS GET Profile data is empty or undefined');
+        }
+    } catch (error) {
+        console.error('AXIOS OIDC Error fetching profile', error.message || error);
+    }
+
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -1033,6 +1061,11 @@ async function whoAreYou() {
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
+
+    if (force_peer_name) {
+        getId('usernameInput').disabled = true;
+        getId('initUsernameEmojiButton').disabled = true;
+    }
 
     if (!isVideoAllowed) {
         elemDisplay('initVideo', false);
@@ -4503,6 +4536,7 @@ function adaptAspectRatio(participantsCount) {
     // desktop aspect ratio
     switch (participantsCount) {
         case 1:
+        //case 2:
         case 3:
         case 4:
         case 7:
@@ -4564,7 +4598,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.27',
+        title: 'WebRTC SFU v1.6.28',
         html: `
         <br />
         <div id="about">

@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.27
+ * @version 1.6.28
  *
  */
 
@@ -395,9 +395,22 @@ function startServer() {
     // Route to display user information
     app.get('/profile', OIDCAuth, (req, res) => {
         if (OIDC.enabled) {
-            return res.json(req.oidc.user); // Send user information as JSON
+            const user = { ...req.oidc.user };
+            user.peer_name = {
+                force: OIDC.peer_name?.force || false,
+                email: OIDC.peer_name?.email || false,
+                name: OIDC.peer_name?.name || false,
+            };
+            log.debug('OIDC get Profile', user);
+            return res.json(user);
         }
-        res.sendFile(views.notFound);
+        // OIDC disabled
+        res.status(201).json({
+            email: false,
+            name: false,
+            peer_name: false,
+            message: 'Profile not found because OIDC is disabled',
+        });
     });
 
     // Authentication Callback Route
