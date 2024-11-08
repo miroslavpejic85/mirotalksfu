@@ -1157,6 +1157,10 @@ button:hover {
     color: red !important;
 }
 
+.yellow {
+    color: yellow !important;
+}
+
 .green {
     color: rgb(0, 255, 71) !important;
 }
