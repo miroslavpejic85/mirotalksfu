@@ -932,7 +932,6 @@ function getInfo() {
 async function whoAreYou() {
     console.log('04 ----> Who are you?');
 
-    hide(loadingDiv);
     document.body.style.background = 'var(--body-bg)';
 
     try {
@@ -960,6 +959,7 @@ async function whoAreYou() {
     }
 
     if (peer_name) {
+        hide(loadingDiv);
         checkMedia();
         getPeerInfo();
         joinRoom(peer_name, room_id);
@@ -1038,6 +1038,9 @@ async function whoAreYou() {
         customClass: { popup: 'init-modal-size' },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        willOpen: () => {
+            hide(loadingDiv);
+        },
         inputValidator: (name) => {
             if (!name) return 'Please enter your email or name';
             if (name.length > 30) return 'Name must be max 30 char';
