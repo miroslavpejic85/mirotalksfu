@@ -994,8 +994,6 @@ async function whoAreYou() {
         hide(initStartScreenButton);
     }
 
-    initUser.classList.toggle('hidden');
-
     // Fetch the OIDC profile and manage peer_name
     let force_peer_name = false;
 
@@ -1023,6 +1021,8 @@ async function whoAreYou() {
     } catch (error) {
         console.error('AXIOS OIDC Error fetching profile', error.message || error);
     }
+
+    initUser.classList.toggle('hidden');
 
     Swal.fire({
         allowOutsideClick: false,
@@ -1064,7 +1064,7 @@ async function whoAreYou() {
 
     if (force_peer_name) {
         getId('usernameInput').disabled = true;
-        getId('initUsernameEmojiButton').disabled = true;
+        hide(initUsernameEmojiButton);
     }
 
     if (!isVideoAllowed) {
