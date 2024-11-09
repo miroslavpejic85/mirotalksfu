@@ -1006,7 +1006,9 @@ async function whoAreYou() {
             // Define peer_name based on the profile properties and preferences
             const peerNamePreference = profile.peer_name || {};
             default_name =
-                (peerNamePreference.email && profile.email) || (peerNamePreference.name && profile.name) || null;
+                (peerNamePreference.email && profile.email) ||
+                (peerNamePreference.name && profile.name) ||
+                default_name;
 
             // Set localStorage and force_peer_name if applicable
             if (default_name && peerNamePreference.force) {
