@@ -156,6 +156,7 @@
     background: var(--btns-bg-color);
 }
 
+.videoAvatarMenuBar,
 .videoMenuBarShare {
     z-index: 2;
     position: absolute;
@@ -174,6 +175,7 @@
 
 .videoMenuBar input,
 .videoMenuBar button,
+.videoAvatarMenuBar button,
 .videoMenuBarShare button {
     font-size: 1.2rem;
     float: right;
@@ -184,8 +186,9 @@
     border: none;
 }
 
-.videoMenuBarShare button:hover,
-.videoMenuBar button:hover {
+.videoMenuBar button:hover,
+.videoAvatarMenuBar button:hover,
+.videoMenuBarShare button:hover {
     color: grey;
     transition: all 0.3s ease-in-out;
 }

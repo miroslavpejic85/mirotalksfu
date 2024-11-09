@@ -8273,6 +8273,7 @@ class RoomClient {
                     'Angela in Black Dress',
                     'Kayla in Casual Suit',
                     'Anna in Brown T-shirt',
+                    'Anna in White T-shirt',
                     'Briana in Brown suit',
                     'Justin in White Shirt',
                     'Leah in Black Suit',
@@ -8280,7 +8281,9 @@ class RoomClient {
                     'Tyler in Casual Suit',
                     'Tyler in Shirt',
                     'Tyler in Suit',
-                    'default',
+                    'Edward in Blue Shirt',
+                    'Susan in Black Shirt',
+                    'Monica in Sleeveless',
                 ];
 
                 //console.log('AVATARS LISTS', completion.response.avatars);
@@ -8408,7 +8411,7 @@ class RoomClient {
     async handleVideoAI() {
         const vb = document.createElement('div');
         vb.setAttribute('id', 'avatar__vb');
-        vb.className = 'videoMenuBar fadein';
+        vb.className = 'videoAvatarMenuBar fadein';
 
         const fs = this.createButton('avatar__fs', html.fullScreen);
         const pin = this.createButton('avatar__pin', html.pin);
