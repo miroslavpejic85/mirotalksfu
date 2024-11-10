@@ -47,6 +47,7 @@ const html = {
     hideALL: 'fas fa-eye',
     mirror: 'fas fa-arrow-right-arrow-left',
     close: 'fas fa-times',
+    stop: 'fas fa-circle-stop',
 };
 
 const icons = {
@@ -8413,6 +8414,7 @@ class RoomClient {
         vb.setAttribute('id', 'avatar__vb');
         vb.className = 'videoAvatarMenuBar fadein';
 
+        const interrupt = this.createButton('avatar__interrupt', html.stop);
         const fs = this.createButton('avatar__fs', html.fullScreen);
         const pin = this.createButton('avatar__pin', html.pin);
         const ss = this.createButton('avatar__stopSession', html.kickOut);
@@ -8446,6 +8448,7 @@ class RoomClient {
         // Append elements to video container
         vb.appendChild(ss);
         this.isVideoFullScreenSupported && vb.appendChild(fs);
+        vb.appendChild(interrupt);
         !this.isMobileDevice && vb.appendChild(pin);
         avatarName.appendChild(an);
 
@@ -8467,12 +8470,17 @@ class RoomClient {
             this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true, true);
         }
 
+        interrupt.onclick = () => {
+            this.streamingInterrupt();
+        };
+
         ss.onclick = () => {
             this.stopSession();
         };
 
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
+            this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
             this.setTippy(fs.id, 'Toggle full screen', 'bottom');
             this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
         }
@@ -8658,6 +8666,13 @@ class RoomClient {
                 text: message,
             });
             console.log('Video AI streamingTask', response);
+        }
+    }
+
+    streamingInterrupt() {
+        if (VideoAI.enabled && VideoAI.active && VideoAI.info.session_id) {
+            const response = this.socket.request('streamingInterrupt', { session_id: VideoAI.info.session_id });
+            console.log('Video AI streamingInterrupt', response);
         }
     }
 

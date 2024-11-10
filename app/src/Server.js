@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.30
+ * @version 1.6.31
  *
  */
 
@@ -2250,6 +2250,7 @@ function startServer() {
         socket.on('getAvatarList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
+
             try {
                 const response = await axios.get(`${config.videoAI.basePath}/v1/avatar.list`, {
                     headers: {
@@ -2273,6 +2274,7 @@ function startServer() {
         socket.on('getVoiceList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
+
             try {
                 const response = await axios.get(`${config.videoAI.basePath}/v1/voice.list`, {
                     headers: {
@@ -2393,6 +2395,7 @@ function startServer() {
 
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
+
             try {
                 const response = await axios.post(
                     `${config.videoAI.basePath}/v1/streaming.task`,
@@ -2415,6 +2418,38 @@ function startServer() {
                 cb(data);
             } catch (error) {
                 log.error('streamingTask', error.response.data);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+            }
+        });
+
+        // https://docs.heygen.com/reference/interrupt-task
+        socket.on('streamingInterrupt', async ({ session_id, text }, cb) => {
+            if (!roomExists(socket)) return;
+
+            if (!config.videoAI.enabled || !config.videoAI.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+
+            try {
+                const response = await axios.post(
+                    `${config.videoAI.basePath}/v1/streaming.interrupt`,
+                    {
+                        session_id,
+                    },
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Api-Key': config.videoAI.apiKey,
+                        },
+                    },
+                );
+
+                const data = { response: response.data };
+
+                log.debug('streamingInterrupt', data);
+
+                cb(data);
+            } catch (error) {
+                log.error('streamingInterrupt', error.response.data);
                 cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
             }
         });
