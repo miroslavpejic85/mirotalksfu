@@ -47,6 +47,7 @@ module.exports = class Room {
             screen_cant_share: false,
             chat_cant_privately: false,
             chat_cant_chatgpt: false,
+            media_cant_sharing: false,
         };
         this.survey = config.survey;
         this.redirect = config.redirect;
@@ -463,6 +464,9 @@ module.exports = class Room {
                 break;
             case 'chat_cant_chatgpt':
                 this._moderator.chat_cant_chatgpt = data.status;
+                break;
+            case 'media_cant_sharing':
+                this._moderator.media_cant_sharing = data.status;
                 break;
             default:
                 break;

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.29
+ * @version 1.6.30
  *
  */
 
@@ -1952,6 +1952,9 @@ function handleButtons() {
         rc.shareVideo('all');
     };
     videoCloseBtn.onclick = () => {
+        if (rc._moderator.media_cant_sharing) {
+            return userLog('warning', 'The moderator does not allow you close this media', 'top-end', 6000);
+        }
         rc.closeVideo(true);
     };
     sendAbortBtn.onclick = () => {
@@ -2655,6 +2658,14 @@ function handleSelects() {
         rc.updateRoomModerator({ type: 'chat_cant_chatgpt', status: chatCantChatGPT });
         rc.roomMessage('chat_cant_chatgpt', chatCantChatGPT);
         localStorageSettings.moderator_chat_cant_chatgpt = chatCantChatGPT;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
+    switchEveryoneCantMediaSharing.onchange = (e) => {
+        const mediaCantSharing = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'media_cant_sharing', status: mediaCantSharing });
+        rc.roomMessage('media_cant_sharing', mediaCantSharing);
+        localStorageSettings.moderator_media_cant_sharing = mediaCantSharing;
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
@@ -4603,7 +4614,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.29',
+        title: 'WebRTC SFU v1.6.30',
         html: `
         <br />
         <div id="about">

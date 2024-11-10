@@ -228,6 +228,7 @@ class RoomClient {
             screen_cant_share: false,
             chat_cant_privately: false,
             chat_cant_chatgpt: false,
+            media_cant_sharing: false,
         };
 
         // Chat messages
@@ -531,27 +532,10 @@ class RoomClient {
             // Handle Room moderator rules
             if (room.moderator && (!isRulesActive || !isPresenter)) {
                 console.log('07.2 ----> ROOM MODERATOR', room.moderator);
-                const {
-                    video_start_privacy,
-                    audio_start_muted,
-                    video_start_hidden,
-                    audio_cant_unmute,
-                    video_cant_unhide,
-                    screen_cant_share,
-                    chat_cant_privately,
-                    chat_cant_chatgpt,
-                } = room.moderator;
 
-                this._moderator.video_start_privacy = video_start_privacy;
-                this._moderator.audio_start_muted = audio_start_muted;
-                this._moderator.video_start_hidden = video_start_hidden;
-                this._moderator.audio_cant_unmute = audio_cant_unmute;
-                this._moderator.video_cant_unhide = video_cant_unhide;
-                this._moderator.screen_cant_share = screen_cant_share;
-                this._moderator.chat_cant_privately = chat_cant_privately;
-                this._moderator.chat_cant_chatgpt = chat_cant_chatgpt;
+                // Update `this._moderator` with properties from `room.moderator`, keeping existing ones.
+                this._moderator = { ...this._moderator, ...room.moderator };
 
-                //
                 if (this._moderator.video_start_privacy || localStorageSettings.moderator_video_start_privacy) {
                     this.peer_info.peer_video_privacy = true;
                     this.emitCmd({
@@ -560,7 +544,7 @@ class RoomClient {
                         active: true,
                         broadcast: true,
                     });
-                    this.userLog('warning', 'The Moderator starts video in privacy mode', 'top-end');
+                    this.userLog('warning', 'The Moderator starts your video in privacy mode', 'top-end');
                 }
                 if (this._moderator.audio_start_muted && this._moderator.video_start_hidden) {
                     this.userLog('warning', 'The Moderator disabled your audio and video', 'top-end');
@@ -6086,6 +6070,10 @@ class RoomClient {
     }
 
     shareVideo(peer_id = 'all') {
+        if (this._moderator.media_cant_sharing) {
+            return userLog('warning', 'The moderator does not allow you to share any media', 'top-end', 6000);
+        }
+
         this.sound('open');
 
         Swal.fire({
@@ -6266,11 +6254,16 @@ class RoomClient {
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
         handleAspectRatio();
-        let exitVideoBtn = this.getId(e.id);
+
+        const exitVideoBtn = this.getId(e.id);
         exitVideoBtn.addEventListener('click', (e) => {
             e.preventDefault();
+            if (this._moderator.media_cant_sharing) {
+                return userLog('warning', 'The moderator does not allow you close this media', 'top-end', 6000);
+            }
             this.closeVideo(true);
         });
+
         this.handlePN(video.id, pn.id, d.id);
         if (!this.isMobileDevice) {
             this.setTippy(pn.id, 'Toggle Pin video player', 'bottom');
@@ -6529,6 +6522,9 @@ class RoomClient {
                     `${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`,
                     'top-end',
                 );
+                break;
+            case 'media_cant_sharing':
+                this.userLog('info', `${icons.moderator} Moderator: everyone can't share media ${status}`, 'top-end');
                 break;
             case 'disconnect_all_on_leave':
                 this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
@@ -7967,6 +7963,10 @@ class RoomClient {
             case 'chat_cant_chatgpt':
                 this._moderator.chat_cant_chatgpt = data.status;
                 rc.roomMessage('chat_cant_chatgpt', data.status);
+                break;
+            case 'media_cant_sharing':
+                this._moderator.media_cant_sharing = data.status;
+                rc.roomMessage('media_cant_sharing', data.status);
                 break;
             default:
                 break;
