@@ -8740,6 +8740,10 @@ class RoomClient {
 
     stopRendering() {
         this.renderAIToken = null;
+        if (isHideMeActive) {
+            isHideMeActive = !isHideMeActive;
+            this.handleHideMe();
+        }
     }
 
     stopSession() {
