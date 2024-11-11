@@ -553,7 +553,7 @@ module.exports = class Room {
             throw new Error('Create WebRtc Transport failed!');
         }
 
-        const { id, iceParameters, iceCandidates, dtlsParameters } = transport;
+        const { id, type, iceParameters, iceCandidates, dtlsParameters } = transport;
 
         if (maxIncomingBitrate) {
             try {
@@ -565,7 +565,7 @@ module.exports = class Room {
 
         peer.addTransport(transport);
 
-        log.debug('Transport created', { transportId: id });
+        log.debug('Transport created', { transportId: id, transportType: type });
 
         const { peer_name } = peer;
 
