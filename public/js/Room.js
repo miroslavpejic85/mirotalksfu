@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.33
+ * @version 1.6.34
  *
  */
 
@@ -4045,7 +4045,7 @@ function getParticipantsList(peers) {
 
     // CHAT-GPT
     if (chatGPT) {
-        const chatgpt_active = !rc.isChatOpen && rc.chatPeerName === 'ChatGPT' ? ' active' : '';
+        const chatgpt_active = rc.chatPeerName === 'ChatGPT' ? ' active' : '';
 
         li = `
         <li 
@@ -4066,7 +4066,7 @@ function getParticipantsList(peers) {
         </li>`;
     }
 
-    const public_chat_active = !rc.isChatOpen && rc.chatPeerName === 'all' ? ' active' : '';
+    const public_chat_active = rc.chatPeerName === 'all' ? ' active' : '';
 
     // ALL
     li += `
@@ -4149,7 +4149,7 @@ function getParticipantsList(peers) {
         const peer_id = peer_info.peer_id;
         const avatarImg = getParticipantAvatar(peer_name);
 
-        const peer_chat_active = !rc.isChatOpen && rc.chatPeerId === peer_id ? ' active' : '';
+        const peer_chat_active = rc.chatPeerId === peer_id ? ' active' : '';
 
         // NOT ME
         if (socket.id !== peer_id) {
@@ -4614,7 +4614,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.33',
+        title: 'WebRTC SFU v1.6.34',
         html: `
         <br />
         <div id="about">
