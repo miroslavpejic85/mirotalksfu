@@ -88,6 +88,11 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
     apt-get install -y nodejs
 
     npm install -g npm@latest
+
+
+    log "Install FFmpeg"
+
+    apt install -y ffmpeg
 fi
 
 CONFIG=app/src/config.js
