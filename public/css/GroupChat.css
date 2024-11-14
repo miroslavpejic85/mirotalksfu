@@ -1,6 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 .container {
+    position: fixed !important;
     padding: 2px !important;
     /* overflow-y: auto;
     overflow-x: hidden; */
