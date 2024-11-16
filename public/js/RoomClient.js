@@ -195,6 +195,7 @@ class RoomClient {
         peer_name,
         peer_uuid,
         peer_info,
+        isDesktopDevice,
         isAudioAllowed,
         isVideoAllowed,
         isScreenAllowed,
@@ -215,6 +216,11 @@ class RoomClient {
         this.peer_name = peer_name;
         this.peer_uuid = peer_uuid;
         this.peer_info = peer_info;
+
+        // Device type
+        this.isDesktopDevice = isDesktopDevice;
+        this.isMobileDevice = DetectRTC.isMobileDevice;
+        this.isMobileSafari = this.isMobileDevice && DetectRTC.browser.name === 'Safari';
 
         // RTMP selected file name
         this.selectedRtmpFilename = '';
@@ -257,9 +263,6 @@ class RoomClient {
         this.producerTransport = null;
         this.consumerTransport = null;
         this.device = null;
-
-        this.isMobileDevice = DetectRTC.isMobileDevice;
-        this.isMobileSafari = this.isMobileDevice && DetectRTC.browser.name === 'Safari';
 
         this.isScreenShareSupported =
             navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia ? true : false;
@@ -4792,7 +4795,22 @@ class RoomClient {
             deletePollButton.className = 'del-btn';
             deletePollButton.insertBefore(deletePollButtonIcon, deletePollButton.firstChild);
             deletePollButton.addEventListener('click', () => {
-                this.socket.emit('deletePoll', { index, peer_name: this.peer_name, peer_uuid: this.peer_uuid });
+                // confirm before delete poll
+                Swal.fire({
+                    background: swalBackground,
+                    position: 'top',
+                    title: 'Delete this poll?',
+                    imageUrl: image.delete,
+                    showDenyButton: true,
+                    confirmButtonText: `Yes`,
+                    denyButtonText: `No`,
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        this.socket.emit('deletePoll', { index, peer_name: this.peer_name, peer_uuid: this.peer_uuid });
+                    }
+                });
             });
             pollButtonsDiv.appendChild(deletePollButton);
 

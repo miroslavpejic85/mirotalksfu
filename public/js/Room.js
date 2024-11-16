@@ -1315,6 +1315,7 @@ function joinRoom(peer_name, room_id) {
     if (rc && rc.isConnected()) {
         console.log('Already connected to a room');
     } else {
+        const isDesktopDevice = !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
         console.log('05 ----> join Room ' + room_id);
         roomId.innerText = room_id;
         userName.innerText = peer_name;
@@ -1330,6 +1331,7 @@ function joinRoom(peer_name, room_id) {
             peer_name,
             peer_uuid,
             peer_info,
+            isDesktopDevice,
             isAudioAllowed,
             isVideoAllowed,
             isScreenAllowed,
