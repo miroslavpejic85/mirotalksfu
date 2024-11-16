@@ -3887,6 +3887,7 @@ class RoomClient {
         if (!this.isChatOpen) {
             await getRoomParticipants();
             hide(chatMinButton);
+
             if (!this.isMobileDevice) {
                 BUTTONS.chat.chatMaxButton && show(chatMaxButton);
             }
@@ -3896,7 +3897,13 @@ class RoomClient {
         }
         isParticipantsListOpen = !isParticipantsListOpen;
         this.isChatOpen = !this.isChatOpen;
+
         if (this.isChatPinned) this.chatUnpin();
+
+        if (!this.isMobileDevice && this.isChatOpen && this.canBePinned()) {
+            this.toggleChatPin();
+        }
+
         resizeChatRoom();
     }
 
@@ -3956,6 +3963,12 @@ class RoomClient {
             document.documentElement.style.setProperty('--msger-height', '700px');
             this.toggleChatHistorySize(false);
         }
+    }
+
+    canBePinned() {
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        return viewportWidth >= 1024 && viewportHeight >= 768;
     }
 
     chatPin() {
@@ -4589,7 +4602,12 @@ class RoomClient {
             this.sound('open');
         }
         this.isPollOpen = !this.isPollOpen;
+
         if (this.isPollPinned) this.pollUnpin();
+
+        if (!this.isMobileDevice && this.isPollOpen && this.canBePinned()) {
+            this.togglePollPin();
+        }
     }
 
     togglePollPin() {
@@ -4769,7 +4787,7 @@ class RoomClient {
             // Delete poll button
             const deletePollButton = document.createElement('button');
             const deletePollButtonIcon = document.createElement('i');
-            deletePollButtonIcon.className = 'fas fa-minus';
+            deletePollButtonIcon.className = 'fas fa-trash';
             deletePollButton.id = 'delPoll';
             deletePollButton.className = 'del-btn';
             deletePollButton.insertBefore(deletePollButtonIcon, deletePollButton.firstChild);
@@ -4907,7 +4925,12 @@ class RoomClient {
             this.sound('open');
         }
         this.isEditorOpen = !this.isEditorOpen;
+
         if (this.isEditorPinned) this.editorUnpin();
+
+        if (!this.isMobileDevice && this.isEditorOpen && this.canBePinned()) {
+            this.toggleEditorPin();
+        }
     }
 
     toggleLockUnlockEditor() {

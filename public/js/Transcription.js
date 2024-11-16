@@ -243,7 +243,13 @@ class Transcription {
             transcriptionRoom.style.display = 'none';
         }
         this.isHidden = !this.isHidden;
+
         if (this.isPinned) this.unpinned();
+
+        if (!rc.isMobileDevice && !this.isHidden && rc.canBePinned()) {
+            this.togglePinUnpin();
+        }
+
         resizeTranscriptionRoom();
     }
 
