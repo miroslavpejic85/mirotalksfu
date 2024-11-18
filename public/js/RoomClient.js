@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.38
+ * @version 1.6.39
  *
  */
 
@@ -8330,75 +8330,65 @@ class RoomClient {
 
                 //console.log('AVATARS LISTS', completion.response.avatars);
                 completion.response.avatars.forEach((avatar) => {
-                    avatar.avatar_states.forEach((avatarUi) => {
-                        if (
-                            !excludedIds.includes(avatarUi.id) &&
-                            (showFreeAvatars ? freeAvatars.includes(avatarUi.pose_name) : true)
-                        ) {
-                            const div = document.createElement('div');
-                            div.style.float = 'left';
-                            div.style.padding = '5px';
-                            div.style.width = '100px';
-                            div.style.height = '200px';
-                            const img = document.createElement('img');
-                            const hr = document.createElement('hr');
-                            const label = document.createElement('label');
-                            const textContent = document.createTextNode(avatarUi.pose_name);
-                            label.appendChild(textContent);
-                            //label.style.fontSize = '12px';
-                            img.setAttribute('id', avatarUi.id);
-                            img.setAttribute('class', 'avatarImg');
-                            img.setAttribute('src', avatarUi.normal_thumbnail_medium);
-                            img.setAttribute('width', '100%');
-                            img.setAttribute('height', 'auto');
-                            img.setAttribute('alt', avatarUi.pose_name);
-                            img.setAttribute('style', 'cursor:pointer; padding: 2px; border-radius: 5px;');
-                            img.setAttribute(
-                                'avatarData',
-                                avatarUi.id +
-                                    '|' +
-                                    avatar.name +
-                                    '|' +
-                                    avatarUi.default_voice.free.voice_id +
-                                    '|' +
-                                    avatarUi.video_url.grey,
-                            );
-                            img.onclick = () => {
-                                const avatarImages = document.querySelectorAll('.avatarImg');
-                                avatarImages.forEach((image) => {
-                                    image.style.border = 'none';
-                                });
-                                img.style.border = 'var(--border)';
-                                const avatarData = img.getAttribute('avatarData');
-                                const avatarDataArr = avatarData.split('|');
-                                VideoAI.avatarId = avatarDataArr[0];
-                                VideoAI.avatarName = avatarDataArr[1];
-                                //VideoAI.avatarVoice = avatarDataArr[2] ? avatarDataArr[2] : ''; use the default one
+                    if (
+                        !excludedIds.includes(avatar.avatar_id) &&
+                        (showFreeAvatars ? freeAvatars.includes(avatar.avatar_name) : true)
+                    ) {
+                        const div = document.createElement('div');
+                        div.style.float = 'left';
+                        div.style.padding = '5px';
+                        div.style.width = '100px';
+                        div.style.height = '200px';
+                        const img = document.createElement('img');
+                        const hr = document.createElement('hr');
+                        const label = document.createElement('label');
+                        const textContent = document.createTextNode(avatar.avatar_name);
+                        label.appendChild(textContent);
+                        //label.style.fontSize = '12px';
+                        img.setAttribute('id', avatar.avatar_id);
+                        img.setAttribute('class', 'avatarImg');
+                        img.setAttribute('src', avatar.preview_image_url);
+                        img.setAttribute('width', '100%');
+                        img.setAttribute('height', 'auto');
+                        img.setAttribute('alt', avatar.avatar_name);
+                        img.setAttribute('style', 'cursor:pointer; padding: 2px; border-radius: 5px;');
+                        img.setAttribute(
+                            'avatarData',
+                            avatar.avatar_id + '|' + avatar.avatar_name + '|' + avatar.preview_video_url,
+                        );
+                        img.onclick = () => {
+                            const avatarImages = document.querySelectorAll('.avatarImg');
+                            avatarImages.forEach((image) => {
+                                image.style.border = 'none';
+                            });
+                            img.style.border = 'var(--border)';
+                            const avatarData = img.getAttribute('avatarData');
+                            const avatarDataArr = avatarData.split('|');
+                            VideoAI.avatarId = avatarDataArr[0];
+                            VideoAI.avatarName = avatarDataArr[1];
 
-                                avatarVideoAIPreview.setAttribute('src', avatarUi.video_url.grey);
-                                avatarVideoAIPreview.play();
+                            avatarVideoAIPreview.setAttribute('src', avatarDataArr[2]);
+                            avatarVideoAIPreview.play();
 
-                                console.log('Avatar image click event', {
-                                    avatar,
-                                    avatarUi,
-                                    avatarDataArr,
-                                });
-                            };
-                            div.append(img);
-                            div.append(hr);
-                            div.append(label);
-                            avatarVideoAIcontainer.append(div);
+                            console.log('Avatar image click event', {
+                                avatar,
+                                avatarDataArr,
+                            });
+                        };
+                        div.append(img);
+                        div.append(hr);
+                        div.append(label);
+                        avatarVideoAIcontainer.append(div);
 
-                            // Show the first available free avatar
-                            if (showFreeAvatars && avatarUi.pose_name === 'Kristin in Black Suit') {
-                                avatarVideoAIPreview.setAttribute('src', avatarUi.video_url.grey);
-                                avatarVideoAIPreview.playsInline = true;
-                                avatarVideoAIPreview.autoplay = true;
-                                avatarVideoAIPreview.controls = true;
-                                avatarVideoAIPreview.volume = 0.5;
-                            }
+                        // Show the first available free avatar
+                        if (showFreeAvatars && avatar.avatar_name === 'Kristin in Black Suit') {
+                            avatarVideoAIPreview.setAttribute('src', avatar.preview_video_url);
+                            avatarVideoAIPreview.playsInline = true;
+                            avatarVideoAIPreview.autoplay = true;
+                            avatarVideoAIPreview.controls = true;
+                            avatarVideoAIPreview.volume = 0.5;
                         }
-                    });
+                    }
                 });
             })
             .catch((err) => {
@@ -8413,40 +8403,52 @@ class RoomClient {
     getVoiceList() {
         this.socket
             .request('getVoiceList')
-            .then(function (completion) {
+            .then((completion) => {
+                //console.log('VOICES LISTS', completion.response.voices);
+
+                // Ensure the response has the list of voices
+                const voiceList = completion?.response?.voices ?? [];
+                if (!voiceList.length) {
+                    console.warn('No voices available in the response');
+                    return;
+                }
+
                 const selectElement = document.getElementById('avatarVoiceIDs');
                 selectElement.innerHTML = '<option value="">Select Avatar Voice</option>'; // Reset options with default
 
                 // Sort the list alphabetically by language
-                const sortedList = completion.response.list.sort((a, b) => a.language.localeCompare(b.language));
+                const sortedList = voiceList.sort((a, b) => (a.language ?? '').localeCompare(b.language ?? ''));
 
-                sortedList.forEach((flag) => {
-                    // console.log('flag', flag);
-                    const { is_paid, voice_id, language, display_name, gender } = flag;
-                    if (showFreeAvatars ? is_paid == false : true) {
+                // Populate the select element with options
+                sortedList.forEach((voice) => {
+                    const { is_paid, voice_id, language, display_name, gender } = voice;
+                    if (showFreeAvatars ? !is_paid : true) {
                         const option = document.createElement('option');
                         option.value = voice_id;
-                        option.text = `${language}, ${display_name} (${gender})`; // You can customize the display text
+                        option.textContent = `${language ?? 'Unknown'}, ${display_name ?? 'Unnamed'} (${gender ?? 'N/A'})`;
                         selectElement.appendChild(option);
                     }
                 });
 
-                // Event listener for changes on select element
+                // Event listener for changes on the select element
                 selectElement.addEventListener('change', (event) => {
                     const selectedVoiceID = event.target.value;
-                    const selectedPreviewURL = completion.response.list.find(
-                        (flag) => flag.voice_id === selectedVoiceID,
-                    )?.preview?.movio;
-                    VideoAI.avatarVoice = selectedVoiceID ? selectedVoiceID : null;
-                    if (selectedPreviewURL) {
+                    const selectedVoice = voiceList.find((voice) => voice.voice_id === selectedVoiceID);
+
+                    VideoAI.avatarVoice = selectedVoiceID || null;
+
+                    const previewAudioURL = selectedVoice?.preview_audio;
+                    if (previewAudioURL) {
                         const avatarPreviewAudio = document.getElementById('avatarPreviewAudio');
-                        avatarPreviewAudio.src = selectedPreviewURL;
-                        avatarPreviewAudio.play();
+                        avatarPreviewAudio.src = previewAudioURL;
+                        avatarPreviewAudio.play().catch((err) => {
+                            console.error('Error playing preview audio:', err);
+                        });
                     }
                 });
             })
             .catch((err) => {
-                console.error('Video AI getVoiceList error:', err);
+                console.error('Video AI getVoiceList error', err);
             });
     }
 

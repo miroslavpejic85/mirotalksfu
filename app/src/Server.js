@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.38
+ * @version 1.6.39
  *
  */
 
@@ -2246,13 +2246,13 @@ function startServer() {
             }
         });
 
-        // https://docs.heygen.com/reference/avatar-list
+        // https://docs.heygen.com/reference/list-avatars-v2
         socket.on('getAvatarList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
-                const response = await axios.get(`${config.videoAI.basePath}/v1/avatar.list`, {
+                const response = await axios.get(`${config.videoAI.basePath}/v2/avatars`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
@@ -2270,13 +2270,13 @@ function startServer() {
             }
         });
 
-        // https://docs.heygen.com/reference/get-voices
+        // https://docs.heygen.com/reference/list-voices-v2
         socket.on('getVoiceList', async ({}, cb) => {
             if (!config.videoAI.enabled || !config.videoAI.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
-                const response = await axios.get(`${config.videoAI.basePath}/v1/voice.list`, {
+                const response = await axios.get(`${config.videoAI.basePath}/v2/voices`, {
                     headers: {
                         'Content-Type': 'application/json',
                         'X-Api-Key': config.videoAI.apiKey,
