@@ -195,6 +195,8 @@ $ apt install -y ffmpeg
 
 ---
 
+![nodejs](public/images/nodejs.png)
+
 Install `NodeJS 18.X` and `npm` using [Node Version Manager](https://docs.mirotalk.com/nvm/nvm/)
 
 ---
