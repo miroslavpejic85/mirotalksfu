@@ -1935,16 +1935,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Device = void 0;
                 exports.detectDevice = detectDevice;
@@ -2832,16 +2843,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 var __importDefault =
                     (this && this.__importDefault) ||
                     function (mod) {
@@ -3895,16 +3917,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Chrome111 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -4648,16 +4681,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Chrome55 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -5253,16 +5297,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Chrome67 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -5906,16 +5961,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Chrome70 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -6589,16 +6655,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Chrome74 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -7351,16 +7428,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Edge11 = void 0;
                 const Logger_1 = require('../Logger');
@@ -7840,16 +7928,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Firefox120 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -8606,16 +8705,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Firefox60 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -9389,16 +9499,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.ReactNative = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -10011,16 +10132,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.ReactNativeUnifiedPlan = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -10812,16 +10944,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Safari11 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -11460,16 +11603,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Safari12 = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -12208,16 +12362,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.getCapabilities = getCapabilities;
                 exports.mangleRtpParameters = mangleRtpParameters;
@@ -12349,16 +12514,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.OfferMediaSection = exports.AnswerMediaSection = exports.MediaSection = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -12986,16 +13162,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.RemoteSdp = void 0;
                 const sdpTransform = __importStar(require('sdp-transform'));
@@ -13325,16 +13512,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.extractRtpCapabilities = extractRtpCapabilities;
                 exports.extractDtlsParameters = extractDtlsParameters;
@@ -13523,7 +13721,7 @@
                             case 'audio/opus': {
                                 const spropStereo = codec.parameters['sprop-stereo'];
                                 if (spropStereo !== undefined) {
-                                    parameters.stereo = spropStereo ? 1 : 0;
+                                    parameters.stereo = Number(spropStereo) ? 1 : 0;
                                 }
                                 break;
                             }
@@ -13860,16 +14058,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 var __importDefault =
                     (this && this.__importDefault) ||
                     function (mod) {
@@ -13903,7 +14112,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.7.17';
+                exports.version = '3.7.18';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -13951,16 +14160,27 @@
                           });
                 var __importStar =
                     (this && this.__importStar) ||
-                    function (mod) {
-                        if (mod && mod.__esModule) return mod;
-                        var result = {};
-                        if (mod != null)
-                            for (var k in mod)
-                                if (k !== 'default' && Object.prototype.hasOwnProperty.call(mod, k))
-                                    __createBinding(result, mod, k);
-                        __setModuleDefault(result, mod);
-                        return result;
-                    };
+                    (function () {
+                        var ownKeys = function (o) {
+                            ownKeys =
+                                Object.getOwnPropertyNames ||
+                                function (o) {
+                                    var ar = [];
+                                    for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+                                    return ar;
+                                };
+                            return ownKeys(o);
+                        };
+                        return function (mod) {
+                            if (mod && mod.__esModule) return mod;
+                            var result = {};
+                            if (mod != null)
+                                for (var k = ownKeys(mod), i = 0; i < k.length; i++)
+                                    if (k[i] !== 'default') __createBinding(result, mod, k[i]);
+                            __setModuleDefault(result, mod);
+                            return result;
+                        };
+                    })();
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.validateRtpCapabilities = validateRtpCapabilities;
                 exports.validateRtpParameters = validateRtpParameters;
@@ -16174,7 +16394,9 @@
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
+                var grammar = require('./grammar');
 
+                exports.grammar = grammar;
                 exports.write = writer;
                 exports.parse = parser.parse;
                 exports.parseParams = parser.parseParams;
@@ -16184,7 +16406,7 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './parser': 48, './writer': 49 },
+            { './grammar': 46, './parser': 48, './writer': 49 },
         ],
         48: [
             function (require, module, exports) {
@@ -16435,208 +16657,166 @@
         ],
         50: [
             function (require, module, exports) {
-                /////////////////////////////////////////////////////////////////////////////////
-                /* UAParser.js v1.0.39
-   Copyright © 2012-2021 Faisal Salman <f@faisalman.com>
-   MIT License */ /*
-   Detect Browser, Engine, OS, CPU, and Device type/model from User-Agent data.
-   Supports browser & node.js environment. 
-   Demo   : https://faisalman.github.io/ua-parser-js
-   Source : https://github.com/faisalman/ua-parser-js */
-                /////////////////////////////////////////////////////////////////////////////////
-
-                (function (window, undefined) {
+                /* UAParser.js v2.0.0
+   Copyright © 2012-2024 Faisal Salman <f@faisalman.com>
+   AGPLv3 License */
+                !(function (i, d) {
                     'use strict';
-
-                    //////////////
-                    // Constants
-                    /////////////
-
-                    var LIBVERSION = '1.0.39',
-                        EMPTY = '',
-                        UNKNOWN = '?',
-                        FUNC_TYPE = 'function',
-                        UNDEF_TYPE = 'undefined',
-                        OBJ_TYPE = 'object',
-                        STR_TYPE = 'string',
-                        MAJOR = 'major',
-                        MODEL = 'model',
-                        NAME = 'name',
-                        TYPE = 'type',
-                        VENDOR = 'vendor',
-                        VERSION = 'version',
-                        ARCHITECTURE = 'architecture',
-                        CONSOLE = 'console',
-                        MOBILE = 'mobile',
-                        TABLET = 'tablet',
-                        SMARTTV = 'smarttv',
-                        WEARABLE = 'wearable',
-                        EMBEDDED = 'embedded',
-                        UA_MAX_LENGTH = 500;
-
-                    var AMAZON = 'Amazon',
-                        APPLE = 'Apple',
-                        ASUS = 'ASUS',
-                        BLACKBERRY = 'BlackBerry',
-                        BROWSER = 'Browser',
-                        CHROME = 'Chrome',
-                        EDGE = 'Edge',
-                        FIREFOX = 'Firefox',
-                        GOOGLE = 'Google',
-                        HUAWEI = 'Huawei',
-                        LG = 'LG',
-                        MICROSOFT = 'Microsoft',
-                        MOTOROLA = 'Motorola',
-                        OPERA = 'Opera',
-                        SAMSUNG = 'Samsung',
-                        SHARP = 'Sharp',
-                        SONY = 'Sony',
-                        XIAOMI = 'Xiaomi',
-                        ZEBRA = 'Zebra',
-                        FACEBOOK = 'Facebook',
-                        CHROMIUM_OS = 'Chromium OS',
-                        MAC_OS = 'Mac OS',
-                        SUFFIX_BROWSER = ' Browser';
-
-                    ///////////
-                    // Helper
-                    //////////
-
-                    var extend = function (regexes, extensions) {
-                            var mergedRegexes = {};
-                            for (var i in regexes) {
-                                if (extensions[i] && extensions[i].length % 2 === 0) {
-                                    mergedRegexes[i] = extensions[i].concat(regexes[i]);
-                                } else {
-                                    mergedRegexes[i] = regexes[i];
+                    function e(i) {
+                        for (var e = {}, t = 0; t < i.length; t++) e[i[t].toUpperCase()] = i[t];
+                        return e;
+                    }
+                    function n(i, e) {
+                        if (!(typeof i === l && 0 < i.length)) return !!gi(i) && -1 !== ki(e).indexOf(ki(i));
+                        for (var t in i) if (ki(i[t]) == ki(e)) return 1;
+                    }
+                    var w = '',
+                        u = 'function',
+                        b = 'undefined',
+                        l = 'object',
+                        c = 'string',
+                        p = 'major',
+                        h = 'model',
+                        m = 'name',
+                        f = 'type',
+                        g = 'vendor',
+                        v = 'version',
+                        k = 'architecture',
+                        x = 'console',
+                        y = 'mobile',
+                        r = 'tablet',
+                        t = 'smarttv',
+                        o = 'wearable',
+                        a = 'xr',
+                        s = 'embedded',
+                        S = 'inapp',
+                        _ = 'user-agent',
+                        C = 500,
+                        T = 'brands',
+                        q = 'formFactors',
+                        O = 'fullVersionList',
+                        z = 'platform',
+                        A = 'platformVersion',
+                        N = 'bitness',
+                        P = 'sec-ch-ua',
+                        H = P + '-full-version-list',
+                        I = P + '-arch',
+                        U = P + '-' + N,
+                        j = P + '-form-factors',
+                        E = P + '-' + y,
+                        M = P + '-' + h,
+                        R = P + '-' + z,
+                        B = R + '-version',
+                        V = [T, O, y, h, z, A, k, q, N],
+                        F = 'browser',
+                        G = 'cpu',
+                        L = 'device',
+                        D = 'engine',
+                        X = 'os',
+                        $ = 'result',
+                        W = 'Amazon',
+                        K = 'Apple',
+                        Q = 'ASUS',
+                        Z = 'BlackBerry',
+                        Y = 'Google',
+                        J = 'Huawei',
+                        ii = 'Microsoft',
+                        ei = 'Motorola',
+                        ti = 'Samsung',
+                        oi = 'Sony',
+                        ri = 'Xiaomi',
+                        ai = 'Zebra',
+                        si = 'Mobile ',
+                        ni = ' Browser',
+                        wi = 'Chromecast',
+                        bi = 'Firefox',
+                        ci = 'Opera',
+                        di = 'Facebook',
+                        ui = 'Windows',
+                        li = typeof i !== b,
+                        pi = li && i.navigator ? i.navigator : d,
+                        hi = pi && pi.userAgentData ? pi.userAgentData : d,
+                        mi = function (i, e) {
+                            var t,
+                                o = {},
+                                r = e;
+                            if (!fi(e))
+                                for (var a in ((r = {}), e)) for (var s in e[a]) r[s] = e[a][s].concat(r[s] || []);
+                            for (t in i) o[t] = r[t] && r[t].length % 2 == 0 ? r[t].concat(i[t]) : i[t];
+                            return o;
+                        },
+                        fi = function (i, e) {
+                            for (var t in i) return /^(browser|cpu|device|engine|os)$/.test(t) || (!!e && fi(i[t]));
+                        },
+                        gi = function (i) {
+                            return typeof i === c;
+                        },
+                        vi = function (i) {
+                            if (!i) return d;
+                            for (var e, t = [], o = Si(/\\?\"/g, i).split(','), r = 0; r < o.length; r++)
+                                -1 < o[r].indexOf(';')
+                                    ? ((e = Ci(o[r]).split(';v=')), (t[r] = { brand: e[0], version: e[1] }))
+                                    : (t[r] = Ci(o[r]));
+                            return t;
+                        },
+                        ki = function (i) {
+                            return gi(i) ? i.toLowerCase() : i;
+                        },
+                        xi = function (i) {
+                            return gi(i) ? Si(/[^\d\.]/g, i).split('.')[0] : d;
+                        },
+                        yi = function (i) {
+                            for (var e in i) {
+                                e = i[e];
+                                typeof e == l && 2 == e.length ? (this[e[0]] = e[1]) : (this[e] = d);
+                            }
+                            return this;
+                        },
+                        Si = function (i, e) {
+                            return gi(e) ? e.replace(i, w) : e;
+                        },
+                        _i = function (i) {
+                            return Si(/\\?\"/g, i);
+                        },
+                        Ci = function (i, e) {
+                            if (gi(i)) return (i = Si(/^\s\s*/, i)), typeof e === b ? i : i.substring(0, C);
+                        },
+                        Ti = function (i, e) {
+                            if (i && e)
+                                for (var t, o, r, a, s, n = 0; n < e.length && !a; ) {
+                                    for (var w = e[n], b = e[n + 1], c = (t = 0); c < w.length && !a && w[c]; )
+                                        if ((a = w[c++].exec(i)))
+                                            for (o = 0; o < b.length; o++)
+                                                (s = a[++t]),
+                                                    typeof (r = b[o]) === l && 0 < r.length
+                                                        ? 2 === r.length
+                                                            ? typeof r[1] == u
+                                                                ? (this[r[0]] = r[1].call(this, s))
+                                                                : (this[r[0]] = r[1])
+                                                            : 3 === r.length
+                                                              ? typeof r[1] !== u || (r[1].exec && r[1].test)
+                                                                  ? (this[r[0]] = s ? s.replace(r[1], r[2]) : d)
+                                                                  : (this[r[0]] = s ? r[1].call(this, s, r[2]) : d)
+                                                              : 4 === r.length &&
+                                                                (this[r[0]] = s
+                                                                    ? r[3].call(this, s.replace(r[1], r[2]))
+                                                                    : d)
+                                                        : (this[r] = s || d);
+                                    n += 2;
                                 }
-                            }
-                            return mergedRegexes;
                         },
-                        enumerize = function (arr) {
-                            var enums = {};
-                            for (var i = 0; i < arr.length; i++) {
-                                enums[arr[i].toUpperCase()] = arr[i];
-                            }
-                            return enums;
+                        qi = function (i, e) {
+                            for (var t in e)
+                                if (typeof e[t] === l && 0 < e[t].length) {
+                                    for (var o = 0; o < e[t].length; o++) if (n(e[t][o], i)) return '?' === t ? d : t;
+                                } else if (n(e[t], i)) return '?' === t ? d : t;
+                            return e.hasOwnProperty('*') ? e['*'] : i;
                         },
-                        has = function (str1, str2) {
-                            return typeof str1 === STR_TYPE ? lowerize(str2).indexOf(lowerize(str1)) !== -1 : false;
-                        },
-                        lowerize = function (str) {
-                            return str.toLowerCase();
-                        },
-                        majorize = function (version) {
-                            return typeof version === STR_TYPE
-                                ? version.replace(/[^\d\.]/g, EMPTY).split('.')[0]
-                                : undefined;
-                        },
-                        trim = function (str, len) {
-                            if (typeof str === STR_TYPE) {
-                                str = str.replace(/^\s\s*/, EMPTY);
-                                return typeof len === UNDEF_TYPE ? str : str.substring(0, UA_MAX_LENGTH);
-                            }
-                        };
-
-                    ///////////////
-                    // Map helper
-                    //////////////
-
-                    var rgxMapper = function (ua, arrays) {
-                            var i = 0,
-                                j,
-                                k,
-                                p,
-                                q,
-                                matches,
-                                match;
-
-                            // loop through all regexes maps
-                            while (i < arrays.length && !matches) {
-                                var regex = arrays[i], // even sequence (0,2,4,..)
-                                    props = arrays[i + 1]; // odd sequence (1,3,5,..)
-                                j = k = 0;
-
-                                // try matching uastring with regexes
-                                while (j < regex.length && !matches) {
-                                    if (!regex[j]) {
-                                        break;
-                                    }
-                                    matches = regex[j++].exec(ua);
-
-                                    if (!!matches) {
-                                        for (p = 0; p < props.length; p++) {
-                                            match = matches[++k];
-                                            q = props[p];
-                                            // check if given property is actually array
-                                            if (typeof q === OBJ_TYPE && q.length > 0) {
-                                                if (q.length === 2) {
-                                                    if (typeof q[1] == FUNC_TYPE) {
-                                                        // assign modified match
-                                                        this[q[0]] = q[1].call(this, match);
-                                                    } else {
-                                                        // assign given value, ignore regex match
-                                                        this[q[0]] = q[1];
-                                                    }
-                                                } else if (q.length === 3) {
-                                                    // check whether function or regex
-                                                    if (typeof q[1] === FUNC_TYPE && !(q[1].exec && q[1].test)) {
-                                                        // call function (usually string mapper)
-                                                        this[q[0]] = match ? q[1].call(this, match, q[2]) : undefined;
-                                                    } else {
-                                                        // sanitize match using given regex
-                                                        this[q[0]] = match ? match.replace(q[1], q[2]) : undefined;
-                                                    }
-                                                } else if (q.length === 4) {
-                                                    this[q[0]] = match
-                                                        ? q[3].call(this, match.replace(q[1], q[2]))
-                                                        : undefined;
-                                                }
-                                            } else {
-                                                this[q] = match ? match : undefined;
-                                            }
-                                        }
-                                    }
-                                }
-                                i += 2;
-                            }
-                        },
-                        strMapper = function (str, map) {
-                            for (var i in map) {
-                                // check if current value is array
-                                if (typeof map[i] === OBJ_TYPE && map[i].length > 0) {
-                                    for (var j = 0; j < map[i].length; j++) {
-                                        if (has(map[i][j], str)) {
-                                            return i === UNKNOWN ? undefined : i;
-                                        }
-                                    }
-                                } else if (has(map[i], str)) {
-                                    return i === UNKNOWN ? undefined : i;
-                                }
-                            }
-                            return map.hasOwnProperty('*') ? map['*'] : str;
-                        };
-
-                    ///////////////
-                    // String map
-                    //////////////
-
-                    // Safari < 3.0
-                    var oldSafariMap = {
-                            '1.0': '/8',
-                            1.2: '/1',
-                            1.3: '/3',
-                            '2.0': '/412',
-                            '2.0.2': '/416',
-                            '2.0.3': '/417',
-                            '2.0.4': '/419',
-                            '?': '/',
-                        },
-                        windowsVersionMap = {
+                        Oi = {
                             ME: '4.90',
                             'NT 3.11': 'NT3.51',
                             'NT 4.0': 'NT4.0',
-                            2000: 'NT 5.0',
+                            2e3: 'NT 5.0',
                             XP: ['NT 5.1', 'NT 5.2'],
                             Vista: 'NT 6.0',
                             7: 'NT 6.1',
@@ -16644,1118 +16824,884 @@
                             8.1: 'NT 6.3',
                             10: ['NT 6.4', 'NT 10.0'],
                             RT: 'ARM',
-                        };
-
-                    //////////////
-                    // Regex map
-                    /////////////
-
-                    var regexes = {
-                        browser: [
-                            [
-                                /\b(?:crmo|crios)\/([\w\.]+)/i, // Chrome for Android/iOS
-                            ],
-                            [VERSION, [NAME, 'Chrome']],
-                            [
-                                /edg(?:e|ios|a)?\/([\w\.]+)/i, // Microsoft Edge
-                            ],
-                            [VERSION, [NAME, 'Edge']],
-                            [
-                                // Presto based
-                                /(opera mini)\/([-\w\.]+)/i, // Opera Mini
-                                /(opera [mobiletab]{3,6})\b.+version\/([-\w\.]+)/i, // Opera Mobi/Tablet
-                                /(opera)(?:.+version\/|[\/ ]+)([\w\.]+)/i, // Opera
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /opios[\/ ]+([\w\.]+)/i, // Opera mini on iphone >= 8.0
-                            ],
-                            [VERSION, [NAME, OPERA + ' Mini']],
-                            [
-                                /\bop(?:rg)?x\/([\w\.]+)/i, // Opera GX
-                            ],
-                            [VERSION, [NAME, OPERA + ' GX']],
-                            [
-                                /\bopr\/([\w\.]+)/i, // Opera Webkit
-                            ],
-                            [VERSION, [NAME, OPERA]],
-                            [
-                                // Mixed
-                                /\bb[ai]*d(?:uhd|[ub]*[aekoprswx]{5,6})[\/ ]?([\w\.]+)/i, // Baidu
-                            ],
-                            [VERSION, [NAME, 'Baidu']],
-                            [
-                                /(kindle)\/([\w\.]+)/i, // Kindle
-                                /(lunascape|maxthon|netfront|jasmine|blazer|sleipnir)[\/ ]?([\w\.]*)/i,
-                                // Lunascape/Maxthon/Netfront/Jasmine/Blazer/Sleipnir
-                                // Trident based
-                                /(avant|iemobile|slim)\s?(?:browser)?[\/ ]?([\w\.]*)/i, // Avant/IEMobile/SlimBrowser
-                                /(?:ms|\()(ie) ([\w\.]+)/i, // Internet Explorer
-
-                                // Webkit/KHTML based                                               // Flock/RockMelt/Midori/Epiphany/Silk/Skyfire/Bolt/Iron/Iridium/PhantomJS/Bowser/QupZilla/Falkon
-                                /(flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|duckduckgo|klar|helio)\/([-\w\.]+)/i,
-                                // Rekonq/Puffin/Brave/Whale/QQBrowserLite/QQ//Vivaldi/DuckDuckGo/Klar/Helio
-                                /(heytap|ovi)browser\/([\d\.]+)/i, // HeyTap/Ovi
-                                /(weibo)__([\d\.]+)/i, // Weibo
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /quark(?:pc)?\/([-\w\.]+)/i, // Quark
-                            ],
-                            [VERSION, [NAME, 'Quark']],
-                            [
-                                /\bddg\/([\w\.]+)/i, // DuckDuckGo
-                            ],
-                            [VERSION, [NAME, 'DuckDuckGo']],
-                            [
-                                /(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)/i, // UCBrowser
-                            ],
-                            [VERSION, [NAME, 'UC' + BROWSER]],
-                            [
-                                /microm.+\bqbcore\/([\w\.]+)/i, // WeChat Desktop for Windows Built-in Browser
-                                /\bqbcore\/([\w\.]+).+microm/i,
-                                /micromessenger\/([\w\.]+)/i, // WeChat
-                            ],
-                            [VERSION, [NAME, 'WeChat']],
-                            [
-                                /konqueror\/([\w\.]+)/i, // Konqueror
-                            ],
-                            [VERSION, [NAME, 'Konqueror']],
-                            [
-                                /trident.+rv[: ]([\w\.]{1,9})\b.+like gecko/i, // IE11
-                            ],
-                            [VERSION, [NAME, 'IE']],
-                            [
-                                /ya(?:search)?browser\/([\w\.]+)/i, // Yandex
-                            ],
-                            [VERSION, [NAME, 'Yandex']],
-                            [
-                                /slbrowser\/([\w\.]+)/i, // Smart Lenovo Browser
-                            ],
-                            [VERSION, [NAME, 'Smart Lenovo ' + BROWSER]],
-                            [
-                                /(avast|avg)\/([\w\.]+)/i, // Avast/AVG Secure Browser
-                            ],
-                            [[NAME, /(.+)/, '$1 Secure ' + BROWSER], VERSION],
-                            [
-                                /\bfocus\/([\w\.]+)/i, // Firefox Focus
-                            ],
-                            [VERSION, [NAME, FIREFOX + ' Focus']],
-                            [
-                                /\bopt\/([\w\.]+)/i, // Opera Touch
-                            ],
-                            [VERSION, [NAME, OPERA + ' Touch']],
-                            [
-                                /coc_coc\w+\/([\w\.]+)/i, // Coc Coc Browser
-                            ],
-                            [VERSION, [NAME, 'Coc Coc']],
-                            [
-                                /dolfin\/([\w\.]+)/i, // Dolphin
-                            ],
-                            [VERSION, [NAME, 'Dolphin']],
-                            [
-                                /coast\/([\w\.]+)/i, // Opera Coast
-                            ],
-                            [VERSION, [NAME, OPERA + ' Coast']],
-                            [
-                                /miuibrowser\/([\w\.]+)/i, // MIUI Browser
-                            ],
-                            [VERSION, [NAME, 'MIUI ' + BROWSER]],
-                            [
-                                /fxios\/([-\w\.]+)/i, // Firefox for iOS
-                            ],
-                            [VERSION, [NAME, FIREFOX]],
-                            [
-                                /\bqihu|(qi?ho?o?|360)browser/i, // 360
-                            ],
-                            [[NAME, '360' + SUFFIX_BROWSER]],
-                            [
-                                /\b(qq)\/([\w\.]+)/i, // QQ
-                            ],
-                            [[NAME, /(.+)/, '$1Browser'], VERSION],
-                            [/(oculus|sailfish|huawei|vivo|pico)browser\/([\w\.]+)/i],
-                            [[NAME, /(.+)/, '$1' + SUFFIX_BROWSER], VERSION],
-                            [
-                                // Oculus/Sailfish/HuaweiBrowser/VivoBrowser/PicoBrowser
-                                /samsungbrowser\/([\w\.]+)/i, // Samsung Internet
-                            ],
-                            [VERSION, [NAME, SAMSUNG + ' Internet']],
-                            [
-                                /(comodo_dragon)\/([\w\.]+)/i, // Comodo Dragon
-                            ],
-                            [[NAME, /_/g, ' '], VERSION],
-                            [
-                                /metasr[\/ ]?([\d\.]+)/i, // Sogou Explorer
-                            ],
-                            [VERSION, [NAME, 'Sogou Explorer']],
-                            [
-                                /(sogou)mo\w+\/([\d\.]+)/i, // Sogou Mobile
-                            ],
-                            [[NAME, 'Sogou Mobile'], VERSION],
-                            [
-                                /(electron)\/([\w\.]+) safari/i, // Electron-based App
-                                /(tesla)(?: qtcarbrowser|\/(20\d\d\.[-\w\.]+))/i, // Tesla
-                                /m?(qqbrowser|2345Explorer)[\/ ]?([\w\.]+)/i, // QQBrowser/2345 Browser
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /(lbbrowser|rekonq)/i, // LieBao Browser/Rekonq
-                                /\[(linkedin)app\]/i, // LinkedIn App for iOS & Android
-                            ],
-                            [NAME],
-                            [
-                                // WebView
-                                /((?:fban\/fbios|fb_iab\/fb4a)(?!.+fbav)|;fbav\/([\w\.]+);)/i, // Facebook App for iOS & Android
-                            ],
-                            [[NAME, FACEBOOK], VERSION],
-                            [
-                                /(Klarna)\/([\w\.]+)/i, // Klarna Shopping Browser for iOS & Android
-                                /(kakao(?:talk|story))[\/ ]([\w\.]+)/i, // Kakao App
-                                /(naver)\(.*?(\d+\.[\w\.]+).*\)/i, // Naver InApp
-                                /safari (line)\/([\w\.]+)/i, // Line App for iOS
-                                /\b(line)\/([\w\.]+)\/iab/i, // Line App for Android
-                                /(alipay)client\/([\w\.]+)/i, // Alipay
-                                /(twitter)(?:and| f.+e\/([\w\.]+))/i, // Twitter
-                                /(chromium|instagram|snapchat)[\/ ]([-\w\.]+)/i, // Chromium/Instagram/Snapchat
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /\bgsa\/([\w\.]+) .*safari\//i, // Google Search Appliance on iOS
-                            ],
-                            [VERSION, [NAME, 'GSA']],
-                            [
-                                /musical_ly(?:.+app_?version\/|_)([\w\.]+)/i, // TikTok
-                            ],
-                            [VERSION, [NAME, 'TikTok']],
-                            [
-                                /headlesschrome(?:\/([\w\.]+)| )/i, // Chrome Headless
-                            ],
-                            [VERSION, [NAME, CHROME + ' Headless']],
-                            [
-                                / wv\).+(chrome)\/([\w\.]+)/i, // Chrome WebView
-                            ],
-                            [[NAME, CHROME + ' WebView'], VERSION],
-                            [
-                                /droid.+ version\/([\w\.]+)\b.+(?:mobile safari|safari)/i, // Android Browser
-                            ],
-                            [VERSION, [NAME, 'Android ' + BROWSER]],
-                            [
-                                /(chrome|omniweb|arora|[tizenoka]{5} ?browser)\/v?([\w\.]+)/i, // Chrome/OmniWeb/Arora/Tizen/Nokia
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /version\/([\w\.\,]+) .*mobile\/\w+ (safari)/i, // Mobile Safari
-                            ],
-                            [VERSION, [NAME, 'Mobile Safari']],
-                            [
-                                /version\/([\w(\.|\,)]+) .*(mobile ?safari|safari)/i, // Safari & Safari Mobile
-                            ],
-                            [VERSION, NAME],
-                            [
-                                /webkit.+?(mobile ?safari|safari)(\/[\w\.]+)/i, // Safari < 3.0
-                            ],
-                            [NAME, [VERSION, strMapper, oldSafariMap]],
-                            [/(webkit|khtml)\/([\w\.]+)/i],
-                            [NAME, VERSION],
-                            [
-                                // Gecko based
-                                /(navigator|netscape\d?)\/([-\w\.]+)/i, // Netscape
-                            ],
-                            [[NAME, 'Netscape'], VERSION],
-                            [
-                                /(wolvic)\/([\w\.]+)/i, // Wolvic
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /mobile vr; rv:([\w\.]+)\).+firefox/i, // Firefox Reality
-                            ],
-                            [VERSION, [NAME, FIREFOX + ' Reality']],
-                            [
-                                /ekiohf.+(flow)\/([\w\.]+)/i, // Flow
-                                /(swiftfox)/i, // Swiftfox
-                                /(icedragon|iceweasel|camino|chimera|fennec|maemo browser|minimo|conkeror)[\/ ]?([\w\.\+]+)/i,
-                                // IceDragon/Iceweasel/Camino/Chimera/Fennec/Maemo/Minimo/Conkeror
-                                /(seamonkey|k-meleon|icecat|iceape|firebird|phoenix|palemoon|basilisk|waterfox)\/([-\w\.]+)$/i,
-                                // Firefox/SeaMonkey/K-Meleon/IceCat/IceApe/Firebird/Phoenix
-                                /(firefox)\/([\w\.]+)/i, // Other Firefox-based
-                                /(mozilla)\/([\w\.]+) .+rv\:.+gecko\/\d+/i, // Mozilla
-
-                                // Other
-                                /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf|obigo|mosaic|(?:go|ice|up)[\. ]?browser)[-\/ ]?v?([\w\.]+)/i,
-                                // Polaris/Lynx/Dillo/iCab/Doris/Amaya/w3m/NetSurf/Obigo/Mosaic/Go/ICE/UP.Browser
-                                /(links) \(([\w\.]+)/i, // Links
-                            ],
-                            [NAME, [VERSION, /_/g, '.']],
-                            [
-                                /(cobalt)\/([\w\.]+)/i, // Cobalt
-                            ],
-                            [NAME, [VERSION, /master.|lts./, '']],
-                        ],
-
-                        cpu: [
-                            [
-                                /(?:(amd|x(?:(?:86|64)[-_])?|wow|win)64)[;\)]/i, // AMD64 (x64)
-                            ],
-                            [[ARCHITECTURE, 'amd64']],
-                            [
-                                /(ia32(?=;))/i, // IA32 (quicktime)
-                            ],
-                            [[ARCHITECTURE, lowerize]],
-                            [
-                                /((?:i[346]|x)86)[;\)]/i, // IA32 (x86)
-                            ],
-                            [[ARCHITECTURE, 'ia32']],
-                            [
-                                /\b(aarch64|arm(v?8e?l?|_?64))\b/i, // ARM64
-                            ],
-                            [[ARCHITECTURE, 'arm64']],
-                            [
-                                /\b(arm(?:v[67])?ht?n?[fl]p?)\b/i, // ARMHF
-                            ],
-                            [[ARCHITECTURE, 'armhf']],
-                            [
-                                // PocketPC mistakenly identified as PowerPC
-                                /windows (ce|mobile); ppc;/i,
-                            ],
-                            [[ARCHITECTURE, 'arm']],
-                            [
-                                /((?:ppc|powerpc)(?:64)?)(?: mac|;|\))/i, // PowerPC
-                            ],
-                            [[ARCHITECTURE, /ower/, EMPTY, lowerize]],
-                            [
-                                /(sun4\w)[;\)]/i, // SPARC
-                            ],
-                            [[ARCHITECTURE, 'sparc']],
-                            [
-                                /((?:avr32|ia64(?=;))|68k(?=\))|\barm(?=v(?:[1-7]|[5-7]1)l?|;|eabi)|(?=atmel )avr|(?:irix|mips|sparc)(?:64)?\b|pa-risc)/i,
-                                // IA64, 68K, ARM/64, AVR/32, IRIX/64, MIPS/64, SPARC/64, PA-RISC
-                            ],
-                            [[ARCHITECTURE, lowerize]],
-                        ],
-
-                        device: [
-                            [
-                                //////////////////////////
-                                // MOBILES & TABLETS
-                                /////////////////////////
-
-                                // Samsung
-                                /\b(sch-i[89]0\d|shw-m380s|sm-[ptx]\w{2,4}|gt-[pn]\d{2,4}|sgh-t8[56]9|nexus 10)/i,
-                            ],
-                            [MODEL, [VENDOR, SAMSUNG], [TYPE, TABLET]],
-                            [
-                                /\b((?:s[cgp]h|gt|sm)-(?![lr])\w+|sc[g-]?[\d]+a?|galaxy nexus)/i,
-                                /samsung[- ]((?!sm-[lr])[-\w]+)/i,
-                                /sec-(sgh\w+)/i,
-                            ],
-                            [MODEL, [VENDOR, SAMSUNG], [TYPE, MOBILE]],
-                            [
-                                // Apple
-                                /(?:\/|\()(ip(?:hone|od)[\w, ]*)(?:\/|;)/i, // iPod/iPhone
-                            ],
-                            [MODEL, [VENDOR, APPLE], [TYPE, MOBILE]],
-                            [
-                                /\((ipad);[-\w\),; ]+apple/i, // iPad
-                                /applecoremedia\/[\w\.]+ \((ipad)/i,
-                                /\b(ipad)\d\d?,\d\d?[;\]].+ios/i,
-                            ],
-                            [MODEL, [VENDOR, APPLE], [TYPE, TABLET]],
-                            [/(macintosh);/i],
-                            [MODEL, [VENDOR, APPLE]],
-                            [
-                                // Sharp
-                                /\b(sh-?[altvz]?\d\d[a-ekm]?)/i,
-                            ],
-                            [MODEL, [VENDOR, SHARP], [TYPE, MOBILE]],
-                            [
-                                // Huawei
-                                /\b((?:ag[rs][23]?|bah2?|sht?|btv)-a?[lw]\d{2})\b(?!.+d\/s)/i,
-                            ],
-                            [MODEL, [VENDOR, HUAWEI], [TYPE, TABLET]],
-                            [
-                                /(?:huawei|honor)([-\w ]+)[;\)]/i,
-                                /\b(nexus 6p|\w{2,4}e?-[atu]?[ln][\dx][012359c][adn]?)\b(?!.+d\/s)/i,
-                            ],
-                            [MODEL, [VENDOR, HUAWEI], [TYPE, MOBILE]],
-                            [
-                                // Xiaomi
-                                /\b(poco[\w ]+|m2\d{3}j\d\d[a-z]{2})(?: bui|\))/i, // Xiaomi POCO
-                                /\b; (\w+) build\/hm\1/i, // Xiaomi Hongmi 'numeric' models
-                                /\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui/i, // Xiaomi Hongmi
-                                /\b(redmi[\-_ ]?(?:note|k)?[\w_ ]+)(?: bui|\))/i, // Xiaomi Redmi
-                                /oid[^\)]+; (m?[12][0-389][01]\w{3,6}[c-y])( bui|; wv|\))/i, // Xiaomi Redmi 'numeric' models
-                                /\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note lte|max|cc)?[_ ]?(?:\d?\w?)[_ ]?(?:plus|se|lite|pro)?)(?: bui|\))/i, // Xiaomi Mi
-                            ],
-                            [
-                                [MODEL, /_/g, ' '],
-                                [VENDOR, XIAOMI],
-                                [TYPE, MOBILE],
-                            ],
-                            [
-                                /oid[^\)]+; (2\d{4}(283|rpbf)[cgl])( bui|\))/i, // Redmi Pad
-                                /\b(mi[-_ ]?(?:pad)(?:[\w_ ]+))(?: bui|\))/i, // Mi Pad tablets
-                            ],
-                            [
-                                [MODEL, /_/g, ' '],
-                                [VENDOR, XIAOMI],
-                                [TYPE, TABLET],
-                            ],
-                            [
-                                // OPPO
-                                /; (\w+) bui.+ oppo/i,
-                                /\b(cph[12]\d{3}|p(?:af|c[al]|d\w|e[ar])[mt]\d0|x9007|a101op)\b/i,
-                            ],
-                            [MODEL, [VENDOR, 'OPPO'], [TYPE, MOBILE]],
-                            [/\b(opd2\d{3}a?) bui/i],
-                            [MODEL, [VENDOR, 'OPPO'], [TYPE, TABLET]],
-                            [
-                                // Vivo
-                                /vivo (\w+)(?: bui|\))/i,
-                                /\b(v[12]\d{3}\w?[at])(?: bui|;)/i,
-                            ],
-                            [MODEL, [VENDOR, 'Vivo'], [TYPE, MOBILE]],
-                            [
-                                // Realme
-                                /\b(rmx[1-3]\d{3})(?: bui|;|\))/i,
-                            ],
-                            [MODEL, [VENDOR, 'Realme'], [TYPE, MOBILE]],
-                            [
-                                // Motorola
-                                /\b(milestone|droid(?:[2-4x]| (?:bionic|x2|pro|razr))?:?( 4g)?)\b[\w ]+build\//i,
-                                /\bmot(?:orola)?[- ](\w*)/i,
-                                /((?:moto[\w\(\) ]+|xt\d{3,4}|nexus 6)(?= bui|\)))/i,
-                            ],
-                            [MODEL, [VENDOR, MOTOROLA], [TYPE, MOBILE]],
-                            [/\b(mz60\d|xoom[2 ]{0,2}) build\//i],
-                            [MODEL, [VENDOR, MOTOROLA], [TYPE, TABLET]],
-                            [
-                                // LG
-                                /((?=lg)?[vl]k\-?\d{3}) bui| 3\.[-\w; ]{10}lg?-([06cv9]{3,4})/i,
-                            ],
-                            [MODEL, [VENDOR, LG], [TYPE, TABLET]],
-                            [
-                                /(lm(?:-?f100[nv]?|-[\w\.]+)(?= bui|\))|nexus [45])/i,
-                                /\blg[-e;\/ ]+((?!browser|netcast|android tv)\w+)/i,
-                                /\blg-?([\d\w]+) bui/i,
-                            ],
-                            [MODEL, [VENDOR, LG], [TYPE, MOBILE]],
-                            [
-                                // Lenovo
-                                /(ideatab[-\w ]+)/i,
-                                /lenovo ?(s[56]000[-\w]+|tab(?:[\w ]+)|yt[-\d\w]{6}|tb[-\d\w]{6})/i,
-                            ],
-                            [MODEL, [VENDOR, 'Lenovo'], [TYPE, TABLET]],
-                            [
-                                // Nokia
-                                /(?:maemo|nokia).*(n900|lumia \d+)/i,
-                                /nokia[-_ ]?([-\w\.]*)/i,
-                            ],
-                            [
-                                [MODEL, /_/g, ' '],
-                                [VENDOR, 'Nokia'],
-                                [TYPE, MOBILE],
-                            ],
-                            [
-                                // Google
-                                /(pixel c)\b/i, // Google Pixel C
-                            ],
-                            [MODEL, [VENDOR, GOOGLE], [TYPE, TABLET]],
-                            [
-                                /droid.+; (pixel[\daxl ]{0,6})(?: bui|\))/i, // Google Pixel
-                            ],
-                            [MODEL, [VENDOR, GOOGLE], [TYPE, MOBILE]],
-                            [
-                                // Sony
-                                /droid.+ (a?\d[0-2]{2}so|[c-g]\d{4}|so[-gl]\w+|xq-a\w[4-7][12])(?= bui|\).+chrome\/(?![1-6]{0,1}\d\.))/i,
-                            ],
-                            [MODEL, [VENDOR, SONY], [TYPE, MOBILE]],
-                            [/sony tablet [ps]/i, /\b(?:sony)?sgp\w+(?: bui|\))/i],
-                            [
-                                [MODEL, 'Xperia Tablet'],
-                                [VENDOR, SONY],
-                                [TYPE, TABLET],
-                            ],
-                            [
-                                // OnePlus
-                                / (kb2005|in20[12]5|be20[12][59])\b/i,
-                                /(?:one)?(?:plus)? (a\d0\d\d)(?: b|\))/i,
-                            ],
-                            [MODEL, [VENDOR, 'OnePlus'], [TYPE, MOBILE]],
-                            [
-                                // Amazon
-                                /(alexa)webm/i,
-                                /(kf[a-z]{2}wi|aeo(?!bc)\w\w)( bui|\))/i, // Kindle Fire without Silk / Echo Show
-                                /(kf[a-z]+)( bui|\)).+silk\//i, // Kindle Fire HD
-                            ],
-                            [MODEL, [VENDOR, AMAZON], [TYPE, TABLET]],
-                            [
-                                /((?:sd|kf)[0349hijorstuw]+)( bui|\)).+silk\//i, // Fire Phone
-                            ],
-                            [
-                                [MODEL, /(.+)/g, 'Fire Phone $1'],
-                                [VENDOR, AMAZON],
-                                [TYPE, MOBILE],
-                            ],
-                            [
-                                // BlackBerry
-                                /(playbook);[-\w\),; ]+(rim)/i, // BlackBerry PlayBook
-                            ],
-                            [MODEL, VENDOR, [TYPE, TABLET]],
-                            [
-                                /\b((?:bb[a-f]|st[hv])100-\d)/i,
-                                /\(bb10; (\w+)/i, // BlackBerry 10
-                            ],
-                            [MODEL, [VENDOR, BLACKBERRY], [TYPE, MOBILE]],
-                            [
-                                // Asus
-                                /(?:\b|asus_)(transfo[prime ]{4,10} \w+|eeepc|slider \w+|nexus 7|padfone|p00[cj])/i,
-                            ],
-                            [MODEL, [VENDOR, ASUS], [TYPE, TABLET]],
-                            [/ (z[bes]6[027][012][km][ls]|zenfone \d\w?)\b/i],
-                            [MODEL, [VENDOR, ASUS], [TYPE, MOBILE]],
-                            [
-                                // HTC
-                                /(nexus 9)/i, // HTC Nexus 9
-                            ],
-                            [MODEL, [VENDOR, 'HTC'], [TYPE, TABLET]],
-                            [
-                                /(htc)[-;_ ]{1,2}([\w ]+(?=\)| bui)|\w+)/i, // HTC
-
-                                // ZTE
-                                /(zte)[- ]([\w ]+?)(?: bui|\/|\))/i,
-                                /(alcatel|geeksphone|nexian|panasonic(?!(?:;|\.))|sony(?!-bra))[-_ ]?([-\w]*)/i, // Alcatel/GeeksPhone/Nexian/Panasonic/Sony
-                            ],
-                            [VENDOR, [MODEL, /_/g, ' '], [TYPE, MOBILE]],
-                            [
-                                // TCL
-                                /droid [\w\.]+; ((?:8[14]9[16]|9(?:0(?:48|60|8[01])|1(?:3[27]|66)|2(?:6[69]|9[56])|466))[gqswx])\w*(\)| bui)/i,
-                            ],
-                            [MODEL, [VENDOR, 'TCL'], [TYPE, TABLET]],
-                            [
-                                // itel
-                                /(itel) ((\w+))/i,
-                            ],
-                            [
-                                [VENDOR, lowerize],
-                                MODEL,
-                                [TYPE, strMapper, { tablet: ['p10001l', 'w7001'], '*': 'mobile' }],
-                            ],
-                            [
-                                // Acer
-                                /droid.+; ([ab][1-7]-?[0178a]\d\d?)/i,
-                            ],
-                            [MODEL, [VENDOR, 'Acer'], [TYPE, TABLET]],
-                            [
-                                // Meizu
-                                /droid.+; (m[1-5] note) bui/i,
-                                /\bmz-([-\w]{2,})/i,
-                            ],
-                            [MODEL, [VENDOR, 'Meizu'], [TYPE, MOBILE]],
-                            [
-                                // Ulefone
-                                /; ((?:power )?armor(?:[\w ]{0,8}))(?: bui|\))/i,
-                            ],
-                            [MODEL, [VENDOR, 'Ulefone'], [TYPE, MOBILE]],
-                            [
-                                // Nothing
-                                /droid.+; (a(?:015|06[35]|142p?))/i,
-                            ],
-                            [MODEL, [VENDOR, 'Nothing'], [TYPE, MOBILE]],
-                            [
-                                // MIXED
-                                /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron|infinix|tecno)[-_ ]?([-\w]*)/i,
-                                // BlackBerry/BenQ/Palm/Sony-Ericsson/Acer/Asus/Dell/Meizu/Motorola/Polytron
-                                /(hp) ([\w ]+\w)/i, // HP iPAQ
-                                /(asus)-?(\w+)/i, // Asus
-                                /(microsoft); (lumia[\w ]+)/i, // Microsoft Lumia
-                                /(lenovo)[-_ ]?([-\w]+)/i, // Lenovo
-                                /(jolla)/i, // Jolla
-                                /(oppo) ?([\w ]+) bui/i, // OPPO
-                            ],
-                            [VENDOR, MODEL, [TYPE, MOBILE]],
-                            [
-                                /(kobo)\s(ereader|touch)/i, // Kobo
-                                /(archos) (gamepad2?)/i, // Archos
-                                /(hp).+(touchpad(?!.+tablet)|tablet)/i, // HP TouchPad
-                                /(kindle)\/([\w\.]+)/i, // Kindle
-                                /(nook)[\w ]+build\/(\w+)/i, // Nook
-                                /(dell) (strea[kpr\d ]*[\dko])/i, // Dell Streak
-                                /(le[- ]+pan)[- ]+(\w{1,9}) bui/i, // Le Pan Tablets
-                                /(trinity)[- ]*(t\d{3}) bui/i, // Trinity Tablets
-                                /(gigaset)[- ]+(q\w{1,9}) bui/i, // Gigaset Tablets
-                                /(vodafone) ([\w ]+)(?:\)| bui)/i, // Vodafone
-                            ],
-                            [VENDOR, MODEL, [TYPE, TABLET]],
-                            [
-                                /(surface duo)/i, // Surface Duo
-                            ],
-                            [MODEL, [VENDOR, MICROSOFT], [TYPE, TABLET]],
-                            [
-                                /droid [\d\.]+; (fp\du?)(?: b|\))/i, // Fairphone
-                            ],
-                            [MODEL, [VENDOR, 'Fairphone'], [TYPE, MOBILE]],
-                            [
-                                /(u304aa)/i, // AT&T
-                            ],
-                            [MODEL, [VENDOR, 'AT&T'], [TYPE, MOBILE]],
-                            [
-                                /\bsie-(\w*)/i, // Siemens
-                            ],
-                            [MODEL, [VENDOR, 'Siemens'], [TYPE, MOBILE]],
-                            [
-                                /\b(rct\w+) b/i, // RCA Tablets
-                            ],
-                            [MODEL, [VENDOR, 'RCA'], [TYPE, TABLET]],
-                            [
-                                /\b(venue[\d ]{2,7}) b/i, // Dell Venue Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Dell'], [TYPE, TABLET]],
-                            [
-                                /\b(q(?:mv|ta)\w+) b/i, // Verizon Tablet
-                            ],
-                            [MODEL, [VENDOR, 'Verizon'], [TYPE, TABLET]],
-                            [
-                                /\b(?:barnes[& ]+noble |bn[rt])([\w\+ ]*) b/i, // Barnes & Noble Tablet
-                            ],
-                            [MODEL, [VENDOR, 'Barnes & Noble'], [TYPE, TABLET]],
-                            [/\b(tm\d{3}\w+) b/i],
-                            [MODEL, [VENDOR, 'NuVision'], [TYPE, TABLET]],
-                            [
-                                /\b(k88) b/i, // ZTE K Series Tablet
-                            ],
-                            [MODEL, [VENDOR, 'ZTE'], [TYPE, TABLET]],
-                            [
-                                /\b(nx\d{3}j) b/i, // ZTE Nubia
-                            ],
-                            [MODEL, [VENDOR, 'ZTE'], [TYPE, MOBILE]],
-                            [
-                                /\b(gen\d{3}) b.+49h/i, // Swiss GEN Mobile
-                            ],
-                            [MODEL, [VENDOR, 'Swiss'], [TYPE, MOBILE]],
-                            [
-                                /\b(zur\d{3}) b/i, // Swiss ZUR Tablet
-                            ],
-                            [MODEL, [VENDOR, 'Swiss'], [TYPE, TABLET]],
-                            [
-                                /\b((zeki)?tb.*\b) b/i, // Zeki Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Zeki'], [TYPE, TABLET]],
-                            [
-                                /\b([yr]\d{2}) b/i,
-                                /\b(dragon[- ]+touch |dt)(\w{5}) b/i, // Dragon Touch Tablet
-                            ],
-                            [[VENDOR, 'Dragon Touch'], MODEL, [TYPE, TABLET]],
-                            [
-                                /\b(ns-?\w{0,9}) b/i, // Insignia Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Insignia'], [TYPE, TABLET]],
-                            [
-                                /\b((nxa|next)-?\w{0,9}) b/i, // NextBook Tablets
-                            ],
-                            [MODEL, [VENDOR, 'NextBook'], [TYPE, TABLET]],
-                            [
-                                /\b(xtreme\_)?(v(1[045]|2[015]|[3469]0|7[05])) b/i, // Voice Xtreme Phones
-                            ],
-                            [[VENDOR, 'Voice'], MODEL, [TYPE, MOBILE]],
-                            [
-                                /\b(lvtel\-)?(v1[12]) b/i, // LvTel Phones
-                            ],
-                            [[VENDOR, 'LvTel'], MODEL, [TYPE, MOBILE]],
-                            [
-                                /\b(ph-1) /i, // Essential PH-1
-                            ],
-                            [MODEL, [VENDOR, 'Essential'], [TYPE, MOBILE]],
-                            [
-                                /\b(v(100md|700na|7011|917g).*\b) b/i, // Envizen Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Envizen'], [TYPE, TABLET]],
-                            [
-                                /\b(trio[-\w\. ]+) b/i, // MachSpeed Tablets
-                            ],
-                            [MODEL, [VENDOR, 'MachSpeed'], [TYPE, TABLET]],
-                            [
-                                /\btu_(1491) b/i, // Rotor Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Rotor'], [TYPE, TABLET]],
-                            [
-                                /(shield[\w ]+) b/i, // Nvidia Shield Tablets
-                            ],
-                            [MODEL, [VENDOR, 'Nvidia'], [TYPE, TABLET]],
-                            [
-                                /(sprint) (\w+)/i, // Sprint Phones
-                            ],
-                            [VENDOR, MODEL, [TYPE, MOBILE]],
-                            [
-                                /(kin\.[onetw]{3})/i, // Microsoft Kin
-                            ],
-                            [
-                                [MODEL, /\./g, ' '],
-                                [VENDOR, MICROSOFT],
-                                [TYPE, MOBILE],
-                            ],
-                            [
-                                /droid.+; (cc6666?|et5[16]|mc[239][23]x?|vc8[03]x?)\)/i, // Zebra
-                            ],
-                            [MODEL, [VENDOR, ZEBRA], [TYPE, TABLET]],
-                            [/droid.+; (ec30|ps20|tc[2-8]\d[kx])\)/i],
-                            [MODEL, [VENDOR, ZEBRA], [TYPE, MOBILE]],
-                            [
-                                ///////////////////
-                                // SMARTTVS
-                                ///////////////////
-
-                                /smart-tv.+(samsung)/i, // Samsung
-                            ],
-                            [VENDOR, [TYPE, SMARTTV]],
-                            [/hbbtv.+maple;(\d+)/i],
-                            [
-                                [MODEL, /^/, 'SmartTV'],
-                                [VENDOR, SAMSUNG],
-                                [TYPE, SMARTTV],
-                            ],
-                            [
-                                /(nux; netcast.+smarttv|lg (netcast\.tv-201\d|android tv))/i, // LG SmartTV
-                            ],
-                            [
-                                [VENDOR, LG],
-                                [TYPE, SMARTTV],
-                            ],
-                            [
-                                /(apple) ?tv/i, // Apple TV
-                            ],
-                            [VENDOR, [MODEL, APPLE + ' TV'], [TYPE, SMARTTV]],
-                            [
-                                /crkey/i, // Google Chromecast
-                            ],
-                            [
-                                [MODEL, CHROME + 'cast'],
-                                [VENDOR, GOOGLE],
-                                [TYPE, SMARTTV],
-                            ],
-                            [
-                                /droid.+aft(\w+)( bui|\))/i, // Fire TV
-                            ],
-                            [MODEL, [VENDOR, AMAZON], [TYPE, SMARTTV]],
-                            [
-                                /\(dtv[\);].+(aquos)/i,
-                                /(aquos-tv[\w ]+)\)/i, // Sharp
-                            ],
-                            [MODEL, [VENDOR, SHARP], [TYPE, SMARTTV]],
-                            [
-                                /(bravia[\w ]+)( bui|\))/i, // Sony
-                            ],
-                            [MODEL, [VENDOR, SONY], [TYPE, SMARTTV]],
-                            [
-                                /(mitv-\w{5}) bui/i, // Xiaomi
-                            ],
-                            [MODEL, [VENDOR, XIAOMI], [TYPE, SMARTTV]],
-                            [
-                                /Hbbtv.*(technisat) (.*);/i, // TechniSAT
-                            ],
-                            [VENDOR, MODEL, [TYPE, SMARTTV]],
-                            [
-                                /\b(roku)[\dx]*[\)\/]((?:dvp-)?[\d\.]*)/i, // Roku
-                                /hbbtv\/\d+\.\d+\.\d+ +\([\w\+ ]*; *([\w\d][^;]*);([^;]*)/i, // HbbTV devices
-                            ],
-                            [
-                                [VENDOR, trim],
-                                [MODEL, trim],
-                                [TYPE, SMARTTV],
-                            ],
-                            [
-                                /\b(android tv|smart[- ]?tv|opera tv|tv; rv:)\b/i, // SmartTV from Unidentified Vendors
-                            ],
-                            [[TYPE, SMARTTV]],
-                            [
-                                ///////////////////
-                                // CONSOLES
-                                ///////////////////
-
-                                /(ouya)/i, // Ouya
-                                /(nintendo) ([wids3utch]+)/i, // Nintendo
-                            ],
-                            [VENDOR, MODEL, [TYPE, CONSOLE]],
-                            [
-                                /droid.+; (shield) bui/i, // Nvidia
-                            ],
-                            [MODEL, [VENDOR, 'Nvidia'], [TYPE, CONSOLE]],
-                            [
-                                /(playstation [345portablevi]+)/i, // Playstation
-                            ],
-                            [MODEL, [VENDOR, SONY], [TYPE, CONSOLE]],
-                            [
-                                /\b(xbox(?: one)?(?!; xbox))[\); ]/i, // Microsoft Xbox
-                            ],
-                            [MODEL, [VENDOR, MICROSOFT], [TYPE, CONSOLE]],
-                            [
-                                ///////////////////
-                                // WEARABLES
-                                ///////////////////
-
-                                /\b(sm-[lr]\d\d[05][fnuw]?s?)\b/i, // Samsung Galaxy Watch
-                            ],
-                            [MODEL, [VENDOR, SAMSUNG], [TYPE, WEARABLE]],
-                            [
-                                /((pebble))app/i, // Pebble
-                            ],
-                            [VENDOR, MODEL, [TYPE, WEARABLE]],
-                            [
-                                /(watch)(?: ?os[,\/]|\d,\d\/)[\d\.]+/i, // Apple Watch
-                            ],
-                            [MODEL, [VENDOR, APPLE], [TYPE, WEARABLE]],
-                            [
-                                /droid.+; (glass) \d/i, // Google Glass
-                            ],
-                            [MODEL, [VENDOR, GOOGLE], [TYPE, WEARABLE]],
-                            [/droid.+; (wt63?0{2,3})\)/i],
-                            [MODEL, [VENDOR, ZEBRA], [TYPE, WEARABLE]],
-                            [
-                                /(quest( \d| pro)?)/i, // Oculus Quest
-                            ],
-                            [MODEL, [VENDOR, FACEBOOK], [TYPE, WEARABLE]],
-                            [
-                                ///////////////////
-                                // EMBEDDED
-                                ///////////////////
-
-                                /(tesla)(?: qtcarbrowser|\/[-\w\.]+)/i, // Tesla
-                            ],
-                            [VENDOR, [TYPE, EMBEDDED]],
-                            [
-                                /(aeobc)\b/i, // Echo Dot
-                            ],
-                            [MODEL, [VENDOR, AMAZON], [TYPE, EMBEDDED]],
-                            [
-                                ////////////////////
-                                // MIXED (GENERIC)
-                                ///////////////////
-
-                                /droid .+?; ([^;]+?)(?: bui|; wv\)|\) applew).+? mobile safari/i, // Android Phones from Unidentified Vendors
-                            ],
-                            [MODEL, [TYPE, MOBILE]],
-                            [
-                                /droid .+?; ([^;]+?)(?: bui|\) applew).+?(?! mobile) safari/i, // Android Tablets from Unidentified Vendors
-                            ],
-                            [MODEL, [TYPE, TABLET]],
-                            [
-                                /\b((tablet|tab)[;\/]|focus\/\d(?!.+mobile))/i, // Unidentifiable Tablet
-                            ],
-                            [[TYPE, TABLET]],
-                            [
-                                /(phone|mobile(?:[;\/]| [ \w\/\.]*safari)|pda(?=.+windows ce))/i, // Unidentifiable Mobile
-                            ],
-                            [[TYPE, MOBILE]],
-                            [
-                                /(android[-\w\. ]{0,9});.+buil/i, // Generic Android Device
-                            ],
-                            [MODEL, [VENDOR, 'Generic']],
-                        ],
-
-                        engine: [
-                            [
-                                /windows.+ edge\/([\w\.]+)/i, // EdgeHTML
-                            ],
-                            [VERSION, [NAME, EDGE + 'HTML']],
-                            [
-                                /webkit\/537\.36.+chrome\/(?!27)([\w\.]+)/i, // Blink
-                            ],
-                            [VERSION, [NAME, 'Blink']],
-                            [
-                                /(presto)\/([\w\.]+)/i, // Presto
-                                /(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna)\/([\w\.]+)/i, // WebKit/Trident/NetFront/NetSurf/Amaya/Lynx/w3m/Goanna
-                                /ekioh(flow)\/([\w\.]+)/i, // Flow
-                                /(khtml|tasman|links)[\/ ]\(?([\w\.]+)/i, // KHTML/Tasman/Links
-                                /(icab)[\/ ]([23]\.[\d\.]+)/i, // iCab
-                                /\b(libweb)/i,
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /rv\:([\w\.]{1,9})\b.+(gecko)/i, // Gecko
-                            ],
-                            [VERSION, NAME],
-                        ],
-
-                        os: [
-                            [
-                                // Windows
-                                /microsoft (windows) (vista|xp)/i, // Windows (iTunes)
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /(windows (?:phone(?: os)?|mobile))[\/ ]?([\d\.\w ]*)/i, // Windows Phone
-                            ],
-                            [NAME, [VERSION, strMapper, windowsVersionMap]],
-                            [
-                                /windows nt 6\.2; (arm)/i, // Windows RT
-                                /windows[\/ ]?([ntce\d\. ]+\w)(?!.+xbox)/i,
-                                /(?:win(?=3|9|n)|win 9x )([nt\d\.]+)/i,
-                            ],
-                            [
-                                [VERSION, strMapper, windowsVersionMap],
-                                [NAME, 'Windows'],
-                            ],
-                            [
-                                // iOS/macOS
-                                /ip[honead]{2,4}\b(?:.*os ([\w]+) like mac|; opera)/i, // iOS
-                                /(?:ios;fbsv\/|iphone.+ios[\/ ])([\d\.]+)/i,
-                                /cfnetwork\/.+darwin/i,
-                            ],
-                            [
-                                [VERSION, /_/g, '.'],
-                                [NAME, 'iOS'],
-                            ],
-                            [
-                                /(mac os x) ?([\w\. ]*)/i,
-                                /(macintosh|mac_powerpc\b)(?!.+haiku)/i, // Mac OS
-                            ],
-                            [
-                                [NAME, MAC_OS],
-                                [VERSION, /_/g, '.'],
-                            ],
-                            [
-                                // Mobile OSes
-                                /droid ([\w\.]+)\b.+(android[- ]x86|harmonyos)/i, // Android-x86/HarmonyOS
-                            ],
-                            [VERSION, NAME],
-                            [
-                                // Android/WebOS/QNX/Bada/RIM/Maemo/MeeGo/Sailfish OS
-                                /(android|webos|qnx|bada|rim tablet os|maemo|meego|sailfish)[-\/ ]?([\w\.]*)/i,
-                                /(blackberry)\w*\/([\w\.]*)/i, // Blackberry
-                                /(tizen|kaios)[\/ ]([\w\.]+)/i, // Tizen/KaiOS
-                                /\((series40);/i, // Series 40
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /\(bb(10);/i, // BlackBerry 10
-                            ],
-                            [VERSION, [NAME, BLACKBERRY]],
-                            [
-                                /(?:symbian ?os|symbos|s60(?=;)|series60)[-\/ ]?([\w\.]*)/i, // Symbian
-                            ],
-                            [VERSION, [NAME, 'Symbian']],
-                            [
-                                /mozilla\/[\d\.]+ \((?:mobile|tablet|tv|mobile; [\w ]+); rv:.+ gecko\/([\w\.]+)/i, // Firefox OS
-                            ],
-                            [VERSION, [NAME, FIREFOX + ' OS']],
-                            [
-                                /web0s;.+rt(tv)/i,
-                                /\b(?:hp)?wos(?:browser)?\/([\w\.]+)/i, // WebOS
-                            ],
-                            [VERSION, [NAME, 'webOS']],
-                            [
-                                /watch(?: ?os[,\/]|\d,\d\/)([\d\.]+)/i, // watchOS
-                            ],
-                            [VERSION, [NAME, 'watchOS']],
-                            [
-                                // Google Chromecast
-                                /crkey\/([\d\.]+)/i, // Google Chromecast
-                            ],
-                            [VERSION, [NAME, CHROME + 'cast']],
-                            [
-                                /(cros) [\w]+(?:\)| ([\w\.]+)\b)/i, // Chromium OS
-                            ],
-                            [[NAME, CHROMIUM_OS], VERSION],
-                            [
-                                // Smart TVs
-                                /panasonic;(viera)/i, // Panasonic Viera
-                                /(netrange)mmh/i, // Netrange
-                                /(nettv)\/(\d+\.[\w\.]+)/i, // NetTV
-
-                                // Console
-                                /(nintendo|playstation) ([wids345portablevuch]+)/i, // Nintendo/Playstation
-                                /(xbox); +xbox ([^\);]+)/i, // Microsoft Xbox (360, One, X, S, Series X, Series S)
-
-                                // Other
-                                /\b(joli|palm)\b ?(?:os)?\/?([\w\.]*)/i, // Joli/Palm
-                                /(mint)[\/\(\) ]?(\w*)/i, // Mint
-                                /(mageia|vectorlinux)[; ]/i, // Mageia/VectorLinux
-                                /([kxln]?ubuntu|debian|suse|opensuse|gentoo|arch(?= linux)|slackware|fedora|mandriva|centos|pclinuxos|red ?hat|zenwalk|linpus|raspbian|plan 9|minix|risc os|contiki|deepin|manjaro|elementary os|sabayon|linspire)(?: gnu\/linux)?(?: enterprise)?(?:[- ]linux)?(?:-gnu)?[-\/ ]?(?!chrom|package)([-\w\.]*)/i,
-                                // Ubuntu/Debian/SUSE/Gentoo/Arch/Slackware/Fedora/Mandriva/CentOS/PCLinuxOS/RedHat/Zenwalk/Linpus/Raspbian/Plan9/Minix/RISCOS/Contiki/Deepin/Manjaro/elementary/Sabayon/Linspire
-                                /(hurd|linux) ?([\w\.]*)/i, // Hurd/Linux
-                                /(gnu) ?([\w\.]*)/i, // GNU
-                                /\b([-frentopcghs]{0,5}bsd|dragonfly)[\/ ]?(?!amd|[ix346]{1,2}86)([\w\.]*)/i, // FreeBSD/NetBSD/OpenBSD/PC-BSD/GhostBSD/DragonFly
-                                /(haiku) (\w+)/i, // Haiku
-                            ],
-                            [NAME, VERSION],
-                            [
-                                /(sunos) ?([\w\.\d]*)/i, // Solaris
-                            ],
-                            [[NAME, 'Solaris'], VERSION],
-                            [
-                                /((?:open)?solaris)[-\/ ]?([\w\.]*)/i, // Solaris
-                                /(aix) ((\d)(?=\.|\)| )[\w\.])*/i, // AIX
-                                /\b(beos|os\/2|amigaos|morphos|openvms|fuchsia|hp-ux|serenityos)/i, // BeOS/OS2/AmigaOS/MorphOS/OpenVMS/Fuchsia/HP-UX/SerenityOS
-                                /(unix) ?([\w\.]*)/i, // UNIX
-                            ],
-                            [NAME, VERSION],
-                        ],
-                    };
-
-                    /////////////////
-                    // Constructor
-                    ////////////////
-
-                    var UAParser = function (ua, extensions) {
-                        if (typeof ua === OBJ_TYPE) {
-                            extensions = ua;
-                            ua = undefined;
-                        }
-
-                        if (!(this instanceof UAParser)) {
-                            return new UAParser(ua, extensions).getResult();
-                        }
-
-                        var _navigator =
-                            typeof window !== UNDEF_TYPE && window.navigator ? window.navigator : undefined;
-                        var _ua = ua || (_navigator && _navigator.userAgent ? _navigator.userAgent : EMPTY);
-                        var _uach = _navigator && _navigator.userAgentData ? _navigator.userAgentData : undefined;
-                        var _rgxmap = extensions ? extend(regexes, extensions) : regexes;
-                        var _isSelfNav = _navigator && _navigator.userAgent == _ua;
-
-                        this.getBrowser = function () {
-                            var _browser = {};
-                            _browser[NAME] = undefined;
-                            _browser[VERSION] = undefined;
-                            rgxMapper.call(_browser, _ua, _rgxmap.browser);
-                            _browser[MAJOR] = majorize(_browser[VERSION]);
-                            // Brave-specific detection
-                            if (
-                                _isSelfNav &&
-                                _navigator &&
-                                _navigator.brave &&
-                                typeof _navigator.brave.isBrave == FUNC_TYPE
-                            ) {
-                                _browser[NAME] = 'Brave';
+                        },
+                        zi = {
+                            embedded: 'Automotive',
+                            mobile: 'Mobile',
+                            tablet: ['Tablet', 'EInk'],
+                            smarttv: 'TV',
+                            wearable: 'Watch',
+                            xr: ['VR', 'XR'],
+                            '?': ['Desktop', 'Unknown'],
+                            '*': d,
+                        },
+                        Ai = {
+                            browser: [
+                                [/\b(?:crmo|crios)\/([\w\.]+)/i],
+                                [v, [m, si + 'Chrome']],
+                                [/edg(?:e|ios|a)?\/([\w\.]+)/i],
+                                [v, [m, 'Edge']],
+                                [
+                                    /(opera mini)\/([-\w\.]+)/i,
+                                    /(opera [mobiletab]{3,6})\b.+version\/([-\w\.]+)/i,
+                                    /(opera)(?:.+version\/|[\/ ]+)([\w\.]+)/i,
+                                ],
+                                [m, v],
+                                [/opios[\/ ]+([\w\.]+)/i],
+                                [v, [m, ci + ' Mini']],
+                                [/\bop(?:rg)?x\/([\w\.]+)/i],
+                                [v, [m, ci + ' GX']],
+                                [/\bopr\/([\w\.]+)/i],
+                                [v, [m, ci]],
+                                [/\bb[ai]*d(?:uhd|[ub]*[aekoprswx]{5,6})[\/ ]?([\w\.]+)/i],
+                                [v, [m, 'Baidu']],
+                                [/\b(?:mxbrowser|mxios|myie2)\/?([-\w\.]*)\b/i],
+                                [v, [m, 'Maxthon']],
+                                [
+                                    /(kindle)\/([\w\.]+)/i,
+                                    /(lunascape|maxthon|netfront|jasmine|blazer|sleipnir)[\/ ]?([\w\.]*)/i,
+                                    /(avant|iemobile|slim(?:browser|boat|jet))[\/ ]?([\d\.]*)/i,
+                                    /(?:ms|\()(ie) ([\w\.]+)/i,
+                                    /(flock|rockmelt|midori|epiphany|silk|skyfire|ovibrowser|bolt|iron|vivaldi|iridium|phantomjs|bowser|qupzilla|falkon|rekonq|puffin|brave|whale(?!.+naver)|qqbrowserlite|duckduckgo|klar|helio|(?=comodo_)?dragon)\/([-\w\.]+)/i,
+                                    /(heytap|ovi|115)browser\/([\d\.]+)/i,
+                                    /(weibo)__([\d\.]+)/i,
+                                ],
+                                [m, v],
+                                [/quark(?:pc)?\/([-\w\.]+)/i],
+                                [v, [m, 'Quark']],
+                                [/\bddg\/([\w\.]+)/i],
+                                [v, [m, 'DuckDuckGo']],
+                                [/(?:\buc? ?browser|(?:juc.+)ucweb)[\/ ]?([\w\.]+)/i],
+                                [v, [m, 'UCBrowser']],
+                                [
+                                    /microm.+\bqbcore\/([\w\.]+)/i,
+                                    /\bqbcore\/([\w\.]+).+microm/i,
+                                    /micromessenger\/([\w\.]+)/i,
+                                ],
+                                [v, [m, 'WeChat']],
+                                [/konqueror\/([\w\.]+)/i],
+                                [v, [m, 'Konqueror']],
+                                [/trident.+rv[: ]([\w\.]{1,9})\b.+like gecko/i],
+                                [v, [m, 'IE']],
+                                [/ya(?:search)?browser\/([\w\.]+)/i],
+                                [v, [m, 'Yandex']],
+                                [/slbrowser\/([\w\.]+)/i],
+                                [v, [m, 'Smart Lenovo' + ni]],
+                                [/(avast|avg)\/([\w\.]+)/i],
+                                [[m, /(.+)/, '$1 Secure' + ni], v],
+                                [/\bfocus\/([\w\.]+)/i],
+                                [v, [m, bi + ' Focus']],
+                                [/\bopt\/([\w\.]+)/i],
+                                [v, [m, ci + ' Touch']],
+                                [/coc_coc\w+\/([\w\.]+)/i],
+                                [v, [m, 'Coc Coc']],
+                                [/dolfin\/([\w\.]+)/i],
+                                [v, [m, 'Dolphin']],
+                                [/coast\/([\w\.]+)/i],
+                                [v, [m, ci + ' Coast']],
+                                [/miuibrowser\/([\w\.]+)/i],
+                                [v, [m, 'MIUI' + ni]],
+                                [/fxios\/([\w\.-]+)/i],
+                                [v, [m, si + bi]],
+                                [/\bqihoobrowser\/?([\w\.]*)/i],
+                                [v, [m, '360']],
+                                [/\b(qq)\/([\w\.]+)/i],
+                                [[m, /(.+)/, '$1Browser'], v],
+                                [/(oculus|sailfish|huawei|vivo|pico)browser\/([\w\.]+)/i],
+                                [[m, /(.+)/, '$1' + ni], v],
+                                [/samsungbrowser\/([\w\.]+)/i],
+                                [v, [m, ti + ' Internet']],
+                                [/metasr[\/ ]?([\d\.]+)/i],
+                                [v, [m, 'Sogou Explorer']],
+                                [/(sogou)mo\w+\/([\d\.]+)/i],
+                                [[m, 'Sogou Mobile'], v],
+                                [
+                                    /(electron)\/([\w\.]+) safari/i,
+                                    /(tesla)(?: qtcarbrowser|\/(20\d\d\.[-\w\.]+))/i,
+                                    /m?(qqbrowser|2345(?=browser|chrome|explorer))\w*[\/ ]?v?([\w\.]+)/i,
+                                ],
+                                [m, v],
+                                [/(lbbrowser|rekonq)/i],
+                                [m],
+                                [/ome\/([\w\.]+) \w* ?(iron) saf/i, /ome\/([\w\.]+).+qihu (360)[es]e/i],
+                                [v, m],
+                                [/((?:fban\/fbios|fb_iab\/fb4a)(?!.+fbav)|;fbav\/([\w\.]+);)/i],
+                                [[m, di], v, [f, S]],
+                                [
+                                    /(Klarna)\/([\w\.]+)/i,
+                                    /(kakao(?:talk|story))[\/ ]([\w\.]+)/i,
+                                    /(naver)\(.*?(\d+\.[\w\.]+).*\)/i,
+                                    /safari (line)\/([\w\.]+)/i,
+                                    /\b(line)\/([\w\.]+)\/iab/i,
+                                    /(alipay)client\/([\w\.]+)/i,
+                                    /(twitter)(?:and| f.+e\/([\w\.]+))/i,
+                                    /(instagram|snapchat)[\/ ]([-\w\.]+)/i,
+                                ],
+                                [m, v, [f, S]],
+                                [/\bgsa\/([\w\.]+) .*safari\//i],
+                                [v, [m, 'GSA'], [f, S]],
+                                [/musical_ly(?:.+app_?version\/|_)([\w\.]+)/i],
+                                [v, [m, 'TikTok'], [f, S]],
+                                [/\[(linkedin)app\]/i],
+                                [m, [f, S]],
+                                [/(chromium)[\/ ]([-\w\.]+)/i],
+                                [m, v],
+                                [/headlesschrome(?:\/([\w\.]+)| )/i],
+                                [v, [m, 'Chrome Headless']],
+                                [/ wv\).+(chrome)\/([\w\.]+)/i],
+                                [[m, 'Chrome WebView'], v],
+                                [/droid.+ version\/([\w\.]+)\b.+(?:mobile safari|safari)/i],
+                                [v, [m, 'Android' + ni]],
+                                [/chrome\/([\w\.]+) mobile/i],
+                                [v, [m, si + 'Chrome']],
+                                [/(chrome|omniweb|arora|[tizenoka]{5} ?browser)\/v?([\w\.]+)/i],
+                                [m, v],
+                                [/version\/([\w\.\,]+) .*mobile(?:\/\w+ | ?)safari/i],
+                                [v, [m, si + 'Safari']],
+                                [/iphone .*mobile(?:\/\w+ | ?)safari/i],
+                                [[m, si + 'Safari']],
+                                [/version\/([\w\.\,]+) .*(safari)/i],
+                                [v, m],
+                                [/webkit.+?(mobile ?safari|safari)(\/[\w\.]+)/i],
+                                [m, [v, '1']],
+                                [/(webkit|khtml)\/([\w\.]+)/i],
+                                [m, v],
+                                [/(?:mobile|tablet);.*(firefox)\/([\w\.-]+)/i],
+                                [[m, si + bi], v],
+                                [/(navigator|netscape\d?)\/([-\w\.]+)/i],
+                                [[m, 'Netscape'], v],
+                                [/(wolvic|librewolf)\/([\w\.]+)/i],
+                                [m, v],
+                                [/mobile vr; rv:([\w\.]+)\).+firefox/i],
+                                [v, [m, bi + ' Reality']],
+                                [
+                                    /ekiohf.+(flow)\/([\w\.]+)/i,
+                                    /(swiftfox)/i,
+                                    /(icedragon|iceweasel|camino|chimera|fennec|maemo browser|minimo|conkeror)[\/ ]?([\w\.\+]+)/i,
+                                    /(seamonkey|k-meleon|icecat|iceape|firebird|phoenix|palemoon|basilisk|waterfox)\/([-\w\.]+)$/i,
+                                    /(firefox)\/([\w\.]+)/i,
+                                    /(mozilla)\/([\w\.]+) .+rv\:.+gecko\/\d+/i,
+                                    /(polaris|lynx|dillo|icab|doris|amaya|w3m|netsurf|obigo|mosaic|(?:go|ice|up)[\. ]?browser)[-\/ ]?v?([\w\.]+)/i,
+                                    /\b(links) \(([\w\.]+)/i,
+                                ],
+                                [m, [v, /_/g, '.']],
+                                [/(cobalt)\/([\w\.]+)/i],
+                                [m, [v, /[^\d\.]+./, w]],
+                            ],
+                            cpu: [
+                                [/\b(?:(amd|x|x86[-_]?|wow|win)64)\b/i],
+                                [[k, 'amd64']],
+                                [/(ia32(?=;))/i, /((?:i[346]|x)86)[;\)]/i],
+                                [[k, 'ia32']],
+                                [/\b(aarch64|arm(v?8e?l?|_?64))\b/i],
+                                [[k, 'arm64']],
+                                [/\b(arm(?:v[67])?ht?n?[fl]p?)\b/i],
+                                [[k, 'armhf']],
+                                [/windows (ce|mobile); ppc;/i],
+                                [[k, 'arm']],
+                                [/((?:ppc|powerpc)(?:64)?)(?: mac|;|\))/i],
+                                [[k, /ower/, w, ki]],
+                                [/(sun4\w)[;\)]/i],
+                                [[k, 'sparc']],
+                                [
+                                    /((?:avr32|ia64(?=;))|68k(?=\))|\barm(?=v(?:[1-7]|[5-7]1)l?|;|eabi)|(?=atmel )avr|(?:irix|mips|sparc)(?:64)?\b|pa-risc)/i,
+                                ],
+                                [[k, ki]],
+                            ],
+                            device: [
+                                [/\b(sch-i[89]0\d|shw-m380s|sm-[ptx]\w{2,4}|gt-[pn]\d{2,4}|sgh-t8[56]9|nexus 10)/i],
+                                [h, [g, ti], [f, r]],
+                                [
+                                    /\b((?:s[cgp]h|gt|sm)-(?![lr])\w+|sc[g-]?[\d]+a?|galaxy nexus)/i,
+                                    /samsung[- ]((?!sm-[lr])[-\w]+)/i,
+                                    /sec-(sgh\w+)/i,
+                                ],
+                                [h, [g, ti], [f, y]],
+                                [/(?:\/|\()(ip(?:hone|od)[\w, ]*)(?:\/|;)/i],
+                                [h, [g, K], [f, y]],
+                                [
+                                    /\((ipad);[-\w\),; ]+apple/i,
+                                    /applecoremedia\/[\w\.]+ \((ipad)/i,
+                                    /\b(ipad)\d\d?,\d\d?[;\]].+ios/i,
+                                ],
+                                [h, [g, K], [f, r]],
+                                [/(macintosh);/i],
+                                [h, [g, K]],
+                                [/\b(sh-?[altvz]?\d\d[a-ekm]?)/i],
+                                [h, [g, 'Sharp'], [f, y]],
+                                [/(?:honor)([-\w ]+)[;\)]/i],
+                                [h, [g, 'Honor'], [f, y]],
+                                [/\b((?:ag[rs][23]?|bah2?|sht?|btv)-a?[lw]\d{2})\b(?!.+d\/s)/i],
+                                [h, [g, J], [f, r]],
+                                [
+                                    /(?:huawei)([-\w ]+)[;\)]/i,
+                                    /\b(nexus 6p|\w{2,4}e?-[atu]?[ln][\dx][012359c][adn]?)\b(?!.+d\/s)/i,
+                                ],
+                                [h, [g, J], [f, y]],
+                                [
+                                    /\b(poco[\w ]+|m2\d{3}j\d\d[a-z]{2})(?: bui|\))/i,
+                                    /\b; (\w+) build\/hm\1/i,
+                                    /\b(hm[-_ ]?note?[_ ]?(?:\d\w)?) bui/i,
+                                    /\b(redmi[\-_ ]?(?:note|k)?[\w_ ]+)(?: bui|\))/i,
+                                    /oid[^\)]+; (m?[12][0-389][01]\w{3,6}[c-y])( bui|; wv|\))/i,
+                                    /\b(mi[-_ ]?(?:a\d|one|one[_ ]plus|note lte|max|cc)?[_ ]?(?:\d?\w?)[_ ]?(?:plus|se|lite|pro)?)(?: bui|\))/i,
+                                ],
+                                [
+                                    [h, /_/g, ' '],
+                                    [g, ri],
+                                    [f, y],
+                                ],
+                                [
+                                    /oid[^\)]+; (2\d{4}(283|rpbf)[cgl])( bui|\))/i,
+                                    /\b(mi[-_ ]?(?:pad)(?:[\w_ ]+))(?: bui|\))/i,
+                                ],
+                                [
+                                    [h, /_/g, ' '],
+                                    [g, ri],
+                                    [f, r],
+                                ],
+                                [
+                                    /; (\w+) bui.+ oppo/i,
+                                    /\b(cph[12]\d{3}|p(?:af|c[al]|d\w|e[ar])[mt]\d0|x9007|a101op)\b/i,
+                                ],
+                                [h, [g, 'OPPO'], [f, y]],
+                                [/\b(opd2\d{3}a?) bui/i],
+                                [h, [g, 'OPPO'], [f, r]],
+                                [/vivo (\w+)(?: bui|\))/i, /\b(v[12]\d{3}\w?[at])(?: bui|;)/i],
+                                [h, [g, 'Vivo'], [f, y]],
+                                [/\b(rmx[1-3]\d{3})(?: bui|;|\))/i],
+                                [h, [g, 'Realme'], [f, y]],
+                                [
+                                    /\b(milestone|droid(?:[2-4x]| (?:bionic|x2|pro|razr))?:?( 4g)?)\b[\w ]+build\//i,
+                                    /\bmot(?:orola)?[- ](\w*)/i,
+                                    /((?:moto[\w\(\) ]+|xt\d{3,4}|nexus 6)(?= bui|\)))/i,
+                                ],
+                                [h, [g, ei], [f, y]],
+                                [/\b(mz60\d|xoom[2 ]{0,2}) build\//i],
+                                [h, [g, ei], [f, r]],
+                                [/((?=lg)?[vl]k\-?\d{3}) bui| 3\.[-\w; ]{10}lg?-([06cv9]{3,4})/i],
+                                [h, [g, 'LG'], [f, r]],
+                                [
+                                    /(lm(?:-?f100[nv]?|-[\w\.]+)(?= bui|\))|nexus [45])/i,
+                                    /\blg[-e;\/ ]+((?!browser|netcast|android tv)\w+)/i,
+                                    /\blg-?([\d\w]+) bui/i,
+                                ],
+                                [h, [g, 'LG'], [f, y]],
+                                [
+                                    /(ideatab[-\w ]+)/i,
+                                    /lenovo ?(s[56]000[-\w]+|tab(?:[\w ]+)|yt[-\d\w]{6}|tb[-\d\w]{6})/i,
+                                ],
+                                [h, [g, 'Lenovo'], [f, r]],
+                                [/(?:maemo|nokia).*(n900|lumia \d+)/i, /nokia[-_ ]?([-\w\.]*)/i],
+                                [
+                                    [h, /_/g, ' '],
+                                    [g, 'Nokia'],
+                                    [f, y],
+                                ],
+                                [/(pixel c)\b/i],
+                                [h, [g, Y], [f, r]],
+                                [/droid.+; (pixel[\daxl ]{0,6})(?: bui|\))/i],
+                                [h, [g, Y], [f, y]],
+                                [
+                                    /droid.+; (a?\d[0-2]{2}so|[c-g]\d{4}|so[-gl]\w+|xq-a\w[4-7][12])(?= bui|\).+chrome\/(?![1-6]{0,1}\d\.))/i,
+                                ],
+                                [h, [g, oi], [f, y]],
+                                [/sony tablet [ps]/i, /\b(?:sony)?sgp\w+(?: bui|\))/i],
+                                [
+                                    [h, 'Xperia Tablet'],
+                                    [g, oi],
+                                    [f, r],
+                                ],
+                                [/ (kb2005|in20[12]5|be20[12][59])\b/i, /(?:one)?(?:plus)? (a\d0\d\d)(?: b|\))/i],
+                                [h, [g, 'OnePlus'], [f, y]],
+                                [
+                                    /(alexa)webm/i,
+                                    /(kf[a-z]{2}wi|aeo(?!bc)\w\w)( bui|\))/i,
+                                    /(kf[a-z]+)( bui|\)).+silk\//i,
+                                ],
+                                [h, [g, W], [f, r]],
+                                [/((?:sd|kf)[0349hijorstuw]+)( bui|\)).+silk\//i],
+                                [
+                                    [h, /(.+)/g, 'Fire Phone $1'],
+                                    [g, W],
+                                    [f, y],
+                                ],
+                                [/(playbook);[-\w\),; ]+(rim)/i],
+                                [h, g, [f, r]],
+                                [/\b((?:bb[a-f]|st[hv])100-\d)/i, /\(bb10; (\w+)/i],
+                                [h, [g, Z], [f, y]],
+                                [/(?:\b|asus_)(transfo[prime ]{4,10} \w+|eeepc|slider \w+|nexus 7|padfone|p00[cj])/i],
+                                [h, [g, Q], [f, r]],
+                                [/ (z[bes]6[027][012][km][ls]|zenfone \d\w?)\b/i],
+                                [h, [g, Q], [f, y]],
+                                [/(nexus 9)/i],
+                                [h, [g, 'HTC'], [f, r]],
+                                [
+                                    /(htc)[-;_ ]{1,2}([\w ]+(?=\)| bui)|\w+)/i,
+                                    /(zte)[- ]([\w ]+?)(?: bui|\/|\))/i,
+                                    /(alcatel|geeksphone|nexian|panasonic(?!(?:;|\.))|sony(?!-bra))[-_ ]?([-\w]*)/i,
+                                ],
+                                [g, [h, /_/g, ' '], [f, y]],
+                                [
+                                    /tcl (xess p17aa)/i,
+                                    /droid [\w\.]+; ((?:8[14]9[16]|9(?:0(?:48|60|8[01])|1(?:3[27]|66)|2(?:6[69]|9[56])|466))[gqswx])(_\w(\w|\w\w))?(\)| bui)/i,
+                                ],
+                                [h, [g, 'TCL'], [f, r]],
+                                [
+                                    /droid [\w\.]+; (418(?:7d|8v)|5087z|5102l|61(?:02[dh]|25[adfh]|27[ai]|56[dh]|59k|65[ah])|a509dl|t(?:43(?:0w|1[adepqu])|50(?:6d|7[adju])|6(?:09dl|10k|12b|71[efho]|76[hjk])|7(?:66[ahju]|67[hw]|7[045][bh]|71[hk]|73o|76[ho]|79w|81[hks]?|82h|90[bhsy]|99b)|810[hs]))(_\w(\w|\w\w))?(\)| bui)/i,
+                                ],
+                                [h, [g, 'TCL'], [f, y]],
+                                [/(itel) ((\w+))/i],
+                                [[g, ki], h, [f, qi, { tablet: ['p10001l', 'w7001'], '*': 'mobile' }]],
+                                [/droid.+; ([ab][1-7]-?[0178a]\d\d?)/i],
+                                [h, [g, 'Acer'], [f, r]],
+                                [/droid.+; (m[1-5] note) bui/i, /\bmz-([-\w]{2,})/i],
+                                [h, [g, 'Meizu'], [f, y]],
+                                [/; ((?:power )?armor(?:[\w ]{0,8}))(?: bui|\))/i],
+                                [h, [g, 'Ulefone'], [f, y]],
+                                [/; (energy ?\w+)(?: bui|\))/i, /; energizer ([\w ]+)(?: bui|\))/i],
+                                [h, [g, 'Energizer'], [f, y]],
+                                [/; cat (b35);/i, /; (b15q?|s22 flip|s48c|s62 pro)(?: bui|\))/i],
+                                [h, [g, 'Cat'], [f, y]],
+                                [/((?:new )?andromax[\w- ]+)(?: bui|\))/i],
+                                [h, [g, 'Smartfren'], [f, y]],
+                                [/droid.+; (a(?:015|06[35]|142p?))/i],
+                                [h, [g, 'Nothing'], [f, y]],
+                                [
+                                    /(blackberry|benq|palm(?=\-)|sonyericsson|acer|asus|dell|meizu|motorola|polytron|infinix|tecno|micromax|advan)[-_ ]?([-\w]*)/i,
+                                    /; (imo) ((?!tab)[\w ]+?)(?: bui|\))/i,
+                                    /(hp) ([\w ]+\w)/i,
+                                    /(asus)-?(\w+)/i,
+                                    /(microsoft); (lumia[\w ]+)/i,
+                                    /(lenovo)[-_ ]?([-\w]+)/i,
+                                    /(jolla)/i,
+                                    /(oppo) ?([\w ]+) bui/i,
+                                ],
+                                [g, h, [f, y]],
+                                [
+                                    /(imo) (tab \w+)/i,
+                                    /(kobo)\s(ereader|touch)/i,
+                                    /(archos) (gamepad2?)/i,
+                                    /(hp).+(touchpad(?!.+tablet)|tablet)/i,
+                                    /(kindle)\/([\w\.]+)/i,
+                                ],
+                                [g, h, [f, r]],
+                                [/(surface duo)/i],
+                                [h, [g, ii], [f, r]],
+                                [/droid [\d\.]+; (fp\du?)(?: b|\))/i],
+                                [h, [g, 'Fairphone'], [f, y]],
+                                [/(shield[\w ]+) b/i],
+                                [h, [g, 'Nvidia'], [f, r]],
+                                [/(sprint) (\w+)/i],
+                                [g, h, [f, y]],
+                                [/(kin\.[onetw]{3})/i],
+                                [
+                                    [h, /\./g, ' '],
+                                    [g, ii],
+                                    [f, y],
+                                ],
+                                [/droid.+; ([c6]+|et5[16]|mc[239][23]x?|vc8[03]x?)\)/i],
+                                [h, [g, ai], [f, r]],
+                                [/droid.+; (ec30|ps20|tc[2-8]\d[kx])\)/i],
+                                [h, [g, ai], [f, y]],
+                                [/smart-tv.+(samsung)/i],
+                                [g, [f, t]],
+                                [/hbbtv.+maple;(\d+)/i],
+                                [
+                                    [h, /^/, 'SmartTV'],
+                                    [g, ti],
+                                    [f, t],
+                                ],
+                                [/(nux; netcast.+smarttv|lg (netcast\.tv-201\d|android tv))/i],
+                                [
+                                    [g, 'LG'],
+                                    [f, t],
+                                ],
+                                [/(apple) ?tv/i],
+                                [g, [h, K + ' TV'], [f, t]],
+                                [/crkey.*devicetype\/chromecast/i],
+                                [
+                                    [h, wi + ' Third Generation'],
+                                    [g, Y],
+                                    [f, t],
+                                ],
+                                [/crkey.*devicetype\/([^/]*)/i],
+                                [
+                                    [h, /^/, 'Chromecast '],
+                                    [g, Y],
+                                    [f, t],
+                                ],
+                                [/fuchsia.*crkey/i],
+                                [
+                                    [h, wi + ' Nest Hub'],
+                                    [g, Y],
+                                    [f, t],
+                                ],
+                                [/crkey/i],
+                                [
+                                    [h, wi],
+                                    [g, Y],
+                                    [f, t],
+                                ],
+                                [/droid.+aft(\w+)( bui|\))/i],
+                                [h, [g, W], [f, t]],
+                                [/\(dtv[\);].+(aquos)/i, /(aquos-tv[\w ]+)\)/i],
+                                [h, [g, 'Sharp'], [f, t]],
+                                [/(bravia[\w ]+)( bui|\))/i],
+                                [h, [g, oi], [f, t]],
+                                [/(mitv-\w{5}) bui/i],
+                                [h, [g, ri], [f, t]],
+                                [/Hbbtv.*(technisat) (.*);/i],
+                                [g, h, [f, t]],
+                                [
+                                    /\b(roku)[\dx]*[\)\/]((?:dvp-)?[\d\.]*)/i,
+                                    /hbbtv\/\d+\.\d+\.\d+ +\([\w\+ ]*; *([\w\d][^;]*);([^;]*)/i,
+                                ],
+                                [
+                                    [g, Ci],
+                                    [h, Ci],
+                                    [f, t],
+                                ],
+                                [/\b(android tv|smart[- ]?tv|opera tv|tv; rv:)\b/i],
+                                [[f, t]],
+                                [/(ouya)/i, /(nintendo) (\w+)/i],
+                                [g, h, [f, x]],
+                                [/droid.+; (shield) bui/i],
+                                [h, [g, 'Nvidia'], [f, x]],
+                                [/(playstation \w+)/i],
+                                [h, [g, oi], [f, x]],
+                                [/\b(xbox(?: one)?(?!; xbox))[\); ]/i],
+                                [h, [g, ii], [f, x]],
+                                [/\b(sm-[lr]\d\d[05][fnuw]?s?)\b/i],
+                                [h, [g, ti], [f, o]],
+                                [/((pebble))app/i],
+                                [g, h, [f, o]],
+                                [/(watch)(?: ?os[,\/]|\d,\d\/)[\d\.]+/i],
+                                [h, [g, K], [f, o]],
+                                [/droid.+; (wt63?0{2,3})\)/i],
+                                [h, [g, ai], [f, o]],
+                                [/droid.+; (glass) \d/i],
+                                [h, [g, Y], [f, a]],
+                                [/(pico) (4|neo3(?: link|pro)?)/i],
+                                [g, h, [f, a]],
+                                [/; (quest( \d| pro)?)/i],
+                                [h, [g, di], [f, a]],
+                                [/(tesla)(?: qtcarbrowser|\/[-\w\.]+)/i],
+                                [g, [f, s]],
+                                [/(aeobc)\b/i],
+                                [h, [g, W], [f, s]],
+                                [/droid .+?; ([^;]+?)(?: bui|; wv\)|\) applew).+? mobile safari/i],
+                                [h, [f, y]],
+                                [/droid .+?; ([^;]+?)(?: bui|\) applew).+?(?! mobile) safari/i],
+                                [h, [f, r]],
+                                [/\b((tablet|tab)[;\/]|focus\/\d(?!.+mobile))/i],
+                                [[f, r]],
+                                [/(phone|mobile(?:[;\/]| [ \w\/\.]*safari)|pda(?=.+windows ce))/i],
+                                [[f, y]],
+                                [/(android[-\w\. ]{0,9});.+buil/i],
+                                [h, [g, 'Generic']],
+                            ],
+                            engine: [
+                                [/windows.+ edge\/([\w\.]+)/i],
+                                [v, [m, 'EdgeHTML']],
+                                [/(arkweb)\/([\w\.]+)/i],
+                                [m, v],
+                                [/webkit\/537\.36.+chrome\/(?!27)([\w\.]+)/i],
+                                [v, [m, 'Blink']],
+                                [
+                                    /(presto)\/([\w\.]+)/i,
+                                    /(webkit|trident|netfront|netsurf|amaya|lynx|w3m|goanna|servo)\/([\w\.]+)/i,
+                                    /ekioh(flow)\/([\w\.]+)/i,
+                                    /(khtml|tasman|links)[\/ ]\(?([\w\.]+)/i,
+                                    /(icab)[\/ ]([23]\.[\d\.]+)/i,
+                                    /\b(libweb)/i,
+                                ],
+                                [m, v],
+                                [/rv\:([\w\.]{1,9})\b.+(gecko)/i],
+                                [v, m],
+                            ],
+                            os: [
+                                [/microsoft (windows) (vista|xp)/i],
+                                [m, v],
+                                [/(windows (?:phone(?: os)?|mobile))[\/ ]?([\d\.\w ]*)/i],
+                                [m, [v, qi, Oi]],
+                                [
+                                    /windows nt 6\.2; (arm)/i,
+                                    /windows[\/ ]?([ntce\d\. ]+\w)(?!.+xbox)/i,
+                                    /(?:win(?=3|9|n)|win 9x )([nt\d\.]+)/i,
+                                ],
+                                [
+                                    [v, qi, Oi],
+                                    [m, ui],
+                                ],
+                                [
+                                    /ip[honead]{2,4}\b(?:.*os ([\w]+) like mac|; opera)/i,
+                                    /(?:ios;fbsv\/|iphone.+ios[\/ ])([\d\.]+)/i,
+                                    /cfnetwork\/.+darwin/i,
+                                ],
+                                [
+                                    [v, /_/g, '.'],
+                                    [m, 'iOS'],
+                                ],
+                                [/(mac os x) ?([\w\. ]*)/i, /(macintosh|mac_powerpc\b)(?!.+haiku)/i],
+                                [
+                                    [m, 'macOS'],
+                                    [v, /_/g, '.'],
+                                ],
+                                [/android ([\d\.]+).*crkey/i],
+                                [v, [m, wi + ' Android']],
+                                [/fuchsia.*crkey\/([\d\.]+)/i],
+                                [v, [m, wi + ' Fuchsia']],
+                                [/crkey\/([\d\.]+).*devicetype\/smartspeaker/i],
+                                [v, [m, wi + ' SmartSpeaker']],
+                                [/linux.*crkey\/([\d\.]+)/i],
+                                [v, [m, wi + ' Linux']],
+                                [/crkey\/([\d\.]+)/i],
+                                [v, [m, wi]],
+                                [/droid ([\w\.]+)\b.+(android[- ]x86|harmonyos)/i],
+                                [v, m],
+                                [
+                                    /(android|webos|qnx|bada|rim tablet os|maemo|meego|sailfish|openharmony)[-\/ ]?([\w\.]*)/i,
+                                    /(blackberry)\w*\/([\w\.]*)/i,
+                                    /(tizen|kaios)[\/ ]([\w\.]+)/i,
+                                    /\((series40);/i,
+                                ],
+                                [m, v],
+                                [/\(bb(10);/i],
+                                [v, [m, Z]],
+                                [/(?:symbian ?os|symbos|s60(?=;)|series60)[-\/ ]?([\w\.]*)/i],
+                                [v, [m, 'Symbian']],
+                                [/mozilla\/[\d\.]+ \((?:mobile|tablet|tv|mobile; [\w ]+); rv:.+ gecko\/([\w\.]+)/i],
+                                [v, [m, bi + ' OS']],
+                                [/web0s;.+rt(tv)/i, /\b(?:hp)?wos(?:browser)?\/([\w\.]+)/i],
+                                [v, [m, 'webOS']],
+                                [/watch(?: ?os[,\/]|\d,\d\/)([\d\.]+)/i],
+                                [v, [m, 'watchOS']],
+                                [/(cros) [\w]+(?:\)| ([\w\.]+)\b)/i],
+                                [[m, 'Chrome OS'], v],
+                                [
+                                    /panasonic;(viera)/i,
+                                    /(netrange)mmh/i,
+                                    /(nettv)\/(\d+\.[\w\.]+)/i,
+                                    /(nintendo|playstation) (\w+)/i,
+                                    /(xbox); +xbox ([^\);]+)/i,
+                                    /(pico) .+os([\w\.]+)/i,
+                                    /\b(joli|palm)\b ?(?:os)?\/?([\w\.]*)/i,
+                                    /(mint)[\/\(\) ]?(\w*)/i,
+                                    /(mageia|vectorlinux)[; ]/i,
+                                    /([kxln]?ubuntu|debian|suse|opensuse|gentoo|arch(?= linux)|slackware|fedora|mandriva|centos|pclinuxos|red ?hat|zenwalk|linpus|raspbian|plan 9|minix|risc os|contiki|deepin|manjaro|elementary os|sabayon|linspire)(?: gnu\/linux)?(?: enterprise)?(?:[- ]linux)?(?:-gnu)?[-\/ ]?(?!chrom|package)([-\w\.]*)/i,
+                                    /(hurd|linux) ?([\w\.]*)/i,
+                                    /(gnu) ?([\w\.]*)/i,
+                                    /\b([-frentopcghs]{0,5}bsd|dragonfly)[\/ ]?(?!amd|[ix346]{1,2}86)([\w\.]*)/i,
+                                    /(haiku) (\w+)/i,
+                                ],
+                                [m, v],
+                                [/(sunos) ?([\w\.\d]*)/i],
+                                [[m, 'Solaris'], v],
+                                [
+                                    /((?:open)?solaris)[-\/ ]?([\w\.]*)/i,
+                                    /(aix) ((\d)(?=\.|\)| )[\w\.])*/i,
+                                    /\b(beos|os\/2|amigaos|morphos|openvms|fuchsia|hp-ux|serenityos)/i,
+                                    /(unix) ?([\w\.]*)/i,
+                                ],
+                                [m, v],
+                            ],
+                        },
+                        Ni =
+                            ((bi = { init: {}, isIgnore: {}, isIgnoreRgx: {}, toString: {} }),
+                            yi.call(bi.init, [
+                                [F, [m, v, p, f]],
+                                [G, [k]],
+                                [L, [f, h, g]],
+                                [D, [m, v]],
+                                [X, [m, v]],
+                            ]),
+                            yi.call(bi.isIgnore, [
+                                [F, [v, p]],
+                                [D, [v]],
+                                [X, [v]],
+                            ]),
+                            yi.call(bi.isIgnoreRgx, [
+                                [F, / ?browser$/i],
+                                [X, / ?os$/i],
+                            ]),
+                            yi.call(bi.toString, [
+                                [F, [m, v]],
+                                [G, [k]],
+                                [L, [g, h]],
+                                [D, [m, v]],
+                                [X, [m, v]],
+                            ]),
+                            bi),
+                        Pi = function (e, i) {
+                            var t = Ni.init[i],
+                                o = Ni.isIgnore[i] || 0,
+                                r = Ni.isIgnoreRgx[i] || 0,
+                                a = Ni.toString[i] || 0;
+                            function s() {
+                                yi.call(this, t);
                             }
-                            return _browser;
+                            return (
+                                (s.prototype.getItem = function () {
+                                    return e;
+                                }),
+                                (s.prototype.withClientHints = function () {
+                                    return hi
+                                        ? hi.getHighEntropyValues(V).then(function (i) {
+                                              return e.setCH(new Hi(i, !1)).parseCH().get();
+                                          })
+                                        : e.parseCH().get();
+                                }),
+                                (s.prototype.withFeatureCheck = function () {
+                                    return e.detectFeature().get();
+                                }),
+                                i != $ &&
+                                    ((s.prototype.is = function (i) {
+                                        var e,
+                                            t = !1;
+                                        for (e in this)
+                                            if (
+                                                this.hasOwnProperty(e) &&
+                                                !n(o, e) &&
+                                                ki(r ? Si(r, this[e]) : this[e]) == ki(r ? Si(r, i) : i)
+                                            ) {
+                                                if (((t = !0), i != b)) break;
+                                            } else if (i == b && t) {
+                                                t = !t;
+                                                break;
+                                            }
+                                        return t;
+                                    }),
+                                    (s.prototype.toString = function () {
+                                        var i,
+                                            e = w;
+                                        for (i in a) typeof this[a[i]] !== b && (e += (e ? ' ' : w) + this[a[i]]);
+                                        return e || b;
+                                    })),
+                                hi ||
+                                    (s.prototype.then = function (i) {
+                                        var e = this,
+                                            t = function () {
+                                                for (var i in e) e.hasOwnProperty(i) && (this[i] = e[i]);
+                                            };
+                                        t.prototype = { is: s.prototype.is, toString: s.prototype.toString };
+                                        t = new t();
+                                        return i(t), t;
+                                    }),
+                                new s()
+                            );
                         };
-                        this.getCPU = function () {
-                            var _cpu = {};
-                            _cpu[ARCHITECTURE] = undefined;
-                            rgxMapper.call(_cpu, _ua, _rgxmap.cpu);
-                            return _cpu;
-                        };
-                        this.getDevice = function () {
-                            var _device = {};
-                            _device[VENDOR] = undefined;
-                            _device[MODEL] = undefined;
-                            _device[TYPE] = undefined;
-                            rgxMapper.call(_device, _ua, _rgxmap.device);
-                            if (_isSelfNav && !_device[TYPE] && _uach && _uach.mobile) {
-                                _device[TYPE] = MOBILE;
-                            }
-                            // iPadOS-specific detection: identified as Mac, but has some iOS-only properties
-                            if (
-                                _isSelfNav &&
-                                _device[MODEL] == 'Macintosh' &&
-                                _navigator &&
-                                typeof _navigator.standalone !== UNDEF_TYPE &&
-                                _navigator.maxTouchPoints &&
-                                _navigator.maxTouchPoints > 2
-                            ) {
-                                _device[MODEL] = 'iPad';
-                                _device[TYPE] = TABLET;
-                            }
-                            return _device;
-                        };
-                        this.getEngine = function () {
-                            var _engine = {};
-                            _engine[NAME] = undefined;
-                            _engine[VERSION] = undefined;
-                            rgxMapper.call(_engine, _ua, _rgxmap.engine);
-                            return _engine;
-                        };
-                        this.getOS = function () {
-                            var _os = {};
-                            _os[NAME] = undefined;
-                            _os[VERSION] = undefined;
-                            rgxMapper.call(_os, _ua, _rgxmap.os);
-                            if (_isSelfNav && !_os[NAME] && _uach && _uach.platform && _uach.platform != 'Unknown') {
-                                _os[NAME] = _uach.platform.replace(/chrome os/i, CHROMIUM_OS).replace(/macos/i, MAC_OS); // backward compatibility
-                            }
-                            return _os;
-                        };
-                        this.getResult = function () {
-                            return {
-                                ua: this.getUA(),
-                                browser: this.getBrowser(),
-                                engine: this.getEngine(),
-                                os: this.getOS(),
-                                device: this.getDevice(),
-                                cpu: this.getCPU(),
+                    function Hi(i, e) {
+                        if (((i = i || {}), yi.call(this, V), e))
+                            yi.call(this, [
+                                [T, vi(i[P])],
+                                [O, vi(i[H])],
+                                [y, /\?1/.test(i[E])],
+                                [h, _i(i[M])],
+                                [z, _i(i[R])],
+                                [A, _i(i[B])],
+                                [k, _i(i[I])],
+                                [q, vi(i[j])],
+                                [N, _i(i[U])],
+                            ]);
+                        else for (var t in i) this.hasOwnProperty(t) && typeof i[t] !== b && (this[t] = i[t]);
+                    }
+                    function Ii(i, e, t, o) {
+                        return (
+                            (this.get = function (i) {
+                                return i ? (this.data.hasOwnProperty(i) ? this.data[i] : d) : this.data;
+                            }),
+                            (this.set = function (i, e) {
+                                return (this.data[i] = e), this;
+                            }),
+                            (this.setCH = function (i) {
+                                return (this.uaCH = i), this;
+                            }),
+                            (this.detectFeature = function () {
+                                if (pi && pi.userAgent == this.ua)
+                                    switch (this.itemType) {
+                                        case F:
+                                            pi.brave && typeof pi.brave.isBrave == u && this.set(m, 'Brave');
+                                            break;
+                                        case L:
+                                            !this.get(f) && hi && hi[y] && this.set(f, y),
+                                                'Macintosh' == this.get(h) &&
+                                                    pi &&
+                                                    typeof pi.standalone !== b &&
+                                                    pi.maxTouchPoints &&
+                                                    2 < pi.maxTouchPoints &&
+                                                    this.set(h, 'iPad').set(f, r);
+                                            break;
+                                        case X:
+                                            !this.get(m) && hi && hi[z] && this.set(m, hi[z]);
+                                            break;
+                                        case $:
+                                            var e = this.data,
+                                                i = function (i) {
+                                                    return e[i].getItem().detectFeature().get();
+                                                };
+                                            this.set(F, i(F)).set(G, i(G)).set(L, i(L)).set(D, i(D)).set(X, i(X));
+                                    }
+                                return this;
+                            }),
+                            (this.parseUA = function () {
+                                return (
+                                    this.itemType != $ && Ti.call(this.data, this.ua, this.rgxMap),
+                                    this.itemType == F && this.set(p, xi(this.get(v))),
+                                    this
+                                );
+                            }),
+                            (this.parseCH = function () {
+                                var i,
+                                    e = this.uaCH,
+                                    t = this.rgxMap;
+                                switch (this.itemType) {
+                                    case F:
+                                        var o,
+                                            r = e[O] || e[T];
+                                        if (r)
+                                            for (var a in r) {
+                                                var s = Si(/(Google|Microsoft) /, r[a].brand || r[a]),
+                                                    a = r[a].version;
+                                                /not.a.brand/i.test(s) ||
+                                                    (o && (!/chrom/i.test(o) || /chromi/i.test(s))) ||
+                                                    (this.set(m, s).set(v, a).set(p, xi(a)), (o = s));
+                                            }
+                                        break;
+                                    case G:
+                                        var n = e[k];
+                                        n && (n && '64' == e[N] && (n += '64'), Ti.call(this.data, n + ';', t));
+                                        break;
+                                    case L:
+                                        if (
+                                            (e[y] && this.set(f, y),
+                                            e[h] && this.set(h, e[h]),
+                                            'Xbox' == e[h] && this.set(f, x).set(g, ii),
+                                            e[q])
+                                        ) {
+                                            if ('string' != typeof e[q])
+                                                for (var w = 0; !i && w < e[q].length; ) i = qi(e[q][w++], zi);
+                                            else i = qi(e[q], zi);
+                                            this.set(f, i);
+                                        }
+                                        break;
+                                    case X:
+                                        n = e[z];
+                                        n &&
+                                            ((c = e[A]),
+                                            n == ui && (c = 13 <= parseInt(xi(c), 10) ? '11' : '10'),
+                                            this.set(m, n).set(v, c)),
+                                            this.get(m) == ui && 'Xbox' == e[h] && this.set(m, 'Xbox').set(v, d);
+                                        break;
+                                    case $:
+                                        var b = this.data,
+                                            c = function (i) {
+                                                return b[i].getItem().setCH(e).parseCH().get();
+                                            };
+                                        this.set(F, c(F)).set(G, c(G)).set(L, c(L)).set(D, c(D)).set(X, c(X));
+                                }
+                                return this;
+                            }),
+                            yi.call(this, [
+                                ['itemType', i],
+                                ['ua', e],
+                                ['uaCH', o],
+                                ['rgxMap', t],
+                                ['data', Pi(this, i)],
+                            ]),
+                            this
+                        );
+                    }
+                    function Ui(i, e, t) {
+                        var o;
+                        if (
+                            (typeof i === l
+                                ? ((e = fi(i, !0) ? (typeof e === l && (t = e), i) : ((t = i), d)), (i = d))
+                                : typeof i !== c || fi(e, !0) || ((t = e), (e = d)),
+                            t &&
+                                typeof t.append === u &&
+                                ((o = {}),
+                                t.forEach(function (i, e) {
+                                    o[e] = i;
+                                }),
+                                (t = o)),
+                            !(this instanceof Ui))
+                        )
+                            return new Ui(i, e, t).getResult();
+                        var r = typeof i === c ? i : t && t[_] ? t[_] : pi && pi.userAgent ? pi.userAgent : w,
+                            a = new Hi(t, !0),
+                            s = e ? mi(Ai, e) : Ai,
+                            e = function (i) {
+                                return i == $
+                                    ? function () {
+                                          return new Ii(i, r, s, a)
+                                              .set('ua', r)
+                                              .set(F, this.getBrowser())
+                                              .set(G, this.getCPU())
+                                              .set(L, this.getDevice())
+                                              .set(D, this.getEngine())
+                                              .set(X, this.getOS())
+                                              .get();
+                                      }
+                                    : function () {
+                                          return new Ii(i, r, s[i], a).parseUA().get();
+                                      };
                             };
-                        };
-                        this.getUA = function () {
-                            return _ua;
-                        };
-                        this.setUA = function (ua) {
-                            _ua = typeof ua === STR_TYPE && ua.length > UA_MAX_LENGTH ? trim(ua, UA_MAX_LENGTH) : ua;
-                            return this;
-                        };
-                        this.setUA(_ua);
-                        return this;
-                    };
-
-                    UAParser.VERSION = LIBVERSION;
-                    UAParser.BROWSER = enumerize([NAME, VERSION, MAJOR]);
-                    UAParser.CPU = enumerize([ARCHITECTURE]);
-                    UAParser.DEVICE = enumerize([
-                        MODEL,
-                        VENDOR,
-                        TYPE,
-                        CONSOLE,
-                        MOBILE,
-                        SMARTTV,
-                        TABLET,
-                        WEARABLE,
-                        EMBEDDED,
-                    ]);
-                    UAParser.ENGINE = UAParser.OS = enumerize([NAME, VERSION]);
-
-                    ///////////
-                    // Export
-                    //////////
-
-                    // check js environment
-                    if (typeof exports !== UNDEF_TYPE) {
-                        // nodejs env
-                        if (typeof module !== UNDEF_TYPE && module.exports) {
-                            exports = module.exports = UAParser;
-                        }
-                        exports.UAParser = UAParser;
-                    } else {
-                        // requirejs env (optional)
-                        if (typeof define === FUNC_TYPE && define.amd) {
-                            define(function () {
-                                return UAParser;
-                            });
-                        } else if (typeof window !== UNDEF_TYPE) {
-                            // browser env
-                            window.UAParser = UAParser;
-                        }
+                        return (
+                            yi
+                                .call(this, [
+                                    ['getBrowser', e(F)],
+                                    ['getCPU', e(G)],
+                                    ['getDevice', e(L)],
+                                    ['getEngine', e(D)],
+                                    ['getOS', e(X)],
+                                    ['getResult', e($)],
+                                    [
+                                        'getUA',
+                                        function () {
+                                            return r;
+                                        },
+                                    ],
+                                    [
+                                        'setUA',
+                                        function (i) {
+                                            return gi(i) && (r = i.length > C ? Ci(i, C) : i), this;
+                                        },
+                                    ],
+                                ])
+                                .setUA(r),
+                            this
+                        );
                     }
-
-                    // jQuery/Zepto specific (optional)
-                    // Note:
-                    //   In AMD env the global scope should be kept clean, but jQuery is an exception.
-                    //   jQuery always exports to global scope, unless jQuery.noConflict(true) is used,
-                    //   and we should catch that.
-                    var $ = typeof window !== UNDEF_TYPE && (window.jQuery || window.Zepto);
-                    if ($ && !$.ua) {
-                        var parser = new UAParser();
-                        $.ua = parser.getResult();
-                        $.ua.get = function () {
-                            return parser.getUA();
-                        };
-                        $.ua.set = function (ua) {
-                            parser.setUA(ua);
-                            var result = parser.getResult();
-                            for (var prop in result) {
-                                $.ua[prop] = result[prop];
-                            }
-                        };
-                    }
-                })(typeof window === 'object' ? window : this);
+                    (Ui.VERSION = '2.0.0'),
+                        (Ui.BROWSER = e([m, v, p, f])),
+                        (Ui.CPU = e([k])),
+                        (Ui.DEVICE = e([h, g, f, x, y, t, r, o, s])),
+                        (Ui.ENGINE = Ui.OS = e([m, v])),
+                        typeof exports !== b
+                            ? (typeof module !== b && module.exports && (exports = module.exports = Ui),
+                              (exports.UAParser = Ui))
+                            : typeof define === u && define.amd
+                              ? define(function () {
+                                    return Ui;
+                                })
+                              : li && (i.UAParser = Ui);
+                    var ji,
+                        Ei = li && (i.jQuery || i.Zepto);
+                    Ei &&
+                        !Ei.ua &&
+                        ((ji = new Ui()),
+                        (Ei.ua = ji.getResult()),
+                        (Ei.ua.get = function () {
+                            return ji.getUA();
+                        }),
+                        (Ei.ua.set = function (i) {
+                            ji.setUA(i);
+                            var e,
+                                t = ji.getResult();
+                            for (e in t) Ei.ua[e] = t[e];
+                        }));
+                })('object' == typeof window ? window : this);
             },
             {},
         ],
