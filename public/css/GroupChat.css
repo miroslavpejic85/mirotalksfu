@@ -211,14 +211,16 @@
 
 /* chat message bubble */
 .chat .chat-history .message {
+    position: relative;
+    display: inline-block;
+    overflow-wrap: break-word;
+    word-wrap: break-word;
     color: #fff;
     padding: 18px 20px;
     line-height: 26px;
     font-size: 16px;
     max-width: 100%;
     border-radius: 7px;
-    display: inline-block;
-    position: relative;
     /* border: 1px solid lime;  */
 }
 
