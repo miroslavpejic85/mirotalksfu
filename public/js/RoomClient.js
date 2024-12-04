@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.43
+ * @version 1.6.44
  *
  */
 
@@ -727,15 +727,15 @@ class RoomClient {
 
                     this.restartIce();
 
-                    popupHtmlMessage(
-                        null,
-                        image.network,
-                        'Producer Transport disconnected',
+                    this.toast(
+                        'warning',
+                        'Producer Transport lost',
                         'Network connection may have dropped or changed (Restarted ICE)',
-                        'center',
-                        false,
-                        false,
+                        'top-end',
+                        6000,
+                        true,
                     );
+
                     break;
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
@@ -746,11 +746,12 @@ class RoomClient {
                         null,
                         image.network,
                         'Producer Transport failed',
-                        'Check Your Network Connectivity',
+                        'Check Your Network Configuration',
                         'center',
                         false,
                         true,
                     );
+
                     break;
                 default:
                     console.log('Producer transport connection state changes', {
@@ -813,15 +814,15 @@ class RoomClient {
 
                     this.restartIce();
 
-                    popupHtmlMessage(
-                        null,
-                        image.network,
-                        'Consumer Transport disconnected',
+                    this.toast(
+                        'warning',
+                        'Consumer Transport lost',
                         'Network connection may have dropped or changed (Restarted ICE)',
-                        'center',
-                        false,
-                        false,
+                        'top-end',
+                        6000,
+                        true,
                     );
+
                     break;
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
@@ -832,11 +833,12 @@ class RoomClient {
                         null,
                         image.network,
                         'Consumer Transport failed',
-                        'Check Your Network Connectivity',
+                        'Check Your Network Configuration',
                         'center',
                         false,
                         true,
                     );
+
                     break;
                 default:
                     console.log('Consumer transport connection state changes', {
@@ -3141,6 +3143,26 @@ class RoomClient {
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
         }
+    }
+
+    toast(icon, title, text, position = 'top-end', timer = 5000, sound = false) {
+        if (sound) this.sound('alert');
+
+        const Toast = Swal.mixin({
+            toast: true,
+            position: position,
+            showConfirmButton: false,
+            timer: timer,
+            timerProgressBar: true,
+            background: swalBackground,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+        Toast.fire({
+            icon: icon,
+            title: title,
+            text: text,
+        });
     }
 
     msgPopup(type, message, timer = 3000) {
