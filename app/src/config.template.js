@@ -17,7 +17,17 @@ function getIPv4() {
     return '0.0.0.0'; // Default to 0.0.0.0 if no external IPv4 address found
 }
 
-const IPv4 = getIPv4(); // Replace it with the Server Public IPv4 in production.
+/*
+IPv4 Configuration Guide:
+    1. Localhost Setup:
+        - For local development with Docker, replace `getIPv4()` with '127.0.0.1'.
+    2. Production Setup:
+        - Replace `getIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
+        - For AWS EC2 instances, replace `getIPv4()` with the 'Elastic IP' associated with the instance. 
+        This ensures the public IP remains consistent across instance reboots.
+    Note: Always enclose the IP address in single quotes ''.
+*/
+const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your environment.
 
 const numWorkers = require('os').cpus().length;
 
@@ -630,7 +640,5 @@ module.exports = {
             maxSctpMessageSize: 262144,
             maxIncomingBitrate: 1500000,
         },
-        //announcedAddress: replace by 'public static IPV4 address' https://api.ipify.org (type string --> 'xx.xxx.xxx.xx' not xx.xxx.xxx.xx)
-        //announcedAddress: '' will be auto-detected on server start, for docker localPC set '127.0.0.1' otherwise the 'public static IPV4 address'
     },
 };
