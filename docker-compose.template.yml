@@ -1,21 +1,16 @@
-version: '3'
-
 services:
     mirotalksfu:
         image: mirotalk/sfu:latest
-        build:
-            context: .
-            dockerfile: Dockerfile
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
-            # These volume is mandatory if server.recording.enabled in the app/src/config.js
+            # Mandatory volume if `server.recording.enabled` is true in app/src/config.js
             # - ./app/rec:/src/app/rec
-            # These volume is mandatory if server.rtmp.enabled fromFile in the app/src/config.js
+            # Mandatory volume if `server.rtmp.enabled.fromFile` is true in app/src/config.js
             # - ./app/rtmp:/src/app/rtmp
-            # These volumes are not mandatory, comment if you want to use it
+            # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro
         ports:
