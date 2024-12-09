@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.45
+ * @version 1.6.46
  *
  */
 
@@ -64,7 +64,7 @@ const { auth, requiresAuth } = require('express-openid-connect');
 const cors = require('cors');
 const compression = require('compression');
 const socketIo = require('socket.io');
-const https = require('httpolyglot');
+const httpolyglot = require('httpolyglot');
 const mediasoup = require('mediasoup');
 const mediasoupClient = require('mediasoup-client');
 const http = require('http');
@@ -123,14 +123,14 @@ const corsOptions = {
     methods: config.server?.cors?.methods || ['GET', 'POST'],
 };
 
-const httpsServer = https.createServer(options, app);
-const io = socketIo(httpsServer, {
+const server = httpolyglot.createServer(options, app);
+const io = socketIo(server, {
     maxHttpBufferSize: 1e7,
     transports: ['websocket'],
     cors: corsOptions,
 });
 
-const host = 'https://' + 'localhost' + ':' + config.server.listen.port; // config.server.listen.ip
+const host = config.server.hostUrl || `http://localhost:${config.server.listen.port}`;
 
 const jwtCfg = {
     JWT_KEY: (config.jwt && config.jwt.key) || 'mirotalksfu_jwt_secret',
@@ -1148,7 +1148,7 @@ function startServer() {
     // START SERVER
     // ####################################################
 
-    httpsServer.listen(config.server.listen.port, () => {
+    server.listen(config.server.listen.port, () => {
         log.log(
             `%c
     

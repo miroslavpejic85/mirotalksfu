@@ -41,6 +41,7 @@ module.exports = {
         colors: true,
     },
     server: {
+        hostUrl: '', // default to http://localhost:port
         listen: {
             // app listen on
             ip: '0.0.0.0',
