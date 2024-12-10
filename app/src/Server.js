@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.46
+ * @version 1.6.47
  *
  */
 
@@ -624,7 +624,7 @@ function startServer() {
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
                 const roomExists = hostCfg.users.some(
-                    (user) => user.allowed_rooms && user.allowed_rooms.includes(roomId),
+                    (user) => user.allowed_rooms && (user.allowed_rooms.includes(roomId) || roomList.has(roomId)),
                 );
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
                 return roomExists ? res.sendFile(views.room) : res.redirect('/whoAreYou/' + roomId);
