@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.47
+ * @version 1.6.48
  *
  */
 
@@ -4291,7 +4291,6 @@ class RoomClient {
     }
 
     appendMessage(side, img, fromName, fromId, msg, toId, toName) {
-        //
         const getSide = filterXSS(side);
         const getImg = filterXSS(img);
         const getFromName = filterXSS(fromName);
@@ -4309,12 +4308,11 @@ class RoomClient {
             : `<span class="message-data-time">${time}, ${getFromName} </span>`;
 
         const formatMessage = this.formatMsg(getMsg);
-        console.log('FormatMessage', formatMessage);
         const speechButton = this.isSpeechSynthesisSupported
             ? `<button 
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
-                    onclick="rc.speechText('${formatMessage}')">
+                    onclick="rc.speechElementText('message-${chatMessagesId}')">
                     <i class="fas fa-volume-high"></i>
                 </button>`
             : '';
@@ -4323,7 +4321,7 @@ class RoomClient {
             ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
             : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
 
-        const message = getFromName === 'ChatGPT' ? `<pre>${getMsg}</pre>` : getMsg;
+        const message = getFromName === 'ChatGPT' ? '' : getMsg;
 
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
@@ -4337,13 +4335,13 @@ class RoomClient {
                     ${positionFirst}
                 </div>
                 <div class="message ${messageClass}">
-                    <span class="text-start " id="${chatMessagesId}">${message}</span>
+                    <span class="text-start" id="message-${chatMessagesId}">${message}</span>
                     <hr/>
                     <div class="about-buttons mt5">
                         <button 
                             id="msg-copy-${chatMessagesId}" 
                             class="mr5" 
-                            onclick="rc.copyToClipboard('${chatMessagesId}')">
+                            onclick="rc.copyToClipboard('message-${chatMessagesId}')">
                             <i class="fas fa-paste"></i>
                         </button>
                         ${speechButton}
@@ -4374,6 +4372,13 @@ class RoomClient {
                 break;
         }
 
+        if (getFromName === 'ChatGPT') {
+            const element = this.getId(`message-${chatMessagesId}`);
+            if (element) {
+                this.streamMessage(element, getMsg, 100);
+            }
+        }
+
         chatHistory.scrollTop += 500;
 
         if (!this.isMobileDevice) {
@@ -4383,6 +4388,67 @@ class RoomClient {
         }
 
         chatMessagesId++;
+    }
+
+    streamMessage(element, message, speed = 100) {
+        const codeBlockRegex = /```([a-zA-Z0-9]+)?\n([\s\S]*?)```/g;
+        const parts = [];
+
+        let lastIndex = 0;
+
+        message.replace(codeBlockRegex, (match, lang, code, offset) => {
+            if (offset > lastIndex) {
+                parts.push({ type: 'text', value: message.slice(lastIndex, offset) });
+            }
+            parts.push({ type: 'code', lang, value: code });
+            lastIndex = offset + match.length;
+        });
+
+        if (lastIndex < message.length) {
+            parts.push({ type: 'text', value: message.slice(lastIndex) });
+        }
+    
+        let index = 0;
+        let textBuffer = '';
+        let wordIndex = 0;
+    
+        const interval = setInterval(() => {
+            if (index < parts.length) {
+                const part = parts[index];
+
+                if (part.type === 'text') {
+                    const words = part.value.split(" ");
+                    if (wordIndex < words.length) {
+                        textBuffer += words[wordIndex] + " ";
+                        wordIndex++;
+                        element.innerHTML = textBuffer;
+                    } else {
+                        wordIndex = 0;
+                        index++;
+                    }
+                } 
+
+                else if (part.type === 'code') {
+                    textBuffer += `<pre><code class="language-${part.lang || ''}">${part.value}</code></pre>`;
+                    element.innerHTML = textBuffer;
+                    index++;
+                }
+
+                if (index % 5 === 0 || index === parts.length) {
+                    highlightCodeBlocks(element);
+                }
+            } else {
+                clearInterval(interval);
+                highlightCodeBlocks(element);
+            }
+        }, speed);
+
+        function highlightCodeBlocks(element) {
+            const codeBlocks = element.querySelectorAll('pre code');
+            codeBlocks.forEach((block) => {
+                hljs.highlightElement(block);
+            });
+        }
     }
 
     deleteMessage(id) {
@@ -4553,6 +4619,11 @@ class RoomClient {
         speech.text = (newMsg ? 'New' : '') + ' message from:' + from + '. The message is:' + msg;
         speech.rate = 0.9;
         window.speechSynthesis.speak(speech);
+    }
+
+    speechElementText(elemId){
+        const element = this.getId(elemId);
+        this.speechText(element.innerText);
     }
 
     speechText(msg) {
