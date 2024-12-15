@@ -2,7 +2,13 @@
 
 // https://codepen.io/tutsplus/pen/BaVqjvg
 
-const snowEnabled = true;
+const now = new Date();
+
+const month = now.getMonth();
+
+const snowEnabled = month === 11 || month === 0;
+
+console.log(`Snow enabled: ${snowEnabled}`);
 
 const snowContainer = document.getElementById('snow-container');
 
