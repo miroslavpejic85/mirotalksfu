@@ -1615,14 +1615,19 @@ access to use this app.
                                 </li>
                                 <li>
                                     <button id="transcriptionGhostBtn">
-                                        <i class="fas fa-circle-half-stroke"></i> Toggle bg
+                                        <i class="fas fa-circle-half-stroke"></i>&nbsp;Toggle bg
+                                    </button>
+                                </li>
+                                <li id="transcriptionAllLi" class="hidden">
+                                    <button id="transcriptionAllBtn">
+                                        <i class="fas fa-play"></i>&nbsp;Start for all
                                     </button>
                                 </li>
                                 <li>
-                                    <button id="transcriptionSaveBtn"><i class="fas fa-save"></i> Save</button>
+                                    <button id="transcriptionSaveBtn"><i class="fas fa-save"></i>&nbsp;Save</button>
                                 </li>
                                 <li>
-                                    <button id="transcriptionCleanBtn"><i class="fas fa-trash"></i> Clean</button>
+                                    <button id="transcriptionCleanBtn"><i class="fas fa-trash"></i>&nbsp;Clean</button>
                                 </li>
                             </ul>
                         </div>
@@ -1630,7 +1635,7 @@ access to use this app.
                     </div>
                 </header>
                 <main id="transcriptionChat" class="transcription-chat"></main>
-                <div class="transcription-inputarea">
+                <div id="transcriptionFooter" class="transcription-inputarea">
                     <select id="transcriptionLanguage" class="form-select text-light bg-dark"></select>
                     <select id="transcriptionDialect" class="form-select text-light bg-dark"></select>
                     <button id="transcriptionSpeechStart" class=""><i class="fas fa-play"></i></button>

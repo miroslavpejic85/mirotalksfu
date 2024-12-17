@@ -150,6 +150,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.sendEmailInvitation = true;
 
         show(editorUnlockBtn);
+        show(transcriptionAllLi);
         //...
 
         // ##################################
