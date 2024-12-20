@@ -32,12 +32,15 @@ const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your en
 const numWorkers = require('os').cpus().length;
 
 /*
-    Port range for WebRTC communication (40000-40100).
-    Used for dynamic allocation of UDP ports for media streams.
-    Can handle up to 50 concurrent participants (2 ports per participant: 1 for audio, 1 for video).
-    If more participants are needed, increase the port range.
-    When using Docker, consider using 'network mode: host' for better performance.
-    Alternatively, try 'webRtcServerActive: true' mode for better scalability.
+    Set the port range for WebRTC communication. This range is used for the dynamic allocation of UDP ports for media streams.
+
+    - Each participant requires 2 ports: one for audio and one for video.
+    - The default configuration supports up to 50 participants (50 * 2 ports = 100 ports).
+    - To support more participants, simply increase the port range.
+
+    Note: 
+    - When running in Docker, use 'network mode: host' for improved performance.
+    - Alternatively, enable 'webRtcServerActive: true' mode for better scalability.
 */
 const rtcMinPort = 40000;
 const rtcMaxPort = 40100;
