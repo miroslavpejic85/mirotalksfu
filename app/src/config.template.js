@@ -31,6 +31,17 @@ const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your en
 
 const numWorkers = require('os').cpus().length;
 
+/*
+    Port range for WebRTC communication (40000-40100).
+    Used for dynamic allocation of UDP ports for media streams.
+    Can handle up to 50 concurrent participants (2 ports per participant: 1 for audio, 1 for video).
+    If more participants are needed, increase the port range.
+    When using Docker, consider using 'network mode: host' for better performance.
+    Alternatively, try 'webRtcServerActive: true' mode for better scalability.
+*/
+const rtcMinPort = 40000;
+const rtcMaxPort = 40100;
+
 module.exports = {
     console: {
         /*
@@ -540,8 +551,8 @@ module.exports = {
         // Worker settings
         numWorkers: numWorkers,
         worker: {
-            rtcMinPort: 40000,
-            rtcMaxPort: 40100,
+            rtcMinPort: rtcMinPort,
+            rtcMaxPort: rtcMaxPort,
             disableLiburing: false, // https://github.com/axboe/liburing
             logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
@@ -602,38 +613,38 @@ module.exports = {
         webRtcServerActive: false,
         webRtcServerOptions: {
             listenInfos: [
-                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: 40000 },
-                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: 40000 },
+                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: rtcMinPort },
+                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: rtcMinPort },
                 {
                     protocol: 'udp',
                     ip: '0.0.0.0',
                     announcedAddress: IPv4,
-                    portRange: { min: 40000, max: 40000 + numWorkers },
+                    portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
                 },
                 {
                     protocol: 'tcp',
                     ip: '0.0.0.0',
                     announcedAddress: IPv4,
-                    portRange: { min: 40000, max: 40000 + numWorkers },
+                    portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
                 },
             ],
         },
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
-                // { protocol: 'udp', ip: IPv4, portRange: { min: 40000, max: 40100 } },
-                // { protocol: 'tcp', ip: IPv4, portRange: { min: 40000, max: 40100 } },
+                // { protocol: 'udp', ip: IPv4, portRange: { min: rtcMinPort, max: rtcMaxPort } },
+                // { protocol: 'tcp', ip: IPv4, portRange: { min: rtcMinPort, max: rtcMaxPort } },
                 {
                     protocol: 'udp',
                     ip: '0.0.0.0',
                     announcedAddress: IPv4,
-                    portRange: { min: 40000, max: 40100 },
+                    portRange: { min: rtcMinPort, max: rtcMaxPort },
                 },
                 {
                     protocol: 'tcp',
                     ip: '0.0.0.0',
                     announcedAddress: IPv4,
-                    portRange: { min: 40000, max: 40100 },
+                    portRange: { min: rtcMinPort, max: rtcMaxPort },
                 },
             ],
             initialAvailableOutgoingBitrate: 1000000,
