@@ -61,8 +61,8 @@ describe('test-ServerAPI', () => {
             const result = serverApi.getStats(roomList);
 
             result.should.deepEqual({
-                totalUsers: 3,
                 totalRooms: 2,
+                totalUsers: 3,
             });
         });
 
@@ -75,8 +75,8 @@ describe('test-ServerAPI', () => {
             const result = serverApi.getStats(roomList);
 
             result.should.deepEqual({
-                totalUsers: 0,
                 totalRooms: 2,
+                totalUsers: 0,
             });
         });
 
@@ -86,8 +86,8 @@ describe('test-ServerAPI', () => {
             const result = serverApi.getStats(roomList);
 
             result.should.deepEqual({
-                totalUsers: 0,
                 totalRooms: 0,
+                totalUsers: 0,
             });
         });
     });

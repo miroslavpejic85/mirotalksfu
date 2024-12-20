@@ -24,7 +24,7 @@ module.exports = class ServerApi {
     getStats(roomList) {
         const totalUsers = Array.from(roomList.values()).reduce((total, room) => total + room.peers.size, 0);
         const totalRooms = roomList.size;
-        return { totalUsers, totalRooms };
+        return { totalRooms, totalUsers };
     }
 
     getMeetings(roomList) {

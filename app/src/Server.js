@@ -949,16 +949,16 @@ function startServer() {
 
             res.json({
                 success: true,
-                totalUsers,
                 totalRooms,
+                totalUsers,
             });
 
             // log.debug the output if all done
             log.debug('MiroTalk get stats - Authorized', {
                 header: req.headers,
                 body: req.body,
-                totalUsers,
                 totalRooms,
+                totalUsers,
             });
         } catch (error) {
             console.error('Error fetching stats', error);
