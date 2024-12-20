@@ -38,6 +38,60 @@ describe('test-ServerAPI', () => {
         });
     });
 
+    describe('getStats', () => {
+        it('should return total number of rooms and users', () => {
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        peers: new Map([
+                            ['peer1', { peer_info: { peer_name: 'John Doe' } }],
+                            ['peer2', { peer_info: { peer_name: 'Jane Doe' } }],
+                        ]),
+                    },
+                ],
+                [
+                    'room2',
+                    {
+                        peers: new Map([['peer3', { peer_info: { peer_name: 'Sam Smith' } }]]),
+                    },
+                ],
+            ]);
+
+            const result = serverApi.getStats(roomList);
+
+            result.should.deepEqual({
+                totalUsers: 3,
+                totalRooms: 2,
+            });
+        });
+
+        it('should return 0 users when there are no peers in any room', () => {
+            const roomList = new Map([
+                ['room1', { peers: new Map() }],
+                ['room2', { peers: new Map() }],
+            ]);
+
+            const result = serverApi.getStats(roomList);
+
+            result.should.deepEqual({
+                totalUsers: 0,
+                totalRooms: 2,
+            });
+        });
+
+        it('should return 0 rooms when roomList is empty', () => {
+            const roomList = new Map();
+
+            const result = serverApi.getStats(roomList);
+
+            result.should.deepEqual({
+                totalUsers: 0,
+                totalRooms: 0,
+            });
+        });
+    });
+
     describe('getMeetings', () => {
         it('should return formatted meetings with peer information', () => {
             const roomList = new Map([

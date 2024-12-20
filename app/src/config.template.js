@@ -141,6 +141,7 @@ module.exports = {
         keySecret: 'mirotalksfu_default_secret',
         // Define which endpoints are allowed
         allowed: {
+            stats: true,
             meetings: false,
             meeting: true,
             join: true,

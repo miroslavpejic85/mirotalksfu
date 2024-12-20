@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.53
+ * @version 1.6.54
  *
  */
 
@@ -923,6 +923,48 @@ function startServer() {
     // ####################################################
     // REST API
     // ####################################################
+
+    app.get([restApi.basePath + '/stats'], (req, res) => {
+        try {
+            // Check if endpoint allowed
+            if (restApi.allowed && !restApi.allowed.stats) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+                });
+            }
+            // check if user was authorized for the api call
+            const { host, authorization } = req.headers;
+            const api = new ServerApi(host, authorization);
+
+            if (!api.isAuthorized()) {
+                log.debug('MiroTalk get meetings - Unauthorized', {
+                    header: req.headers,
+                    body: req.body,
+                });
+                return res.status(403).json({ error: 'Unauthorized!' });
+            }
+
+            const { totalRooms, totalUsers } = api.getStats(roomList);
+
+            res.json({
+                success: true,
+                totalUsers,
+                totalRooms,
+            });
+
+            // log.debug the output if all done
+            log.debug('MiroTalk get stats - Authorized', {
+                header: req.headers,
+                body: req.body,
+                totalUsers,
+                totalRooms,
+            });
+        } catch (error) {
+            console.error('Error fetching stats', error);
+            res.status(500).json({ success: false, error: 'Failed to retrieve stats.' });
+        }
+    });
 
     // request meetings list
     app.get([restApi.basePath + '/meetings'], (req, res) => {
