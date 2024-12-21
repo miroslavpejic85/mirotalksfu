@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.54
+ * @version 1.6.55
  *
  */
 
@@ -945,10 +945,11 @@ function startServer() {
                 return res.status(403).json({ error: 'Unauthorized!' });
             }
 
-            const { totalRooms, totalUsers } = api.getStats(roomList);
+            const { timestamp, totalRooms, totalUsers } = api.getStats(roomList);
 
             res.json({
                 success: true,
+                timestamp,
                 totalRooms,
                 totalUsers,
             });
@@ -957,6 +958,7 @@ function startServer() {
             log.debug('MiroTalk get stats - Authorized', {
                 header: req.headers,
                 body: req.body,
+                timestamp,
                 totalRooms,
                 totalUsers,
             });

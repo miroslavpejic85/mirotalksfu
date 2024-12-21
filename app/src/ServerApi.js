@@ -21,10 +21,10 @@ module.exports = class ServerApi {
         return true;
     }
 
-    getStats(roomList) {
+    getStats(roomList, timestamp = new Date().toISOString()) {
         const totalUsers = Array.from(roomList.values()).reduce((total, room) => total + room.peers.size, 0);
         const totalRooms = roomList.size;
-        return { totalRooms, totalUsers };
+        return { timestamp, totalRooms, totalUsers };
     }
 
     getMeetings(roomList) {

@@ -16,6 +16,7 @@ describe('test-ServerAPI', () => {
     const host = 'example.com';
     const authorization = 'secret-key';
     const apiKeySecret = 'secret-key';
+    const timestamp = new Date().toISOString();
 
     beforeEach(() => {
         // Mocking config values
@@ -58,9 +59,10 @@ describe('test-ServerAPI', () => {
                 ],
             ]);
 
-            const result = serverApi.getStats(roomList);
+            const result = serverApi.getStats(roomList, timestamp);
 
             result.should.deepEqual({
+                timestamp: timestamp,
                 totalRooms: 2,
                 totalUsers: 3,
             });
@@ -72,9 +74,10 @@ describe('test-ServerAPI', () => {
                 ['room2', { peers: new Map() }],
             ]);
 
-            const result = serverApi.getStats(roomList);
+            const result = serverApi.getStats(roomList, timestamp);
 
             result.should.deepEqual({
+                timestamp: timestamp,
                 totalRooms: 2,
                 totalUsers: 0,
             });
@@ -83,9 +86,10 @@ describe('test-ServerAPI', () => {
         it('should return 0 rooms when roomList is empty', () => {
             const roomList = new Map();
 
-            const result = serverApi.getStats(roomList);
+            const result = serverApi.getStats(roomList, timestamp);
 
             result.should.deepEqual({
+                timestamp: timestamp,
                 totalRooms: 0,
                 totalUsers: 0,
             });
