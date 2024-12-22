@@ -532,7 +532,9 @@ module.exports = class Room {
     // ####################################################
 
     async createWebRtcTransport(socket_id) {
-        if (!this.peers.has(socket_id)) return;
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
 
         const { maxIncomingBitrate, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
 
@@ -550,7 +552,7 @@ module.exports = class Room {
         const transport = await this.router.createWebRtcTransport(webRtcTransportOptions);
 
         if (!transport) {
-            throw new Error('Create WebRtc Transport failed!');
+            throw new Error('Failed to create WebRtc Transport');
         }
 
         const { id, type, iceParameters, iceCandidates, dtlsParameters } = transport;
@@ -558,7 +560,10 @@ module.exports = class Room {
         if (maxIncomingBitrate) {
             try {
                 await transport.setMaxIncomingBitrate(maxIncomingBitrate);
-            } catch (error) {}
+            } catch (error) {
+                log.error('Failed to set max incoming bitrate', error);
+                throw new Error(`Failed to set max incoming bitrate for transport ${id}`);
+            }
         }
 
         const peer = this.getPeer(socket_id);
@@ -615,11 +620,18 @@ module.exports = class Room {
     }
 
     async connectPeerTransport(socket_id, transport_id, dtlsParameters) {
-        if (!this.peers.has(socket_id)) return;
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
 
         const peer = this.getPeer(socket_id);
 
-        await peer.connectTransport(transport_id, dtlsParameters);
+        try {
+            await peer.connectTransport(transport_id, dtlsParameters);
+        } catch (error) {
+            log.error(`Failed to connect peer transport for socket ID ${socket_id}`, error);
+            throw new Error(`Failed to connect transport for peer with socket ID ${socket_id}`);
+        }
 
         return '[Room|connectPeerTransport] done';
     }
@@ -629,14 +641,22 @@ module.exports = class Room {
     // ####################################################
 
     async produce(socket_id, producerTransportId, rtpParameters, kind, type) {
-        if (!this.peers.has(socket_id)) return;
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
 
         const peer = this.getPeer(socket_id);
 
-        const peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
+        let peerProducer;
+        try {
+            peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
+        } catch (error) {
+            log.error(`Error creating producer for peer with socket ID ${socket_id}`, error);
+            throw new Error(`Error creating producer with transport ID ${producerTransportId} for peer ${socket_id}`);
+        }
 
         if (!peerProducer) {
-            throw new Error(`Peer producer kind ${kind} with id ${producerTransportId} not found`);
+            throw new Error(`Failed to create producer with ID ${producerTransportId} for peer ${socket_id}`);
         }
 
         const { id } = peerProducer;
@@ -657,11 +677,18 @@ module.exports = class Room {
     }
 
     closeProducer(socket_id, producer_id) {
-        if (!this.peers.has(socket_id)) return;
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
 
         const peer = this.getPeer(socket_id);
 
-        peer.closeProducer(producer_id);
+        try {
+            peer.closeProducer(producer_id);
+        } catch (error) {
+            log.error(`Error closing producer for peer ${socket_id}`, error);
+            throw new Error(`Error closing producer with ID ${producer_id} for peer ${socket_id}`);
+        }
     }
 
     // ####################################################
@@ -669,28 +696,30 @@ module.exports = class Room {
     // ####################################################
 
     async consume(socket_id, consumer_transport_id, producer_id, rtpCapabilities) {
-        if (!this.peers.has(socket_id)) return;
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
 
-        if (
-            !this.router.canConsume({
-                producerId: producer_id,
-                rtpCapabilities,
-            })
-        ) {
-            log.warn('Cannot consume', {
-                socket_id,
-                consumer_transport_id,
-                producer_id,
-            });
-            return;
+        if (!this.router.canConsume({ producerId: producer_id, rtpCapabilities })) {
+            throw new Error(`Cannot consume producer with ID ${producer_id}, router validation failed`);
         }
 
         const peer = this.getPeer(socket_id);
 
-        const peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
+        let peerConsumer;
+        try {
+            peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
+        } catch (error) {
+            log.error(`Error creating consumer for peer with socket ID ${socket_id}`, error);
+            throw new Error(
+                `Failed to create consumer with transport ID ${consumer_transport_id} and producer ID ${producer_id} for peer ${socket_id}`,
+            );
+        }
 
         if (!peerConsumer) {
-            throw new Error(`Peer consumer kind ${kind} with id ${consumer_transport_id} not found`);
+            throw new Error(
+                `Consumer creation failed for transport ID ${consumer_transport_id} and producer ID ${producer_id}`,
+            );
         }
 
         const { consumer, params } = peerConsumer;
@@ -702,7 +731,7 @@ module.exports = class Room {
 
             peer.removeConsumer(id);
 
-            // Notify the client that consumer is closed
+            // Notify the client that the consumer is closed
             this.send(socket_id, 'consumerClosed', {
                 consumer_id: id,
                 consumer_kind: kind,

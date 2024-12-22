@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.55
+ * @version 1.6.60
  *
  */
 
@@ -1558,15 +1558,10 @@ function startServer() {
 
             try {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
-
-                //log.debug('Create WebRtc transport callback', { callback: createWebRtcTransport });
-
                 callback(createWebRtcTransport);
             } catch (err) {
                 log.error('Create WebRtc Transport error', err);
-                callback({
-                    error: err.message,
-                });
+                callback({ error: err.message });
             }
         });
 
@@ -1576,22 +1571,16 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
-
             const { peer_name } = peer || 'undefined';
 
             log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
 
             try {
                 const connectTransport = await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
-
-                //log.debug('Connect transport', { callback: connectTransport });
-
-                callback(connectTransport);
+                callback({ success: true, message: connectTransport });
             } catch (err) {
                 log.error('Connect transport error', err);
-                callback({
-                    error: err.message,
-                });
+                callback({ success: false, error: err.message });
             }
         });
 
@@ -1624,9 +1613,7 @@ function startServer() {
                 callback(iceParameters);
             } catch (err) {
                 log.error('Restart ICE error', err);
-                callback({
-                    error: err.message,
-                });
+                callback({ error: err.message });
             }
         });
 
@@ -1643,7 +1630,6 @@ function startServer() {
 
             const { peer_name } = peer || 'undefined';
 
-            // peer_info.audio OR video ON
             const data = {
                 room_id: room.id,
                 peer_name: peer_name,
@@ -1678,16 +1664,10 @@ function startServer() {
                     room.addProducerToActiveSpeakerObserver({ producerId: producer_id });
                 }
 
-                //log.debug('Producer transport callback', { callback: producer_id });
-
-                callback({
-                    producer_id,
-                });
+                callback({ producer_id });
             } catch (err) {
                 log.error('Producer transport error', err);
-                callback({
-                    error: err.message,
-                });
+                callback({ error: err.message });
             }
         });
 
@@ -1709,14 +1689,10 @@ function startServer() {
                     consumer_id: params ? params.id : undefined,
                 });
 
-                //log.debug('Consumer transport callback', { callback: params });
-
                 callback(params);
             } catch (err) {
                 log.error('Consumer transport error', err);
-                callback({
-                    error: err.message,
-                });
+                callback({ error: err.message });
             }
         });
 
@@ -1751,15 +1727,15 @@ function startServer() {
 
             try {
                 await producer.pause();
+
+                const { peer_name } = peer || 'undefined';
+
+                log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
+
+                callback('successfully');
             } catch (error) {
-                return callback({ error: error.message });
+                callback({ error: error.message });
             }
-
-            const { peer_name } = peer || 'undefined';
-
-            log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
-
-            callback('successfully');
         });
 
         socket.on('resumeProducer', async ({ producer_id }, callback) => {
@@ -1781,15 +1757,15 @@ function startServer() {
 
             try {
                 await producer.resume();
+
+                const { peer_name } = peer || 'undefined';
+
+                log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
+
+                callback('successfully');
             } catch (error) {
-                return callback({ error: error.message });
+                callback({ error: error.message });
             }
-
-            const { peer_name } = peer || 'undefined';
-
-            log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
-
-            callback('successfully');
         });
 
         socket.on('resumeConsumer', async ({ consumer_id }, callback) => {
@@ -1811,15 +1787,15 @@ function startServer() {
 
             try {
                 await consumer.resume();
+
+                const { peer_name } = peer || 'undefined';
+
+                log.debug('Consumer resumed', { peer_name: peer_name, consumer_id: consumer_id });
+
+                callback('successfully');
             } catch (error) {
-                return callback({ error: error.message });
+                callback({ error: error.message });
             }
-
-            const { peer_name } = peer || 'undefined';
-
-            log.debug('Consumer resumed', { peer_name: peer_name, consumer_id: consumer_id });
-
-            callback('successfully');
         });
 
         socket.on('getProducers', () => {

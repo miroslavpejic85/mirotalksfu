@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.55
+ * @version 1.6.60
  *
  */
 
@@ -688,12 +688,17 @@ class RoomClient {
 
         this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
-                await this.socket.request('connectTransport', {
+                const response = await this.socket.request('connectTransport', {
                     transport_id: this.producerTransport.id,
                     dtlsParameters,
                 });
+                if (!response.success) {
+                    console.error('Producer Transport connection failed', response.error);
+                    throw new Error(response.error);
+                }
                 callback();
             } catch (err) {
+                console.error('Producer Transport connection error', err);
                 errback(err);
             }
         });
@@ -792,12 +797,17 @@ class RoomClient {
 
         this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
-                await this.socket.request('connectTransport', {
+                const response = await this.socket.request('connectTransport', {
                     transport_id: this.consumerTransport.id,
                     dtlsParameters,
                 });
+                if (!response.success) {
+                    console.error('Consumer Transport connection failed', response.error);
+                    throw new Error(response.error);
+                }
                 callback();
             } catch (err) {
+                console.error('Consumer Transport connection error', err);
                 errback(err);
             }
         });
@@ -2272,13 +2282,24 @@ class RoomClient {
     async getConsumeStream(producerId, peer_id, type) {
         const { rtpCapabilities } = this.device;
 
-        const data = await this.socket.request('consume', {
-            rtpCapabilities,
-            consumerTransportId: this.consumerTransport.id,
-            producerId,
-        });
+        let data = {};
 
-        console.log('DATA', data);
+        try {
+            data = await this.socket.request('consume', {
+                rtpCapabilities,
+                consumerTransportId: this.consumerTransport.id,
+                producerId,
+            });
+
+            if (data.error) {
+                console.error('Error consuming producer:', data.error);
+                throw new Error(data.error);
+            }
+
+            console.log('Consumer parameters received:', data);
+        } catch (err) {
+            console.error('Failed to consume:', err);
+        }
 
         const { id, kind, rtpParameters } = data;
         const codecOptions = {};

@@ -108,25 +108,33 @@ module.exports = class Peer {
 
     async connectTransport(transport_id, dtlsParameters) {
         if (!this.transports.has(transport_id)) {
-            return false;
+            throw new Error(`Transport with ID ${transport_id} not found`);
         }
 
-        await this.transports.get(transport_id).connect({
-            dtlsParameters: dtlsParameters,
-        });
+        try {
+            await this.transports.get(transport_id).connect({
+                dtlsParameters: dtlsParameters,
+            });
+        } catch (error) {
+            log.error(`Failed to connect transport with ID ${transport_id}`, error);
+            throw new Error(`Failed to connect transport with ID ${transport_id}`);
+        }
 
         return true;
     }
 
     close() {
         this.transports.forEach((transport, transport_id) => {
-            transport.close();
-            this.delTransport(transport_id);
-            log.debug('Closed and deleted peer transport', {
-                //transport_id: transport_id,
-                transportInternal: transport.internal,
-                transport_closed: transport.closed,
-            });
+            try {
+                transport.close();
+                this.delTransport(transport_id);
+                log.debug('Closed and deleted peer transport', {
+                    transportInternal: transport.internal,
+                    transport_closed: transport.closed,
+                });
+            } catch (error) {
+                log.warn(`Error closing transport with ID ${transport_id}`, error.message);
+            }
         });
 
         const peerTransports = this.getTransports();
@@ -159,14 +167,22 @@ module.exports = class Peer {
     }
 
     async createProducer(producerTransportId, producer_rtpParameters, producer_kind, producer_type) {
-        if (!this.transports.has(producerTransportId)) return;
+        if (!this.transports.has(producerTransportId)) {
+            throw new Error(`Producer transport with ID ${producerTransportId} not found`);
+        }
 
         const producerTransport = this.transports.get(producerTransportId);
 
-        const producer = await producerTransport.produce({
-            kind: producer_kind,
-            rtpParameters: producer_rtpParameters,
-        });
+        let producer;
+        try {
+            producer = await producerTransport.produce({
+                kind: producer_kind,
+                rtpParameters: producer_rtpParameters,
+            });
+        } catch (error) {
+            log.error(`Error creating producer for transport ID ${producerTransportId}:`, error);
+            throw new Error(`Failed to create producer for transport ID ${producerTransportId}`);
+        }
 
         const { id, appData, type, kind, rtpParameters } = producer;
 
@@ -236,17 +252,25 @@ module.exports = class Peer {
     }
 
     async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
-        if (!this.transports.has(consumer_transport_id)) return;
+        if (!this.transports.has(consumer_transport_id)) {
+            throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
+        }
 
         const consumerTransport = this.transports.get(consumer_transport_id);
 
-        const consumer = await consumerTransport.consume({
-            producerId: producer_id,
-            rtpCapabilities,
-            enableRtx: true, // Enable NACK for OPUS.
-            paused: true,
-            ignoreDtx: true,
-        });
+        let consumer;
+        try {
+            consumer = await consumerTransport.consume({
+                producerId: producer_id,
+                rtpCapabilities,
+                enableRtx: true, // Enable NACK for OPUS.
+                paused: true,
+                ignoreDtx: true,
+            });
+        } catch (error) {
+            log.error(`Error creating consumer for transport ID ${consumer_transport_id}`, error);
+            throw new Error(`Failed to create consumer for transport ID ${consumer_transport_id}`);
+        }
 
         const { id, type, kind, rtpParameters, producerPaused } = consumer;
 
