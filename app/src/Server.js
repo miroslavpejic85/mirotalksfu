@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.60
+ * @version 1.6.61
  *
  */
 
@@ -670,6 +670,9 @@ function startServer() {
 
     // handle login if user_auth enabled
     app.get(['/login'], (req, res) => {
+        if (!hostCfg.protected) {
+            return res.redirect('/');
+        }
         res.sendFile(views.login);
     });
 

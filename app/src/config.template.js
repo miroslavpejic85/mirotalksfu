@@ -18,13 +18,13 @@ function getIPv4() {
 }
 
 /*
-IPv4 Configuration Guide:
-    1. Localhost Setup:
-        - For local development with Docker, replace `getIPv4()` with '127.0.0.1'.
-    2. Production Setup:
-        - Replace `getIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
-        - For AWS EC2 instances, replace `getIPv4()` with the 'Elastic IP' associated with the instance. 
-        This ensures the public IP remains consistent across instance reboots.
+    IPv4 Configuration Guide:
+        1. Localhost Setup:
+            - For local development with Docker, replace `getIPv4()` with '127.0.0.1'.
+        2. Production Setup:
+            - Replace `getIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
+            - For AWS EC2 instances, replace `getIPv4()` with the 'Elastic IP' associated with the instance. 
+            This ensures the public IP remains consistent across instance reboots.
     Note: Always enclose the IP address in single quotes ''.
 */
 const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your environment.
@@ -33,11 +33,9 @@ const numWorkers = require('os').cpus().length;
 
 /*
     Set the port range for WebRTC communication. This range is used for the dynamic allocation of UDP ports for media streams.
-
-    - Each participant requires 2 ports: one for audio and one for video.
-    - The default configuration supports up to 50 participants (50 * 2 ports = 100 ports).
-    - To support more participants, simply increase the port range.
-
+        - Each participant requires 2 ports: one for audio and one for video.
+        - The default configuration supports up to 50 participants (50 * 2 ports = 100 ports).
+        - To support more participants, simply increase the port range.
     Note: 
     - When running in Docker, use 'network mode: host' for improved performance.
     - Alternatively, enable 'webRtcServerActive: true' mode for better scalability.
