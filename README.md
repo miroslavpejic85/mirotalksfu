@@ -154,25 +154,6 @@ Example:
 </details>
 
 <details open>
-<summary>Embed a meeting</summary>
-
-<br/>
-
-![iframe](public/images/iframe.png)
-
-To embed a meeting within `your service or app` using an iframe, you can use the following code:
-
-```html
-<iframe
-    allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; web-share; autoplay"
-    src="https://sfu.mirotalk.com/newroom"
-    style="height: 100vh; width: 100vw; border: 0px;"
-></iframe>
-```
-
-</details>
-
-<details open>
 <summary>Quick Start</summary>
 
 <br/>
@@ -258,6 +239,25 @@ $ docker-compose down
 ```
 
 - Open [https://localhost:3010](https://localhost:3010) in your browser.
+
+</details>
+
+<details open>
+<summary>Embed a meeting</summary>
+
+<br/>
+
+![iframe](public/images/iframe.png)
+
+To embed a meeting within `your service or app` using an iframe, you can use the following code:
+
+```html
+<iframe
+    allow="camera; microphone; display-capture; fullscreen; clipboard-read; clipboard-write; web-share; autoplay"
+    src="https://sfu.mirotalk.com/newroom"
+    style="height: 100vh; width: 100vw; border: 0px;"
+></iframe>
+```
 
 </details>
 
