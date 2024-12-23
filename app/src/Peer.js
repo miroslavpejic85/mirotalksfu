@@ -200,11 +200,11 @@ module.exports = class Peer {
                 temporalLayer,
             });
         } else {
-            log.debug('Producer ----->', { type: type, kind: kind });
+            log.debug('Producer ----->', { type, kind });
         }
 
         producer.on('transportclose', () => {
-            log.debug('Producer "transportclose" event');
+            log.debug('Producer "transportclose" event', { producerId: id });
             this.closeProducer(id);
         });
 
@@ -281,6 +281,7 @@ module.exports = class Peer {
             const { scalabilityMode } = rtpParameters.encodings[0];
             const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
             const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+
             try {
                 await consumer.setPreferredLayers({
                     spatialLayer: spatialLayer,
@@ -291,13 +292,18 @@ module.exports = class Peer {
                     spatialLayer,
                     temporalLayer,
                 });
-            } catch (error) {}
+            } catch (error) {
+                log.error('Failed to set preferred layers', {
+                    consumerId: id,
+                    error,
+                });
+            }
         } else {
-            log.debug('Consumer ----->', { type: type, kind: kind });
+            log.debug('Consumer ----->', { type, kind });
         }
 
         consumer.on('transportclose', () => {
-            log.debug('Consumer "transportclose" event');
+            log.debug('Consumer "transportclose" event', { consumerId: id });
             this.removeConsumer(id);
         });
 

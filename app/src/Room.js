@@ -574,6 +574,18 @@ module.exports = class Room {
 
         const { peer_name } = peer;
 
+        transport.observer.on('newproducer', (producer) => {
+            log.debug('---> new producer created [id:%s]', producer.id);
+        });
+
+        transport.observer.on('newconsumer', (consumer) => {
+            log.debug('---> new consumer created [id:%s]', consumer.id);
+        });
+
+        transport.observer.on('close', () => {
+            log.debug('---> transport close [id:%s]', transport.id);
+        });
+
         transport.on('icestatechange', (iceState) => {
             if (iceState === 'disconnected' || iceState === 'closed') {
                 log.debug('Transport closed "icestatechange" event', {

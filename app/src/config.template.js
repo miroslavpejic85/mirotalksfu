@@ -401,6 +401,7 @@ module.exports = {
     ui: {
         /*
             Customize your MiroTalk instance
+            Branding and customizations require a license: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
         */
         brand: {
             app: {
