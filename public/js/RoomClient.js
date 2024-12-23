@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.63
+ * @version 1.6.64
  *
  */
 
@@ -2051,7 +2051,7 @@ class RoomClient {
         this.producers.get(producer_id).pause();
 
         try {
-            const response = await this.socket.request('pauseProducer', { producer_id: producer_id });
+            const response = await this.socket.request('pauseProducer', { producer_id, type });
             console.log('Producer paused', response);
         } catch (error) {
             console.error('Error pausing producer', error);
@@ -2082,7 +2082,7 @@ class RoomClient {
         this.producers.get(producer_id).resume();
 
         try {
-            const response = await this.socket.request('resumeProducer', { producer_id: producer_id });
+            const response = await this.socket.request('resumeProducer', { producer_id, type });
             console.log('Producer resumed', response);
         } catch (error) {
             console.error('Error resuming producer', error);
@@ -2286,9 +2286,10 @@ class RoomClient {
 
         try {
             data = await this.socket.request('consume', {
-                rtpCapabilities,
                 consumerTransportId: this.consumerTransport.id,
+                rtpCapabilities,
                 producerId,
+                type,
             });
 
             if (data.error) {

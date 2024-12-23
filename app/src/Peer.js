@@ -194,6 +194,7 @@ module.exports = class Peer {
             const { scalabilityMode } = rtpParameters.encodings[0];
             const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
             const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+
             log.debug(`Producer [${type}-${kind}] ----->`, {
                 scalabilityMode,
                 spatialLayer,
@@ -251,7 +252,7 @@ module.exports = class Peer {
         this.consumers.delete(consumer_id);
     }
 
-    async createConsumer(consumer_transport_id, producer_id, rtpCapabilities) {
+    async createConsumer(consumer_transport_id, producerId, rtpCapabilities) {
         if (!this.transports.has(consumer_transport_id)) {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
         }
@@ -261,7 +262,7 @@ module.exports = class Peer {
         let consumer;
         try {
             consumer = await consumerTransport.consume({
-                producerId: producer_id,
+                producerId,
                 rtpCapabilities,
                 enableRtx: true, // Enable NACK for OPUS.
                 paused: true,
@@ -284,8 +285,8 @@ module.exports = class Peer {
 
             try {
                 await consumer.setPreferredLayers({
-                    spatialLayer: spatialLayer,
-                    temporalLayer: temporalLayer,
+                    spatialLayer,
+                    temporalLayer,
                 });
                 log.debug(`Consumer [${type}-${kind}] ----->`, {
                     scalabilityMode,
@@ -310,7 +311,7 @@ module.exports = class Peer {
         return {
             consumer: consumer,
             params: {
-                producerId: producer_id,
+                producerId,
                 id: id,
                 kind: kind,
                 rtpParameters: rtpParameters,

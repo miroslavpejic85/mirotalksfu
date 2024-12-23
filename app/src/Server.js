@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.63
+ * @version 1.6.64
  *
  */
 
@@ -1674,7 +1674,7 @@ function startServer() {
             }
         });
 
-        socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities }, callback) => {
+        socket.on('consume', async ({ consumerTransportId, producerId, rtpCapabilities, type }, callback) => {
             if (!roomExists(socket)) {
                 return callback({ error: 'Room not found' });
             }
@@ -1684,10 +1684,11 @@ function startServer() {
             const { peer_name } = peer || 'undefined';
 
             try {
-                const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities);
+                const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities, type);
 
                 log.debug('Consuming', {
                     peer_name: peer_name,
+                    producer_type: type,
                     producer_id: producerId,
                     consumer_id: params ? params.id : undefined,
                 });
@@ -1711,21 +1712,21 @@ function startServer() {
             room.closeProducer(socket.id, data.producer_id);
         });
 
-        socket.on('pauseProducer', async ({ producer_id }, callback) => {
+        socket.on('pauseProducer', async ({ producer_id, type }, callback) => {
             if (!roomExists(socket)) return;
 
             const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
-                    error: `Peer with ID: ${socket.id} for producer with id "${producer_id}" not found`,
+                    error: `Peer with ID: ${socket.id} for producer with id "${producer_id}" type "${type}" not found`,
                 });
             }
 
             const producer = peer.getProducer(producer_id);
 
             if (!producer) {
-                return callback({ error: `Producer with id "${producer_id}" not found` });
+                return callback({ error: `Producer with id "${producer_id}" type "${type}" not found` });
             }
 
             try {
@@ -1733,7 +1734,7 @@ function startServer() {
 
                 const { peer_name } = peer || 'undefined';
 
-                log.debug('Producer paused', { peer_name: peer_name, producer_id: producer_id });
+                log.debug('Producer paused', { peer_name, producer_id, type });
 
                 callback('successfully');
             } catch (error) {
@@ -1741,21 +1742,21 @@ function startServer() {
             }
         });
 
-        socket.on('resumeProducer', async ({ producer_id }, callback) => {
+        socket.on('resumeProducer', async ({ producer_id, type }, callback) => {
             if (!roomExists(socket)) return;
 
             const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
-                    error: `peer with ID: "${socket.id}" for producer with id "${producer_id}" not found`,
+                    error: `peer with ID: "${socket.id}" for producer with id "${producer_id}" type "${type}" not found`,
                 });
             }
 
             const producer = peer.getProducer(producer_id);
 
             if (!producer) {
-                return callback({ error: `producer with id "${producer_id}" not found` });
+                return callback({ error: `producer with id "${producer_id}" type "${type}" not found` });
             }
 
             try {
@@ -1763,7 +1764,7 @@ function startServer() {
 
                 const { peer_name } = peer || 'undefined';
 
-                log.debug('Producer resumed', { peer_name: peer_name, producer_id: producer_id });
+                log.debug('Producer resumed', { peer_name, producer_id, type });
 
                 callback('successfully');
             } catch (error) {
@@ -1771,21 +1772,21 @@ function startServer() {
             }
         });
 
-        socket.on('resumeConsumer', async ({ consumer_id }, callback) => {
+        socket.on('resumeConsumer', async ({ consumer_id, type }, callback) => {
             if (!roomExists(socket)) return;
 
             const peer = getPeer(socket);
 
             if (!peer) {
                 return callback({
-                    error: `peer with ID: "${socket.id}" for consumer with id "${consumer_id}" not found`,
+                    error: `peer with ID: "${socket.id}" for consumer with id "${consumer_id}" type "${type}" not found`,
                 });
             }
 
             const consumer = peer.getConsumer(consumer_id);
 
             if (!consumer) {
-                return callback({ error: `consumer with id "${consumer_id}" not found` });
+                return callback({ error: `consumer with id "${consumer_id}" type "${type}" not found` });
             }
 
             try {
@@ -1793,7 +1794,7 @@ function startServer() {
 
                 const { peer_name } = peer || 'undefined';
 
-                log.debug('Consumer resumed', { peer_name: peer_name, consumer_id: consumer_id });
+                log.debug('Consumer resumed', { peer_name, consumer_id, type });
 
                 callback('successfully');
             } catch (error) {

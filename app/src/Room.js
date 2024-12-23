@@ -707,30 +707,30 @@ module.exports = class Room {
     // CONSUME
     // ####################################################
 
-    async consume(socket_id, consumer_transport_id, producer_id, rtpCapabilities) {
+    async consume(socket_id, consumer_transport_id, producerId, rtpCapabilities, type) {
         if (!this.peers.has(socket_id)) {
             throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
         }
 
-        if (!this.router.canConsume({ producerId: producer_id, rtpCapabilities })) {
-            throw new Error(`Cannot consume producer with ID ${producer_id}, router validation failed`);
+        if (!this.router.canConsume({ producerId, rtpCapabilities })) {
+            throw new Error(`Cannot consume producer with ID ${producerId} type ${type}, router validation failed`);
         }
 
         const peer = this.getPeer(socket_id);
 
         let peerConsumer;
         try {
-            peerConsumer = await peer.createConsumer(consumer_transport_id, producer_id, rtpCapabilities);
+            peerConsumer = await peer.createConsumer(consumer_transport_id, producerId, rtpCapabilities);
         } catch (error) {
             log.error(`Error creating consumer for peer with socket ID ${socket_id}`, error);
             throw new Error(
-                `Failed to create consumer with transport ID ${consumer_transport_id} and producer ID ${producer_id} for peer ${socket_id}`,
+                `Failed to create consumer with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`,
             );
         }
 
         if (!peerConsumer) {
             throw new Error(
-                `Consumer creation failed for transport ID ${consumer_transport_id} and producer ID ${producer_id}`,
+                `Consumer creation failed for transport ID ${consumer_transport_id} and producer ID ${producerId}`,
             );
         }
 
