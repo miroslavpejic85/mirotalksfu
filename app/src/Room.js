@@ -568,7 +568,12 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
 
-        peer.addTransport(transport);
+        try {
+            peer.addTransport(transport);
+        } catch (error) {
+            log.error('Failed to add peer transport', error);
+            throw new Error(`Failed to add peer transport ${id}`);
+        }
 
         log.debug('Transport created', { transportId: id, transportType: type });
 
@@ -664,7 +669,9 @@ module.exports = class Room {
             peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
         } catch (error) {
             log.error(`Error creating producer for peer with socket ID ${socket_id}`, error);
-            throw new Error(`Error creating producer with transport ID ${producerTransportId} for peer ${socket_id}`);
+            throw new Error(
+                `Error creating producer with transport ID ${producerTransportId} type ${type} for peer ${socket_id}`,
+            );
         }
 
         if (!peerProducer) {
