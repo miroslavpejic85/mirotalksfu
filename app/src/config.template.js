@@ -584,7 +584,7 @@ module.exports = {
                     mimeType: 'video/VP9',
                     clockRate: 90000,
                     parameters: {
-                        'profile-id': 2,
+                        'profile-id': 0, // Default profile for wider compatibility
                         'x-google-start-bitrate': 1000,
                     },
                 },
@@ -594,7 +594,7 @@ module.exports = {
                     clockRate: 90000,
                     parameters: {
                         'packetization-mode': 1,
-                        'profile-level-id': '4d0032',
+                        'profile-level-id': '42e01f', // Baseline profile for compatibility
                         'level-asymmetry-allowed': 1,
                         'x-google-start-bitrate': 1000,
                     },
@@ -605,7 +605,7 @@ module.exports = {
                     clockRate: 90000,
                     parameters: {
                         'packetization-mode': 1,
-                        'profile-level-id': '42e01f',
+                        'profile-level-id': '4d0032', // High profile for modern devices
                         'level-asymmetry-allowed': 1,
                         'x-google-start-bitrate': 1000,
                     },
