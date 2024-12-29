@@ -590,6 +590,15 @@ module.exports = {
                 },
                 {
                     kind: 'video',
+                    mimeType: 'video/VP9',
+                    clockRate: 90000,
+                    parameters: {
+                        'profile-id': 2, // High profile for modern devices
+                        'x-google-start-bitrate': 1000,
+                    },
+                },
+                {
+                    kind: 'video',
                     mimeType: 'video/h264',
                     clockRate: 90000,
                     parameters: {
