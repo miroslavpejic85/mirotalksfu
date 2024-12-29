@@ -29,8 +29,6 @@ function getIPv4() {
 */
 const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your environment.
 
-const numWorkers = require('os').cpus().length;
-
 /*
     Set the port range for WebRTC communication. This range is used for the dynamic allocation of UDP ports for media streams.
         - Each participant requires 2 ports: one for audio and one for video.
@@ -42,6 +40,8 @@ const numWorkers = require('os').cpus().length;
 */
 const rtcMinPort = 40000;
 const rtcMaxPort = 40100;
+
+const numWorkers = require('os').cpus().length;
 
 module.exports = {
     console: {
