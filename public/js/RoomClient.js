@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.66
+ * @version 1.6.67
  *
  */
 
@@ -4327,8 +4327,6 @@ class RoomClient {
             ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
             : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
 
-        const message = getFromName === 'ChatGPT' ? '' : getMsg;
-
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
                 data-from-id="${getFromId}" 
@@ -4341,7 +4339,7 @@ class RoomClient {
                     ${positionFirst}
                 </div>
                 <div class="message ${messageClass}">
-                    <span class="text-start" id="message-${chatMessagesId}">${message}</span>
+                    <span class="text-start" id="message-${chatMessagesId}"></span>
                     <hr/>
                     <div class="about-buttons mt5">
                         <button 
@@ -4378,10 +4376,15 @@ class RoomClient {
                 break;
         }
 
-        if (getFromName === 'ChatGPT') {
-            const element = this.getId(`message-${chatMessagesId}`);
-            if (element) {
-                this.streamMessage(element, getMsg, 100);
+        const message = getId(`message-${chatMessagesId}`);
+        if (message) {
+            if (getFromName === 'ChatGPT') {
+                // Stream the message for ChatGPT
+                this.streamMessage(message, getMsg, 100);
+            } else {
+                // Process the message for other senders
+                message.innerHTML = this.processMessage(getMsg);
+                hljs.highlightAll();
             }
         }
 
@@ -4453,6 +4456,32 @@ class RoomClient {
                 hljs.highlightElement(block);
             });
         }
+    }
+
+    processMessage(message) {
+        const codeBlockRegex = /```([a-zA-Z0-9]+)?\n([\s\S]*?)```/g;
+        let parts = [];
+        let lastIndex = 0;
+    
+        message.replace(codeBlockRegex, (match, lang, code, offset) => {
+            if (offset > lastIndex) {
+                parts.push({ type: 'text', value: message.slice(lastIndex, offset) });
+            }
+            parts.push({ type: 'code', lang, value: code });
+            lastIndex = offset + match.length;
+        });
+    
+        if (lastIndex < message.length) {
+            parts.push({ type: 'text', value: message.slice(lastIndex) });
+        }
+    
+        return parts.map(part => {
+            if (part.type === 'text') {
+                return part.value;
+            } else if (part.type === 'code') {
+                return `<pre><code class="language-${part.lang || ''}">${part.value}</code></pre>`;
+            }
+        }).join('');
     }
 
     deleteMessage(id) {
