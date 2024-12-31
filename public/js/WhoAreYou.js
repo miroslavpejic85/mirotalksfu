@@ -20,6 +20,9 @@ guestJoinRoomBtn.classList.add('disabled');
 const pathParts = window.location.pathname.split('/');
 const roomId = filterXSS(pathParts[pathParts.length - 1]);
 
+// Store the room in the session for auto-join from the landing page after successful login
+window.sessionStorage.roomID = roomId;
+
 let intervalId = null;
 let roomActive = false;
 

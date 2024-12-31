@@ -158,7 +158,13 @@ function typeWriter() {
 const roomName = document.getElementById('roomName');
 if (roomName) {
     roomName.value = '';
-    typeWriter();
+    if (window.sessionStorage.roomID !== '') {
+        roomName.value = window.sessionStorage.roomID;
+        window.sessionStorage.roomID = '';
+        joinRoom();
+    } else {
+        typeWriter();
+    }
 }
 
 // ####################################################################
