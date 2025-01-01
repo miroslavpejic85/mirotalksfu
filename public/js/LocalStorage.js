@@ -30,7 +30,7 @@ class LocalStorage {
             moderator_chat_cant_chatgpt: false, // Everyone can't chat with ChatGPT
             moderator_media_cant_sharing: false, // Everyone can't share media
             moderator_disconnect_all_on_leave: false, // Disconnect all participants on leave room
-            mic_auto_gain_control: false,
+            mic_auto_gain_control: true,
             mic_echo_cancellations: true,
             mic_noise_suppression: true,
             mic_sample_rate: 0, // 0: 48000 Hz 1: 44100 Hz
