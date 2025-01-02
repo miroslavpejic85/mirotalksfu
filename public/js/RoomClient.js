@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.72
+ * @version 1.6.73
  *
  */
 
@@ -7447,6 +7447,9 @@ class RoomClient {
         const path = '../sounds/emoji/';
         const ext = '.mp3';
         switch (cmd.shortcodes) {
+            case ':+1:':
+                this.sound('ok', true, path, ext);
+                break;
             case ':clap:':
                 this.sound('applause', true, path, ext);
                 break;
@@ -7455,6 +7458,9 @@ class RoomClient {
                 break;
             case ':trumpet:':
                 this.sound('trombone', true, path, ext);
+                break;
+            case ':heart:':
+                this.sound('heart', true, path, ext);
                 break;
             // ...
             default:
