@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.71
+ * @version 1.6.72
  *
  */
 
@@ -3112,9 +3112,9 @@ class RoomClient {
     // UTILITY
     // ####################################################
 
-    async sound(name, force = false) {
+    async sound(name, force = false, path = '../sounds/', ext = '.wav') {
         if (!isSoundEnabled && !force) return;
-        let sound = '../sounds/' + name + '.wav';
+        let sound = path + name + ext;
         let audio = new Audio(sound);
         try {
             audio.volume = 0.5;
@@ -7434,9 +7434,31 @@ class RoomClient {
             emojiDisplay.style.marginBottom = '5px';
             emojiDisplay.innerText = `${cmd.emoji} ${cmd.peer_name}`;
             userEmoji.appendChild(emojiDisplay);
+
             setTimeout(() => {
                 emojiDisplay.remove();
             }, duration);
+
+            this.handleEmojiSound(cmd);
+        }
+    }
+
+    handleEmojiSound(cmd) {
+        const path = '../sounds/emoji/';
+        const ext = '.mp3';
+        switch (cmd.shortcodes) {
+            case ':clap:':
+                this.sound('applause', true, path, ext);
+                break;
+            case ':joy:':
+                this.sound('laughs', true, path, ext);
+                break;
+            case ':trumpet:':
+                this.sound('trombone', true, path, ext);
+                break;
+            // ...
+            default:
+                break;
         }
     }
 
