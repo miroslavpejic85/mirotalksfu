@@ -871,6 +871,7 @@ function getRoomDuration() {
         console.log('Direct join', { duration: roomDuration, timeLimit: timeLimit });
         return roomDuration;
     }
+    return 'unlimited';
 }
 
 function timeToMilliseconds(timeString) {
