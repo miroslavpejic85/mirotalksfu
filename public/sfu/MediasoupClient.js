@@ -17267,7 +17267,7 @@
         52: [
             function (require, module, exports) {
                 /* UAParser.js v2.0.0
-   Copyright © 2012-2024 Faisal Salman <f@faisalman.com>
+   Copyright © 2012-2025 Faisal Salman <f@faisalman.com>
    AGPLv3 License */
                 !(function (i, d) {
                     'use strict';
