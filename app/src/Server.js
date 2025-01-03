@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.74
+ * @version 1.6.75
  *
  */
 
@@ -513,12 +513,11 @@ function startServer() {
 
             log.debug('Direct Join', req.query);
 
-            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1
+            // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:20
             // http://localhost:3010/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token
 
-            const { room, roomPassword, name, audio, video, screen, hide, notify, token, isPresenter } = checkXSS(
-                req.query,
-            );
+            const { room, roomPassword, name, audio, video, screen, hide, notify, duration, token, isPresenter } =
+                checkXSS(req.query);
 
             if (!room) {
                 log.warn('/join/params room empty', room);

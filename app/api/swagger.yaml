@@ -177,6 +177,9 @@ definitions:
             notify:
                 type: boolean
                 default: false
+            duration:
+                type: string
+                default: 'unlimited'
             token:
                 $ref: '#/definitions/TokenRequest'
     TokenRequest:

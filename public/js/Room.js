@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.74
+ * @version 1.6.75
  *
  */
 
@@ -191,6 +191,7 @@ let chatMessagesId = 0;
 
 let room_id = getRoomId();
 let room_password = getRoomPassword();
+let room_duration = getRoomDuration();
 let peer_name = getPeerName();
 let peer_uuid = getPeerUUID();
 let peer_token = getPeerToken();
@@ -441,12 +442,20 @@ function setTippy(elem, content, placement, allowHTML = false) {
 }
 
 // ####################################################
+// HELPERS
+// ####################################################
+
+function getQueryParam(param) {
+    const urlParams = new URLSearchParams(window.location.search);
+    return filterXSS(urlParams.get(param));
+}
+
+// ####################################################
 // GET ROOM ID
 // ####################################################
 
 function getRoomId() {
-    let qs = new URLSearchParams(window.location.search);
-    let queryRoomId = filterXSS(qs.get('room'));
+    let queryRoomId = getQueryParam('room');
     let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
     if (roomId == '') {
         roomId = makeId(12);
@@ -732,12 +741,11 @@ function hasVideoTrack(mediaStream) {
 }
 
 // ####################################################
-// API CHECK
+// QUERY PARAMS CHECK
 // ####################################################
 
 function getScreen() {
-    let qs = new URLSearchParams(window.location.search);
-    let screen = filterXSS(qs.get('screen'));
+    let screen = getQueryParam('screen');
     if (screen) {
         screen = screen.toLowerCase();
         let queryScreen = screen === '1' || screen === 'true';
@@ -751,8 +759,7 @@ function getScreen() {
 }
 
 function getNotify() {
-    let qs = new URLSearchParams(window.location.search);
-    let notify = filterXSS(qs.get('notify'));
+    let notify = getQueryParam('notify');
     if (notify) {
         notify = notify.toLowerCase();
         let queryNotify = notify === '1' || notify === 'true';
@@ -767,8 +774,7 @@ function getNotify() {
 }
 
 function getHideMeActive() {
-    let qs = new URLSearchParams(window.location.search);
-    let hide = filterXSS(qs.get('hide'));
+    let hide = getQueryParam('hide');
     let queryHideMe = false;
     if (hide) {
         hide = hide.toLowerCase();
@@ -779,8 +785,7 @@ function getHideMeActive() {
 }
 
 function isPeerPresenter() {
-    let qs = new URLSearchParams(window.location.search);
-    let presenter = filterXSS(qs.get('isPresenter'));
+    let presenter = getQueryParam('isPresenter');
     if (presenter) {
         presenter = presenter.toLowerCase();
         let queryPresenter = presenter === '1' || presenter === 'true';
@@ -794,8 +799,7 @@ function isPeerPresenter() {
 }
 
 function getPeerName() {
-    const qs = new URLSearchParams(window.location.search);
-    const name = filterXSS(qs.get('name'));
+    const name = getQueryParam('name');
     if (isHtml(name)) {
         console.log('Direct join', { name: 'Invalid name' });
         return 'Invalid name';
@@ -815,8 +819,7 @@ function getPeerUUID() {
 
 function getPeerToken() {
     if (window.sessionStorage.peer_token) return window.sessionStorage.peer_token;
-    let qs = new URLSearchParams(window.location.search);
-    let token = filterXSS(qs.get('token'));
+    let token = getQueryParam('token');
     let queryToken = false;
     if (token) {
         queryToken = token;
@@ -826,8 +829,7 @@ function getPeerToken() {
 }
 
 function getRoomPassword() {
-    let qs = new URLSearchParams(window.location.search);
-    let roomPassword = filterXSS(qs.get('roomPassword'));
+    let roomPassword = getQueryParam('roomPassword');
     if (roomPassword) {
         let queryNoRoomPassword = roomPassword === '0' || roomPassword === 'false';
         if (queryNoRoomPassword) {
@@ -837,6 +839,58 @@ function getRoomPassword() {
         return roomPassword;
     }
     return false;
+}
+
+function getRoomDuration() {
+    const roomDuration = getQueryParam('duration');
+
+    if (isValidDuration(roomDuration)) {
+        if (roomDuration === 'unlimited') {
+            console.log('The room has no time limit');
+            return roomDuration;
+        }
+        const timeLimit = timeToMilliseconds(roomDuration);
+        setTimeout(() => {
+            Swal.fire({
+                title: 'Time Limit Reached',
+                text: 'The room has reached its time limit and will close shortly',
+                icon: 'warning',
+                timer: 6000, // 6 seconds
+                timerProgressBar: true,
+                showConfirmButton: false,
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+                willClose: () => {
+                    openURL('/');
+                },
+            });
+        }, timeLimit);
+
+        console.log('Direct join', { duration: roomDuration, timeLimit: timeLimit });
+        return roomDuration;
+    }
+}
+
+function timeToMilliseconds(timeString) {
+    const [hours, minutes, seconds] = timeString.split(':').map(Number);
+    return (hours * 3600 + minutes * 60 + seconds) * 1000;
+}
+
+function isValidDuration(duration) {
+    if (duration === 'unlimited') return true;
+
+    // Check if the format is HH:MM:SS
+    const regex = /^(\d{2}):(\d{2}):(\d{2})$/;
+    const match = duration.match(regex);
+    if (!match) return false;
+    const [hours, minutes, seconds] = match.slice(1).map(Number);
+    // Validate ranges: hours, minutes, and seconds
+    if (hours < 0 || minutes < 0 || minutes > 59 || seconds < 0 || seconds > 59) {
+        return false;
+    }
+    return true;
 }
 
 // ####################################################
@@ -1155,9 +1209,8 @@ function initVideoContainerShow(show = true) {
 }
 
 function checkMedia() {
-    let qs = new URLSearchParams(window.location.search);
-    let audio = filterXSS(qs.get('audio'));
-    let video = filterXSS(qs.get('video'));
+    let audio = getQueryParam('audio');
+    let video = getQueryParam('video');
     if (audio) {
         audio = audio.toLowerCase();
         let queryPeerAudio = audio === '1' || audio === 'true';
@@ -4619,7 +4672,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.74',
+        title: 'WebRTC SFU v1.6.75',
         html: `
         <br />
         <div id="about">

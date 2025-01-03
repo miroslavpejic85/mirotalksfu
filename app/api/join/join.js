@@ -24,6 +24,7 @@ async function getJoin() {
                 screen: true,
                 hide: false,
                 notify: true,
+                duration: 'unlimited',
                 token: {
                     username: 'username',
                     password: 'password',
