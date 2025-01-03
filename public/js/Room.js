@@ -851,7 +851,10 @@ function getRoomDuration() {
         }
         const timeLimit = timeToMilliseconds(roomDuration);
         setTimeout(() => {
+            sound('eject');
             Swal.fire({
+                background: swalBackground,
+                position: 'center',
                 title: 'Time Limit Reached',
                 text: 'The room has reached its time limit and will close shortly',
                 icon: 'warning',
