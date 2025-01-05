@@ -2545,6 +2545,8 @@ class RoomClient {
     }
 
     removeConsumer(consumer_id, consumer_kind) {
+        if (!this.consumers.get(consumer_id)) return;
+
         console.log('Remove consumer', { consumer_id: consumer_id, consumer_kind: consumer_kind });
 
         const elem = this.getId(consumer_id);
@@ -2601,12 +2603,8 @@ class RoomClient {
             }
         }
 
-        const consumer = this.consumers.get(consumer_id);
-        if (consumer) {
-            consumer.close();
-            this.consumers.delete(consumer_id);
-        }
-
+        this.consumers.get(consumer_id).close();
+        this.consumers.delete(consumer_id);
         this.sound('left');
     }
 
