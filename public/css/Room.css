@@ -1040,6 +1040,10 @@ th {
     background: var(--body-bg);
 }
 
+.swal2-timer-progress-bar {
+    background-color: #1d8ecd !important;
+}
+
 .img-about {
     margin: 0 !important;
 }
