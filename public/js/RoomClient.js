@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.79
+ * @version 1.6.80
  *
  */
 
@@ -728,18 +728,6 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.log('Producer Transport disconnected', { id: this.producerTransport.id });
-
-                    this.restartIce();
-
-                    this.toast(
-                        'warning',
-                        'Producer Transport lost',
-                        'Network connection may have dropped or changed (Restarted ICE)',
-                        'top-end',
-                        6000,
-                        true,
-                    );
-
                     break;
                 case 'failed':
                     console.warn('Producer Transport failed', { id: this.producerTransport.id });
@@ -816,18 +804,6 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.log('Consumer Transport disconnected', { id: this.consumerTransport.id });
-
-                    this.restartIce();
-
-                    this.toast(
-                        'warning',
-                        'Consumer Transport lost',
-                        'Network connection may have dropped or changed (Restarted ICE)',
-                        'top-end',
-                        6000,
-                        true,
-                    );
-
                     break;
                 case 'failed':
                     console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
@@ -1089,10 +1065,29 @@ class RoomClient {
     };
 
     handleSocketDisconnect = () => {
+        this.toast(
+            'warning',
+            'Socket Disconnected',
+            'Network connection may have dropped or changed!',
+            'top-end',
+            3000,
+            true,
+        );
+        setTimeout(() => {
+            console.log('SocketOn Disconnect attempting to reconnect...');
+            this.socket.connect();
+            this.socket.once('connect_error', () => {
+                console.warn('Connection failed. Server down or in maintenance');
+                this.byeBye();
+            });
+        }, 3000);
+    };
+
+    byeBye() {
         this.exit(true);
         this.ServerAway();
         this.saveRecording('Socket disconnected');
-    };
+    }
 
     handleEndRTMP = (data) => {
         this.endRTMP(data);
