@@ -2601,8 +2601,12 @@ class RoomClient {
             }
         }
 
-        this.consumers.get(consumer_id).close();
-        this.consumers.delete(consumer_id);
+        const consumer = this.consumers.get(consumer_id);
+        if (consumer) {
+            consumer.close();
+            this.consumers.delete(consumer_id);
+        }
+
         this.sound('left');
     }
 
