@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.80
+ * @version 1.6.81
  *
  */
 
@@ -881,6 +881,8 @@ class RoomClient {
     // ####################################################
 
     initSockets() {
+        this.socket.on('connect', this.handleSocketConnect);
+        this.socket.on('disconnect', this.handleSocketDisconnect);
         this.socket.on('consumerClosed', this.handleConsumerClosed);
         this.socket.on('setVideoOff', this.handleSetVideoOff);
         this.socket.on('removeMe', this.handleRemoveMe);
@@ -905,8 +907,6 @@ class RoomClient {
         this.socket.on('updateRoomModerator', this.handleUpdateRoomModeratorData);
         this.socket.on('updateRoomModeratorALL', this.handleUpdateRoomModeratorALLData);
         this.socket.on('recordingAction', this.handleRecordingActionData);
-        this.socket.on('connect', this.handleSocketConnect);
-        this.socket.on('disconnect', this.handleSocketDisconnect);
         this.socket.on('endRTMP', this.handleEndRTMP);
         this.socket.on('errorRTMP', this.handleErrorRTMP);
         this.socket.on('endRTMPfromURL', this.handleEndRTMPfromURL);
