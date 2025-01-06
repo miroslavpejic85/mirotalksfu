@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.82
+ * @version 1.6.83
  *
  */
 
@@ -7098,10 +7098,14 @@ class RoomClient {
         if (volumeInput && audioPlayer) {
             console.log('Setting audio volume:', volumeValue);
             volumeInput.value = volumeValue;
-            if (isConsumer) {
-                this.toggleVolumeInput(volumeInput, volumeValue);
+            if (!audioPlayer.muted) {
+                if (isConsumer) {
+                    this.toggleVolumeInput(volumeInput, volumeValue);
+                }
+                this.setAudioVolume(audioPlayer, volume);
+            } else {
+                console.log('Audio player is muted, volume not adjusted.');
             }
-            this.setAudioVolume(audioPlayer, volume);
         }
     }
 
