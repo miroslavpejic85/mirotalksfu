@@ -1161,7 +1161,7 @@ class RoomClient {
         };
 
         const showServerAwayMessage = () => {
-            console.error('Server away or in maintenance, please wait...');
+            console.warn('Server away or in maintenance, please wait...');
             this.ServerAway();
         };
 
