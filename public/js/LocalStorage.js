@@ -44,6 +44,7 @@ class LocalStorage {
             lobby: false, // default false
             pitch_bar: true, // volume indicator
             sounds: true, // room notify sounds
+            keep_buttons_visible: false, // Keep buttons always visible
             host_only_recording: false, // presenter
             rec_prioritize_h264: false, // Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs
             rec_server: false, // The recording will be stored on the server rather than locally

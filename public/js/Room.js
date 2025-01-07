@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.85
+ * @version 1.6.86
  *
  */
 
@@ -206,6 +206,7 @@ let isPushToTalkActive = false;
 let isSpaceDown = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
+let isKeepButtonsVisible = false;
 let isBroadcastingEnabled = false;
 let isLobbyEnabled = false;
 let isLobbyOpen = false;
@@ -300,6 +301,7 @@ function initClient() {
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
+        setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('recordingImage', 'Toggle recording', 'right');
@@ -2513,6 +2515,15 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    switchKeepButtonsVisible.onchange = (e) => {
+        isButtonsBarOver = isKeepButtonsVisible = e.currentTarget.checked;
+        localStorageSettings.keep_buttons_visible = isButtonsBarOver;
+        lS.setSettings(localStorageSettings);
+        checkButtonsBar();
+        const status = isButtonsBarOver ? 'enabled' : 'disabled';
+        userLog('info', `Buttons always visible ${status}`, 'top-end');
+        e.target.blur();
+    };
     // audio options
     switchAutoGainControl.onchange = (e) => {
         localStorageSettings.mic_auto_gain_control = e.currentTarget.checked;
@@ -2954,12 +2965,14 @@ function loadSettingsFromLocalStorage() {
     rc.speechInMessages = localStorageSettings.speech_in_msg;
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
+    isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
+    switchKeepButtonsVisible.checked = isKeepButtonsVisible;
 
     recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
     switchH264Recording.checked = recPrioritizeH264;
@@ -3337,12 +3350,25 @@ function showButtons() {
 }
 
 function checkButtonsBar() {
-    if (!isButtonsBarOver) {
-        control.style.display = 'none';
+    if (localStorageSettings.keep_buttons_visible) {
+        control.style.display = 'flex';
         toggleExtraButton.innerHTML = icons.up;
-        bottomButtons.style.display = 'none';
-        isButtonsVisible = false;
+        bottomButtons.style.display = 'flex';
+        isButtonsVisible = true;
+    } else {
+        if (!isButtonsBarOver) {
+            control.style.display = 'none';
+            toggleExtraButton.innerHTML = icons.up;
+            bottomButtons.style.display = 'none';
+            isButtonsVisible = false;
+        }
     }
+    // if (!isButtonsBarOver) {
+    //     control.style.display = 'none';
+    //     toggleExtraButton.innerHTML = icons.up;
+    //     bottomButtons.style.display = 'none';
+    //     isButtonsVisible = false;
+    // }
     setTimeout(() => {
         checkButtonsBar();
     }, 10000);
@@ -4676,7 +4702,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.85',
+        title: 'WebRTC SFU v1.6.86',
         html: `
         <br />
         <div id="about">
