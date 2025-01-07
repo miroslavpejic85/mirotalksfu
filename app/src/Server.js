@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.84
+ * @version 1.6.85
  *
  */
 
@@ -1400,7 +1400,7 @@ function startServer() {
                         is_presenter =
                             presenter === '1' ||
                             presenter === 'true' ||
-                            (config.presenters.join_first && room.getPeers().size === 0);
+                            (config.presenters.join_first && room.getPeersCount() === 0);
 
                         log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
                             ip: peer_ip,
@@ -2211,7 +2211,7 @@ function startServer() {
 
             const room = getRoom(socket);
 
-            const peerCounts = room.getPeers().size;
+            const peerCounts = room.getPeersCount();
 
             const data = {
                 room_id: socket.room_id,
@@ -2802,7 +2802,7 @@ function startServer() {
 
             room.removePeer(socket.id);
 
-            if (room.getPeers().size === 0) {
+            if (room.getPeersCount() === 0) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
 
@@ -2847,7 +2847,7 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
-            if (room.getPeers().size === 0) {
+            if (room.getPeersCount() === 0) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
 
@@ -2918,7 +2918,7 @@ function startServer() {
 
         function removeMeData(room, peerName, isPresenter) {
             const roomId = room && socket.room_id;
-            const peerCounts = room && room.getPeers().size;
+            const peerCounts = room && room.getPeersCount();
             const data = {
                 room_id: roomId,
                 peer_id: socket.id,
@@ -3117,7 +3117,7 @@ function startServer() {
         const roomIds = Array.from(roomList.keys());
         const roomPeersArray = roomIds.map((roomId) => {
             const room = roomList.get(roomId);
-            const peerCount = (room && room.getPeers().size) || 0;
+            const peerCount = (room && room.getPeersCount()) || 0;
             const broadcasting = (room && room.isBroadcasting()) || false;
             return {
                 room: roomId,
