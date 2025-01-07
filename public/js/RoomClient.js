@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.86
+ * @version 1.6.87
  *
  */
 
@@ -1116,6 +1116,8 @@ class RoomClient {
     }
 
     handleDisconnect() {
+        window.localStorage.isReconnected = true;
+
         console.log('Disconnected. Attempting to reconnect...');
         this.exit(true);
 
@@ -1236,7 +1238,6 @@ class RoomClient {
 
     ServerAway() {
         this.sound('alert');
-        window.localStorage.isReconnected = true;
         Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,

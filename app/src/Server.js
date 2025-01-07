@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.86
+ * @version 1.6.87
  *
  */
 
@@ -1478,7 +1478,7 @@ function startServer() {
 
             const isPresenter = peer_token
                 ? is_presenter
-                : await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+                : isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             const peer = room.getPeer(socket.id);
 
@@ -1859,7 +1859,7 @@ function startServer() {
                     break;
                 case 'ejectAll':
                     const { peer_name, peer_uuid } = data;
-                    const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+                    const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
                     if (!isPresenter) return;
                     break;
                 case 'peerAudio':
@@ -1881,7 +1881,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
             const room = getRoom(socket);
 
@@ -1997,7 +1997,7 @@ function startServer() {
             ];
 
             if (presenterActions.some((v) => data.action === v)) {
-                const isPresenter = await isPeerPresenter(
+                const isPresenter = isPeerPresenter(
                     socket.room_id,
                     socket.id,
                     data.from_peer_name,
@@ -2032,14 +2032,14 @@ function startServer() {
             }
         });
 
-        socket.on('updateRoomModerator', async (dataObject) => {
+        socket.on('updateRoomModerator', (dataObject) => {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             const room = getRoom(socket);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
             if (!isPresenter) return;
 
@@ -2061,14 +2061,14 @@ function startServer() {
             }
         });
 
-        socket.on('updateRoomModeratorALL', async (dataObject) => {
+        socket.on('updateRoomModeratorALL', (dataObject) => {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
 
             const room = getRoom(socket);
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
             if (!isPresenter) return;
 
@@ -2582,7 +2582,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
             const { peer_name, peer_uuid, file } = data;
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
 
             const room = getRoom(socket);
@@ -2626,7 +2626,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
             const { peer_name, peer_uuid, inputVideoURL } = data;
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
 
             const room = getRoom(socket);
@@ -2739,7 +2739,7 @@ function startServer() {
             const { index, peer_name, peer_uuid } = checkXSS(data);
 
             // Disable for now...
-            // const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            // const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             // if (!isPresenter) return;
 
             const room = getRoom(socket);
@@ -2789,14 +2789,14 @@ function startServer() {
             room.broadCast(socket.id, 'editorUpdate', data);
         });
 
-        socket.on('disconnect', async () => {
+        socket.on('disconnect', () => {
             if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
             const { peer_name, peer_uuid } = peer || {};
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             log.debug('[Disconnect] - peer name', peer_name);
 
@@ -2828,7 +2828,7 @@ function startServer() {
             socket.room_id = null;
         });
 
-        socket.on('exitRoom', async (_, callback) => {
+        socket.on('exitRoom', (_, callback) => {
             if (!roomExists(socket)) {
                 return callback({
                     error: 'Not currently in a room',
@@ -2839,7 +2839,7 @@ function startServer() {
 
             const { peer_name, peer_uuid } = peer || {};
 
-            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             log.debug('Exit room', peer_name);
 
@@ -2984,7 +2984,7 @@ function startServer() {
         return JSON.parse(JSON.stringify(value));
     }
 
-    async function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
+    function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         try {
             if (
                 config.presenters &&
