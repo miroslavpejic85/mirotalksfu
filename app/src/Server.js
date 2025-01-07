@@ -2790,16 +2790,16 @@ function startServer() {
         });
 
         socket.on('disconnect', async () => {
-            await handleRoomExit('disconnect', socket, true);
+            await handleRoomExit('disconnect', socket);
         });
 
         socket.on('exitRoom', async (_, callback) => {
-            await handleRoomExit('exitRoom', socket, false, callback);
+            await handleRoomExit('exitRoom', socket, callback);
         });
 
         // common
 
-        async function handleRoomExit(event, socket, broadcast = false, callback = null) {
+        async function handleRoomExit(event, socket, callback = null) {
             if (!roomExists(socket)) {
                 if (callback) callback({ error: 'Room not found' });
                 return;
@@ -2811,13 +2811,9 @@ function startServer() {
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            room.removePeer(socket.id);
-
-            if (broadcast) room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
-
             log.debug('[Room Exit] ----------->', { event: event, peer_name: peer_name, isPresenter: isPresenter });
 
-            if (room.getPeers().size === 0) {
+            if (room.getPeersCount() === 0) {
                 stopRTMPActiveStreams(isPresenter, room);
 
                 roomList.delete(socket.room_id);
@@ -2834,6 +2830,10 @@ function startServer() {
             socket.room_id = null;
 
             if (isPresenter) removeIP(socket);
+
+            room.removePeer(socket.id);
+
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             if (callback) callback('Successfully exited room');
         }
