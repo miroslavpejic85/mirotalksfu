@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.83
+ * @version 1.6.84
  *
  */
 
@@ -2790,19 +2790,49 @@ function startServer() {
         });
 
         socket.on('disconnect', async () => {
-            await handleRoomExit('disconnect', socket);
+            if (!roomExists(socket)) return;
+
+            const { room, peer } = getRoomAndPeer(socket);
+
+            const { peer_name, peer_uuid } = peer || {};
+
+            const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+
+            log.debug('[Disconnect] - peer name', peer_name);
+
+            room.removePeer(socket.id);
+
+            if (room.getPeers().size === 0) {
+                //
+                stopRTMPActiveStreams(isPresenter, room);
+
+                roomList.delete(socket.room_id);
+
+                delete presenters[socket.room_id];
+
+                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
+
+                const activeRooms = getActiveRooms();
+
+                log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
+
+                const activeStreams = getRTMPActiveStreams();
+
+                log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
+            }
+
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
+            if (isPresenter) removeIP(socket);
+
+            socket.room_id = null;
         });
 
         socket.on('exitRoom', async (_, callback) => {
-            await handleRoomExit('exitRoom', socket, callback);
-        });
-
-        // common
-
-        async function handleRoomExit(event, socket, callback = null) {
             if (!roomExists(socket)) {
-                if (callback) callback({ error: 'Room not found' });
-                return;
+                return callback({
+                    error: 'Not currently in a room',
+                });
             }
 
             const { room, peer } = getRoomAndPeer(socket);
@@ -2811,32 +2841,39 @@ function startServer() {
 
             const isPresenter = await isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            log.debug('[Room Exit] ----------->', { event: event, peer_name: peer_name, isPresenter: isPresenter });
+            log.debug('Exit room', peer_name);
 
-            if (room.getPeersCount() === 0) {
+            room.removePeer(socket.id);
+
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
+            if (room.getPeers().size === 0) {
+                //
                 stopRTMPActiveStreams(isPresenter, room);
 
                 roomList.delete(socket.room_id);
 
                 delete presenters[socket.room_id];
 
-                log.info('[Room Exit] - Last peer - current presenters grouped by roomId', presenters);
+                log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
 
-                log.info('[Room Exit] - Current active rooms:', getActiveRooms());
+                const activeRooms = getActiveRooms();
 
-                log.info('[Room Exit] - Current active RTMP streams:', getRTMPActiveStreams());
+                log.info('[REMOVE ME] - Last peer - current active rooms', activeRooms);
+
+                const activeStreams = getRTMPActiveStreams();
+
+                log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
             }
 
             socket.room_id = null;
 
             if (isPresenter) removeIP(socket);
 
-            room.removePeer(socket.id);
+            callback('Successfully exited room');
+        });
 
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
-
-            if (callback) callback('Successfully exited room');
-        }
+        // Helpers
 
         function getRoomAndPeer(socket) {
             const room = getRoom(socket);

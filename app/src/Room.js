@@ -481,6 +481,10 @@ module.exports = class Room {
         this.peers.set(peer.id, peer);
     }
 
+    delPeer(peer) {
+        this.peers.delete(peer.id);
+    }
+
     getPeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
 
@@ -513,16 +517,16 @@ module.exports = class Room {
         return producerList;
     }
 
-    async removePeer(socket_id) {
+    removePeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
 
         const peer = this.getPeer(socket_id);
 
         peer.close();
 
-        this.peers.delete(socket_id);
+        this.delPeer(peer);
 
-        if (this.getPeers().size === 0) {
+        if (this.getPeersCount() === 0) {
             this.closeRouter();
         }
     }

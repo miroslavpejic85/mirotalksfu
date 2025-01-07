@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.83
+ * @version 1.6.84
  *
  */
 
@@ -211,7 +211,13 @@ class RoomClient {
         this.videoPinMediaContainer = videoPinMediaContainer;
         this.mediasoupClient = mediasoupClient;
 
+        // Handle Socket
         this.socket = socket;
+        this.reconnectAttempts = 0;
+        this.maxReconnectAttempts = 5;
+        this.reconnectInterval = 3000;
+        this.maxReconnectInterval = 15000;
+
         this.room_id = room_id;
         this.peer_id = socket.id;
         this.peer_name = peer_name;
@@ -921,6 +927,16 @@ class RoomClient {
     // HANDLE SOCKET DATA
     // ####################################################
 
+    handleSocketConnect = () => {
+        console.log('SocketOn Connected to signaling server!');
+        this.handleConnect();
+    };
+
+    handleSocketDisconnect = () => {
+        console.log('SocketOn Disconnect');
+        this.handleDisconnect();
+    };
+
     handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
         console.log('SocketOn Closing consumer', { consumer_id, consumer_kind });
         this.removeConsumer(consumer_id, consumer_kind);
@@ -1058,37 +1074,6 @@ class RoomClient {
         this.handleRecordingAction(data);
     };
 
-    handleSocketConnect = () => {
-        console.log('SocketOn Connected to signaling server!');
-        this._isConnected = true;
-        this.refreshBrowser();
-    };
-
-    handleSocketDisconnect = () => {
-        this.saveRecording('Socket disconnected');
-        this.toast(
-            'warning',
-            'Socket Disconnected',
-            'Network connection may have dropped or changed!',
-            'top-end',
-            3000,
-            true,
-        );
-        setTimeout(() => {
-            console.log('SocketOn Disconnect attempting to reconnect...');
-            this.socket.connect();
-            this.socket.once('connect_error', () => {
-                console.warn('Connection failed. Server down or in maintenance');
-                this.byeBye();
-            });
-        }, 3000);
-    };
-
-    byeBye() {
-        this.exit(true);
-        this.ServerAway();
-    }
-
     handleEndRTMP = (data) => {
         this.endRTMP(data);
     };
@@ -1122,6 +1107,130 @@ class RoomClient {
     };
 
     // ####################################################
+    // SOCKET CONNECT/DISCONNECT
+    // ####################################################
+
+    handleConnect() {
+        this._isConnected = true;
+        this.refreshBrowser();
+    }
+
+    handleDisconnect() {
+        console.log('Disconnected. Attempting to reconnect...');
+        this.exit(true);
+
+        let reconnectAlert;
+
+        // Helper functions
+        const showReconnectAlert = () => {
+            this.sound('reconnect');
+            reconnectAlert = Swal.fire({
+                background: swalBackground,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showDenyButton: false,
+                showConfirmButton: false,
+                icon: 'warning',
+                title: 'Lost connection',
+                text: 'The server may be under maintenance or your connection may have changed',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+        };
+
+        const showMaxAttemptsAlert = () => {
+            this.sound('alert');
+            Swal.fire({
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showDenyButton: false,
+                showConfirmButton: true,
+                background: swalBackground,
+                title: 'Unable to reconnect',
+                text: 'Please check your internet connection!',
+                icon: 'error',
+                confirmButtonText: 'Join Room',
+                confirmButtonColor: '#18392B',
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    this.refreshBrowser();
+                }
+            });
+        };
+
+        const showServerAwayMessage = () => {
+            console.error('Server away or in maintenance, please wait...');
+            this.ServerAway();
+        };
+
+        // Show reconnect alert or save recording if necessary
+        this.isRecording() ? this.saveRecording('Socket disconnected') : showReconnectAlert();
+
+        let serverAwayShown = false;
+        let reconnect;
+        let reconnectTimer;
+
+        // Handle connect_error events
+        this.socket.once('connect_error', () => {
+            clearTimeout(reconnect);
+            clearTimeout(reconnectTimer);
+        });
+        this.socket.on('connect_error', () => {
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                this.reconnectAttempts++;
+                reconnectAlert.update({
+                    title: 'Reconnect',
+                    text: `Attempting to reconnect ${this.reconnectAttempts}...`,
+                });
+            } else {
+                if (!serverAwayShown) {
+                    showServerAwayMessage();
+                    serverAwayShown = true;
+                }
+            }
+        });
+
+        // Attempt reconnect after delay
+        const attemptReconnect = async () => {
+            if (this.reconnectAttempts < this.maxReconnectAttempts) {
+                this.reconnectAttempts++;
+                console.log(`Reconnection attempt ${this.reconnectAttempts}...`);
+
+                const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, this.maxReconnectInterval);
+
+                reconnectAlert.update({
+                    title: 'Reconnect',
+                    text: `Attempting to reconnect in ${delay / 1000}s...`,
+                });
+
+                reconnectTimer = setTimeout(() => {
+                    //this.socket.connect();
+                    attemptReconnect();
+                }, delay);
+            } else {
+                console.log('Reconnection limit reached!');
+                reconnectAlert.close();
+                showMaxAttemptsAlert();
+            }
+        };
+
+        // Handle successful reconnection
+        this.socket.once('connect', () => {
+            console.log('Reconnected!');
+            this.reconnectAttempts = 0;
+            clearTimeout(reconnectTimer);
+        });
+
+        // Start reconnect logic after a brief delay
+        reconnect = setTimeout(() => {
+            showReconnectAlert();
+            attemptReconnect();
+        }, 6000);
+    }
+
+    // ####################################################
     // SERVER AWAY/MAINTENANCE
     // ####################################################
 
@@ -1131,7 +1240,7 @@ class RoomClient {
         Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
-            showDenyButton: true,
+            showDenyButton: false,
             showConfirmButton: false,
             background: swalBackground,
             imageUrl: image.poster,
