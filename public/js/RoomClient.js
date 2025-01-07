@@ -1206,7 +1206,7 @@ class RoomClient {
                 });
 
                 reconnectTimer = setTimeout(() => {
-                    //this.socket.connect();
+                    this.socket.connect();
                     attemptReconnect();
                 }, delay);
             } else {
