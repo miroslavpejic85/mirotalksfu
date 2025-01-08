@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.88
+ * @version 1.6.89
  *
  */
 
@@ -21,13 +21,14 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 console.log('Window Location', window.location);
 
-const userAgent = navigator.userAgent.toLowerCase();
+const userAgent = navigator.userAgent;
 const parser = new UAParser(userAgent);
 const parserResult = parser.getResult();
-const isMobileDevice = isMobile(userAgent);
-const isTabletDevice = isTablet(userAgent);
-const isIPadDevice = isIpad(userAgent);
-const isDesktopDevice = isDesktop();
+const deviceType = parserResult.device.type || 'desktop';
+const isMobileDevice = deviceType === 'mobile';
+const isTabletDevice = deviceType === 'tablet';
+const isIPadDevice = parserResult.device.model?.toLowerCase() === 'ipad';
+const isDesktopDevice = deviceType === 'desktop';
 const thisInfo = getInfo();
 
 const socket = io({
@@ -4703,7 +4704,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.88',
+        title: 'WebRTC SFU v1.6.89',
         html: `
         <br />
         <div id="about">
