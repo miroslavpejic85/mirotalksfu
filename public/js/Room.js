@@ -2517,7 +2517,6 @@ function handleSelects() {
         isButtonsBarOver = isKeepButtonsVisible = e.currentTarget.checked;
         localStorageSettings.keep_buttons_visible = isButtonsBarOver;
         lS.setSettings(localStorageSettings);
-        checkButtonsBar();
         const status = isButtonsBarOver ? 'enabled' : 'disabled';
         userLog('info', `Buttons always visible ${status}`, 'top-end');
         e.target.blur();
@@ -3361,12 +3360,6 @@ function checkButtonsBar() {
             isButtonsVisible = false;
         }
     }
-    // if (!isButtonsBarOver) {
-    //     control.style.display = 'none';
-    //     toggleExtraButton.innerHTML = icons.up;
-    //     bottomButtons.style.display = 'none';
-    //     isButtonsVisible = false;
-    // }
     setTimeout(() => {
         checkButtonsBar();
     }, 10000);
