@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.87
+ * @version 1.6.88
  *
  */
 
@@ -21,7 +21,19 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 console.log('Window Location', window.location);
 
-const socket = io({ transports: ['websocket'] });
+const userAgent = navigator.userAgent.toLowerCase();
+const parser = new UAParser(userAgent);
+const parserResult = parser.getResult();
+const isMobileDevice = isMobile(userAgent);
+const isTabletDevice = isTablet(userAgent);
+const isIPadDevice = isIpad(userAgent);
+const isDesktopDevice = isDesktop();
+const thisInfo = getInfo();
+
+const socket = io({
+    transports: ['websocket'],
+    reconnection: isDesktopDevice,
+});
 
 let survey = {
     enabled: true,
@@ -60,11 +72,6 @@ const _PEER = {
 const initUser = document.getElementById('initUser');
 const initVideoContainerClass = document.querySelector('.init-video-container');
 const bars = document.querySelectorAll('.volume-bar');
-
-const userAgent = navigator.userAgent.toLowerCase();
-const isTabletDevice = isTablet(userAgent);
-const isIPadDevice = isIpad(userAgent);
-const thisInfo = getInfo();
 
 const Base64Prefix = 'data:application/pdf;base64,';
 
@@ -276,7 +283,7 @@ function initClient() {
     transcription = new Transcription();
     transcription.init();
 
-    if (!DetectRTC.isMobileDevice) {
+    if (!isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
         setTippy('closeEmojiPickerContainer', 'Close', 'bottom');
         setTippy('mySettingsCloseBtn', 'Close', 'bottom');
@@ -381,7 +388,7 @@ function initClient() {
 // ####################################################
 
 function refreshMainButtonsToolTipPlacement() {
-    if (!DetectRTC.isMobileDevice) {
+    if (!isMobileDevice) {
         //
         const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
         const placement = position == 'vertical' ? 'right' : 'top';
@@ -935,26 +942,22 @@ function getPeerInfo() {
         peer_recording: isRecording,
         peer_video_privacy: isVideoPrivacyActive,
         peer_hand: false,
-        is_desktop_device: !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice,
-        is_mobile_device: DetectRTC.isMobileDevice,
+        is_desktop_device: isDesktopDevice,
+        is_mobile_device: isMobileDevice,
         is_tablet_device: isTabletDevice,
         is_ipad_pro_device: isIPadDevice,
-        os_name: DetectRTC.osName,
-        os_version: DetectRTC.osVersion,
-        browser_name: DetectRTC.browser.name,
-        browser_version: DetectRTC.browser.version,
+        os_name: parserResult.os.name,
+        os_version: parserResult.os.version,
+        browser_name: parserResult.browser.name,
+        browser_version: parserResult.browser.version,
         user_agent: userAgent,
     };
 }
 
 function getInfo() {
-    const parser = new UAParser(userAgent);
-
     try {
-        const parserResult = parser.getResult();
         console.log('Info', parserResult);
 
-        // Filter out properties with 'Unknown' values
         const filterUnknown = (obj) => {
             const filtered = {};
             for (const [key, value] of Object.entries(obj)) {
@@ -1176,7 +1179,7 @@ async function handleAudioVideo() {
         hide(initVideoButton);
         hide(initVideoAudioRefreshButton);
     }
-    if (isAudioAllowed && isVideoAllowed && !DetectRTC.isMobileDevice) show(initVideoAudioRefreshButton);
+    if (isAudioAllowed && isVideoAllowed && !isMobileDevice) show(initVideoAudioRefreshButton);
     setColor(initAudioVideoButton, isAudioVideoAllowed ? 'white' : 'red');
     setColor(initAudioButton, isAudioAllowed ? 'white' : 'red');
     setColor(initVideoButton, isVideoAllowed ? 'white' : 'red');
@@ -1294,10 +1297,6 @@ async function shareRoom(useNavigator = false) {
 // ROOM UTILITY
 // ####################################################
 
-function isDesktopDevice() {
-    return !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
-}
-
 function makeRoomQR() {
     let qr = new QRious({
         element: document.getElementById('qrRoom'),
@@ -1374,7 +1373,6 @@ function joinRoom(peer_name, room_id) {
     if (rc && rc.isConnected()) {
         console.log('Already connected to a room');
     } else {
-        const isDesktopDevice = !DetectRTC.isMobileDevice && !isTabletDevice && !isIPadDevice;
         console.log('05 ----> join Room ' + room_id);
         roomId.innerText = room_id;
         userName.innerText = peer_name;
@@ -1390,7 +1388,6 @@ function joinRoom(peer_name, room_id) {
             peer_name,
             peer_uuid,
             peer_info,
-            isDesktopDevice,
             isAudioAllowed,
             isVideoAllowed,
             isScreenAllowed,
@@ -1443,10 +1440,10 @@ function roomIsReady() {
     show(chatCleanTextButton);
     show(chatPasteButton);
     show(chatSendButton);
-    if (isDesktopDevice()) {
+    if (isDesktopDevice) {
         show(whiteboardGridBtn);
     }
-    if (DetectRTC.isMobileDevice) {
+    if (isMobileDevice) {
         hide(initVideoAudioRefreshButton);
         hide(refreshVideoDevices);
         hide(refreshAudioDevices);
@@ -1495,7 +1492,7 @@ function roomIsReady() {
             show(startRtmpURLButton) &&
             show(streamerRtmpButton);
     }
-    if (DetectRTC.browser.name != 'Safari') {
+    if (!parserResult.browser.name.toLowerCase().includes('safari')) {
         document.onfullscreenchange = () => {
             if (!document.fullscreenElement) rc.isDocumentOnFullScreen = false;
         };
@@ -1512,7 +1509,7 @@ function roomIsReady() {
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
     if (rc.recording.recSyncServerRecording) show(roomRecordingServer);
     BUTTONS.main.aboutButton && show(aboutButton);
-    if (!DetectRTC.isMobileDevice) show(pinUnpinGridDiv);
+    if (!isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
     handleButtons();
     handleSelects();
@@ -1727,14 +1724,14 @@ function handleButtons() {
         sound('ring', true);
     };
     roomId.onclick = () => {
-        DetectRTC.isMobileDevice ? shareRoom(true) : copyRoomURL();
+        isMobileDevice ? shareRoom(true) : copyRoomURL();
     };
     roomSendEmail.onclick = () => {
         shareRoomByEmail();
     };
     chatButton.onclick = () => {
         rc.toggleChat();
-        if (DetectRTC.isMobileDevice) {
+        if (isMobileDevice) {
             rc.toggleShowParticipants();
         }
     };
@@ -1918,7 +1915,7 @@ function handleButtons() {
     };
     toggleExtraButton.onclick = () => {
         toggleExtraButtons();
-        if (!DetectRTC.isMobileDevice) {
+        if (!isMobileDevice) {
             isToggleExtraBtnClicked = true;
             setTimeout(() => {
                 isToggleExtraBtnClicked = false;
@@ -1926,7 +1923,7 @@ function handleButtons() {
         }
     };
     toggleExtraButton.onmouseover = () => {
-        if (isToggleExtraBtnClicked || DetectRTC.isMobileDevice) return;
+        if (isToggleExtraBtnClicked || isMobileDevice) return;
         if (control.style.display === 'none') {
             toggleExtraButtons();
         }
@@ -2121,7 +2118,7 @@ function handleButtons() {
 // ####################################################
 
 function setButtonsInit() {
-    if (!DetectRTC.isMobileDevice) {
+    if (!isMobileDevice) {
         setTippy('initAudioButton', 'Toggle the audio', 'top');
         setTippy('initVideoButton', 'Toggle the video', 'top');
         setTippy('initAudioVideoButton', 'Toggle the audio & video', 'top');
@@ -2133,7 +2130,7 @@ function setButtonsInit() {
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
     if (!isAudioAllowed || !isVideoAllowed) hide(initAudioVideoButton);
-    if ((!isAudioAllowed && !isVideoAllowed) || DetectRTC.isMobileDevice) hide(initVideoAudioRefreshButton);
+    if ((!isAudioAllowed && !isVideoAllowed) || isMobileDevice) hide(initVideoAudioRefreshButton);
     isAudioVideoAllowed = isAudioAllowed && isVideoAllowed;
 }
 
@@ -2391,7 +2388,7 @@ async function toggleScreenSharing() {
 }
 
 function handleCameraMirror(video) {
-    if (isDesktopDevice()) {
+    if (isDesktopDevice) {
         // Desktop devices...
         if (!video.classList.contains('mirror')) {
             video.classList.toggle('mirror');
@@ -2757,7 +2754,7 @@ function handleSelects() {
 
 function handleInputs() {
     chatMessage.onkeyup = (e) => {
-        if (e.keyCode === 13 && (DetectRTC.isMobileDevice || !e.shiftKey)) {
+        if (e.keyCode === 13 && (isMobileDevice || !e.shiftKey)) {
             e.preventDefault();
             chatSendButton.click();
         }
@@ -3340,8 +3337,8 @@ function showButtons() {
     if (
         isButtonsBarOver ||
         isButtonsVisible ||
-        (rc.isMobileDevice && rc.isChatOpen) ||
-        (rc.isMobileDevice && rc.isMySettingsOpen)
+        (isMobileDevice && rc.isChatOpen) ||
+        (isMobileDevice && rc.isMySettingsOpen)
     )
         return;
     toggleExtraButton.innerHTML = icons.down;
@@ -3452,6 +3449,10 @@ function isTablet(userAgent) {
 
 function isIpad(userAgent) {
     return /macintosh/.test(userAgent) && 'ontouchend' in document;
+}
+
+function isDesktop() {
+    return !isMobileDevice && !isTabletDevice && !isIPadDevice;
 }
 
 function openURL(url, blank = false) {
@@ -4393,7 +4394,7 @@ function getParticipantsList(peers) {
 
 function setParticipantsTippy(peers) {
     //
-    if (!DetectRTC.isMobileDevice) {
+    if (!isMobileDevice) {
         setTippy('muteAllButton', 'Mute all participants', 'top');
         setTippy('hideAllButton', 'Hide all participants', 'top');
         setTippy('stopAllButton', 'Stop screen share to all participants', 'top');
@@ -4686,7 +4687,7 @@ function adaptAspectRatio(participantsCount) {
         desktop = 1; // (4:3)
         mobile = 3; // (1:1)
     }
-    BtnAspectRatio.selectedIndex = DetectRTC.isMobileDevice ? mobile : desktop;
+    BtnAspectRatio.selectedIndex = isMobileDevice ? mobile : desktop;
     setAspectRatio(BtnAspectRatio.selectedIndex);
 }
 
@@ -4702,7 +4703,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.87',
+        title: 'WebRTC SFU v1.6.88',
         html: `
         <br />
         <div id="about">

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.87
+ * @version 1.6.88
  *
  */
 
@@ -196,7 +196,6 @@ class RoomClient {
         peer_name,
         peer_uuid,
         peer_info,
-        isDesktopDevice,
         isAudioAllowed,
         isVideoAllowed,
         isScreenAllowed,
@@ -225,9 +224,9 @@ class RoomClient {
         this.peer_info = peer_info;
 
         // Device type
-        this.isDesktopDevice = isDesktopDevice;
-        this.isMobileDevice = DetectRTC.isMobileDevice;
-        this.isMobileSafari = this.isMobileDevice && DetectRTC.browser.name === 'Safari';
+        this.isDesktopDevice = peer_info.is_desktop_device;
+        this.isMobileDevice = peer_info.is_mobile_device;
+        this.isMobileSafari = this.isMobileDevice && peer_info.browser_name.toLowerCase().includes('safari');
 
         // RTMP selected file name
         this.selectedRtmpFilename = '';
@@ -932,9 +931,9 @@ class RoomClient {
         this.handleConnect();
     };
 
-    handleSocketDisconnect = () => {
-        console.log('SocketOn Disconnect');
-        this.handleDisconnect();
+    handleSocketDisconnect = (reason) => {
+        console.log(`SocketOn Disconnect Reason: ${reason}`);
+        this.handleDisconnect(reason);
     };
 
     handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
@@ -1115,7 +1114,7 @@ class RoomClient {
         this.refreshBrowser();
     }
 
-    handleDisconnect() {
+    handleDisconnect(reason) {
         window.localStorage.isReconnected = true;
 
         console.log('Disconnected. Attempting to reconnect...');
@@ -1133,8 +1132,8 @@ class RoomClient {
                 showDenyButton: false,
                 showConfirmButton: false,
                 icon: 'warning',
-                title: 'Lost connection',
-                text: 'The server may be under maintenance or your connection may have changed',
+                title: `Lost connection\n(${reason})`,
+                text: `The server may be under maintenance or your connection may have changed. Please ${this.isMobileDevice ? 'wait...' : 'check your connection.'}`,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
@@ -1173,11 +1172,17 @@ class RoomClient {
         let serverAwayShown = false;
         let reconnect;
         let reconnectTimer;
+        let waitingTime = this.isMobileDevice ? 30000 : 6000;
+
+        // Clear existing timers if any
+        const clearTimers = () => {
+            clearTimeout(reconnect);
+            clearTimeout(reconnectTimer);
+        };
 
         // Handle connect_error events
         this.socket.once('connect_error', () => {
-            clearTimeout(reconnect);
-            clearTimeout(reconnectTimer);
+            clearTimers();
         });
         this.socket.on('connect_error', () => {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
@@ -1222,14 +1227,14 @@ class RoomClient {
         this.socket.once('connect', () => {
             console.log('Reconnected!');
             this.reconnectAttempts = 0;
-            clearTimeout(reconnectTimer);
+            clearTimers();
         });
 
-        // Start reconnect logic after a brief delay
+        //Start reconnect logic after a brief delay
         reconnect = setTimeout(() => {
             showReconnectAlert();
             attemptReconnect();
-        }, 6000);
+        }, waitingTime);
     }
 
     // ####################################################
@@ -3017,7 +3022,7 @@ class RoomClient {
     // ####################################################
 
     setTippy(elem, content, placement, allowHTML = false) {
-        if (DetectRTC.isMobileDevice) return;
+        if (this.isMobileDevice) return;
         const element = this.getId(elem);
         if (element) {
             if (element._tippy) {
@@ -5695,7 +5700,7 @@ class RoomClient {
         const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
         const blob = new Blob(recordedBlobs, { type: 'video/' + type });
         const recFileName = `Rec_${dateTime}.${type}`;
-        const currentDevice = DetectRTC.isMobileDevice ? 'MOBILE' : 'PC';
+        const currentDevice = this.isMobileDevice ? 'MOBILE' : 'PC';
         const blobFileSize = bytesToSize(blob.size);
         const recTime = document.getElementById('recordingStatus');
         const recType = 'Locally';
