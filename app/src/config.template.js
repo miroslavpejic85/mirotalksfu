@@ -476,6 +476,7 @@ module.exports = {
                 tabRecording: true,
                 host_only_recording: true, // presenter
                 pushToTalk: true,
+                keyboardShortcuts: true,
             },
             producerVideo: {
                 videoPictureInPicture: true,
