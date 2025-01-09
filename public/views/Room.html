@@ -253,6 +253,9 @@ access to use this app.
                     <button id="tabProfileBtn" class="fas fa-user tablinks">
                         <p class="tabButtonText">Profile</p>
                     </button>
+                    <button id="tabShortcutsBtn" class="fas fa-keyboard tablinks">
+                        <p class="tabButtonText">Shortcuts</p>
+                    </button>
                     <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks">
                         <p class="tabButtonText">Aspect</p>
                     </button>
@@ -964,7 +967,7 @@ access to use this app.
                             <hr />
                             <table class="settingsTable">
                                 <tr id="avatars">
-                                    <td class=".width-180">
+                                    <td class="width-180">
                                         <div class="title">
                                             <i class="fa-solid fa-users-line"></i>
                                             <p>Show free avatars</p>
@@ -1121,6 +1124,96 @@ access to use this app.
                                 </td>
                             </tr>
                         </table>
+                    </div>
+
+                    <div id="tabShortcuts" class="tabcontent">
+                        <table class="settingsTable">
+                            <tr>
+                                <td class="width-180">
+                                    <div class="title">
+                                        <i class="fa-solid fa-keyboard"></i>
+                                        <p>Shortcuts</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input id="switchShortcuts" class="form-check-input" type="checkbox" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <div>
+                            <table id="shortcutsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Shortcut</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td><i class="fa-solid fa-a"></i></td>
+                                        <td><strong>Mute/Unmute</strong> your microphone</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-v"></i></td>
+                                        <td><strong>Start/Stop</strong> your camera</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-s"></i></td>
+                                        <td><strong>Start/Stop</strong> your screen</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-r"></i></td>
+                                        <td><strong>Start/Stop</strong> the recording</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-h"></i></td>
+                                        <td><strong>Raise/Lower</strong> your hand</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-c"></i></td>
+                                        <td><strong>Open/Close</strong> the chat</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-o"></i></td>
+                                        <td><strong>Open/Close</strong> the settings</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-x"></i></td>
+                                        <td><strong>Hide/Show</strong> myself</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-k"></i></td>
+                                        <td><strong>Open/Close</strong> the captions</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-p"></i></td>
+                                        <td><strong>Open/Close</strong> the polls</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-w"></i></td>
+                                        <td><strong>Open/Close</strong> the whiteboard</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-e"></i></td>
+                                        <td><strong>Open/Close</strong> the editor</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-j"></i></td>
+                                        <td><strong>Open/Close</strong> the emoji</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-t"></i></td>
+                                        <td><strong>Snapshot</strong> screen/window or tab</td>
+                                    </tr>
+                                    <tr>
+                                        <td><i class="fa-solid fa-f"></i></td>
+                                        <td><strong>Share</strong> the file</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
                     <div id="tabAspect" class="tabcontent">

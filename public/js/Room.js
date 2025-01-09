@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.89
+ * @version 1.6.90
  *
  */
 
@@ -215,6 +215,7 @@ let isSpaceDown = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isKeepButtonsVisible = false;
+let isShortcutsEnabled = false;
 let isBroadcastingEnabled = false;
 let isLobbyEnabled = false;
 let isLobbyOpen = false;
@@ -235,6 +236,11 @@ let isChatGPTOn = false;
 let isSpeechSynthesisSupported = 'speechSynthesis' in window;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
+
+let audio = false;
+let video = false;
+let screen = false;
+let hand = false;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -1551,6 +1557,10 @@ function setColor(elem, color) {
     elem.style.color = color;
 }
 
+function getColor(elem) {
+    return elem.style.color;
+}
+
 // ####################################################
 // SESSION TIMER
 // ####################################################
@@ -1686,6 +1696,9 @@ function handleButtons() {
     };
     tabProfileBtn.onclick = (e) => {
         rc.openTab(e, 'tabProfile');
+    };
+    tabShortcutsBtn.onclick = (e) => {
+        rc.openTab(e, 'tabShortcuts');
     };
     tabStylingBtn.onclick = (e) => {
         rc.openTab(e, 'tabStyling');
@@ -2746,6 +2759,148 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+
+    // handle Shortcuts
+    if (!isDesktopDevice) {
+        elemDisplay('tabShortcutsBtn', false);
+    } else {
+        switchShortcuts.onchange = (e) => {
+            isShortcutsEnabled = e.currentTarget.checked;
+            localStorageSettings.keyboard_shortcuts = isShortcutsEnabled;
+            lS.setSettings(localStorageSettings);
+            const status = isShortcutsEnabled ? 'enabled' : 'disabled';
+            userLog('info', `Keyboard shortcuts ${status}`, 'top-end');
+            e.target.blur();
+        };
+
+        document.addEventListener('keydown', (event) => {
+            if (
+                !isShortcutsEnabled ||
+                rc.isChatOpen ||
+                wbIsOpen ||
+                rc.isEditorOpen ||
+                (!isPresenter && isBroadcastingEnabled)
+            )
+                return;
+
+            const key = event.key.toLowerCase(); // Convert to lowercase for simplicity
+            console.log(`Detected shortcut: ${key}`);
+
+            const { audio_cant_unmute, video_cant_unhide, screen_cant_share } = rc._moderator;
+            const notPresenter = isRulesActive && !isPresenter;
+
+            switch (key) {
+                case 'a':
+                    if (notPresenter && !audio && (audio_cant_unmute || !BUTTONS.main.startAudioButton)) {
+                        userLog('warning', 'The presenter has disabled your ability to enable audio', 'top-end');
+                        break;
+                    }
+                    audio ? stopAudioButton.click() : startAudioButton.click();
+                    break;
+                case 'v':
+                    if (notPresenter && !video && (video_cant_unhide || !BUTTONS.main.startVideoButton)) {
+                        userLog('warning', 'The presenter has disabled your ability to enable video', 'top-end');
+                        break;
+                    }
+                    video ? stopVideoButton.click() : startVideoButton.click();
+                    break;
+                case 's':
+                    if (notPresenter && !screen && (screen_cant_share || !BUTTONS.main.startScreenButton)) {
+                        userLog('warning', 'The presenter has disabled your ability to share the screen', 'top-end');
+                        break;
+                    }
+                    screen ? stopScreenButton.click() : startScreenButton.click();
+                    break;
+                case 'r':
+                    if (notPresenter && (hostOnlyRecording || !BUTTONS.settings.tabRecording)) {
+                        userLog('warning', 'The presenter has disabled your ability to start recording', 'top-end');
+                        break;
+                    }
+                    isRecording ? stopRecButton.click() : startRecButton.click();
+                    break;
+                case 'h':
+                    if (notPresenter && !BUTTONS.main.raiseHandButton) {
+                        userLog('warning', 'The presenter has disabled your ability to raise your hand', 'top-end');
+                        break;
+                    }
+                    hand ? lowerHandButton.click() : raiseHandButton.click();
+                    break;
+                case 'c':
+                    if (notPresenter && !BUTTONS.main.chatButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the chat', 'top-end');
+                        break;
+                    }
+                    chatButton.click();
+                    break;
+                case 'o':
+                    if (notPresenter && !BUTTONS.main.settingsButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the settings', 'top-end');
+                        break;
+                    }
+                    settingsButton.click();
+                    break;
+                case 'x':
+                    if (notPresenter && !BUTTONS.main.hideMeButton) {
+                        userLog('warning', 'The presenter has disabled your ability to hide yourself', 'top-end');
+                        break;
+                    }
+                    hideMeButton.click();
+                    break;
+                case 'k':
+                    if (notPresenter && !BUTTONS.main.transcriptionButton) {
+                        userLog('warning', 'The presenter has disabled your ability to start transcription', 'top-end');
+                        break;
+                    }
+                    transcriptionButton.click();
+                    break;
+                case 'p':
+                    if (notPresenter && !BUTTONS.main.pollButton) {
+                        userLog('warning', 'The presenter has disabled your ability to start a poll', 'top-end');
+                        break;
+                    }
+                    pollButton.click();
+                    break;
+                case 'e':
+                    if (notPresenter && !BUTTONS.main.editorButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the editor', 'top-end');
+                        break;
+                    }
+                    editorButton.click();
+                    break;
+                case 'w':
+                    if (notPresenter && !BUTTONS.main.whiteboardButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the whiteboard', 'top-end');
+                        break;
+                    }
+                    whiteboardButton.click();
+                    break;
+                case 'j':
+                    if (notPresenter && !BUTTONS.main.emojiRoomButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the room emoji', 'top-end');
+                        break;
+                    }
+                    emojiRoomButton.click();
+                    break;
+                case 't':
+                    if (notPresenter && !BUTTONS.main.snapshotRoomButton) {
+                        userLog('warning', 'The presenter has disabled your ability to take a snapshot', 'top-end');
+                        break;
+                    }
+                    snapshotRoomButton.click();
+                    break;
+                case 'f':
+                    if (notPresenter && !BUTTONS.settings.fileSharing) {
+                        userLog('warning', 'The presenter has disabled your ability to share files', 'top-end');
+                        break;
+                    }
+                    fileShareButton.click();
+                    break;
+                //...
+                default:
+                    console.log(`Unhandled shortcut key: ${key}`);
+            }
+        });
+    }
 }
 
 // ####################################################
@@ -2963,6 +3118,7 @@ function loadSettingsFromLocalStorage() {
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
     isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
+    isShortcutsEnabled = localStorageSettings.keyboard_shortcuts;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     speechIncomingMsg.checked = rc.speechInMessages;
@@ -2970,6 +3126,7 @@ function loadSettingsFromLocalStorage() {
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
+    switchShortcuts.checked = isShortcutsEnabled;
 
     recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
     switchH264Recording.checked = recPrioritizeH264;
@@ -3047,12 +3204,14 @@ function handleRoomClientEvents() {
         hide(raiseHandButton);
         show(lowerHandButton);
         setColor(lowerHandIcon, 'lime');
+        hand = true;
     });
     rc.on(RoomClient.EVENTS.lowerHand, () => {
         console.log('Room event: Client lower hand');
         hide(lowerHandButton);
         show(raiseHandButton);
         setColor(lowerHandIcon, 'white');
+        hand = false;
     });
     rc.on(RoomClient.EVENTS.startAudio, () => {
         console.log('Room event: Client start audio');
@@ -3060,6 +3219,7 @@ function handleRoomClientEvents() {
         show(stopAudioButton);
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
+        audio = true;
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room event: Client pause audio');
@@ -3067,12 +3227,14 @@ function handleRoomClientEvents() {
         show(startAudioButton);
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
+        audio = false;
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room event: Client resume audio');
         hide(startAudioButton);
         show(stopAudioButton);
         setAudioButtonsDisabled(false);
+        audio = true;
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
         console.log('Room event: Client stop audio');
@@ -3080,6 +3242,7 @@ function handleRoomClientEvents() {
         show(startAudioButton);
         setAudioButtonsDisabled(false);
         stopMicrophoneProcessing();
+        audio = false;
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room event: Client start video');
@@ -3089,6 +3252,7 @@ function handleRoomClientEvents() {
         setVideoButtonsDisabled(false);
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
+        video = true;
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
@@ -3097,6 +3261,7 @@ function handleRoomClientEvents() {
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
         hideClassElements('videoMenuBar');
+        video = false;
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
@@ -3105,6 +3270,7 @@ function handleRoomClientEvents() {
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
         hideClassElements('videoMenuBar');
+        video = true;
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -3114,6 +3280,7 @@ function handleRoomClientEvents() {
         isVideoPrivacyActive = false;
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
+        video = false;
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
@@ -3121,18 +3288,21 @@ function handleRoomClientEvents() {
         show(stopScreenButton);
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
+        screen = true;
     });
     rc.on(RoomClient.EVENTS.pauseScreen, () => {
         console.log('Room event: Client pause screen');
         hide(startScreenButton);
         show(stopScreenButton);
         hideClassElements('videoMenuBar');
+        screen = false;
     });
     rc.on(RoomClient.EVENTS.resumeScreen, () => {
         console.log('Room event: Client resume screen');
         hide(stopScreenButton);
         show(startScreenButton);
         hideClassElements('videoMenuBar');
+        screen = true;
     });
     rc.on(RoomClient.EVENTS.stopScreen, () => {
         console.log('Room event: Client stop screen');
@@ -3140,6 +3310,7 @@ function handleRoomClientEvents() {
         show(startScreenButton);
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
+        screen = false;
     });
     rc.on(RoomClient.EVENTS.roomLock, () => {
         console.log('Room event: Client lock room');
@@ -4697,7 +4868,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.89',
+        title: 'WebRTC SFU v1.6.90',
         html: `
         <br />
         <div id="about">

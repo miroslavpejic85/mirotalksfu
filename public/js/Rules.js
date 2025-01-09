@@ -26,6 +26,7 @@ let BUTTONS = {
         raiseHandButton: true,
         transcriptionButton: true,
         whiteboardButton: true,
+        editorButton: true,
         snapshotRoomButton: true,
         emojiRoomButton: true,
         settingsButton: true,
