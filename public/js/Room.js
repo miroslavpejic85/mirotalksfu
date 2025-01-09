@@ -2763,12 +2763,10 @@ function handleSelects() {
     // handle Shortcuts
     if (!isDesktopDevice || !BUTTONS.settings.keyboardShortcuts) {
         elemDisplay('tabShortcutsBtn', false);
+        setKeyboardShortcuts(false);
     } else {
         switchShortcuts.onchange = (e) => {
-            isShortcutsEnabled = e.currentTarget.checked;
-            localStorageSettings.keyboard_shortcuts = isShortcutsEnabled;
-            lS.setSettings(localStorageSettings);
-            const status = isShortcutsEnabled ? 'enabled' : 'disabled';
+            const status = setKeyboardShortcuts(e.currentTarget.checked);
             userLog('info', `Keyboard shortcuts ${status}`, 'top-end');
             e.target.blur();
         };
@@ -2901,6 +2899,17 @@ function handleSelects() {
             }
         });
     }
+}
+
+// ####################################################
+// KEYBOARD SHORTCUTS
+// ####################################################
+
+function setKeyboardShortcuts(enabled) {
+    isShortcutsEnabled = enabled;
+    localStorageSettings.keyboard_shortcuts = isShortcutsEnabled;
+    lS.setSettings(localStorageSettings);
+    return isShortcutsEnabled ? 'enabled' : 'disabled';
 }
 
 // ####################################################
