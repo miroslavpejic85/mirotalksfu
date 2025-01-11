@@ -26,7 +26,7 @@ const html = {
     videoOn: 'fas fa-video',
     videoOff: 'fas fa-video-slash',
     userName: 'username',
-    userHand: 'fas fa-hand-paper pulsate',
+    userHand: 'fas fa-hand-paper user-hand pulsate',
     pip: 'fas fa-images',
     fullScreen: 'fas fa-expand',
     fullScreenOn: 'fas fa-compress-alt',
