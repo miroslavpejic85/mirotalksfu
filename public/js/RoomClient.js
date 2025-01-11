@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.92
+ * @version 1.6.93
  *
  */
 
@@ -3496,6 +3496,16 @@ class RoomClient {
                         console.error('Failed to enter Picture-in-Picture mode:', error);
                         this.userLog('warning', error.message, 'top-end', 6000);
                         elemDisplay(btnPIP.id, false);
+                    });
+                }
+            });
+        }
+        if (videoPlayer) {
+            videoPlayer.addEventListener('leavepictureinpicture', (event) => {
+                console.log('Exited PiP mode');
+                if (videoPlayer.paused) {
+                    videoPlayer.play().catch((error) => {
+                        console.error('Error playing video after exit PIP mode:', error);
                     });
                 }
             });
