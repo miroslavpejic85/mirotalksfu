@@ -31,6 +31,9 @@ const isIPadDevice = parserResult.device.model?.toLowerCase() === 'ipad';
 const isDesktopDevice = deviceType === 'desktop';
 const thisInfo = getInfo();
 
+const isEmbedded = window.self !== window.top;
+const showDocumentPipBtn = !isEmbedded && 'documentPictureInPicture' in window;
+
 const socket = io({
     transports: ['websocket'],
     reconnection: isDesktopDevice,
@@ -412,6 +415,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('editorButton', 'Toggle the editor', placement);
         setTippy('transcriptionButton', 'Toggle transcription', placement);
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
+        setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
         setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
         setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('restartICEButton', 'Restart ICE', placement);
@@ -1506,6 +1510,7 @@ function roomIsReady() {
         show(fullScreenButton);
     }
     BUTTONS.main.whiteboardButton && show(whiteboardButton);
+    if (BUTTONS.main.documentPiPButton && showDocumentPipBtn) show(documentPiPButton);
     BUTTONS.main.settingsButton && show(settingsButton);
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
@@ -2043,6 +2048,9 @@ function handleButtons() {
     };
     whiteboardButton.onclick = () => {
         toggleWhiteboard();
+    };
+    documentPiPButton.onclick = () => {
+        rc.toggleDocumentPIP();
     };
     snapshotRoomButton.onclick = () => {
         rc.snapshotRoom();
@@ -2871,6 +2879,17 @@ function handleSelects() {
                         break;
                     }
                     whiteboardButton.click();
+                    break;
+                case 'd':
+                    if (notPresenter && !BUTTONS.main.documentPiPButton) {
+                        userLog(
+                            'warning',
+                            'The presenter has disabled your ability to open the document PIP',
+                            'top-end',
+                        );
+                        break;
+                    }
+                    documentPiPButton.click();
                     break;
                 case 'j':
                     if (notPresenter && !BUTTONS.main.emojiRoomButton) {

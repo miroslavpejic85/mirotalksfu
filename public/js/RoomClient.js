@@ -3513,6 +3513,134 @@ class RoomClient {
     }
 
     // ####################################################
+    // HANDLE DOCUMENT PIP
+    // ####################################################
+
+    async toggleDocumentPIP() {
+        if (documentPictureInPicture.window) {
+            documentPictureInPicture.window.close();
+            console.log('DOCUMENT PIP close');
+            return;
+        }
+        await this.documentPictureInPictureOpen();
+    }
+
+    documentPictureInPictureClose() {
+        if (!showDocumentPipBtn) return;
+        if (documentPictureInPicture.window) {
+            documentPictureInPicture.window.close();
+            console.log('DOCUMENT PIP close');
+        }
+    }
+
+    async documentPictureInPictureOpen() {
+        if (!showDocumentPipBtn) return;
+        try {
+            const pipWindow = await documentPictureInPicture.requestWindow({
+                width: 300,
+                height: 720,
+            });
+
+            function updateCustomProperties() {
+                const documentStyle = getComputedStyle(document.documentElement);
+
+                pipWindow.document.documentElement.style = `
+                    --body-bg: ${documentStyle.getPropertyValue('--body-bg')};
+                `;
+            }
+
+            updateCustomProperties();
+
+            const pipStylesheet = document.createElement('link');
+            const pipVideoContainer = document.createElement('div');
+
+            pipStylesheet.type = 'text/css';
+            pipStylesheet.rel = 'stylesheet';
+            pipStylesheet.href = '../css/DocumentPiP.css';
+
+            pipVideoContainer.className = 'pipVideoContainer';
+
+            pipWindow.document.head.append(pipStylesheet);
+            pipWindow.document.body.append(pipVideoContainer);
+
+            function cloneVideoElements() {
+                let foundVideo = false;
+
+                pipVideoContainer.innerHTML = '';
+
+                [...document.querySelectorAll('video')].forEach((video) => {
+                    console.log('DOCUMENT PIP found video id -----> ' + video.id);
+
+                    // No video stream detected or is video share from URL...
+                    if (!video.srcObject || video.id === '__videoShare') return;
+
+                    let videoPIPAllowed = false;
+
+                    // get video element
+                    const videoPlayer = rc.getId(video.id);
+
+                    // Check if video can be add on pipVideo
+                    if ([rc.videoProducerId, rc.screenProducerId].includes(video.id)) {
+                        // PRODUCER
+                        videoPIPAllowed = !videoPlayer.classList.contains('videoCircle'); // not in privacy mode
+                        console.log('DOCUMENT PIP PRODUCER videoPIPAllowed -----> ' + videoPIPAllowed);
+                    } else {
+                        // CONSUMER
+                        videoPIPAllowed = !videoPlayer.classList.contains('videoCircle'); // not in privacy mode
+                        console.log('DOCUMENT PIP CONAUMER videoPIPAllowed -----> ' + videoPIPAllowed);
+                    }
+
+                    if (!videoPIPAllowed) return;
+
+                    // Video is ON not in privacy mode continue....
+
+                    foundVideo = true;
+
+                    const pipVideo = document.createElement('video');
+
+                    pipVideo.classList.add('pipVideo');
+                    pipVideo.classList.toggle('mirror', video.classList.contains('mirror'));
+                    pipVideo.srcObject = video.srcObject;
+                    pipVideo.autoplay = true;
+                    pipVideo.muted = true;
+
+                    pipVideoContainer.append(pipVideo);
+                });
+
+                return foundVideo;
+            }
+
+            if (!cloneVideoElements()) {
+                rc.documentPictureInPictureClose();
+                return userLog('warning', 'No video allowed for Document PIP', 'top-end', 6000);
+            }
+
+            const videoObserver = new MutationObserver(() => {
+                cloneVideoElements();
+            });
+
+            videoObserver.observe(rc.videoMediaContainer, {
+                childList: true,
+            });
+
+            const documentObserver = new MutationObserver(() => {
+                updateCustomProperties();
+            });
+
+            documentObserver.observe(document.documentElement, {
+                attributeFilter: ['style'],
+            });
+
+            pipWindow.addEventListener('unload', () => {
+                videoObserver.disconnect();
+                documentObserver.disconnect();
+            });
+        } catch (err) {
+            userLog('warning', err.message, 'top-end', 6000);
+        }
+    }
+
+    // ####################################################
     // FULL SCREEN
     // ####################################################
 

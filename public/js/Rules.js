@@ -23,10 +23,11 @@ let BUTTONS = {
         swapCameraButton: true,
         chatButton: true,
         pollButton: true,
+        editorButton: true,
         raiseHandButton: true,
         transcriptionButton: true,
         whiteboardButton: true,
-        editorButton: true,
+        documentPiPButton: true,
         snapshotRoomButton: true,
         emojiRoomButton: true,
         settingsButton: true,
@@ -240,6 +241,7 @@ function handleRulesBroadcasting() {
     BUTTONS.main.swapCameraButton = false;
     //BUTTONS.main.raiseHandButton = false;
     BUTTONS.main.whiteboardButton = false;
+    BUTTONS.main.documentPiPButton = false;
     //BUTTONS.main.snapshotRoomButton = false;
     //BUTTONS.main.emojiRoomButton = false,
     //BUTTONS.main.pollButton = false;
@@ -275,6 +277,7 @@ function handleRulesBroadcasting() {
     elemDisplay('swapCameraButton', false);
     //elemDisplay('raiseHandButton', false);
     elemDisplay('whiteboardButton', false);
+    elemDisplay('documentPiPButton', false);
     //elemDisplay('snapshotRoomButton', false);
     //elemDisplay('emojiRoomButton', false);
     //elemDisplay('pollButton', false);

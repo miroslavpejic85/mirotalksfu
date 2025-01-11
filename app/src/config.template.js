@@ -457,6 +457,7 @@ module.exports = {
                 raiseHandButton: true,
                 transcriptionButton: true,
                 whiteboardButton: true,
+                documentPiPButton: true,
                 snapshotRoomButton: true,
                 emojiRoomButton: true,
                 settingsButton: true,
