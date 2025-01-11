@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.95
+ * @version 1.6.96
  *
  */
 
@@ -3574,25 +3574,19 @@ class RoomClient {
                     // No video stream detected or is video share from URL...
                     if (!video.srcObject || video.id === '__videoShare') return;
 
-                    let videoPIPAllowed = false;
+                    const videoElement = rc.getId(video.id);
 
-                    // get video element
-                    const videoPlayer = rc.getId(video.id);
+                    const isPIPAllowed = !videoElement.classList.contains('videoCircle'); // Check if not in privacy mode
 
-                    // Check if video can be add on pipVideo
-                    if ([rc.videoProducerId, rc.screenProducerId].includes(video.id)) {
-                        // PRODUCER
-                        videoPIPAllowed = !videoPlayer.classList.contains('videoCircle'); // not in privacy mode
-                        console.log('DOCUMENT PIP PRODUCER videoPIPAllowed -----> ' + videoPIPAllowed);
-                    } else {
-                        // CONSUMER
-                        videoPIPAllowed = !videoPlayer.classList.contains('videoCircle'); // not in privacy mode
-                        console.log('DOCUMENT PIP CONAUMER videoPIPAllowed -----> ' + videoPIPAllowed);
-                    }
+                    const logMessage = [rc.videoProducerId, rc.screenProducerId].includes(video.id)
+                        ? `DOCUMENT PIP PRODUCER: PiP allowed? -----> ${isPIPAllowed}`
+                        : `DOCUMENT PIP CONSUMER: PiP allowed? -----> ${isPIPAllowed}`;
 
-                    if (!videoPIPAllowed) return;
+                    console.log(logMessage);
 
-                    // Video is ON not in privacy mode continue....
+                    if (!isPIPAllowed) return;
+
+                    // Video is ON and not in privacy mode continue....
 
                     foundVideo = true;
 
@@ -3605,6 +3599,19 @@ class RoomClient {
                     pipVideo.muted = true;
 
                     pipVideoContainer.append(pipVideo);
+
+                    const videoElementObserver = new MutationObserver((mutations) => {
+                        mutations.forEach((mutation) => {
+                            if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                                // Handle class changes in video elements
+                                console.log(`Video ${mutation.target.id} class changed:`, mutation.target.className);
+                                cloneVideoElements();
+                            }
+                        });
+                    });
+
+                    // Start observing for new videos and class changes
+                    videoElementObserver.observe(video, { attributes: true, attributeFilter: ['class'] });
                 });
 
                 return foundVideo;
