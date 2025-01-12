@@ -224,11 +224,11 @@ function joinRoom() {
     const roomValid = isValidRoomName(roomName);
 
     if (!roomName) {
-        alert('Room name empty!\nPlease pick a room name.');
+        popup('warning', 'Room name empty!\nPlease pick a room name.');
         return;
     }
     if (!roomValid) {
-        alert('Invalid Room name!\nPath traversal pattern detected!');
+        popup('warning', 'Invalid Room name!\nPath traversal pattern detected!');
         return;
     }
 
