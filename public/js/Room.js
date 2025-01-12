@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.6.96
+ * @version 1.6.97
  *
  */
 
@@ -2769,6 +2769,14 @@ function handleSelects() {
     };
 
     // handle Shortcuts
+    handleKeyboardShortcuts();
+}
+
+// ####################################################
+// KEYBOARD SHORTCUTS
+// ####################################################
+
+function handleKeyboardShortcuts() {
     if (!isDesktopDevice || !BUTTONS.settings.keyboardShortcuts) {
         elemDisplay('tabShortcutsBtn', false);
         setKeyboardShortcuts(false);
@@ -2817,13 +2825,6 @@ function handleSelects() {
                     }
                     screen ? stopScreenButton.click() : startScreenButton.click();
                     break;
-                case 'r':
-                    if (notPresenter && (hostOnlyRecording || !BUTTONS.settings.tabRecording)) {
-                        userLog('warning', 'The presenter has disabled your ability to start recording', 'top-end');
-                        break;
-                    }
-                    isRecording ? stopRecButton.click() : startRecButton.click();
-                    break;
                 case 'h':
                     if (notPresenter && !BUTTONS.main.raiseHandButton) {
                         userLog('warning', 'The presenter has disabled your ability to raise your hand', 'top-end');
@@ -2851,6 +2852,20 @@ function handleSelects() {
                         break;
                     }
                     hideMeButton.click();
+                    break;
+                case 'r':
+                    if (notPresenter && (hostOnlyRecording || !BUTTONS.settings.tabRecording)) {
+                        userLog('warning', 'The presenter has disabled your ability to start recording', 'top-end');
+                        break;
+                    }
+                    isRecording ? stopRecButton.click() : startRecButton.click();
+                    break;
+                case 'j':
+                    if (notPresenter && !BUTTONS.main.emojiRoomButton) {
+                        userLog('warning', 'The presenter has disabled your ability to open the room emoji', 'top-end');
+                        break;
+                    }
+                    emojiRoomButton.click();
                     break;
                 case 'k':
                     if (notPresenter && !BUTTONS.main.transcriptionButton) {
@@ -2895,13 +2910,6 @@ function handleSelects() {
                     }
                     documentPiPButton.click();
                     break;
-                case 'j':
-                    if (notPresenter && !BUTTONS.main.emojiRoomButton) {
-                        userLog('warning', 'The presenter has disabled your ability to open the room emoji', 'top-end');
-                        break;
-                    }
-                    emojiRoomButton.click();
-                    break;
                 case 't':
                     if (notPresenter && !BUTTONS.main.snapshotRoomButton) {
                         userLog('warning', 'The presenter has disabled your ability to take a snapshot', 'top-end');
@@ -2923,10 +2931,6 @@ function handleSelects() {
         });
     }
 }
-
-// ####################################################
-// KEYBOARD SHORTCUTS
-// ####################################################
 
 function setKeyboardShortcuts(enabled) {
     isShortcutsEnabled = enabled;
@@ -4900,7 +4904,7 @@ function showAbout() {
         imageUrl: image.about,
         customClass: { image: 'img-about' },
         position: 'center',
-        title: 'WebRTC SFU v1.6.96',
+        title: 'WebRTC SFU v1.6.97',
         html: `
         <br />
         <div id="about">
