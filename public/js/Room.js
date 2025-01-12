@@ -417,7 +417,6 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
         setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
         setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
-        setTippy('settingsButton', 'Toggle the settings', placement);
         setTippy('restartICEButton', 'Restart ICE', placement);
         setTippy('aboutButton', 'About this project', placement);
 
@@ -433,6 +432,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
+        setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
 }
