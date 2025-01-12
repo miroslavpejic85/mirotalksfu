@@ -102,7 +102,7 @@ let BUTTONS = {
         saveInfoButton: true, // presenter
         sendFileAllButton: true, // presenter
         ejectAllButton: true, // presenter
-        sendFileButton: false, // presenter & guests
+        sendFileButton: true, // presenter & guests
         geoLocationButton: true, // presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
