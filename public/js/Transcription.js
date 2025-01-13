@@ -75,6 +75,7 @@ class Transcription {
             ],
             ['日本語', ['ja-JP']],
             ['Lingua latīna', ['la']],
+            ['Tiếng Việt', ['vi-VN']],
         ];
         this.speechTranscription = window.SpeechRecognition || window.webkitSpeechRecognition;
         this.isTranscriptionSupported = false;
