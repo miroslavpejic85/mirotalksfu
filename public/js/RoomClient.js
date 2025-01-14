@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.00
+ * @version 1.7.01
  *
  */
 
@@ -1421,8 +1421,12 @@ class RoomClient {
 
     async produce(type, deviceId = null, swapCamera = false, init = false) {
         let mediaConstraints = {};
+        let elem;
+        let stream;
         let audio = false;
+        let video = false;
         let screen = false;
+
         switch (type) {
             case mediaType.audio:
                 this.isAudioAllowed = true;
@@ -1434,6 +1438,7 @@ class RoomClient {
                 swapCamera
                     ? (mediaConstraints = this.getCameraConstraints())
                     : (mediaConstraints = this.getVideoConstraints(deviceId));
+                video = true;
                 break;
             case mediaType.screen:
                 mediaConstraints = this.getScreenConstraints();
@@ -1442,9 +1447,11 @@ class RoomClient {
             default:
                 return;
         }
+
         if (!this.device.canProduce('video') && !audio) {
             return console.error('Cannot produce video');
         }
+
         if (this.producerLabel.has(type)) {
             return console.warn('Producer already exists for this type ' + type);
         }
@@ -1454,7 +1461,6 @@ class RoomClient {
 
         console.log(`Media constraints ${type}:`, mediaConstraints);
 
-        let stream;
         try {
             if (init) {
                 stream = initStream;
@@ -1487,7 +1493,7 @@ class RoomClient {
                 };
             }
 
-            if (!audio && !screen) {
+            if (video) {
                 const { encodings, codec } = this.getWebCamEncoding();
                 console.log('GET WEBCAM ENCODING', {
                     encodings: encodings,
@@ -1500,7 +1506,7 @@ class RoomClient {
                 };
             }
 
-            if (!audio && screen) {
+            if (screen) {
                 const { encodings, codec } = this.getScreenEncoding();
                 console.log('GET SCREEN ENCODING', {
                     encodings: encodings,
@@ -1535,84 +1541,42 @@ class RoomClient {
                 this.produceScreenAudio(stream);
             }
 
-            let elem, au;
             if (!audio) {
                 this.localVideoStream = stream;
-                if (type == mediaType.video) this.videoProducerId = producer.id;
-                if (type == mediaType.screen) this.screenProducerId = producer.id;
+
                 elem = await this.handleProducer(producer.id, type, stream);
+
+                if (video) this.videoProducerId = producer.id;
+                if (screen) this.screenProducerId = producer.id;
+
                 // No mirror effect for producer
                 if (!isInitVideoMirror && elem.classList.contains('mirror')) {
                     elem.classList.remove('mirror');
                 }
-                //if (!screen && !isEnumerateDevices) enumerateVideoDevices(stream);
             } else {
                 this.localAudioStream = stream;
+
+                elem = await this.handleProducer(producer.id, type, stream);
+
                 this.audioProducerId = producer.id;
-                au = await this.handleProducer(producer.id, type, stream);
-                //if (!isEnumerateDevices) enumerateAudioDevices(stream);
+
                 getMicrophoneVolumeIndicator(stream);
             }
 
-            if (type == mediaType.video) {
+            if (video) {
                 this.handleHideMe();
             }
 
             producer.on('trackended', () => {
-                console.log('Producer track ended', { id: producer.id, type });
-                this.closeProducer(type);
+                this.closeProducer(type, 'trackended');
             });
 
             producer.on('transportclose', () => {
-                console.log('Producer transport close', { id: producer.id, type });
-                if (!audio) {
-                    const d = this.getId(producer.id + '__video');
-                    const vb = this.getId(producer.id + '__vb');
-
-                    elem.srcObject.getTracks().forEach(function (track) {
-                        track.stop();
-                    });
-                    elem.parentNode.removeChild(elem);
-
-                    d.parentNode.removeChild(d);
-                    vb.parentNode.removeChild(vb);
-
-                    handleAspectRatio();
-                    console.log('[transportClose] Video-element-count', this.videoMediaContainer.childElementCount);
-                } else {
-                    au.srcObject.getTracks().forEach(function (track) {
-                        track.stop();
-                    });
-                    au.parentNode.removeChild(au);
-                    console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
-                }
-                this.closeProducer(type);
+                this.closeProducer(type, 'transportclose');
             });
 
             producer.on('close', () => {
-                console.log('Closing producer', { id: producer.id, type });
-                if (!audio) {
-                    const d = this.getId(producer.id + '__video');
-                    const vb = this.getId(producer.id + '__vb');
-
-                    elem.srcObject.getTracks().forEach(function (track) {
-                        track.stop();
-                    });
-                    elem.parentNode.removeChild(elem);
-
-                    d.parentNode.removeChild(d);
-                    vb.parentNode.removeChild(vb);
-
-                    handleAspectRatio();
-                    console.log('[closingProducer] Video-element-count', this.videoMediaContainer.childElementCount);
-                } else {
-                    au.srcObject.getTracks().forEach(function (track) {
-                        track.stop();
-                    });
-                    au.parentNode.removeChild(au);
-                    console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
-                }
-                this.closeProducer(type);
+                this.closeProducer(type, 'close');
             });
 
             switch (type) {
@@ -1987,7 +1951,7 @@ class RoomClient {
     }
 
     closeThenProduce(type, deviceId = null, swapCamera = false) {
-        this.closeProducer(type);
+        this.closeProducer(type, 'closeThenProduce');
         setTimeout(async function () {
             await rc.produce(type, deviceId, swapCamera);
         }, 1000);
@@ -2122,7 +2086,7 @@ class RoomClient {
             case mediaType.audio:
                 elem = document.createElement('audio');
                 elem.setAttribute('id', id);
-                elem.setAttribute('name', id + '__localAudio');
+                elem.setAttribute('name', 'LOCAL-AUDIO');
                 elem.setAttribute('volume', this.peer_id + '___pVolume');
                 elem.controls = false;
                 elem.autoplay = true;
@@ -2209,7 +2173,7 @@ class RoomClient {
         }
     }
 
-    closeProducer(type) {
+    closeProducer(type, event = 'Close Producer') {
         if (!this.producerLabel.has(type)) {
             return console.warn('There is no producer for this type ' + type);
         }
@@ -2222,7 +2186,7 @@ class RoomClient {
             type: type,
             status: false,
         };
-        console.log(`Close producer ${type}`, data);
+        console.log(`${event} ${type}`, data);
 
         this.socket.emit('producerClosed', data);
 
@@ -2230,19 +2194,9 @@ class RoomClient {
         this.producers.delete(producer_id);
         this.producerLabel.delete(type);
 
-        console.log('[closeProducer] - PRODUCER LABEL', this.producerLabel);
+        console.log(`[${event}] - PRODUCER LABEL`, this.producerLabel);
 
-        if (type !== mediaType.audio) {
-            const elem = this.getId(producer_id);
-            const d = this.getId(producer_id + '__video');
-            const vb = this.getId(producer_id + '__vb');
-            elem.srcObject.getTracks().forEach(function (track) {
-                track.stop();
-            });
-            d.parentNode.removeChild(d);
-            vb.parentNode.removeChild(vb);
-
-            //alert(this.pinnedVideoPlayerId + '==' + producer_id);
+        if (type === mediaType.video || type === mediaType.screen) {
             if (this.isVideoPinned && this.pinnedVideoPlayerId == producer_id) {
                 this.removeVideoPinMediaContainer();
                 console.log('Remove pin container due the Producer close', {
@@ -2251,21 +2205,24 @@ class RoomClient {
                 });
             }
 
-            handleAspectRatio();
-
-            console.log('[producerClose] Video-element-count', this.videoMediaContainer.childElementCount);
+            const video = this.getId(producer_id);
+            this.removeVideoProducer(video, event);
         }
 
         if (type === mediaType.audio) {
-            const au = this.getName(producer_id + '__localAudio');
-            au.srcObject.getTracks().forEach(function (track) {
-                track.stop();
-            });
-            this.localAudioEl.removeChild(au);
-            console.log('[producerClose] Audio-element-count', this.localAudioEl.childElementCount);
+            const audio = this.getId(producer_id);
+            this.removeAudioProducer(audio, event);
+        }
+
+        if (type === mediaType.audioTab) {
+            const auTab = this.getId(producer_id);
+            this.removeAudioProducer(auTab, event);
         }
 
         switch (type) {
+            case mediaType.audioTab:
+                console.log('Closed audio tab');
+                break;
             case mediaType.audio:
                 this.setIsAudio(this.peer_id, false);
                 this.event(_EVENTS.stopAudio);
@@ -2311,32 +2268,49 @@ class RoomClient {
             const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
             producerSa.on('trackended', () => {
-                console.log('Producer Screen audio track ended', { id: producerSa.id });
-                this.closeProducer(mediaType.audioTab);
+                this.closeProducer(mediaType.audioTab, 'trackended');
             });
 
             producerSa.on('transportclose', () => {
-                console.log('Producer Screen audio transport close', { id: producerSa.id });
-                sa.srcObject.getTracks().forEach(function (track) {
-                    track.stop();
-                });
-                sa.parentNode.removeChild(sa);
-                console.log('[transportClose] audio-element-count', this.localAudioEl.childElementCount);
-                this.closeProducer(mediaType.audioTab);
+                this.closeProducer(mediaType.audioTab, 'transportclose');
             });
 
             producerSa.on('close', () => {
-                console.log('Closing Screen audio producer', { id: producerSa.id });
-                sa.srcObject.getTracks().forEach(function (track) {
-                    track.stop();
-                });
-                sa.parentNode.removeChild(sa);
-                console.log('[closingProducer] audio-element-count', this.localAudioEl.childElementCount);
-                this.closeProducer(mediaType.audioTab);
+                this.closeProducer(mediaType.audioTab, 'close');
             });
         } catch (err) {
             console.error('Produce Screen Audio error:', err);
         }
+    }
+
+    // ####################################################
+    // REMOVE PRODUCER VIDEO/AUDIO
+    // ####################################################
+
+    removeVideoProducer(video, event) {
+        const d = this.getId(video.id + '__video');
+        const vb = this.getId(video.id + '__vb');
+
+        video.srcObject.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        video.parentNode.removeChild(video);
+
+        d.parentNode.removeChild(d);
+        vb.parentNode.removeChild(vb);
+
+        handleAspectRatio();
+
+        console.log(`[${event}] Video-element-count`, this.videoMediaContainer.childElementCount);
+    }
+
+    removeAudioProducer(audio, event) {
+        audio.srcObject.getTracks().forEach(function (track) {
+            track.stop();
+        });
+        audio.parentNode.removeChild(audio);
+
+        console.log(`[${event}] audio-element-count`, this.localAudioEl.childElementCount);
     }
 
     // ####################################################
@@ -7911,7 +7885,7 @@ class RoomClient {
                     break;
                 case 'hide':
                     if (peerActionAllowed) {
-                        this.closeProducer(mediaType.video);
+                        this.closeProducer(mediaType.video, 'moderator');
                         this.userLog(
                             'warning',
                             from_peer_name + '  ' + _PEER.videoOff + ' has closed yours video',
@@ -7933,7 +7907,7 @@ class RoomClient {
                 case 'stop':
                     if (this.isScreenShareSupported) {
                         if (peerActionAllowed) {
-                            this.closeProducer(mediaType.screen);
+                            this.closeProducer(mediaType.screen, 'moderator');
                             this.userLog(
                                 'warning',
                                 from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
@@ -8521,39 +8495,8 @@ class RoomClient {
 
     popupPeerInfo(id, peer_info) {
         if (this.showPeerInfo && !this.isMobileDevice) {
-            //console.log('POPUP_PEER_INFO', peer_info);
-
-            // Destructuring peer_info
-            const {
-                join_data_time,
-                peer_name,
-                peer_presenter,
-                is_desktop_device,
-                is_mobile_device,
-                is_tablet_device,
-                is_ipad_pro_device,
-                os_name,
-                os_version,
-                browser_name,
-                browser_version,
-            } = peer_info;
-
-            const emojiPeerInfo = [
-                { label: 'Join Time', value: join_data_time, emoji: '⏰' },
-                { label: 'Name', value: peer_name, emoji: '👤' },
-                { label: 'Presenter', value: peer_presenter ? 'Yes' : 'No', emoji: peer_presenter ? '⭐' : '🎤' },
-                { label: 'Desktop Device', value: is_desktop_device ? 'Yes' : 'No', emoji: '💻' },
-                { label: 'Mobile Device', value: is_mobile_device ? 'Yes' : 'No', emoji: '📱' },
-                { label: 'Tablet Device', value: is_tablet_device ? 'Yes' : 'No', emoji: '📲' },
-                { label: 'iPad Pro', value: is_ipad_pro_device ? 'Yes' : 'No', emoji: '📱' },
-                { label: 'OS', value: `${os_name} ${os_version}`, emoji: '🖥️' },
-                { label: 'Browser', value: `${browser_name} ${browser_version}`, emoji: '🌐' },
-            ];
-
             // Format the peer info into a structured string
-            const peerInfoFormatted = emojiPeerInfo
-                .map((item) => `${item.emoji} <b>${item.label}:</b> ${item.value}`)
-                .join('<br/>');
+            const peerInfoFormatted = this.getPeerUiInfos();
 
             // Apply the improved Tippy.js tooltip
             this.setTippy(
@@ -8563,6 +8506,38 @@ class RoomClient {
                 true,
             );
         }
+    }
+
+    getPeerUiInfos() {
+        // console.log('PEER_INFO', peer_info);
+        const {
+            join_data_time,
+            peer_name,
+            peer_presenter,
+            is_desktop_device,
+            is_mobile_device,
+            is_tablet_device,
+            is_ipad_pro_device,
+            os_name,
+            os_version,
+            browser_name,
+            browser_version,
+        } = peer_info;
+
+        const emojiPeerInfo = [
+            { label: 'Join Time', value: join_data_time, emoji: '⏰' },
+            { label: 'Name', value: peer_name, emoji: '👤' },
+            { label: 'Presenter', value: peer_presenter ? 'Yes' : 'No', emoji: peer_presenter ? '⭐' : '🎤' },
+            { label: 'Desktop Device', value: is_desktop_device ? 'Yes' : 'No', emoji: '💻' },
+            { label: 'Mobile Device', value: is_mobile_device ? 'Yes' : 'No', emoji: '📱' },
+            { label: 'Tablet Device', value: is_tablet_device ? 'Yes' : 'No', emoji: '📲' },
+            { label: 'iPad Pro', value: is_ipad_pro_device ? 'Yes' : 'No', emoji: '📱' },
+            { label: 'OS', value: `${os_name} ${os_version}`, emoji: '🖥️' },
+            { label: 'Browser', value: `${browser_name} ${browser_version}`, emoji: '🌐' },
+        ];
+
+        // Format the peer info into a structured string
+        return emojiPeerInfo.map((item) => `${item.emoji} <b>${item.label}:</b> ${item.value}`).join('<br/>');
     }
 
     // ####################################################
