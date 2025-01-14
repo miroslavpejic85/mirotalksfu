@@ -1538,7 +1538,7 @@ class RoomClient {
 
             // if screen sharing produce the tab audio + microphone
             if (screen && stream.getAudioTracks()[0]) {
-                this.produceScreenAudio(stream);
+                await this.produceScreenAudio(stream);
             }
 
             if (!audio) {
@@ -2265,7 +2265,7 @@ class RoomClient {
 
             console.log('[produceScreenAudio] - PRODUCER LABEL', this.producerLabel);
 
-            const sa = await this.handleProducer(producerSa.id, mediaType.audio, stream);
+            await this.handleProducer(producerSa.id, mediaType.audio, stream);
 
             producerSa.on('trackended', () => {
                 this.closeProducer(mediaType.audioTab, 'trackended');
@@ -2330,6 +2330,8 @@ class RoomClient {
 
             this.consumers.set(consumer.id, consumer);
 
+            await this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
+
             // https://mediasoup.discourse.group/t/create-server-side-consumers-with-paused-true/244
             try {
                 const response = await this.socket.request('resumeConsumer', { consumer_id: consumer.id, type });
@@ -2347,8 +2349,6 @@ class RoomClient {
                 console.log('Consumer transport close', { id: consumer.id, type });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
-
-            this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
 
             if (kind === 'video' && isParticipantsListOpen) {
                 await getRoomParticipants();
