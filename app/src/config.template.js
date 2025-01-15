@@ -303,6 +303,14 @@ module.exports = {
         DSN: '',
         tracesSampleRate: 0.5,
     },
+    webhook: {
+        /*
+            Enable or disable webhook functionality.
+            Set `enabled` to `true` to activate webhook sending of socket events (join, exitRoom, disconnect)
+        */
+        enabled: false,
+        url: 'https://your-site.com/webhook-endpoint',
+    },
     mattermost: {
         /*
         Mattermost: https://mattermost.com

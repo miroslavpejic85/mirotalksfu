@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.02
+ * @version 1.7.03
  *
  */
 
@@ -180,6 +180,12 @@ if (sentryEnabled) {
     log.debug('test-debug');
 */
 }
+
+// Handle WebHook
+const webhook = {
+    enabled: config?.webhook?.enabled || false,
+    url: config?.webhook?.url || 'http://localhost:8888/webhook-endpoint',
+};
 
 // Discord Bot
 const { enabled, commands, token } = config.discord || {};
@@ -1182,6 +1188,7 @@ function startServer() {
             stats_enabled: config.stats?.enabled ? config.stats : false,
             ngrok_enabled: config.ngrok?.enabled ? config.ngrok : false,
             email_alerts: config.email?.alert ? config.email : false,
+            webhook: webhook,
 
             // Version Information
             app_version: packageJson.version,
@@ -1524,6 +1531,15 @@ function startServer() {
                     os: os_name ? `${os_name} ${os_version}` : '',
                     browser: browser_name ? `${browser_name} ${browser_version}` : '',
                 }); // config.email.alert: true
+            }
+
+            // handle WebHook
+            if (webhook.enabled) {
+                // Trigger a POST request when a user joins
+                axios
+                    .post(webhook.url, { event: 'join', data })
+                    .then((response) => log.debug('Join event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking join event:', error.message));
             }
 
             cb(room.toJson());
@@ -2789,7 +2805,7 @@ function startServer() {
             room.broadCast(socket.id, 'editorUpdate', data);
         });
 
-        socket.on('disconnect', () => {
+        socket.on('disconnect', (reason) => {
             if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
@@ -2798,7 +2814,7 @@ function startServer() {
 
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
-            log.debug('[Disconnect] - peer name', peer_name);
+            log.debug('[Disconnect] - peer name', { peer_name, reason });
 
             room.removePeer(socket.id);
 
@@ -2824,6 +2840,19 @@ function startServer() {
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             if (isPresenter) removeIP(socket);
+
+            if (webhook.enabled) {
+                const data = {
+                    peer_name: peer_name,
+                    presenter: isPresenter,
+                    reason: reason,
+                };
+                // Trigger a POST request when a user disconnects
+                axios
+                    .post(webhook.url, { event: 'disconnect', data })
+                    .then((response) => log.debug('Disconnect event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking disconnect event:', error.message));
+            }
 
             socket.room_id = null;
         });
@@ -2869,6 +2898,18 @@ function startServer() {
             socket.room_id = null;
 
             if (isPresenter) removeIP(socket);
+
+            if (webhook.enabled) {
+                const data = {
+                    peer_name: peer_name,
+                    presenter: isPresenter,
+                };
+                // Trigger a POST request when a user exits
+                axios
+                    .post(webhook.url, { event: 'exit', data })
+                    .then((response) => log.debug('ExitROom event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking exitRoom event:', error.message));
+            }
 
             callback('Successfully exited room');
         });
