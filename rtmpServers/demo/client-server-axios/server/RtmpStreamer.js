@@ -2,8 +2,8 @@
 
 const { PassThrough } = require('stream');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegInstaller = require('@ffmpeg-installer/ffmpeg');
-ffmpeg.setFfmpegPath(ffmpegInstaller.path);
+const ffmpegPath = '/usr/local/bin/ffmpeg'; // /usr/bin/ffmpeg (Linux) | /usr/local/bin/ffmpeg (Mac)
+ffmpeg.setFfmpegPath(ffmpegPath);
 
 class RtmpStreamer {
     constructor(rtmpUrl, rtmpKey) {
