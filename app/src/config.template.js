@@ -8,20 +8,17 @@ const os = require('os');
 
 const platform = os.platform();
 
-let ffmpegPath;
-
-switch (platform) {
-    case 'darwin':
-        ffmpegPath = '/usr/local/bin/ffmpeg'; // macOS
-        break;
-    case 'linux':
-        ffmpegPath = '/usr/bin/ffmpeg'; // Linux
-        break;
-    case 'win32':
-        ffmpegPath = 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
-        break;
-    default:
-        ffmpegPath = '/usr/bin/ffmpeg'; // Centos or others...
+function getFFmpegPath(platform) {
+    switch (platform) {
+        case 'darwin':
+            return '/usr/local/bin/ffmpeg'; // macOS
+        case 'linux':
+            return '/usr/bin/ffmpeg'; // Linux
+        case 'win32':
+            return 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
+        default:
+            return '/usr/bin/ffmpeg'; // Centos or others...
+    }
 }
 
 // https://api.ipify.org
@@ -64,6 +61,8 @@ const rtcMinPort = 40000;
 const rtcMaxPort = 40100;
 
 const numWorkers = require('os').cpus().length;
+
+const ffmpegPath = getFFmpegPath(platform);
 
 module.exports = {
     console: {
