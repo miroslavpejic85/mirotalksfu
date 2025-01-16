@@ -121,7 +121,7 @@ module.exports = {
                 - expirationHours: The number of hours before the RTMP URL expires. Default is 4 hours.
                 - dir: Directory where your video files are stored to be streamed via RTMP.
                 - ffmpegPath: Path of the ffmpeg installation on the system (which ffmpeg)
-                - platform: OS es darwin, linux, win32....
+                - platform: 'darwin', 'linux', 'win32', etc.
 
                 Important: Before proceeding, make sure your RTMP server is up and running. 
                 For more information, refer to the documentation here: https://docs.mirotalk.com/mirotalk-sfu/rtmp/.

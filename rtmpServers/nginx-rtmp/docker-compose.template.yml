@@ -1,5 +1,3 @@
-version: '3'
-
 services:
     mirotalk-rtmp:
         container_name: mirotalk-rtmp
