@@ -15,16 +15,16 @@ app.post('/webhook-endpoint', (req, res) => {
 
     // Handle different events
     switch (event) {
-        case 'disconnect':
-            console.log('User disconnected:', data);
-            // Add your custom logic here
-            break;
         case 'join':
             console.log('User joined:', data);
             // Add your custom logic here
             break;
         case 'exit':
             console.log('User exited:', data);
+            // Add your custom logic here
+            break;
+        case 'disconnect':
+            console.log('User disconnected:', data);
             // Add your custom logic here
             break;
         default:

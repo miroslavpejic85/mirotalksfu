@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.04
+ * @version 1.7.05
  *
  */
 
@@ -2843,6 +2843,8 @@ function startServer() {
 
             if (webhook.enabled) {
                 const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
                     peer_name: peer_name,
                     presenter: isPresenter,
                     reason: reason,
@@ -2895,12 +2897,12 @@ function startServer() {
                 log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
             }
 
-            socket.room_id = null;
-
             if (isPresenter) removeIP(socket);
 
             if (webhook.enabled) {
                 const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
                     peer_name: peer_name,
                     presenter: isPresenter,
                 };
@@ -2910,6 +2912,8 @@ function startServer() {
                     .then((response) => log.debug('ExitROom event tracked:', response.data))
                     .catch((error) => log.error('Error tracking exitRoom event:', error.message));
             }
+
+            socket.room_id = null;
 
             callback('Successfully exited room');
         });
