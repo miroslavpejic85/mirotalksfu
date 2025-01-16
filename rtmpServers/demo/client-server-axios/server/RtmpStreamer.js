@@ -2,8 +2,29 @@
 
 const { PassThrough } = require('stream');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath = '/usr/local/bin/ffmpeg'; // /usr/bin/ffmpeg (Linux) | /usr/local/bin/ffmpeg (Mac)
+
+const os = require('os');
+
+const platform = os.platform();
+let ffmpegPath;
+
+switch (platform) {
+    case 'darwin':
+        ffmpegPath = '/usr/local/bin/ffmpeg'; // macOS
+        break;
+    case 'linux':
+        ffmpegPath = '/usr/bin/ffmpeg'; // Linux
+        break;
+    case 'win32':
+        ffmpegPath = 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
+        break;
+    default:
+        ffmpegPath = '/usr/bin/ffmpeg'; // Centos or others...
+}
+
 ffmpeg.setFfmpegPath(ffmpegPath);
+
+console.log('FFmpeg', { platform, ffmpegPath });
 
 class RtmpStreamer {
     constructor(rtmpUrl, rtmpKey) {

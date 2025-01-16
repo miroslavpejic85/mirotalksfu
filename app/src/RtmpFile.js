@@ -1,7 +1,8 @@
 'use strict';
 
 const config = require('./config');
-const ffmpegPath = config.server.rtmp && config.server.rtmp.ffmpeg ? config.server.rtmp.ffmpeg : '/usr/bin/ffmpeg';
+const ffmpegPath =
+    config.server.rtmp && config.server.rtmp.ffmpegPath ? config.server.rtmp.ffmpegPath : '/usr/bin/ffmpeg';
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 

@@ -2,6 +2,28 @@
 
 const os = require('os');
 
+// #############################
+// HELPERS
+// #############################
+
+const platform = os.platform();
+
+let ffmpegPath;
+
+switch (platform) {
+    case 'darwin':
+        ffmpegPath = '/usr/local/bin/ffmpeg'; // macOS
+        break;
+    case 'linux':
+        ffmpegPath = '/usr/bin/ffmpeg'; // Linux
+        break;
+    case 'win32':
+        ffmpegPath = 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
+        break;
+    default:
+        ffmpegPath = '/usr/bin/ffmpeg'; // Centos or others...
+}
+
 // https://api.ipify.org
 
 function getIPv4() {
@@ -99,7 +121,8 @@ module.exports = {
                 - apiSecret: The API secret for streaming WebRTC to RTMP through the MiroTalk API.
                 - expirationHours: The number of hours before the RTMP URL expires. Default is 4 hours.
                 - dir: Directory where your video files are stored to be streamed via RTMP.
-                - ffmpeg: Path of the ffmpeg installation on the system (which ffmpeg)
+                - ffmpegPath: Path of the ffmpeg installation on the system (which ffmpeg)
+                - platform: OS es darwin, linux, win32....
 
                 Important: Before proceeding, make sure your RTMP server is up and running. 
                 For more information, refer to the documentation here: https://docs.mirotalk.com/mirotalk-sfu/rtmp/.
@@ -120,7 +143,8 @@ module.exports = {
             apiSecret: 'mirotalkRtmpApiSecret',
             expirationHours: 4,
             dir: 'rtmp',
-            ffmpeg: '/usr/bin/ffmpeg',
+            ffmpegPath: ffmpegPath,
+            platform: platform,
         },
     },
     middleware: {
