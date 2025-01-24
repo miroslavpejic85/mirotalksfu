@@ -304,7 +304,7 @@ $ curl -X POST "https://sfu.mirotalk.com/api/v1/token" -H "authorization: mirota
 </details>
 
 <details open>
-<summary>Hetzner & Contabo</summary>
+<summary>Hetzner, Hostinger & Contabo</summary>
 
 <br/>
 
@@ -318,9 +318,15 @@ Use [my personal link](https://hetzner.cloud/?ref=XdRifCzCK3bn) to receive `€�
 
 ---
 
+[![Hostinger](public/advertisers/HostingerLogo.png)](https://hostinger.com/?REFERRALCODE=MIROTALK)
+
+Fast, reliable hosting with 24/7 support and great performance. Start today! [Check out Hostinger now](https://hostinger.com/?REFERRALCODE=MIROTALK)
+
+---
+
 [![Contabo](public/advertisers/ContaboLogo.png)](https://www.dpbolvw.net/click-101027391-14462707)
 
-Experience also top-tier German web hosting – dedicated servers, VPS, and web hosting at `unbeatable prices`. Reliable, secure, and backed by 24/7 support. [Explore now here](https://www.dpbolvw.net/click-101027391-14462707)
+Experience also top-tier German web hosting – dedicated servers, VPS, and web hosting at `unbeatable prices`. [Explore now here](https://www.dpbolvw.net/click-101027391-14462707)
 
 ---
 
@@ -397,7 +403,9 @@ Do you find MiroTalk SFU indispensable for your needs? Join us in supporting thi
 
 ---
 
-[![Contabo](public/advertisers/ContaboLogo.png)](https://www.dpbolvw.net/click-101027391-14462707)
+|                                                                                                |                                                                                                |
+| ---------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| [![Hostinger](public/advertisers/Hostinger.png)](https://hostinger.com/?REFERRALCODE=MIROTALK) | [![Contabo](public/advertisers/Contabo.png)](https://www.dpbolvw.net/click-101027391-14462707) |
 
 ---
 
