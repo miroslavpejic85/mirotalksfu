@@ -456,15 +456,8 @@ th {
     border-radius: 5px;
 }
 .custom-width {
-    width: 140px;
+    width: 220px;
 }
-.width-150 {
-    width: 150px;
-}
-.width-180 {
-    width: 180px;
-}
-
 .microphone-table-width {
     width: 180px;
 }
