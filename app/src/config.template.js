@@ -436,15 +436,22 @@ module.exports = {
         */
         brand: {
             app: {
+                language: 'en', // https://en.wikipedia.org/wiki/List_of_ISO_639_language_codes
                 name: 'MiroTalk SFU',
                 title: 'MiroTalk SFU<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
                 description:
                     'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
+                joinDescription: 'Pick a room name.<br />How about this one?',
+                joinButtonLabel: 'JOIN ROOM',
+                joinLastLabel: 'Your recent room:',
             },
             site: {
                 title: 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
                 icon: '../images/logo.svg',
                 appleTouchIcon: '../images/logo.svg',
+                newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
+                newRoomDescription:
+                    "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
             },
             meta: {
                 description:

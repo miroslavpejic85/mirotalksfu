@@ -6,6 +6,8 @@ const brandData = window.sessionStorage.getItem(brandDataKey);
 const title = document.getElementById('title');
 const icon = document.getElementById('icon');
 const appleTouchIcon = document.getElementById('appleTouchIcon');
+const newRoomTitle = document.getElementById('newRoomTitle');
+const newRoomDescription = document.getElementById('newRoomDescription');
 
 const description = document.getElementById('description');
 const keywords = document.getElementById('keywords');
@@ -19,6 +21,8 @@ const ogUrl = document.getElementById('ogUrl');
 
 const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
+const joinDescription = document.getElementById('joinDescription');
+const joinLastLabel = document.getElementById('joinLastLabel');
 
 const features = document.getElementById('features');
 const teams = document.getElementById('teams');
@@ -32,15 +36,22 @@ const footer = document.getElementById('footer');
 // app/src/config.js - ui.brand
 let BRAND = {
     app: {
+        language: 'en',
         name: 'MiroTalk SFU',
         title: 'MiroTalk SFU<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
         description:
             'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
+        joinDescription: 'Pick a room name.<br />How about this one?',
+        joinButtonLabel: 'JOIN ROOM',
+        joinLastLabel: 'Your recent room:',
     },
     site: {
         title: 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
         icon: '../images/logo.svg',
         appleTouchIcon: '../images/logo.svg',
+        newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
+        newRoomDescription:
+            "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
     },
     meta: {
         description:
@@ -138,6 +149,15 @@ function customizeApp() {
     if (appDescription) {
         appDescription.textContent = BRAND.app.description;
     }
+    if (joinDescription) {
+        joinDescription.innerHTML = BRAND.app.joinDescription;
+    }
+    if (joinRoomButton) {
+        joinRoomButton.innerText = BRAND.app.joinButtonLabel; // Common.js
+    }
+    if (joinLastLabel) {
+        joinLastLabel.innerText = BRAND.app.joinLastLabel;
+    }
 }
 
 // SITE metadata
@@ -150,6 +170,12 @@ function customizeSite() {
     }
     if (appleTouchIcon) {
         appleTouchIcon.href = BRAND.site.appleTouchIcon;
+    }
+    if (newRoomTitle) {
+        newRoomTitle.innerHTML = BRAND.site.newRoomTitle;
+    }
+    if (newRoomDescription) {
+        newRoomDescription.textContent = BRAND.site.newRoomDescription;
     }
 }
 

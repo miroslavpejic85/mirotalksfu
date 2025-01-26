@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.7.12",
+    "version": "1.7.13",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
