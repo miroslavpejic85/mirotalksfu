@@ -143,70 +143,70 @@ function elementDisplay(element, display, mode = 'block') {
 
 // APP customize
 function customizeApp() {
-    if (appTitle) {
-        appTitle.innerHTML = BRAND.app.title;
+    if (appTitle && BRAND.app?.title) {
+        appTitle.innerHTML = BRAND.app?.title;
     }
-    if (appDescription) {
+    if (appDescription && BRAND.app?.description) {
         appDescription.textContent = BRAND.app.description;
     }
-    if (joinDescription) {
+    if (joinDescription && BRAND.app?.joinDescription) {
         joinDescription.innerHTML = BRAND.app.joinDescription;
     }
-    if (joinRoomButton) {
+    if (joinRoomButton && BRAND.app?.joinButtonLabel) {
         joinRoomButton.innerText = BRAND.app.joinButtonLabel; // Common.js
     }
-    if (joinLastLabel) {
+    if (joinLastLabel && BRAND.app?.joinLastLabel) {
         joinLastLabel.innerText = BRAND.app.joinLastLabel;
     }
 }
 
 // SITE metadata
 function customizeSite() {
-    if (title) {
-        title.textContent = BRAND.site.title;
+    if (title && BRAND.site?.title) {
+        title.textContent = BRAND.site?.title;
     }
-    if (icon) {
-        icon.href = BRAND.site.icon;
+    if (icon && BRAND.site?.icon) {
+        icon.href = BRAND.site?.icon;
     }
-    if (appleTouchIcon) {
+    if (appleTouchIcon && BRAND.site?.appleTouchIcon) {
         appleTouchIcon.href = BRAND.site.appleTouchIcon;
     }
-    if (newRoomTitle) {
-        newRoomTitle.innerHTML = BRAND.site.newRoomTitle;
+    if (newRoomTitle && BRAND.site?.newRoomTitle) {
+        newRoomTitle.innerHTML = BRAND.site?.newRoomTitle;
     }
-    if (newRoomDescription) {
+    if (newRoomDescription && BRAND.site?.newRoomDescription) {
         newRoomDescription.textContent = BRAND.site.newRoomDescription;
     }
 }
 
 // SEO metadata
 function customizeMetaTags() {
-    if (description) {
+    if (description && BRAND.meta?.description) {
         description.content = BRAND.meta.description;
     }
-    if (keywords) {
+    if (keywords && BRAND.meta?.keywords) {
         keywords.content = BRAND.meta.keywords;
     }
 }
 
 // SOCIAL MEDIA SHARING metadata
 function customizeOpenGraph() {
-    if (ogType) {
+    if (ogType && BRAND.og?.type) {
         ogType.content = BRAND.og.type;
     }
-    if (ogSiteName) {
+    if (ogSiteName && BRAND.og?.siteName) {
         ogSiteName.content = BRAND.og.siteName;
     }
-    if (ogTitle) {
+    if (ogTitle && BRAND.og?.title) {
         ogTitle.content = BRAND.og.title;
     }
-    if (ogDescription) {
+    if (ogDescription && BRAND.og?.description) {
         ogDescription.content = BRAND.og.description;
     }
-    if (ogImage) {
+    if (ogImage && BRAND.og?.image) {
         ogImage.content = BRAND.og.image;
     }
-    if (ogUrl) {
+    if (ogUrl && BRAND.og?.url) {
         ogUrl.content = BRAND.og.url;
     }
 }
