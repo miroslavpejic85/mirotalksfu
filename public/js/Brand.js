@@ -22,6 +22,7 @@ const ogUrl = document.getElementById('ogUrl');
 const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
 const joinDescription = document.getElementById('joinDescription');
+const joinRoomBtn = document.getElementById('joinRoomButton');
 const joinLastLabel = document.getElementById('joinLastLabel');
 
 const features = document.getElementById('features');
@@ -152,8 +153,8 @@ function customizeApp() {
     if (joinDescription && BRAND.app?.joinDescription) {
         joinDescription.innerHTML = BRAND.app.joinDescription;
     }
-    if (joinRoomButton && BRAND.app?.joinButtonLabel) {
-        joinRoomButton.innerText = BRAND.app.joinButtonLabel; // Common.js
+    if (joinRoomBtn && BRAND.app?.joinButtonLabel) {
+        joinRoomBtn.innerText = BRAND.app.joinButtonLabel;
     }
     if (joinLastLabel && BRAND.app?.joinLastLabel) {
         joinLastLabel.innerText = BRAND.app.joinLastLabel;
