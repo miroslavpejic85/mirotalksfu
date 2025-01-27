@@ -1725,6 +1725,7 @@ function handleButtons() {
         showFreeAvatars = e.currentTarget.checked;
         rc.getAvatarList();
     };
+    avatarQuality.selectedIndex = 1;
     avatarQuality.onchange = (e) => {
         VideoAI.quality = e.target.value;
     };

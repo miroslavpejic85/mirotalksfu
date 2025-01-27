@@ -418,9 +418,8 @@ body {
 }
 
 #applyAudioOptionsButton {
-    width: 180px;
+    width: 100%;
     padding: 10px;
-    margin-left: 10px;
     font-size: 1rem;
     background: var(--body-bg);
     border: var(--border);
@@ -438,30 +437,39 @@ body {
 .settingsTable {
     width: 100%;
     color: #fff;
-    table-layout: fixed;
+    table-layout: auto;
     border-collapse: collapse;
     border-radius: 10px;
-    border-style: hidden;
     background: var(--body-bg);
 }
-.settingsTable td,
-th {
-    text-align: left;
+
+.settingsTable td, .settingsTable th {
     padding: 10px;
-    /* border: 1px solid grey; */
+    text-align: left;
 }
+
+.settingsTable td:first-child {
+    width: auto;
+}
+
+.settingsTable td:last-child {
+    width: 140px;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Optional alternating row background */
 /* .settingsTable tr:nth-child(even) {
     background: var(--select-bg);
 } */
+
 .settingsTable i {
     border: none;
     border-radius: 5px;
 }
-.custom-width {
-    width: auto;
-}
-.microphone-table-width {
-    width: 180px;
+
+.settingsTable select {
+    width: 100px !important;
 }
 
 /*--------------------------------------------------------------
@@ -606,7 +614,7 @@ th {
 }
 
 .dropdown-menu button {
-    width: 240px;
+    min-width: 240px;
     padding: 8px 16px;
     align-items: center;
     justify-content: flex-start;
@@ -665,7 +673,7 @@ th {
     width: 65%;
     background-color: var(--body-bg);
     min-height: 480px;
-    max-height: 768px;
+    max-height: 750px;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -1494,16 +1502,6 @@ progress {
 
 hr {
     background: #ffffff !important;
-}
-
-.wa {
-    width: 260px;
-}
-
-@media screen and (max-width: 500px) {
-    .wa {
-        width: 220px;
-    }
 }
 
 .ml-5 {
