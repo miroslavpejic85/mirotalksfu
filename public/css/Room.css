@@ -443,7 +443,8 @@ body {
     background: var(--body-bg);
 }
 
-.settingsTable td, .settingsTable th {
+.settingsTable td,
+.settingsTable th {
     padding: 10px;
     text-align: left;
 }

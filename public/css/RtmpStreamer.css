@@ -257,3 +257,14 @@ footer {
     -moz-animation-duration: 1s;
     animation-duration: 1s;
 }
+
+/*--------------------------------------------------------------
+# Google Translate
+--------------------------------------------------------------*/
+
+.skiptranslate iframe,
+.goog-te-banner-frame.skiptranslate,
+.VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+.VIpgJd-ZVi9od-aZ2wEe-OiiCO {
+    display: none !important;
+}
