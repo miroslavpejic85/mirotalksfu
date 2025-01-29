@@ -16,6 +16,9 @@ RUN apt-get update \
         ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
+# Rename config.template.js to config.js
+COPY ./app/src/config.template.js ./app/src/config.js
+
 # Copy package.json and install npm dependencies
 COPY package.json .
 RUN npm install
@@ -30,9 +33,6 @@ RUN apt-get purge -y --auto-remove \
 # Copy the application code
 COPY app app
 COPY public public
-
-# Rename config.template.js to config.js
-RUN cp app/src/config.template.js app/src/config.js
 
 # Set default command to start the application
 CMD ["npm", "start"]
