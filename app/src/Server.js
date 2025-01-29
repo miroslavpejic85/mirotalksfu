@@ -87,9 +87,9 @@ const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
 const swaggerDocument = yaml.load(fs.readFileSync(path.join(__dirname, '/../api/swagger.yaml'), 'utf8'));
 const Sentry = require('@sentry/node');
-const Discord = require('./Discord.js');
-const Mattermost = require('./Mattermost.js');
-const restrictAccessByIP = require('./middleware/IpWhitelist.js');
+const Discord = require('./Discord');
+const Mattermost = require('./Mattermost');
+const restrictAccessByIP = require('./middleware/IpWhitelist');
 const packageJson = require('../../package.json');
 
 // Incoming Stream to RTPM

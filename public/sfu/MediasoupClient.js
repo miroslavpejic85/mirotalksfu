@@ -34,6 +34,196 @@
     {
         1: [
             function (require, module, exports) {
+                // shim for using process in browser
+                var process = (module.exports = {});
+
+                // cached from whatever global is present so that test runners that stub it
+                // don't break things.  But we need to wrap it in a try catch in case it is
+                // wrapped in strict mode code which doesn't define any globals.  It's inside a
+                // function because try/catches deoptimize in certain engines.
+
+                var cachedSetTimeout;
+                var cachedClearTimeout;
+
+                function defaultSetTimout() {
+                    throw new Error('setTimeout has not been defined');
+                }
+                function defaultClearTimeout() {
+                    throw new Error('clearTimeout has not been defined');
+                }
+                (function () {
+                    try {
+                        if (typeof setTimeout === 'function') {
+                            cachedSetTimeout = setTimeout;
+                        } else {
+                            cachedSetTimeout = defaultSetTimout;
+                        }
+                    } catch (e) {
+                        cachedSetTimeout = defaultSetTimout;
+                    }
+                    try {
+                        if (typeof clearTimeout === 'function') {
+                            cachedClearTimeout = clearTimeout;
+                        } else {
+                            cachedClearTimeout = defaultClearTimeout;
+                        }
+                    } catch (e) {
+                        cachedClearTimeout = defaultClearTimeout;
+                    }
+                })();
+                function runTimeout(fun) {
+                    if (cachedSetTimeout === setTimeout) {
+                        //normal enviroments in sane situations
+                        return setTimeout(fun, 0);
+                    }
+                    // if setTimeout wasn't available but was latter defined
+                    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+                        cachedSetTimeout = setTimeout;
+                        return setTimeout(fun, 0);
+                    }
+                    try {
+                        // when when somebody has screwed with setTimeout but no I.E. maddness
+                        return cachedSetTimeout(fun, 0);
+                    } catch (e) {
+                        try {
+                            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+                            return cachedSetTimeout.call(null, fun, 0);
+                        } catch (e) {
+                            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+                            return cachedSetTimeout.call(this, fun, 0);
+                        }
+                    }
+                }
+                function runClearTimeout(marker) {
+                    if (cachedClearTimeout === clearTimeout) {
+                        //normal enviroments in sane situations
+                        return clearTimeout(marker);
+                    }
+                    // if clearTimeout wasn't available but was latter defined
+                    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+                        cachedClearTimeout = clearTimeout;
+                        return clearTimeout(marker);
+                    }
+                    try {
+                        // when when somebody has screwed with setTimeout but no I.E. maddness
+                        return cachedClearTimeout(marker);
+                    } catch (e) {
+                        try {
+                            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+                            return cachedClearTimeout.call(null, marker);
+                        } catch (e) {
+                            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+                            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+                            return cachedClearTimeout.call(this, marker);
+                        }
+                    }
+                }
+                var queue = [];
+                var draining = false;
+                var currentQueue;
+                var queueIndex = -1;
+
+                function cleanUpNextTick() {
+                    if (!draining || !currentQueue) {
+                        return;
+                    }
+                    draining = false;
+                    if (currentQueue.length) {
+                        queue = currentQueue.concat(queue);
+                    } else {
+                        queueIndex = -1;
+                    }
+                    if (queue.length) {
+                        drainQueue();
+                    }
+                }
+
+                function drainQueue() {
+                    if (draining) {
+                        return;
+                    }
+                    var timeout = runTimeout(cleanUpNextTick);
+                    draining = true;
+
+                    var len = queue.length;
+                    while (len) {
+                        currentQueue = queue;
+                        queue = [];
+                        while (++queueIndex < len) {
+                            if (currentQueue) {
+                                currentQueue[queueIndex].run();
+                            }
+                        }
+                        queueIndex = -1;
+                        len = queue.length;
+                    }
+                    currentQueue = null;
+                    draining = false;
+                    runClearTimeout(timeout);
+                }
+
+                process.nextTick = function (fun) {
+                    var args = new Array(arguments.length - 1);
+                    if (arguments.length > 1) {
+                        for (var i = 1; i < arguments.length; i++) {
+                            args[i - 1] = arguments[i];
+                        }
+                    }
+                    queue.push(new Item(fun, args));
+                    if (queue.length === 1 && !draining) {
+                        runTimeout(drainQueue);
+                    }
+                };
+
+                // v8 likes predictible objects
+                function Item(fun, array) {
+                    this.fun = fun;
+                    this.array = array;
+                }
+                Item.prototype.run = function () {
+                    this.fun.apply(null, this.array);
+                };
+                process.title = 'browser';
+                process.browser = true;
+                process.env = {};
+                process.argv = [];
+                process.version = ''; // empty string to avoid regexp issues
+                process.versions = {};
+
+                function noop() {}
+
+                process.on = noop;
+                process.addListener = noop;
+                process.once = noop;
+                process.off = noop;
+                process.removeListener = noop;
+                process.removeAllListeners = noop;
+                process.emit = noop;
+                process.prependListener = noop;
+                process.prependOnceListener = noop;
+
+                process.listeners = function (name) {
+                    return [];
+                };
+
+                process.binding = function (name) {
+                    throw new Error('process.binding is not supported');
+                };
+
+                process.cwd = function () {
+                    return '/';
+                };
+                process.chdir = function (dir) {
+                    throw new Error('process.chdir is not supported');
+                };
+                process.umask = function () {
+                    return 0;
+                };
+            },
+            {},
+        ],
+        2: [
+            function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
                 exports.Logger = void 0;
@@ -68,9 +258,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 3 },
+            { debug: 4 },
         ],
-        2: [
+        3: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -251,9 +441,9 @@
                 }
                 exports.AwaitQueue = AwaitQueue;
             },
-            { './Logger': 1 },
+            { './Logger': 2 },
         ],
-        3: [
+        4: [
             function (require, module, exports) {
                 (function (process) {
                     (function () {
@@ -398,6 +588,7 @@
 
                             // Is webkit? http://stackoverflow.com/a/16459606/376773
                             // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
+                            // eslint-disable-next-line no-return-assign
                             return (
                                 (typeof document !== 'undefined' &&
                                     document.documentElement &&
@@ -555,9 +746,9 @@
                     }).call(this);
                 }).call(this, require('_process'));
             },
-            { './common': 4, _process: 54 },
+            { './common': 5, _process: 1 },
         ],
-        4: [
+        5: [
             function (require, module, exports) {
                 /**
                  * This is the common logic for both the Node.js and web browser
@@ -728,24 +919,66 @@
                         createDebug.names = [];
                         createDebug.skips = [];
 
-                        let i;
-                        const split = (typeof namespaces === 'string' ? namespaces : '').split(/[\s,]+/);
-                        const len = split.length;
+                        const split = (typeof namespaces === 'string' ? namespaces : '')
+                            .trim()
+                            .replace(' ', ',')
+                            .split(',')
+                            .filter(Boolean);
 
-                        for (i = 0; i < len; i++) {
-                            if (!split[i]) {
-                                // ignore empty strings
-                                continue;
-                            }
-
-                            namespaces = split[i].replace(/\*/g, '.*?');
-
-                            if (namespaces[0] === '-') {
-                                createDebug.skips.push(new RegExp('^' + namespaces.slice(1) + '$'));
+                        for (const ns of split) {
+                            if (ns[0] === '-') {
+                                createDebug.skips.push(ns.slice(1));
                             } else {
-                                createDebug.names.push(new RegExp('^' + namespaces + '$'));
+                                createDebug.names.push(ns);
                             }
                         }
+                    }
+
+                    /**
+                     * Checks if the given string matches a namespace template, honoring
+                     * asterisks as wildcards.
+                     *
+                     * @param {String} search
+                     * @param {String} template
+                     * @return {Boolean}
+                     */
+                    function matchesTemplate(search, template) {
+                        let searchIndex = 0;
+                        let templateIndex = 0;
+                        let starIndex = -1;
+                        let matchIndex = 0;
+
+                        while (searchIndex < search.length) {
+                            if (
+                                templateIndex < template.length &&
+                                (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')
+                            ) {
+                                // Match character or proceed with wildcard
+                                if (template[templateIndex] === '*') {
+                                    starIndex = templateIndex;
+                                    matchIndex = searchIndex;
+                                    templateIndex++; // Skip the '*'
+                                } else {
+                                    searchIndex++;
+                                    templateIndex++;
+                                }
+                            } else if (starIndex !== -1) {
+                                // eslint-disable-line no-negated-condition
+                                // Backtrack to the last '*' and try to match more characters
+                                templateIndex = starIndex + 1;
+                                matchIndex++;
+                                searchIndex = matchIndex;
+                            } else {
+                                return false; // No match
+                            }
+                        }
+
+                        // Handle trailing '*' in template
+                        while (templateIndex < template.length && template[templateIndex] === '*') {
+                            templateIndex++;
+                        }
+
+                        return templateIndex === template.length;
                     }
 
                     /**
@@ -756,8 +989,8 @@
                      */
                     function disable() {
                         const namespaces = [
-                            ...createDebug.names.map(toNamespace),
-                            ...createDebug.skips.map(toNamespace).map((namespace) => '-' + namespace),
+                            ...createDebug.names,
+                            ...createDebug.skips.map((namespace) => '-' + namespace),
                         ].join(',');
                         createDebug.enable('');
                         return namespaces;
@@ -771,40 +1004,19 @@
                      * @api public
                      */
                     function enabled(name) {
-                        if (name[name.length - 1] === '*') {
-                            return true;
-                        }
-
-                        let i;
-                        let len;
-
-                        for (i = 0, len = createDebug.skips.length; i < len; i++) {
-                            if (createDebug.skips[i].test(name)) {
+                        for (const skip of createDebug.skips) {
+                            if (matchesTemplate(name, skip)) {
                                 return false;
                             }
                         }
 
-                        for (i = 0, len = createDebug.names.length; i < len; i++) {
-                            if (createDebug.names[i].test(name)) {
+                        for (const ns of createDebug.names) {
+                            if (matchesTemplate(name, ns)) {
                                 return true;
                             }
                         }
 
                         return false;
-                    }
-
-                    /**
-                     * Convert regexp to namespace
-                     *
-                     * @param {RegExp} regxep
-                     * @return {String} namespace
-                     * @api private
-                     */
-                    function toNamespace(regexp) {
-                        return regexp
-                            .toString()
-                            .substring(2, regexp.toString().length - 2)
-                            .replace(/\.\*\?$/, '*');
                     }
 
                     /**
@@ -838,9 +1050,174 @@
 
                 module.exports = setup;
             },
-            { ms: 45 },
+            { ms: 6 },
         ],
-        5: [
+        6: [
+            function (require, module, exports) {
+                /**
+                 * Helpers.
+                 */
+
+                var s = 1000;
+                var m = s * 60;
+                var h = m * 60;
+                var d = h * 24;
+                var w = d * 7;
+                var y = d * 365.25;
+
+                /**
+                 * Parse or format the given `val`.
+                 *
+                 * Options:
+                 *
+                 *  - `long` verbose formatting [false]
+                 *
+                 * @param {String|Number} val
+                 * @param {Object} [options]
+                 * @throws {Error} throw an error if val is not a non-empty string or a number
+                 * @return {String|Number}
+                 * @api public
+                 */
+
+                module.exports = function (val, options) {
+                    options = options || {};
+                    var type = typeof val;
+                    if (type === 'string' && val.length > 0) {
+                        return parse(val);
+                    } else if (type === 'number' && isFinite(val)) {
+                        return options.long ? fmtLong(val) : fmtShort(val);
+                    }
+                    throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val));
+                };
+
+                /**
+                 * Parse the given `str` and return milliseconds.
+                 *
+                 * @param {String} str
+                 * @return {Number}
+                 * @api private
+                 */
+
+                function parse(str) {
+                    str = String(str);
+                    if (str.length > 100) {
+                        return;
+                    }
+                    var match =
+                        /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
+                            str,
+                        );
+                    if (!match) {
+                        return;
+                    }
+                    var n = parseFloat(match[1]);
+                    var type = (match[2] || 'ms').toLowerCase();
+                    switch (type) {
+                        case 'years':
+                        case 'year':
+                        case 'yrs':
+                        case 'yr':
+                        case 'y':
+                            return n * y;
+                        case 'weeks':
+                        case 'week':
+                        case 'w':
+                            return n * w;
+                        case 'days':
+                        case 'day':
+                        case 'd':
+                            return n * d;
+                        case 'hours':
+                        case 'hour':
+                        case 'hrs':
+                        case 'hr':
+                        case 'h':
+                            return n * h;
+                        case 'minutes':
+                        case 'minute':
+                        case 'mins':
+                        case 'min':
+                        case 'm':
+                            return n * m;
+                        case 'seconds':
+                        case 'second':
+                        case 'secs':
+                        case 'sec':
+                        case 's':
+                            return n * s;
+                        case 'milliseconds':
+                        case 'millisecond':
+                        case 'msecs':
+                        case 'msec':
+                        case 'ms':
+                            return n;
+                        default:
+                            return undefined;
+                    }
+                }
+
+                /**
+                 * Short format for `ms`.
+                 *
+                 * @param {Number} ms
+                 * @return {String}
+                 * @api private
+                 */
+
+                function fmtShort(ms) {
+                    var msAbs = Math.abs(ms);
+                    if (msAbs >= d) {
+                        return Math.round(ms / d) + 'd';
+                    }
+                    if (msAbs >= h) {
+                        return Math.round(ms / h) + 'h';
+                    }
+                    if (msAbs >= m) {
+                        return Math.round(ms / m) + 'm';
+                    }
+                    if (msAbs >= s) {
+                        return Math.round(ms / s) + 's';
+                    }
+                    return ms + 'ms';
+                }
+
+                /**
+                 * Long format for `ms`.
+                 *
+                 * @param {Number} ms
+                 * @return {String}
+                 * @api private
+                 */
+
+                function fmtLong(ms) {
+                    var msAbs = Math.abs(ms);
+                    if (msAbs >= d) {
+                        return plural(ms, msAbs, d, 'day');
+                    }
+                    if (msAbs >= h) {
+                        return plural(ms, msAbs, h, 'hour');
+                    }
+                    if (msAbs >= m) {
+                        return plural(ms, msAbs, m, 'minute');
+                    }
+                    if (msAbs >= s) {
+                        return plural(ms, msAbs, s, 'second');
+                    }
+                    return ms + ' ms';
+                }
+
+                /**
+                 * Pluralization helper.
+                 */
+
+                function plural(ms, msAbs, n, name) {
+                    var isPlural = msAbs >= n * 1.5;
+                    return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
+                }
+            },
+            {},
+        ],
+        7: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -881,9 +1258,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 3 },
+            { debug: 9 },
         ],
-        6: [
+        8: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1347,9 +1724,27 @@
                     );
                 }
             },
-            { './Logger': 5 },
+            { './Logger': 7 },
         ],
-        7: [
+        9: [
+            function (require, module, exports) {
+                arguments[4][4][0].apply(exports, arguments);
+            },
+            { './common': 10, _process: 1, dup: 4 },
+        ],
+        10: [
+            function (require, module, exports) {
+                arguments[4][5][0].apply(exports, arguments);
+            },
+            { dup: 5, ms: 11 },
+        ],
+        11: [
+            function (require, module, exports) {
+                arguments[4][6][0].apply(exports, arguments);
+            },
+            { dup: 6 },
+        ],
+        12: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1541,9 +1936,9 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
+            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
         ],
-        8: [
+        13: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1711,9 +2106,9 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './Logger': 11, './enhancedEvents': 16 },
+            { './Logger': 16, './enhancedEvents': 21 },
         ],
-        9: [
+        14: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1899,9 +2294,9 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
+            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
         ],
-        10: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -2432,28 +2827,28 @@
                 exports.Device = Device;
             },
             {
-                './Logger': 11,
-                './Transport': 15,
-                './enhancedEvents': 16,
-                './errors': 17,
-                './handlers/Chrome111': 18,
-                './handlers/Chrome55': 19,
-                './handlers/Chrome67': 20,
-                './handlers/Chrome70': 21,
-                './handlers/Chrome74': 22,
-                './handlers/Edge11': 23,
-                './handlers/Firefox120': 24,
-                './handlers/Firefox60': 25,
-                './handlers/ReactNative': 27,
-                './handlers/ReactNativeUnifiedPlan': 28,
-                './handlers/Safari11': 29,
-                './handlers/Safari12': 30,
-                './ortc': 39,
-                './utils': 42,
-                'ua-parser-js': 52,
+                './Logger': 16,
+                './Transport': 20,
+                './enhancedEvents': 21,
+                './errors': 22,
+                './handlers/Chrome111': 23,
+                './handlers/Chrome55': 24,
+                './handlers/Chrome67': 25,
+                './handlers/Chrome70': 26,
+                './handlers/Chrome74': 27,
+                './handlers/Edge11': 28,
+                './handlers/Firefox120': 29,
+                './handlers/Firefox60': 30,
+                './handlers/ReactNative': 32,
+                './handlers/ReactNativeUnifiedPlan': 33,
+                './handlers/Safari11': 34,
+                './handlers/Safari12': 35,
+                './ortc': 44,
+                './utils': 47,
+                'ua-parser-js': 57,
             },
         ],
-        11: [
+        16: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -2494,9 +2889,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 43 },
+            { debug: 48 },
         ],
-        12: [
+        17: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2789,9 +3184,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './Logger': 11, './enhancedEvents': 16, './errors': 17 },
+            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
         ],
-        13: [
+        18: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -2802,14 +3197,14 @@
             },
             {},
         ],
-        14: [
+        19: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        15: [
+        20: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -3749,20 +4144,20 @@
                 exports.Transport = Transport;
             },
             {
-                './Consumer': 7,
-                './DataConsumer': 8,
-                './DataProducer': 9,
-                './Logger': 11,
-                './Producer': 12,
-                './enhancedEvents': 16,
-                './errors': 17,
-                './ortc': 39,
-                './utils': 42,
-                awaitqueue: 2,
-                'queue-microtask': 47,
+                './Consumer': 12,
+                './DataConsumer': 13,
+                './DataProducer': 14,
+                './Logger': 16,
+                './Producer': 17,
+                './enhancedEvents': 21,
+                './errors': 22,
+                './ortc': 44,
+                './utils': 47,
+                awaitqueue: 3,
+                'queue-microtask': 52,
             },
         ],
-        16: [
+        21: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3842,9 +4237,9 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 11, 'npm-events-package': 46 },
+            { './Logger': 16, 'npm-events-package': 51 },
         ],
-        17: [
+        22: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3883,7 +4278,7 @@
             },
             {},
         ],
-        18: [
+        23: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -4634,20 +5029,20 @@
                 exports.Chrome111 = Chrome111;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './ortc/utils': 32,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './ortc/utils': 37,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        19: [
+        24: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5252,18 +5647,18 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/planBUtils': 36,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/planBUtils': 41,
+                'sdp-transform': 54,
             },
         ],
-        20: [
+        25: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5917,17 +6312,17 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 11,
-                '../ortc': 39,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/planBUtils': 36,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../ortc': 44,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/planBUtils': 41,
+                'sdp-transform': 54,
             },
         ],
-        21: [
+        26: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6610,18 +7005,18 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 11,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        22: [
+        27: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7381,20 +7776,20 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './ortc/utils': 32,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './ortc/utils': 37,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        23: [
+        28: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7886,15 +8281,15 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './ortc/edgeUtils': 31,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './ortc/edgeUtils': 36,
             },
         ],
-        24: [
+        29: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8659,19 +9054,19 @@
                 exports.Firefox120 = Firefox120;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        25: [
+        30: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9438,19 +9833,19 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        26: [
+        31: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -9463,9 +9858,9 @@
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../enhancedEvents': 16 },
+            { '../enhancedEvents': 21 },
         ],
-        27: [
+        32: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10087,18 +10482,18 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/planBUtils': 36,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/planBUtils': 41,
+                'sdp-transform': 54,
             },
         ],
-        28: [
+        33: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10897,20 +11292,20 @@
                 exports.ReactNativeUnifiedPlan = ReactNativeUnifiedPlan;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './ortc/utils': 32,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './ortc/utils': 37,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        29: [
+        34: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11559,17 +11954,17 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 11,
-                '../ortc': 39,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/planBUtils': 36,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../ortc': 44,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/planBUtils': 41,
+                'sdp-transform': 54,
             },
         ],
-        30: [
+        35: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12315,20 +12710,20 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 11,
-                '../errors': 17,
-                '../ortc': 39,
-                '../scalabilityModes': 40,
-                '../utils': 42,
-                './HandlerInterface': 26,
-                './ortc/utils': 32,
-                './sdp/RemoteSdp': 34,
-                './sdp/commonUtils': 35,
-                './sdp/unifiedPlanUtils': 37,
-                'sdp-transform': 49,
+                '../Logger': 16,
+                '../errors': 22,
+                '../ortc': 44,
+                '../scalabilityModes': 45,
+                '../utils': 47,
+                './HandlerInterface': 31,
+                './ortc/utils': 37,
+                './sdp/RemoteSdp': 39,
+                './sdp/commonUtils': 40,
+                './sdp/unifiedPlanUtils': 42,
+                'sdp-transform': 54,
             },
         ],
-        31: [
+        36: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12453,9 +12848,9 @@
                     return params;
                 }
             },
-            { '../../utils': 42 },
+            { '../../utils': 47 },
         ],
-        32: [
+        37: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12480,7 +12875,7 @@
             },
             {},
         ],
-        33: [
+        38: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13126,9 +13521,9 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 42, 'sdp-transform': 49 },
+            { '../../utils': 47, 'sdp-transform': 54 },
         ],
-        34: [
+        39: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13476,9 +13871,9 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 11, './MediaSection': 33, 'sdp-transform': 49 },
+            { '../../Logger': 16, './MediaSection': 38, 'sdp-transform': 54 },
         ],
-        35: [
+        40: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13737,9 +14132,9 @@
                     }
                 }
             },
-            { 'sdp-transform': 49 },
+            { 'sdp-transform': 54 },
         ],
-        36: [
+        41: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -13894,7 +14289,7 @@
             },
             {},
         ],
-        37: [
+        42: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14024,7 +14419,7 @@
             },
             {},
         ],
-        38: [
+        43: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -14124,9 +14519,9 @@
                     },
                 });
             },
-            { './Device': 10, './scalabilityModes': 40, './types': 41, debug: 43 },
+            { './Device': 15, './scalabilityModes': 45, './types': 46, debug: 48 },
         ],
-        39: [
+        44: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -15065,9 +15460,9 @@
                     return reducedRtcpFeedback;
                 }
             },
-            { './utils': 42, 'h264-profile-level-id': 6 },
+            { './utils': 47, 'h264-profile-level-id': 8 },
         ],
-        40: [
+        45: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -15090,7 +15485,7 @@
             },
             {},
         ],
-        41: [
+        46: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -15133,19 +15528,19 @@
                 __exportStar(require('./errors'), exports);
             },
             {
-                './Consumer': 7,
-                './DataConsumer': 8,
-                './DataProducer': 9,
-                './Device': 10,
-                './Producer': 12,
-                './RtpParameters': 13,
-                './SctpParameters': 14,
-                './Transport': 15,
-                './errors': 17,
-                './handlers/HandlerInterface': 26,
+                './Consumer': 12,
+                './DataConsumer': 13,
+                './DataProducer': 14,
+                './Device': 15,
+                './Producer': 17,
+                './RtpParameters': 18,
+                './SctpParameters': 19,
+                './Transport': 20,
+                './errors': 22,
+                './handlers/HandlerInterface': 31,
             },
         ],
-        42: [
+        47: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -15192,781 +15587,25 @@
             },
             {},
         ],
-        43: [
+        48: [
             function (require, module, exports) {
-                (function (process) {
-                    (function () {
-                        /* eslint-env browser */
-
-                        /**
-                         * This is the web browser implementation of `debug()`.
-                         */
-
-                        exports.formatArgs = formatArgs;
-                        exports.save = save;
-                        exports.load = load;
-                        exports.useColors = useColors;
-                        exports.storage = localstorage();
-                        exports.destroy = (() => {
-                            let warned = false;
-
-                            return () => {
-                                if (!warned) {
-                                    warned = true;
-                                    console.warn(
-                                        'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
-                                    );
-                                }
-                            };
-                        })();
-
-                        /**
-                         * Colors.
-                         */
-
-                        exports.colors = [
-                            '#0000CC',
-                            '#0000FF',
-                            '#0033CC',
-                            '#0033FF',
-                            '#0066CC',
-                            '#0066FF',
-                            '#0099CC',
-                            '#0099FF',
-                            '#00CC00',
-                            '#00CC33',
-                            '#00CC66',
-                            '#00CC99',
-                            '#00CCCC',
-                            '#00CCFF',
-                            '#3300CC',
-                            '#3300FF',
-                            '#3333CC',
-                            '#3333FF',
-                            '#3366CC',
-                            '#3366FF',
-                            '#3399CC',
-                            '#3399FF',
-                            '#33CC00',
-                            '#33CC33',
-                            '#33CC66',
-                            '#33CC99',
-                            '#33CCCC',
-                            '#33CCFF',
-                            '#6600CC',
-                            '#6600FF',
-                            '#6633CC',
-                            '#6633FF',
-                            '#66CC00',
-                            '#66CC33',
-                            '#9900CC',
-                            '#9900FF',
-                            '#9933CC',
-                            '#9933FF',
-                            '#99CC00',
-                            '#99CC33',
-                            '#CC0000',
-                            '#CC0033',
-                            '#CC0066',
-                            '#CC0099',
-                            '#CC00CC',
-                            '#CC00FF',
-                            '#CC3300',
-                            '#CC3333',
-                            '#CC3366',
-                            '#CC3399',
-                            '#CC33CC',
-                            '#CC33FF',
-                            '#CC6600',
-                            '#CC6633',
-                            '#CC9900',
-                            '#CC9933',
-                            '#CCCC00',
-                            '#CCCC33',
-                            '#FF0000',
-                            '#FF0033',
-                            '#FF0066',
-                            '#FF0099',
-                            '#FF00CC',
-                            '#FF00FF',
-                            '#FF3300',
-                            '#FF3333',
-                            '#FF3366',
-                            '#FF3399',
-                            '#FF33CC',
-                            '#FF33FF',
-                            '#FF6600',
-                            '#FF6633',
-                            '#FF9900',
-                            '#FF9933',
-                            '#FFCC00',
-                            '#FFCC33',
-                        ];
-
-                        /**
-                         * Currently only WebKit-based Web Inspectors, Firefox >= v31,
-                         * and the Firebug extension (any Firefox version) are known
-                         * to support "%c" CSS customizations.
-                         *
-                         * TODO: add a `localStorage` variable to explicitly enable/disable colors
-                         */
-
-                        // eslint-disable-next-line complexity
-                        function useColors() {
-                            // NB: In an Electron preload script, document will be defined but not fully
-                            // initialized. Since we know we're in Chrome, we'll just detect this case
-                            // explicitly
-                            if (
-                                typeof window !== 'undefined' &&
-                                window.process &&
-                                (window.process.type === 'renderer' || window.process.__nwjs)
-                            ) {
-                                return true;
-                            }
-
-                            // Internet Explorer and Edge do not support colors.
-                            if (
-                                typeof navigator !== 'undefined' &&
-                                navigator.userAgent &&
-                                navigator.userAgent.toLowerCase().match(/(edge|trident)\/(\d+)/)
-                            ) {
-                                return false;
-                            }
-
-                            let m;
-
-                            // Is webkit? http://stackoverflow.com/a/16459606/376773
-                            // document is undefined in react-native: https://github.com/facebook/react-native/pull/1632
-                            // eslint-disable-next-line no-return-assign
-                            return (
-                                (typeof document !== 'undefined' &&
-                                    document.documentElement &&
-                                    document.documentElement.style &&
-                                    document.documentElement.style.WebkitAppearance) ||
-                                // Is firebug? http://stackoverflow.com/a/398120/376773
-                                (typeof window !== 'undefined' &&
-                                    window.console &&
-                                    (window.console.firebug || (window.console.exception && window.console.table))) ||
-                                // Is firefox >= v31?
-                                // https://developer.mozilla.org/en-US/docs/Tools/Web_Console#Styling_messages
-                                (typeof navigator !== 'undefined' &&
-                                    navigator.userAgent &&
-                                    (m = navigator.userAgent.toLowerCase().match(/firefox\/(\d+)/)) &&
-                                    parseInt(m[1], 10) >= 31) ||
-                                // Double check webkit in userAgent just in case we are in a worker
-                                (typeof navigator !== 'undefined' &&
-                                    navigator.userAgent &&
-                                    navigator.userAgent.toLowerCase().match(/applewebkit\/(\d+)/))
-                            );
-                        }
-
-                        /**
-                         * Colorize log arguments if enabled.
-                         *
-                         * @api public
-                         */
-
-                        function formatArgs(args) {
-                            args[0] =
-                                (this.useColors ? '%c' : '') +
-                                this.namespace +
-                                (this.useColors ? ' %c' : ' ') +
-                                args[0] +
-                                (this.useColors ? '%c ' : ' ') +
-                                '+' +
-                                module.exports.humanize(this.diff);
-
-                            if (!this.useColors) {
-                                return;
-                            }
-
-                            const c = 'color: ' + this.color;
-                            args.splice(1, 0, c, 'color: inherit');
-
-                            // The final "%c" is somewhat tricky, because there could be other
-                            // arguments passed either before or after the %c, so we need to
-                            // figure out the correct index to insert the CSS into
-                            let index = 0;
-                            let lastC = 0;
-                            args[0].replace(/%[a-zA-Z%]/g, (match) => {
-                                if (match === '%%') {
-                                    return;
-                                }
-                                index++;
-                                if (match === '%c') {
-                                    // We only are interested in the *last* %c
-                                    // (the user may have provided their own)
-                                    lastC = index;
-                                }
-                            });
-
-                            args.splice(lastC, 0, c);
-                        }
-
-                        /**
-                         * Invokes `console.debug()` when available.
-                         * No-op when `console.debug` is not a "function".
-                         * If `console.debug` is not available, falls back
-                         * to `console.log`.
-                         *
-                         * @api public
-                         */
-                        exports.log = console.debug || console.log || (() => {});
-
-                        /**
-                         * Save `namespaces`.
-                         *
-                         * @param {String} namespaces
-                         * @api private
-                         */
-                        function save(namespaces) {
-                            try {
-                                if (namespaces) {
-                                    exports.storage.setItem('debug', namespaces);
-                                } else {
-                                    exports.storage.removeItem('debug');
-                                }
-                            } catch (error) {
-                                // Swallow
-                                // XXX (@Qix-) should we be logging these?
-                            }
-                        }
-
-                        /**
-                         * Load `namespaces`.
-                         *
-                         * @return {String} returns the previously persisted debug modes
-                         * @api private
-                         */
-                        function load() {
-                            let r;
-                            try {
-                                r = exports.storage.getItem('debug');
-                            } catch (error) {
-                                // Swallow
-                                // XXX (@Qix-) should we be logging these?
-                            }
-
-                            // If debug isn't set in LS, and we're in Electron, try to load $DEBUG
-                            if (!r && typeof process !== 'undefined' && 'env' in process) {
-                                r = process.env.DEBUG;
-                            }
-
-                            return r;
-                        }
-
-                        /**
-                         * Localstorage attempts to return the localstorage.
-                         *
-                         * This is necessary because safari throws
-                         * when a user disables cookies/localstorage
-                         * and you attempt to access it.
-                         *
-                         * @return {LocalStorage}
-                         * @api private
-                         */
-
-                        function localstorage() {
-                            try {
-                                // TVMLKit (Apple TV JS Runtime) does not have a window object, just localStorage in the global context
-                                // The Browser also has localStorage in the global context.
-                                return localStorage;
-                            } catch (error) {
-                                // Swallow
-                                // XXX (@Qix-) should we be logging these?
-                            }
-                        }
-
-                        module.exports = require('./common')(exports);
-
-                        const { formatters } = module.exports;
-
-                        /**
-                         * Map %j to `JSON.stringify()`, since no Web Inspectors do that by default.
-                         */
-
-                        formatters.j = function (v) {
-                            try {
-                                return JSON.stringify(v);
-                            } catch (error) {
-                                return '[UnexpectedJSONParseError]: ' + error.message;
-                            }
-                        };
-                    }).call(this);
-                }).call(this, require('_process'));
+                arguments[4][4][0].apply(exports, arguments);
             },
-            { './common': 44, _process: 54 },
+            { './common': 49, _process: 1, dup: 4 },
         ],
-        44: [
+        49: [
             function (require, module, exports) {
-                /**
-                 * This is the common logic for both the Node.js and web browser
-                 * implementations of `debug()`.
-                 */
-
-                function setup(env) {
-                    createDebug.debug = createDebug;
-                    createDebug.default = createDebug;
-                    createDebug.coerce = coerce;
-                    createDebug.disable = disable;
-                    createDebug.enable = enable;
-                    createDebug.enabled = enabled;
-                    createDebug.humanize = require('ms');
-                    createDebug.destroy = destroy;
-
-                    Object.keys(env).forEach((key) => {
-                        createDebug[key] = env[key];
-                    });
-
-                    /**
-                     * The currently active debug mode names, and names to skip.
-                     */
-
-                    createDebug.names = [];
-                    createDebug.skips = [];
-
-                    /**
-                     * Map of special "%n" handling functions, for the debug "format" argument.
-                     *
-                     * Valid key names are a single, lower or upper-case letter, i.e. "n" and "N".
-                     */
-                    createDebug.formatters = {};
-
-                    /**
-                     * Selects a color for a debug namespace
-                     * @param {String} namespace The namespace string for the debug instance to be colored
-                     * @return {Number|String} An ANSI color code for the given namespace
-                     * @api private
-                     */
-                    function selectColor(namespace) {
-                        let hash = 0;
-
-                        for (let i = 0; i < namespace.length; i++) {
-                            hash = (hash << 5) - hash + namespace.charCodeAt(i);
-                            hash |= 0; // Convert to 32bit integer
-                        }
-
-                        return createDebug.colors[Math.abs(hash) % createDebug.colors.length];
-                    }
-                    createDebug.selectColor = selectColor;
-
-                    /**
-                     * Create a debugger with the given `namespace`.
-                     *
-                     * @param {String} namespace
-                     * @return {Function}
-                     * @api public
-                     */
-                    function createDebug(namespace) {
-                        let prevTime;
-                        let enableOverride = null;
-                        let namespacesCache;
-                        let enabledCache;
-
-                        function debug(...args) {
-                            // Disabled?
-                            if (!debug.enabled) {
-                                return;
-                            }
-
-                            const self = debug;
-
-                            // Set `diff` timestamp
-                            const curr = Number(new Date());
-                            const ms = curr - (prevTime || curr);
-                            self.diff = ms;
-                            self.prev = prevTime;
-                            self.curr = curr;
-                            prevTime = curr;
-
-                            args[0] = createDebug.coerce(args[0]);
-
-                            if (typeof args[0] !== 'string') {
-                                // Anything else let's inspect with %O
-                                args.unshift('%O');
-                            }
-
-                            // Apply any `formatters` transformations
-                            let index = 0;
-                            args[0] = args[0].replace(/%([a-zA-Z%])/g, (match, format) => {
-                                // If we encounter an escaped % then don't increase the array index
-                                if (match === '%%') {
-                                    return '%';
-                                }
-                                index++;
-                                const formatter = createDebug.formatters[format];
-                                if (typeof formatter === 'function') {
-                                    const val = args[index];
-                                    match = formatter.call(self, val);
-
-                                    // Now we need to remove `args[index]` since it's inlined in the `format`
-                                    args.splice(index, 1);
-                                    index--;
-                                }
-                                return match;
-                            });
-
-                            // Apply env-specific formatting (colors, etc.)
-                            createDebug.formatArgs.call(self, args);
-
-                            const logFn = self.log || createDebug.log;
-                            logFn.apply(self, args);
-                        }
-
-                        debug.namespace = namespace;
-                        debug.useColors = createDebug.useColors();
-                        debug.color = createDebug.selectColor(namespace);
-                        debug.extend = extend;
-                        debug.destroy = createDebug.destroy; // XXX Temporary. Will be removed in the next major release.
-
-                        Object.defineProperty(debug, 'enabled', {
-                            enumerable: true,
-                            configurable: false,
-                            get: () => {
-                                if (enableOverride !== null) {
-                                    return enableOverride;
-                                }
-                                if (namespacesCache !== createDebug.namespaces) {
-                                    namespacesCache = createDebug.namespaces;
-                                    enabledCache = createDebug.enabled(namespace);
-                                }
-
-                                return enabledCache;
-                            },
-                            set: (v) => {
-                                enableOverride = v;
-                            },
-                        });
-
-                        // Env-specific initialization logic for debug instances
-                        if (typeof createDebug.init === 'function') {
-                            createDebug.init(debug);
-                        }
-
-                        return debug;
-                    }
-
-                    function extend(namespace, delimiter) {
-                        const newDebug = createDebug(
-                            this.namespace + (typeof delimiter === 'undefined' ? ':' : delimiter) + namespace,
-                        );
-                        newDebug.log = this.log;
-                        return newDebug;
-                    }
-
-                    /**
-                     * Enables a debug mode by namespaces. This can include modes
-                     * separated by a colon and wildcards.
-                     *
-                     * @param {String} namespaces
-                     * @api public
-                     */
-                    function enable(namespaces) {
-                        createDebug.save(namespaces);
-                        createDebug.namespaces = namespaces;
-
-                        createDebug.names = [];
-                        createDebug.skips = [];
-
-                        const split = (typeof namespaces === 'string' ? namespaces : '')
-                            .trim()
-                            .replace(' ', ',')
-                            .split(',')
-                            .filter(Boolean);
-
-                        for (const ns of split) {
-                            if (ns[0] === '-') {
-                                createDebug.skips.push(ns.slice(1));
-                            } else {
-                                createDebug.names.push(ns);
-                            }
-                        }
-                    }
-
-                    /**
-                     * Checks if the given string matches a namespace template, honoring
-                     * asterisks as wildcards.
-                     *
-                     * @param {String} search
-                     * @param {String} template
-                     * @return {Boolean}
-                     */
-                    function matchesTemplate(search, template) {
-                        let searchIndex = 0;
-                        let templateIndex = 0;
-                        let starIndex = -1;
-                        let matchIndex = 0;
-
-                        while (searchIndex < search.length) {
-                            if (
-                                templateIndex < template.length &&
-                                (template[templateIndex] === search[searchIndex] || template[templateIndex] === '*')
-                            ) {
-                                // Match character or proceed with wildcard
-                                if (template[templateIndex] === '*') {
-                                    starIndex = templateIndex;
-                                    matchIndex = searchIndex;
-                                    templateIndex++; // Skip the '*'
-                                } else {
-                                    searchIndex++;
-                                    templateIndex++;
-                                }
-                            } else if (starIndex !== -1) {
-                                // eslint-disable-line no-negated-condition
-                                // Backtrack to the last '*' and try to match more characters
-                                templateIndex = starIndex + 1;
-                                matchIndex++;
-                                searchIndex = matchIndex;
-                            } else {
-                                return false; // No match
-                            }
-                        }
-
-                        // Handle trailing '*' in template
-                        while (templateIndex < template.length && template[templateIndex] === '*') {
-                            templateIndex++;
-                        }
-
-                        return templateIndex === template.length;
-                    }
-
-                    /**
-                     * Disable debug output.
-                     *
-                     * @return {String} namespaces
-                     * @api public
-                     */
-                    function disable() {
-                        const namespaces = [
-                            ...createDebug.names,
-                            ...createDebug.skips.map((namespace) => '-' + namespace),
-                        ].join(',');
-                        createDebug.enable('');
-                        return namespaces;
-                    }
-
-                    /**
-                     * Returns true if the given mode name is enabled, false otherwise.
-                     *
-                     * @param {String} name
-                     * @return {Boolean}
-                     * @api public
-                     */
-                    function enabled(name) {
-                        for (const skip of createDebug.skips) {
-                            if (matchesTemplate(name, skip)) {
-                                return false;
-                            }
-                        }
-
-                        for (const ns of createDebug.names) {
-                            if (matchesTemplate(name, ns)) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-                    }
-
-                    /**
-                     * Coerce `val`.
-                     *
-                     * @param {Mixed} val
-                     * @return {Mixed}
-                     * @api private
-                     */
-                    function coerce(val) {
-                        if (val instanceof Error) {
-                            return val.stack || val.message;
-                        }
-                        return val;
-                    }
-
-                    /**
-                     * XXX DO NOT USE. This is a temporary stub function.
-                     * XXX It WILL be removed in the next major release.
-                     */
-                    function destroy() {
-                        console.warn(
-                            'Instance method `debug.destroy()` is deprecated and no longer does anything. It will be removed in the next major version of `debug`.',
-                        );
-                    }
-
-                    createDebug.enable(createDebug.load());
-
-                    return createDebug;
-                }
-
-                module.exports = setup;
+                arguments[4][5][0].apply(exports, arguments);
             },
-            { ms: 45 },
+            { dup: 5, ms: 50 },
         ],
-        45: [
+        50: [
             function (require, module, exports) {
-                /**
-                 * Helpers.
-                 */
-
-                var s = 1000;
-                var m = s * 60;
-                var h = m * 60;
-                var d = h * 24;
-                var w = d * 7;
-                var y = d * 365.25;
-
-                /**
-                 * Parse or format the given `val`.
-                 *
-                 * Options:
-                 *
-                 *  - `long` verbose formatting [false]
-                 *
-                 * @param {String|Number} val
-                 * @param {Object} [options]
-                 * @throws {Error} throw an error if val is not a non-empty string or a number
-                 * @return {String|Number}
-                 * @api public
-                 */
-
-                module.exports = function (val, options) {
-                    options = options || {};
-                    var type = typeof val;
-                    if (type === 'string' && val.length > 0) {
-                        return parse(val);
-                    } else if (type === 'number' && isFinite(val)) {
-                        return options.long ? fmtLong(val) : fmtShort(val);
-                    }
-                    throw new Error('val is not a non-empty string or a valid number. val=' + JSON.stringify(val));
-                };
-
-                /**
-                 * Parse the given `str` and return milliseconds.
-                 *
-                 * @param {String} str
-                 * @return {Number}
-                 * @api private
-                 */
-
-                function parse(str) {
-                    str = String(str);
-                    if (str.length > 100) {
-                        return;
-                    }
-                    var match =
-                        /^(-?(?:\d+)?\.?\d+) *(milliseconds?|msecs?|ms|seconds?|secs?|s|minutes?|mins?|m|hours?|hrs?|h|days?|d|weeks?|w|years?|yrs?|y)?$/i.exec(
-                            str,
-                        );
-                    if (!match) {
-                        return;
-                    }
-                    var n = parseFloat(match[1]);
-                    var type = (match[2] || 'ms').toLowerCase();
-                    switch (type) {
-                        case 'years':
-                        case 'year':
-                        case 'yrs':
-                        case 'yr':
-                        case 'y':
-                            return n * y;
-                        case 'weeks':
-                        case 'week':
-                        case 'w':
-                            return n * w;
-                        case 'days':
-                        case 'day':
-                        case 'd':
-                            return n * d;
-                        case 'hours':
-                        case 'hour':
-                        case 'hrs':
-                        case 'hr':
-                        case 'h':
-                            return n * h;
-                        case 'minutes':
-                        case 'minute':
-                        case 'mins':
-                        case 'min':
-                        case 'm':
-                            return n * m;
-                        case 'seconds':
-                        case 'second':
-                        case 'secs':
-                        case 'sec':
-                        case 's':
-                            return n * s;
-                        case 'milliseconds':
-                        case 'millisecond':
-                        case 'msecs':
-                        case 'msec':
-                        case 'ms':
-                            return n;
-                        default:
-                            return undefined;
-                    }
-                }
-
-                /**
-                 * Short format for `ms`.
-                 *
-                 * @param {Number} ms
-                 * @return {String}
-                 * @api private
-                 */
-
-                function fmtShort(ms) {
-                    var msAbs = Math.abs(ms);
-                    if (msAbs >= d) {
-                        return Math.round(ms / d) + 'd';
-                    }
-                    if (msAbs >= h) {
-                        return Math.round(ms / h) + 'h';
-                    }
-                    if (msAbs >= m) {
-                        return Math.round(ms / m) + 'm';
-                    }
-                    if (msAbs >= s) {
-                        return Math.round(ms / s) + 's';
-                    }
-                    return ms + 'ms';
-                }
-
-                /**
-                 * Long format for `ms`.
-                 *
-                 * @param {Number} ms
-                 * @return {String}
-                 * @api private
-                 */
-
-                function fmtLong(ms) {
-                    var msAbs = Math.abs(ms);
-                    if (msAbs >= d) {
-                        return plural(ms, msAbs, d, 'day');
-                    }
-                    if (msAbs >= h) {
-                        return plural(ms, msAbs, h, 'hour');
-                    }
-                    if (msAbs >= m) {
-                        return plural(ms, msAbs, m, 'minute');
-                    }
-                    if (msAbs >= s) {
-                        return plural(ms, msAbs, s, 'second');
-                    }
-                    return ms + ' ms';
-                }
-
-                /**
-                 * Pluralization helper.
-                 */
-
-                function plural(ms, msAbs, n, name) {
-                    var isPlural = msAbs >= n * 1.5;
-                    return Math.round(ms / n) + ' ' + name + (isPlural ? 's' : '');
-                }
+                arguments[4][6][0].apply(exports, arguments);
             },
-            {},
+            { dup: 6 },
         ],
-        46: [
+        51: [
             function (require, module, exports) {
                 // Copyright Joyent, Inc. and other Node contributors.
                 //
@@ -16455,7 +16094,7 @@
             },
             {},
         ],
-        47: [
+        52: [
             function (require, module, exports) {
                 (function (global) {
                     (function () {
@@ -16486,7 +16125,7 @@
             },
             {},
         ],
-        48: [
+        53: [
             function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
@@ -16999,7 +16638,7 @@
             },
             {},
         ],
-        49: [
+        54: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -17015,9 +16654,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './grammar': 48, './parser': 50, './writer': 51 },
+            { './grammar': 53, './parser': 55, './writer': 56 },
         ],
-        50: [
+        55: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -17150,9 +16789,9 @@
                     });
                 };
             },
-            { './grammar': 48 },
+            { './grammar': 53 },
         ],
-        51: [
+        56: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -17262,12 +16901,12 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 48 },
+            { './grammar': 53 },
         ],
-        52: [
+        57: [
             function (require, module, exports) {
                 /* UAParser.js v2.0.0
-   Copyright © 2012-2025 Faisal Salman <f@faisalman.com>
+   Copyright © 2012-2024 Faisal Salman <f@faisalman.com>
    AGPLv3 License */
                 !(function (i, d) {
                     'use strict';
@@ -18314,204 +17953,14 @@
             },
             {},
         ],
-        53: [
+        58: [
             function (require, module, exports) {
                 const client = require('mediasoup-client');
                 window.mediasoupClient = client;
             },
-            { 'mediasoup-client': 38 },
-        ],
-        54: [
-            function (require, module, exports) {
-                // shim for using process in browser
-                var process = (module.exports = {});
-
-                // cached from whatever global is present so that test runners that stub it
-                // don't break things.  But we need to wrap it in a try catch in case it is
-                // wrapped in strict mode code which doesn't define any globals.  It's inside a
-                // function because try/catches deoptimize in certain engines.
-
-                var cachedSetTimeout;
-                var cachedClearTimeout;
-
-                function defaultSetTimout() {
-                    throw new Error('setTimeout has not been defined');
-                }
-                function defaultClearTimeout() {
-                    throw new Error('clearTimeout has not been defined');
-                }
-                (function () {
-                    try {
-                        if (typeof setTimeout === 'function') {
-                            cachedSetTimeout = setTimeout;
-                        } else {
-                            cachedSetTimeout = defaultSetTimout;
-                        }
-                    } catch (e) {
-                        cachedSetTimeout = defaultSetTimout;
-                    }
-                    try {
-                        if (typeof clearTimeout === 'function') {
-                            cachedClearTimeout = clearTimeout;
-                        } else {
-                            cachedClearTimeout = defaultClearTimeout;
-                        }
-                    } catch (e) {
-                        cachedClearTimeout = defaultClearTimeout;
-                    }
-                })();
-                function runTimeout(fun) {
-                    if (cachedSetTimeout === setTimeout) {
-                        //normal enviroments in sane situations
-                        return setTimeout(fun, 0);
-                    }
-                    // if setTimeout wasn't available but was latter defined
-                    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-                        cachedSetTimeout = setTimeout;
-                        return setTimeout(fun, 0);
-                    }
-                    try {
-                        // when when somebody has screwed with setTimeout but no I.E. maddness
-                        return cachedSetTimeout(fun, 0);
-                    } catch (e) {
-                        try {
-                            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-                            return cachedSetTimeout.call(null, fun, 0);
-                        } catch (e) {
-                            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-                            return cachedSetTimeout.call(this, fun, 0);
-                        }
-                    }
-                }
-                function runClearTimeout(marker) {
-                    if (cachedClearTimeout === clearTimeout) {
-                        //normal enviroments in sane situations
-                        return clearTimeout(marker);
-                    }
-                    // if clearTimeout wasn't available but was latter defined
-                    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-                        cachedClearTimeout = clearTimeout;
-                        return clearTimeout(marker);
-                    }
-                    try {
-                        // when when somebody has screwed with setTimeout but no I.E. maddness
-                        return cachedClearTimeout(marker);
-                    } catch (e) {
-                        try {
-                            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-                            return cachedClearTimeout.call(null, marker);
-                        } catch (e) {
-                            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-                            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-                            return cachedClearTimeout.call(this, marker);
-                        }
-                    }
-                }
-                var queue = [];
-                var draining = false;
-                var currentQueue;
-                var queueIndex = -1;
-
-                function cleanUpNextTick() {
-                    if (!draining || !currentQueue) {
-                        return;
-                    }
-                    draining = false;
-                    if (currentQueue.length) {
-                        queue = currentQueue.concat(queue);
-                    } else {
-                        queueIndex = -1;
-                    }
-                    if (queue.length) {
-                        drainQueue();
-                    }
-                }
-
-                function drainQueue() {
-                    if (draining) {
-                        return;
-                    }
-                    var timeout = runTimeout(cleanUpNextTick);
-                    draining = true;
-
-                    var len = queue.length;
-                    while (len) {
-                        currentQueue = queue;
-                        queue = [];
-                        while (++queueIndex < len) {
-                            if (currentQueue) {
-                                currentQueue[queueIndex].run();
-                            }
-                        }
-                        queueIndex = -1;
-                        len = queue.length;
-                    }
-                    currentQueue = null;
-                    draining = false;
-                    runClearTimeout(timeout);
-                }
-
-                process.nextTick = function (fun) {
-                    var args = new Array(arguments.length - 1);
-                    if (arguments.length > 1) {
-                        for (var i = 1; i < arguments.length; i++) {
-                            args[i - 1] = arguments[i];
-                        }
-                    }
-                    queue.push(new Item(fun, args));
-                    if (queue.length === 1 && !draining) {
-                        runTimeout(drainQueue);
-                    }
-                };
-
-                // v8 likes predictible objects
-                function Item(fun, array) {
-                    this.fun = fun;
-                    this.array = array;
-                }
-                Item.prototype.run = function () {
-                    this.fun.apply(null, this.array);
-                };
-                process.title = 'browser';
-                process.browser = true;
-                process.env = {};
-                process.argv = [];
-                process.version = ''; // empty string to avoid regexp issues
-                process.versions = {};
-
-                function noop() {}
-
-                process.on = noop;
-                process.addListener = noop;
-                process.once = noop;
-                process.off = noop;
-                process.removeListener = noop;
-                process.removeAllListeners = noop;
-                process.emit = noop;
-                process.prependListener = noop;
-                process.prependOnceListener = noop;
-
-                process.listeners = function (name) {
-                    return [];
-                };
-
-                process.binding = function (name) {
-                    throw new Error('process.binding is not supported');
-                };
-
-                process.cwd = function () {
-                    return '/';
-                };
-                process.chdir = function (dir) {
-                    throw new Error('process.chdir is not supported');
-                };
-                process.umask = function () {
-                    return 0;
-                };
-            },
-            {},
+            { 'mediasoup-client': 43 },
         ],
     },
     {},
-    [53],
+    [58],
 );
