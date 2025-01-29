@@ -2,7 +2,7 @@ const fs = require('fs');
 
 const Logger = require('./Logger');
 
-const log = new Logger('HtmlInjection');
+const log = new Logger('HtmlInjector');
 
 class HtmlInjector {
     constructor(filesPath, config) {
