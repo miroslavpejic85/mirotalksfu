@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.17
+ * @version 1.7.18
  *
  */
 
@@ -81,6 +81,7 @@ const Peer = require('./Peer');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
+const HtmlInjector = require('./HtmlInjector');
 const log = new Logger('Server');
 const yaml = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
@@ -237,6 +238,7 @@ if (serverRecordingEnabled) {
 
 // html views
 const views = {
+    html: path.join(__dirname, '../../public/views'),
     about: path.join(__dirname, '../../', 'public/views/about.html'),
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
     login: path.join(__dirname, '../../', 'public/views/login.html'),
@@ -248,6 +250,10 @@ const views = {
     rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
 };
+
+const filesPath = [views.landing, views.newRoom, views.room, views.login];
+
+const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
 const authHost = new Host(); // Authenticated IP by Login
 
@@ -457,20 +463,19 @@ function startServer() {
     });
 
     // main page
-    app.get(['/'], OIDCAuth, (req, res) => {
+    app.get('/', OIDCAuth, (req, res) => {
         //log.debug('/ - hostCfg ----->', hostCfg);
-
         if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
-                res.sendFile(views.landing);
+                htmlInjector.injectHtml(views.landing, res);
                 hostCfg.authenticated = true;
             } else {
                 hostCfg.authenticated = false;
                 res.redirect('/login');
             }
         } else {
-            res.sendFile(views.landing);
+            return htmlInjector.injectHtml(views.landing, res);
         }
     });
 
@@ -483,7 +488,7 @@ function startServer() {
     });
 
     // set new room name and join
-    app.get(['/newroom'], OIDCAuth, (req, res) => {
+    app.get('/newroom', OIDCAuth, (req, res) => {
         //log.info('/newroom - hostCfg ----->', hostCfg);
 
         if (!OIDC.enabled && hostCfg.protected) {
@@ -496,12 +501,12 @@ function startServer() {
                 res.redirect('/login');
             }
         } else {
-            res.sendFile(views.newRoom);
+            htmlInjector.injectHtml(views.newRoom, res);
         }
     });
 
     // Check if room active (exists)
-    app.post(['/isRoomActive'], (req, res) => {
+    app.post('/isRoomActive', (req, res) => {
         const { roomId } = checkXSS(req.body);
 
         if (roomId && (hostCfg.protected || hostCfg.user_auth)) {
@@ -571,8 +576,8 @@ function startServer() {
                 } catch (err) {
                     log.error('Direct Join JWT error', { error: err.message, token: token });
                     return hostCfg.protected || hostCfg.user_auth
-                        ? res.sendFile(views.login)
-                        : res.sendFile(views.landing);
+                        ? htmlInjector.injectHtml(views.login, res)
+                        : htmlInjector.injectHtml(views.landing, res);
                 }
             } else {
                 const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, roomList, room);
@@ -601,9 +606,9 @@ function startServer() {
             }
 
             if (room && (hostCfg.authenticated || isPeerValid)) {
-                return res.sendFile(views.room);
+                return htmlInjector.injectHtml(views.room, res);
             } else {
-                return res.sendFile(views.login);
+                return htmlInjector.injectHtml(views.login, res);
             }
         }
 
@@ -632,7 +637,7 @@ function startServer() {
             if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
                 const roomExists = await roomExistsForUser(roomId);
                 log.debug('/join/:roomId exists from API endpoint', roomExists);
-                return roomExists ? res.sendFile(views.room) : res.redirect('/login');
+                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/login');
             }
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
@@ -640,9 +645,9 @@ function startServer() {
                     (user) => user.allowed_rooms && (user.allowed_rooms.includes(roomId) || roomList.has(roomId)),
                 );
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
-                return roomExists ? res.sendFile(views.room) : res.redirect('/whoAreYou/' + roomId);
+                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/whoAreYou/' + roomId);
             }
-            res.sendFile(views.room);
+            htmlInjector.injectHtml(views.room, res);
         } else {
             // Who are you?
             !OIDC.enabled && hostCfg.protected ? res.redirect('/whoAreYou/' + roomId) : res.redirect('/');
@@ -655,42 +660,42 @@ function startServer() {
     });
 
     // if not allow video/audio
-    app.get(['/permission'], (req, res) => {
+    app.get('/permission', (req, res) => {
         res.sendFile(views.permission);
     });
 
     // privacy policy
-    app.get(['/privacy'], (req, res) => {
+    app.get('/privacy', (req, res) => {
         res.sendFile(views.privacy);
     });
 
     // mirotalk about
-    app.get(['/about'], (req, res) => {
+    app.get('/about', (req, res) => {
         res.sendFile(views.about);
     });
 
     // Get stats endpoint
-    app.get(['/stats'], (req, res) => {
+    app.get('/stats', (req, res) => {
         const stats = config.stats ? config.stats : defaultStats;
         // log.debug('Send stats', stats);
         res.send(stats);
     });
 
     // handle who are you: Presenter or Guest
-    app.get(['/whoAreYou/:roomId'], (req, res) => {
+    app.get('/whoAreYou/:roomId', (req, res) => {
         res.sendFile(views.whoAreYou);
     });
 
     // handle login if user_auth enabled
-    app.get(['/login'], (req, res) => {
+    app.get('/login', (req, res) => {
         if (hostCfg.protected || hostCfg.user_auth) {
-            return res.sendFile(views.login);
+            return htmlInjector.injectHtml(views.login, res);
         }
         res.redirect('/');
     });
 
     // handle logged on host protected
-    app.get(['/logged'], (req, res) => {
+    app.get('/logged', (req, res) => {
         const ip = getIP(req);
         if (allowedIP(ip)) {
             res.redirect('/');
@@ -706,7 +711,7 @@ function startServer() {
     // ####################################################
 
     // handle login on host protected
-    app.post(['/login'], async (req, res) => {
+    app.post('/login', async (req, res) => {
         const ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.body);
 
@@ -753,7 +758,7 @@ function startServer() {
     // KEEP RECORDING ON SERVER DIR
     // ####################################################
 
-    app.post(['/recSync'], (req, res) => {
+    app.post('/recSync', (req, res) => {
         // Store recording...
         if (serverRecordingEnabled) {
             //
@@ -940,7 +945,7 @@ function startServer() {
     // REST API
     // ####################################################
 
-    app.get([restApi.basePath + '/stats'], (req, res) => {
+    app.get(restApi.basePath + '/stats', (req, res) => {
         try {
             // Check if endpoint allowed
             if (restApi.allowed && !restApi.allowed.stats) {
@@ -985,7 +990,7 @@ function startServer() {
     });
 
     // request meetings list
-    app.get([restApi.basePath + '/meetings'], (req, res) => {
+    app.get(restApi.basePath + '/meetings', (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.meetings) {
             return res.status(403).json({
@@ -1014,7 +1019,7 @@ function startServer() {
     });
 
     // request meeting room endpoint
-    app.post([restApi.basePath + '/meeting'], (req, res) => {
+    app.post(restApi.basePath + '/meeting', (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.meeting) {
             return res.status(403).json({
@@ -1043,7 +1048,7 @@ function startServer() {
     });
 
     // request join room endpoint
-    app.post([restApi.basePath + '/join'], (req, res) => {
+    app.post(restApi.basePath + '/join', (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.join) {
             return res.status(403).json({
@@ -1072,7 +1077,7 @@ function startServer() {
     });
 
     // request token endpoint
-    app.post([restApi.basePath + '/token'], (req, res) => {
+    app.post(restApi.basePath + '/token', (req, res) => {
         // Check if endpoint allowed
         if (restApi.allowed && !restApi.allowed.token) {
             return res.status(403).json({
