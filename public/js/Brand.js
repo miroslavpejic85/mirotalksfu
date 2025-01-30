@@ -12,13 +12,6 @@ const newRoomDescription = document.getElementById('newRoomDescription');
 const description = document.getElementById('description');
 const keywords = document.getElementById('keywords');
 
-const ogType = document.getElementById('ogType');
-const ogSiteName = document.getElementById('ogSiteName');
-const ogTitle = document.getElementById('ogTitle');
-const ogDescription = document.getElementById('ogDescription');
-const ogImage = document.getElementById('ogImage');
-const ogUrl = document.getElementById('ogUrl');
-
 const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
 const joinDescription = document.getElementById('joinDescription');
@@ -60,14 +53,6 @@ let BRAND = {
         keywords:
             'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
     },
-    og: {
-        type: 'app-webrtc',
-        siteName: 'MiroTalk SFU',
-        title: 'Click the link to make a call.',
-        description: 'MiroTalk SFU calling provides real-time video calls, messaging and screen sharing.',
-        image: 'https://sfu.mirotalk.com/images/mirotalksfu.png',
-        url: 'https://sfu.mirotalk.com',
-    },
     html: {
         features: true,
         teams: true,
@@ -76,6 +61,39 @@ let BRAND = {
         sponsors: true,
         advertisers: true,
         footer: true,
+    },
+    about: {
+        imageUrl: '../images/mirotalk-logo.gif',
+        title: '<strong>WebRTC SFU v1.7.19</strong>',
+        html: `
+            <button 
+                id="support-button" 
+                data-umami-event="Support button" 
+                onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
+                <i class="fas fa-heart"></i> Support
+            </button>
+            <br /><br /><br />
+            Author: 
+            <a 
+                id="linkedin-button" 
+                data-umami-event="Linkedin button" 
+                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" 
+                target="_blank"> 
+                Miroslav Pejic
+            </a>
+            <br /><br />
+            Email: 
+            <a 
+                id="email-button" 
+                data-umami-event="Email button" 
+                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
+                miroslav.pejic.85@gmail.com
+            </a>
+            <br /><br />
+            <hr />
+            <span>&copy; 2025 MiroTalk SFU, all rights reserved</span>
+            <hr />
+        `,
     },
     //...
 };
@@ -86,8 +104,6 @@ async function initialize() {
     customizeSite();
 
     customizeMetaTags();
-
-    customizeOpenGraph();
 
     customizeApp();
 
@@ -187,28 +203,6 @@ function customizeMetaTags() {
     }
     if (keywords && BRAND.meta?.keywords) {
         keywords.content = BRAND.meta.keywords;
-    }
-}
-
-// SOCIAL MEDIA SHARING metadata
-function customizeOpenGraph() {
-    if (ogType && BRAND.og?.type) {
-        ogType.content = BRAND.og.type;
-    }
-    if (ogSiteName && BRAND.og?.siteName) {
-        ogSiteName.content = BRAND.og.siteName;
-    }
-    if (ogTitle && BRAND.og?.title) {
-        ogTitle.content = BRAND.og.title;
-    }
-    if (ogDescription && BRAND.og?.description) {
-        ogDescription.content = BRAND.og.description;
-    }
-    if (ogImage && BRAND.og?.image) {
-        ogImage.content = BRAND.og.image;
-    }
-    if (ogUrl && BRAND.og?.url) {
-        ogUrl.content = BRAND.og.url;
     }
 }
 
