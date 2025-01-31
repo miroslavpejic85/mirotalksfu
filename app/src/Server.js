@@ -55,7 +55,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.19
+ * @version 1.7.20
  *
  */
 
@@ -73,8 +73,10 @@ const axios = require('axios');
 const ngrok = require('ngrok');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
+const sanitizeFilename = require('sanitize-filename');
+const helmet = require('helmet');
 const config = require('./config');
-const checkXSS = require('./XSS.js');
+const checkXSS = require('./XSS');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
@@ -226,13 +228,25 @@ const OIDC = config.oidc ? config.oidc : { enabled: false };
 const dir = {
     public: path.join(__dirname, '../../', 'public'),
     rec: path.join(__dirname, '../', config?.server?.recording?.dir ? config.server.recording.dir + '/' : 'rec/'),
+    rtmp: path.join(__dirname, '../', config?.rtmp?.dir ? config.rtmp.dir + '/' : 'rtmp/'),
 };
 
-// rec directory create
+// Rec directory create and set max file size
+const recMaxFileSize = config?.server?.recording?.maxFileSize || 1 * 1024 * 1024 * 1024; // 1GB default
 const serverRecordingEnabled = config?.server?.recording?.enabled;
 if (serverRecordingEnabled) {
+    log.debug('Server Recording enabled creating dir', dir.rtmp);
     if (!fs.existsSync(dir.rec)) {
         fs.mkdirSync(dir.rec, { recursive: true });
+    }
+}
+
+// Rtmp directory create
+const rtmpEnabled = rtmpCfg && rtmpCfg.enabled;
+if (rtmpEnabled) {
+    log.debug('RTMP enabled creating dir', dir.rtmp);
+    if (!fs.existsSync(dir.rtmp)) {
+        fs.mkdirSync(dir.rtmp, { recursive: true });
     }
 }
 
@@ -340,6 +354,8 @@ function OIDCAuth(req, res, next) {
 
 function startServer() {
     // Start the app
+    app.use(helmet.xssFilter()); // Enable XSS protection
+    app.use(helmet.noSniff()); // Enable content type sniffing prevention
     app.use(express.static(dir.public));
     app.use(cors(corsOptions));
     app.use(compression());
@@ -769,8 +785,10 @@ function startServer() {
                     return res.status(400).send('Filename not provided');
                 }
 
-                if (!Validator.isValidRecFileNameFormat(fileName)) {
-                    log.warn('[RecSync] - Invalid file name', fileName);
+                // Sanitize and validate filename
+                const safeFileName = sanitizeFilename(fileName);
+                if (safeFileName !== fileName || !Validator.isValidRecFileNameFormat(fileName)) {
+                    log.warn('[RecSync] - Invalid file name:', fileName);
                     return res.status(400).send('Invalid file name');
                 }
 
@@ -782,11 +800,37 @@ function startServer() {
                     return res.status(400).send('Invalid file name');
                 }
 
+                // Ensure directory exists
                 if (!fs.existsSync(dir.rec)) {
                     fs.mkdirSync(dir.rec, { recursive: true });
                 }
-                const filePath = dir.rec + fileName;
+
+                // Resolve and validate file path
+                const filePath = path.resolve(dir.rec, fileName);
+                if (!filePath.startsWith(path.resolve(dir.rec))) {
+                    log.warn('[RecSync] - Attempt to save file outside allowed directory:', fileName);
+                    return res.status(400).send('Invalid file path');
+                }
+
+                //Validate content type
+                if (!['application/octet-stream'].includes(req.headers['content-type'])) {
+                    log.warn('[RecSync] - Invalid content type:', req.headers['content-type']);
+                    return res.status(400).send('Invalid content type');
+                }
+
+                // Set up write stream and handle file upload
                 const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+                let receivedBytes = 0;
+
+                req.on('data', (chunk) => {
+                    receivedBytes += chunk.length;
+                    if (receivedBytes > recMaxFileSize) {
+                        req.destroy(); // Stop receiving data
+                        writeStream.destroy(); // Stop writing data
+                        log.warn('[RecSync] - File size exceeds limit:', fileName);
+                        return res.status(413).send('File too large');
+                    }
+                });
 
                 req.pipe(writeStream);
 
@@ -841,7 +885,6 @@ function startServer() {
     });
 
     app.get('/rtmpEnabled', (req, res) => {
-        const rtmpEnabled = rtmpCfg && rtmpCfg.enabled;
         log.debug('RTMP enabled', rtmpEnabled);
         res.json({ enabled: rtmpEnabled });
     });

@@ -4,6 +4,8 @@ const express = require('express');
 const cors = require('cors');
 const fs = require('fs');
 const path = require('path');
+const sanitizeFilename = require('sanitize-filename');
+const helmet = require('helmet');
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -13,6 +15,9 @@ const log = {
     error: console.error,
     debug: console.log,
 };
+
+// Recording max file size
+const recMaxFileSize = 1 * 1024 * 1024 * 1024; // 1 GB
 
 // Directory where recordings will be stored
 const recordingDirectory = path.join(__dirname, 'rec');
@@ -27,6 +32,7 @@ const corsOptions = {
 };
 
 // Middleware
+app.use(helmet());
 app.use(express.json());
 app.use(cors(corsOptions));
 
@@ -50,15 +56,38 @@ app.post('/recSync', (req, res) => {
             return res.status(400).send('Filename not provided');
         }
 
-        if (!isValidRecFileNameFormat(fileName)) {
-            log.warn('[RecSync] - Invalid file name', fileName);
+        const safeFileName = sanitizeFilename(fileName);
+        if (safeFileName !== fileName || !isValidRecFileNameFormat(fileName)) {
+            log.warn('[RecSync] - Invalid file name:', fileName);
             return res.status(400).send('Invalid file name');
         }
 
         ensureRecordingDirectoryExists();
 
-        const filePath = path.join(recordingDirectory, fileName);
+        const filePath = path.resolve(recordingDirectory, fileName);
+        if (!filePath.startsWith(path.resolve(recordingDirectory))) {
+            log.warn('[RecSync] - Attempt to save file outside allowed directory:', fileName);
+            return res.status(400).send('Invalid file path');
+        }
+
+        if (!['application/octet-stream'].includes(req.headers['content-type'])) {
+            log.warn('[RecSync] - Invalid content type:', req.headers['content-type']);
+            return res.status(400).send('Invalid content type');
+        }
+
         const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+
+        let receivedBytes = 0;
+
+        req.on('data', (chunk) => {
+            receivedBytes += chunk.length;
+            if (receivedBytes > recMaxFileSize) {
+                req.destroy(); // Stop receiving data
+                writeStream.destroy(); // Stop writing data
+                log.warn('[RecSync] - File size exceeds limit:', fileName);
+                return res.status(413).send('File too large');
+            }
+        });
 
         req.pipe(writeStream);
 

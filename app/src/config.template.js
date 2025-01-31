@@ -104,6 +104,7 @@ module.exports = {
             enabled: false,
             endpoint: '', // Change the URL if you want to save the recording to a different server or cloud service (http://localhost:8080), otherwise leave it as is (empty).
             dir: 'rec',
+            maxFileSize: 1 * 1024 * 1024 * 1024, // 1 GB
         },
         rtmp: {
             /*
