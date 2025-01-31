@@ -241,7 +241,7 @@ function joinRoom() {
 }
 
 function isValidRoomName(input) {
-    if (typeof input !== 'string') {
+    if (!input || typeof input !== 'string') {
         return false;
     }
     const pathTraversalPattern = /(\.\.(\/|\\))+/;

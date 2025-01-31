@@ -118,16 +118,42 @@ app.listen(port, () => {
 
 // Utils
 function isValidRecFileNameFormat(input) {
-    if (typeof input !== 'string') {
+    if (!input || typeof input !== 'string') {
         return false;
     }
-    if (!input.startsWith('Rec_') || !input.endsWith('.webm')) {
+    const validPattern = /^Rec_[a-zA-Z0-9_-]+\.webm$/;
+    if (!validPattern.test(input)) {
         return false;
     }
     return !hasPathTraversal(input);
 }
 
 function hasPathTraversal(input) {
+    if (!input || typeof input !== 'string') {
+        return false;
+    }
+
+    let decodedInput = input;
+    try {
+        decodedInput = decodeURIComponent(input);
+        decodedInput = decodeURIComponent(decodedInput);
+    } catch (err) {
+        // Ignore any errors during decoding
+    }
+
     const pathTraversalPattern = /(\.\.(\/|\\))+/;
-    return pathTraversalPattern.test(input);
+    const excessiveDotsPattern = /(\.{4,}\/+|\.{4,}\\+)/;
+    const complexTraversalPattern = /(\.{2,}(\/+|\\+))/;
+
+    if (complexTraversalPattern.test(decodedInput)) {
+        return true;
+    }
+
+    const normalizedPath = path.normalize(decodedInput);
+
+    if (pathTraversalPattern.test(normalizedPath) || excessiveDotsPattern.test(normalizedPath)) {
+        return true;
+    }
+
+    return false;
 }

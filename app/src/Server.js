@@ -11,8 +11,8 @@ prod dependencies: {
     @mattermost/client      : https://www.npmjs.com/package/@mattermost/client
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
-    compression             : https://www.npmjs.com/package/compression
     colors                  : https://www.npmjs.com/package/colors
+    compression             : https://www.npmjs.com/package/compression
     cors                    : https://www.npmjs.com/package/cors
     crypto-js               : https://www.npmjs.com/package/crypto-js
     discord.js              : https://www.npmjs.com/package/discord.js
@@ -21,6 +21,7 @@ prod dependencies: {
     express-openid-connect  : https://www.npmjs.com/package/express-openid-connect
     fluent-ffmpeg           : https://www.npmjs.com/package/fluent-ffmpeg
     he                      : https://www.npmjs.com/package/he
+    helmet                  : https://www.npmjs.com/package/helmet
     httpolyglot             : https://www.npmjs.com/package/httpolyglot
     js-yaml                 : https://www.npmjs.com/package/js-yaml
     jsdom                   : https://www.npmjs.com/package/jsdom
@@ -28,8 +29,10 @@ prod dependencies: {
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
     ngrok                   : https://www.npmjs.com/package/ngrok
+    nodemailer              : https://www.npmjs.com/package/nodemailer
     openai                  : https://www.npmjs.com/package/openai
     qs                      : https://www.npmjs.com/package/qs
+    sanitize-filename       : https://www.npmjs.com/package/sanitize-filename
     socket.io               : https://www.npmjs.com/package/socket.io
     swagger-ui-express      : https://www.npmjs.com/package/swagger-ui-express
     uuid                    : https://www.npmjs.com/package/uuid
@@ -55,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.20
+ * @version 1.7.21
  *
  */
 
