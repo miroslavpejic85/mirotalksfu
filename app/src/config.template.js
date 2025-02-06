@@ -82,7 +82,7 @@ module.exports = {
             ip: '0.0.0.0',
             port: process.env.PORT || 3010,
         },
-        trustProxy: false,
+        trustProxy: false, // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
         ssl: {
             // ssl/README.md
             cert: '../ssl/cert.pem',

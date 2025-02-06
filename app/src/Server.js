@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.22
+ * @version 1.7.23
  *
  */
 
@@ -358,7 +358,7 @@ function OIDCAuth(req, res, next) {
 
 function startServer() {
     // Start the app
-    app.set('trust proxy', trustProxy);
+    app.set('trust proxy', trustProxy); // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
     app.use(helmet.xssFilter()); // Enable XSS protection
     app.use(helmet.noSniff()); // Enable content type sniffing prevention
     app.use(express.static(dir.public));
@@ -1219,6 +1219,7 @@ function startServer() {
             // General Server Information
             server_listen: host,
             server_tunnel: tunnel,
+            trust_proxy: trustProxy,
 
             // Core Configurations
             cors_options: corsOptions,
