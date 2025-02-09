@@ -259,7 +259,7 @@ body {
 
 @media screen and (max-width: 500px) {
     #bottomButtons button {
-        width: 36px;
+        width: 42px;
         font-size: 1rem;
     }
 }
