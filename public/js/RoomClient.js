@@ -3270,13 +3270,13 @@ class RoomClient {
         });
     }
 
-    msgPopup(type, message, timer = 3000) {
+    msgPopup(type, message, timer = 3000, position = 'center') {
         switch (type) {
             case 'warning':
             case 'error':
                 Swal.fire({
                     background: swalBackground,
-                    position: 'center',
+                    position: position,
                     icon: type,
                     title: type,
                     text: message,
@@ -3289,7 +3289,7 @@ class RoomClient {
             case 'success':
                 Swal.fire({
                     background: swalBackground,
-                    position: 'center',
+                    position: position,
                     icon: type,
                     title: type,
                     text: message,
@@ -3300,7 +3300,7 @@ class RoomClient {
             case 'html':
                 Swal.fire({
                     background: swalBackground,
-                    position: 'center',
+                    position: position,
                     icon: type,
                     html: message,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -8965,7 +8965,14 @@ class RoomClient {
 
             await this.startSession();
         } catch (error) {
-            this.userLog('error', error, 'top-end');
+            switch (error.code) {
+                case 'quota_not_enough':
+                    this.msgPopup('warning', 'You’ve reached your quota limit for this demo account. Please consider upgrading for more features.', 6000, 'top');
+                    break;
+                // ...
+                default:
+                    this.userLog('error', error.message, 'top-end');
+            }
             console.error('Video AI streamingNew error:', error);
             this.stopSession();
         }

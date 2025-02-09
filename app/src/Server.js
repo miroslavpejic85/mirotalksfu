@@ -2469,7 +2469,7 @@ function startServer() {
                 cb(data);
             } catch (error) {
                 log.error('streamingNew', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data });
             }
         });
 
