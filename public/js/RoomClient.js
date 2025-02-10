@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.25
+ * @version 1.7.26
  *
  */
 
@@ -8967,7 +8967,12 @@ class RoomClient {
         } catch (error) {
             switch (error.code) {
                 case 'quota_not_enough':
-                    this.msgPopup('warning', 'You’ve reached your quota limit for this demo account. Please consider upgrading for more features.', 6000, 'top');
+                    this.msgPopup(
+                        'warning',
+                        'You’ve reached your quota limit for this demo account. Please consider upgrading for more features.',
+                        6000,
+                        'top',
+                    );
                     break;
                 // ...
                 default:

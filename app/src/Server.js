@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.25
+ * @version 1.7.26
  *
  */
 
@@ -416,12 +416,22 @@ function startServer() {
             });
             return res.status(400).send({ status: 404, message: err.message }); // Bad request
         }
-        if (req.path.substr(-1) === '/' && req.path.length > 1) {
-            let query = req.url.slice(req.path.length);
-            res.redirect(301, req.path.slice(0, -1) + query);
-        } else {
-            next();
+
+        // Remove multiple leading slashes & normalize path
+        let cleanPath = req.path.replace(/^\/+/, ''); // Removes all leading slashes
+        let query = req.url.slice(req.path.length);
+
+        // Prevent open redirect attacks by checking if the path is an external domain
+        if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(cleanPath)) {
+            return res.status(400).send('Bad Request: Potential Open Redirect Detected');
         }
+
+        // If a trailing slash exists, redirect to a clean version
+        if (req.path.endsWith('/') && req.path.length > 1) {
+            return res.redirect(301, '/' + cleanPath + query);
+        }
+
+        next();
     });
 
     // OpenID Connect - Dynamically set baseURL based on incoming host and protocol
