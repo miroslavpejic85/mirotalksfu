@@ -414,23 +414,14 @@ function startServer() {
                 body: req.body,
                 error: err.message,
             });
-            return res.status(400).send({ status: 404, message: err.message });
+            return res.status(400).send({ status: 404, message: err.message }); // Bad request
         }
-
-        let cleanPath = req.path.replace(/^\/+/, ''); // Removes leading slashes
-        let query = req.url.slice(req.path.length);
-
-        // Prevent open redirect attacks
-        if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(cleanPath)) {
-            return res.status(400).send('Bad Request: Potential Open Redirect Detected');
+        if (req.path.substr(-1) === '/' && req.path.length > 1) {
+            let query = req.url.slice(req.path.length);
+            res.redirect(301, req.path.slice(0, -1) + query);
+        } else {
+            next();
         }
-
-        // Avoid infinite redirects by checking if req.path is already clean
-        if (req.path.endsWith('/') && req.path.length > 1 && cleanPath + query !== req.url) {
-            return res.redirect(301, '/' + cleanPath + query);
-        }
-
-        next();
     });
 
     // OpenID Connect - Dynamically set baseURL based on incoming host and protocol
