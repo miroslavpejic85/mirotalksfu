@@ -414,20 +414,19 @@ function startServer() {
                 body: req.body,
                 error: err.message,
             });
-            return res.status(400).send({ status: 404, message: err.message }); // Bad request
+            return res.status(400).send({ status: 404, message: err.message });
         }
 
-        // Remove multiple leading slashes & normalize path
-        let cleanPath = req.path.replace(/^\/+/, ''); // Removes all leading slashes
+        let cleanPath = req.path.replace(/^\/+/, ''); // Removes leading slashes
         let query = req.url.slice(req.path.length);
 
-        // Prevent open redirect attacks by checking if the path is an external domain
+        // Prevent open redirect attacks
         if (/^([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,}/.test(cleanPath)) {
             return res.status(400).send('Bad Request: Potential Open Redirect Detected');
         }
 
-        // If a trailing slash exists, redirect to a clean version
-        if (req.path.endsWith('/') && req.path.length > 1) {
+        // Avoid infinite redirects by checking if req.path is already clean
+        if (req.path.endsWith('/') && req.path.length > 1 && cleanPath + query !== req.url) {
             return res.redirect(301, '/' + cleanPath + query);
         }
 
