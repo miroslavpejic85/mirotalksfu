@@ -21,14 +21,15 @@ Thanks in advance for your support to make our products safer!
 
 ---
 
-## 🙏 Acknowledgments
+## 🙏 Acknowledgements
 
 We would like to extend our gratitude to the following individuals for their responsible disclosure of security vulnerabilities:
 
-| Name              | Contact                         |
-| ----------------- | ------------------------------- |
-| `Hendrik Siewert` | hendrik.siewert@upb.de          |
-| `Caio Fook`       | https://github.com/caiofook     |
-| `Nishant Jain`    | https://twitter.com/realArcherL |
+| Name              | Contact                            |
+| ----------------- | ---------------------------------- |
+| `Hendrik Siewert` | hendrik.siewert@upb.de             |
+| `Caio Fook`       | https://github.com/caiofook        |
+| `Nishant Jain`    | https://twitter.com/realArcherL    |
+| `Florian LELEU`   | https://hosting.cognix-systems.com |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
