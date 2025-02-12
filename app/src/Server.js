@@ -633,9 +633,15 @@ function startServer() {
             } else {
                 const allowRoomAccess = isAllowedRoomAccess('/join/params', req, hostCfg, roomList, room);
                 const roomAllowedForUser = await isRoomAllowedForUser('Direct Join without token', name, room);
+
+                log.debug('Direct Room Join no JWT --------------->', {
+                    allowRoomAccess: allowRoomAccess,
+                    roomAllowedForUser: roomAllowedForUser,
+                });
+
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     log.warn('Direct Room Join Unauthorized', room);
-                    return res.redirect('/whoAreYou/' + room);
+                    return OIDC.enabled ? res.redirect('/') : res.redirect('/whoAreYou/' + room);
                     //return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
                 }
             }
@@ -3359,6 +3365,8 @@ function startServer() {
         const logData = { message, username, room };
 
         log.debug('isRoomAllowedForUser ------>', logData);
+
+        if (!username || !room) return false;
 
         const isOIDCEnabled = config.oidc && config.oidc.enabled;
 
