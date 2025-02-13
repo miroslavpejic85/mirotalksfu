@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.28
+ * @version 1.7.35
  *
  */
 
@@ -621,7 +621,6 @@ function startServer() {
                                 room: room,
                             });
                             return res.redirect('/whoAreYou/' + room);
-                            //return res.status(401).json({ message: 'Direct Room Join for this User is Unauthorized' });
                         }
                     }
                 } catch (err) {
@@ -642,7 +641,6 @@ function startServer() {
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     log.warn('Direct Room Join Unauthorized', room);
                     return OIDC.enabled ? res.redirect('/') : res.redirect('/whoAreYou/' + room);
-                    //return res.status(401).json({ message: 'Direct Room Join Unauthorized' });
                 }
             }
 

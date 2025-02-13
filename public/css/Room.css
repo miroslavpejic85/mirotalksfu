@@ -119,6 +119,22 @@ body {
     width: 100%;
 }
 
+/*---------------------------
+> 1024px SCREEN */
+@media screen and (min-width: 1025px) {
+    .init-modal-size {
+        width: 1024px !important;
+    }
+    .init-user {
+        display: flex;
+    }
+    .init-video-container {
+        padding: 10px;
+    }
+}
+
+/*---------------------------
+<= 1024px SCREEN */
 @media screen and (max-width: 1024px) {
     .init-modal-size {
         width: auto !important;
@@ -147,7 +163,8 @@ body {
 }
 
 .init-user button {
-    width: 50px;
+    width: 48px;
+    height: 48px;
     padding: 10px;
     margin-top: 20px;
     margin-bottom: 10px;
@@ -160,6 +177,46 @@ body {
 .init-user button:hover {
     color: white;
     background: var(--body-bg);
+}
+
+/*--------------------------------------------------------------
+# Image Grid
+--------------------------------------------------------------*/
+.image-grid {
+    display: none;
+    grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+    gap: 10px;
+    width: 100%;
+    padding: 10px;
+    max-height: 120px;
+    border-radius: 8px;
+    background: transparent;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.5) transparent;
+}
+
+/* Scrollbar Styling */
+.image-grid::-webkit-scrollbar {
+    width: 5px;
+}
+
+.image-grid::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+}
+
+/* Image Thumbnails */
+.image-grid img {
+    width: 100%;
+    max-width: 50px;
+    height: 45px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.image-grid img:hover {
+    transform: scale(1.1);
 }
 
 /*--------------------------------------------------------------

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.28
+ * @version 1.7.35
  *
  */
 
@@ -112,6 +112,21 @@ const image = {
     rtmp: '../images/rtmp.png',
     save: '../images/save.png',
     transcription: '../images/transcription.png',
+    back: '../images/back.png',
+    blur: '../images/blur.png',
+    upload: '../images/upload.png',
+    virtualBackground: {
+        one: '../images/virtual-background/background-1.jpg',
+        two: '../images/virtual-background/background-2.jpg',
+        three: '../images/virtual-background/background-3.jpg',
+        four: '../images/virtual-background/background-4.jpg',
+        five: '../images/virtual-background/background-5.jpg',
+        six: '../images/virtual-background/background-6.jpg',
+        seven: '../images/virtual-background/background-7.jpg',
+        eight: '../images/virtual-background/background-8.jpg',
+        nine: '../images/virtual-background/background-9.jpg',
+        ten: '../images/virtual-background/background-10.jpg',
+    },
 };
 
 const mediaType = {
@@ -178,7 +193,7 @@ const VideoAI = {
     avatarVoice: null,
     quality: 'medium',
     virtualBackground: true,
-    background: '../images/virtual/1.jpg',
+    background: image.virtualBackground.one,
 };
 
 // Recording
@@ -308,6 +323,7 @@ class RoomClient {
         this.leftMsgAvatar = null;
         this.rightMsgAvatar = null;
 
+        this.localVideoElement = null;
         this.localVideoStream = null;
         this.localAudioStream = null;
         this.localScreenStream = null;
@@ -1466,6 +1482,25 @@ class RoomClient {
                 stream = screen
                     ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
                     : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+
+                // Handle Virtual Background and Blur using MediaPipe
+                if (video && MediaStreamTrackProcessorSupported) {
+                    const videoTrack = stream.getVideoTracks()[0];
+                    const processor = new WebRTCStreamProcessor();
+
+                    if (virtualBackgroundBlurLevel) {
+                        // Apply blur before sending it to WebRTC
+                        stream = await processor.applyBlurToWebRTCStream(videoTrack, virtualBackgroundBlurLevel);
+                    }
+
+                    if (virtualBackgroundSelectedImage) {
+                        // Apply background image before sending it to WebRTC
+                        stream = await processor.applyVirtualBackgroundToWebRTCStream(
+                            videoTrack,
+                            virtualBackgroundSelectedImage,
+                        );
+                    }
+                }
             }
 
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
@@ -1558,6 +1593,10 @@ class RoomClient {
 
                 elem = await this.handleProducer(producer.id, type, stream);
 
+                if (video) {
+                    this.localVideoElement = elem;
+                }
+
                 if (video) this.videoProducerId = producer.id;
                 if (screen) this.screenProducerId = producer.id;
 
@@ -1625,6 +1664,117 @@ class RoomClient {
                 );
             }
         }
+    }
+
+    // ####################################################
+    // HANDLE INIT VIRTUAL BACKGROUND AND BLUR
+    // ####################################################
+
+    showVideoImageSelector() {
+        elemDisplay('imageGridVideo', true, 'grid');
+
+        if (imageGridVideo.innerHTML != '') return;
+
+        // Clear previous images
+        imageGridVideo.innerHTML = '';
+
+        // Get virtual background images from the `image` object
+        const virtualBackgrounds = Object.values(image.virtualBackground);
+
+        // Create clean virtual bg Image
+        const cleanVbImg = document.createElement('img');
+        cleanVbImg.id = 'cleanVbImg';
+        cleanVbImg.src = image.user;
+        cleanVbImg.alt = 'Clean virtual bacgroundk';
+        cleanVbImg.dataset.index = 'cleanVb';
+        cleanVbImg.addEventListener('click', async function () {
+            if (!virtualBackgroundBlurLevel && !virtualBackgroundSelectedImage) {
+                return;
+            }
+            virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = null;
+            videoSelect.onchange();
+        });
+        imageGridVideo.appendChild(cleanVbImg);
+        setTippy(cleanVbImg.id, 'Remove virtual background', 'top');
+
+        // Create High Blur Image
+        const highBlurImg = document.createElement('img');
+        highBlurImg.id = 'highBlurImg';
+        highBlurImg.src = image.blur;
+        highBlurImg.alt = 'High Blur';
+        highBlurImg.dataset.index = 'high';
+        highBlurImg.addEventListener('click', async function () {
+            await rc.applyVirtualBackground(15);
+        });
+        imageGridVideo.appendChild(highBlurImg);
+        setTippy(highBlurImg.id, 'Blur', 'top');
+
+        // Create a button for uploading custom images
+        const uploadImg = document.createElement('img');
+        uploadImg.id = 'uploadImg';
+        uploadImg.src = image.upload;
+
+        // Create an input element for custom image upload, hidden initially
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*'; // Only image files
+        fileInput.style.display = 'none'; // Hide the file input element
+
+        // Trigger file input when button is clicked
+        uploadImg.addEventListener('click', function () {
+            fileInput.click();
+        });
+
+        // Handle image selection
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const customImg = document.createElement('img');
+                    customImg.id = `customImage${imageCounter}`; // Assign a unique id
+                    customImg.src = e.target.result;
+                    customImg.alt = 'Custom Background';
+                    customImg.addEventListener('click', async function () {
+                        await rc.applyVirtualBackground(false, e.target.result);
+                    });
+                    imageGridVideo.appendChild(customImg);
+                    setTippy(customImg.id, 'Custom background', 'top');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // Append the button to the imageGrid
+        imageGridVideo.appendChild(uploadImg);
+        setTippy(uploadImg.id, 'Upload your custom background', 'top');
+
+        // Loop through virtual background images dynamically
+        virtualBackgrounds.forEach((imageUrl, index) => {
+            const img = document.createElement('img');
+            img.src = imageUrl;
+            img.dataset.index = index + 1;
+            img.addEventListener('click', async function () {
+                console.log('Selected Image Index:', this.dataset.index);
+                await rc.applyVirtualBackground(false, imageUrl);
+            });
+            imageGridVideo.appendChild(img);
+        });
+    }
+
+    async applyVirtualBackground(blurLevel, backgroundImage) {
+        if (blurLevel) {
+            virtualBackgroundBlurLevel = blurLevel;
+            virtualBackgroundSelectedImage = null;
+        } else if (backgroundImage) {
+            virtualBackgroundSelectedImage = backgroundImage;
+            virtualBackgroundBlurLevel = null;
+        } else {
+            virtualBackgroundSelectedImage = null;
+            virtualBackgroundBlurLevel = null;
+        }
+        videoSelect.onchange();
     }
 
     // ####################################################

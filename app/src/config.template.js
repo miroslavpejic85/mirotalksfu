@@ -553,6 +553,7 @@ module.exports = {
                 host_only_recording: true, // presenter
                 pushToTalk: true,
                 keyboardShortcuts: true,
+                virtualBackground: true,
             },
             producerVideo: {
                 videoPictureInPicture: true,

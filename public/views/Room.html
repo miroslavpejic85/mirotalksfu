@@ -118,6 +118,7 @@
         <script defer src="../js/SpeechRec.js"></script>
         <script defer src="../js/Transcription.js"></script>
         <script defer src="../js/VideoGrid.js"></script>
+        <script defer src="../js/WebRTCStreamProcessor.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/Room.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -125,8 +126,6 @@
         <script defer src="https://cdn.jsdelivr.net/npm/fabric@5.3.0-browser/dist/fabric.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.8"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/emoji-mart@latest/dist/browser.js"></script>
-        <!-- <script defer src="https://unpkg.com/@popperjs/core@2"></script>
-        <script defer src="https://unpkg.com/tippy.js@6"></script> -->
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.11.8/umd/popper.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/tippy.js/6.3.7/tippy-bundle.umd.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -134,6 +133,7 @@
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
         <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.10.0/highlight.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/quill@2/dist/quill.js"></script>
+        <script defer src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation"></script>
     </head>
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
@@ -149,7 +149,6 @@ access to use this app.
 
         <section>
             <div id="initUser" class="init-user hidden">
-                <!-- <p>Please allow the camera & microphone access to use this app.</p> -->
                 <div id="initVideoContainer" class="init-video-container">
                     <video
                         id="initVideo"
@@ -158,15 +157,17 @@ access to use this app.
                         class="mirror"
                         poster="../images/loader.gif"
                     ></video>
+                    <div id="imageGrid" class="image-grid fadein"></div>
                 </div>
                 <div class="initComands">
                     <button id="initVideoAudioRefreshButton" class="fas fa-rotate"></button>
+                    <button id="initAudioVideoButton" class="fas fa-eye"></button>
                     <button id="initVideoButton" class="fas fa-video"></button>
                     <button id="initAudioButton" class="fas fa-microphone"></button>
-                    <button id="initAudioVideoButton" class="fas fa-eye"></button>
                     <button id="initStartScreenButton" class="fas fa-desktop hidden"></button>
                     <button id="initStopScreenButton" class="fas fa-stop-circle hidden"></button>
                     <button id="initVideoMirrorButton" class="fas fa-arrow-right-arrow-left"></button>
+                    <button id="initVirtualBackgroundButton" class="fa-solid fa-image hidden"></button>
                     <button id="initUsernameEmojiButton" class="fas fa-smile"></button>
                     <select id="initVideoSelect" class="form-select text-light bg-dark"></select>
                     <select id="initMicrophoneSelect" class="form-select text-light bg-dark"></select>
@@ -398,6 +399,14 @@ access to use this app.
                         </div>
                         <select id="videoSelect" class="form-select text-light bg-dark"></select>
                         <br />
+                        <div id="videoVirtualBackground" class="hidden">
+                            <div class="title">
+                                <i class="fa-solid fa-image"></i>
+                                <p>Virtual background:</p>
+                            </div>
+                            <div id="imageGridVideo" class="image-grid"></div>
+                            <br />
+                        </div>
                         <div class="title">
                             <i class="fas fa-palette"></i>
                             <p>Video Quality:</p>
