@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.38
+ * @version 1.7.39
  *
  */
 
@@ -114,6 +114,8 @@ const image = {
     transcription: '../images/transcription.png',
     back: '../images/back.png',
     blur: '../images/blur.png',
+    blurLow: '../images/blur-low.png',
+    blurHigh: '../images/blur-high.png',
     link: '../images/link.png',
     upload: '../images/upload.png',
     virtualBackground: {
@@ -1701,15 +1703,27 @@ class RoomClient {
 
         // Create High Blur Image
         const highBlurImg = document.createElement('img');
-        highBlurImg.id = 'highBlurImg';
-        highBlurImg.src = image.blur;
+        highBlurImg.id = 'initHighBlurImg';
+        highBlurImg.src = image.blurHigh;
         highBlurImg.alt = 'High Blur';
         highBlurImg.dataset.index = 'high';
         highBlurImg.addEventListener('click', async function () {
-            await rc.applyVirtualBackground(15);
+            await rc.applyVirtualBackground(20);
         });
         imageGridVideo.appendChild(highBlurImg);
-        setTippy(highBlurImg.id, 'Blur', 'top');
+        setTippy(highBlurImg.id, 'High Blur', 'top');
+
+        // Create Low Blur Image
+        const lowBlurImg = document.createElement('img');
+        lowBlurImg.id = 'initLowBlurImg';
+        lowBlurImg.src = image.blurLow;
+        lowBlurImg.alt = 'Low Blur';
+        lowBlurImg.dataset.index = 'low';
+        lowBlurImg.addEventListener('click', async function () {
+            await rc.applyVirtualBackground(10);
+        });
+        imageGridVideo.appendChild(lowBlurImg);
+        setTippy(lowBlurImg.id, 'Low Blur', 'top');
 
         // Create a button for uploading custom images
         const uploadImg = document.createElement('img');
@@ -1836,7 +1850,7 @@ class RoomClient {
 
         // Append the button to the imageGrid
         imageGridVideo.appendChild(uploadImg);
-        setTippy(uploadImg.id, 'Upload your custom background', 'top');
+        setTippy(uploadImg.id, 'Upload your custom image', 'top');
 
         // Function to fetch image from URL and store it in IndexedDB
         async function fetchAndStoreImage(url) {

@@ -4980,14 +4980,26 @@ function showImageSelector() {
     // Create High Blur Image
     const highBlurImg = document.createElement('img');
     highBlurImg.id = 'initHighBlurImg';
-    highBlurImg.src = image.blur;
+    highBlurImg.src = image.blurHigh;
     highBlurImg.alt = 'High Blur';
     highBlurImg.dataset.index = 'high';
     highBlurImg.addEventListener('click', async function () {
-        await applyVirtualBackground(initVideo, initStream, 15);
+        await applyVirtualBackground(initVideo, initStream, 20);
     });
     imageGrid.appendChild(highBlurImg);
-    setTippy(highBlurImg.id, 'Blur', 'top');
+    setTippy(highBlurImg.id, 'High Blur', 'top');
+
+    // Create Low Blur Image
+    const lowBlurImg = document.createElement('img');
+    lowBlurImg.id = 'initLowBlurImg';
+    lowBlurImg.src = image.blurLow;
+    lowBlurImg.alt = 'Low Blur';
+    lowBlurImg.dataset.index = 'low';
+    lowBlurImg.addEventListener('click', async function () {
+        await applyVirtualBackground(initVideo, initStream, 10);
+    });
+    imageGrid.appendChild(lowBlurImg);
+    setTippy(lowBlurImg.id, 'Low Blur', 'top');
 
     // Create a button for uploading custom images
     const uploadImg = document.createElement('img');
@@ -5114,7 +5126,7 @@ function showImageSelector() {
 
     // Append the button to the imageGrid
     imageGrid.appendChild(uploadImg);
-    setTippy(uploadImg.id, 'Upload your custom background', 'top');
+    setTippy(uploadImg.id, 'Upload your custom image', 'top');
 
     // Function to fetch image from URL and store it in IndexedDB
     async function fetchAndStoreImage(url) {
