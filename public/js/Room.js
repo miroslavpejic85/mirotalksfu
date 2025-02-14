@@ -5116,6 +5116,74 @@ function showImageSelector() {
     imageGrid.appendChild(uploadImg);
     setTippy(uploadImg.id, 'Upload your custom background', 'top');
 
+    // Function to fetch image from URL and store it in IndexedDB
+    async function fetchAndStoreImage(url) {
+        try {
+            const response = await fetch(url);
+            const blob = await response.blob();
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const imgData = e.target.result;
+                saveImageToIndexedDB(imgData);
+                addImageToUI(imgData);
+            };
+
+            reader.readAsDataURL(blob);
+        } catch (error) {
+            console.error('Error fetching image:', error);
+        }
+    }
+
+    saveImageUrlBtn.addEventListener('click', async () => {
+        elemDisplay(imageUrlModal.id, false);
+        if (isValidURL(imageUrlInput.value)) {
+            await fetchAndStoreImage(imageUrlInput.value);
+            imageUrlInput.value = '';
+        }
+    });
+
+    cancelImageUrlBtn.addEventListener('click', () => {
+        elemDisplay(imageUrlModal.id, false);
+        imageUrlInput.value = '';
+    });
+
+    function askForImageURL() {
+        elemDisplay(imageUrlModal.id, true);
+
+        // Take URL from clipboard ex:
+        navigator.clipboard
+            .readText()
+            .then((clipboardText) => {
+                if (!clipboardText) return false;
+                const sanitizedText = filterXSS(clipboardText);
+                if (isValidURL(sanitizedText) && imageUrlInput) {
+                    imageUrlInput.value = sanitizedText;
+                }
+                return false;
+            })
+            .catch(() => {
+                return false;
+            });
+    }
+
+    // Function to validate URL format
+    function isValidURL(url) {
+        return (
+            url.match(/\.(jpeg|jpg|png|gif|webp|bmp|svg|apng|avif|heif|heic|tiff?|ico|cur|jfif|pjpeg|pjp|raw)$/i) !==
+            null
+        );
+    }
+
+    // Create link to upload image
+    const linkImg = document.createElement('img');
+    linkImg.id = 'linkImage';
+    linkImg.src = image.link;
+    linkImg.alt = 'Link image';
+    linkImg.addEventListener('click', askForImageURL);
+    imageGrid.appendChild(linkImg);
+    setTippy(linkImg.id, 'Upload Image from Url', 'top');
+
     // Loop through virtual background images dynamically
     virtualBackgrounds.forEach((imageUrl, index) => {
         const img = document.createElement('img');
