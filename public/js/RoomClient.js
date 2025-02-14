@@ -1703,7 +1703,7 @@ class RoomClient {
 
         // Create High Blur Image
         const highBlurImg = document.createElement('img');
-        highBlurImg.id = 'initHighBlurImg';
+        highBlurImg.id = 'highBlurImg';
         highBlurImg.src = image.blurHigh;
         highBlurImg.alt = 'High Blur';
         highBlurImg.dataset.index = 'high';
@@ -1715,7 +1715,7 @@ class RoomClient {
 
         // Create Low Blur Image
         const lowBlurImg = document.createElement('img');
-        lowBlurImg.id = 'initLowBlurImg';
+        lowBlurImg.id = 'lowBlurImg';
         lowBlurImg.src = image.blurLow;
         lowBlurImg.alt = 'Low Blur';
         lowBlurImg.dataset.index = 'low';
