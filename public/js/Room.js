@@ -5011,19 +5011,106 @@ function showImageSelector() {
         if (file) {
             const reader = new FileReader();
             reader.onload = function (e) {
-                const customImg = document.createElement('img');
-                customImg.id = `customImage${imageCounter}`; // Assign a unique id
-                customImg.src = e.target.result;
-                customImg.alt = 'Custom Background';
-                customImg.addEventListener('click', async function () {
-                    await applyVirtualBackground(initVideo, initStream, false, e.target.result);
-                });
-                imageGrid.appendChild(customImg);
-                setTippy(customImg.id, 'Custom background', 'top');
+                const imgData = e.target.result;
+                saveImageToIndexedDB(imgData);
+                addImageToUI(imgData);
             };
             reader.readAsDataURL(file);
         }
     });
+
+    // Load images from IndexedDB
+    async function loadStoredImages() {
+        const storedImages = await getImagesFromIndexedDB();
+        storedImages.forEach((imgData) => addImageToUI(imgData));
+    }
+
+    // Save image to IndexedDB
+    async function saveImageToIndexedDB(imgData) {
+        const db = await openDB();
+        const transaction = db.transaction('images', 'readwrite');
+        const store = transaction.objectStore('images');
+        store.add({ imgData });
+    }
+
+    // Open IndexedDB
+    function openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('customImageDB', 1);
+            request.onupgradeneeded = function (event) {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('images')) {
+                    db.createObjectStore('images', { keyPath: 'id', autoIncrement: true });
+                }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    // Get images from IndexedDB
+    function getImagesFromIndexedDB() {
+        return new Promise((resolve, reject) => {
+            const dbRequest = openDB();
+            dbRequest.then((db) => {
+                const transaction = db.transaction('images', 'readonly');
+                const store = transaction.objectStore('images');
+                const request = store.getAll();
+
+                request.onsuccess = () => resolve(request.result.map((item) => item.imgData));
+                request.onerror = () => reject(request.error);
+            });
+        });
+    }
+
+    // Add image to UI
+    function addImageToUI(imgData) {
+        const imageContainer = document.createElement('div');
+        imageContainer.className = 'image-wrapper';
+        const customImg = document.createElement('img');
+
+        customImg.id = `customImageGrid${imageCounter}`;
+        customImg.src = imgData;
+        customImg.alt = 'Custom Background';
+        customImg.addEventListener('click', async function () {
+            await applyVirtualBackground(initVideo, initStream, false, imgData);
+        });
+
+        // Create delete button
+        const deleteBtn = createDeleteIcon(imgData, imageContainer);
+        imageContainer.appendChild(customImg);
+        imageContainer.appendChild(deleteBtn);
+        imageGrid.appendChild(imageContainer);
+        setTippy(customImg.id, 'Custom background', 'top');
+
+        imageCounter++;
+    }
+
+    // Create delete icon
+    function createDeleteIcon(imgData, container) {
+        const deleteIcon = document.createElement('span');
+        deleteIcon.className = 'delete-icon fas fa-times';
+        deleteIcon.addEventListener('click', function (event) {
+            event.stopPropagation(); // Prevent triggering background change
+            removeImageFromIndexedDB(imgData);
+            container.remove();
+        });
+        return deleteIcon;
+    }
+
+    // Remove image from IndexedDB
+    async function removeImageFromIndexedDB(imgData) {
+        const db = await openDB();
+        const transaction = db.transaction('images', 'readwrite');
+        const store = transaction.objectStore('images');
+
+        const request = store.getAll();
+        request.onsuccess = () => {
+            const items = request.result;
+            const itemToDelete = items.find((item) => item.imgData === imgData);
+            if (itemToDelete) store.delete(itemToDelete.id);
+        };
+    }
 
     // Append the button to the imageGrid
     imageGrid.appendChild(uploadImg);
@@ -5040,6 +5127,9 @@ function showImageSelector() {
         });
         imageGrid.appendChild(img);
     });
+
+    // Load images from IndexedDB on page load
+    loadStoredImages();
 }
 
 async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage) {
