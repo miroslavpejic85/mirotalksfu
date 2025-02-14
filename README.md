@@ -58,6 +58,7 @@
 - Compatible with desktop and mobile devices.
 - Optimized mobile room URL sharing.
 - Webcam streaming with front and rear camera support for mobile devices.
+- Virtual Background and Blur Support!
 - Broadcasting, distribution of audio or video content to a wide audience.
 - Crystal-clear audio streaming with speaking detection and volume indicators.
 - Screen sharing for presentations.
