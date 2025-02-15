@@ -190,12 +190,17 @@ const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
 
 // ####################################################
+// VIRTUAL BACKGROUND DEFAULT IMAGES
+// ####################################################
+
+const virtualBackgrounds = Object.values(image.virtualBackground);
+
+// ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
 
 let virtualBackgroundBlurLevel;
 let virtualBackgroundSelectedImage;
-let imageCounter = 0; // Virtual Background upload custom images
 
 let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
@@ -4943,269 +4948,159 @@ function adaptAspectRatio(participantsCount) {
 
 function showImageSelector() {
     elemDisplay('imageGrid', true, 'grid');
+    if (imageGrid.innerHTML !== '') return;
 
-    if (imageGrid.innerHTML != '') return;
+    imageGrid.innerHTML = ''; // Clear previous images
 
-    // Clear previous images
-    imageGrid.innerHTML = '';
+    function createImage(id, src, tooltip, index, clickHandler) {
+        const img = document.createElement('img');
+        img.id = id;
+        img.src = src;
+        img.dataset.index = index;
+        img.addEventListener('click', clickHandler);
+        imageGrid.appendChild(img);
+        if (tooltip) {
+            setTippy(img.id, tooltip, 'top');
+        }
+    }
 
-    // Get virtual background images from the `image` object
-    const virtualBackgrounds = Object.values(image.virtualBackground);
+    // Common function to handle virtual background changes
+    async function handleVirtualBackground(blurLevel = null, imgSrc = null) {
+        if (!blurLevel && !imgSrc) {
+            virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = null;
+            elemDisplay('imageGrid', false);
+        }
+        await applyVirtualBackground(initVideo, initStream, blurLevel, imgSrc);
+    }
 
     // Create clean virtual bg Image
-    const cleanVbImg = document.createElement('img');
-    cleanVbImg.id = 'initCleanVbImg';
-    cleanVbImg.src = image.user;
-    cleanVbImg.alt = 'Clean virtual background';
-    cleanVbImg.dataset.index = 'cleanVb';
-    cleanVbImg.addEventListener('click', async function () {
-        elemDisplay('imageGrid', false);
-
-        if (!virtualBackgroundBlurLevel && !virtualBackgroundSelectedImage) {
-            return;
-        }
-        virtualBackgroundBlurLevel = null;
-        virtualBackgroundSelectedImage = null;
-        initVideoSelect.onchange();
-        saveVirtualBackgroundSettings(virtualBackgroundBlurLevel, virtualBackgroundSelectedImage);
-    });
-    imageGrid.appendChild(cleanVbImg);
-    setTippy(cleanVbImg.id, 'Remove virtual background', 'top');
-
+    createImage('initCleanVbImg', image.user, 'Remove virtual background', 'cleanVb', () =>
+        handleVirtualBackground(null, null),
+    );
     // Create High Blur Image
-    const highBlurImg = document.createElement('img');
-    highBlurImg.id = 'initHighBlurImg';
-    highBlurImg.src = image.blurHigh;
-    highBlurImg.alt = 'High Blur';
-    highBlurImg.dataset.index = 'high';
-    highBlurImg.addEventListener('click', async function () {
-        await applyVirtualBackground(initVideo, initStream, 20);
-    });
-    imageGrid.appendChild(highBlurImg);
-    setTippy(highBlurImg.id, 'High Blur', 'top');
-
+    createImage('initHighBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
     // Create Low Blur Image
-    const lowBlurImg = document.createElement('img');
-    lowBlurImg.id = 'initLowBlurImg';
-    lowBlurImg.src = image.blurLow;
-    lowBlurImg.alt = 'Low Blur';
-    lowBlurImg.dataset.index = 'low';
-    lowBlurImg.addEventListener('click', async function () {
-        await applyVirtualBackground(initVideo, initStream, 10);
-    });
-    imageGrid.appendChild(lowBlurImg);
-    setTippy(lowBlurImg.id, 'Low Blur', 'top');
+    createImage('initLowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
 
-    // Create a button for uploading custom images
-    const uploadImg = document.createElement('img');
-    uploadImg.id = 'initUploadImg';
-    uploadImg.src = image.upload;
+    // Handle file upload (common logic for file selection)
+    function setupFileUploadButton(buttonId, sourceImg, tooltip, handler) {
+        const imgButton = document.createElement('img');
+        imgButton.id = buttonId;
+        imgButton.src = sourceImg;
+        imgButton.addEventListener('click', handler);
+        imageGrid.appendChild(imgButton);
+        setTippy(imgButton.id, tooltip, 'top');
+    }
 
-    // Create an input element for custom image upload, hidden initially
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*'; // Only image files
-    fileInput.style.display = 'none'; // Hide the file input element
-
-    // Trigger file input when button is clicked
-    uploadImg.addEventListener('click', function () {
-        fileInput.click();
-    });
-
-    // Handle image selection
-    fileInput.addEventListener('change', function () {
-        const file = this.files[0];
+    function handleFileUpload(event) {
+        const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function (e) {
+            reader.onload = async (e) => {
                 const imgData = e.target.result;
-                saveImageToIndexedDB(imgData);
+                await indexedDBHelper.saveImage(imgData);
                 addImageToUI(imgData);
             };
             reader.readAsDataURL(file);
         }
-    });
-
-    // Load images from IndexedDB
-    async function loadStoredImages() {
-        const storedImages = await getImagesFromIndexedDB();
-        storedImages.forEach((imgData) => addImageToUI(imgData));
     }
 
-    // Save image to IndexedDB
-    async function saveImageToIndexedDB(imgData) {
-        const db = await openDB();
-        const transaction = db.transaction('images', 'readwrite');
-        const store = transaction.objectStore('images');
-        store.add({ imgData });
+    function createUploadImageButton() {
+        const fileInput = document.createElement('input');
+        fileInput.type = 'file';
+        fileInput.accept = 'image/*';
+        fileInput.style.display = 'none';
+        fileInput.addEventListener('change', handleFileUpload);
+
+        setupFileUploadButton('initUploadImg', image.upload, 'Upload your custom image', () => fileInput.click());
+
+        return fileInput;
     }
 
-    // Open IndexedDB
-    function openDB() {
-        return new Promise((resolve, reject) => {
-            const request = indexedDB.open('customImageDB', 1);
-            request.onupgradeneeded = function (event) {
-                const db = event.target.result;
-                if (!db.objectStoreNames.contains('images')) {
-                    db.createObjectStore('images', { keyPath: 'id', autoIncrement: true });
-                }
-            };
-            request.onsuccess = () => resolve(request.result);
-            request.onerror = () => reject(request.error);
-        });
-    }
-
-    // Get images from IndexedDB
-    function getImagesFromIndexedDB() {
-        return new Promise((resolve, reject) => {
-            const dbRequest = openDB();
-            dbRequest.then((db) => {
-                const transaction = db.transaction('images', 'readonly');
-                const store = transaction.objectStore('images');
-                const request = store.getAll();
-
-                request.onsuccess = () => resolve(request.result.map((item) => item.imgData));
-                request.onerror = () => reject(request.error);
-            });
-        });
-    }
-
-    // Add image to UI
+    // Function to add an image to UI
     function addImageToUI(imgData) {
         const imageContainer = document.createElement('div');
         imageContainer.className = 'image-wrapper';
-        const customImg = document.createElement('img');
 
-        customImg.id = `customImageGrid${imageCounter}`;
+        const customImg = document.createElement('img');
         customImg.src = imgData;
-        customImg.alt = 'Custom Background';
-        customImg.addEventListener('click', async function () {
-            await applyVirtualBackground(initVideo, initStream, null, imgData);
+        customImg.addEventListener('click', () => handleVirtualBackground(null, imgData));
+
+        const deleteBtn = document.createElement('span');
+        deleteBtn.className = 'delete-icon fas fa-times';
+        deleteBtn.addEventListener('click', async (event) => {
+            event.stopPropagation();
+            await indexedDBHelper.removeImage(imgData);
+            imageContainer.remove();
         });
 
-        // Create delete button
-        const deleteBtn = createDeleteIcon(imgData, imageContainer);
         imageContainer.appendChild(customImg);
         imageContainer.appendChild(deleteBtn);
         imageGrid.appendChild(imageContainer);
-        setTippy(customImg.id, 'Custom background', 'top');
-
-        imageCounter++;
     }
 
-    // Create delete icon
-    function createDeleteIcon(imgData, container) {
-        const deleteIcon = document.createElement('span');
-        deleteIcon.className = 'delete-icon fas fa-times';
-        deleteIcon.addEventListener('click', function (event) {
-            event.stopPropagation(); // Prevent triggering background change
-            removeImageFromIndexedDB(imgData);
-            container.remove();
-        });
-        return deleteIcon;
-    }
-
-    // Remove image from IndexedDB
-    async function removeImageFromIndexedDB(imgData) {
-        const db = await openDB();
-        const transaction = db.transaction('images', 'readwrite');
-        const store = transaction.objectStore('images');
-
-        const request = store.getAll();
-        request.onsuccess = () => {
-            const items = request.result;
-            const itemToDelete = items.find((item) => item.imgData === imgData);
-            if (itemToDelete) store.delete(itemToDelete.id);
-        };
-    }
-
-    // Append the button to the imageGrid
-    imageGrid.appendChild(uploadImg);
-    setTippy(uploadImg.id, 'Upload your custom image', 'top');
-
-    // Function to fetch image from URL and store it in IndexedDB
+    // Function to fetch and store an image from URL
     async function fetchAndStoreImage(url) {
         try {
             const response = await fetch(url);
             const blob = await response.blob();
             const reader = new FileReader();
-
-            reader.onload = function (e) {
+            reader.onload = async (e) => {
                 const imgData = e.target.result;
-                saveImageToIndexedDB(imgData);
+                await indexedDBHelper.saveImage(imgData);
                 addImageToUI(imgData);
             };
-
             reader.readAsDataURL(blob);
         } catch (error) {
             console.error('Error fetching image:', error);
         }
     }
 
-    saveImageUrlBtn.addEventListener('click', async () => {
-        elemDisplay(imageUrlModal.id, false);
-        if (isValidURL(imageUrlInput.value)) {
-            await fetchAndStoreImage(imageUrlInput.value);
-            imageUrlInput.value = '';
-        }
-    });
-
-    cancelImageUrlBtn.addEventListener('click', () => {
-        elemDisplay(imageUrlModal.id, false);
-        imageUrlInput.value = '';
-    });
-
+    // Paste image from URL
     function askForImageURL() {
-        elemDisplay(imageUrlModal.id, true);
-
-        // Take URL from clipboard ex:
+        elemDisplay(initImageUrlModal.id, true);
         navigator.clipboard
             .readText()
             .then((clipboardText) => {
-                if (!clipboardText) return false;
-                const sanitizedText = filterXSS(clipboardText);
-                if (isValidURL(sanitizedText) && imageUrlInput) {
-                    imageUrlInput.value = sanitizedText;
+                if (isValidImageURL(filterXSS(clipboardText))) {
+                    initImageUrlInput.value = clipboardText;
                 }
-                return false;
             })
-            .catch(() => {
-                return false;
-            });
+            .catch(() => {});
     }
 
-    // Function to validate URL format
-    function isValidURL(url) {
-        return (
-            url.match(/\.(jpeg|jpg|png|gif|webp|bmp|svg|apng|avif|heif|heic|tiff?|ico|cur|jfif|pjpeg|pjp|raw)$/i) !==
-            null
-        );
-    }
-
-    // Create link to upload image
-    const linkImg = document.createElement('img');
-    linkImg.id = 'linkImage';
-    linkImg.src = image.link;
-    linkImg.alt = 'Link image';
-    linkImg.addEventListener('click', askForImageURL);
-    imageGrid.appendChild(linkImg);
-    setTippy(linkImg.id, 'Upload Image from Url', 'top');
-
-    // Loop through virtual background images dynamically
-    virtualBackgrounds.forEach((imageUrl, index) => {
-        const img = document.createElement('img');
-        img.src = imageUrl;
-        img.dataset.index = index + 1;
-        img.addEventListener('click', async function () {
-            console.log('Selected Image Index:', this.dataset.index);
-            await applyVirtualBackground(initVideo, initStream, null, imageUrl);
-        });
-        imageGrid.appendChild(img);
+    initSaveImageUrlBtn.addEventListener('click', async () => {
+        elemDisplay(initImageUrlModal.id, false);
+        if (isValidImageURL(initImageUrlInput.value)) {
+            await fetchAndStoreImage(initImageUrlInput.value);
+            initImageUrlInput.value = '';
+        }
     });
 
-    // Load images from IndexedDB on page load
-    loadStoredImages();
+    initCancelImageUrlBtn.addEventListener('click', () => {
+        elemDisplay(initImageUrlModal.id, false);
+        initImageUrlInput.value = '';
+    });
+
+    // Upload from file button
+    createUploadImageButton();
+
+    // Upload from URL button
+    setupFileUploadButton('initLinkImage', image.link, 'Upload Image from URL', askForImageURL);
+
+    // Load default virtual backgrounds
+    virtualBackgrounds.forEach((imageUrl, index) => {
+        createImage(`initVirtualBg${index}`, imageUrl, null, index + 1, () => handleVirtualBackground(null, imageUrl));
+    });
+
+    // Load stored images and add to image grid UI
+    indexedDBHelper.getAllImages().then((images) => images.forEach(addImageToUI));
 }
+
+// ####################################################
+// VIRTUAL BACKGROUND HELPER
+// ####################################################
 
 async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage) {
     const videoTrack = stream.getVideoTracks()[0];
@@ -5227,6 +5122,58 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
 
     saveVirtualBackgroundSettings(blurLevel, backgroundImage);
 }
+
+function isValidImageURL(url) {
+    return (
+        url.match(/\.(jpeg|jpg|png|gif|webp|bmp|svg|apng|avif|heif|heic|tiff?|ico|cur|jfif|pjpeg|pjp|raw)$/i) !== null
+    );
+}
+
+// ####################################################
+// VIRTUAL BACKGROUND INDEXDB HELPER
+// ####################################################
+
+const indexedDBHelper = {
+    async openDB() {
+        return new Promise((resolve, reject) => {
+            const request = indexedDB.open('customImageDB', 1);
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                if (!db.objectStoreNames.contains('images')) {
+                    db.createObjectStore('images', { keyPath: 'id', autoIncrement: true });
+                }
+            };
+            request.onsuccess = () => resolve(request.result);
+            request.onerror = () => reject(request.error);
+        });
+    },
+    async saveImage(imgData) {
+        const db = await this.openDB();
+        const transaction = db.transaction('images', 'readwrite');
+        transaction.objectStore('images').add({ imgData });
+    },
+    async getAllImages() {
+        const db = await this.openDB();
+        return new Promise((resolve, reject) => {
+            const transaction = db.transaction('images', 'readonly');
+            const store = transaction.objectStore('images');
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result.map((item) => item.imgData));
+            request.onerror = () => reject(request.error);
+        });
+    },
+    async removeImage(imgData) {
+        const db = await this.openDB();
+        const transaction = db.transaction('images', 'readwrite');
+        const store = transaction.objectStore('images');
+
+        const request = store.getAll();
+        request.onsuccess = () => {
+            const item = request.result.find((item) => item.imgData === imgData);
+            if (item) store.delete(item.id);
+        };
+    },
+};
 
 // ####################################################
 // VIRTUAL BACKGROUND LOCAL STORAGE SETTINGS
