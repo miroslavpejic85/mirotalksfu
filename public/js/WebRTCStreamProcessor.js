@@ -2,14 +2,27 @@
 
 class WebRTCStreamProcessor {
     constructor() {
-        this.segmentation = new SelfieSegmentation({
-            locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
-        });
-        this.segmentation.setOptions({ modelSelection: 1 }); // 1 = High accuracy
+        this.segmentation = null;
+        this.initialized = false;
     }
 
     async initializeSegmentation() {
-        await this.segmentation.initialize(); // Ensure MediaPipe is ready
+        if (!this.segmentation) {
+            this.segmentation = new SelfieSegmentation({
+                locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
+            });
+            this.segmentation.setOptions({ modelSelection: 1 });
+        }
+
+        if (!this.initialized) {
+            try {
+                await this.segmentation.initialize();
+                this.initialized = true;
+                console.log('✅ Segmentation initialized successfully.');
+            } catch (error) {
+                console.error('❌ Error initializing segmentation:', error);
+            }
+        }
     }
 
     async processStreamWithSegmentation(videoTrack, maskHandler) {
@@ -18,6 +31,11 @@ class WebRTCStreamProcessor {
 
         await this.initializeSegmentation(); // Ensure segmentation is initialized
 
+        if (!this.segmentation) {
+            console.error('❌ Segmentation is still undefined after initialization!');
+            return new MediaStream([videoTrack]); // Fallback to original video stream
+        }
+
         const processSegmentation = async (videoFrame, controller) => {
             try {
                 const imageBitmap = await createImageBitmap(videoFrame);
@@ -25,7 +43,9 @@ class WebRTCStreamProcessor {
                 // Process segmentation
                 this.segmentation.onResults(async (results) => {
                     if (!results || !results.segmentationMask) {
-                        console.warn('Mediapipe segmentationMask is missing, skipping frame.');
+                        console.warn('⚠️ Segmentation mask is missing, skipping frame.');
+                        videoFrame.close();
+                        imageBitmap.close();
                         return;
                     }
 
@@ -43,14 +63,19 @@ class WebRTCStreamProcessor {
                     const newFrame = new VideoFrame(canvas, { timestamp: videoFrame.timestamp });
                     controller.enqueue(newFrame);
 
-                    // Close VideoFrame after processing
+                    // Close VideoFrame & imageBitmap after processing
                     videoFrame.close();
+                    imageBitmap.close();
                 });
 
-                // Send frame to Mediapipe
-                await this.segmentation.send({ image: imageBitmap });
+                // Send frame to MediaPipe
+                await this.segmentation.send({ image: imageBitmap }).catch((err) => {
+                    console.error('❌ Segmentation processing failed:', err);
+                    return null;
+                });
             } catch (error) {
-                console.error('Error in processSegmentation:', error);
+                console.error('❌ Error in processSegmentation:', error);
+                videoFrame.close();
             }
         };
 
@@ -98,10 +123,7 @@ class WebRTCStreamProcessor {
     }
 
     async applyVirtualBackgroundToWebRTCStream(videoTrack, image = 'https://i.postimg.cc/t9PJw5P7/forest.jpg') {
-        const backgroundImage = new Image();
-        backgroundImage.crossOrigin = 'anonymous'; // Ensure the image is not tainted
-        backgroundImage.src = image;
-        await backgroundImage.decode(); // Ensure the image is loaded
+        const backgroundImage = await this.loadImage(image);
 
         const maskHandler = async (ctx, canvas, mask, imageBitmap) => {
             // Apply the mask to keep the person in focus
@@ -122,5 +144,15 @@ class WebRTCStreamProcessor {
         };
 
         return this.processStreamWithSegmentation(videoTrack, maskHandler);
+    }
+
+    async loadImage(src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
     }
 }
