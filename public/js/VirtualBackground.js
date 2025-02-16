@@ -4,6 +4,10 @@ class VirtualBackground {
     constructor() {
         this.segmentation = null;
         this.initialized = false;
+        this.gifCanvas = null;
+        this.gifCtx = null;
+        this.gifAnimation = null;
+        this.currentGifFrame = null;
     }
 
     async initializeSegmentation() {
@@ -123,36 +127,78 @@ class VirtualBackground {
     }
 
     async applyVirtualBackgroundToWebRTCStream(videoTrack, image = 'https://i.postimg.cc/t9PJw5P7/forest.jpg') {
-        const backgroundImage = await this.loadImage(image);
+        const isGif = image.endsWith('.gif') || image.startsWith('data:image/gif');
+
+        const backgroundImage = await this.loadImage(image, isGif);
 
         const maskHandler = async (ctx, canvas, mask, imageBitmap) => {
-            // Apply the mask to keep the person in focus
-            ctx.save();
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
-            ctx.restore();
+            try {
+                // Apply the mask to keep the person in focus
+                ctx.save();
+                ctx.globalCompositeOperation = 'destination-in';
+                ctx.drawImage(mask, 0, 0, canvas.width, canvas.height);
+                ctx.restore();
 
-            // Save the focused person area
-            const personImageBitmap = await createImageBitmap(canvas);
+                // Save the focused person area
+                const personImageBitmap = await createImageBitmap(canvas);
 
-            // Draw the background image
-            ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                // If GIF is detected, draw the current animated frame
+                if (isGif) {
+                    if (this.currentGifFrame) {
+                        ctx.drawImage(this.currentGifFrame, 0, 0, canvas.width, canvas.height);
+                    }
+                } else {
+                    // Draw the background image
+                    ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+                }
 
-            // Draw the person back on top of the background image
-            ctx.globalCompositeOperation = 'source-over';
-            ctx.drawImage(personImageBitmap, 0, 0, canvas.width, canvas.height);
+                // Draw the person back on top of the background image
+                ctx.globalCompositeOperation = 'source-over';
+                ctx.drawImage(personImageBitmap, 0, 0, canvas.width, canvas.height);
+            } catch (error) {
+                console.error('❌ Error in maskHandler:', error);
+            }
         };
 
+        if (isGif) this.animateGifBackground();
         return this.processStreamWithSegmentation(videoTrack, maskHandler);
     }
 
-    async loadImage(src) {
+    async loadImage(src, isGif) {
         return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'anonymous';
-            img.src = src;
-            img.onload = () => resolve(img);
-            img.onerror = reject;
+            if (isGif) {
+                // Setup canvas for GIF animation rendering
+                this.gifCanvas = document.createElement('canvas');
+                this.gifCtx = this.gifCanvas.getContext('2d');
+                try {
+                    gifler(src).get((a) => {
+                        this.gifAnimation = a;
+                        a.animateInCanvas(this.gifCanvas); // Start the animation
+                        console.log('✅ GIF loaded and animation started.');
+                        resolve(this.gifCanvas);
+                    });
+                } catch (error) {
+                    console.error('❌ Error loading GIF:', error);
+                    reject(error);
+                }
+            } else {
+                const img = new Image();
+                img.crossOrigin = 'anonymous';
+                img.src = src;
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+            }
         });
+    }
+
+    animateGifBackground() {
+        if (!this.gifAnimation) return;
+
+        // Updates the current GIF frame at each animation step
+        const updateFrame = () => {
+            this.currentGifFrame = this.gifCanvas;
+            requestAnimationFrame(updateFrame);
+        };
+        updateFrame();
     }
 }
