@@ -5104,14 +5104,14 @@ function showImageSelector() {
 
 async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage) {
     const videoTrack = stream.getVideoTracks()[0];
-    const processor = new WebRTCStreamProcessor();
+    const virtualBackground = new VirtualBackground();
 
     if (blurLevel) {
-        videoElement.srcObject = await processor.applyBlurToWebRTCStream(videoTrack, blurLevel);
+        videoElement.srcObject = await virtualBackground.applyBlurToWebRTCStream(videoTrack, blurLevel);
         virtualBackgroundBlurLevel = blurLevel;
         virtualBackgroundSelectedImage = null;
     } else if (backgroundImage) {
-        videoElement.srcObject = await processor.applyVirtualBackgroundToWebRTCStream(videoTrack, backgroundImage);
+        videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(videoTrack, backgroundImage);
         virtualBackgroundSelectedImage = backgroundImage;
         virtualBackgroundBlurLevel = null;
     } else {

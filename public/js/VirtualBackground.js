@@ -1,6 +1,6 @@
 'use strict';
 
-class WebRTCStreamProcessor {
+class VirtualBackground {
     constructor() {
         this.segmentation = null;
         this.initialized = false;

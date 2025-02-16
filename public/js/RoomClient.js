@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.43
+ * @version 1.7.44
  *
  */
 
@@ -1489,16 +1489,16 @@ class RoomClient {
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && MediaStreamTrackProcessorSupported) {
                     const videoTrack = stream.getVideoTracks()[0];
-                    const processor = new WebRTCStreamProcessor();
+                    const virtualBackground = new VirtualBackground();
 
                     if (virtualBackgroundBlurLevel) {
-                        // Apply blur before sending it to WebRTC
-                        stream = await processor.applyBlurToWebRTCStream(videoTrack, virtualBackgroundBlurLevel);
+                        // Apply blur before sending it to WebRTC stream
+                        stream = await virtualBackground.applyBlurToWebRTCStream(videoTrack, virtualBackgroundBlurLevel);
                     }
 
                     if (virtualBackgroundSelectedImage) {
-                        // Apply background image before sending it to WebRTC
-                        stream = await processor.applyVirtualBackgroundToWebRTCStream(
+                        // Apply virtual background to WebRTC stream
+                        stream = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
                             videoTrack,
                             virtualBackgroundSelectedImage,
                         );
@@ -1670,7 +1670,7 @@ class RoomClient {
     }
 
     // ####################################################
-    // HANDLE INIT VIRTUAL BACKGROUND AND BLUR
+    // HANDLE VIRTUAL BACKGROUND AND BLUR
     // ####################################################
 
     showVideoImageSelector() {
