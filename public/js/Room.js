@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.46
+ * @version 1.7.47
  *
  */
 
@@ -2322,7 +2322,9 @@ async function changeCamera(deviceId) {
             );
             checkInitConfig();
             handleCameraMirror(initVideo);
-            await loadVirtualBackgroundSettings();
+            if (isVideoAllowed) {
+                await loadVirtualBackgroundSettings();
+            }
         })
         .catch((error) => {
             console.error('[Error] changeCamera', error);
@@ -5210,6 +5212,8 @@ function saveVirtualBackgroundSettings(blurLevel, imageUrl) {
 }
 
 async function loadVirtualBackgroundSettings() {
+    if (!MediaStreamTrackProcessorSupported) return;
+
     const savedSettings = localStorage.getItem('virtualBackgroundSettings');
     if (savedSettings) {
         const { blurLevel, imageUrl } = JSON.parse(savedSettings);
@@ -5235,7 +5239,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.46',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.47',
         html: `
             <br />
             <div id="about">
