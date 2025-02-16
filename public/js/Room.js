@@ -4993,9 +4993,8 @@ function showImageSelector() {
         setTippy(imgButton.id, tooltip, 'top');
     }
 
-    function handleFileUpload(event) {
-        const file = event.target.files[0];
-        if (file) {
+    function handleFileUpload(file) {
+        if (file && file.type.startsWith('image/')) {
             const reader = new FileReader();
             reader.onload = async (e) => {
                 const imgData = e.target.result;
@@ -5011,7 +5010,9 @@ function showImageSelector() {
         fileInput.type = 'file';
         fileInput.accept = 'image/*';
         fileInput.style.display = 'none';
-        fileInput.addEventListener('change', handleFileUpload);
+        fileInput.addEventListener('change', (event) => {
+            handleFileUpload(event.target.files[0]);
+        });
 
         setupFileUploadButton('initUploadImg', image.upload, 'Upload your custom image', () => fileInput.click());
 
@@ -5096,6 +5097,24 @@ function showImageSelector() {
 
     // Load stored images and add to image grid UI
     indexedDBHelper.getAllImages().then((images) => images.forEach(addImageToUI));
+
+    // Upload image with drag and drop
+    imageGrid.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        imageGrid.classList.add('drag-over');
+    });
+
+    imageGrid.addEventListener('dragleave', () => {
+        imageGrid.classList.remove('drag-over');
+    });
+
+    imageGrid.addEventListener('drop', (event) => {
+        event.preventDefault();
+        imageGrid.classList.remove('drag-over');
+        if (event.dataTransfer.files.length > 0) {
+            handleFileUpload(event.dataTransfer.files[0]);
+        }
+    });
 }
 
 // ####################################################
@@ -5111,7 +5130,10 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
         virtualBackgroundBlurLevel = blurLevel;
         virtualBackgroundSelectedImage = null;
     } else if (backgroundImage) {
-        videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(videoTrack, backgroundImage);
+        videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
+            videoTrack,
+            backgroundImage,
+        );
         virtualBackgroundSelectedImage = backgroundImage;
         virtualBackgroundBlurLevel = null;
     } else {
