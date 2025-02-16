@@ -129,7 +129,7 @@ class VirtualBackground {
     async applyVirtualBackgroundToWebRTCStream(videoTrack, image = 'https://i.postimg.cc/t9PJw5P7/forest.jpg') {
         const isGif = image.endsWith('.gif') || image.startsWith('data:image/gif');
 
-        const backgroundImage = await this.loadImage(image, isGif);
+        const backgroundImage = isGif ? await this.loadGifImage(image) : await this.loadImage(image);
 
         const maskHandler = async (ctx, canvas, mask, imageBitmap) => {
             try {
@@ -164,29 +164,31 @@ class VirtualBackground {
         return this.processStreamWithSegmentation(videoTrack, maskHandler);
     }
 
-    async loadImage(src, isGif) {
+    async loadImage(src) {
         return new Promise((resolve, reject) => {
-            if (isGif) {
-                // Setup canvas for GIF animation rendering
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.src = src;
+            img.onload = () => resolve(img);
+            img.onerror = reject;
+        });
+    }
+
+    async loadGifImage(src) {
+        return new Promise((resolve, reject) => {
+            try {
                 this.gifCanvas = document.createElement('canvas');
                 this.gifCtx = this.gifCanvas.getContext('2d');
-                try {
-                    gifler(src).get((a) => {
-                        this.gifAnimation = a;
-                        a.animateInCanvas(this.gifCanvas); // Start the animation
-                        console.log('✅ GIF loaded and animation started.');
-                        resolve(this.gifCanvas);
-                    });
-                } catch (error) {
-                    console.error('❌ Error loading GIF:', error);
-                    reject(error);
-                }
-            } else {
-                const img = new Image();
-                img.crossOrigin = 'anonymous';
-                img.src = src;
-                img.onload = () => resolve(img);
-                img.onerror = reject;
+
+                gifler(src).get((a) => {
+                    this.gifAnimation = a;
+                    a.animateInCanvas(this.gifCanvas); // Start the animation
+                    console.log('✅ GIF loaded and animation started.');
+                    resolve(this.gifCanvas);
+                });
+            } catch (error) {
+                console.error('❌ Error loading GIF with gifler:', error);
+                reject(error);
             }
         });
     }
