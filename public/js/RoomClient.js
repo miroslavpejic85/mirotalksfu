@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.48
+ * @version 1.7.49
  *
  */
 
@@ -1786,6 +1786,10 @@ class RoomClient {
                 reader.readAsDataURL(blob);
             } catch (error) {
                 console.error('Error fetching image:', error);
+                // Detect CORS issue and provide a clearer error message
+                error.message.includes('Failed to fetch')
+                    ? showError(errorMessage, 'Error: Unable to fetch image. CORS policy may be blocking the request.')
+                    : showError(errorMessage, `Error fetching image: ${error.message}`);
             }
         }
 

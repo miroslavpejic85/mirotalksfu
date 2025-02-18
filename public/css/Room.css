@@ -323,6 +323,28 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Error span
+--------------------------------------------------------------*/
+
+.show-error {
+    margin-top: 10px !important;
+    color: red !important;
+    opacity: 0 !important;
+    transition: opacity 0.5s ease-in-out !important;
+    display: none;
+}
+
+.show-error.fade-in {
+    opacity: 1 !important;
+    display: block;
+}
+
+.show-error.fade-out {
+    opacity: 0 !important;
+    display: none;
+}
+
+/*--------------------------------------------------------------
 # Buttons bar
 --------------------------------------------------------------*/
 
