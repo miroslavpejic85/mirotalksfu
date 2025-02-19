@@ -204,11 +204,20 @@ class VirtualBackground {
         let background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
 
         // Handler for applying virtual background
-        const maskHandler = (ctx, canvas, mask) => {
-            ctx.globalCompositeOperation = 'destination-in';
-            ctx.drawImage(mask, 0, 0);
+        const maskHandler = (ctx, canvas, mask, imageBitmap) => {
+            // Create an offscreen canvas for a softer mask
+            const maskCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+            const maskCtx = maskCanvas.getContext('2d');
 
-            // Draw background (GIF or static image)
+            // Apply slight blur to mask to smooth edges
+            maskCtx.filter = 'blur(5px)'; // Adjust to control softness
+            maskCtx.drawImage(mask, 0, 0, canvas.width, canvas.height);
+
+            // Apply the softened mask
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+
+            // Draw background behind the person
             ctx.globalCompositeOperation = 'destination-over';
             isGif && this.currentGifFrame
                 ? ctx.drawImage(this.currentGifFrame, 0, 0, canvas.width, canvas.height)
