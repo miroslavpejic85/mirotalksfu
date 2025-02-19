@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.49
+ * @version 1.7.50
  *
  */
 
@@ -190,10 +190,11 @@ const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
 
 // ####################################################
-// VIRTUAL BACKGROUND DEFAULT IMAGES
+// VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
 // ####################################################
 
 const virtualBackgrounds = Object.values(image.virtualBackground);
+const virtualBackground = new VirtualBackground();
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -5129,7 +5130,6 @@ function showImageSelector() {
 
 async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage) {
     const videoTrack = stream.getVideoTracks()[0];
-    const virtualBackground = new VirtualBackground();
 
     if (blurLevel) {
         videoElement.srcObject = await virtualBackground.applyBlurToWebRTCStream(videoTrack, blurLevel);
@@ -5269,7 +5269,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.49',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.50',
         html: `
             <br />
             <div id="about">

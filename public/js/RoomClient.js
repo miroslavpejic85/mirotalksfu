@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.49
+ * @version 1.7.50
  *
  */
 
@@ -1490,7 +1490,6 @@ class RoomClient {
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && MediaStreamTrackProcessorSupported) {
                     const videoTrack = stream.getVideoTracks()[0];
-                    const virtualBackground = new VirtualBackground();
 
                     if (virtualBackgroundBlurLevel) {
                         // Apply blur before sending it to WebRTC stream
