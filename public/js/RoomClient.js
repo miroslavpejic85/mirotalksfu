@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.51
+ * @version 1.7.52
  *
  */
 
@@ -119,17 +119,17 @@ const image = {
     link: '../images/link.png',
     upload: '../images/upload.png',
     virtualBackground: {
-        one: '../images/virtual-background/background-1.jpg',
-        two: '../images/virtual-background/background-2.jpg',
-        three: '../images/virtual-background/background-3.jpg',
-        four: '../images/virtual-background/background-4.jpg',
-        five: '../images/virtual-background/background-5.jpg',
-        six: '../images/virtual-background/background-6.jpg',
-        seven: '../images/virtual-background/background-7.jpg',
-        eight: '../images/virtual-background/background-8.jpg',
-        nine: '../images/virtual-background/background-9.jpg',
-        ten: '../images/virtual-background/background-10.jpg',
-        eleven: '../images/virtual-background/background-11.gif',
+        one: '../images/virtual-background/default/background-1.jpg',
+        two: '../images/virtual-background/default/background-2.webp',
+        three: '../images/virtual-background/default/background-3.jpg',
+        four: '../images/virtual-background/default/background-4.jpg',
+        five: '../images/virtual-background/default/background-5.jpg',
+        six: '../images/virtual-background/default/background-6.jpg',
+        seven: '../images/virtual-background/default/background-7.jpg',
+        eight: '../images/virtual-background/default/background-8.jpg',
+        nine: '../images/virtual-background/default/background-9.jpg',
+        ten: '../images/virtual-background/default/background-10.jpg',
+        eleven: '../images/virtual-background/default/background-11.gif',
     },
 };
 

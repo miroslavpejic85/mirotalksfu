@@ -20,3 +20,6 @@ docker-compose.yml
 docker-push.sh
 rec
 rtmp
+
+# virtual background
+custom
