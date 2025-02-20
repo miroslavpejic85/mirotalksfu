@@ -23,6 +23,8 @@ class VirtualBackground {
         this.currentGifFrame = null;
         this.gifCanvas = null;
         this.gifContext = null;
+        this.frameCounter = 0;
+        this.lastSegmentationMask = null;
     }
 
     async initializeSegmentation() {
@@ -34,7 +36,12 @@ class VirtualBackground {
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
             });
 
-            this.segmentation.setOptions({ modelSelection: 1 });
+            this.segmentation.setOptions({
+                modelSelection: 1, // Higher accuracy
+                runningMode: 'video', // Smoother segmentation for streaming
+                smoothSegmentation: true, // Enables smoother edges
+            });
+
             this.segmentation.onResults(this.handleSegmentationResults.bind(this));
 
             await this.segmentation.initialize();
@@ -47,9 +54,12 @@ class VirtualBackground {
     }
 
     handleSegmentationResults(results) {
-        // Handle the segmentation results by processing the next frame
+        if (!results?.segmentationMask) return;
+
+        this.lastSegmentationMask = results.segmentationMask; // Store mask for skipped frames
+
         const pending = this.pendingFrames.shift();
-        if (!pending || !results?.segmentationMask) return;
+        if (!pending || !pending.shouldProcess) return;
 
         const { videoFrame, controller, imageBitmap, maskHandler } = pending;
         this.processFrame(videoFrame, controller, imageBitmap, maskHandler, results.segmentationMask);
@@ -112,11 +122,35 @@ class VirtualBackground {
                         return;
                     }
 
-                    // Queue the frame for segmentation processing
-                    this.pendingFrames.push({ videoFrame, controller, imageBitmap, maskHandler });
+                    if (this.frameCounter % 3 === 0) {
+                        // Process only every 3rd frame
+                        this.pendingFrames.push({
+                            videoFrame,
+                            controller,
+                            imageBitmap,
+                            maskHandler,
+                            shouldProcess: true, // Mark frame for processing
+                        });
 
-                    // Send the image to the segmentation model for processing
-                    await this.segmentation.send({ image: imageBitmap });
+                        // Send the image to the segmentation model
+                        await this.segmentation.send({ image: imageBitmap });
+                    } else {
+                        // Use last segmentation mask for skipped frames
+                        if (this.lastSegmentationMask) {
+                            this.processFrame(
+                                videoFrame,
+                                controller,
+                                imageBitmap,
+                                maskHandler,
+                                this.lastSegmentationMask,
+                            );
+                        } else {
+                            // If no previous mask, just enqueue the original frame
+                            controller.enqueue(videoFrame);
+                        }
+                    }
+
+                    this.frameCounter++; // Increment frame counter
                 } catch (error) {
                     console.error('❌ Frame transformation error:', error);
                 } finally {
