@@ -297,17 +297,4 @@ class VirtualBackground {
             }
         });
     }
-
-    animateGifBackground() {
-        // Continuously update the GIF frame for animation
-        if (!this.gifAnimation) return;
-
-        const updateFrame = () => {
-            if (this.gifAnimation && this.gifCanvas) {
-                this.currentGifFrame = this.gifCanvas;
-            }
-            requestAnimationFrame(updateFrame);
-        };
-        updateFrame();
-    }
 }
