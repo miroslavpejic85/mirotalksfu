@@ -20,9 +20,7 @@ class VirtualBackground {
         this.activeGenerator = null;
         this.isProcessing = false;
         this.gifAnimation = null;
-        this.currentGifFrame = null;
         this.gifCanvas = null;
-        this.gifContext = null;
         this.frameCounter = 0;
         this.lastSegmentationMask = null;
     }
@@ -235,7 +233,7 @@ class VirtualBackground {
     async applyVirtualBackgroundToWebRTCStream(videoTrack, imageUrl) {
         // Determine if the background is a GIF
         const isGif = imageUrl.endsWith('.gif') || imageUrl.startsWith('data:image/gif');
-        let background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
+        const background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
 
         // Handler for applying virtual background
         const maskHandler = (ctx, canvas, mask, imageBitmap) => {
@@ -253,9 +251,7 @@ class VirtualBackground {
 
             // Draw background behind the person
             ctx.globalCompositeOperation = 'destination-over';
-            isGif && this.currentGifFrame
-                ? ctx.drawImage(this.currentGifFrame, 0, 0, canvas.width, canvas.height)
-                : ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
+            ctx.drawImage(background, 0, 0, canvas.width, canvas.height);
         };
 
         console.log('✅ Apply Virtual Background.');
@@ -283,7 +279,6 @@ class VirtualBackground {
                 }
 
                 this.gifCanvas = document.createElement('canvas');
-                this.gifContext = this.gifCanvas.getContext('2d');
 
                 gifler(src).get((animation) => {
                     this.gifAnimation = animation;
