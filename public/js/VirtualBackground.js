@@ -92,9 +92,6 @@ class VirtualBackground {
     }
 
     async processStreamWithSegmentation(videoTrack, maskHandler) {
-        // Stop any existing processor before starting a new one
-        await this.stopCurrentProcessor();
-
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
 
@@ -176,8 +173,9 @@ class VirtualBackground {
     cleanPendingFrames() {
         // Close all pending frames to release resources
         while (this.pendingFrames.length) {
-            const { videoFrame } = this.pendingFrames.pop();
+            const { videoFrame, imageBitmap } = this.pendingFrames.pop();
             videoFrame?.close();
+            imageBitmap?.close();
         }
     }
 
