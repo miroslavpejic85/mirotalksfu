@@ -86,8 +86,16 @@ class VirtualBackground {
             console.error('❌ Frame processing error:', error);
         } finally {
             // Close frames after processing to release resources
-            videoFrame?.close();
-            imageBitmap?.close();
+            this.closeFrames(videoFrame, imageBitmap);
+        }
+    }
+
+    closeFrames(videoFrame, imageBitmap) {
+        if (videoFrame && !videoFrame.closed) {
+            videoFrame.close();
+        }
+        if (imageBitmap && !imageBitmap.closed) {
+            imageBitmap.close();
         }
     }
 
@@ -103,7 +111,7 @@ class VirtualBackground {
             transform: async (videoFrame, controller) => {
                 if (!this.segmentation || !this.initialized) {
                     console.warn('⚠️ Segmentation is not initialized, skipping frame.');
-                    videoFrame?.close();
+                    this.closeFrames(videoFrame);
                     return;
                 }
 
@@ -113,7 +121,7 @@ class VirtualBackground {
 
                     if (!imageBitmap) {
                         console.warn('⚠️ Failed to create imageBitmap, skipping frame.');
-                        videoFrame?.close();
+                        this.closeFrames(videoFrame);
                         return;
                     }
 
@@ -150,7 +158,7 @@ class VirtualBackground {
                     console.error('❌ Frame transformation error:', error);
                 } finally {
                     // Close the video frame after processing
-                    videoFrame?.close();
+                    this.closeFrames(videoFrame);
                 }
             },
             flush: () => this.cleanPendingFrames(), // Clean up any pending frames when the stream ends
@@ -174,8 +182,7 @@ class VirtualBackground {
         // Close all pending frames to release resources
         while (this.pendingFrames.length) {
             const { videoFrame, imageBitmap } = this.pendingFrames.pop();
-            videoFrame?.close();
-            imageBitmap?.close();
+            this.closeFrames(videoFrame, imageBitmap);
         }
     }
 
