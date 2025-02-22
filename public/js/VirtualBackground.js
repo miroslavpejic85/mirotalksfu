@@ -276,7 +276,9 @@ class VirtualBackground {
                     this.gifAnimation = null;
                 }
 
-                this.gifCanvas = document.createElement('canvas');
+                if (!this.gifCanvas) {
+                    this.gifCanvas = document.createElement('canvas');
+                }
 
                 gifler(src).get((animation) => {
                     this.gifAnimation = animation;
