@@ -473,13 +473,13 @@ body {
     padding: 10px;
     width: 50%;
     min-height: 480px;
+    max-height: 98vh; /* Prevents overflow */
     background: var(--settings-bg);
     box-shadow: var(--box-shadow);
     border: var(--border);
     border-radius: 10px;
     overflow-y: auto;
     overflow-x: hidden;
-    max-height: 90vh; /* Prevents overflow */
 }
 
 .mySettingsMain {
