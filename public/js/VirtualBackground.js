@@ -22,13 +22,13 @@ class VirtualBackground {
         this.gifAnimation = null;
         this.gifCanvas = null;
         this.frameCounter = 0;
+        this.frameSkipRatio = 3;
         this.lastSegmentationMask = null;
     }
 
     async initializeSegmentation() {
         // Initialize the segmentation model if not already done
         if (this.initialized) return;
-
         try {
             this.segmentation = new SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
@@ -54,13 +54,19 @@ class VirtualBackground {
     handleSegmentationResults(results) {
         if (!results?.segmentationMask) return;
 
-        this.lastSegmentationMask = results.segmentationMask; // Store mask for skipped frames
+        this.lastSegmentationMask = results.segmentationMask;
 
-        const pending = this.pendingFrames.shift();
-        if (!pending || !pending.shouldProcess) return;
+        const pendingFrame = this.pendingFrames.shift();
 
-        const { videoFrame, controller, imageBitmap, maskHandler } = pending;
-        this.processFrame(videoFrame, controller, imageBitmap, maskHandler, results.segmentationMask);
+        if (!pendingFrame) return;
+
+        this.processFrame(
+            pendingFrame.videoFrame,
+            pendingFrame.controller,
+            pendingFrame.imageBitmap,
+            pendingFrame.maskHandler,
+            this.lastSegmentationMask,
+        );
     }
 
     processFrame(videoFrame, controller, imageBitmap, maskHandler, segmentationMask) {
@@ -115,9 +121,11 @@ class VirtualBackground {
                     return;
                 }
 
+                let imageBitmap = null;
+
                 try {
                     // Create image bitmap from video frame
-                    const imageBitmap = await createImageBitmap(videoFrame);
+                    imageBitmap = await createImageBitmap(videoFrame);
 
                     if (!imageBitmap) {
                         console.warn('⚠️ Failed to create imageBitmap, skipping frame.');
@@ -125,32 +133,23 @@ class VirtualBackground {
                         return;
                     }
 
-                    if (this.frameCounter % 3 === 0) {
-                        // Process only every 3rd frame
+                    if (this.frameCounter % this.frameSkipRatio === 0) {
+                        // Process only every 3rd frame (reduce CPU load)
                         this.pendingFrames.push({
                             videoFrame,
                             controller,
                             imageBitmap,
                             maskHandler,
-                            shouldProcess: true, // Mark frame for processing
                         });
 
                         // Send the image to the segmentation model
                         await this.segmentation.send({ image: imageBitmap });
-                    } else {
+                    } else if (this.lastSegmentationMask) {
                         // Use last segmentation mask for skipped frames
-                        if (this.lastSegmentationMask) {
-                            this.processFrame(
-                                videoFrame,
-                                controller,
-                                imageBitmap,
-                                maskHandler,
-                                this.lastSegmentationMask,
-                            );
-                        } else {
-                            // If no previous mask, just enqueue the original frame
-                            controller.enqueue(videoFrame);
-                        }
+                        this.processFrame(videoFrame, controller, imageBitmap, maskHandler, this.lastSegmentationMask);
+                    } else {
+                        // If no previous mask, just enqueue the original frame
+                        controller.enqueue(videoFrame);
                     }
 
                     this.frameCounter++; // Increment frame counter
@@ -158,7 +157,7 @@ class VirtualBackground {
                     console.error('❌ Frame transformation error:', error);
                 } finally {
                     // Close the video frame after processing
-                    this.closeFrames(videoFrame);
+                    this.closeFrames(videoFrame, imageBitmap);
                 }
             },
             flush: () => this.cleanPendingFrames(), // Clean up any pending frames when the stream ends
@@ -173,7 +172,7 @@ class VirtualBackground {
         processor.readable
             .pipeThrough(transformer)
             .pipeTo(generator.writable)
-            .catch(() => this.stopCurrentProcessor());
+            .catch(async () => await this.stopCurrentProcessor());
 
         return new MediaStream([generator]);
     }
