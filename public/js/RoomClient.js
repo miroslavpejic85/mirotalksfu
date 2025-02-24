@@ -5002,7 +5002,7 @@ class RoomClient {
     }
 
     isHtml(str) {
-        var a = document.createElement('div');
+        const a = document.createElement('div');
         a.innerHTML = str;
         for (var c = a.childNodes, i = c.length; i--; ) {
             if (c[i].nodeType == 1) return true;
@@ -5011,17 +5011,12 @@ class RoomClient {
     }
 
     isValidHttpURL(input) {
-        const pattern = new RegExp(
-            '^(https?:\\/\\/)?' + // protocol
-                '((([a-z\\d]([a-z\\d-]*[a-z\\d])*)\\.)+[a-z]{2,}|' + // domain name
-                'localhost|' + // allow localhost
-                '((\\d{1,3}\\.){3}\\d{1,3}))' + // OR ip (v4) address
-                '(\\:\\d+)?(\\/[-a-z\\d%_.~+]*)*' + // port and path
-                '(\\?[;&a-z\\d%_.~+=-]*)?' + // query string
-                '(\\#[-a-z\\d_]*)?$',
-            'i',
-        ); // fragment locator
-        return pattern.test(input);
+        try {
+            new URL(input);
+            return true;
+        } catch (_) {
+            return false;
+        }
     }
 
     isImageURL(input) {
