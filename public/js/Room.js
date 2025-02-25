@@ -194,11 +194,9 @@ const initSpeakerSelect = getId('initSpeakerSelect');
 
 const virtualBackgrounds = Object.values(image.virtualBackground);
 
-const isMediaStreamTrackAndTransformerSupported = Boolean(
-    window.MediaStreamTrackProcessor && window.MediaStreamTrackGenerator && window.TransformStream,
-);
-
 const virtualBackground = new VirtualBackground();
+
+const isMediaStreamTrackAndTransformerSupported = virtualBackground.checkSupport();
 
 // ####################################################
 // DYNAMIC SETTINGS
@@ -1204,7 +1202,7 @@ function handleVideo() {
     elemDisplay('imageGrid', false);
 
     isVideoAllowed &&
-    MediaStreamTrackProcessorSupported &&
+    isMediaStreamTrackAndTransformerSupported &&
     (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);

@@ -10,7 +10,20 @@ class VirtualBackground {
         }
         VirtualBackground.instance = this;
 
+        // Check for API support
+        this.isSupported = this.checkSupport();
+        if (!this.isSupported) {
+            console.warn(
+                '⚠️ MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+            );
+        }
+
         this.resetState();
+    }
+
+    checkSupport() {
+        // Check if required APIs are supported
+        return Boolean(window.MediaStreamTrackProcessor && window.MediaStreamTrackGenerator && window.TransformStream);
     }
 
     resetState() {
@@ -108,6 +121,13 @@ class VirtualBackground {
     }
 
     async processStreamWithSegmentation(videoTrack, maskHandler) {
+        // Check if the required APIs are supported
+        if (!this.isSupported) {
+            throw new Error(
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+            );
+        }
+
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
 
@@ -216,6 +236,13 @@ class VirtualBackground {
     }
 
     async applyBlurToWebRTCStream(videoTrack, blurLevel = 10) {
+        // Check if the required APIs are supported
+        if (!this.isSupported) {
+            throw new Error(
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+            );
+        }
+
         // Handler for applying blur effect to the background
         const maskHandler = (ctx, canvas, mask, imageBitmap) => {
             // Keep only the person using the segmentation mask
@@ -237,6 +264,13 @@ class VirtualBackground {
     }
 
     async applyVirtualBackgroundToWebRTCStream(videoTrack, imageUrl) {
+        // Check if the required APIs are supported
+        if (!this.isSupported) {
+            throw new Error(
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+            );
+        }
+
         // Determine if the background is a GIF
         const isGif = imageUrl.endsWith('.gif') || imageUrl.startsWith('data:image/gif');
         const background = isGif ? await this.loadGifImage(imageUrl) : await this.loadImage(imageUrl);
