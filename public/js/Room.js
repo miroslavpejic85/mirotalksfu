@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.59
+ * @version 1.7.60
  *
  */
 
@@ -93,7 +93,6 @@ const swalImageUrl = '../images/pricing-illustration.svg';
 
 // Media
 const sinkId = 'sinkId' in HTMLMediaElement.prototype;
-const MediaStreamTrackProcessorSupported = 'MediaStreamTrackProcessor' in window;
 
 // ####################################################
 // LOCAL STORAGE
@@ -194,6 +193,11 @@ const initSpeakerSelect = getId('initSpeakerSelect');
 // ####################################################
 
 const virtualBackgrounds = Object.values(image.virtualBackground);
+
+const isMediaStreamTrackAndTransformerSupported = Boolean(
+    window.MediaStreamTrackProcessor && window.MediaStreamTrackGenerator && window.TransformStream,
+);
+
 const virtualBackground = new VirtualBackground();
 
 // ####################################################
@@ -1048,7 +1052,7 @@ async function whoAreYou() {
 
     // Virtual Background if supported (Chrome/Edge/Opera/Vivaldi/...)
     if (
-        MediaStreamTrackProcessorSupported &&
+        isMediaStreamTrackAndTransformerSupported &&
         (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
     ) {
         show(initVirtualBackgroundButton);
@@ -1233,7 +1237,7 @@ async function handleAudioVideo() {
     elemDisplay('imageGrid', false);
 
     isVideoAllowed &&
-    MediaStreamTrackProcessorSupported &&
+    isMediaStreamTrackAndTransformerSupported &&
     (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
         ? show(initVirtualBackgroundButton)
         : hide(initVirtualBackgroundButton);
@@ -1564,7 +1568,7 @@ function roomIsReady() {
     if (!isMobileDevice) show(pinUnpinGridDiv);
     if (!isSpeechSynthesisSupported) hide(speechMsgDiv);
     if (
-        MediaStreamTrackProcessorSupported &&
+        isMediaStreamTrackAndTransformerSupported &&
         (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
     ) {
         rc.showVideoImageSelector();
@@ -5217,7 +5221,7 @@ function saveVirtualBackgroundSettings(blurLevel, imageUrl) {
 }
 
 async function loadVirtualBackgroundSettings() {
-    if (!MediaStreamTrackProcessorSupported) return;
+    if (!isMediaStreamTrackAndTransformerSupported) return;
 
     const savedSettings = localStorage.getItem('virtualBackgroundSettings');
 
@@ -5270,7 +5274,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.59',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.60',
         html: `
             <br />
             <div id="about">
