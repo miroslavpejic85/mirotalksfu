@@ -1,3 +1,5 @@
+'use strict';
+
 class VirtualBackground {
     static instance = null;
 

@@ -58,7 +58,7 @@
     },
     "dependencies": {
         "@mattermost/client": "10.2.0",
-        "@sentry/node": "^9.1.0",
+        "@sentry/node": "^9.2.0",
         "axios": "^1.7.9",
         "colors": "1.4.0",
         "compression": "1.8.0",
