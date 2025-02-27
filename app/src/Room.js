@@ -596,18 +596,18 @@ module.exports = class Room {
         });
 
         transport.on('icestatechange', (iceState) => {
-            if (iceState === 'failed') {
-                log.warn('ICE failed, closing transport', {
+            if (iceState === 'disconnected' || iceState === 'closed') {
+                log.warn('ICE state changed, closing peer', {
                     peer_name: peer_name,
                     transport_id: id,
                     iceState: iceState,
                 });
-                transport.close();
+                peer.close();
             }
         });
 
         transport.on('sctpstatechange', (sctpState) => {
-            log.debug('SCTP changed', {
+            log.debug('SCTP state changed', {
                 peer_name: peer_name,
                 transport_id: id,
                 sctpState: sctpState,
@@ -615,13 +615,13 @@ module.exports = class Room {
         });
 
         transport.on('dtlsstatechange', (dtlsState) => {
-            if (dtlsState === 'failed') {
-                log.warn('DTLS failed, closing transport', {
+            if (dtlsState === 'failed' || dtlsState === 'closed') {
+                log.warn('DTLS state changed, closing peer', {
                     peer_name: peer_name,
                     transport_id: id,
                     dtlsState: dtlsState,
                 });
-                transport.close();
+                peer.close();
             }
         });
 
