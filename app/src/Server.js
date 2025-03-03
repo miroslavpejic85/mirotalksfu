@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.63
+ * @version 1.7.64
  *
  */
 
@@ -1823,9 +1823,22 @@ function startServer() {
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            if (!peer) return;
+            if (!peer) {
+                console.error('Peer not found for socket:', socket.id);
+                return;
+            }
 
-            peer.updatePeerInfo(data); // peer_info.audio OR video OFF
+            if (typeof peer.updatePeerInfo !== 'function') {
+                console.error('updatePeerInfo is not a function on peer:', peer);
+                return;
+            }
+
+            peer.updatePeerInfo(data); // peer_info.audio OR video OFF //*
+
+            if (typeof room.closeProducer !== 'function') {
+                console.error('closeProducer is not a function on room:', room);
+                return;
+            }
 
             room.closeProducer(socket.id, data.producer_id);
         });

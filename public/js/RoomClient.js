@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.63
+ * @version 1.7.64
  *
  */
 
@@ -235,6 +235,12 @@ class RoomClient {
         this.maxReconnectAttempts = 5;
         this.reconnectInterval = 3000;
         this.maxReconnectInterval = 15000;
+
+        // Handle ICE
+        this.iceMaxRetries = 3;
+        this.iceRestarting = false;
+        this.iceProducerRestarting = false;
+        this.iceConsumerRestarting = false;
 
         this.room_id = room_id;
         this.peer_id = socket.id;
@@ -688,29 +694,30 @@ class RoomClient {
     // ####################################################
 
     async initTransports(device) {
-        // ####################################################
-        // PRODUCER TRANSPORT
-        // ####################################################
+        await this.initProducerTransport(device);
+        await this.initConsumerTransport(device);
+    }
 
+    // ####################################################
+    // PRODUCER TRANSPORT
+    // ####################################################
+
+    async initProducerTransport(device) {
         const producerTransportData = await this.socket.request('createWebRtcTransport', {
             forceTcp: false,
             rtpCapabilities: device.rtpCapabilities,
         });
 
         if (producerTransportData.error) {
-            console.error(producerTransportData.error);
+            console.error('Producer Transport creation failed', producerTransportData.error);
             return;
         }
 
-        producerTransportData['proprietaryConstraints'] = { optional: [{ googDscp: true }] };
-
         this.producerTransport = device.createSendTransport(producerTransportData);
+        this.setupProducerTransportHandlers();
+    }
 
-        console.info('07.4 producerTransportData ---->', {
-            producerTransportId: this.producerTransport.id,
-            producerTransportData: producerTransportData,
-        });
-
+    setupProducerTransportHandlers() {
         this.producerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
@@ -725,7 +732,6 @@ class RoomClient {
         });
 
         this.producerTransport.on('produce', async ({ kind, appData, rtpParameters }, callback, errback) => {
-            console.log('Going to produce', { kind, appData, rtpParameters });
             try {
                 const { producer_id } = await this.socket.request('produce', {
                     producerTransportId: this.producerTransport.id,
@@ -733,40 +739,42 @@ class RoomClient {
                     appData,
                     rtpParameters,
                 });
-                callback({
-                    id: producer_id,
-                });
+                callback({ id: producer_id });
             } catch (err) {
                 errback(err);
             }
         });
 
-        this.producerTransport.on('connectionstatechange', (state) => {
+        this.producerTransport.on('connectionstatechange', async (state) => {
+            console.log(`Producer Transport state changed to: ${state}`, { id: this.producerTransport.id });
+
             switch (state) {
                 case 'connecting':
                     console.log('Producer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('Producer Transport connected', { id: this.producerTransport.id });
+                    console.log('✅ Producer Transport connected', { id: this.producerTransport.id });
                     break;
                 case 'disconnected':
-                    console.log('Producer Transport disconnected', { id: this.producerTransport.id });
+                    console.warn('Producer Transport disconnected', { id: this.producerTransport.id });
+
+                    await this.restartProducerIce();
+
                     break;
                 case 'failed':
-                    console.warn('Producer Transport failed', { id: this.producerTransport.id });
+                    console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
 
                     this.producerTransport.close();
 
                     popupHtmlMessage(
                         null,
                         image.network,
-                        'Producer Transport failed',
-                        'Check Your Network Configuration',
+                        'Producer Transport',
+                        'Unable to connect. Please check your network.',
                         'center',
                         false,
                         true,
                     );
-
                     break;
                 default:
                     console.log('Producer transport connection state changes', {
@@ -776,34 +784,27 @@ class RoomClient {
                     break;
             }
         });
+    }
 
-        this.producerTransport.on('icegatheringstatechange', (state) => {
-            console.log('Producer icegatheringstatechange', {
-                state: state,
-                id: this.producerTransport.id,
-            });
-        });
+    // ####################################################
+    // CONSUMER TRANSPORT
+    // ####################################################
 
-        // ####################################################
-        // CONSUMER TRANSPORT
-        // ####################################################
-
+    async initConsumerTransport(device) {
         const consumerTransportData = await this.socket.request('createWebRtcTransport', {
             forceTcp: false,
         });
 
         if (consumerTransportData.error) {
-            console.error(consumerTransportData.error);
+            console.error('Consumer Transport creation failed', consumerTransportData.error);
             return;
         }
 
         this.consumerTransport = device.createRecvTransport(consumerTransportData);
+        this.setupConsumerTransportHandlers();
+    }
 
-        console.info('07.5 consumerTransportData ---->', {
-            consumerTransportId: this.consumerTransport.id,
-            consumerTransportData: consumerTransportData,
-        });
-
+    setupConsumerTransportHandlers() {
         this.consumerTransport.on('connect', async ({ dtlsParameters }, callback, errback) => {
             try {
                 await this.socket.request('connectTransport', {
@@ -817,32 +818,36 @@ class RoomClient {
             }
         });
 
-        this.consumerTransport.on('connectionstatechange', (state) => {
+        this.consumerTransport.on('connectionstatechange', async (state) => {
+            console.log(`Consumer Transport state changed to: ${state}`, { id: this.consumerTransport.id });
+
             switch (state) {
                 case 'connecting':
                     console.log('Consumer Transport connecting...');
                     break;
                 case 'connected':
-                    console.log('Consumer Transport connected', { id: this.consumerTransport.id });
+                    console.log('✅ Consumer Transport connected', { id: this.consumerTransport.id });
                     break;
                 case 'disconnected':
-                    console.log('Consumer Transport disconnected', { id: this.consumerTransport.id });
+                    console.warn('Consumer Transport disconnected', { id: this.consumerTransport.id });
+
+                    await this.restartConsumerIce();
+
                     break;
                 case 'failed':
-                    console.warn('Consumer Transport failed', { id: this.consumerTransport.id });
+                    console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
 
                     this.consumerTransport.close();
 
                     popupHtmlMessage(
                         null,
                         image.network,
-                        'Consumer Transport failed',
-                        'Check Your Network Configuration',
+                        'Consumer Transport',
+                        'Unable to connect. Please check your network.',
                         'center',
                         false,
                         true,
                     );
-
                     break;
                 default:
                     console.log('Consumer transport connection state changes', {
@@ -852,50 +857,111 @@ class RoomClient {
                     break;
             }
         });
-
-        this.consumerTransport.on('icegatheringstatechange', (state) => {
-            console.log('Consumer icegatheringstatechange', {
-                state: state,
-                id: this.consumerTransport.id,
-            });
-        });
-
-        // ####################################################
-        // TODO: DATA TRANSPORT
-        // ####################################################
-
-        //
     }
 
     // ####################################################
-    // RESTART ICE
+    // TODO: DATA TRANSPORT
     // ####################################################
 
-    async restartIce() {
-        console.log('Restart ICE...');
+    // ####################################################
+    // HANDLE ICE
+    // ####################################################
+
+    async restartTransportIce(transport, type) {
+        if (!transport || typeof transport !== 'object' || transport.closed || this[`ice${type}Restarting`]) return;
+
         try {
-            if (this.producerTransport) {
-                const iceParameters = await this.socket.request('restartIce', {
-                    transport_id: this.producerTransport.id,
-                });
+            this[`ice${type}Restarting`] = true;
 
-                console.log('Restarting producer transport ICE', iceParameters);
+            if (transport.connectionState !== 'disconnected') return;
 
-                await this.producerTransport.restartIce({ iceParameters });
+            console.warn(`🔄 Restarting ${type} ICE...`, {
+                id: transport.id,
+                state: transport.connectionState,
+            });
+
+            let retryCount = 0;
+            while (retryCount < this.iceMaxRetries) {
+                try {
+                    const iceParameters = await Promise.race([
+                        this.socket.request('restartIce', { transport_id: transport.id }),
+                        new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error('ICE restart timeout')), 5000 + retryCount * 5000),
+                        ),
+                    ]);
+
+                    if (!iceParameters) {
+                        console.warn(`⚠️ No ${type} ICE Parameters received.`);
+                        return;
+                    }
+
+                    console.info(`🚀 Restarting ${type} transport ICE`, iceParameters);
+                    await transport.restartIce({ iceParameters });
+
+                    console.info(`✅ Successfully restarted ${type} ICE`);
+                    return;
+                } catch (error) {
+                    retryCount++;
+                    console.error(`❌ ${type} ICE restart failed (attempt ${retryCount})`, {
+                        id: transport.id,
+                        error: error.message,
+                    });
+
+                    if (retryCount >= this.iceMaxRetries) {
+                        console.error(`🚨 Max retries reached for ${type} ICE restart.`);
+
+                        transport.close();
+
+                        popupHtmlMessage(
+                            null,
+                            image.network,
+                            'Transport closed',
+                            'Unable to reconnect. Please check your network.',
+                            'center',
+                            false,
+                            true,
+                        );
+                        return;
+                    }
+
+                    await new Promise((resolve) => setTimeout(resolve, 5000 * retryCount));
+                }
             }
-
-            if (this.consumerTransport) {
-                const iceParameters = await this.socket.request('restartIce', {
-                    transport_id: this.consumerTransport.id,
-                });
-
-                console.log('Restarting consumer transport ICE', iceParameters);
-
-                await this.consumerTransport.restartIce({ iceParameters });
-            }
-            console.log('Restart ICE done');
         } catch (error) {
-            console.error('Restart ICE error', error);
+            console.error(`🔥 Restart ${type} ICE error`, {
+                id: transport?.id,
+                error: error.message,
+            });
+        } finally {
+            this[`ice${type}Restarting`] = false;
+        }
+    }
+
+    async restartProducerIce() {
+        await this.restartTransportIce(this.producerTransport, 'Producer');
+    }
+
+    async restartConsumerIce() {
+        await this.restartTransportIce(this.consumerTransport, 'Consumer');
+    }
+
+    async restartIce() {
+        if (this.iceRestarting) return;
+
+        console.warn('Restart ICE...', {
+            producerTransportConnectionState: this.producerTransport.connectionState,
+            consumerTransportConnectionState: this.consumerTransport.connectionState,
+        });
+
+        try {
+            this.iceRestarting = true;
+            await this.restartProducerIce();
+            await this.restartConsumerIce();
+            console.log('✅ Restart ICE done');
+        } catch (error) {
+            console.error('❌ Restart ICE error', error);
+        } finally {
+            this.iceRestarting = false;
         }
     }
 
