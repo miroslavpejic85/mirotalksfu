@@ -3998,6 +3998,12 @@
                                 this.safeEmit('icegatheringstatechange', iceGatheringState);
                             }
                         });
+                        handler.on('@icecandidateerror', (event) => {
+                            logger.warn(
+                                `ICE candidate error [url:${event.url}, localAddress:${event.address}, localPort:${event.port}]: ${event.errorCode} "${event.errorText}"`,
+                            );
+                            this.safeEmit('icecandidateerror', event);
+                        });
                         handler.on('@connectionstatechange', (connectionState) => {
                             if (connectionState === this._connectionState) {
                                 return;
@@ -4469,6 +4475,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -5230,6 +5239,9 @@
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
                         });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -5844,6 +5856,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -6502,6 +6517,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -7206,6 +7224,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -8498,6 +8519,9 @@
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
                         });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -9277,6 +9301,9 @@
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
                         });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -10052,6 +10079,9 @@
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
                         });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -10688,6 +10718,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -11491,6 +11524,9 @@
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
                         });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
+                        });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
                                 this.emit('@connectionstatechange', this._pc.connectionState);
@@ -12153,6 +12189,9 @@
                         );
                         this._pc.addEventListener('icegatheringstatechange', () => {
                             this.emit('@icegatheringstatechange', this._pc.iceGatheringState);
+                        });
+                        this._pc.addEventListener('icecandidateerror', (event) => {
+                            this.emit('@icecandidateerror', event);
                         });
                         if (this._pc.connectionState) {
                             this._pc.addEventListener('connectionstatechange', () => {
@@ -14507,7 +14546,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.8.2';
+                exports.version = '3.9.1';
                 /**
                  * Expose parseScalabilityMode() function.
                  */

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.64
+ * @version 1.7.65
  *
  */
 
@@ -784,6 +784,20 @@ class RoomClient {
                     break;
             }
         });
+
+        this.producerTransport.on('icegatheringstatechange', (state) => {
+            console.warn('Producer ICE gathering change state', {
+                state: state,
+                id: this.producerTransport.id,
+            });
+        });
+
+        this.producerTransport.on('icecandidateerror', (error) => {
+            console.error('❌ Producer ICE candidate error', {
+                error: error,
+                id: this.producerTransport.id,
+            });
+        });
     }
 
     // ####################################################
@@ -856,6 +870,20 @@ class RoomClient {
                     });
                     break;
             }
+        });
+
+        this.consumerTransport.on('icegatheringstatechange', (state) => {
+            console.warn('Consumer ICE gathering change state', {
+                state: state,
+                id: this.consumerTransport.id,
+            });
+        });
+
+        this.consumerTransport.on('icecandidateerror', (error) => {
+            console.error('❌ Consumer ICE candidate error', {
+                error: error,
+                id: this.consumerTransport.id,
+            });
         });
     }
 
