@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.65
+ * @version 1.7.66
  *
  */
 
@@ -237,7 +237,6 @@ class RoomClient {
         this.maxReconnectInterval = 15000;
 
         // Handle ICE
-        this.iceMaxRetries = 3;
         this.iceRestarting = false;
         this.iceProducerRestarting = false;
         this.iceConsumerRestarting = false;
@@ -896,72 +895,33 @@ class RoomClient {
     // ####################################################
 
     async restartTransportIce(transport, type) {
-        if (!transport || typeof transport !== 'object' || transport.closed || this[`ice${type}Restarting`]) return;
+        if (!transport || typeof transport !== 'object' || transport.closed) return;
 
         try {
-            this[`ice${type}Restarting`] = true;
-
-            if (transport.connectionState !== 'disconnected') return;
-
             console.warn(`🔄 Restarting ${type} ICE...`, {
                 id: transport.id,
                 state: transport.connectionState,
             });
 
-            let retryCount = 0;
-            while (retryCount < this.iceMaxRetries) {
-                try {
-                    const iceParameters = await Promise.race([
-                        this.socket.request('restartIce', { transport_id: transport.id }),
-                        new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('ICE restart timeout')), 5000 + retryCount * 5000),
-                        ),
-                    ]);
+            const iceParameters = await this.socket.request('restartIce', {
+                transport_id: transport.id,
+            });
 
-                    if (!iceParameters) {
-                        console.warn(`⚠️ No ${type} ICE Parameters received.`);
-                        return;
-                    }
-
-                    console.info(`🚀 Restarting ${type} transport ICE`, iceParameters);
-                    await transport.restartIce({ iceParameters });
-
-                    console.info(`✅ Successfully restarted ${type} ICE`);
-                    return;
-                } catch (error) {
-                    retryCount++;
-                    console.error(`❌ ${type} ICE restart failed (attempt ${retryCount})`, {
-                        id: transport.id,
-                        error: error.message,
-                    });
-
-                    if (retryCount >= this.iceMaxRetries) {
-                        console.error(`🚨 Max retries reached for ${type} ICE restart.`);
-
-                        transport.close();
-
-                        popupHtmlMessage(
-                            null,
-                            image.network,
-                            'Transport closed',
-                            'Unable to reconnect. Please check your network.',
-                            'center',
-                            false,
-                            true,
-                        );
-                        return;
-                    }
-
-                    await new Promise((resolve) => setTimeout(resolve, 5000 * retryCount));
-                }
+            if (!iceParameters) {
+                console.warn(`⚠️ No ${type} ICE Parameters received`);
+                return;
             }
+
+            console.info(`🚀 Restarting ${type} transport ICE`, iceParameters);
+
+            await transport.restartIce({ iceParameters });
+
+            console.info(`✅ Successfully restarted ${type} ICE`);
         } catch (error) {
             console.error(`🔥 Restart ${type} ICE error`, {
                 id: transport?.id,
                 error: error.message,
             });
-        } finally {
-            this[`ice${type}Restarting`] = false;
         }
     }
 
