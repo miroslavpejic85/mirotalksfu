@@ -757,7 +757,11 @@ class RoomClient {
                 case 'disconnected':
                     console.warn('Producer Transport disconnected', { id: this.producerTransport.id });
 
-                    await this.restartProducerIce();
+                    setTimeout(async () => {
+                        if (this.producerTransport && this.producerTransport.connectionState === 'disconnected') {
+                            await this.restartProducerIce();
+                        }
+                    }, 5000);
 
                     break;
                 case 'failed':
@@ -844,7 +848,11 @@ class RoomClient {
                 case 'disconnected':
                     console.warn('Consumer Transport disconnected', { id: this.consumerTransport.id });
 
-                    await this.restartConsumerIce();
+                    setTimeout(async () => {
+                        if (this.consumerTransport && this.consumerTransport.connectionState === 'disconnected') {
+                            await this.restartConsumerIce();
+                        }
+                    }, 5000);
 
                     break;
                 case 'failed':
