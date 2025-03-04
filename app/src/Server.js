@@ -1821,26 +1821,17 @@ function startServer() {
         socket.on('producerClosed', (data) => {
             if (!roomExists(socket)) return;
 
-            const { room, peer } = getRoomAndPeer(socket);
+            try {
+                const { room, peer } = getRoomAndPeer(socket);
 
-            if (!peer) {
-                console.error('Peer not found for socket:', socket.id);
-                return;
+                if (!room || !peer) return;
+
+                peer.updatePeerInfo(data); // peer_info.audio OR video OFF
+
+                room.closeProducer(socket.id, data.producer_id);
+            } catch (err) {
+                log.error('Producer Close error', err.message);
             }
-
-            if (typeof peer.updatePeerInfo !== 'function') {
-                console.error('updatePeerInfo is not a function on peer:', peer);
-                return;
-            }
-
-            peer.updatePeerInfo(data); // peer_info.audio OR video OFF //*
-
-            if (typeof room.closeProducer !== 'function') {
-                console.error('closeProducer is not a function on room:', room);
-                return;
-            }
-
-            room.closeProducer(socket.id, data.producer_id);
         });
 
         socket.on('pauseProducer', async ({ producer_id, type }, callback) => {
