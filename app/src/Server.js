@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.67
+ * @version 1.7.68
  *
  */
 
@@ -435,11 +435,17 @@ function startServer() {
     if (OIDC.enabled) {
         const getDynamicConfig = (host, protocol) => {
             const baseURL = `${protocol}://${host}`;
-            log.debug('OIDC baseURL', baseURL);
-            return {
-                ...OIDC.config,
-                baseURL,
-            };
+
+            const config = OIDC.baseUrlDynamic
+                ? {
+                      ...OIDC.config,
+                      baseURL,
+                  }
+                : OIDC.config;
+
+            log.debug('OIDC baseURL', config.baseURL);
+
+            return config;
         };
 
         // Apply the authentication middleware using dynamic baseURL configuration

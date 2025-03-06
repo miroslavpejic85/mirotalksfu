@@ -195,6 +195,7 @@ module.exports = {
             For those seeking an open-source solution, check out: https://github.com/panva/node-oidc-provider
         */
         enabled: false,
+        baseURLDynamic: false,
         peer_name: {
             force: true, // Enforce using profile data for peer_name
             email: true, // Use email as peer_name
