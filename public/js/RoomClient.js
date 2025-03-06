@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.68
+ * @version 1.7.69
  *
  */
 
@@ -756,13 +756,6 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.warn('Producer Transport disconnected', { id: this.producerTransport.id });
-
-                    setTimeout(async () => {
-                        if (this.producerTransport && this.producerTransport.connectionState === 'disconnected') {
-                            await this.restartProducerIce();
-                        }
-                    }, 5000);
-
                     break;
                 case 'failed':
                     console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
@@ -847,13 +840,6 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.warn('Consumer Transport disconnected', { id: this.consumerTransport.id });
-
-                    setTimeout(async () => {
-                        if (this.consumerTransport && this.consumerTransport.connectionState === 'disconnected') {
-                            await this.restartConsumerIce();
-                        }
-                    }, 5000);
-
                     break;
                 case 'failed':
                     console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
