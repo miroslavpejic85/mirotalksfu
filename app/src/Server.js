@@ -1584,6 +1584,12 @@ function startServer() {
 
             const peer = room.getPeer(socket.id);
 
+            if (!peer) {
+                return cb({
+                    error: 'Peer does not exist in the room',
+                });
+            }
+
             peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
 
             log.info('[Join] - Is presenter', {
@@ -1962,11 +1968,13 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            log.debug('cmd', data);
-
             const room = getRoom(socket);
 
             const peer = getPeer(socket);
+
+            if (!room || !peer) return;
+
+            log.debug('cmd', data);
 
             switch (data.type) {
                 case 'privacy':
@@ -3028,13 +3036,13 @@ function startServer() {
         }
 
         function getRoom(socket) {
-            return roomList.get(socket.room_id) || {};
+            return roomList.get(socket.room_id) || null;
         }
 
         function getPeer(socket) {
             const room = getRoom(socket); // Reusing getRoom to retrieve the room
 
-            return room.getPeer ? room.getPeer(socket.id) || {} : {};
+            return room.getPeer ? room.getPeer(socket.id) || null : null;
         }
 
         function roomExists(socket) {
