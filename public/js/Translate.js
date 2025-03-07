@@ -21,6 +21,9 @@ function googleTranslateElementInit() {
     );
 
     const language = BRAND?.app?.language || 'en';
+
+    console.log('Language', language);
+
     if (language === 'en') return; // No need to switch if default is 'en'
 
     const observer = new MutationObserver(() => {
