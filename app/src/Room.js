@@ -547,7 +547,7 @@ module.exports = class Room {
             enableUdp: true,
             enableTcp: true,
             preferUdp: true,
-            iceConsentTimeout: 20,
+            iceConsentTimeout: 35,
             initialAvailableOutgoingBitrate,
         };
 
