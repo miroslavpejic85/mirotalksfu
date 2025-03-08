@@ -1836,9 +1836,7 @@ function startServer() {
             try {
                 const { room, peer } = getRoomAndPeer(socket);
 
-                if (!room || !peer) return;
-
-                peer.updatePeerInfo(data); // peer_info.audio OR video OFF
+                if (peer) peer.updatePeerInfo(data); // peer_info.audio OR video OFF
 
                 room.closeProducer(socket.id, data.producer_id);
             } catch (err) {
