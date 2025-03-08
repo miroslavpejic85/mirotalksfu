@@ -668,23 +668,26 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
 
+        const { peer_name, peer_info } = peer;
+
         let peerProducer;
+
         try {
             peerProducer = await peer.createProducer(producerTransportId, rtpParameters, kind, type);
         } catch (error) {
-            log.error(`Error creating producer for peer with socket ID ${socket_id}`, error);
+            log.error(`Error creating producer for peer ${peer_name} with socket ID ${socket_id}`, error);
             throw new Error(
-                `Error creating producer with transport ID ${producerTransportId} type ${type} for peer ${socket_id}`,
+                `Error creating producer for peer ${peer_name} with transport ID ${producerTransportId} type ${type} for peer ${socket_id}`,
             );
         }
 
         if (!peerProducer) {
-            throw new Error(`Failed to create producer with ID ${producerTransportId} for peer ${socket_id}`);
+            throw new Error(
+                `Failed to create producer for peer ${peer_name} with ID ${producerTransportId} for peer ${socket_id}`,
+            );
         }
 
         const { id } = peerProducer;
-
-        const { peer_name, peer_info } = peer;
 
         this.broadCast(socket_id, 'newProducers', [
             {
@@ -723,11 +726,15 @@ module.exports = class Room {
             throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
         }
 
-        if (!this.router.canConsume({ producerId, rtpCapabilities })) {
-            throw new Error(`Cannot consume producer with ID ${producerId} type ${type}, router validation failed`);
-        }
-
         const peer = this.getPeer(socket_id);
+
+        const { peer_name } = peer;
+
+        if (!this.router.canConsume({ producerId, rtpCapabilities })) {
+            throw new Error(
+                `Cannot consume producer for peer ${peer_name} with ID ${producerId} type ${type}, router validation failed`,
+            );
+        }
 
         let peerConsumer;
         try {
@@ -735,13 +742,13 @@ module.exports = class Room {
         } catch (error) {
             log.error(`Error creating consumer for peer with socket ID ${socket_id}`, error);
             throw new Error(
-                `Failed to create consumer with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`,
+                `Failed to create consumer for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`,
             );
         }
 
         if (!peerConsumer) {
             throw new Error(
-                `Consumer creation failed for transport ID ${consumer_transport_id} and producer ID ${producerId}`,
+                `Consumer creation failed for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId}`,
             );
         }
 
