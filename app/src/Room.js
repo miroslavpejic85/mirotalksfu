@@ -703,9 +703,7 @@ module.exports = class Room {
     }
 
     closeProducer(socket_id, producer_id) {
-        if (!this.peers.has(socket_id)) {
-            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
-        }
+        if (!this.peers.has(socket_id)) return;
 
         const peer = this.getPeer(socket_id);
 
