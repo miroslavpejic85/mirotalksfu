@@ -166,6 +166,10 @@ module.exports = class Peer {
         this.producers.delete(producer_id);
     }
 
+    addProducer(producer_id, producer) {
+        this.producers.set(producer_id, producer);
+    }
+
     async createProducer(producerTransportId, producer_rtpParameters, producer_kind, producer_type) {
         if (!this.transports.has(producerTransportId)) {
             throw new Error(`Producer transport with ID ${producerTransportId} not found`);
@@ -188,7 +192,7 @@ module.exports = class Peer {
 
         appData.mediaType = producer_type;
 
-        this.producers.set(id, producer);
+        this.addProducer(id, producer);
 
         if (['simulcast', 'svc'].includes(type)) {
             const { scalabilityMode } = rtpParameters.encodings[0];
@@ -252,6 +256,10 @@ module.exports = class Peer {
         this.consumers.delete(consumer_id);
     }
 
+    addConsumer(consumer_id, consumer) {
+        this.consumers.set(consumer_id, consumer);
+    }
+
     async createConsumer(consumer_transport_id, producerId, rtpCapabilities) {
         if (!this.transports.has(consumer_transport_id)) {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
@@ -275,7 +283,7 @@ module.exports = class Peer {
 
         const { id, type, kind, rtpParameters, producerPaused } = consumer;
 
-        this.consumers.set(id, consumer);
+        this.addConsumer(id, consumer);
 
         if (['simulcast', 'svc'].includes(type)) {
             // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
