@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.74
+ * @version 1.7.75
  *
  */
 
@@ -1678,7 +1678,7 @@ function startServer() {
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            const { peer_name } = peer || 'undefined';
+            const { peer_name, peer_info } = peer;
 
             log.debug('Create WebRtc transport', peer_name);
 
@@ -1689,7 +1689,10 @@ function startServer() {
 
                 callback(createWebRtcTransport);
             } catch (err) {
-                log.error('Create WebRtc Transport error', err);
+                log.error('Create WebRtc Transport error', {
+                    error: err,
+                    peer_info,
+                });
                 callback({ error: err.message });
             }
         });
@@ -1829,7 +1832,12 @@ function startServer() {
 
                 callback(params);
             } catch (err) {
-                log.error('Consumer transport error', err);
+                log.error('Consumer transport error', {
+                    error: err,
+                    type,
+                    producerId,
+                    rtpCapabilities,
+                });
                 callback({ error: err.message });
             }
         });

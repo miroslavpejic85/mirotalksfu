@@ -64,7 +64,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.7.74</strong>',
+        title: '<strong>WebRTC SFU v1.7.75</strong>',
         html: `
             <button 
                 id="support-button" 
