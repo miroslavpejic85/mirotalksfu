@@ -226,79 +226,10 @@
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.Logger = void 0;
-                const debug_1 = require('debug');
-                const LIB_NAME = 'awaitqueue';
-                class Logger {
-                    constructor(prefix) {
-                        if (prefix) {
-                            this._debug = (0, debug_1.default)(`${LIB_NAME}:${prefix}`);
-                            this._warn = (0, debug_1.default)(`${LIB_NAME}:WARN:${prefix}`);
-                            this._error = (0, debug_1.default)(`${LIB_NAME}:ERROR:${prefix}`);
-                        } else {
-                            this._debug = (0, debug_1.default)(LIB_NAME);
-                            this._warn = (0, debug_1.default)(`${LIB_NAME}:WARN`);
-                            this._error = (0, debug_1.default)(`${LIB_NAME}:ERROR`);
-                        }
-                        /* eslint-disable no-console */
-                        this._debug.log = console.info.bind(console);
-                        this._warn.log = console.warn.bind(console);
-                        this._error.log = console.error.bind(console);
-                        /* eslint-enable no-console */
-                    }
-                    get debug() {
-                        return this._debug;
-                    }
-                    get warn() {
-                        return this._warn;
-                    }
-                    get error() {
-                        return this._error;
-                    }
-                }
-                exports.Logger = Logger;
-            },
-            { debug: 4 },
-        ],
-        3: [
-            function (require, module, exports) {
-                'use strict';
-                Object.defineProperty(exports, '__esModule', { value: true });
-                exports.AwaitQueue = exports.AwaitQueueRemovedTaskError = exports.AwaitQueueStoppedError = void 0;
+                exports.AwaitQueue = void 0;
                 const Logger_1 = require('./Logger');
-                const logger = new Logger_1.Logger();
-                /**
-                 * Custom Error derived class used to reject pending tasks once stop() method
-                 * has been called.
-                 */
-                class AwaitQueueStoppedError extends Error {
-                    constructor(message) {
-                        super(message ?? 'AwaitQueue stopped');
-                        this.name = 'AwaitQueueStoppedError';
-                        // @ts-ignore
-                        if (typeof Error.captureStackTrace === 'function') {
-                            // @ts-ignore
-                            Error.captureStackTrace(this, AwaitQueueStoppedError);
-                        }
-                    }
-                }
-                exports.AwaitQueueStoppedError = AwaitQueueStoppedError;
-                /**
-                 * Custom Error derived class used to reject pending tasks once removeTask()
-                 * method has been called.
-                 */
-                class AwaitQueueRemovedTaskError extends Error {
-                    constructor(message) {
-                        super(message ?? 'AwaitQueue task removed');
-                        this.name = 'AwaitQueueRemovedTaskError';
-                        // @ts-ignore
-                        if (typeof Error.captureStackTrace === 'function') {
-                            // @ts-ignore
-                            Error.captureStackTrace(this, AwaitQueueRemovedTaskError);
-                        }
-                    }
-                }
-                exports.AwaitQueueRemovedTaskError = AwaitQueueRemovedTaskError;
+                const errors_1 = require('./errors');
+                const logger = new Logger_1.Logger('AwaitQueue');
                 class AwaitQueue {
                     constructor() {
                         // Queue of pending tasks (map of PendingTasks indexed by id).
@@ -307,6 +238,7 @@
                         this.nextTaskId = 0;
                         // Whether stop() method is stopping all pending tasks.
                         this.stopping = false;
+                        logger.debug('constructor()');
                     }
                     get size() {
                         return this.pendingTasks.size;
@@ -397,7 +329,7 @@
                         this.stopping = true;
                         for (const pendingTask of this.pendingTasks.values()) {
                             logger.debug(`stop() | stopping task [name:${pendingTask.name}]`);
-                            pendingTask.reject(new AwaitQueueStoppedError());
+                            pendingTask.reject(new errors_1.AwaitQueueStoppedError());
                         }
                         this.stopping = false;
                     }
@@ -408,7 +340,7 @@
                             logger.debug(`stop() | no task with given idx [taskIdx:${taskIdx}]`);
                             return;
                         }
-                        pendingTask.reject(new AwaitQueueRemovedTaskError());
+                        pendingTask.reject(new errors_1.AwaitQueueRemovedTaskError());
                     }
                     dump() {
                         const now = Date.now();
@@ -441,9 +373,111 @@
                 }
                 exports.AwaitQueue = AwaitQueue;
             },
-            { './Logger': 2 },
+            { './Logger': 3, './errors': 4 },
+        ],
+        3: [
+            function (require, module, exports) {
+                'use strict';
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.Logger = void 0;
+                const debug = require('debug');
+                const LIB_NAME = 'awaitqueue';
+                class Logger {
+                    constructor(prefix) {
+                        if (prefix) {
+                            this._debug = debug(`${LIB_NAME}:${prefix}`);
+                            this._warn = debug(`${LIB_NAME}:WARN:${prefix}`);
+                            this._error = debug(`${LIB_NAME}:ERROR:${prefix}`);
+                        } else {
+                            this._debug = debug(LIB_NAME);
+                            this._warn = debug(`${LIB_NAME}:WARN`);
+                            this._error = debug(`${LIB_NAME}:ERROR`);
+                        }
+                        /* eslint-disable no-console */
+                        this._debug.log = console.info.bind(console);
+                        this._warn.log = console.warn.bind(console);
+                        this._error.log = console.error.bind(console);
+                        /* eslint-enable no-console */
+                    }
+                    get debug() {
+                        return this._debug;
+                    }
+                    get warn() {
+                        return this._warn;
+                    }
+                    get error() {
+                        return this._error;
+                    }
+                }
+                exports.Logger = Logger;
+            },
+            { debug: 6 },
         ],
         4: [
+            function (require, module, exports) {
+                'use strict';
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.AwaitQueueRemovedTaskError = exports.AwaitQueueStoppedError = void 0;
+                /**
+                 * Custom Error derived class used to reject pending tasks once stop() method
+                 * has been called.
+                 */
+                class AwaitQueueStoppedError extends Error {
+                    constructor(message) {
+                        super(message ?? 'queue stopped');
+                        this.name = 'AwaitQueueStoppedError';
+                        if (typeof Error.captureStackTrace === 'function') {
+                            Error.captureStackTrace(this, AwaitQueueStoppedError);
+                        }
+                    }
+                }
+                exports.AwaitQueueStoppedError = AwaitQueueStoppedError;
+                /**
+                 * Custom Error derived class used to reject pending tasks once removeTask()
+                 * method has been called.
+                 */
+                class AwaitQueueRemovedTaskError extends Error {
+                    constructor(message) {
+                        super(message ?? 'queue task removed');
+                        this.name = 'AwaitQueueRemovedTaskError';
+                        if (typeof Error.captureStackTrace === 'function') {
+                            Error.captureStackTrace(this, AwaitQueueRemovedTaskError);
+                        }
+                    }
+                }
+                exports.AwaitQueueRemovedTaskError = AwaitQueueRemovedTaskError;
+            },
+            {},
+        ],
+        5: [
+            function (require, module, exports) {
+                'use strict';
+                Object.defineProperty(exports, '__esModule', { value: true });
+                exports.AwaitQueueRemovedTaskError = exports.AwaitQueueStoppedError = exports.AwaitQueue = void 0;
+                var AwaitQueue_1 = require('./AwaitQueue');
+                Object.defineProperty(exports, 'AwaitQueue', {
+                    enumerable: true,
+                    get: function () {
+                        return AwaitQueue_1.AwaitQueue;
+                    },
+                });
+                var errors_1 = require('./errors');
+                Object.defineProperty(exports, 'AwaitQueueStoppedError', {
+                    enumerable: true,
+                    get: function () {
+                        return errors_1.AwaitQueueStoppedError;
+                    },
+                });
+                Object.defineProperty(exports, 'AwaitQueueRemovedTaskError', {
+                    enumerable: true,
+                    get: function () {
+                        return errors_1.AwaitQueueRemovedTaskError;
+                    },
+                });
+            },
+            { './AwaitQueue': 2, './errors': 4 },
+        ],
+        6: [
             function (require, module, exports) {
                 (function (process) {
                     (function () {
@@ -746,9 +780,9 @@
                     }).call(this);
                 }).call(this, require('_process'));
             },
-            { './common': 5, _process: 1 },
+            { './common': 7, _process: 1 },
         ],
-        5: [
+        7: [
             function (require, module, exports) {
                 /**
                  * This is the common logic for both the Node.js and web browser
@@ -1050,9 +1084,9 @@
 
                 module.exports = setup;
             },
-            { ms: 6 },
+            { ms: 8 },
         ],
-        6: [
+        8: [
             function (require, module, exports) {
                 /**
                  * Helpers.
@@ -1217,7 +1251,7 @@
             },
             {},
         ],
-        7: [
+        9: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -1258,31 +1292,27 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 9 },
+            { debug: 11 },
         ],
-        8: [
+        10: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
-                exports.generateProfileLevelIdStringForAnswer =
-                    exports.isSameProfile =
-                    exports.parseSdpProfileLevelId =
-                    exports.levelToString =
-                    exports.profileToString =
-                    exports.profileLevelIdToString =
-                    exports.parseProfileLevelId =
-                    exports.ProfileLevelId =
-                    exports.Level =
-                    exports.Profile =
-                        void 0;
+                exports.ProfileLevelId = exports.Level = exports.Profile = void 0;
+                exports.parseProfileLevelId = parseProfileLevelId;
+                exports.profileLevelIdToString = profileLevelIdToString;
+                exports.profileToString = profileToString;
+                exports.levelToString = levelToString;
+                exports.parseSdpProfileLevelId = parseSdpProfileLevelId;
+                exports.isSameProfile = isSameProfile;
+                exports.isSameProfileAndLevel = isSameProfileAndLevel;
+                exports.generateProfileLevelIdStringForAnswer = generateProfileLevelIdStringForAnswer;
+                exports.supportedLevel = supportedLevel;
                 const Logger_1 = require('./Logger');
                 const logger = new Logger_1.Logger();
                 /**
                  * Supported profiles.
                  */
-                // ESLint absurdly complains about "'Profile' is already declared in
-                // the upper scope".
-                // eslint-disable-next-line no-shadow
                 var Profile;
                 (function (Profile) {
                     Profile[(Profile['ConstrainedBaseline'] = 1)] = 'ConstrainedBaseline';
@@ -1295,9 +1325,6 @@
                 /**
                  * Supported levels.
                  */
-                // ESLint absurdly complains about "'Level' is already declared in
-                // the upper scope".
-                // eslint-disable-next-line no-shadow
                 var Level;
                 (function (Level) {
                     Level[(Level['L1_b'] = 0)] = 'L1_b';
@@ -1374,6 +1401,94 @@
                     new ProfilePattern(0x64, new BitPattern('00001100'), Profile.ConstrainedHigh),
                     new ProfilePattern(0xf4, new BitPattern('00000000'), Profile.PredictiveHigh444),
                 ];
+                // This is from ITU-T H.264 (02/2016) Table A-1 – Level limits.
+                const LevelConstraints = [
+                    {
+                        max_macroblocks_per_second: 1485,
+                        max_macroblock_frame_size: 99,
+                        level: Level.L1,
+                    },
+                    {
+                        max_macroblocks_per_second: 1485,
+                        max_macroblock_frame_size: 99,
+                        level: Level.L1_b,
+                    },
+                    {
+                        max_macroblocks_per_second: 3000,
+                        max_macroblock_frame_size: 396,
+                        level: Level.L1_1,
+                    },
+                    {
+                        max_macroblocks_per_second: 6000,
+                        max_macroblock_frame_size: 396,
+                        level: Level.L1_2,
+                    },
+                    {
+                        max_macroblocks_per_second: 11880,
+                        max_macroblock_frame_size: 396,
+                        level: Level.L1_3,
+                    },
+                    {
+                        max_macroblocks_per_second: 11880,
+                        max_macroblock_frame_size: 396,
+                        level: Level.L2,
+                    },
+                    {
+                        max_macroblocks_per_second: 19800,
+                        max_macroblock_frame_size: 792,
+                        level: Level.L2_1,
+                    },
+                    {
+                        max_macroblocks_per_second: 20250,
+                        max_macroblock_frame_size: 1620,
+                        level: Level.L2_2,
+                    },
+                    {
+                        max_macroblocks_per_second: 40500,
+                        max_macroblock_frame_size: 1620,
+                        level: Level.L3,
+                    },
+                    {
+                        max_macroblocks_per_second: 108000,
+                        max_macroblock_frame_size: 3600,
+                        level: Level.L3_1,
+                    },
+                    {
+                        max_macroblocks_per_second: 216000,
+                        max_macroblock_frame_size: 5120,
+                        level: Level.L3_2,
+                    },
+                    {
+                        max_macroblocks_per_second: 245760,
+                        max_macroblock_frame_size: 8192,
+                        level: Level.L4,
+                    },
+                    {
+                        max_macroblocks_per_second: 245760,
+                        max_macroblock_frame_size: 8192,
+                        level: Level.L4_1,
+                    },
+                    {
+                        max_macroblocks_per_second: 522240,
+                        max_macroblock_frame_size: 8704,
+                        level: Level.L4_2,
+                    },
+                    {
+                        max_macroblocks_per_second: 589824,
+                        max_macroblock_frame_size: 22080,
+                        level: Level.L5,
+                    },
+                    {
+                        max_macroblocks_per_second: 983040,
+                        max_macroblock_frame_size: 36864,
+                        level: Level.L5_1,
+                    },
+                    {
+                        max_macroblocks_per_second: 2073600,
+                        max_macroblock_frame_size: 36864,
+                        level: Level.L5_2,
+                    },
+                ];
                 /**
                  * Parse profile level id that is represented as a string of 3 hex bytes.
                  * Nothing will be returned if the string is not a recognized H264 profile
@@ -1431,6 +1546,9 @@
                     // Parse profile_idc/profile_iop into a Profile enum.
                     for (const pattern of ProfilePatterns) {
                         if (profile_idc === pattern.profile_idc && pattern.profile_iop.isMatch(profile_iop)) {
+                            logger.debug(
+                                `parseProfileLevelId() | result [str:${str}, profile:${pattern.profile}, level:${level}]`,
+                            );
                             return new ProfileLevelId(pattern.profile, level);
                         }
                     }
@@ -1439,7 +1557,6 @@
                     );
                     return undefined;
                 }
-                exports.parseProfileLevelId = parseProfileLevelId;
                 /**
                  * Returns canonical string representation as three hex bytes of the profile
                  * level id, or returns nothing for invalid profile level ids.
@@ -1503,7 +1620,6 @@
                     }
                     return `${profile_idc_iop_string}${levelStr}`;
                 }
-                exports.profileLevelIdToString = profileLevelIdToString;
                 /**
                  * Returns a human friendly name for the given profile.
                  */
@@ -1533,7 +1649,6 @@
                         }
                     }
                 }
-                exports.profileToString = profileToString;
                 /**
                  * Returns a human friendly name for the given level.
                  */
@@ -1596,7 +1711,6 @@
                         }
                     }
                 }
-                exports.levelToString = levelToString;
                 /**
                  * Parse profile level id that is represented as a string of 3 hex bytes
                  * contained in an SDP key-value map. A default profile level id will be
@@ -1607,10 +1721,9 @@
                     const profile_level_id = params['profile-level-id'];
                     return profile_level_id ? parseProfileLevelId(profile_level_id) : DefaultProfileLevelId;
                 }
-                exports.parseSdpProfileLevelId = parseSdpProfileLevelId;
                 /**
-                 * Returns true if the parameters have the same H264 profile, i.e. the same
-                 * H264 profile (Baseline, High, etc).
+                 * Returns true if the codec parameters have the same H264 profile, i.e. the
+                 * same H264 profile (Baseline, High, etc).
                  */
                 function isSameProfile(params1 = {}, params2 = {}) {
                     const profile_level_id_1 = parseSdpProfileLevelId(params1);
@@ -1622,7 +1735,21 @@
                             profile_level_id_1.profile === profile_level_id_2.profile,
                     );
                 }
-                exports.isSameProfile = isSameProfile;
+                /**
+                 * Returns true if the codec parameters have the same H264 profile, i.e. the
+                 * same H264 profile (Baseline, High, etc) and same level.
+                 */
+                function isSameProfileAndLevel(params1 = {}, params2 = {}) {
+                    const profile_level_id_1 = parseSdpProfileLevelId(params1);
+                    const profile_level_id_2 = parseSdpProfileLevelId(params2);
+                    // Compare H264 profiles, but not levels.
+                    return Boolean(
+                        profile_level_id_1 &&
+                            profile_level_id_2 &&
+                            profile_level_id_1.profile === profile_level_id_2.profile &&
+                            profile_level_id_1.level == profile_level_id_2.level,
+                    );
+                }
                 /**
                  * Generate codec parameters that will be used as answer in an SDP negotiation
                  * based on local supported parameters and remote offered parameters. Both
@@ -1684,7 +1811,33 @@
                     // Return the resulting profile-level-id for the answer parameters.
                     return profileLevelIdToString(new ProfileLevelId(local_profile_level_id.profile, answer_level));
                 }
-                exports.generateProfileLevelIdStringForAnswer = generateProfileLevelIdStringForAnswer;
+                /**
+                 * Given that a decoder supports up to a given frame size (in pixels) at up to
+                 * a given number of frames per second, return the highest H264 level where it
+                 * can guarantee that it will be able to support all valid encoded streams that
+                 * are within that level.
+                 */
+                function supportedLevel(max_frame_pixel_count, max_fps) {
+                    const PixelsPerMacroblock = 16 * 16;
+                    for (let i = LevelConstraints.length - 1; i >= 0; --i) {
+                        const level_constraint = LevelConstraints[i];
+                        if (
+                            level_constraint.max_macroblock_frame_size * PixelsPerMacroblock <= max_frame_pixel_count &&
+                            level_constraint.max_macroblocks_per_second <=
+                                max_fps * level_constraint.max_macroblock_frame_size
+                        ) {
+                            logger.debug(
+                                `supportedLevel() | result [max_frame_pixel_count:${max_frame_pixel_count}, max_fps:${max_fps}, level:${level_constraint.level}]`,
+                            );
+                            return level_constraint.level;
+                        }
+                    }
+                    // No level supported.
+                    logger.warn(
+                        `supportedLevel() | no level supported [max_frame_pixel_count:${max_frame_pixel_count}, max_fps:${max_fps}]`,
+                    );
+                    return undefined;
+                }
                 /**
                  * Convert a string of 8 characters into a byte where the positions containing
                  * character c will have their bit set. For example, c = 'x', str = "x1xx0000"
@@ -1724,27 +1877,27 @@
                     );
                 }
             },
-            { './Logger': 7 },
-        ],
-        9: [
-            function (require, module, exports) {
-                arguments[4][4][0].apply(exports, arguments);
-            },
-            { './common': 10, _process: 1, dup: 4 },
-        ],
-        10: [
-            function (require, module, exports) {
-                arguments[4][5][0].apply(exports, arguments);
-            },
-            { dup: 5, ms: 11 },
+            { './Logger': 9 },
         ],
         11: [
             function (require, module, exports) {
                 arguments[4][6][0].apply(exports, arguments);
             },
-            { dup: 6 },
+            { './common': 12, _process: 1, dup: 6 },
         ],
         12: [
+            function (require, module, exports) {
+                arguments[4][7][0].apply(exports, arguments);
+            },
+            { dup: 7, ms: 13 },
+        ],
+        13: [
+            function (require, module, exports) {
+                arguments[4][8][0].apply(exports, arguments);
+            },
+            { dup: 8 },
+        ],
+        14: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -1936,9 +2089,9 @@
                 }
                 exports.Consumer = Consumer;
             },
-            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
+            { './Logger': 18, './enhancedEvents': 23, './errors': 24 },
         ],
-        13: [
+        15: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2106,9 +2259,9 @@
                 }
                 exports.DataConsumer = DataConsumer;
             },
-            { './Logger': 16, './enhancedEvents': 21 },
+            { './Logger': 18, './enhancedEvents': 23 },
         ],
-        14: [
+        16: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -2294,9 +2447,9 @@
                 }
                 exports.DataProducer = DataProducer;
             },
-            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
+            { './Logger': 18, './enhancedEvents': 23, './errors': 24 },
         ],
-        15: [
+        17: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -2827,28 +2980,28 @@
                 exports.Device = Device;
             },
             {
-                './Logger': 16,
-                './Transport': 20,
-                './enhancedEvents': 21,
-                './errors': 22,
-                './handlers/Chrome111': 23,
-                './handlers/Chrome55': 24,
-                './handlers/Chrome67': 25,
-                './handlers/Chrome70': 26,
-                './handlers/Chrome74': 27,
-                './handlers/Edge11': 28,
-                './handlers/Firefox120': 29,
-                './handlers/Firefox60': 30,
-                './handlers/ReactNative': 32,
-                './handlers/ReactNativeUnifiedPlan': 33,
-                './handlers/Safari11': 34,
-                './handlers/Safari12': 35,
-                './ortc': 44,
-                './utils': 47,
-                'ua-parser-js': 57,
+                './Logger': 18,
+                './Transport': 22,
+                './enhancedEvents': 23,
+                './errors': 24,
+                './handlers/Chrome111': 25,
+                './handlers/Chrome55': 26,
+                './handlers/Chrome67': 27,
+                './handlers/Chrome70': 28,
+                './handlers/Chrome74': 29,
+                './handlers/Edge11': 30,
+                './handlers/Firefox120': 31,
+                './handlers/Firefox60': 32,
+                './handlers/ReactNative': 34,
+                './handlers/ReactNativeUnifiedPlan': 35,
+                './handlers/Safari11': 36,
+                './handlers/Safari12': 37,
+                './ortc': 46,
+                './utils': 49,
+                'ua-parser-js': 59,
             },
         ],
-        16: [
+        18: [
             function (require, module, exports) {
                 'use strict';
                 var __importDefault =
@@ -2889,9 +3042,9 @@
                 }
                 exports.Logger = Logger;
             },
-            { debug: 48 },
+            { debug: 50 },
         ],
-        17: [
+        19: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -3184,9 +3337,9 @@
                 }
                 exports.Producer = Producer;
             },
-            { './Logger': 16, './enhancedEvents': 21, './errors': 22 },
+            { './Logger': 18, './enhancedEvents': 23, './errors': 24 },
         ],
-        18: [
+        20: [
             function (require, module, exports) {
                 'use strict';
                 /**
@@ -3197,14 +3350,14 @@
             },
             {},
         ],
-        19: [
+        21: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
             },
             {},
         ],
-        20: [
+        22: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -4150,20 +4303,20 @@
                 exports.Transport = Transport;
             },
             {
-                './Consumer': 12,
-                './DataConsumer': 13,
-                './DataProducer': 14,
-                './Logger': 16,
-                './Producer': 17,
-                './enhancedEvents': 21,
-                './errors': 22,
-                './ortc': 44,
-                './utils': 47,
-                awaitqueue: 3,
-                'queue-microtask': 52,
+                './Consumer': 14,
+                './DataConsumer': 15,
+                './DataProducer': 16,
+                './Logger': 18,
+                './Producer': 19,
+                './enhancedEvents': 23,
+                './errors': 24,
+                './ortc': 46,
+                './utils': 49,
+                awaitqueue: 5,
+                'queue-microtask': 54,
             },
         ],
-        21: [
+        23: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4243,9 +4396,9 @@
                 }
                 exports.EnhancedEventEmitter = EnhancedEventEmitter;
             },
-            { './Logger': 16, 'npm-events-package': 51 },
+            { './Logger': 18, 'npm-events-package': 53 },
         ],
-        22: [
+        24: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -4284,7 +4437,7 @@
             },
             {},
         ],
-        23: [
+        25: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5038,20 +5191,20 @@
                 exports.Chrome111 = Chrome111;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './ortc/utils': 37,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './ortc/utils': 39,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        24: [
+        26: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -5659,18 +5812,18 @@
                 exports.Chrome55 = Chrome55;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/planBUtils': 41,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/planBUtils': 43,
+                'sdp-transform': 56,
             },
         ],
-        25: [
+        27: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -6327,17 +6480,17 @@
                 exports.Chrome67 = Chrome67;
             },
             {
-                '../Logger': 16,
-                '../ortc': 44,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/planBUtils': 41,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../ortc': 46,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/planBUtils': 43,
+                'sdp-transform': 56,
             },
         ],
-        26: [
+        28: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7023,18 +7176,18 @@
                 exports.Chrome70 = Chrome70;
             },
             {
-                '../Logger': 16,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        27: [
+        29: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -7797,20 +7950,20 @@
                 exports.Chrome74 = Chrome74;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './ortc/utils': 37,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './ortc/utils': 39,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        28: [
+        30: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -8302,15 +8455,15 @@
                 exports.Edge11 = Edge11;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './ortc/edgeUtils': 36,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './ortc/edgeUtils': 38,
             },
         ],
-        29: [
+        31: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9078,19 +9231,19 @@
                 exports.Firefox120 = Firefox120;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        30: [
+        32: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -9860,19 +10013,19 @@
                 exports.Firefox60 = Firefox60;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        31: [
+        33: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -9885,9 +10038,9 @@
                 }
                 exports.HandlerInterface = HandlerInterface;
             },
-            { '../enhancedEvents': 21 },
+            { '../enhancedEvents': 23 },
         ],
-        32: [
+        34: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -10512,18 +10665,18 @@
                 exports.ReactNative = ReactNative;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/planBUtils': 41,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/planBUtils': 43,
+                'sdp-transform': 56,
             },
         ],
-        33: [
+        35: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11325,20 +11478,20 @@
                 exports.ReactNativeUnifiedPlan = ReactNativeUnifiedPlan;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './ortc/utils': 37,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './ortc/utils': 39,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        34: [
+        36: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -11990,17 +12143,17 @@
                 exports.Safari11 = Safari11;
             },
             {
-                '../Logger': 16,
-                '../ortc': 44,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/planBUtils': 41,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../ortc': 46,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/planBUtils': 43,
+                'sdp-transform': 56,
             },
         ],
-        35: [
+        37: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12749,20 +12902,20 @@
                 exports.Safari12 = Safari12;
             },
             {
-                '../Logger': 16,
-                '../errors': 22,
-                '../ortc': 44,
-                '../scalabilityModes': 45,
-                '../utils': 47,
-                './HandlerInterface': 31,
-                './ortc/utils': 37,
-                './sdp/RemoteSdp': 39,
-                './sdp/commonUtils': 40,
-                './sdp/unifiedPlanUtils': 42,
-                'sdp-transform': 54,
+                '../Logger': 18,
+                '../errors': 24,
+                '../ortc': 46,
+                '../scalabilityModes': 47,
+                '../utils': 49,
+                './HandlerInterface': 33,
+                './ortc/utils': 39,
+                './sdp/RemoteSdp': 41,
+                './sdp/commonUtils': 42,
+                './sdp/unifiedPlanUtils': 44,
+                'sdp-transform': 56,
             },
         ],
-        36: [
+        38: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -12887,9 +13040,9 @@
                     return params;
                 }
             },
-            { '../../utils': 47 },
+            { '../../utils': 49 },
         ],
-        37: [
+        39: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12914,7 +13067,7 @@
             },
             {},
         ],
-        38: [
+        40: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13560,9 +13713,9 @@
                     return mimeTypeMatch[2];
                 }
             },
-            { '../../utils': 47, 'sdp-transform': 54 },
+            { '../../utils': 49, 'sdp-transform': 56 },
         ],
-        39: [
+        41: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -13910,9 +14063,9 @@
                 }
                 exports.RemoteSdp = RemoteSdp;
             },
-            { '../../Logger': 16, './MediaSection': 38, 'sdp-transform': 54 },
+            { '../../Logger': 18, './MediaSection': 40, 'sdp-transform': 56 },
         ],
-        40: [
+        42: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -14020,7 +14173,7 @@
                             codecsMap.set(codec.preferredPayloadType, codec);
                         }
                         // Get codec parameters.
-                        for (const fmtp of m.fmtp || []) {
+                        for (const fmtp of m.fmtp ?? []) {
                             const parameters = sdpTransform.parseParams(fmtp.config);
                             const codec = codecsMap.get(fmtp.payload);
                             if (!codec) {
@@ -14033,7 +14186,7 @@
                             codec.parameters = parameters;
                         }
                         // Get RTCP feedback for each codec.
-                        for (const fb of m.rtcpFb || []) {
+                        for (const fb of m.rtcpFb ?? []) {
                             const feedback = {
                                 type: fb.type,
                                 parameter: fb.subtype,
@@ -14061,7 +14214,7 @@
                             }
                         }
                         // Get RTP header extensions.
-                        for (const ext of m.ext || []) {
+                        for (const ext of m.ext ?? []) {
                             // Ignore encrypted extensions (not yet supported in mediasoup).
                             if (ext['encrypt-uri']) {
                                 continue;
@@ -14084,7 +14237,7 @@
                     let setup = sdpObject.setup;
                     let fingerprint = sdpObject.fingerprint;
                     if (!setup || !fingerprint) {
-                        const mediaObject = (sdpObject.media || []).find((m) => m.port !== 0);
+                        const mediaObject = (sdpObject.media ?? []).find((m) => m.port !== 0);
                         if (mediaObject) {
                             setup ?? (setup = mediaObject.setup);
                             fingerprint ?? (fingerprint = mediaObject.fingerprint);
@@ -14122,7 +14275,7 @@
                     return dtlsParameters;
                 }
                 function getCname({ offerMediaObject }) {
-                    const ssrcCnameLine = (offerMediaObject.ssrcs || []).find((line) => line.attribute === 'cname');
+                    const ssrcCnameLine = (offerMediaObject.ssrcs ?? []).find((line) => line.attribute === 'cname');
                     if (!ssrcCnameLine) {
                         return '';
                     }
@@ -14139,12 +14292,12 @@
                         if (mimeType !== 'audio/opus') {
                             continue;
                         }
-                        const rtp = (answerMediaObject.rtp || []).find((r) => r.payload === codec.payloadType);
+                        const rtp = (answerMediaObject.rtp ?? []).find((r) => r.payload === codec.payloadType);
                         if (!rtp) {
                             continue;
                         }
                         // Just in case.
-                        answerMediaObject.fmtp = answerMediaObject.fmtp || [];
+                        answerMediaObject.fmtp = answerMediaObject.fmtp ?? [];
                         let fmtp = answerMediaObject.fmtp.find((f) => f.payload === codec.payloadType);
                         if (!fmtp) {
                             fmtp = { payload: codec.payloadType, config: '' };
@@ -14171,9 +14324,9 @@
                     }
                 }
             },
-            { 'sdp-transform': 54 },
+            { 'sdp-transform': 56 },
         ],
-        41: [
+        43: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14183,7 +14336,7 @@
                     // First media SSRC (or the only one).
                     let firstSsrc;
                     const ssrcs = new Set();
-                    for (const line of offerMediaObject.ssrcs || []) {
+                    for (const line of offerMediaObject.ssrcs ?? []) {
                         if (line.attribute !== 'msid') {
                             continue;
                         }
@@ -14201,7 +14354,7 @@
                     }
                     const ssrcToRtxSsrc = new Map();
                     // First assume RTX is used.
-                    for (const line of offerMediaObject.ssrcGroups || []) {
+                    for (const line of offerMediaObject.ssrcGroups ?? []) {
                         if (line.semantics !== 'FID') {
                             continue;
                         }
@@ -14244,7 +14397,7 @@
                     let firstRtxSsrc;
                     let streamId;
                     // Get the SSRC.
-                    const ssrcMsidLine = (offerMediaObject.ssrcs || []).find((line) => {
+                    const ssrcMsidLine = (offerMediaObject.ssrcs ?? []).find((line) => {
                         if (line.attribute !== 'msid') {
                             return false;
                         }
@@ -14261,7 +14414,7 @@
                         throw new Error(`a=ssrc line with msid information not found [track.id:${track.id}]`);
                     }
                     // Get the SSRC for RTX.
-                    (offerMediaObject.ssrcGroups || []).some((line) => {
+                    (offerMediaObject.ssrcGroups ?? []).some((line) => {
                         if (line.semantics !== 'FID') {
                             return false;
                         }
@@ -14288,8 +14441,8 @@
                             rtxSsrcs.push(firstRtxSsrc + i);
                         }
                     }
-                    offerMediaObject.ssrcGroups = offerMediaObject.ssrcGroups || [];
-                    offerMediaObject.ssrcs = offerMediaObject.ssrcs || [];
+                    offerMediaObject.ssrcGroups = offerMediaObject.ssrcGroups ?? [];
+                    offerMediaObject.ssrcs = offerMediaObject.ssrcs ?? [];
                     offerMediaObject.ssrcGroups.push({
                         semantics: 'SIM',
                         ssrcs: ssrcs.join(' '),
@@ -14328,7 +14481,7 @@
             },
             {},
         ],
-        42: [
+        44: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14336,7 +14489,7 @@
                 exports.addLegacySimulcast = addLegacySimulcast;
                 function getRtpEncodings({ offerMediaObject }) {
                     const ssrcs = new Set();
-                    for (const line of offerMediaObject.ssrcs || []) {
+                    for (const line of offerMediaObject.ssrcs ?? []) {
                         const ssrc = line.id;
                         ssrcs.add(ssrc);
                     }
@@ -14345,7 +14498,7 @@
                     }
                     const ssrcToRtxSsrc = new Map();
                     // First assume RTX is used.
-                    for (const line of offerMediaObject.ssrcGroups || []) {
+                    for (const line of offerMediaObject.ssrcGroups ?? []) {
                         if (line.semantics !== 'FID') {
                             continue;
                         }
@@ -14385,7 +14538,7 @@
                         throw new TypeError('numStreams must be greater than 1');
                     }
                     // Get the SSRC.
-                    const ssrcMsidLine = (offerMediaObject.ssrcs || []).find((line) => line.attribute === 'msid');
+                    const ssrcMsidLine = (offerMediaObject.ssrcs ?? []).find((line) => line.attribute === 'msid');
                     if (!ssrcMsidLine) {
                         throw new Error('a=ssrc line with msid information not found');
                     }
@@ -14393,7 +14546,7 @@
                     const firstSsrc = Number(ssrcMsidLine.id);
                     let firstRtxSsrc;
                     // Get the SSRC for RTX.
-                    (offerMediaObject.ssrcGroups || []).some((line) => {
+                    (offerMediaObject.ssrcGroups ?? []).some((line) => {
                         if (line.semantics !== 'FID') {
                             return false;
                         }
@@ -14458,7 +14611,7 @@
             },
             {},
         ],
-        43: [
+        45: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -14546,7 +14699,7 @@
                 /**
                  * Expose mediasoup-client version.
                  */
-                exports.version = '3.9.1';
+                exports.version = '3.9.2';
                 /**
                  * Expose parseScalabilityMode() function.
                  */
@@ -14558,9 +14711,9 @@
                     },
                 });
             },
-            { './Device': 15, './scalabilityModes': 45, './types': 46, debug: 48 },
+            { './Device': 17, './scalabilityModes': 47, './types': 48, debug: 50 },
         ],
-        44: [
+        46: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -15433,8 +15586,8 @@
                     switch (aMimeType) {
                         case 'video/h264': {
                             if (strict) {
-                                const aPacketizationMode = aCodec.parameters['packetization-mode'] || 0;
-                                const bPacketizationMode = bCodec.parameters['packetization-mode'] || 0;
+                                const aPacketizationMode = aCodec.parameters['packetization-mode'] ?? 0;
+                                const bPacketizationMode = bCodec.parameters['packetization-mode'] ?? 0;
                                 if (aPacketizationMode !== bPacketizationMode) {
                                     return false;
                                 }
@@ -15464,8 +15617,8 @@
                         }
                         case 'video/vp9': {
                             if (strict) {
-                                const aProfileId = aCodec.parameters['profile-id'] || 0;
-                                const bProfileId = bCodec.parameters['profile-id'] || 0;
+                                const aProfileId = aCodec.parameters['profile-id'] ?? 0;
+                                const bProfileId = bCodec.parameters['profile-id'] ?? 0;
                                 if (aProfileId !== bProfileId) {
                                     return false;
                                 }
@@ -15499,9 +15652,9 @@
                     return reducedRtcpFeedback;
                 }
             },
-            { './utils': 47, 'h264-profile-level-id': 8 },
+            { './utils': 49, 'h264-profile-level-id': 10 },
         ],
-        45: [
+        47: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -15524,7 +15677,7 @@
             },
             {},
         ],
-        46: [
+        48: [
             function (require, module, exports) {
                 'use strict';
                 var __createBinding =
@@ -15567,19 +15720,19 @@
                 __exportStar(require('./errors'), exports);
             },
             {
-                './Consumer': 12,
-                './DataConsumer': 13,
-                './DataProducer': 14,
-                './Device': 15,
-                './Producer': 17,
-                './RtpParameters': 18,
-                './SctpParameters': 19,
-                './Transport': 20,
-                './errors': 22,
-                './handlers/HandlerInterface': 31,
+                './Consumer': 14,
+                './DataConsumer': 15,
+                './DataProducer': 16,
+                './Device': 17,
+                './Producer': 19,
+                './RtpParameters': 20,
+                './SctpParameters': 21,
+                './Transport': 22,
+                './errors': 24,
+                './handlers/HandlerInterface': 33,
             },
         ],
-        47: [
+        49: [
             function (require, module, exports) {
                 'use strict';
                 Object.defineProperty(exports, '__esModule', { value: true });
@@ -15626,25 +15779,25 @@
             },
             {},
         ],
-        48: [
-            function (require, module, exports) {
-                arguments[4][4][0].apply(exports, arguments);
-            },
-            { './common': 49, _process: 1, dup: 4 },
-        ],
-        49: [
-            function (require, module, exports) {
-                arguments[4][5][0].apply(exports, arguments);
-            },
-            { dup: 5, ms: 50 },
-        ],
         50: [
             function (require, module, exports) {
                 arguments[4][6][0].apply(exports, arguments);
             },
-            { dup: 6 },
+            { './common': 51, _process: 1, dup: 6 },
         ],
         51: [
+            function (require, module, exports) {
+                arguments[4][7][0].apply(exports, arguments);
+            },
+            { dup: 7, ms: 52 },
+        ],
+        52: [
+            function (require, module, exports) {
+                arguments[4][8][0].apply(exports, arguments);
+            },
+            { dup: 8 },
+        ],
+        53: [
             function (require, module, exports) {
                 // Copyright Joyent, Inc. and other Node contributors.
                 //
@@ -16133,7 +16286,7 @@
             },
             {},
         ],
-        52: [
+        54: [
             function (require, module, exports) {
                 (function (global) {
                     (function () {
@@ -16164,7 +16317,7 @@
             },
             {},
         ],
-        53: [
+        55: [
             function (require, module, exports) {
                 var grammar = (module.exports = {
                     v: [
@@ -16677,7 +16830,7 @@
             },
             {},
         ],
-        54: [
+        56: [
             function (require, module, exports) {
                 var parser = require('./parser');
                 var writer = require('./writer');
@@ -16693,9 +16846,9 @@
                 exports.parseImageAttributes = parser.parseImageAttributes;
                 exports.parseSimulcastStreamList = parser.parseSimulcastStreamList;
             },
-            { './grammar': 53, './parser': 55, './writer': 56 },
+            { './grammar': 55, './parser': 57, './writer': 58 },
         ],
-        55: [
+        57: [
             function (require, module, exports) {
                 var toIntIfInt = function (v) {
                     return String(Number(v)) === v ? Number(v) : v;
@@ -16828,9 +16981,9 @@
                     });
                 };
             },
-            { './grammar': 53 },
+            { './grammar': 55 },
         ],
-        56: [
+        58: [
             function (require, module, exports) {
                 var grammar = require('./grammar');
 
@@ -16940,9 +17093,9 @@
                     return sdp.join('\r\n') + '\r\n';
                 };
             },
-            { './grammar': 53 },
+            { './grammar': 55 },
         ],
-        57: [
+        59: [
             function (require, module, exports) {
                 /* UAParser.js v2.0.2
    Copyright © 2012-2024 Faisal Salman <f@faisalman.com>
@@ -18041,14 +18194,14 @@
             },
             {},
         ],
-        58: [
+        60: [
             function (require, module, exports) {
                 const client = require('mediasoup-client');
                 window.mediasoupClient = client;
             },
-            { 'mediasoup-client': 43 },
+            { 'mediasoup-client': 45 },
         ],
     },
     {},
-    [58],
+    [60],
 );
