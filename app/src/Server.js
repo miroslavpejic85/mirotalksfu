@@ -1818,7 +1818,7 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
-            const { peer_name } = peer || 'undefined';
+            const { peer_name, peer_info } = peer;
 
             try {
                 const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities, type);
@@ -1837,6 +1837,7 @@ function startServer() {
                     type,
                     producerId,
                     rtpCapabilities,
+                    peer_info,
                 });
                 callback({ error: err.message });
             }
