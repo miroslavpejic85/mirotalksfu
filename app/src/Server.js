@@ -58,7 +58,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.77
+ * @version 1.7.78
  *
  */
 
@@ -1653,9 +1653,9 @@ function startServer() {
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            const { peer_name } = peer || 'undefined';
+            const peerInfo = getPeerInfo(peer);
 
-            log.debug('Get RouterRtpCapabilities', peer_name);
+            log.debug('Get RouterRtpCapabilities', peerInfo);
 
             try {
                 const getRouterRtpCapabilities = room.getRtpCapabilities();
@@ -1664,7 +1664,10 @@ function startServer() {
 
                 callback(getRouterRtpCapabilities);
             } catch (err) {
-                log.error('Get RouterRtpCapabilities error', err);
+                log.error('Get RouterRtpCapabilities error', {
+                    error: err,
+                    peerInfo,
+                });
                 callback({
                     error: err.message,
                 });
@@ -1678,9 +1681,9 @@ function startServer() {
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            const { peer_name, peer_info } = peer;
+            const peerInfo = getPeerInfo(peer);
 
-            log.debug('Create WebRtc transport', peer_name);
+            log.debug('Create WebRtc transport', peerInfo);
 
             try {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
@@ -1691,7 +1694,7 @@ function startServer() {
             } catch (err) {
                 log.error('Create WebRtc Transport error', {
                     error: err,
-                    peer_info,
+                    peerInfo,
                 });
                 callback({ error: err.message });
             }
@@ -1704,9 +1707,9 @@ function startServer() {
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            const { peer_name } = peer || 'undefined';
+            const peerInfo = getPeerInfo(peer);
 
-            log.debug('Connect transport', { peer_name: peer_name, transport_id: transport_id });
+            log.debug('Connect transport', { transport_id: transport_id, peerInfo });
 
             try {
                 const connectTransport = await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
@@ -1715,7 +1718,10 @@ function startServer() {
 
                 callback(connectTransport);
             } catch (err) {
-                log.error('Connect transport error', err);
+                log.error('Connect transport error', {
+                    error: err,
+                    peerInfo,
+                });
                 callback({ error: err.message });
             }
         });
@@ -1731,9 +1737,9 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
-            const { peer_name } = peer || 'undefined';
+            const peerInfo = getPeerInfo(peer);
 
-            log.debug('Restart ICE', { peer_name: peer_name, transport_id: transport_id });
+            log.debug('Restart ICE', { transport_id: transport_id, peerInfo });
 
             try {
                 const transport = peer.getTransport(transport_id);
@@ -1748,7 +1754,10 @@ function startServer() {
 
                 callback(iceParameters);
             } catch (err) {
-                log.error('Restart ICE error', err);
+                log.error('Restart ICE error', {
+                    error: err,
+                    peerInfo,
+                });
                 callback({ error: err.message });
             }
         });
@@ -1764,11 +1773,11 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
-            const { peer_name } = peer || 'undefined';
+            const peerInfo = getPeerInfo(peer);
 
             const data = {
                 room_id: room.id,
-                peer_name: peer_name,
+                peer_name: peerInfo.peer_name,
                 peer_id: socket.id,
                 kind: kind,
                 type: appData.mediaType,
@@ -1789,9 +1798,9 @@ function startServer() {
                 log.debug('Produce', {
                     kind: kind,
                     type: appData.mediaType,
-                    peer_name: peer_name,
-                    peer_id: socket.id,
                     producer_id: producer_id,
+                    peer_id: socket.id,
+                    peerInfo: peerInfo,
                 });
 
                 // add & monitor producer audio level and active speaker
@@ -1802,7 +1811,10 @@ function startServer() {
 
                 callback({ producer_id });
             } catch (err) {
-                log.error('Producer transport error', err);
+                log.error('Producer transport error', {
+                    error: err,
+                    peerInfo,
+                });
                 callback({ error: err.message });
             }
         });
@@ -1818,16 +1830,16 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
-            const { peer_name, peer_info } = peer;
+            const peerInfo = getPeerInfo(peer);
 
             try {
                 const params = await room.consume(socket.id, consumerTransportId, producerId, rtpCapabilities, type);
 
                 log.debug('Consuming', {
-                    peer_name: peer_name,
                     producer_type: type,
                     producer_id: producerId,
                     consumer_id: params ? params.id : undefined,
+                    peerInfo: peerInfo,
                 });
 
                 callback(params);
@@ -1835,9 +1847,10 @@ function startServer() {
                 log.error('Consumer transport error', {
                     error: err,
                     type,
+                    consumerTransportId,
                     producerId,
                     rtpCapabilities,
-                    peer_info,
+                    peerInfo,
                 });
                 callback({ error: err.message });
             }
@@ -1846,14 +1859,19 @@ function startServer() {
         socket.on('producerClosed', (data) => {
             if (!roomExists(socket)) return;
 
+            const { room, peer } = getRoomAndPeer(socket);
+
+            const peerInfo = getPeerInfo(peer);
+
+            if (peer) peer.updatePeerInfo(data); // peer_info.audio OR video OFF
+
             try {
-                const { room, peer } = getRoomAndPeer(socket);
-
                 room.closeProducer(socket.id, data.producer_id);
-
-                if (peer) peer.updatePeerInfo(data); // peer_info.audio OR video OFF
             } catch (err) {
-                log.error('Producer Close error', err.message);
+                log.error('Producer Close error', {
+                    error: err.message,
+                    peerInfo,
+                });
             }
         });
 
@@ -1874,15 +1892,19 @@ function startServer() {
                 return callback({ error: `Producer with id "${producer_id}" type "${type}" not found` });
             }
 
+            const peerInfo = getPeerInfo(peer);
+
             try {
                 await producer.pause();
 
-                const { peer_name } = peer || 'undefined';
-
-                log.debug('Producer paused', { peer_name, producer_id, type });
+                log.debug('Producer paused', { producer_id, type, peerInfo });
 
                 callback('successfully');
             } catch (error) {
+                log.error('Pause producer', {
+                    error: error,
+                    peerInfo,
+                });
                 callback({ error: error.message });
             }
         });
@@ -1904,15 +1926,19 @@ function startServer() {
                 return callback({ error: `producer with id "${producer_id}" type "${type}" not found` });
             }
 
+            const peerInfo = getPeerInfo(peer);
+
             try {
                 await producer.resume();
 
-                const { peer_name } = peer || 'undefined';
-
-                log.debug('Producer resumed', { peer_name, producer_id, type });
+                log.debug('Producer resumed', { producer_id, type, peerInfo });
 
                 callback('successfully');
             } catch (error) {
+                log.error('Resume producer', {
+                    error: error,
+                    peerInfo,
+                });
                 callback({ error: error.message });
             }
         });
@@ -1934,15 +1960,19 @@ function startServer() {
                 return callback({ error: `consumer with id "${consumer_id}" type "${type}" not found` });
             }
 
+            const peerInfo = getPeerInfo(peer);
+
             try {
                 await consumer.resume();
 
-                const { peer_name } = peer || 'undefined';
-
-                log.debug('Consumer resumed', { peer_name, consumer_id, type });
+                log.debug('Consumer resumed', { consumer_id, type, peerInfo });
 
                 callback('successfully');
             } catch (error) {
+                log.error('Resume consumer', {
+                    error: error,
+                    peerInfo,
+                });
                 callback({ error: error.message });
             }
         });
@@ -3058,6 +3088,28 @@ function startServer() {
 
         function roomExists(socket) {
             return roomList.has(socket.room_id);
+        }
+
+        function getPeerInfo(peer) {
+            if (!peer || !peer.peer_info) {
+                return {
+                    peer_name: peer?.peer_name || 'Unknown',
+                    isDesktop: false,
+                    os: 'Unknown',
+                    browser: 'Unknown',
+                };
+            }
+
+            const { peer_name, peer_info } = peer;
+            const { is_desktop_device, os_name, os_version, browser_name, browser_version } = peer_info;
+
+            return {
+                peer_name: peer_name || 'Unknown',
+                isDesktop: Boolean(is_desktop_device),
+                os: os_name && os_version ? `${os_name} ${os_version}` : os_name || 'Unknown',
+                browser:
+                    browser_name && browser_version ? `${browser_name} ${browser_version}` : browser_name || 'Unknown',
+            };
         }
 
         function isValidFileName(fileName) {
