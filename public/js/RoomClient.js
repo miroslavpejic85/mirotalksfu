@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.80
+ * @version 1.7.81
  *
  */
 
@@ -116,6 +116,7 @@ const image = {
     blur: '../images/blur.png',
     blurLow: '../images/blur-low.png',
     blurHigh: '../images/blur-high.png',
+    transparentBg: '../images/transparentBg.png',
     link: '../images/link.png',
     upload: '../images/upload.png',
     virtualBackground: {
@@ -1556,6 +1557,11 @@ class RoomClient {
                             virtualBackgroundSelectedImage,
                         );
                     }
+
+                    if (virtualBackgroundTransparent) {
+                        // Apply Transparent virtual background to WebRTC stream
+                        stream = await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack);
+                    }
                 }
             }
 
@@ -1746,12 +1752,13 @@ class RoomClient {
         }
 
         // Common function to handle virtual background changes
-        async function handleVirtualBackground(blurLevel = null, imgSrc = null) {
-            if (!blurLevel && !imgSrc) {
+        async function handleVirtualBackground(blurLevel = null, imgSrc = null, transparentBg = null) {
+            if (!blurLevel && !imgSrc && !transparentBg) {
                 virtualBackgroundBlurLevel = null;
                 virtualBackgroundSelectedImage = null;
+                virtualBackgroundTransparent = null;
             }
-            await rc.applyVirtualBackground(blurLevel, imgSrc);
+            await rc.applyVirtualBackground(blurLevel, imgSrc, transparentBg);
         }
 
         // Create clean virtual bg Image
@@ -1762,6 +1769,11 @@ class RoomClient {
         createImage('highBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
         // Create Low Blur Image
         createImage('lowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
+
+        // Create transparent virtual bg Image
+        createImage('transparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
+            handleVirtualBackground(null, null, true),
+        );
 
         // Handle file upload (common logic for file selection)
         function setupFileUploadButton(buttonId, sourceImg, tooltip, handler) {
@@ -1905,20 +1917,27 @@ class RoomClient {
     // VIRTUAL BACKGROUND HELPER
     // ####################################################
 
-    async applyVirtualBackground(blurLevel, backgroundImage) {
+    async applyVirtualBackground(blurLevel, backgroundImage, backgroundTransparent) {
         if (blurLevel) {
             virtualBackgroundBlurLevel = blurLevel;
             virtualBackgroundSelectedImage = null;
+            virtualBackgroundTransparent = null;
         } else if (backgroundImage) {
             virtualBackgroundSelectedImage = backgroundImage;
+            virtualBackgroundTransparent = null;
+            virtualBackgroundBlurLevel = null;
+        } else if (backgroundTransparent) {
+            virtualBackgroundTransparent = true;
+            virtualBackgroundSelectedImage = null;
             virtualBackgroundBlurLevel = null;
         } else {
             virtualBackgroundSelectedImage = null;
             virtualBackgroundBlurLevel = null;
+            virtualBackgroundTransparent = null;
         }
 
         videoSelect.onchange();
-        saveVirtualBackgroundSettings(blurLevel, backgroundImage);
+        saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
     }
 
     // ####################################################

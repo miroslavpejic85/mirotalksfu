@@ -98,7 +98,7 @@ class VirtualBackground {
             // Create new video frame with the processed content
             const processedFrame = new VideoFrame(canvas, {
                 timestamp: videoFrame.timestamp,
-                alpha: 'keep',
+                alpha: 'keep', // Ensure transparency is preserved
             });
 
             // Enqueue the processed frame to continue the stream
@@ -295,6 +295,42 @@ class VirtualBackground {
         };
 
         console.log('✅ Apply Virtual Background.');
+        return this.processStreamWithSegmentation(videoTrack, maskHandler);
+    }
+
+    async applyTransparentVirtualBackgroundToWebRTCStream(videoTrack) {
+        // Check if the required APIs are supported
+        if (!this.isSupported) {
+            throw new Error(
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+            );
+        }
+
+        // Handler for applying transparency by using only the mask
+        const maskHandler = (ctx, canvas, mask, imageBitmap) => {
+            // Clear the canvas (ensures transparency)
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw the original frame (so we start with the full image)
+            ctx.drawImage(imageBitmap, 0, 0, canvas.width, canvas.height);
+
+            // Create an offscreen canvas for smooth masking
+            const maskCanvas = new OffscreenCanvas(canvas.width, canvas.height);
+            const maskCtx = maskCanvas.getContext('2d');
+
+            // Blur the mask slightly for softer edges
+            maskCtx.filter = 'blur(5px)';
+            maskCtx.drawImage(mask, 0, 0, canvas.width, canvas.height);
+
+            // Apply the mask to keep only the person
+            ctx.globalCompositeOperation = 'destination-in';
+            ctx.drawImage(maskCanvas, 0, 0, canvas.width, canvas.height);
+
+            // Reset blending mode to normal
+            ctx.globalCompositeOperation = 'source-over';
+        };
+
+        console.log('✅ Apply Transparent Background');
         return this.processStreamWithSegmentation(videoTrack, maskHandler);
     }
 

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.80
+ * @version 1.7.81
  *
  */
 
@@ -204,6 +204,7 @@ const isMediaStreamTrackAndTransformerSupported = virtualBackground.checkSupport
 
 let virtualBackgroundBlurLevel;
 let virtualBackgroundSelectedImage;
+let virtualBackgroundTransparent;
 
 let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)';
 
@@ -4971,13 +4972,14 @@ function showImageSelector() {
     }
 
     // Common function to handle virtual background changes
-    async function handleVirtualBackground(blurLevel = null, imgSrc = null) {
-        if (!blurLevel && !imgSrc) {
+    async function handleVirtualBackground(blurLevel = null, imgSrc = null, bgTransparent = null) {
+        if (!blurLevel && !imgSrc && !bgTransparent) {
             virtualBackgroundBlurLevel = null;
             virtualBackgroundSelectedImage = null;
+            virtualBackgroundTransparent = null;
             elemDisplay('imageGrid', false);
         }
-        await applyVirtualBackground(initVideo, initStream, blurLevel, imgSrc);
+        await applyVirtualBackground(initVideo, initStream, blurLevel, imgSrc, bgTransparent);
     }
 
     // Create clean virtual bg Image
@@ -4988,6 +4990,11 @@ function showImageSelector() {
     createImage('initHighBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
     // Create Low Blur Image
     createImage('initLowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
+
+    // Create transparent virtual bg Image
+    createImage('initTransparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
+        handleVirtualBackground(null, null, true),
+    );
 
     // Handle file upload (common logic for file selection)
     function setupFileUploadButton(buttonId, sourceImg, tooltip, handler) {
@@ -5131,13 +5138,14 @@ function showImageSelector() {
 // VIRTUAL BACKGROUND HELPER
 // ####################################################
 
-async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage) {
+async function applyVirtualBackground(videoElement, stream, blurLevel, backgroundImage, backgroundTransparent) {
     const videoTrack = stream.getVideoTracks()[0];
 
     if (blurLevel) {
         videoElement.srcObject = await virtualBackground.applyBlurToWebRTCStream(videoTrack, blurLevel);
         virtualBackgroundBlurLevel = blurLevel;
         virtualBackgroundSelectedImage = null;
+        virtualBackgroundTransparent = null;
     } else if (backgroundImage) {
         videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
             videoTrack,
@@ -5145,13 +5153,20 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
         );
         virtualBackgroundSelectedImage = backgroundImage;
         virtualBackgroundBlurLevel = null;
+        virtualBackgroundTransparent = null;
+    } else if (backgroundTransparent) {
+        videoElement.srcObject = await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack);
+        virtualBackgroundTransparent = true;
+        virtualBackgroundBlurLevel = null;
+        virtualBackgroundSelectedImage = null;
     } else {
         videoElement.srcObject = stream; // Default case, use original stream
         virtualBackgroundBlurLevel = null;
         virtualBackgroundSelectedImage = null;
+        virtualBackgroundTransparent = null;
     }
 
-    saveVirtualBackgroundSettings(blurLevel, backgroundImage);
+    saveVirtualBackgroundSettings(blurLevel, backgroundImage, backgroundTransparent);
 }
 
 function isValidImageURL(url) {
@@ -5210,10 +5225,11 @@ const indexedDBHelper = {
 // VIRTUAL BACKGROUND LOCAL STORAGE SETTINGS
 // ####################################################
 
-function saveVirtualBackgroundSettings(blurLevel, imageUrl) {
+function saveVirtualBackgroundSettings(blurLevel, imageUrl, transparent) {
     const settings = {
         blurLevel: blurLevel || null,
         imageUrl: imageUrl || null,
+        transparent: transparent || null,
     };
     localStorage.setItem('virtualBackgroundSettings', JSON.stringify(settings));
 }
@@ -5225,12 +5241,14 @@ async function loadVirtualBackgroundSettings() {
 
     if (!savedSettings) return;
 
-    const { blurLevel, imageUrl } = JSON.parse(savedSettings);
+    const { blurLevel, imageUrl, transparent } = JSON.parse(savedSettings);
 
     if (blurLevel) {
         await applyVirtualBackground(initVideo, initStream, blurLevel);
     } else if (imageUrl) {
         await applyVirtualBackground(initVideo, initStream, null, imageUrl);
+    } else if (transparent) {
+        await applyVirtualBackground(initVideo, initStream, null, null, true);
     }
 }
 
@@ -5272,7 +5290,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.80',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.7.81',
         html: `
             <br />
             <div id="about">
