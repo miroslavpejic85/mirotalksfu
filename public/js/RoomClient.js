@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.81
+ * @version 1.7.82
  *
  */
 
@@ -1548,17 +1548,13 @@ class RoomClient {
                             videoTrack,
                             virtualBackgroundBlurLevel,
                         );
-                    }
-
-                    if (virtualBackgroundSelectedImage) {
+                    } else if (virtualBackgroundSelectedImage) {
                         // Apply virtual background to WebRTC stream
                         stream = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
                             videoTrack,
                             virtualBackgroundSelectedImage,
                         );
-                    }
-
-                    if (virtualBackgroundTransparent) {
+                    } else if (virtualBackgroundTransparent) {
                         // Apply Transparent virtual background to WebRTC stream
                         stream = await virtualBackground.applyTransparentVirtualBackgroundToWebRTCStream(videoTrack);
                     }
@@ -1924,12 +1920,12 @@ class RoomClient {
             virtualBackgroundTransparent = null;
         } else if (backgroundImage) {
             virtualBackgroundSelectedImage = backgroundImage;
-            virtualBackgroundTransparent = null;
             virtualBackgroundBlurLevel = null;
+            virtualBackgroundTransparent = null;
         } else if (backgroundTransparent) {
             virtualBackgroundTransparent = true;
-            virtualBackgroundSelectedImage = null;
             virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = null;
         } else {
             virtualBackgroundSelectedImage = null;
             virtualBackgroundBlurLevel = null;
