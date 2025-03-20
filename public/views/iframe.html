@@ -6,7 +6,7 @@
         <title>MiroTalk SFU Iframe demo</title>
 
         <!-- Replace sfu.mirotalk.com with YOUR-DOMAIN-NAME -->
-        <script src="https://sfu.mirotalk.com/js/iframe.js" defer></script>
+        <script src="https://sfu.mirotalk.com/js/Iframe.js" defer></script>
 
         <script>
             document.addEventListener('DOMContentLoaded', function () {
@@ -21,6 +21,7 @@
                     hide: 0,
                     notify: 0,
                     duration: 'unlimited', // HH:MM:SS
+                    token: null,
                     width: '100vw',
                     height: '100vh',
                     parentNode: document.querySelector('#meet'),
