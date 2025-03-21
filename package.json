@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.7.85",
+    "version": "1.7.86",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -8,7 +8,7 @@
         "start": "node app/src/Server.js",
         "start-dev": "nodemon app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
-        "compile": "npx browserify public/sfu/MediasoupClientCompile.js -o public/sfu/MediasoupClient.js",
+        "compile": "npx webpack",
         "lint": "npx prettier --write .",
         "docker-build": "docker build --tag mirotalk/sfu:latest .",
         "docker-rmi": "docker images |grep '<none>' |awk '{print $3}' |xargs docker rmi",
@@ -58,7 +58,7 @@
     },
     "dependencies": {
         "@mattermost/client": "10.6.0",
-        "@sentry/node": "^9.6.1",
+        "@sentry/node": "^9.8.0",
         "axios": "^1.8.4",
         "colors": "1.4.0",
         "compression": "1.8.0",
@@ -79,7 +79,7 @@
         "mediasoup-client": "3.9.2",
         "ngrok": "^5.0.0-beta.2",
         "nodemailer": "^6.10.0",
-        "openai": "^4.88.0",
+        "openai": "^4.89.0",
         "qs": "6.14.0",
         "sanitize-filename": "^1.6.3",
         "socket.io": "4.8.1",
@@ -87,12 +87,17 @@
         "uuid": "11.1.0"
     },
     "devDependencies": {
+        "@babel/core": "^7.26.10",
+        "@babel/preset-env": "^7.26.9",
+        "babel-loader": "^10.0.0",
         "mocha": "^11.1.0",
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.9",
         "prettier": "3.5.3",
         "proxyquire": "^2.1.3",
         "should": "^13.2.3",
-        "sinon": "^19.0.4"
+        "sinon": "^19.0.4",
+        "webpack": "^5.98.0",
+        "webpack-cli": "^6.0.1"
     }
 }
