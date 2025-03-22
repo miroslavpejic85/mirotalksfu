@@ -11,6 +11,7 @@ prod dependencies: {
     @mattermost/client      : https://www.npmjs.com/package/@mattermost/client
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
+    chokidar                : https://www.npmjs.com/package/chokidar
     colors                  : https://www.npmjs.com/package/colors
     compression             : https://www.npmjs.com/package/compression
     cors                    : https://www.npmjs.com/package/cors
@@ -58,7 +59,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.87
+ * @version 1.7.88
  *
  */
 
@@ -1315,7 +1316,7 @@ function startServer() {
             const tunnel = list.tunnels[0].public_url;
             log.info('Server config', getServerConfig(tunnel));
         } catch (err) {
-            log.error('Ngrok Start error: ', err.body);
+            log.error('Ngrok Start error: ', err);
             await ngrok.kill();
             process.exit(1);
         }
@@ -3555,3 +3556,13 @@ function startServer() {
         }
     }
 }
+
+process.on('SIGINT', () => {
+    htmlInjector.cleanup();
+    process.exit();
+});
+
+process.on('SIGTERM', () => {
+    htmlInjector.cleanup();
+    process.exit();
+});
