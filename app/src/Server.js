@@ -9,6 +9,7 @@
 
 prod dependencies: {
     @mattermost/client      : https://www.npmjs.com/package/@mattermost/client
+    @ngrok/ngrok            : https://www.npmjs.com/package/@ngrok/ngrok
     @sentry/node            : https://www.npmjs.com/package/@sentry/node
     axios                   : https://www.npmjs.com/package/axios
     chokidar                : https://www.npmjs.com/package/chokidar
@@ -29,7 +30,6 @@ prod dependencies: {
     jsonwebtoken            : https://www.npmjs.com/package/jsonwebtoken
     mediasoup               : https://www.npmjs.com/package/mediasoup
     mediasoup-client        : https://www.npmjs.com/package/mediasoup-client
-    ngrok                   : https://www.npmjs.com/package/ngrok
     nodemailer              : https://www.npmjs.com/package/nodemailer
     openai                  : https://www.npmjs.com/package/openai
     qs                      : https://www.npmjs.com/package/qs
@@ -59,7 +59,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.88
+ * @version 1.7.89
  *
  */
 
@@ -74,7 +74,7 @@ const mediasoupClient = require('mediasoup-client');
 const http = require('http');
 const path = require('path');
 const axios = require('axios');
-const ngrok = require('ngrok');
+const ngrok = require('@ngrok/ngrok');
 const jwt = require('jsonwebtoken');
 const fs = require('fs');
 const sanitizeFilename = require('sanitize-filename');
@@ -1310,13 +1310,11 @@ function startServer() {
     async function ngrokStart() {
         try {
             await ngrok.authtoken(config.ngrok.authToken);
-            await ngrok.connect(config.server.listen.port);
-            const api = ngrok.getApi();
-            const list = await api.listTunnels();
-            const tunnel = list.tunnels[0].public_url;
-            log.info('Server config', getServerConfig(tunnel));
+            const listener = await ngrok.forward({ addr: config.server.listen.port });
+            const tunnelUrl = listener.url();
+            log.info('Server config', getServerConfig(tunnelUrl));
         } catch (err) {
-            log.error('Ngrok Start error: ', err);
+            log.warn('Ngrok Start error', err);
             await ngrok.kill();
             process.exit(1);
         }
