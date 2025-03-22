@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.89
+ * @version 1.7.90
  *
  */
 
@@ -374,6 +374,7 @@ class RoomClient {
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
+        this.forceAV1 = false; // Force AV1 codec for webcam and screen sharing
         this.enableWebcamLayers = true; // Enable simulcast or SVC for webcam
         this.enableSharingLayers = true; // Enable simulcast or SVC for screen sharing
         this.numSimulcastStreamsWebcam = 3; // Number of streams for simulcast in webcam
@@ -2076,9 +2077,11 @@ class RoomClient {
             forceVP8: this.forceVP8,
             forceVP9: this.forceVP9,
             forceH264: this.forceH264,
+            forceAV1: this.forceAV1,
             numSimulcastStreamsWebcam: this.numSimulcastStreamsWebcam,
             enableWebcamLayers: this.enableWebcamLayers,
             webcamScalabilityMode: this.webcamScalabilityMode,
+            rtpCapabilitiesCodecs: this.device.rtpCapabilities.codecs,
         });
 
         if (this.forceVP8) {
@@ -2090,6 +2093,9 @@ class RoomClient {
         } else if (this.forceVP9) {
             codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
             if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        } else if (this.forceAV1) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/av1');
+            if (!codec) throw new Error('Desired AV1 codec+configuration is not supported');
         }
 
         if (this.enableWebcamLayers) {
@@ -2099,8 +2105,12 @@ class RoomClient {
             console.log('WEBCAM ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
 
             // If VP9 is the only available video codec then use SVC.
-            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
-                console.log('WEBCAM ENCODING: VP9 with SVC');
+            if (
+                ((this.forceVP9 || this.forceAV1) && codec) ||
+                (firstVideoCodec?.mimeType &&
+                    ['video/vp9', 'video/av1'].includes(firstVideoCodec.mimeType.toLowerCase()))
+            ) {
+                console.log('WEBCAM ENCODING: VP9 or AV1 with SVC');
                 encodings = [
                     {
                         maxBitrate: 5000000,
@@ -2147,9 +2157,11 @@ class RoomClient {
             forceVP8: this.forceVP8,
             forceVP9: this.forceVP9,
             forceH264: this.forceH264,
+            forceAV1: this.forceAV1,
             numSimulcastStreamsSharing: this.numSimulcastStreamsSharing,
             enableSharingLayers: this.enableSharingLayers,
             sharingScalabilityMode: this.sharingScalabilityMode,
+            rtpCapabilitiesCodecs: this.device.rtpCapabilities.codecs,
         });
 
         if (this.forceVP8) {
@@ -2161,6 +2173,9 @@ class RoomClient {
         } else if (this.forceVP9) {
             codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/vp9');
             if (!codec) throw new Error('Desired VP9 codec+configuration is not supported');
+        } else if (this.forceAV1) {
+            codec = this.device.rtpCapabilities.codecs.find((c) => c.mimeType.toLowerCase() === 'video/av1');
+            if (!codec) throw new Error('Desired AV1 codec+configuration is not supported');
         }
 
         if (this.enableSharingLayers) {
@@ -2170,8 +2185,12 @@ class RoomClient {
             console.log('SCREEN ENCODING: first codec available', { firstVideoCodec: firstVideoCodec });
 
             // If VP9 is the only available video codec then use SVC.
-            if ((this.forceVP9 && codec) || firstVideoCodec.mimeType.toLowerCase() === 'video/vp9') {
-                console.log('SCREEN ENCODING: VP9 with SVC');
+            if (
+                ((this.forceVP9 || this.forceAV1) && codec) ||
+                (firstVideoCodec?.mimeType &&
+                    ['video/vp9', 'video/av1'].includes(firstVideoCodec.mimeType.toLowerCase()))
+            ) {
+                console.log('SCREEN ENCODING: VP9 or AV1 with SVC');
                 encodings = [
                     {
                         maxBitrate: 5000000,
