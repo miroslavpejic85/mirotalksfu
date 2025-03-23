@@ -40,6 +40,9 @@ prod dependencies: {
 }
 
 dev dependencies: {
+    @babel/core             : https://www.npmjs.com/package/@babel/core
+    @babel/preset-env       : https://www.npmjs.com/package/@babel/preset-env
+    babel-loader            : https://www.npmjs.com/package/babel-loader
     mocha                   : https://www.npmjs.com/package/mocha
     node-fetch              : https://www.npmjs.com/package/node-fetch
     nodemon                 : https://www.npmjs.com/package/nodemon
@@ -47,6 +50,8 @@ dev dependencies: {
     proxyquire              : https://www.npmjs.com/package/proxyquire
     should                  : https://www.npmjs.com/package/should
     sinon                   : https://www.npmjs.com/package/sinon
+    webpack                 : https://www.npmjs.com/package/webpack
+    webpack-cli             : https://www.npmjs.com/package/webpack-cli
 }
 */
 
@@ -3556,11 +3561,13 @@ function startServer() {
 }
 
 process.on('SIGINT', () => {
+    log.debug('PROCESS', 'SIGINT');
     htmlInjector.cleanup();
     process.exit();
 });
 
 process.on('SIGTERM', () => {
+    log.debug('PROCESS', 'SIGTERM');
     htmlInjector.cleanup();
     process.exit();
 });
