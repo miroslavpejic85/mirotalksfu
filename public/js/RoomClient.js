@@ -7303,7 +7303,7 @@ class RoomClient {
                 await this.joinAllowed(data.room);
                 control.style.display = 'flex';
                 bottomButtons.style.display = 'flex';
-                this.msgPopup('info', 'Your join meeting was be accepted by moderator');
+                this.msgPopup('info', 'Your join meeting request was accepted by the moderator');
                 break;
             case 'reject':
                 this.sound('eject');
@@ -7315,7 +7315,7 @@ class RoomClient {
                     showConfirmButton: true,
                     background: swalBackground,
                     title: 'Rejected',
-                    text: 'Your join meeting was be rejected by moderator',
+                    text: 'Your join meeting request was rejected by the moderator',
                     confirmButtonText: `Ok`,
                     showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
