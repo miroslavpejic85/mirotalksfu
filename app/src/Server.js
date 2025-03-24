@@ -290,7 +290,7 @@ const streams = {}; // Collect all rtmp streams
 const webRtcServerActive = config.mediasoup.webRtcServerActive;
 
 // ip (server local IPv4)
-const IPv4 = webRtcServerActive
+const IP = webRtcServerActive
     ? config.mediasoup.webRtcServerOptions.listenInfos[0].ip
     : config.mediasoup.webRtcTransport.listenInfos[0].ip;
 
@@ -304,7 +304,7 @@ const workers = [];
 let nextMediasoupWorkerIdx = 0;
 
 // Autodetect announcedAddress (https://www.ipify.org)
-if (!announcedAddress && IPv4 === '0.0.0.0') {
+if (!announcedAddress && IP === '0.0.0.0') {
     http.get(
         {
             host: 'api.ipify.org',
@@ -1299,6 +1299,18 @@ function startServer() {
             ngrok_enabled: config.ngrok?.enabled ? config.ngrok : false,
             email_alerts: config.email?.alert ? config.email : false,
             webhook: webhook,
+
+            // System info
+            systemInfo: config.systemInfo,
+
+            // SFU settings
+            sfu: {
+                ip: IP, // Local IPv4 listen on
+                announcedAddress, // Public IPv4 listen on
+                numWorker: config.mediasoup?.numWorkers,
+                rtcMinPort: config.mediasoup?.worker?.rtcMinPort || 40000,
+                rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort || 40100,
+            },
 
             // Version Information
             app_version: packageJson.version,

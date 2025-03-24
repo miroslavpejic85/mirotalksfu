@@ -1,8 +1,12 @@
 'use strict';
 
+const dotenv = require('dotenv').config();
+
 const packageJson = require('../../package.json');
 
 const os = require('os');
+
+const https = require('https');
 
 // #############################
 // HELPERS
@@ -23,9 +27,24 @@ function getFFmpegPath(platform) {
     }
 }
 
-// https://api.ipify.org
+function getPublicIPv4(timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const req = https.get('https://api.ipify.org', (res) => {
+            res.on('data', (ip) => {
+                resolve(String(ip)); // Resolve with the public IP address
+            });
+        });
+        req.on('error', (err) => {
+            reject(err);
+        });
+        req.setTimeout(timeout, () => {
+            req.destroy();
+            reject(new Error('Request timed out'));
+        });
+    });
+}
 
-function getIPv4() {
+function getLocalIPv4() {
     const ifaces = os.networkInterfaces();
     for (const interfaceName in ifaces) {
         const iface = ifaces[interfaceName];
@@ -41,14 +60,28 @@ function getIPv4() {
 /*
     IPv4 Configuration Guide:
         1. Localhost Setup:
-            - For local development with Docker, replace `getIPv4()` with '127.0.0.1'.
+            - For local development with Docker, replace `getLocalIPv4()` with '127.0.0.1' if needed.
         2. Production Setup:
-            - Replace `getIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
-            - For AWS EC2 instances, replace `getIPv4()` with the 'Elastic IP' associated with the instance. 
+            - If you leave it empty (''), it will be automatically detected using a service like https://api.ipify.org.
+            - Replace `getLocalIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
+            - For AWS EC2 instances, replace `getLocalIPv4()` with the 'Elastic IP' associated with the instance. 
             This ensures the public IP remains consistent across instance reboots.
     Note: Always enclose the IP address in single quotes ''.
 */
-const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your environment.
+let IPv4 = process.env.SFU_ANNOUNCED_IP || getLocalIPv4(); // Replace with the appropriate IPv4 address for your environment or leave it empty ('') to be automatically detected on instance startup.
+
+(async () => {
+    if (IPv4 === '0.0.0.0' || !IPv4) {
+        try {
+            IPv4 = await getPublicIPv4();
+        } catch (err) {
+            console.error('Failed to determine public IPv4, using local fallback', err);
+            IPv4 = getLocalIPv4();
+        }
+    }
+})();
+
+const listenIP = process.env.SFU_LISTEN_IP || '0.0.0.0';
 
 /*
     Set the port range for WebRTC communication. This range is used for the dynamic allocation of UDP ports for media streams.
@@ -58,15 +91,37 @@ const IPv4 = getIPv4(); // Replace with the appropriate IPv4 address for your en
     Note: 
     - When running in Docker, use 'network mode: host' for improved performance.
     - Alternatively, enable 'webRtcServerActive: true' mode for better scalability.
+    - Make sure these port ranges are not blocked by the firewall, if they are, add the necessary rules
 */
-const rtcMinPort = 40000;
-const rtcMaxPort = 40100;
+const rtcMinPort = process.env.SFU_MIN_PORT || 40000;
+const rtcMaxPort = process.env.SFU_MAX_PORT || 40100;
 
-const numWorkers = require('os').cpus().length;
+/*
+    One worker can handle approximately 100 concurrent participants.
+    The number of workers cannot exceed the number of available CPU cores.
+*/
+const numCPUs = os.cpus().length;
+const numWorkers = Math.min(process.env.SFU_NUM_WORKERS || numCPUs, numCPUs);
 
-const ffmpegPath = getFFmpegPath(platform);
+// Used 4 RTMP streams
+const ffmpegPath = process.env.FFMPEG_PATH || getFFmpegPath(platform);
 
 module.exports = {
+    systemInfo: {
+        os: {
+            type: os.type(),
+            release: os.release(),
+            arch: os.arch(),
+        },
+        cpu: {
+            cores: os.cpus().length,
+            model: os.cpus()[0].model,
+            speed: os.cpus()[0].speed + ' MHz',
+        },
+        memory: {
+            total: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2) + ' GB',
+        },
+    },
     console: {
         /*
             timeZone: Time Zone corresponding to timezone identifiers from the IANA Time Zone Database es 'Europe/Rome' default UTC
@@ -85,8 +140,8 @@ module.exports = {
         trustProxy: false, // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
         ssl: {
             // ssl/README.md
-            cert: '../ssl/cert.pem',
-            key: '../ssl/key.pem',
+            cert: process.env.SSL_CERT || '../ssl/cert.pem',
+            key: process.env.SSL_KEY || '../ssl/key.pem',
         },
         cors: {
             /* 
@@ -704,17 +759,17 @@ module.exports = {
         webRtcServerActive: false,
         webRtcServerOptions: {
             listenInfos: [
-                // { protocol: 'udp', ip: '0.0.0.0', announcedAddress: IPv4, port: rtcMinPort },
-                // { protocol: 'tcp', ip: '0.0.0.0', announcedAddress: IPv4, port: rtcMinPort },
+                // { protocol: 'udp', ip: listenIP, announcedAddress: IPv4, port: rtcMinPort },
+                // { protocol: 'tcp', ip: listenIP, announcedAddress: IPv4, port: rtcMinPort },
                 {
                     protocol: 'udp',
-                    ip: '0.0.0.0',
+                    ip: listenIP,
                     announcedAddress: IPv4,
                     portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
                 },
                 {
                     protocol: 'tcp',
-                    ip: '0.0.0.0',
+                    ip: listenIP,
                     announcedAddress: IPv4,
                     portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
                 },
@@ -727,13 +782,13 @@ module.exports = {
                 // { protocol: 'tcp', ip: IPv4, portRange: { min: rtcMinPort, max: rtcMaxPort } },
                 {
                     protocol: 'udp',
-                    ip: '0.0.0.0',
+                    ip: listenIP,
                     announcedAddress: IPv4,
                     portRange: { min: rtcMinPort, max: rtcMaxPort },
                 },
                 {
                     protocol: 'tcp',
-                    ip: '0.0.0.0',
+                    ip: listenIP,
                     announcedAddress: IPv4,
                     portRange: { min: rtcMinPort, max: rtcMaxPort },
                 },
