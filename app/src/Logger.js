@@ -10,7 +10,7 @@ config.console.colors ? colors.enable() : colors.disable();
 
 const options = {
     depth: null,
-    colors: true,
+    colors: config.console.colors,
 };
 module.exports = class Logger {
     constructor(appName = 'miroTalkSfu') {
