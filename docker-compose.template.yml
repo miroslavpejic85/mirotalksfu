@@ -13,6 +13,8 @@ services:
             # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro
+        # env_file:
+        #     - .env
         ports:
             - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'
