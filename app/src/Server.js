@@ -1308,8 +1308,8 @@ function startServer() {
                 ip: IP, // Local IPv4 listen on
                 announcedAddress, // Public IPv4 listen on
                 numWorker: config.mediasoup?.numWorkers,
-                rtcMinPort: config.mediasoup?.worker?.rtcMinPort || 40000,
-                rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort || 40100,
+                rtcMinPort: config.mediasoup?.worker?.rtcMinPort,
+                rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort,
             },
 
             // Version Information
