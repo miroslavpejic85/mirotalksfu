@@ -4883,7 +4883,7 @@ function setTheme() {
 // ####################################################
 
 function handleAspectRatio() {
-    if (participantsCount > 1) {
+    if (videoMediaContainer.childElementCount > 1) {
         adaptAspectRatio(videoMediaContainer.childElementCount);
     } else {
         resizeVideoMedia();

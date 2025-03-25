@@ -2410,8 +2410,6 @@ class RoomClient {
 
                 if (isScreen && this.videoMediaContainer.childElementCount > 1) pn.click();
 
-                handleAspectRatio();
-
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
                     this.setTippy(mv.id, 'Toggle mirror', 'bottom');
@@ -2421,6 +2419,7 @@ class RoomClient {
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
 
+                handleAspectRatio();
                 console.log('[addProducer] Video-element-count', this.videoMediaContainer.childElementCount);
                 break;
             case mediaType.audio:
@@ -2908,8 +2907,6 @@ class RoomClient {
                     });
                 }
 
-                console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
-
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
                     this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
@@ -2938,6 +2935,8 @@ class RoomClient {
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
 
                 handleAspectRatio();
+                console.log('[addConsumer] Video-element-count', this.videoMediaContainer.childElementCount);
+
                 this.sound('joined');
                 break;
             case mediaType.audio:
@@ -3137,8 +3136,6 @@ class RoomClient {
         this.setVideoAvatarImgName(i.id, peer_name);
         this.getId(i.id).style.display = 'block';
 
-        handleAspectRatio();
-
         if (isParticipantsListOpen) getRoomParticipants();
 
         if (!this.isMobileDevice && remotePeer) {
@@ -3153,6 +3150,8 @@ class RoomClient {
         }
 
         remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
+
+        handleAspectRatio();
 
         console.log('[setVideoOff] Video-element-count', this.videoMediaContainer.childElementCount);
 
@@ -6955,7 +6954,6 @@ class RoomClient {
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
-        handleAspectRatio();
 
         const exitVideoBtn = this.getId(e.id);
         exitVideoBtn.addEventListener('click', (e) => {
@@ -6971,6 +6969,8 @@ class RoomClient {
             this.setTippy(pn.id, 'Toggle Pin video player', 'bottom');
             this.setTippy(e.id, 'Close video player', 'bottom');
         }
+
+        handleAspectRatio();
         console.log('[openVideo] Video-element-count', this.videoMediaContainer.childElementCount);
         this.sound('joined');
     }
