@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.92
+ * @version 1.7.93
  *
  */
 
@@ -7101,13 +7101,15 @@ class RoomClient {
                 this.userLog('info', `${icons.room} BROADCASTING ${isBroadcastingEnabled ? 'On' : 'Off'}`, 'top-end');
                 break;
             case 'lock':
+                if (!isPresenter) return;
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
                 this.userLog('info', `${icons.lock} LOCKED the room by the password`, 'top-end');
                 break;
             case 'unlock':
-                this.event(_EVENTS.roomUnlock);
+                if (!isPresenter) return;
                 this.userLog('info', `${icons.unlock} UNLOCKED the room`, 'top-end');
+                this.event(_EVENTS.roomUnlock);
                 break;
             case 'lobbyOn':
                 this.event(_EVENTS.lobbyOn);
@@ -7249,6 +7251,7 @@ class RoomClient {
         switch (data.password) {
             case 'OK':
                 this.joinAllowed(data.room);
+                handleRules(isPresenter);
                 break;
             case 'KO':
                 this.roomIsLocked();
