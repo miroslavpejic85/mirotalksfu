@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.95
+ * @version 1.7.96
  *
  */
 
@@ -7304,6 +7304,7 @@ class RoomClient {
                 break;
             case 'accept':
                 await this.joinAllowed(data.room);
+                handleRules(isPresenter);
                 control.style.display = 'flex';
                 bottomButtons.style.display = 'flex';
                 this.msgPopup('info', 'Your join meeting request was accepted by the moderator');
