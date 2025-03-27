@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.96
+ * @version 1.7.97
  *
  */
 
@@ -303,32 +303,60 @@ let announcedAddress = webRtcServerActive
 const workers = [];
 let nextMediasoupWorkerIdx = 0;
 
-// Autodetect announcedAddress (https://www.ipify.org)
+// Autodetect announcedAddress with multiple fallback services
 if (!announcedAddress && IP === '0.0.0.0') {
-    http.get(
-        {
-            host: 'api.ipify.org',
-            port: 80,
-            path: '/',
-        },
-        (resp) => {
-            resp.on('data', (ip) => {
-                announcedAddress = ip.toString();
-                if (webRtcServerActive) {
-                    config.mediasoup.webRtcServerOptions.listenInfos.forEach((info) => {
-                        info.announcedAddress = announcedAddress;
-                    });
-                } else {
-                    config.mediasoup.webRtcTransport.listenInfos.forEach((info) => {
-                        info.announcedAddress = announcedAddress;
-                    });
+    const detectPublicIp = async () => {
+        const services = config.services?.ip || [
+            'http://api.ipify.org',
+            'http://ipinfo.io/ip',
+            'http://ifconfig.me/ip',
+        ];
+
+        for (const service of services) {
+            try {
+                const ip = await fetchPublicIp(service);
+                if (ip) {
+                    announcedAddress = ip;
+                    updateAnnouncedAddress(ip);
+                    startServer();
+                    return;
                 }
-                startServer();
-            });
-        },
-    );
+            } catch (err) {
+                log.warn(`Failed to detect IP from ${service}`, err.message);
+            }
+        }
+        throw new Error('All public IP detection services failed! Please check your network connection');
+    };
+
+    detectPublicIp().catch((err) => {
+        log.error('Public IP detection failed', err.message);
+        process.exit(1);
+    });
 } else {
     startServer();
+}
+
+function fetchPublicIp(serviceUrl) {
+    return new Promise((resolve, reject) => {
+        http.get(serviceUrl, (resp) => {
+            if (resp.statusCode !== 200) {
+                return reject(new Error(`HTTP ${resp.statusCode}`));
+            }
+            let data = '';
+            resp.on('data', (chunk) => (data += chunk));
+            resp.on('end', () => resolve(data.toString().trim()));
+        }).on('error', reject);
+    });
+}
+
+function updateAnnouncedAddress(ip) {
+    const target = webRtcServerActive
+        ? config.mediasoup.webRtcServerOptions.listenInfos
+        : config.mediasoup.webRtcTransport.listenInfos;
+
+    target.forEach((info) => {
+        info.announcedAddress = ip;
+    });
 }
 
 // Custom middleware function for OIDC authentication
@@ -1305,8 +1333,8 @@ function startServer() {
 
             // SFU settings
             sfu: {
-                ip: IP, // Local IPv4 listen on
-                announcedAddress, // Public IPv4 listen on
+                listenIP: IP,
+                publicIP: announcedAddress,
                 numWorker: config.mediasoup?.numWorkers,
                 rtcMinPort: config.mediasoup?.worker?.rtcMinPort,
                 rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort,

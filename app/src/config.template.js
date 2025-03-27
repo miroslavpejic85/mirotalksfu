@@ -1,87 +1,18 @@
 'use strict';
 
 const dotenv = require('dotenv').config();
-
-const packageJson = require('../../package.json');
-
 const os = require('os');
+const fs = require('fs');
 
-const https = require('https');
+const PLATFORM = os.platform();
+const IS_DOCKER = require('fs').existsSync('/.dockerenv');
 
-// #############################
-// HELPERS
-// #############################
-
-const platform = os.platform();
-
-function getFFmpegPath(platform) {
-    switch (platform) {
-        case 'darwin':
-            return '/usr/local/bin/ffmpeg'; // macOS
-        case 'linux':
-            return '/usr/bin/ffmpeg'; // Linux
-        case 'win32':
-            return 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
-        default:
-            return '/usr/bin/ffmpeg'; // Centos or others...
-    }
-}
-
-function getPublicIPv4(timeout = 5000) {
-    return new Promise((resolve, reject) => {
-        const req = https.get('https://api.ipify.org', (res) => {
-            res.on('data', (ip) => {
-                resolve(String(ip)); // Resolve with the public IP address
-            });
-        });
-        req.on('error', (err) => {
-            reject(err);
-        });
-        req.setTimeout(timeout, () => {
-            req.destroy();
-            reject(new Error('Request timed out'));
-        });
-    });
-}
-
-function getLocalIPv4() {
-    const ifaces = os.networkInterfaces();
-    for (const interfaceName in ifaces) {
-        const iface = ifaces[interfaceName];
-        for (const { address, family, internal } of iface) {
-            if (family === 'IPv4' && !internal) {
-                return address;
-            }
-        }
-    }
-    return '0.0.0.0'; // Default to 0.0.0.0 if no external IPv4 address found
-}
-
-/*
-    IPv4 Configuration Guide:
-        1. Localhost Setup:
-            - For local development with Docker, replace `getLocalIPv4()` with '127.0.0.1' if needed.
-        2. Production Setup:
-            - If you leave it empty (''), it will be automatically detected using a service like https://api.ipify.org.
-            - Replace `getLocalIPv4()` with the 'Public Static IPv4 Address' of the server hosting this application.
-            - For AWS EC2 instances, replace `getLocalIPv4()` with the 'Elastic IP' associated with the instance. 
-            This ensures the public IP remains consistent across instance reboots.
-    Note: Always enclose the IP address in single quotes ''.
-*/
-let IPv4 = process.env.SFU_ANNOUNCED_IP || getLocalIPv4(); // Replace with the appropriate IPv4 address for your environment or leave it empty ('') to be automatically detected on instance startup.
-
-(async () => {
-    if (IPv4 === '0.0.0.0' || !IPv4) {
-        try {
-            IPv4 = await getPublicIPv4();
-        } catch (err) {
-            console.error('Failed to determine public IPv4, using local fallback', err);
-            IPv4 = getLocalIPv4();
-        }
-    }
-})();
-
-const listenIP = process.env.SFU_LISTEN_IP || '0.0.0.0';
+// ###################################################################################################
+const ENVIRONMENT = process.env.NODE_ENV || 'development'; // production
+const PUBLIC_IP = process.env.SFU_PUBLIC_IP || ''; // SFU Public IP
+const LISTEN_IP = process.env.SFU_LISTEN_IP || '0.0.0.0'; // SFU listen IP
+const IPv4 = getIPv4(); // Determines the appropriate IPv4 address based on ENVIRONMENT
+// ###################################################################################################
 
 /*
     Set the port range for WebRTC communication. This range is used for the dynamic allocation of UDP ports for media streams.
@@ -93,20 +24,23 @@ const listenIP = process.env.SFU_LISTEN_IP || '0.0.0.0';
     - Alternatively, enable 'webRtcServerActive: true' mode for better scalability.
     - Make sure these port ranges are not blocked by the firewall, if they are, add the necessary rules
 */
-const rtcMinPort = process.env.SFU_MIN_PORT || 40000;
-const rtcMaxPort = process.env.SFU_MAX_PORT || 40100;
+const RTC_MIN_PORT = parseInt(process.env.SFU_MIN_PORT) || 40000;
+const RTC_MAX_PORT = parseInt(process.env.SFU_MAX_PORT) || 40100;
 
 /*
     One worker can handle approximately 100 concurrent participants.
     The number of workers cannot exceed the number of available CPU cores.
 */
-const numCPUs = os.cpus().length;
-const numWorkers = Math.min(process.env.SFU_NUM_WORKERS || numCPUs, numCPUs);
+const NUM_CPUS = os.cpus().length;
+const NUM_WORKERS = Math.min(process.env.SFU_NUM_WORKERS || NUM_CPUS, NUM_CPUS);
 
-// Used 4 RTMP streams
-const ffmpegPath = process.env.FFMPEG_PATH || getFFmpegPath(platform);
+// RTMP using FMMPEG for streaming...
+const FFMPEG_PATH = process.env.FFMPEG_PATH || getFFmpegPath(PLATFORM);
 
 module.exports = {
+    services: {
+        ip: ['http://api.ipify.org', 'http://ipinfo.io/ip', 'http://ifconfig.me/ip'],
+    },
     systemInfo: {
         os: {
             type: os.type(),
@@ -120,6 +54,7 @@ module.exports = {
         memory: {
             total: (os.totalmem() / 1024 / 1024 / 1024).toFixed(2) + ' GB',
         },
+        isDocker: IS_DOCKER,
     },
     console: {
         /*
@@ -200,8 +135,8 @@ module.exports = {
             apiSecret: 'mirotalkRtmpApiSecret',
             expirationHours: 4,
             dir: 'rtmp',
-            ffmpegPath: ffmpegPath,
-            platform: platform,
+            ffmpegPath: FFMPEG_PATH,
+            platform: PLATFORM,
         },
     },
     middleware: {
@@ -685,10 +620,10 @@ module.exports = {
     },
     mediasoup: {
         // Worker settings
-        numWorkers: numWorkers,
+        numWorkers: NUM_WORKERS,
         worker: {
-            rtcMinPort: rtcMinPort,
-            rtcMaxPort: rtcMaxPort,
+            rtcMinPort: RTC_MIN_PORT,
+            rtcMaxPort: RTC_MAX_PORT,
             disableLiburing: false, // https://github.com/axboe/liburing
             logLevel: 'error',
             logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
@@ -758,38 +693,38 @@ module.exports = {
         webRtcServerActive: false,
         webRtcServerOptions: {
             listenInfos: [
-                // { protocol: 'udp', ip: listenIP, announcedAddress: IPv4, port: rtcMinPort },
-                // { protocol: 'tcp', ip: listenIP, announcedAddress: IPv4, port: rtcMinPort },
+                // { protocol: 'udp', ip: LISTEN_IP, announcedAddress: IPv4, port: RTC_MIN_PORT },
+                // { protocol: 'tcp', ip: LISTEN_IP, announcedAddress: IPv4, port: RTC_MIN_PORT },
                 {
                     protocol: 'udp',
-                    ip: listenIP,
+                    ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
+                    portRange: { min: RTC_MIN_PORT, max: RTC_MIN_PORT + NUM_WORKERS },
                 },
                 {
                     protocol: 'tcp',
-                    ip: listenIP,
+                    ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: rtcMinPort, max: rtcMinPort + numWorkers },
+                    portRange: { min: RTC_MIN_PORT, max: RTC_MIN_PORT + NUM_WORKERS },
                 },
             ],
         },
         // WebRtcTransportOptions
         webRtcTransport: {
             listenInfos: [
-                // { protocol: 'udp', ip: IPv4, portRange: { min: rtcMinPort, max: rtcMaxPort } },
-                // { protocol: 'tcp', ip: IPv4, portRange: { min: rtcMinPort, max: rtcMaxPort } },
+                // { protocol: 'udp', ip: IPv4, portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT } },
+                // { protocol: 'tcp', ip: IPv4, portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT } },
                 {
                     protocol: 'udp',
-                    ip: listenIP,
+                    ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: rtcMinPort, max: rtcMaxPort },
+                    portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
                 },
                 {
                     protocol: 'tcp',
-                    ip: listenIP,
+                    ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: rtcMinPort, max: rtcMaxPort },
+                    portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
                 },
             ],
             initialAvailableOutgoingBitrate: 1000000,
@@ -799,3 +734,208 @@ module.exports = {
         },
     },
 };
+
+/**
+ * Determines the appropriate IPv4 address based on environment and configuration
+ * Priority order:
+ * 1. Explicitly configured PUBLIC_IP (if set)
+ * 2. Environment-specific detection
+ *
+ * @returns {string} The selected IPv4 address
+ */
+function getIPv4() {
+    // Highest priority: use explicitly configured IP if available
+    if (PUBLIC_IP) return PUBLIC_IP;
+
+    switch (ENVIRONMENT) {
+        case 'development':
+            return IS_DOCKER ? '127.0.0.1' : getLocalIPv4();
+
+        case 'production':
+            /*
+             * Production Environment Notes:
+             * ----------------------------------
+             * 1. Recommended: Explicitly set your public IPv4 address
+             *    - For cloud providers (AWS/Azure/GCP):
+             *      - AWS: Use Elastic IP associated with your EC2 instance
+             *      - GCP: Use static external IP assigned to your VM
+             *      - Azure: Use public IP address resource
+             *
+             * 2. Auto-detection Fallback:
+             *    - Will attempt to detect public IP if not manually configured
+             *    - Not recommended for production as it may cause:
+             *      - DNS resolution delays during startup
+             *      - Inconsistent behavior if detection services are unavailable
+             *
+             * 3. For containerized production:
+             *    - Set via environment variable
+             *    - Use cloud provider metadata service when available
+             *      (e.g., AWS EC2 metadata service)
+             */
+            return PUBLIC_IP;
+
+        default:
+            // Fallback for unknown environments - use local IP detection
+            return getLocalIPv4();
+    }
+}
+
+/**
+ * Retrieves the most suitable local IPv4 address by:
+ * 1. Checking platform-specific priority interfaces first (Ethernet/Wi-Fi)
+ * 2. Falling back to scanning all non-virtual interfaces
+ * 3. Excluding APIPA (169.254.x.x) and internal/virtual addresses
+ *
+ * @returns {string} Valid IPv4 address or '0.0.0.0' if none found
+ */
+function getLocalIPv4() {
+    const ifaces = os.networkInterfaces();
+    const platform = os.platform();
+
+    // ===== 1. Platform-Specific Configuration =====
+    /**
+     * Interface priority list (ordered by most preferred first).
+     * Windows: Physical Ethernet/Wi-Fi before virtual adapters
+     * macOS: Built-in en0 (Ethernet/Wi-Fi) before secondary interfaces
+     * Linux: Standard eth0/wlan0 before containers/virtual NICs
+     */
+    const PRIORITY_CONFIG = {
+        win32: [
+            { name: 'Ethernet', type: 'wired' }, // Primary wired
+            { name: 'Wi-Fi', type: 'wireless' }, // Primary wireless
+            { name: 'Local Area Connection', type: 'wired' }, // Legacy wired
+        ],
+        darwin: [
+            { name: 'en0', type: 'wired/wireless' }, // macOS primary
+            { name: 'en1', type: 'secondary' }, // macOS secondary
+        ],
+        linux: [
+            { name: 'eth0', type: 'wired' }, // Linux primary Ethernet
+            { name: 'wlan0', type: 'wireless' }, // Linux primary wireless
+        ],
+    };
+
+    /**
+     * Virtual interfaces to exclude (case-insensitive partial matches):
+     * - Common: Docker, VPNs, loopback
+     * - Windows: Hyper-V, VMware, Bluetooth
+     * - macOS: AWDL (Apple Wireless Direct Link), virtualization
+     * - Linux: Kubernetes, libvirt bridges
+     */
+    const VIRTUAL_INTERFACES = {
+        all: ['docker', 'veth', 'tun', 'lo'], // Cross-platform virtual NICs
+        win32: ['Virtual', 'vEthernet', 'Teredo', 'Bluetooth'],
+        darwin: ['awdl', 'bridge', 'utun'],
+        linux: ['virbr', 'kube', 'cni'],
+    };
+
+    // ===== 2. Priority Interface Check =====
+    const platformPriorities = PRIORITY_CONFIG[platform] || [];
+    const virtualExcludes = [...VIRTUAL_INTERFACES.all, ...(VIRTUAL_INTERFACES[platform] || [])];
+
+    for (const { name: ifName } of platformPriorities) {
+        // Windows: Match interface names containing priority string (e.g., "Ethernet 2")
+        // Unix: Match exact interface names (eth0, wlan0)
+        const matchingIfaces = platform === 'win32' ? Object.keys(ifaces).filter((k) => k.includes(ifName)) : [ifName];
+
+        for (const interfaceName of matchingIfaces) {
+            const addr = findValidAddress(ifaces[interfaceName]);
+            if (addr) {
+                return addr;
+            }
+        }
+    }
+
+    // ===== 3. Fallback: Full Interface Scan =====
+    const fallbackAddress = scanAllInterfaces(ifaces, virtualExcludes);
+    if (fallbackAddress) return fallbackAddress;
+
+    // ===== 4. Final Fallback =====
+    return '0.0.0.0';
+}
+
+/**
+ * Scans all non-virtual interfaces for valid IPv4 addresses
+ * @param {Object} ifaces - Network interfaces from os.networkInterfaces()
+ * @param {string[]} excludes - Virtual interface prefixes to ignore
+ * @returns {string|null} First valid IPv4 address found
+ */
+function scanAllInterfaces(ifaces, excludes) {
+    for (const [name, addresses] of Object.entries(ifaces)) {
+        // Skip interfaces with excluded prefixes (case-insensitive)
+        if (excludes.some((ex) => name.toLowerCase().includes(ex.toLowerCase()))) {
+            continue;
+        }
+        const addr = findValidAddress(addresses);
+        if (addr) {
+            console.log(`[Fallback] Using ${name}: ${addr}`);
+            return addr;
+        }
+    }
+    return null;
+}
+
+/**
+ * Validates a network address as:
+ * - IPv4 family
+ * - Non-internal (not loopback)
+ * - Non-APIPA (not 169.254.x.x)
+ * @param {Object[]} addresses - Network interface addresses
+ * @returns {string|undefined} Valid address or undefined
+ */
+function findValidAddress(addresses) {
+    return addresses?.find(
+        (addr) => addr.family === 'IPv4' && !addr.internal && !addr.address.startsWith('169.254.'), // Exclude APIPA
+    )?.address;
+}
+
+/**
+ * Finds the appropriate FFmpeg executable path for the current platform
+ *
+ * @param {string} platform - The Node.js process.platform value (darwin, linux, win32)
+ * @returns {string} The first valid FFmpeg path found, or the default path for the platform
+ *
+ * @description
+ * This function handles FFmpeg path detection across different operating systems.
+ * It checks common installation locations and returns the first accessible path.
+ * If no valid path is found, it returns the first default path for the platform.
+ */
+function getFFmpegPath(platform) {
+    // Common FFmpeg installation paths organized by platform
+    const paths = {
+        // macOS (Homebrew default locations)
+        darwin: [
+            '/usr/local/bin/ffmpeg', // Traditional Homebrew location
+            '/opt/homebrew/bin/ffmpeg', // Apple Silicon Homebrew location
+        ],
+        // Linux (common package manager locations)
+        linux: [
+            '/usr/bin/ffmpeg', // System package manager installation
+            '/usr/local/bin/ffmpeg', // Manual compilation default
+        ],
+        // Windows (common installation paths)
+        win32: [
+            'C:\\ffmpeg\\bin\\ffmpeg.exe', // Standard FFmpeg Windows installation
+            'C:\\Program Files\\ffmpeg\\bin\\ffmpeg.exe', // Program Files installation
+        ],
+    };
+
+    // Get platform-specific paths or default to Linux paths if platform not recognized
+    const platformPaths = paths[platform] || ['/usr/bin/ffmpeg'];
+
+    // Try to find the first existing accessible path
+    for (const path of platformPaths) {
+        try {
+            // Check if the path exists and is accessible
+            fs.accessSync(path);
+            return path;
+        } catch (e) {
+            // Path not accessible, try next one
+            continue;
+        }
+    }
+
+    // If no path was accessible, return the first default path for the platform
+    // This allows the calling code to handle the "not found" case with proper error messaging
+    return platformPaths[0];
+}
