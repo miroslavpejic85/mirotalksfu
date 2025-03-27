@@ -1,11 +1,13 @@
 'use strict';
 
 const dotenv = require('dotenv').config();
+const packageJson = require('../../package.json');
+
 const os = require('os');
 const fs = require('fs');
 
 const PLATFORM = os.platform();
-const IS_DOCKER = require('fs').existsSync('/.dockerenv');
+const IS_DOCKER = fs.existsSync('/.dockerenv');
 
 // ###################################################################################################
 const ENVIRONMENT = process.env.NODE_ENV || 'development'; // production
