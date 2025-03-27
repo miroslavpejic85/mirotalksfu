@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.98
+ * @version 1.7.99
  *
  */
 
@@ -1284,67 +1284,84 @@ function startServer() {
 
     function getServerConfig(tunnel = false) {
         return {
-            // General Server Information
-            server_listen: host,
-            server_tunnel: tunnel,
-            trust_proxy: trustProxy,
+            // Network & Connectivity
+            network: {
+                server_listen: host,
+                server_tunnel: tunnel,
+                trust_proxy: trustProxy,
+                sfu: {
+                    listenIP: IP,
+                    publicIP: announcedAddress,
+                    numWorker: config.mediasoup?.numWorkers,
+                    rtcMinPort: config.mediasoup?.worker?.rtcMinPort,
+                    rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort,
+                },
+                ngrok_enabled: config.ngrok?.enabled ? config.ngrok : false,
+            },
 
-            // Core Configurations
-            cors_options: corsOptions,
-            jwtCfg: jwtCfg,
-            rest_api: restApi,
+            // Security & Authentication
+            security: {
+                cors_options: corsOptions,
+                jwtCfg: jwtCfg,
+                hostProtected: hostCfg.protected || hostCfg.user_auth ? hostCfg : false,
+                ip_lookup_enabled: config.IPLookup?.enabled ? config.IPLookup : false,
+                oidc: OIDC.enabled ? OIDC : false,
+            },
 
-            // Middleware and UI
-            middleware: config.middleware,
-            configUI: config.ui,
+            // API & Services
+            api: {
+                rest_api: restApi,
+                webhook: webhook,
+                presenters: config.presenters,
+            },
 
-            // Security, Authorization, and User Management
-            oidc: OIDC.enabled ? OIDC : false,
-            hostProtected: hostCfg.protected || hostCfg.user_auth ? hostCfg : false,
-            ip_lookup_enabled: config.IPLookup?.enabled ? config.IPLookup : false,
-            presenters: config.presenters,
+            // Media Configuration
+            media: {
+                mediasoup: {
+                    listenInfos: config.mediasoup.webRtcTransport.listenInfos,
+                    worker_bin: mediasoup.workerBin,
+                    server_version: mediasoup.version,
+                    client_version: mediasoupClient.version,
+                },
+                rtmp_enabled: rtmpCfg.enabled ? rtmpCfg : false,
+                videoAI_enabled: config.videoAI.enabled ? config.videoAI : false,
+                server_recording: config?.server?.recording,
+            },
 
             // Communication Integrations
-            discord_enabled: config.discord?.enabled ? config.discord : false,
-            mattermost_enabled: config.mattermost?.enabled ? config.mattermost : false,
-            slack_enabled: slackEnabled ? config.slack : false,
-            chatGPT_enabled: config.chatGPT?.enabled ? config.chatGPT : false,
+            integrations: {
+                discord: config.discord?.enabled ? config.discord : false,
+                mattermost: config.mattermost?.enabled ? config.mattermost : false,
+                slack: slackEnabled ? config.slack : false,
+                chatGPT: config.chatGPT?.enabled ? config.chatGPT : false,
+                email_alerts: config.email?.alert ? config.email : false,
+            },
 
-            // Media and Video Configurations
-            mediasoup_listenInfos: config.mediasoup.webRtcTransport.listenInfos,
-            mediasoup_worker_bin: mediasoup.workerBin,
-            rtmp_enabled: rtmpCfg.enabled ? rtmpCfg : false,
-            videAI_enabled: config.videoAI.enabled ? config.videoAI : false,
-            serverRec: config?.server?.recording,
+            // UI & Branding
+            ui: {
+                brand: config.ui.brand,
+                buttons: config.ui.buttons,
+                middleware: config.middleware,
+            },
 
-            // Centralized Logging
-            sentry_enabled: sentryEnabled ? config.sentry : false,
+            // Monitoring & Analytics
+            monitoring: {
+                sentry: sentryEnabled ? config.sentry : false,
+                stats: config.stats?.enabled ? config.stats : false,
+                system_info: config.systemInfo,
+            },
 
-            // Additional Configurations and Features
-            survey_enabled: config.survey?.enabled ? config.survey : false,
-            redirect_enabled: config.redirect?.enabled ? config.redirect : false,
-            stats_enabled: config.stats?.enabled ? config.stats : false,
-            ngrok_enabled: config.ngrok?.enabled ? config.ngrok : false,
-            email_alerts: config.email?.alert ? config.email : false,
-            webhook: webhook,
-
-            // System info
-            systemInfo: config.systemInfo,
-
-            // SFU settings
-            sfu: {
-                listenIP: IP,
-                publicIP: announcedAddress,
-                numWorker: config.mediasoup?.numWorkers,
-                rtcMinPort: config.mediasoup?.worker?.rtcMinPort,
-                rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort,
+            // Features & Functionality
+            features: {
+                survey: config.survey?.enabled ? config.survey : false,
+                redirect: config.redirect?.enabled ? config.redirect : false,
             },
 
             // Version Information
-            app_version: packageJson.version,
-            node_version: process.versions.node,
-            mediasoup_server_version: mediasoup.version,
-            mediasoup_client_version: mediasoupClient.version,
+            versions: {
+                app: packageJson.version,
+                node: process.versions.node,
+            },
         };
     }
 
