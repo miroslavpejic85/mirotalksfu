@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.7.97
+ * @version 1.7.98
  *
  */
 
@@ -2837,13 +2837,17 @@ class RoomClient {
                 vb.appendChild(peerNameHeader);
                 eVc.appendChild(peerNameHeader);
 
-                BUTTONS.consumerVideo.sendMessageButton && eVc.appendChild(sm);
-                BUTTONS.consumerVideo.sendFileButton && eVc.appendChild(sf);
-                BUTTONS.consumerVideo.sendVideoButton && eVc.appendChild(sv);
-                BUTTONS.consumerVideo.geolocationButton && eVc.appendChild(gl);
-                BUTTONS.consumerVideo.banButton && eVc.appendChild(ban);
-                BUTTONS.consumerVideo.ejectButton && eVc.appendChild(ko);
+                const buttonGroup = document.createElement('div');
+                buttonGroup.className = 'button-group';
 
+                BUTTONS.consumerVideo.sendMessageButton && buttonGroup.appendChild(sm);
+                BUTTONS.consumerVideo.sendFileButton && buttonGroup.appendChild(sf);
+                BUTTONS.consumerVideo.sendVideoButton && buttonGroup.appendChild(sv);
+                BUTTONS.consumerVideo.geolocationButton && buttonGroup.appendChild(gl);
+                BUTTONS.consumerVideo.banButton && buttonGroup.appendChild(ban);
+                BUTTONS.consumerVideo.ejectButton && buttonGroup.appendChild(ko);
+
+                eVc.appendChild(buttonGroup);
                 eDiv.appendChild(eBtn);
                 eDiv.appendChild(eVc);
                 vb.appendChild(eDiv);
