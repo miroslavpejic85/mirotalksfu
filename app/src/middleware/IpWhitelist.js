@@ -4,11 +4,10 @@ const config = require('../config');
 const Logger = require('../Logger');
 const log = new Logger('RestrictAccessByIP');
 
-const IpWhitelistEnabled = config.middleware ? config.middleware.IpWhitelist.enabled : false;
-const allowedIPs = config.middleware ? config.middleware.IpWhitelist.allowed : [];
+const { enabled = false, allowedIPs = [] } = config?.security?.middleware?.IpWhitelist || {};
 
 const restrictAccessByIP = (req, res, next) => {
-    if (!IpWhitelistEnabled) return next();
+    if (!enabled) return next();
     //
     const clientIP =
         req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;

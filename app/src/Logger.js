@@ -6,21 +6,21 @@ const colors = require('colors');
 
 const config = require('./config');
 
-config.console.colors ? colors.enable() : colors.disable();
+config.system?.console?.colors ? colors.enable() : colors.disable();
 
 const options = {
     depth: null,
-    colors: config.console.colors,
+    colors: config.system?.console?.colors || false,
 };
 module.exports = class Logger {
     constructor(appName = 'miroTalkSfu') {
         this.appName = colors.yellow(appName);
-        this.debugOn = config.console.debug;
+        this.debugOn = config.system?.console?.debug || true;
         this.timeStart = Date.now();
         this.timeEnd = null;
         this.timeElapsedMs = null;
         this.tzOptions = {
-            timeZone: process.env.TZ || config.console.timeZone || 'UTC',
+            timeZone: process.env.TZ || config.system?.console?.timeZone || 'UTC',
             hour12: false,
         };
     }

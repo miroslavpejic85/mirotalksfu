@@ -9,12 +9,13 @@ const log = new Logger('NodeMailer');
 // EMAIL CONFIG
 // ####################################################
 
-const EMAIL_HOST = config.email ? config.email.host : false;
-const EMAIL_PORT = config.email ? config.email.port : false;
-const EMAIL_USERNAME = config.email ? config.email.username : false;
-const EMAIL_PASSWORD = config.email ? config.email.password : false;
-const EMAIL_SEND_TO = config.email ? config.email.sendTo : false;
-const EMAIL_ALERT = config.email ? config.email.alert : false;
+const emailConfig = config.integrations?.email || {};
+const EMAIL_ALERT = emailConfig.alert || false;
+const EMAIL_HOST = emailConfig.host || false;
+const EMAIL_PORT = emailConfig.port || false;
+const EMAIL_USERNAME = emailConfig.username || false;
+const EMAIL_PASSWORD = emailConfig.password || false;
+const EMAIL_SEND_TO = emailConfig.sendTo || false;
 
 if (EMAIL_ALERT && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD && EMAIL_SEND_TO) {
     log.info('Email', {

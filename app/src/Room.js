@@ -34,8 +34,8 @@ module.exports = class Room {
         this._hostOnlyRecording = false;
         // ##########################
         this.recording = {
-            recSyncServerRecording: config?.server?.recording?.enabled || false,
-            recSyncServerEndpoint: config?.server?.recording?.endpoint || '',
+            recSyncServerRecording: config?.media?.recording?.enabled || false,
+            recSyncServerEndpoint: config?.media?.recording?.endpoint || '',
         };
         // ##########################
         this._moderator = {
@@ -49,9 +49,9 @@ module.exports = class Room {
             chat_cant_chatgpt: false,
             media_cant_sharing: false,
         };
-        this.survey = config.survey;
-        this.redirect = config.redirect;
-        this.videoAIEnabled = config?.videoAI?.enabled || false;
+        this.survey = config?.features?.survey;
+        this.redirect = config?.features?.redirect;
+        this.videoAIEnabled = config?.integrations?.videoAI?.enabled || false;
         this.peers = new Map();
         this.bannedPeers = [];
         this.webRtcTransport = config.mediasoup.webRtcTransport;
@@ -62,12 +62,12 @@ module.exports = class Room {
         // RTMP configuration
         this.rtmpFileStreamer = null;
         this.rtmpUrlStreamer = null;
-        this.rtmp = config.server.rtmp || false;
+        this.rtmp = config?.media?.rtmp || false;
 
         // Polls
         this.polls = [];
 
-        this.isHostProtected = config.host.protected;
+        this.isHostProtected = config?.security?.host?.protected || false;
 
         // Share Media
         this.shareMediaData = {};

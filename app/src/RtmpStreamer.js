@@ -3,8 +3,7 @@
 const config = require('./config');
 const { PassThrough } = require('stream');
 const ffmpeg = require('fluent-ffmpeg');
-const ffmpegPath =
-    config.server.rtmp && config.server.rtmp.ffmpegPath ? config.server.rtmp.ffmpegPath : '/usr/bin/ffmpeg';
+const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
 ffmpeg.setFfmpegPath(ffmpegPath);
 
 const Logger = require('./Logger');
