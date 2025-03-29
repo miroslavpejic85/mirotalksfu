@@ -1178,7 +1178,7 @@ module.exports = {
          * - Active: Enable/disable WebRTC server
          * - Options: Listening interfaces and ports
          */
-        webRtcServerActive: process.env.SFU_SERVER || false,
+        webRtcServerActive: process.env.SFU_SERVER === 'true',
         webRtcServerOptions: {
             listenInfos: [
                 {
