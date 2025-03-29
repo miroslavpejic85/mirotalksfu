@@ -190,20 +190,30 @@ module.exports = {
          * - fromUrl: URL streaming [true/false] (default: true)
          * - fromStream: Live stream input [true/false] (default: true)
          * - maxStreams: Max simultaneous streams (default: 1)
+         * - useNodeMediaServer: Use node-media-server (mirotalk-nms) instead of ngnix-rtmp (mirotalk-rtmp) [true/false] (default true)
          * - server: RTMP server URL
-         * - appName: Application name for RTMP
+         * - appName: Application name for RTMP (if using mirotalk-rtmp add it in the nginx.conf if is not present)
          * - streamKey: Optional authentication key
          * - secret: Must match node-media-server config.js
          * - apiSecret: WebRTC → RTMP API secret
          * - expirationHours: Stream URL expiry in hours (default: 4)
-         * - dir: Directory for video files
-         * - ffmpegPatch: FFmpeg binary path
+         * - dir: Directory for video files (default app/rtmp)
+         * - ffmpegPatch: FFmpeg binary path (autodetected)
+         * - platform: current platform (autodetected)
          *
-         * RTMP Server Management:
+         * RTMP Node Media Server Management:
          * ------------------------
-         * - Start: npm run nms-start
-         * - Stop:  npm run nms-stop
-         * - Logs:  npm run nms-logs
+         * - Image: mirotalk/nms:latest
+         *  - Start: npm run nms-start
+         *  - Stop:  npm run nms-stop
+         *  - Logs:  npm run nms-logs
+         *
+         * RTMP Nginx Server Management:
+         * ------------------------
+         * - Image: mirotalk/rtmp:latest
+         *  - Start: npm run rtmp-start
+         *  - Stop:  npm run rtmp-stop
+         *  - Logs:  npm run rtmp-logs
          *
          * Important:
          * ------------------------
@@ -221,6 +231,7 @@ module.exports = {
             fromUrl: process.env.RTMP_FROM_URL !== 'false',
             fromStream: process.env.RTMP_FROM_STREAM !== 'false',
             maxStreams: parseInt(process.env.RTMP_MAX_STREAMS) || 1,
+            useNodeMediaServer: process.env.RTMP_USE_NODE_MEDIA_SERVER !== 'false',
             server: process.env.RTMP_SERVER || 'rtmp://localhost:1935',
             appName: process.env.RTMP_APP_NAME || 'mirotalk',
             streamKey: process.env.RTMP_STREAM_KEY || '',

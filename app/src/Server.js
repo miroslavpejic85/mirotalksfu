@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.01
+ * @version 1.8.02
  *
  */
 
@@ -982,6 +982,7 @@ function startServer() {
             ? 'localhost'
             : req.headers.host?.split(':')[0] || 'localhost';
 
+        const rtmpUseNodeMediaServer = rtmpCfg.useNodeMediaServer ?? true;
         const rtmpServer = rtmpCfg.server != '' ? rtmpCfg.server : false;
         const rtmpServerAppName = rtmpCfg.appName != '' ? rtmpCfg.appName : 'live';
         const rtmpStreamKey = rtmpCfg.streamKey != '' ? rtmpCfg.streamKey : uuidv4();
@@ -990,12 +991,13 @@ function startServer() {
         const rtmpServerURL = rtmpServer ? rtmpServer : `rtmp://${domainName}:1935`;
         const rtmpServerPath = '/' + rtmpServerAppName + '/' + rtmpStreamKey;
 
-        const rtmp = rtmpServerSecret
+        const rtmp = rtmpUseNodeMediaServer
             ? generateRTMPUrl(rtmpServerURL, rtmpServerPath, rtmpServerSecret, expirationHours)
             : rtmpServerURL + rtmpServerPath;
 
         log.info('initRTMP', {
             headers: req.headers,
+            rtmpUseNodeMediaServer: rtmpUseNodeMediaServer,
             rtmpServer,
             rtmpServerSecret,
             rtmpServerURL,
@@ -1326,8 +1328,8 @@ function startServer() {
                     server_version: mediasoup?.version,
                     client_version: mediasoupClient?.version,
                 },
-                rtmp_enabled: rtmpCfg?.enabled ? rtmpCfg : false,
-                videoAI_enabled: config.integrations?.videoAI?.enabled ? config.integrations.videoAI : false,
+                rtmp: rtmpCfg?.enabled ? rtmpCfg : false,
+                videoAI: config.integrations?.videoAI?.enabled ? config.integrations.videoAI : false,
                 server_recording: config?.media?.recording?.enabled ? config.media.recording : false,
             },
 

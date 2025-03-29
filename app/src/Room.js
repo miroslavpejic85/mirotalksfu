@@ -271,6 +271,7 @@ module.exports = class Room {
     // ####################################################
 
     getRTMPUrl(host, port) {
+        const rtmpUseNodeMediaServer = this.rtmp.useNodeMediaServer ?? true;
         const rtmpServer = this.rtmp.server != '' ? this.rtmp.server : false;
         const rtmpAppName = this.rtmp.appName != '' ? this.rtmp.appName : 'live';
         const rtmpStreamKey = this.rtmp.streamKey != '' ? this.rtmp.streamKey : uuidv4();
@@ -279,7 +280,7 @@ module.exports = class Room {
         const rtmpServerURL = rtmpServer ? rtmpServer : `rtmp://${host}:${port}`;
         const rtmpServerPath = '/' + rtmpAppName + '/' + rtmpStreamKey;
 
-        const rtmpUrl = rtmpServerSecret
+        const rtmpUrl = rtmpUseNodeMediaServer
             ? this.generateRTMPUrl(rtmpServerURL, rtmpServerPath, rtmpServerSecret, expirationHours)
             : rtmpServerURL + rtmpServerPath;
 
