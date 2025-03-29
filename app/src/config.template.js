@@ -1117,7 +1117,8 @@ module.exports = {
      *
      * Essential Links:
      * ---------------
-     * 🌐 Website       : https://mediasoup.org
+     * - 🌐 Website     : https://mediasoup.org
+     * - 💬 Forum       : https://mediasoup.discourse.group
      *
      * 📚 Documentation:
      * ----------------
