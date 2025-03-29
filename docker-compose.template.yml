@@ -6,6 +6,7 @@ services:
         restart: unless-stopped
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
+            - ./.env/:/src/.env
             # Mandatory volume if `server.recording.enabled` is true in app/src/config.js
             # - ./app/rec:/src/app/rec
             # Mandatory volume if `server.rtmp.enabled.fromFile` is true in app/src/config.js
@@ -13,8 +14,6 @@ services:
             # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro
-        # env_file:
-        #     - .env
         ports:
             - '3010:3010/tcp'
             - '40000-40100:40000-40100/tcp'

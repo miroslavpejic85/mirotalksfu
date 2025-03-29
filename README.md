@@ -247,16 +247,6 @@ $ cp .env.template .env
 $ cp docker-compose.template.yml docker-compose.yml
 # (Optional) Get official image from Docker Hub
 $ docker-compose pull
-```
-
-Make sure to load the `.env` file in your `docker-compose.yml` by adding:
-
-```yaml
-env_file:
-    - .env
-```
-
-```bash
 # Create and start containers
 $ docker-compose up # -d
 # To stop and remove resources
