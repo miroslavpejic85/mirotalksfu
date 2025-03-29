@@ -790,14 +790,21 @@ module.exports = {
 
     ui: {
         /**
-         * Branding & Appearance
-         * ---------------------
-         * - app: Application-specific branding
-         * - site: Website metadata and SEO
-         * - meta: HTML meta tags
-         * - og: OpenGraph social media tags
+         * Branding & Appearance Configuration
+         * -----------------------------------
+         * Controls all aspects of the application's visual identity, content, and metadata.
+         * Supports environment variable overrides for deployment-specific customization.
+         *
+         * LICENSE REQUIRED:
+         * ----------------
+         * - https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
          */
         brand: {
+            /**
+             * Application Branding
+             * --------------------
+             * Core application identity and user interface text elements.
+             */
             app: {
                 language: process.env.UI_LANGUAGE || 'en',
                 name: process.env.APP_NAME || 'MiroTalk SFU',
@@ -811,6 +818,12 @@ module.exports = {
                 joinButtonLabel: process.env.JOIN_BUTTON_LABEL || 'JOIN ROOM',
                 joinLastLabel: process.env.JOIN_LAST_LABEL || 'Your recent room:',
             },
+
+            /**
+             * Website Configuration
+             * --------------------
+             * Site-wide settings including icons and page-specific content.
+             */
             site: {
                 title: process.env.SITE_TITLE || 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
@@ -819,12 +832,24 @@ module.exports = {
                 newRoomDescription:
                     process.env.NEW_ROOM_DESC || 'Each room has its disposable URL. Just pick a name and share.',
             },
+
+            /**
+             * SEO Metadata
+             * ------------
+             * Search engine optimization elements.
+             */
             meta: {
                 description:
                     process.env.META_DESCRIPTION ||
                     'MiroTalk SFU powered by WebRTC and mediasoup for real-time video communications.',
                 keywords: process.env.META_KEYWORDS || 'webrtc, video calls, conference, screen sharing, mirotalk, sfu',
             },
+
+            /**
+             * OpenGraph/Social Media
+             * ---------------------
+             * Metadata for rich social media sharing.
+             */
             og: {
                 type: process.env.OG_TYPE || 'app-webrtc',
                 siteName: process.env.OG_SITE_NAME || 'MiroTalk SFU',
@@ -834,6 +859,13 @@ module.exports = {
                 image: process.env.OG_IMAGE_URL || 'https://sfu.mirotalk.com/images/mirotalksfu.png',
                 url: process.env.OG_URL || 'https://sfu.mirotalk.com',
             },
+
+            /**
+             * UI Section Visibility
+             * ---------------------
+             * Toggle display of various page sections.
+             * Set to 'false' via environment variables to hide.
+             */
             html: {
                 features: process.env.SHOW_FEATURES !== 'false',
                 teams: process.env.SHOW_TEAMS !== 'false',
@@ -843,34 +875,42 @@ module.exports = {
                 advertisers: process.env.SHOW_ADVERTISERS !== 'false',
                 footer: process.env.SHOW_FOOTER !== 'false',
             },
+
+            /**
+             * About/Credits Section
+             * ---------------------
+             * Contains author information, version, and support links.
+             * Supports HTML content for flexible formatting.
+             */
             about: {
                 imageUrl: process.env.ABOUT_IMAGE_URL || '../images/mirotalk-logo.gif',
                 title: `WebRTC SFU v${packageJson.version}`,
                 html: `
-                <button id="support-button" data-umami-event="Support button"
-                    onclick="window.open('${process.env.SUPPORT_URL || 'https://codecanyon.net/user/miroslavpejic85'}', '_blank')">
-                    <i class="fas fa-heart"></i> ${process.env.SUPPORT_TEXT || 'Support'}
-                </button>
-                <br />
-                <br />
-                ${process.env.AUTHOR_LABEL || 'Author'}: 
-                <a id="linkedin-button" data-umami-event="Linkedin button"
-                    href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com/in/miroslav-pejic-976a07101/'}" 
-                    target="_blank">
-                    ${process.env.AUTHOR_NAME || 'Miroslav Pejic'}
-                </a>
-                <br />
-                ${process.env.EMAIL_LABEL || 'Email'}: 
-                <a id="email-button" data-umami-event="Email button"
-                    href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}">
-                    ${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}
-                </a>
-                <hr />
-                <span>
-                    &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'MiroTalk SFU, all rights reserved'}
-                </span>
-                <hr />
-                `,
+                    <button id="support-button" data-umami-event="Support button"
+                        onclick="window.open('${process.env.SUPPORT_URL || 'https://codecanyon.net/user/miroslavpejic85'}', '_blank')">
+                        <i class="fas fa-heart"></i> ${process.env.SUPPORT_TEXT || 'Support'}
+                    </button>
+                    <br />
+                    <br />
+                    ${process.env.AUTHOR_LABEL || 'Author'}: 
+                    <a id="linkedin-button" data-umami-event="Linkedin button"
+                        href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com/in/miroslav-pejic-976a07101/'}" 
+                        target="_blank">
+                        ${process.env.AUTHOR_NAME || 'Miroslav Pejic'}
+                    </a>
+                    <br />
+                    <br />
+                    ${process.env.EMAIL_LABEL || 'Email'}: 
+                    <a id="email-button" data-umami-event="Email button"
+                        href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}">
+                        ${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}
+                    </a>
+                    <hr />
+                    <span>
+                        &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'MiroTalk SFU, all rights reserved'}
+                    </span>
+                    <hr />
+                    `,
             },
         },
 
