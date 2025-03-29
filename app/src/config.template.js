@@ -1080,91 +1080,141 @@ module.exports = {
      * 🌐 Website       : https://mediasoup.org
      *
      * 📚 Documentation:
+     * ----------------
      * - Client API     : https://mediasoup.org/documentation/v3/mediasoup-client/api/
      * - Server API     : https://mediasoup.org/documentation/v3/mediasoup/api/
      * - Protocols      : https://mediasoup.org/documentation/v3/mediasoup/rtp-parameters-and-capabilities/
      *
      * 🔧 Key Components:
+     * -----------------
      * - Router         : Manages RTP streams
      * - Transport      : Network connection handler
      * - Producer       : Media sender
      * - Consumer       : Media receiver
+     *
+     * Mediasoup Configuration
+     * -----------------------
+     * This configuration defines settings for mediasoup workers, routers,
+     * WebRTC servers, and transports. These settings control how the SFU
+     * (Selective Forwarding Unit) handles media processing and networking.
      */
     mediasoup: {
         /**
          * Worker Configuration
          * --------------------
-         * - numWorkers: Number of mediasoup workers
-         * - worker: Worker-specific settings
+         * Workers are separate processes that handle media processing.
+         * Multiple workers can run in parallel for load balancing.
          */
-        numWorkers: NUM_WORKERS,
         worker: {
-            rtcMinPort: RTC_MIN_PORT,
-            rtcMaxPort: RTC_MAX_PORT,
+            rtcMinPort: RTC_MIN_PORT, // Minimum UDP/TCP port for ICE, DTLS, RTP
+            rtcMaxPort: RTC_MAX_PORT, // Maximum UDP/TCP port for ICE, DTLS, RTP
+
+            // Disable Linux io_uring for certain operations (false = use if available)
             disableLiburing: false,
+
+            // Logging level (error, warn, debug, etc.)
             logLevel: process.env.MEDIASOUP_LOG_LEVEL || 'error',
-            logTags: ['info', 'ice', 'dtls', 'rtp', 'srtp', 'rtcp', 'rtx', 'bwe', 'score', 'simulcast', 'svc', 'sctp'],
+
+            // Detailed logging for specific components:
+            logTags: [
+                'info', // General information
+                'ice', // ICE (Interactive Connectivity Establishment) events
+                'dtls', // DTLS handshake and encryption
+                'rtp', // RTP packet flow
+                'srtp', // Secure RTP encryption
+                'rtcp', // RTCP control protocol
+                'rtx', // Retransmissions
+                'bwe', // Bandwidth estimation
+                'score', // Network score calculations
+                'simulcast', // Simulcast layers
+                'svc', // Scalable Video Coding
+                'sctp', // SCTP data channels
+            ],
         },
+        numWorkers: NUM_WORKERS, // Number of mediasoup worker processes to create
 
         /**
          * Router Configuration
          * --------------------
-         * - Media codecs and capabilities
+         * Routers manage media streams and define what codecs are supported.
+         * Each mediasoup worker can host multiple routers.
          */
         router: {
+            // Enable audio level monitoring (for detecting who is speaking)
             audioLevelObserverEnabled: true,
+
+            // Disable active speaker detection (uses more CPU)
             activeSpeakerObserverEnabled: false,
+
+            /**
+             * Supported Media Codecs
+             * ----------------------
+             * Defines what codecs the SFU can receive and forward.
+             * Order matters - first is preferred during negotiation.
+             */
             mediaCodecs: [
+                // Opus audio codec (standard for WebRTC)
                 {
                     kind: 'audio',
                     mimeType: 'audio/opus',
-                    clockRate: 48000,
-                    channels: 2,
+                    clockRate: 48000, // Standard sample rate for WebRTC
+                    channels: 2, // Stereo audio
                 },
+
+                // VP8 video codec (widely supported, good for compatibility)
                 {
                     kind: 'video',
                     mimeType: 'video/VP8',
-                    clockRate: 90000,
+                    clockRate: 90000, // Standard video clock rate
                     parameters: {
-                        'x-google-start-bitrate': 1000,
+                        'x-google-start-bitrate': 1000, // Initial bitrate (kbps)
                     },
                 },
+
+                // VP9 video codec (better compression than VP8)
+                // Profile 0: Most widely supported VP9 profile
                 {
                     kind: 'video',
                     mimeType: 'video/VP9',
                     clockRate: 90000,
                     parameters: {
-                        'profile-id': 0,
+                        'profile-id': 0, // Baseline profile
                         'x-google-start-bitrate': 1000,
                     },
                 },
+
+                // VP9 Profile 2: Supports HDR and 10/12-bit color
                 {
                     kind: 'video',
                     mimeType: 'video/VP9',
                     clockRate: 90000,
                     parameters: {
-                        'profile-id': 2,
+                        'profile-id': 2, // Advanced profile
                         'x-google-start-bitrate': 1000,
                     },
                 },
+
+                // H.264 Baseline profile (widest hardware support)
+                {
+                    kind: 'video',
+                    mimeType: 'video/h264',
+                    clockRate: 90000,
+                    parameters: {
+                        'packetization-mode': 1, // Required for WebRTC
+                        'profile-level-id': '42e01f', // Baseline 3.1
+                        'level-asymmetry-allowed': 1, // Allows different levels
+                        'x-google-start-bitrate': 1000,
+                    },
+                },
+
+                // H.264 Main profile (better compression than Baseline)
                 {
                     kind: 'video',
                     mimeType: 'video/h264',
                     clockRate: 90000,
                     parameters: {
                         'packetization-mode': 1,
-                        'profile-level-id': '42e01f',
-                        'level-asymmetry-allowed': 1,
-                        'x-google-start-bitrate': 1000,
-                    },
-                },
-                {
-                    kind: 'video',
-                    mimeType: 'video/h264',
-                    clockRate: 90000,
-                    parameters: {
-                        'packetization-mode': 1,
-                        'profile-level-id': '4d0032',
+                        'profile-level-id': '4d0032', // Main 4.0
                         'level-asymmetry-allowed': 1,
                         'x-google-start-bitrate': 1000,
                     },
@@ -1175,23 +1225,54 @@ module.exports = {
         /**
          * WebRTC Server Configuration
          * ---------------------------
-         * - Active: Enable/disable WebRTC server
-         * - Options: Listening interfaces and ports
+         * WebRTC servers handle ICE (connection establishment) and DTLS (encryption).
+         * Can be disabled if using plain WebRtcTransport instead.
+         *
+         * Best used when:
+         * - Running in controlled environments with fixed IPs
+         * - Need to minimize port usage across workers
+         * - Using StatefulSets/DaemonSets in Kubernetes
+         *
+         * Kubernetes considerations:
+         * - Requires stable network identity (use StatefulSet)
+         * - Needs NodePort/LoadBalancer with externalTrafficPolicy: Local
+         * - Port ranges must be carefully allocated to avoid conflicts
          */
-        webRtcServerActive: process.env.SFU_SERVER === 'true',
+        webRtcServerActive: process.env.SFU_SERVER === 'true', // Enable if SFU_SERVER=true
         webRtcServerOptions: {
+            // Network interfaces and ports for ICE candidates
             listenInfos: [
+                /**
+                 * UDP Configuration
+                 * Preferred for media transport (lower latency)
+                 * Kubernetes implications:
+                 * - Each Pod needs unique ports if sharing host network
+                 * - Consider using hostPort when not using LoadBalancer
+                 */
                 {
                     protocol: 'udp',
-                    ip: LISTEN_IP,
-                    announcedAddress: IPv4,
-                    portRange: { min: RTC_MIN_PORT, max: RTC_MIN_PORT + NUM_WORKERS },
+                    ip: LISTEN_IP, // Local IP to bind to
+                    announcedAddress: IPv4, // Public IP sent to clients
+                    portRange: {
+                        min: RTC_MIN_PORT,
+                        max: RTC_MIN_PORT + NUM_WORKERS, // Port range per worker
+                    },
                 },
+                /**
+                 * TCP Configuration
+                 * Fallback for restrictive networks (higher latency)
+                 * Kubernetes implications:
+                 * - Helps with networks blocking UDP
+                 * - May require separate Service definition in k8s
+                 */
                 {
                     protocol: 'tcp',
                     ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: RTC_MIN_PORT, max: RTC_MIN_PORT + NUM_WORKERS },
+                    portRange: {
+                        min: RTC_MIN_PORT,
+                        max: RTC_MIN_PORT + NUM_WORKERS,
+                    },
                 },
             ],
         },
@@ -1199,27 +1280,71 @@ module.exports = {
         /**
          * WebRTC Transport Configuration
          * ------------------------------
-         * - Network and bandwidth settings
+         * Transports handle the actual media flow between clients and the SFU.
+         * These settings affect bandwidth management and network behavior.
+         *
+         * Preferred when:
+         * - Running in cloud environments with auto-scaling
+         * - Need dynamic port allocation
+         * - Kubernetes Pods are ephemeral
+         *
+         * Kubernetes considerations:
+         * - Requires wide port range exposure (50000-60000 typical)
+         * - Works better with ClusterIP Services
+         * - More resilient to Pod restarts
          */
         webRtcTransport: {
+            // Network interfaces for media transmission
             listenInfos: [
+                /**
+                 * UDP Transport Settings
+                 * Kubernetes implications:
+                 * - Needs hostNetwork or privileged Pod for port access
+                 * - Consider port range size based on expected scale
+                 */
                 {
                     protocol: 'udp',
                     ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
+                    portRange: {
+                        min: RTC_MIN_PORT,
+                        max: RTC_MAX_PORT, // Wider range than WebRtcServer
+                    },
                 },
+                /**
+                 * TCP Transport Settings
+                 * Kubernetes implications:
+                 * - Less efficient but more compatible
+                 * - May require different Service configuration
+                 */
                 {
                     protocol: 'tcp',
                     ip: LISTEN_IP,
                     announcedAddress: IPv4,
-                    portRange: { min: RTC_MIN_PORT, max: RTC_MAX_PORT },
+                    portRange: {
+                        min: RTC_MIN_PORT,
+                        max: RTC_MAX_PORT,
+                    },
                 },
             ],
-            initialAvailableOutgoingBitrate: 1000000,
-            minimumAvailableOutgoingBitrate: 600000,
-            maxSctpMessageSize: 262144,
-            maxIncomingBitrate: 1500000,
+
+            /**
+             * Bandwidth Control Settings
+             * Kubernetes implications:
+             * - These values should be tuned based on Node resources
+             * - Consider network plugin overhead (Calico, Cilium etc.)
+             */
+            initialAvailableOutgoingBitrate: 1000000, // 1 Mbps initial bitrate
+            minimumAvailableOutgoingBitrate: 600000, // 600 Kbps minimum guaranteed
+            maxIncomingBitrate: 1500000, // 1.5 Mbps max per producer
+
+            /**
+             * Data Channel Settings
+             * Kubernetes implications:
+             * - Affects memory allocation per transport
+             * - Larger sizes may require Pod resource adjustments
+             */
+            maxSctpMessageSize: 262144, // 256 KB max message size for data channels
         },
     },
 };
