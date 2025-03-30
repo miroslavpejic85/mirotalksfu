@@ -192,7 +192,7 @@ module.exports = {
          * - maxStreams: Max simultaneous streams (default: 1)
          * - useNodeMediaServer: Use node-media-server (mirotalk-nms) instead of ngnix-rtmp (mirotalk-rtmp) [true/false] (default true)
          * - server: RTMP server URL
-         * - appName: Application name for RTMP (if using mirotalk-rtmp add it in the nginx.conf if is not present)
+         * - appName: Application name for RTMP (for mirotalk/rtmp docker image add it in the nginx.conf)
          * - streamKey: Optional authentication key
          * - secret: Must match node-media-server config.js
          * - apiSecret: WebRTC → RTMP API secret
