@@ -180,50 +180,59 @@ module.exports = {
 
         /**
          * RTMP Configuration
-         * ========================
-         * Real-Time Messaging Protocol for audio/video/data streaming
+         * =================
+         * Configures Real-Time Messaging Protocol (RTMP) for audio/video/data streaming.
          *
-         * Core Settings:
-         * ------------------------
-         * - enabled: Enable RTMP streaming
-         * - fromFile: Local file streaming [true/false] (default: true)
-         * - fromUrl: URL streaming [true/false] (default: true)
-         * - fromStream: Live stream input [true/false] (default: true)
-         * - maxStreams: Max simultaneous streams (default: 1)
-         * - useNodeMediaServer: Use node-media-server (mirotalk-nms) instead of ngnix-rtmp (mirotalk-rtmp) [true/false] (default true)
-         * - server: RTMP server URL
-         * - appName: Application name for RTMP (for mirotalk/rtmp docker image add it in the nginx.conf)
-         * - streamKey: Optional authentication key
-         * - secret: Must match node-media-server config.js
-         * - apiSecret: WebRTC → RTMP API secret
-         * - expirationHours: Stream URL expiry in hours (default: 4)
-         * - dir: Directory for video files (default app/rtmp)
-         * - ffmpegPatch: FFmpeg binary path (autodetected)
-         * - platform: current platform (autodetected)
+         * Core Settings
+         * ------------
+         * - enabled            : Enable/disable RTMP streaming (default: false)
+         * - fromFile           : Enable local file streaming (default: true)
+         * - fromUrl            : Enable URL streaming (default: true)
+         * - fromStream         : Enable live stream input (default: true)
+         * - maxStreams         : Maximum simultaneous streams (default: 1)
+         * - useNodeMediaServer : Use NodeMediaServer instead of nginx-rtmp (default: true)
+         * - server             : RTMP server URL (default: 'rtmp://localhost:1935')
+         * - appName            : Application name (default: 'live')
+         * - streamKey          : Optional authentication key (auto-generated UUID if empty)
+         * - secret             : Must match NodeMediaServer's config.js (default: 'mirotalkRtmpSecret')
+         * - apiSecret          : WebRTC→RTMP API secret (default: 'mirotalkRtmpApiSecret')
+         * - expirationHours    : Stream URL expiry in hours (default: 4)
+         * - dir                : Video storage directory (default: 'app/rtmp')
+         * - ffmpegPath         : FFmpeg binary path (auto-detected)
+         * - platform           : Current OS platform (auto-detected)
          *
-         * RTMP Node Media Server Management:
-         * ------------------------
-         * - Image: mirotalk/nms:latest
-         *  - Start: npm run nms-start
-         *  - Stop:  npm run nms-stop
-         *  - Logs:  npm run nms-logs
+         * Server Management
+         * ----------------
+         * NodeMediaServer (mirotalk/nms:latest):
+         *   - Start: npm run nms-start
+         *   - Stop:  npm run nms-stop
+         *   - Logs:  npm run nms-logs
          *
-         * RTMP Nginx Server Management:
-         * ------------------------
-         * - Image: mirotalk/rtmp:latest
-         *  - Start: npm run rtmp-start
-         *  - Stop:  npm run rtmp-stop
-         *  - Logs:  npm run rtmp-logs
+         * NGINX-RTMP (mirotalk/rtmp:latest):
+         *   - Start: npm run rtmp-start
+         *   - Stop:  npm run rtmp-stop
+         *   - Logs:  npm run rtmp-logs
          *
-         * Important:
-         * ------------------------
-         * - RTMP server must be running (npm run nms-start)
-         * - Requires open port 1935
+         * Implementation Notes:
+         * --------------------
+         * 1. For NodeMediaServer:
+         *    - Mandatory values: appName (falls back to 'live'), streamKey (auto-generated)
+         *    - URL format: rtmp://host:port/appName/streamKey?sign=expiration-token
+         *
+         * 2. Default Behavior:
+         *    - If server URL is empty, uses localhost:1935
+         *    - If no streamKey provided, generates UUIDv4
+         *    - When useNodeMediaServer=true, generates signed URLs with expiration
+         *
+         * Requirements:
+         * -------------
+         * - RTMP server must be running
+         * - Port 1935 must be accessible
          * - FFmpeg must be installed
          *
          * Documentation:
-         * ------------------------
-         * - Docs: https://docs.mirotalk.com/mirotalk-sfu/rtmp/
+         * --------------
+         * - https://docs.mirotalk.com/mirotalk-sfu/rtmp/
          */
         rtmp: {
             enabled: process.env.RTMP_ENABLED === 'true',
@@ -233,7 +242,7 @@ module.exports = {
             maxStreams: parseInt(process.env.RTMP_MAX_STREAMS) || 1,
             useNodeMediaServer: process.env.RTMP_USE_NODE_MEDIA_SERVER !== 'false',
             server: process.env.RTMP_SERVER || 'rtmp://localhost:1935',
-            appName: process.env.RTMP_APP_NAME || 'mirotalk',
+            appName: process.env.RTMP_APP_NAME || 'live',
             streamKey: process.env.RTMP_STREAM_KEY || '',
             secret: process.env.RTMP_SECRET || 'mirotalkRtmpSecret',
             apiSecret: process.env.RTMP_API_SECRET || 'mirotalkRtmpApiSecret',
