@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.02
+ * @version 1.8.03
  *
  */
 
@@ -2337,6 +2337,18 @@ async function changeCamera(deviceId) {
     }
 }
 
+function detectCameraFacingMode(stream) {
+    if (!stream || !stream.getVideoTracks().length) {
+        console.warn("No video track found in the stream. Defaulting to 'user'.");
+        return 'user';
+    }
+    const videoTrack = stream.getVideoTracks()[0];
+    const settings = videoTrack.getSettings();
+    const capabilities = videoTrack.getCapabilities?.() || {};
+    const facingMode = settings.facingMode || capabilities.facingMode?.[0] || 'user';
+    return facingMode === 'environment' ? 'environment' : 'user';
+}
+
 // ####################################################
 // HANDLE MEDIA ERROR
 // ####################################################
@@ -2475,10 +2487,12 @@ function handleCameraMirror(video) {
         }
     } else {
         // Mobile, Tablet, IPad devices...
-        if (video.classList.contains('mirror')) {
-            video.classList.remove('mirror');
-            isInitVideoMirror = false;
-        }
+        const camera = detectCameraFacingMode(video.srcObject);
+        const facingModeEnvironment = camera === 'environment';
+        facingModeEnvironment
+            ? initVideo.classList.remove('mirror') // Back camera → No mirror
+            : initVideo.classList.add('mirror'); // Disable mirror for rear camera
+        isInitVideoMirror = facingModeEnvironment;
     }
 }
 
@@ -5294,7 +5308,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.02',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.03',
         html: `
             <br />
             <div id="about">
