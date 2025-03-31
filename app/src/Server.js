@@ -1264,7 +1264,7 @@ function startServer() {
     });
 
     // not match any of page before, so 404 not found
-    app.get('\\*', function (req, res) {
+    app.use((req, res) => {
         res.sendFile(views.notFound);
     });
 
