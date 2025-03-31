@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.03
+ * @version 1.8.04
  *
  */
 
@@ -439,15 +439,15 @@ function startServer() {
     // Mattermost
     const mattermost = new Mattermost(app);
 
-    // POST start from here...
-    app.post('*', function (next) {
-        next();
-    });
+    // // POST start from here...
+    // app.post('*', function (next) {
+    //     next();
+    // });
 
-    // GET start from here...
-    app.get('*', function (next) {
-        next();
-    });
+    // // GET start from here...
+    // app.get('*', function (next) {
+    //     next();
+    // });
 
     // Remove trailing slashes in url handle bad requests
     app.use((err, req, res, next) => {
@@ -759,7 +759,7 @@ function startServer() {
     });
 
     // not specified correctly the room id
-    app.get('/join/*', (req, res) => {
+    app.get('/join/\\*', (req, res) => {
         res.redirect('/');
     });
 
@@ -973,7 +973,7 @@ function startServer() {
         res.json({ enabled: rtmpEnabled });
     });
 
-    app.post('/initRTMP', checkRTMPApiSecret, checkMaxStreams, async (req, res) => {
+    app.post('/initRTMP', checkRTMPApiSecret, checkMaxStreams, (req, res) => {
         if (!rtmpCfg || !rtmpCfg.enabled) {
             return res.status(400).send('RTMP server is not enabled or missing the config');
         }
@@ -1274,7 +1274,7 @@ function startServer() {
     });
 
     // not match any of page before, so 404 not found
-    app.get('*', function (req, res) {
+    app.get('\\*', function (req, res) {
         res.sendFile(views.notFound);
     });
 
