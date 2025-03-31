@@ -439,16 +439,6 @@ function startServer() {
     // Mattermost
     const mattermost = new Mattermost(app);
 
-    // // POST start from here...
-    // app.post('*', function (next) {
-    //     next();
-    // });
-
-    // // GET start from here...
-    // app.get('*', function (next) {
-    //     next();
-    // });
-
     // Remove trailing slashes in url handle bad requests
     app.use((err, req, res, next) => {
         if (err && (err instanceof SyntaxError || err.status === 400 || 'body' in err)) {
