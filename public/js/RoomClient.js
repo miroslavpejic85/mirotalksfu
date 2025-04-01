@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.04
+ * @version 1.8.06
  *
  */
 
@@ -324,7 +324,6 @@ class RoomClient {
         this.isToggleRaiseHand = false;
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
-        this.camera = 'user';
         this.videoQualitySelectedIndex = 0;
 
         this.pollSelectedOptions = {};
@@ -1654,14 +1653,16 @@ class RoomClient {
 
                 if (video) {
                     this.localVideoElement = elem;
+                    this.videoProducerId = producer.id;
+                    camera = detectCameraFacingMode(stream);
+                    handleCameraMirror(elem);
                 }
 
-                if (video) this.videoProducerId = producer.id;
-                if (screen) this.screenProducerId = producer.id;
-
-                // No mirror effect for producer
-                if (!isInitVideoMirror && elem.classList.contains('mirror')) {
-                    elem.classList.remove('mirror');
+                if (screen) {
+                    this.screenProducerId = producer.id;
+                    if (elem.classList.contains('mirror')) {
+                        elem.classList.remove('mirror');
+                    }
                 }
             } else {
                 this.localAudioStream = stream;
@@ -1971,8 +1972,8 @@ class RoomClient {
     }
 
     getCameraConstraints() {
-        this.camera = this.camera == 'user' ? 'environment' : 'user';
-        if (this.camera != 'user') this.camVideo = { facingMode: { exact: this.camera } };
+        camera = camera == 'user' ? 'environment' : 'user';
+        if (camera != 'user') this.camVideo = { facingMode: { exact: camera } };
         else this.camVideo = true;
         return {
             audio: false,
@@ -2320,7 +2321,6 @@ class RoomClient {
                 elem.volume = 0;
                 elem.poster = image.poster;
                 elem.style.objectFit = isScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
-                elem.className = this.isMobileDevice || isScreen ? '' : 'mirror';
 
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
@@ -4365,7 +4365,6 @@ class RoomClient {
         if (btnMv && videoPlayer) {
             btnMv.addEventListener('click', () => {
                 videoPlayer.classList.toggle('mirror');
-                //rc.roomMessage('toggleVideoMirror', videoPlayer.classList.contains('mirror'));
             });
         }
     }

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.04
+ * @version 1.8.06
  *
  */
 
@@ -242,7 +242,6 @@ let isEnumerateVideoDevices = false;
 let isAudioAllowed = false;
 let isVideoAllowed = false;
 let isVideoPrivacyActive = false;
-let isInitVideoMirror = true;
 let isRecording = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
@@ -258,6 +257,7 @@ let audio = false;
 let video = false;
 let screen = false;
 let hand = false;
+let camera = 'user';
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -710,7 +710,6 @@ function setupInitButtons() {
     };
     initVideoMirrorButton.onclick = () => {
         initVideo.classList.toggle('mirror');
-        isInitVideoMirror = initVideo.classList.contains('mirror');
     };
     initVirtualBackgroundButton.onclick = () => {
         showImageSelector();
@@ -2301,9 +2300,6 @@ async function changeCamera(deviceId) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
         initVideoContainerShow();
-        if (!initVideo.classList.contains('mirror')) {
-            initVideo.classList.toggle('mirror');
-        }
     }
     const videoConstraints = {
         audio: false,
@@ -2317,7 +2313,6 @@ async function changeCamera(deviceId) {
     await navigator.mediaDevices
         .getUserMedia(videoConstraints)
         .then(async (camStream) => {
-            initVideo.className = 'mirror';
             initVideo.srcObject = camStream;
             initStream = camStream;
             console.log(
@@ -2325,6 +2320,7 @@ async function changeCamera(deviceId) {
                 initStream.getVideoTracks()[0].getSettings(),
             );
             checkInitConfig();
+            camera = detectCameraFacingMode(camStream);
             handleCameraMirror(initVideo);
         })
         .catch((error) => {
@@ -2479,21 +2475,9 @@ async function toggleScreenSharing() {
 }
 
 function handleCameraMirror(video) {
-    if (isDesktopDevice) {
-        // Desktop devices...
-        if (!video.classList.contains('mirror')) {
-            video.classList.toggle('mirror');
-            isInitVideoMirror = true;
-        }
-    } else {
-        // Mobile, Tablet, IPad devices...
-        const camera = detectCameraFacingMode(video.srcObject);
-        const facingModeEnvironment = camera === 'environment';
-        facingModeEnvironment
-            ? initVideo.classList.remove('mirror') // Back camera → No mirror
-            : initVideo.classList.add('mirror'); // Disable mirror for rear camera
-        isInitVideoMirror = facingModeEnvironment;
-    }
+    camera === 'environment'
+        ? video.classList.remove('mirror') // Back camera → No mirror
+        : video.classList.add('mirror'); // Disable mirror for rear camera
 }
 
 function handleSelects() {
@@ -5308,7 +5292,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.03',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.06',
         html: `
             <br />
             <div id="about">
