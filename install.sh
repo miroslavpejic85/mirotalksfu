@@ -144,7 +144,7 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
     else
         log "Build image from source"
 
-        docker compose build
+        docker-compose build
 
 
         log "Remove old and unused docker images"
@@ -154,7 +154,7 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
 
     log "Start containers"
 
-    docker compose up #-d
+    docker-compose up #-d
 else
     log "Install dependencies"
 

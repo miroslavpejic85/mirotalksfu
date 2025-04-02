@@ -6,9 +6,9 @@
     "scripts": {
         "start": "node server.js",
         "start-dev": "nodemon server.js",
-        "nms-start": "docker compose -f ../../../node-media-server/docker-compose.yml up -d",
-        "nms-stop": "docker compose -f ../../../node-media-server/docker-compose.yml down",
-        "nms-restart": "docker compose -f ../../../node-media-server/docker-compose.yml down && docker-compose -f ../../node-media-server/docker-compose.yml up -d",
+        "nms-start": "docker-compose -f ../../../node-media-server/docker-compose.yml up -d",
+        "nms-stop": "docker-compose -f ../../../node-media-server/docker-compose.yml down",
+        "nms-restart": "docker-compose -f ../../../node-media-server/docker-compose.yml down && docker-compose -f ../../node-media-server/docker-compose.yml up -d",
         "nms-logs": "docker logs -f mirotalk-nms"
     },
     "keywords": [

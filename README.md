@@ -246,11 +246,11 @@ $ cp .env.template .env
 # Copy docker-compose.template.yml in docker-compose.yml and edit it if needed
 $ cp docker-compose.template.yml docker-compose.yml
 # (Optional) Get official image from Docker Hub
-$ docker compose pull
+$ docker-compose pull
 # Create and start containers
-$ docker compose up # -d
+$ docker-compose up # -d
 # To stop and remove resources
-$ docker compose down
+$ docker-compose down
 ```
 
 - Open [https://localhost:3010](https://localhost:3010) in your browser.
