@@ -39,6 +39,7 @@ class LocalStorage {
             mic_latency: 50, // ms
             mic_volume: 100, // %
             video_fps: 0, // default 1280x768 30fps
+            screen_optimization: 1, // default detail (1): For high fidelity (screen sharing with text/graphics) || motion (2): For high frame rate (video playback, game streaming)
             screen_fps: 3, // default 1920x1080 15fps
             broadcasting: false, // default false (one to many a/v streaming)
             lobby: false, // default false

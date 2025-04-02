@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.07
+ * @version 1.8.08
  *
  */
 
@@ -329,6 +329,12 @@ function initClient() {
             'right',
         );
         setTippy('initVideoAudioRefreshButton', 'Refresh audio/video devices', 'top');
+        setTippy(
+            'screenOptimizationLabel',
+            'Detail: For high fidelity (screen sharing with text/graphics)<br />Motion: For high frame rate (video playback, game streaming',
+            'right',
+            true,
+        );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
@@ -2493,6 +2499,11 @@ function handleSelects() {
     screenQuality.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.screen);
     };
+    screenOptimization.onchange = () => {
+        rc.closeThenProduce(RoomClient.mediaType.screen);
+        localStorageSettings.screen_optimization = screenOptimization.selectedIndex;
+        lS.setSettings(localStorageSettings);
+    };
     videoFps.onchange = () => {
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
         localStorageSettings.video_fps = videoFps.selectedIndex;
@@ -3240,6 +3251,7 @@ function loadSettingsFromLocalStorage() {
     micVolumeRange.value = localStorageSettings.mic_volume || 100;
     micVolumeValue.innerText = localStorageSettings.mic_volume || 100;
 
+    screenOptimization.selectedIndex = localStorageSettings.screen_optimization;
     videoFps.selectedIndex = localStorageSettings.video_fps;
     screenFps.selectedIndex = localStorageSettings.screen_fps;
     BtnVideoObjectFit.selectedIndex = localStorageSettings.video_obj_fit;
@@ -5292,7 +5304,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.07',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.08',
         html: `
             <br />
             <div id="about">

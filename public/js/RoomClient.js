@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.07
+ * @version 1.8.08
  *
  */
 
@@ -1567,14 +1567,20 @@ class RoomClient {
 
             if (screen) {
                 /*
-                    track.contentHint helps optimize media tracks for specific use cases like `motion` or `detail`.
-                        - `motion`: For high frame rate, suitable for dynamic content like video playback or game streaming.
-                        - `detail`: For content requiring high fidelity, such as screen sharing with text, graphics, or fine details, prioritizing resolution over frame rate.
-                */
+                 * track.contentHint helps optimize media tracks for specific use cases:
+                 * - 'motion': For high frame rate (video playback, game streaming)
+                 * - 'detail': For high fidelity (screen sharing with text/graphics)
+                 */
                 if ('contentHint' in track) {
-                    track.contentHint = 'detail';
-                    console.info('Optimized video Track for screen sharing!');
+                    show(ScreenOptimizationDiv);
+
+                    const contentHint = screenOptimization.value;
+                    if (contentHint !== 'None') {
+                        track.contentHint = contentHint;
+                        console.info(`Optimized video track for screen sharing: ${contentHint}`);
+                    }
                 } else {
+                    hide(ScreenOptimizationDiv);
                     console.warn('contentHint is not supported in this browser');
                 }
             }
