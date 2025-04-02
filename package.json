@@ -21,12 +21,12 @@
         "docker-stop": "docker stop mirotalksfu",
         "rtmp-start": "docker compose -f rtmpServers/nginx-rtmp/docker-compose.yml up -d",
         "rtmp-stop": "docker compose -f rtmpServers/nginx-rtmp/docker-compose.yml down",
-        "rtmp-restart": "docker compose -f rtmpServers/nginx-rtmp/docker-compose.yml down && docker-compose -f rtmpServers/nginx-rtmp/docker-compose.yml up -d",
+        "rtmp-restart": "docker compose -f rtmpServers/nginx-rtmp/docker-compose.yml down && docker compose -f rtmpServers/nginx-rtmp/docker-compose.yml up -d",
         "rtmp-logs": "docker logs -f mirotalk-rtmp",
         "nms-node-start": "node rtmpServers/node-media-server/src/server.js",
         "nms-start": "docker compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
         "nms-stop": "docker compose -f rtmpServers/node-media-server/docker-compose.yml down",
-        "nms-restart": "docker compose -f rtmpServers/node-media-server/docker-compose.yml down && docker-compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
+        "nms-restart": "docker compose -f rtmpServers/node-media-server/docker-compose.yml down && docker compose -f rtmpServers/node-media-server/docker-compose.yml up -d",
         "nms-logs": "docker logs -f mirotalk-nms"
     },
     "repository": {

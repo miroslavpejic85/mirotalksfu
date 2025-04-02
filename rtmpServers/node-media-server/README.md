@@ -28,13 +28,13 @@ $ cp docker-compose.template.yml docker-compose.yml
 $ docker pull mirotalk/nms:latest
 
 # Create and start containers
-$ docker-compose up -d
+$ docker compose up -d
 
 # Check the logs
 $ docker logs -f mirotalk-nms
 
 # To stop and remove resources
-$ docker-compose down
+$ docker compose down
 ```
 
 ## Dashboard & API
