@@ -463,6 +463,34 @@ body {
     align-items: center;
 }
 
+#qrRoomPopupContainer {
+    z-index: 9999;
+    position: fixed;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px;
+    background: var(--body-bg);
+    border: var(--border);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+}
+
+#qrText {
+    margin-top: 10px;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-align: center;
+    width: 100%;
+}
+
+#qrRoomPopup {
+    width: 256px;
+    height: 256px;
+}
+
 /*--------------------------------------------------------------
 # My settings
 --------------------------------------------------------------*/
@@ -1337,6 +1365,13 @@ select {
 
 .show {
     display: block !important;
+}
+
+.top-center {
+    position: fixed;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .center {

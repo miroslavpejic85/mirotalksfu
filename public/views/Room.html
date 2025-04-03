@@ -119,6 +119,7 @@
         <script defer src="../js/Transcription.js"></script>
         <script defer src="../js/VideoGrid.js"></script>
         <script defer src="../js/VirtualBackground.js"></script>
+        <script defer src="../js/E2E.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/Room.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -194,6 +195,11 @@ access to use this app.
                 <button id="saveImageUrlBtn">Save</button>
                 <button id="cancelImageUrlBtn">Cancel</button>
             </div>
+        </div>
+
+        <div id="qrRoomPopupContainer" class="hidden top-center fadein">
+            <canvas id="qrRoomPopup"></canvas>
+            <div id="qrText">Scan to join the room</div>
         </div>
 
         <div id="control" class="fadein">
