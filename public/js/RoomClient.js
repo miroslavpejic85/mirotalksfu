@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.10
+ * @version 1.8.11
  *
  */
 
@@ -750,6 +750,11 @@ class RoomClient {
         this.producerTransport.on('connectionstatechange', async (state) => {
             console.log(`Producer Transport state changed to: ${state}`, { id: this.producerTransport.id });
 
+            if (state === 'disconnected' || state === 'failed') {
+                console.warn('⚠️ Attempting ICE restart...');
+                await this.restartProducerIce();
+            }
+
             switch (state) {
                 case 'connecting':
                     console.log('Producer Transport connecting...');
@@ -758,26 +763,14 @@ class RoomClient {
                     console.log('✅ Producer Transport connected', { id: this.producerTransport.id });
                     break;
                 case 'disconnected':
-                    console.warn('Producer Transport disconnected', { id: this.producerTransport.id });
+                    console.warn('⚠️ Producer Transport disconnected', { id: this.producerTransport.id });
                     break;
                 case 'failed':
                     console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
-
-                    this.producerTransport.close();
-
-                    popupHtmlMessage(
-                        null,
-                        image.network,
-                        'Producer Transport',
-                        'Unable to connect. Please check your network.',
-                        'center',
-                        false,
-                        true,
-                    );
                     break;
                 default:
-                    console.log('Producer transport connection state changes', {
-                        state: state,
+                    console.log('Producer transport connection state changed', {
+                        state,
                         id: this.producerTransport.id,
                     });
                     break;
@@ -834,6 +827,11 @@ class RoomClient {
         this.consumerTransport.on('connectionstatechange', async (state) => {
             console.log(`Consumer Transport state changed to: ${state}`, { id: this.consumerTransport.id });
 
+            if (state === 'disconnected' || state === 'failed') {
+                console.warn('⚠️ Attempting ICE restart...');
+                await this.restartConsumerIce();
+            }
+
             switch (state) {
                 case 'connecting':
                     console.log('Consumer Transport connecting...');
@@ -842,26 +840,14 @@ class RoomClient {
                     console.log('✅ Consumer Transport connected', { id: this.consumerTransport.id });
                     break;
                 case 'disconnected':
-                    console.warn('Consumer Transport disconnected', { id: this.consumerTransport.id });
+                    console.warn('⚠️ Consumer Transport disconnected', { id: this.consumerTransport.id });
                     break;
                 case 'failed':
                     console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
-
-                    this.consumerTransport.close();
-
-                    popupHtmlMessage(
-                        null,
-                        image.network,
-                        'Consumer Transport',
-                        'Unable to connect. Please check your network.',
-                        'center',
-                        false,
-                        true,
-                    );
                     break;
                 default:
-                    console.log('Consumer transport connection state changes', {
-                        state: state,
+                    console.log('Consumer transport connection state changed', {
+                        state,
                         id: this.consumerTransport.id,
                     });
                     break;
@@ -892,7 +878,7 @@ class RoomClient {
     // ####################################################
 
     async restartTransportIce(transport, type) {
-        if (!transport || typeof transport !== 'object' || transport.closed) return;
+        if (!transport || typeof transport !== 'object' || transport.closed) return false;
 
         try {
             console.warn(`🔄 Restarting ${type} ICE...`, {
@@ -906,7 +892,7 @@ class RoomClient {
 
             if (!iceParameters) {
                 console.warn(`⚠️ No ${type} ICE Parameters received`);
-                return;
+                return false;
             }
 
             console.info(`🚀 Restarting ${type} transport ICE`, iceParameters);
@@ -914,20 +900,50 @@ class RoomClient {
             await transport.restartIce({ iceParameters });
 
             console.info(`✅ Successfully restarted ${type} ICE`);
+            return true;
         } catch (error) {
             console.error(`🔥 Restart ${type} ICE error`, {
                 id: transport?.id,
                 error: error.message,
             });
+            return false;
         }
     }
 
-    async restartProducerIce() {
-        await this.restartTransportIce(this.producerTransport, 'Producer');
+    async restartTransportWithRetry(transport, transportType, retries = 5, initialDelay = 1000) {
+        let delay = initialDelay;
+
+        for (let i = 0; i < retries; i++) {
+            const success = i === 4 ? await this.restartTransportIce(transport, transportType) : false;
+            if (success) return true; // Exit if reconnection is successful
+
+            console.warn(`🌀 Reconnection attempt ${i + 1} failed. Retrying in ${delay}ms...`);
+            await new Promise((resolve) => setTimeout(resolve, delay));
+            delay *= 2; // Exponential backoff: 1s -> 2s -> 4s -> 8s -> 16s
+        }
+
+        console.error('❌ Failed to reconnect after multiple attempts.');
+        transport.close();
+
+        popupHtmlMessage(
+            null,
+            image.network,
+            `${transportType} Transport`,
+            'Unable to reconnect. Please check your network.',
+            'center',
+            false,
+            true,
+        );
+
+        return false;
     }
 
-    async restartConsumerIce() {
-        await this.restartTransportIce(this.consumerTransport, 'Consumer');
+    async restartProducerIce(retries = 5, delay = 1000) {
+        return this.restartTransportWithRetry(this.producerTransport, 'Producer', retries, delay);
+    }
+
+    async restartConsumerIce(retries = 5, delay = 1000) {
+        return this.restartTransportWithRetry(this.consumerTransport, 'Consumer', retries, delay);
     }
 
     async restartIce() {

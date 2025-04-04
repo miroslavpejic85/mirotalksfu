@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.10
+ * @version 1.8.11
  *
  */
 
@@ -1718,25 +1718,19 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
-
             const peerInfo = getPeerInfo(peer);
 
-            log.debug('Get RouterRtpCapabilities', peerInfo);
+            log.debug('Request: getRouterRtpCapabilities', peerInfo);
 
             try {
-                const getRouterRtpCapabilities = room.getRtpCapabilities();
-
-                //log.debug('Get RouterRtpCapabilities callback', { callback: getRouterRtpCapabilities });
-
-                callback(getRouterRtpCapabilities);
+                const rtpCapabilities = room.getRtpCapabilities();
+                callback(rtpCapabilities);
             } catch (err) {
-                log.error('Get RouterRtpCapabilities error', {
-                    error: err,
+                log.warn('Failed to get Router RTP Capabilities', {
+                    error: err.message,
                     peerInfo,
                 });
-                callback({
-                    error: err.message,
-                });
+                callback({ error: err.message });
             }
         });
 
@@ -1746,22 +1740,15 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
-
             const peerInfo = getPeerInfo(peer);
 
-            log.debug('Create WebRtc transport', peerInfo);
+            log.debug('Create WebRTC transport request received', peerInfo);
 
             try {
                 const createWebRtcTransport = await room.createWebRtcTransport(socket.id);
-
-                //log.debug('Create WebRtc transport callback', { callback: createWebRtcTransport });
-
                 callback(createWebRtcTransport);
             } catch (err) {
-                log.error('Create WebRtc Transport error', {
-                    error: err,
-                    peerInfo,
-                });
+                log.warn('Create WebRTC Transport warning', { error: err.message, peerInfo });
                 callback({ error: err.message });
             }
         });
@@ -1772,22 +1759,15 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
-
             const peerInfo = getPeerInfo(peer);
 
-            log.debug('Connect transport', { transport_id: transport_id, peerInfo });
+            log.debug('Connect transport request received', { transport_id, peerInfo });
 
             try {
                 const connectTransport = await room.connectPeerTransport(socket.id, transport_id, dtlsParameters);
-
-                //log.debug('Connect transport', { callback: connectTransport });
-
                 callback(connectTransport);
             } catch (err) {
-                log.error('Connect transport error', {
-                    error: err,
-                    peerInfo,
-                });
+                log.warn('Connect transport warning', { error: err.message, peerInfo });
                 callback({ error: err.message });
             }
         });
@@ -1805,25 +1785,23 @@ function startServer() {
 
             const peerInfo = getPeerInfo(peer);
 
-            log.debug('Restart ICE', { transport_id: transport_id, peerInfo });
+            log.debug('Restart ICE request received', { transport_id: transport_id, peerInfo });
 
             try {
                 const transport = peer.getTransport(transport_id);
 
                 if (!transport) {
-                    throw new Error(`Restart ICE, transport with id "${transport_id}" not found`);
+                    log.warn(`Restart ICE attempt failed. Transport with ID "${transport_id}" not found.`);
+                    return callback({ error: `Transport with id "${transport_id}" not found` });
                 }
 
                 const iceParameters = await transport.restartIce();
 
-                log.debug('Restart ICE callback', { callback: iceParameters });
+                log.debug('ICE Restart successful', { transport_id: transport_id, iceParameters });
 
                 callback(iceParameters);
             } catch (err) {
-                log.error('Restart ICE error', {
-                    error: err,
-                    peerInfo,
-                });
+                log.warn('Restart ICE warning', { error: err.message, peerInfo });
                 callback({ error: err.message });
             }
         });
@@ -1877,7 +1855,7 @@ function startServer() {
 
                 callback({ producer_id });
             } catch (err) {
-                log.error('Producer transport error', {
+                log.warn('Producer transport error', {
                     error: err,
                     peerInfo,
                 });
@@ -1910,7 +1888,7 @@ function startServer() {
 
                 callback(params);
             } catch (err) {
-                log.error('Consumer transport error', {
+                log.warn('Consumer transport error', {
                     error: err,
                     type,
                     consumerTransportId,
@@ -1934,7 +1912,7 @@ function startServer() {
             try {
                 room.closeProducer(socket.id, data.producer_id);
             } catch (err) {
-                log.error('Producer Close error', {
+                log.warn('Producer Close error', {
                     error: err.message,
                     peerInfo,
                 });
@@ -1942,7 +1920,9 @@ function startServer() {
         });
 
         socket.on('pauseProducer', async ({ producer_id, type }, callback) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
 
             const peer = getPeer(socket);
 
@@ -1967,7 +1947,7 @@ function startServer() {
 
                 callback('successfully');
             } catch (error) {
-                log.error('Pause producer', {
+                log.warn('Pause producer', {
                     error: error,
                     peerInfo,
                 });
@@ -1976,7 +1956,9 @@ function startServer() {
         });
 
         socket.on('resumeProducer', async ({ producer_id, type }, callback) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
 
             const peer = getPeer(socket);
 
@@ -2001,7 +1983,7 @@ function startServer() {
 
                 callback('successfully');
             } catch (error) {
-                log.error('Resume producer', {
+                log.warn('Resume producer', {
                     error: error,
                     peerInfo,
                 });
@@ -2010,7 +1992,9 @@ function startServer() {
         });
 
         socket.on('resumeConsumer', async ({ consumer_id, type }, callback) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
 
             const peer = getPeer(socket);
 
@@ -2035,7 +2019,7 @@ function startServer() {
 
                 callback('successfully');
             } catch (error) {
-                log.error('Resume consumer', {
+                log.warn('Resume consumer', {
                     error: error,
                     peerInfo,
                 });
@@ -2059,7 +2043,9 @@ function startServer() {
         });
 
         socket.on('getPeerCounts', async ({}, callback) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
 
             const room = getRoom(socket);
 
@@ -2310,7 +2296,9 @@ function startServer() {
         });
 
         socket.on('getRoomInfo', async (_, cb) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return cb({ error: 'Room not found' });
+            }
 
             const { room, peer } = getRoomAndPeer(socket);
 

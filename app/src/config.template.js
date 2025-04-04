@@ -1396,9 +1396,9 @@ module.exports = {
              * - These values should be tuned based on Node resources
              * - Consider network plugin overhead (Calico, Cilium etc.)
              */
-            initialAvailableOutgoingBitrate: 1000000, // 1 Mbps initial bitrate
-            minimumAvailableOutgoingBitrate: 600000, // 600 Kbps minimum guaranteed
-            maxIncomingBitrate: 1500000, // 1.5 Mbps max per producer
+            initialAvailableOutgoingBitrate: 2500000, // 2.5 Mbps initial bitrate
+            minimumAvailableOutgoingBitrate: 1000000, // 1 Mbps minimum guaranteed
+            maxIncomingBitrate: 3000000, // 3 Mbps max per producer
 
             /**
              * Data Channel Settings

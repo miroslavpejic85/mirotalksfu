@@ -566,8 +566,7 @@ module.exports = class Room {
             try {
                 await transport.setMaxIncomingBitrate(maxIncomingBitrate);
             } catch (error) {
-                log.error('Failed to set max incoming bitrate', error);
-                throw new Error(`Failed to set max incoming bitrate for transport ${id}`);
+                log.warn('Failed to set max incoming bitrate', error);
             }
         }
 
