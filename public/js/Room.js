@@ -1723,11 +1723,11 @@ function handleButtons() {
         shareRoom(true);
     };
     shareButton.onmouseenter = () => {
-        if (isMobileDevice) return;
+        if (isMobileDevice || !BUTTONS.main.shareQr) return;
         show(qrRoomPopupContainer);
     };
     shareButton.onmouseleave = () => {
-        if (isMobileDevice) return;
+        if (isMobileDevice || !BUTTONS.main.shareQr) return;
         hide(qrRoomPopupContainer);
     };
     hideMeButton.onclick = (e) => {

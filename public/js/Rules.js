@@ -15,6 +15,7 @@ const isRulesActive = true;
  */
 let BUTTONS = {
     main: {
+        shareQr: true,
         shareButton: true, // for quest, presenter default true
         hideMeButton: true,
         startAudioButton: true,

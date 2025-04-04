@@ -942,6 +942,7 @@ module.exports = {
         buttons: {
             // Main control buttons visible in the UI
             main: {
+                shareQr: process.env.SHOW_SHARE_QR !== 'false',
                 shareButton: process.env.SHOW_SHARE_BUTTON !== 'false',
                 hideMeButton: process.env.SHOW_HIDE_ME !== 'false',
                 startAudioButton: process.env.SHOW_AUDIO_BUTTON !== 'false',
