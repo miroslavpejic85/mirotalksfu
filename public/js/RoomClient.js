@@ -759,6 +759,12 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.warn('⚠️ Producer Transport disconnected', { id: this.producerTransport.id });
+                    console.warn('⚠️ Producer Attempting ICE restart...');
+                    try {
+                        await this.restartProducerIce();
+                    } catch (error) {
+                        console.error('❌ ICE restart failed:', error.message);
+                    }
                     break;
                 case 'failed':
                     console.warn('❌ Producer Transport failed', { id: this.producerTransport.id });
@@ -769,11 +775,6 @@ class RoomClient {
                         id: this.producerTransport.id,
                     });
                     break;
-            }
-
-            if (state === 'disconnected' || state === 'failed') {
-                console.warn('⚠️ Producer Attempting ICE restart...');
-                await this.restartProducerIce();
             }
         });
 
@@ -836,6 +837,12 @@ class RoomClient {
                     break;
                 case 'disconnected':
                     console.warn('⚠️ Consumer Transport disconnected', { id: this.consumerTransport.id });
+                    console.warn('⚠️ Consumer Attempting ICE restart...');
+                    try {
+                        await this.restartConsumerIce();
+                    } catch (error) {
+                        console.error('❌ ICE restart failed:', error.message);
+                    }
                     break;
                 case 'failed':
                     console.warn('❌ Consumer Transport failed', { id: this.consumerTransport.id });
@@ -846,11 +853,6 @@ class RoomClient {
                         id: this.consumerTransport.id,
                     });
                     break;
-            }
-
-            if (state === 'disconnected' || state === 'failed') {
-                console.warn('⚠️ Consumer Attempting ICE restart...');
-                await this.restartConsumerIce();
             }
         });
 
@@ -881,7 +883,7 @@ class RoomClient {
         if (!transport || typeof transport !== 'object' || transport.closed) return false;
 
         try {
-            console.warn(`🔄 Restarting ${type} ICE...`, {
+            console.warn(`🔄 ${type} Restarting ICE...`, {
                 id: transport.id,
                 state: transport.connectionState,
             });
@@ -895,16 +897,16 @@ class RoomClient {
                 return false;
             }
 
-            console.info(`🚀 Restarting ${type} transport ICE`, iceParameters);
+            console.info(`🚀 ${type} Restarting transport ICE`, iceParameters);
 
             await transport.restartIce({ iceParameters });
 
             console.info(`✅ Successfully restarted ${type} ICE`);
             return true;
         } catch (error) {
-            console.error(`🔥 Restart ${type} ICE error`, {
+            console.error(`🔥 ${type} Restart ICE error`, {
                 id: transport?.id,
-                error: error.message,
+                error: error,
             });
             return false;
         }
