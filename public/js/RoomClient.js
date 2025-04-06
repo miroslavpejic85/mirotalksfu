@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.11
+ * @version 1.8.12
  *
  */
 
@@ -750,11 +750,6 @@ class RoomClient {
         this.producerTransport.on('connectionstatechange', async (state) => {
             console.log(`Producer Transport state changed to: ${state}`, { id: this.producerTransport.id });
 
-            if (state === 'disconnected' || state === 'failed') {
-                console.warn('⚠️ Attempting ICE restart...');
-                await this.restartProducerIce();
-            }
-
             switch (state) {
                 case 'connecting':
                     console.log('Producer Transport connecting...');
@@ -774,6 +769,11 @@ class RoomClient {
                         id: this.producerTransport.id,
                     });
                     break;
+            }
+
+            if (state === 'disconnected' || state === 'failed') {
+                console.warn('⚠️ Producer Attempting ICE restart...');
+                await this.restartProducerIce();
             }
         });
 
@@ -827,11 +827,6 @@ class RoomClient {
         this.consumerTransport.on('connectionstatechange', async (state) => {
             console.log(`Consumer Transport state changed to: ${state}`, { id: this.consumerTransport.id });
 
-            if (state === 'disconnected' || state === 'failed') {
-                console.warn('⚠️ Attempting ICE restart...');
-                await this.restartConsumerIce();
-            }
-
             switch (state) {
                 case 'connecting':
                     console.log('Consumer Transport connecting...');
@@ -851,6 +846,11 @@ class RoomClient {
                         id: this.consumerTransport.id,
                     });
                     break;
+            }
+
+            if (state === 'disconnected' || state === 'failed') {
+                console.warn('⚠️ Consumer Attempting ICE restart...');
+                await this.restartConsumerIce();
             }
         });
 
@@ -910,16 +910,24 @@ class RoomClient {
         }
     }
 
-    async restartTransportWithRetry(transport, transportType, retries = 5, initialDelay = 1000) {
+    async restartTransportWithRetry(transport, transportType, maxRetries = 5, initialDelay = 1000) {
         let delay = initialDelay;
 
-        for (let i = 0; i < retries; i++) {
-            const success = i === 4 ? await this.restartTransportIce(transport, transportType) : false;
-            if (success) return true; // Exit if reconnection is successful
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            const reconnected = await this.restartTransportIce(transport, transportType);
 
-            console.warn(`🌀 Reconnection attempt ${i + 1} failed. Retrying in ${delay}ms...`);
-            await new Promise((resolve) => setTimeout(resolve, delay));
-            delay *= 2; // Exponential backoff: 1s -> 2s -> 4s -> 8s -> 16s
+            if (reconnected) {
+                console.info(`✅ ${transportType} reconnected successfully on attempt ${attempt}.`);
+                return true;
+            }
+
+            if (attempt < maxRetries) {
+                console.warn(`🌀 ${transportType} reconnection attempt ${attempt} failed. Retrying in ${delay}ms...`);
+                await new Promise((resolve) => setTimeout(resolve, delay));
+                delay *= 2; // Exponential backoff: 1s -> 2s -> 4s -> 8s -> 16s
+            } else {
+                console.error(`❌ ${transportType} failed to reconnect after ${maxRetries} attempts.`);
+            }
         }
 
         console.error('❌ Failed to reconnect after multiple attempts.');
