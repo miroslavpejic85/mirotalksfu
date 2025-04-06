@@ -763,7 +763,7 @@ class RoomClient {
                     try {
                         await this.restartProducerIce();
                     } catch (error) {
-                        console.error('❌ ICE restart failed:', error.message);
+                        console.error('❌ Producer ICE restart failed', error.message);
                     }
                     break;
                 case 'failed':
@@ -841,7 +841,7 @@ class RoomClient {
                     try {
                         await this.restartConsumerIce();
                     } catch (error) {
-                        console.error('❌ ICE restart failed:', error.message);
+                        console.error('❌ Consumer ICE restart failed', error.message);
                     }
                     break;
                 case 'failed':
