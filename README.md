@@ -287,25 +287,82 @@ To embed a meeting within `your service or app` using an iframe, you can use the
 
 - `Rest API:` The [API documentation](https://docs.mirotalk.com/mirotalk-sfu/api/) uses [swagger](https://swagger.io/) at https://localhost:3010/api/v1/docs or check it on live [here](https://sfu.mirotalk.com/api/v1/docs).
 
+### 1. Get Server Statistics
+
 ```bash
-# The response will give you the total of rooms and users.
-$ curl -X GET "http://localhost:3010/api/v1/stats" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-$ curl -X GET "https://sfu.mirotalk.com/api/v1/stats" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-# The response will give you the active meetings (default disabled).
-$ curl -X GET "http://localhost:3010/api/v1/meetings" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-$ curl -X GET "https://sfu.mirotalk.com/api/v1/meetings" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-# The response will give you a entrypoint / Room URL for your meeting.
-$ curl -X POST "http://localhost:3010/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-$ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json"
-# The response will give you a entrypoint / URL for the direct join to the meeting.
-$ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","duration":"unlimited"}'
-$ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","duration":"unlimited"}'
-# The response will give you a entrypoint / URL for the direct join to the meeting with a token.
-$ curl -X POST "http://localhost:3010/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","duration":"unlimited","token":{"username":"username","password":"password","presenter":"true", "expire":"1h"}}'
-$ curl -X POST "https://sfu.mirotalk.com/api/v1/join" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"room":"test","roomPassword":"false","name":"mirotalksfu","audio":"false","video":"false","screen":"false","notify":"false","duration":"unlimited","token":{"username":"username","password":"password","presenter":"true", "expire":"1h"}}'
-# The response will give you a valid token for a meeting (default diabled)
-$ curl -X POST "http://localhost:3010/api/v1/token" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"username":"username","password":"password","presenter":"true", "expire":"1h"}'
-$ curl -X POST "https://sfu.mirotalk.com/api/v1/token" -H "authorization: mirotalksfu_default_secret" -H "Content-Type: application/json" --data '{"username":"username","password":"password","presenter":"true", "expire":"1h"}'
+curl -X GET "http://localhost:3010/api/v1/stats" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+
+curl -X GET "https://sfu.mirotalk.com/api/v1/stats" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+```
+
+### 2. Get Active Meetings
+
+```bash
+curl -X GET "http://localhost:3010/api/v1/meetings" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+
+curl -X GET "https://sfu.mirotalk.com/api/v1/meetings" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+```
+
+### 3. Create Meeting
+
+```bash
+curl -X POST "http://localhost:3010/api/v1/meeting" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+
+curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json"
+```
+
+### 4. Join Meeting (Basic)
+
+```bash
+curl -X POST "http://localhost:3010/api/v1/join" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"room":"test","roomPassword":false,"avatar":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited"}'
+
+curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","avatar":false,"audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited"}'
+```
+
+### 5. Join Meeting with Token
+
+```bash
+curl -X POST "http://localhost:3010/api/v1/join" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+
+curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+```
+
+### 6. Generate Token
+
+```bash
+curl -X POST "http://localhost:3010/api/v1/token" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"username":"username","password":"password","presenter":true,"expire":"1h"}'
+
+curl -X POST "https://sfu.mirotalk.com/api/v1/token" \
+     -H "authorization: mirotalksfu_default_secret" \
+     -H "Content-Type: application/json" \
+     --data '{"username":"username","password":"password","presenter":true,"expire":"1h"}'
 ```
 
 </details>

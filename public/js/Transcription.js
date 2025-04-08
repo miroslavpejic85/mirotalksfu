@@ -120,6 +120,7 @@ class Transcription {
                     type: 'transcript',
                     room_id: room_id,
                     peer_name: peer_name,
+                    peer_avatar: peer_avatar,
                     text_data: transcript,
                     time_stamp: new Date(),
                     broadcast: true,
@@ -185,10 +186,17 @@ class Transcription {
 
         transcriptionData.text_data = filterXSS(transcriptionData.text_data);
         transcriptionData.peer_name = filterXSS(transcriptionData.peer_name);
+        transcriptionData.peer_avatar = filterXSS(transcriptionData.peer_avatar);
 
-        const { peer_name, text_data } = transcriptionData;
+        const { peer_name, peer_avatar, text_data } = transcriptionData;
         const time_stamp = rc.getTimeNow();
-        const avatar_image = rc.isValidEmail(peer_name) ? rc.genGravatar(peer_name) : rc.genAvatarSvg(peer_name, 32);
+
+        const avatar_image =
+            peer_avatar && rc.isImageURL(peer_avatar)
+                ? peer_avatar
+                : rc.isValidEmail(peer_name)
+                  ? rc.genGravatar(peer_name)
+                  : rc.genAvatarSvg(peer_name, 32);
 
         if (this.isHidden) {
             if (this.showOnMessage) {
@@ -468,6 +476,7 @@ class Transcription {
             data: {
                 peer_id: rc.peer_id,
                 peer_name: rc.peer_name,
+                peer_avatar: rc.peer_avatar,
                 transcriptionLanguageIndex: transcriptionLanguage.selectedIndex,
                 transcriptionDialectIndex: transcriptionDialect.selectedIndex,
             },

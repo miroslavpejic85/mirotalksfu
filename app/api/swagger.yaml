@@ -162,6 +162,9 @@ definitions:
             name:
                 type: string
                 default: 'mirotalksfu'
+            avatar:
+                type: ['boolean', 'string'] # Allow boolean or string type
+                default: false
             audio:
                 type: boolean
                 default: false
@@ -211,6 +214,8 @@ definitions:
         type: object
         properties:
             name:
+                type: string
+            avatar:
                 type: string
             presenter:
                 type: boolean

@@ -10,6 +10,7 @@ module.exports = class Peer {
         const {
             peer_uuid,
             peer_name,
+            peer_avatar,
             peer_presenter,
             peer_audio,
             peer_audio_volume,
@@ -23,6 +24,7 @@ module.exports = class Peer {
         this.peer_info = peer_info;
         this.peer_uuid = peer_uuid;
         this.peer_name = peer_name;
+        this.peer_avatar = peer_avatar;
         this.peer_presenter = peer_presenter;
         this.peer_audio = peer_audio;
         this.peer_video = peer_video;

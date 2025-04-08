@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.12
+ * @version 1.8.13
  *
  */
 
@@ -218,6 +218,7 @@ let room_id = getRoomId();
 let room_password = getRoomPassword();
 let room_duration = getRoomDuration();
 let peer_name = getPeerName();
+let peer_avatar = getPeerAvatar();
 let peer_uuid = getPeerUUID();
 let peer_token = getPeerToken();
 let isScreenAllowed = getScreen();
@@ -850,6 +851,16 @@ function getPeerName() {
     return name;
 }
 
+function getPeerAvatar() {
+    const avatar = getQueryParam('avatar');
+    const avatarDisabled = avatar === '0' || avatar === 'false';
+    console.log('Direct join', { avatar: avatar });
+    if (avatarDisabled || !isImageURL(avatar)) {
+        return false;
+    }
+    return avatar;
+}
+
 function getPeerUUID() {
     if (lS.getItemLocalStorage('peer_uuid')) {
         return lS.getItemLocalStorage('peer_uuid');
@@ -966,6 +977,7 @@ function getPeerInfo() {
         peer_uuid: peer_uuid,
         peer_id: socket.id,
         peer_name: peer_name,
+        peer_avatar: peer_avatar,
         peer_token: peer_token,
         peer_presenter: isPresenter,
         peer_audio: isAudioAllowed,
@@ -1473,12 +1485,15 @@ function joinRoom(peer_name, room_id) {
 function roomIsReady() {
     makeRoomPopupQR();
 
-    if (rc.isValidEmail(peer_name)) {
+    if (peer_avatar && isImageURL(peer_avatar)) {
+        myProfileAvatar.setAttribute('src', peer_avatar);
+    } else if (rc.isValidEmail(peer_name)) {
         myProfileAvatar.style.borderRadius = `50px`;
         myProfileAvatar.setAttribute('src', rc.genGravatar(peer_name));
     } else {
         myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
     }
+
     show(toggleExtraButton); //*
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
@@ -3721,8 +3736,15 @@ async function sound(name, force = false) {
     }
 }
 
-function isImageURL(url) {
-    return url.match(/\.(jpeg|jpg|gif|png|tiff|bmp)$/) != null;
+async function isImageURL(url) {
+    if (!url) return false;
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentType = response.headers.get('content-type');
+        return contentType && contentType.startsWith('image/');
+    } catch {
+        return false;
+    }
 }
 
 function isMobile(userAgent) {
@@ -4430,7 +4452,7 @@ function getParticipantsList(peers) {
             data-to-id="ChatGPT"
             data-to-name="ChatGPT"
             class="clearfix${chatgpt_active}" 
-            onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', event)"
+            onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', '', event)"
         >
             <img 
                 src="${image.chatgpt}"
@@ -4451,7 +4473,7 @@ function getParticipantsList(peers) {
         data-to-id="all"
         data-to-name="all"
         class="clearfix${public_chat_active}" 
-        onclick="rc.showPeerAboutAndMessages(this.id, 'all', event)"
+        onclick="rc.showPeerAboutAndMessages(this.id, 'all', '', event)"
     >
         <img 
             src="${image.all}"
@@ -4512,7 +4534,9 @@ function getParticipantsList(peers) {
     // PEERS IN THE CURRENT ROOM
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
+        console.log('PEER-INFO------->', peer_info);
         const peer_name = peer_info.peer_name;
+        const peer_avatar = peer_info.peer_avatar;
         const peer_name_limited = peer_name.length > 15 ? peer_name.substring(0, 10) + '*****' : peer_name;
         //const peer_presenter = peer_info.peer_presenter ? _PEER.presenter : _PEER.guest;
         const peer_audio = peer_info.peer_audio ? _PEER.audioOn : _PEER.audioOff;
@@ -4524,7 +4548,7 @@ function getParticipantsList(peers) {
         const peer_geoLocation = _PEER.geoLocation;
         const peer_sendFile = _PEER.sendFile;
         const peer_id = peer_info.peer_id;
-        const avatarImg = getParticipantAvatar(peer_name);
+        const avatarImg = getParticipantAvatar(peer_name, peer_avatar);
 
         const peer_chat_active = rc.chatPeerId === peer_id ? ' active' : '';
 
@@ -4538,7 +4562,7 @@ function getParticipantsList(peers) {
                     data-to-id="${peer_id}" 
                     data-to-name="${peer_name}"
                     class="clearfix${peer_chat_active}" 
-                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', event)"
+                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', '${peer_avatar}', event)"
                 >
                     <img
                         src="${avatarImg}"
@@ -4614,7 +4638,7 @@ function getParticipantsList(peers) {
                     data-to-id="${peer_id}"
                     data-to-name="${peer_name}"
                     class="clearfix${peer_chat_active}" 
-                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', event)"
+                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', '${peer_avatar}', event)"
                 >
                 <img 
                     src="${avatarImg}"
@@ -4706,7 +4730,10 @@ function refreshParticipantsCount(count, adapt = true) {
     if (adapt) adaptAspectRatio(count);
 }
 
-function getParticipantAvatar(peerName) {
+function getParticipantAvatar(peerName, peerAvatar = false) {
+    if (peerAvatar && rc.isImageURL(peerAvatar)) {
+        return peerAvatar;
+    }
     if (rc.isValidEmail(peerName)) {
         return rc.genGravatar(peerName);
     }
@@ -5324,7 +5351,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.12',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.13',
         html: `
             <br />
             <div id="about">
