@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.13
+ * @version 1.8.14
  *
  */
 
@@ -339,7 +339,14 @@ class RoomClient {
         this.localAudioStream = null;
         this.localScreenStream = null;
 
+        // Room Password
+        this.RoomIsLocked = false;
         this.RoomPassword = false;
+        this.RoomPasswordValid = false;
+
+        // Room Lobby
+        this.RoomIsLobby = false;
+        this.RoomLobbyAccepted = false;
 
         this.transcription = transcription;
 
@@ -455,50 +462,53 @@ class RoomClient {
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+
                 if (room === 'invalid') {
-                    console.log('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
+                    console.warn('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
                     return this.roomInvalid();
                 }
+
                 if (room === 'notAllowed') {
-                    console.log(
+                    console.warn(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user',
                     );
                     return this.userRoomNotAllowed();
                 }
+
                 if (room === 'unauthorized') {
-                    console.log(
+                    console.warn(
                         '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
                     );
                     return this.userUnauthorized();
                 }
+
                 if (room === 'isLocked') {
+                    this.RoomIsLocked = true;
                     this.event(_EVENTS.roomLock);
-                    console.log('00-WARNING ----> Room is Locked, Try to unlock by the password');
+                    console.warn('00-WARNING ----> Room is Locked, Try to unlock by the password');
                     return this.unlockTheRoom();
                 }
+
                 if (room === 'isLobby') {
+                    this.RoomIsLobby = true;
                     this.event(_EVENTS.lobbyOn);
-                    console.log('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
+                    console.warn('00-WARNING ----> Room Lobby Enabled, Wait to confirm my join');
                     return this.waitJoinConfirm();
                 }
+
                 if (room === 'isBanned') {
-                    console.log('00-WARNING ----> You are Banned from the Room!');
+                    console.warn('00-WARNING ----> You are Banned from the Room!');
                     return this.isBanned();
                 }
+
                 // ##########################################
                 this.peers = new Map(JSON.parse(room.peers));
                 // ##########################################
 
-                if (!peer_info.peer_token) {
-                    // hack...
-                    for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
-                        let peer_info = this.peers.get(peer).peer_info;
-                        if (peer_info.peer_name == this.peer_name) {
-                            console.log('00-WARNING ----> Username already in use');
-                            return this.userNameAlreadyInRoom();
-                        }
-                    }
+                if (this.usernameExists(this.peers)) {
+                    return this.userNameAlreadyInRoom();
                 }
+
                 await this.joinAllowed(room);
             })
             .catch((error) => {
@@ -508,19 +518,31 @@ class RoomClient {
             });
     }
 
+    usernameExists(peers) {
+        if (!peer_info.peer_token) {
+            // hack...
+            for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
+                let peer_info = peers.get(peer).peer_info;
+                if (peer_info.peer_name == this.peer_name) {
+                    console.log('07.0-WARNING ----> Username already in use');
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     async joinAllowed(room) {
         console.log('07 ----> Join Room allowed');
+
         await this.handleRoomInfo(room);
-        const routerRtpCapabilities = await this.socket.request('getRouterRtpCapabilities');
-        routerRtpCapabilities.headerExtensions = routerRtpCapabilities.headerExtensions.filter(
-            (ext) => ext.uri !== 'urn:3gpp:video-orientation',
-        );
-        this.device = await this.loadDevice(routerRtpCapabilities);
-        console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
-        await this.initTransports(this.device);
-        // ###################################
-        this.socket.emit('getProducers');
-        // ###################################
+
+        await this.loadDeviceAndInitTransports();
+
+        // ###############################################
+        this.socket.emit('getProducers'); // newProducers
+        // ###############################################
+
         if (isBroadcastingEnabled) {
             isPresenter ? await this.startLocalMedia() : this.handleRoomBroadcasting();
         } else {
@@ -528,12 +550,34 @@ class RoomClient {
         }
     }
 
+    async loadDeviceAndInitTransports() {
+        // Get Router Capabilities
+        const routerRtpCapabilities = await this.socket.request('getRouterRtpCapabilities');
+        routerRtpCapabilities.headerExtensions = routerRtpCapabilities.headerExtensions.filter(
+            (ext) => ext.uri !== 'urn:3gpp:video-orientation',
+        );
+
+        // Load device
+        this.device = await this.loadDevice(routerRtpCapabilities);
+        console.log('07.3 ----> Get Router Rtp Capabilities codecs: ', this.device.rtpCapabilities.codecs);
+
+        // Init Send/Receive Transports
+        await this.initTransports(this.device);
+    }
+
     async handleRoomInfo(room) {
+        // ##########################################
+        this.peers = new Map(JSON.parse(room.peers));
+        // ##########################################
+
         console.log('07.0 ----> Room Survey', room.survey);
         survey = room.survey;
+
         console.log('07.0 ----> Room Leave Redirect', room.redirect);
         redirect = room.redirect;
+
         participantsCount = this.peers.size;
+
         // ME
         for (let peer of Array.from(this.peers.keys()).filter((id) => id == this.peer_id)) {
             let my_peer_info = this.peers.get(peer).peer_info;
@@ -1075,7 +1119,28 @@ class RoomClient {
 
     handleNewProducers = async (data) => {
         if (data.length > 0) {
-            console.log('SocketOn New producers', data);
+            console.log('SocketOn New producers', {
+                data,
+                password: {
+                    roomIsLocked: this.RoomIsLocked,
+                    roomPasswordValid: this.RoomPasswordValid,
+                },
+                lobby: {
+                    roomIsLobby: this.RoomIsLobby,
+                    roomLobbyAccepted: this.RoomLobbyAccepted,
+                }
+            });
+
+            if (this.RoomIsLocked && !this.RoomPasswordValid) {
+                console.log('Access denied: Room is locked and password has not been validated yet', data);
+                return;
+            }
+            
+            if (this.RoomIsLobby && !this.RoomLobbyAccepted) {
+                console.log('Access pending: Lobby mode is active, waiting for approval to join', data);
+                return;
+            }
+
             for (let { producer_id, peer_name, peer_info, type } of data) {
                 await this.consume(producer_id, peer_name, peer_info, type);
             }
@@ -2735,6 +2800,15 @@ class RoomClient {
     }
 
     async getConsumeStream(producerId, peer_id, type) {
+        if (!this.device) {
+            throw new Error('Device not initialized');
+        }
+
+        // Check if consumer transport exists
+        if (!this.consumerTransport) {
+            throw new Error('Consumer transport not initialized');
+        }
+
         const { rtpCapabilities } = this.device;
 
         const data = await this.socket.request('consume', {
@@ -7303,13 +7377,14 @@ class RoomClient {
         }
     }
 
-    roomPassword(data) {
+    async roomPassword(data) {
         switch (data.password) {
             case 'OK':
-                this.joinAllowed(data.room);
-                handleRules(isPresenter);
+                this.RoomPasswordValid = true;
+                await this.joinAllowed(data.room);
                 break;
             case 'KO':
+                this.RoomPasswordValid = false;
                 this.roomIsLocked();
                 break;
             default:
@@ -7335,7 +7410,7 @@ class RoomClient {
                         peer_avatar && this.isImageURL(peer_avatar)
                             ? peer_avatar
                             : this.isValidEmail(peer_name)
-                              ? this.genGravatar(peer_name)
+                              ? this.genGravatar(peer_name, 32)
                               : this.genAvatarSvg(peer_name, 32);
 
                     let lobbyTb = this.getId('lobbyTb');
@@ -7365,13 +7440,14 @@ class RoomClient {
                 }
                 break;
             case 'accept':
+                this.RoomLobbyAccepted = true;
                 await this.joinAllowed(data.room);
-                handleRules(isPresenter);
                 control.style.display = 'flex';
                 bottomButtons.style.display = 'flex';
-                this.msgPopup('info', 'Your join meeting request was accepted by the moderator');
+                this.msgPopup('info', 'Your join meeting request was accepted by the moderator', 3000, 'top');
                 break;
             case 'reject':
+                this.RoomLobbyAccepted = false;
                 this.sound('eject');
                 Swal.fire({
                     icon: 'warning',

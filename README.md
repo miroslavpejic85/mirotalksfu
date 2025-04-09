@@ -108,13 +108,14 @@
 <br/>
 
 - You can `directly join a room` by using link like:
-- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=mirotalksfu&audio=0&video=0&screen=0&notify=0&duration=unlimited
+- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=mirotalksfu&avatar=0&audio=0&video=0&screen=0&notify=0&duration=unlimited
 
     | Params       | Type           | Description               |
     | ------------ | -------------- | ------------------------- |
     | room         | string         | Room Id                   |
     | roomPassword | string/boolean | Room password             |
     | name         | string         | User name                 |
+    | avatar       | string/boolean | User avatar               |
     | audio        | boolean        | Audio stream              |
     | video        | boolean        | Video stream              |
     | screen       | boolean        | Screen stream             |

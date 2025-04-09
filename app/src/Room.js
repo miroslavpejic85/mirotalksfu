@@ -603,6 +603,7 @@ module.exports = class Room {
                     iceState: iceState,
                 });
                 this.removePeer(socket_id);
+                transport.close();
             }
         });
 
@@ -622,6 +623,7 @@ module.exports = class Room {
                     dtlsState: dtlsState,
                 });
                 this.removePeer(socket_id);
+                transport.close();
             }
         });
 
