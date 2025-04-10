@@ -33,7 +33,7 @@ const splitChar = ',';
 const PLATFORM = os.platform();
 const IS_DOCKER = fs.existsSync('/.dockerenv');
 const ENVIRONMENT = process.env.NODE_ENV || 'development';
-const PUBLIC_IP = process.env.SFU_PUBLIC_IP || '';
+const ANNOUNCED_IP = process.env.SFU_ANNOUNCED_IP || '';
 const LISTEN_IP = process.env.SFU_LISTEN_IP || '0.0.0.0';
 const IPv4 = getIPv4();
 
@@ -1423,17 +1423,17 @@ module.exports = {
 /**
  * Get IPv4 Address
  * ----------------
- * - Prioritizes PUBLIC_IP if set
+ * - Prioritizes ANNOUNCED_IP if set
  * - Falls back to local IP detection
  */
 function getIPv4() {
-    if (PUBLIC_IP) return PUBLIC_IP;
+    if (ANNOUNCED_IP) return ANNOUNCED_IP;
 
     switch (ENVIRONMENT) {
         case 'development':
             return IS_DOCKER ? '127.0.0.1' : getLocalIPv4();
         case 'production':
-            return PUBLIC_IP;
+            return ANNOUNCED_IP;
         default:
             return getLocalIPv4();
     }

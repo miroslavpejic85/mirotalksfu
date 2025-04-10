@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.15
+ * @version 1.8.16
  *
  */
 
@@ -1280,8 +1280,8 @@ function startServer() {
                 server_tunnel: tunnel,
                 trust_proxy: trustProxy,
                 sfu: {
+                    announcedIP: announcedAddress,
                     listenIP: IP,
-                    publicIP: announcedAddress,
                     numWorker: config.mediasoup?.numWorkers,
                     rtcMinPort: config.mediasoup?.worker?.rtcMinPort,
                     rtcMaxPort: config.mediasoup?.worker?.rtcMaxPort,
