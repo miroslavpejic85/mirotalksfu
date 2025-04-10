@@ -293,10 +293,11 @@ module.exports = {
          * identity providers like Auth0, Okta, Keycloak, etc.
          *
          * Structure:
-         * - enabled            : Master switch for OIDC authentication
-         * - baseURLDynamic     : Whether to dynamically resolve base URL
-         * - peer_name          : Controls which user attributes to enforce/request
-         * - config             : Core OIDC provider settings
+         * - enabled                                : Master switch for OIDC authentication
+         * - baseURLDynamic                         : Whether to dynamically resolve base URL
+         *   allow_rooms_creation_for_auth_users    : Allow all authenticated users via OIDC to create their own rooms
+         * - peer_name                              : Controls which user attributes to enforce/request
+         * - config                                 : Core OIDC provider settings
          *
          * Core Settings:
          * - issuerBaseURL      : Provider's discovery endpoint (e.g., https://your-tenant.auth0.com)
@@ -318,6 +319,10 @@ module.exports = {
         oidc: {
             enabled: process.env.OIDC_ENABLED === 'true',
             baseURLDynamic: false, // Set true if your app has dynamic base URLs
+
+            // ==================================================================================================
+            allow_rooms_creation_for_auth_users: process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS === 'true',
+            // ==================================================================================================
 
             // User identity requirements
             peer_name: {
