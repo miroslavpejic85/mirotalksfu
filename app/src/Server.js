@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.18
+ * @version 1.8.19
  *
  */
 
@@ -3501,68 +3501,84 @@ function startServer() {
     }
 
     async function isRoomAllowedForUser(message, username, room) {
-        const logData = { message, username, room };
-
-        log.debug('isRoomAllowedForUser ------>', logData);
-
-        if (!username || !room) return false;
-
-        const isOIDCEnabled = config?.security?.oidc?.enabled;
-
-        if (hostCfg.protected || hostCfg.user_auth) {
-            // Check if allowed room for user from DB...
-            if (hostCfg.users_from_db && hostCfg.users_api_room_allowed) {
-                try {
-                    // Using either email or username, as the username can also be an email here.
-                    const response = await axios.post(
-                        hostCfg.users_api_room_allowed,
-                        {
-                            email: username,
-                            username: username,
-                            room: room,
-                            api_secret_key: hostCfg.users_api_secret_key,
-                        },
-                        {
-                            timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
-                        },
-                    );
-                    log.debug('AXIOS isRoomAllowedForUser', { room: room, allowed: true });
-                    return response.data && response.data.message === true;
-                } catch (error) {
-                    log.error('AXIOS isRoomAllowedForUser error', error.message);
-                    return false;
-                }
-            }
-
-            const isInPresenterLists = hostCfg?.presenters?.list?.includes(username);
-
-            if (isInPresenterLists) {
-                log.debug('isRoomAllowedForUser - user in presenters list room allowed', room);
-                return true;
-            }
-
-            const user = hostCfg.users.find((user) => user.displayname === username || user.username === username);
-
-            if (!isOIDCEnabled && !user) {
-                log.debug('isRoomAllowedForUser - user not found', username);
-                return false;
-            }
-
-            if (
-                isOIDCEnabled ||
-                !user.allowed_rooms ||
-                (user.allowed_rooms && (user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room)))
-            ) {
-                log.debug('isRoomAllowedForUser - user room allowed', room);
-                return true;
-            }
-
-            log.debug('isRoomAllowedForUser - user room not allowed', room);
+        if (!username || !room) {
+            log.debug('isRoomAllowedForUser - missing username or room', { username, room });
             return false;
         }
 
-        log.debug('isRoomAllowedForUser - No host protected or user_auth enabled, user room allowed', room);
-        return true;
+        const logData = { message, username, room };
+        log.debug('isRoomAllowedForUser ------>', logData);
+
+        try {
+            const isOIDCEnabled = config?.security?.oidc?.enabled;
+
+            if (hostCfg.protected || hostCfg.user_auth) {
+                // Check API first if configured
+                if (hostCfg.users_from_db && hostCfg.users_api_room_allowed) {
+                    try {
+                        const response = await axios.post(
+                            hostCfg.users_api_room_allowed,
+                            {
+                                email: username,
+                                username: username,
+                                room: room,
+                                api_secret_key: hostCfg.users_api_secret_key,
+                            },
+                            {
+                                timeout: hostCfg.users_api_timeout || 5000,
+                            },
+                        );
+
+                        if (response.data && (response.data === true || response.data.message === true)) {
+                            log.debug('AXIOS isRoomAllowedForUser - allowed access', { room, username });
+                            return true;
+                        }
+                        log.debug('AXIOS isRoomAllowedForUser - denied access', { room, username });
+                        return false;
+                    } catch (error) {
+                        log.error('AXIOS isRoomAllowedForUser - check failed', error.message);
+                        // Fail closed (deny access) if API check fails
+                        return false;
+                    }
+                }
+
+                // Check presenter list
+                if (hostCfg?.presenters?.list?.includes(username)) {
+                    log.debug('isRoomAllowedForUser - User in presenters list', { username });
+                    return true;
+                }
+
+                // Find user in configuration
+                const user = hostCfg.users?.find((u) => u.displayname === username || u.username === username);
+
+                // For OIDC, we might want additional checks even when enabled
+                if (isOIDCEnabled) {
+                    log.debug('isRoomAllowedForUser - OIDC enabled, allowing access', { username });
+                    return true;
+                }
+
+                if (!user) {
+                    log.debug('isRoomAllowedForUser - User not found in configuration', { username });
+                    return false;
+                }
+
+                // Check allowed rooms
+                const isAllowed =
+                    !user.allowed_rooms || user.allowed_rooms.includes('*') || user.allowed_rooms.includes(room);
+
+                log.debug(
+                    isAllowed ? 'isRoomAllowedForUser - Room allowed' : 'isRoomAllowedForUser - Room not allowed',
+                    { room, username },
+                );
+                return isAllowed;
+            }
+
+            log.debug('isRoomAllowedForUser - No protection enabled, allowing access', { room, username });
+            return true;
+        } catch (error) {
+            log.error('isRoomAllowedForUser - Unexpected error', error);
+            return false; // Fail closed
+        }
     }
 
     async function getPeerGeoLocation(ip) {
