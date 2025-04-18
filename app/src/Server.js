@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.20
+ * @version 1.8.21
  *
  */
 
@@ -1703,6 +1703,7 @@ function startServer() {
             // handle WebHook
             if (webhook.enabled) {
                 // Trigger a POST request when a user joins
+                data.timestamp = log.getDateTime(false);
                 axios
                     .post(webhook.url, { event: 'join', data })
                     .then((response) => log.debug('Join event tracked:', response.data))
@@ -3059,8 +3060,7 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
-                    peer_name: peer_name,
-                    presenter: isPresenter,
+                    peer: peer.peer_info,
                     reason: reason,
                 };
                 // Trigger a POST request when a user disconnects
@@ -3117,8 +3117,7 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
-                    peer_name: peer_name,
-                    presenter: isPresenter,
+                    peer: peer.peer_info,
                 };
                 // Trigger a POST request when a user exits
                 axios
