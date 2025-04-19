@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.21
+ * @version 1.8.22
  *
  */
 
@@ -1727,7 +1727,7 @@ function startServer() {
                 const rtpCapabilities = room.getRtpCapabilities();
                 callback(rtpCapabilities);
             } catch (err) {
-                log.warn('Failed to get Router RTP Capabilities', {
+                log.error('Failed to get Router RTP Capabilities', {
                     error: err.message,
                     peerInfo,
                 });
@@ -3060,7 +3060,7 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
-                    peer: peer.peer_info,
+                    peer: peer?.peer_info,
                     reason: reason,
                 };
                 // Trigger a POST request when a user disconnects
@@ -3117,12 +3117,12 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
-                    peer: peer.peer_info,
+                    peer: peer?.peer_info,
                 };
                 // Trigger a POST request when a user exits
                 axios
                     .post(webhook.url, { event: 'exit', data })
-                    .then((response) => log.debug('ExitROom event tracked:', response.data))
+                    .then((response) => log.debug('ExitRoom event tracked:', response.data))
                     .catch((error) => log.error('Error tracking exitRoom event:', error.message));
             }
 
