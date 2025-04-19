@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.22
+ * @version 1.8.23
  *
  */
 
@@ -1538,10 +1538,19 @@ function startServer() {
 
             const room = getRoom(socket);
 
-            const { peer_name, peer_id, peer_uuid, peer_token, os_name, os_version, browser_name, browser_version } =
-                data.peer_info;
+            const {
+                peer_name,
+                peer_id,
+                peer_uuid,
+                peer_token,
+                peer_presenter,
+                os_name,
+                os_version,
+                browser_name,
+                browser_version,
+            } = data.peer_info;
 
-            let is_presenter = true;
+            let is_presenter = peer_presenter;
 
             // User Auth required or detect token, we check if peer valid
             if (hostCfg.user_auth || peer_token) {
@@ -1565,7 +1574,7 @@ function startServer() {
                             return cb('unauthorized');
                         }
 
-                        const is_presenter =
+                        is_presenter =
                             presenter === '1' ||
                             presenter === 'true' ||
                             (hostCfg?.presenters?.join_first && room?.getPeersCount() === 0);
@@ -1656,13 +1665,13 @@ function startServer() {
                 });
             }
 
-            peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
-
-            log.info('[Join] - Is presenter', {
+            log.info('[Join] - Is Peer presenter', {
                 roomId: socket.room_id,
                 peer_name: peer_name,
                 peer_presenter: isPresenter,
             });
+
+            peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
 
             if (room.isLocked() && !isPresenter) {
                 log.debug('The user was rejected because the room is locked, and they are not a presenter');
@@ -3285,7 +3294,7 @@ function startServer() {
                 // Fallback condition: list check
                 hostCfg?.presenters?.list?.includes(peer_name);
 
-            log.debug('isPeerPresenter', {
+            log.debug('isPeerPresenter Check', {
                 room_id: room_id,
                 peer_id: peer_id,
                 peer_name: peer_name,
@@ -3295,7 +3304,7 @@ function startServer() {
 
             return isPresenter;
         } catch (err) {
-            log.error('isPeerPresenter', err);
+            log.error('isPeerPresenter Check error', err);
             return false;
         }
     }
