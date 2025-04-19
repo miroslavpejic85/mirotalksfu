@@ -3292,7 +3292,9 @@ function startServer() {
                     presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
                     Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
                 // Fallback condition: list check
-                hostCfg?.presenters?.list?.includes(peer_name);
+                hostCfg?.presenters?.list?.includes(peer_name) ||
+                // Or from presenters list eg. token...
+                presenters[room_id]?.[peer_id]?.is_presenter;
 
             log.debug('isPeerPresenter Check', {
                 room_id: room_id,
