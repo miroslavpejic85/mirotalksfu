@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.23
+ * @version 1.8.24
  *
  */
 
@@ -1641,14 +1641,10 @@ function startServer() {
                 peer_uuid: peer_uuid,
                 is_presenter: is_presenter,
             };
-            // first we check if the username match the presenters username
-            if (hostCfg?.presenters?.list?.includes(peer_name)) {
+            // first we check if the username match the presenters username else if join_first enabled
+            if (hostCfg?.presenters?.list?.includes(peer_name) || (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0)) {
+                presenter.is_presenter = true;
                 presenters[socket.room_id][socket.id] = presenter;
-            } else {
-                // if not match the presenters username, the first one join room is the presenter
-                if (Object.keys(presenters[socket.room_id]).length === 0) {
-                    presenters[socket.room_id][socket.id] = presenter;
-                }
             }
 
             log.info('[Join] - Connected presenters grp by roomId', presenters);
@@ -3286,15 +3282,23 @@ function startServer() {
             }
 
             const isPresenter =
-                // First condition: join_first validation
-                (hostCfg?.presenters?.join_first &&
-                    presenters[room_id]?.[peer_id]?.peer_name === peer_name &&
-                    presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
-                    Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
-                // Fallback condition: list check
-                hostCfg?.presenters?.list?.includes(peer_name) ||
-                // Or from presenters list eg. token...
-                presenters[room_id]?.[peer_id]?.is_presenter;
+            // 1. Check if join_first mode is enabled and peer matches presenter criteria:
+            //    - Presenters list contains the peer's room_id and peer_id
+            //    - Peer's name and UUID match the stored values
+            //    - Presenter object has additional properties (length > 1)
+            (hostCfg?.presenters?.join_first &&
+                presenters[room_id]?.[peer_id]?.peer_name === peer_name &&
+                presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
+                Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
+            
+            // 2. Check if peer_name exists in the static presenters list configuration
+            hostCfg?.presenters?.list?.includes(peer_name) ||
+            
+            // 3. Check if peer is explicitly marked as presenter (e.g., from token)
+            presenters[room_id]?.[peer_id]?.is_presenter || 
+            
+            // 4. Default case (not a presenter)
+            false;
 
             log.debug('isPeerPresenter Check', {
                 room_id: room_id,
