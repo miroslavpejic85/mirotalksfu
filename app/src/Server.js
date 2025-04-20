@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.24
+ * @version 1.8.25
  *
  */
 
@@ -1642,7 +1642,10 @@ function startServer() {
                 is_presenter: is_presenter,
             };
             // first we check if the username match the presenters username else if join_first enabled
-            if (hostCfg?.presenters?.list?.includes(peer_name) || (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0)) {
+            if (
+                hostCfg?.presenters?.list?.includes(peer_name) ||
+                (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0)
+            ) {
                 presenter.is_presenter = true;
                 presenters[socket.room_id][socket.id] = presenter;
             }
@@ -3036,6 +3039,20 @@ function startServer() {
 
             log.debug('[Disconnect] - peer name', { peer_name, reason });
 
+            if (webhook.enabled) {
+                const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
+                    peer: peer?.peer_info,
+                    reason: reason,
+                };
+                // Trigger a POST request when a user disconnects
+                axios
+                    .post(webhook.url, { event: 'disconnect', data })
+                    .then((response) => log.debug('Disconnect event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking disconnect event:', error.message));
+            }
+
             room.removePeer(socket.id);
 
             if (room.getPeersCount() === 0) {
@@ -3061,20 +3078,6 @@ function startServer() {
 
             if (isPresenter) removeIP(socket);
 
-            if (webhook.enabled) {
-                const data = {
-                    timestamp: log.getDateTime(false),
-                    room_id: socket.room_id,
-                    peer: peer?.peer_info,
-                    reason: reason,
-                };
-                // Trigger a POST request when a user disconnects
-                axios
-                    .post(webhook.url, { event: 'disconnect', data })
-                    .then((response) => log.debug('Disconnect event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking disconnect event:', error.message));
-            }
-
             socket.room_id = null;
         });
 
@@ -3092,6 +3095,19 @@ function startServer() {
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
 
             log.debug('Exit room', peer_name);
+
+            if (webhook.enabled) {
+                const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id: socket.room_id,
+                    peer: peer?.peer_info,
+                };
+                // Trigger a POST request when a user exits
+                axios
+                    .post(webhook.url, { event: 'exit', data })
+                    .then((response) => log.debug('ExitRoom event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking exitRoom event:', error.message));
+            }
 
             room.removePeer(socket.id);
 
@@ -3117,19 +3133,6 @@ function startServer() {
             }
 
             if (isPresenter) removeIP(socket);
-
-            if (webhook.enabled) {
-                const data = {
-                    timestamp: log.getDateTime(false),
-                    room_id: socket.room_id,
-                    peer: peer?.peer_info,
-                };
-                // Trigger a POST request when a user exits
-                axios
-                    .post(webhook.url, { event: 'exit', data })
-                    .then((response) => log.debug('ExitRoom event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking exitRoom event:', error.message));
-            }
 
             socket.room_id = null;
 
@@ -3282,23 +3285,20 @@ function startServer() {
             }
 
             const isPresenter =
-            // 1. Check if join_first mode is enabled and peer matches presenter criteria:
-            //    - Presenters list contains the peer's room_id and peer_id
-            //    - Peer's name and UUID match the stored values
-            //    - Presenter object has additional properties (length > 1)
-            (hostCfg?.presenters?.join_first &&
-                presenters[room_id]?.[peer_id]?.peer_name === peer_name &&
-                presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
-                Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
-            
-            // 2. Check if peer_name exists in the static presenters list configuration
-            hostCfg?.presenters?.list?.includes(peer_name) ||
-            
-            // 3. Check if peer is explicitly marked as presenter (e.g., from token)
-            presenters[room_id]?.[peer_id]?.is_presenter || 
-            
-            // 4. Default case (not a presenter)
-            false;
+                // 1. Check if join_first mode is enabled and peer matches presenter criteria:
+                //    - Presenters list contains the peer's room_id and peer_id
+                //    - Peer's name and UUID match the stored values
+                //    - Presenter object has additional properties (length > 1)
+                (hostCfg?.presenters?.join_first &&
+                    presenters[room_id]?.[peer_id]?.peer_name === peer_name &&
+                    presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
+                    Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
+                // 2. Check if peer_name exists in the static presenters list configuration
+                hostCfg?.presenters?.list?.includes(peer_name) ||
+                // 3. Check if peer is explicitly marked as presenter (e.g., from token)
+                presenters[room_id]?.[peer_id]?.is_presenter ||
+                // 4. Default case (not a presenter)
+                false;
 
             log.debug('isPeerPresenter Check', {
                 room_id: room_id,

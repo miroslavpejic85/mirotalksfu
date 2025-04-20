@@ -602,7 +602,6 @@ module.exports = class Room {
                     transport_id: id,
                     iceState: iceState,
                 });
-                this.removePeer(socket_id);
                 transport.close();
             }
         });
@@ -622,7 +621,6 @@ module.exports = class Room {
                     transport_id: id,
                     dtlsState: dtlsState,
                 });
-                this.removePeer(socket_id);
                 transport.close();
             }
         });
