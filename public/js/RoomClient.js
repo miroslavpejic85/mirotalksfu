@@ -1386,7 +1386,9 @@ class RoomClient {
                 }, delay);
             } else {
                 console.log('Reconnection limit reached!');
-                reconnectAlert.close();
+                if (reconnectAlert) {
+                    reconnectAlert.close();
+                }
                 showMaxAttemptsAlert();
             }
         };
