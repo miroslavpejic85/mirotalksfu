@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.26
+ * @version 1.8.28
  *
  */
 
@@ -1284,7 +1284,7 @@ class RoomClient {
         console.log('Disconnected. Attempting to reconnect...');
         this.exit(true);
 
-        let reconnectAlert;
+        let reconnectAlert = null;
 
         // Helper functions
         const showReconnectAlert = () => {
@@ -1351,10 +1351,12 @@ class RoomClient {
         this.socket.on('connect_error', () => {
             if (this.reconnectAttempts < this.maxReconnectAttempts) {
                 this.reconnectAttempts++;
-                reconnectAlert.update({
-                    title: 'Reconnect',
-                    text: `Attempting to reconnect ${this.reconnectAttempts}...`,
-                });
+                if (reconnectAlert) {
+                    reconnectAlert.update({
+                        title: 'Reconnect',
+                        text: `Attempting to reconnect ${this.reconnectAttempts}...`,
+                    });
+                }
             } else {
                 if (!serverAwayShown) {
                     showServerAwayMessage();
@@ -1371,10 +1373,12 @@ class RoomClient {
 
                 const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, this.maxReconnectInterval);
 
-                reconnectAlert.update({
-                    title: 'Reconnect',
-                    text: `Attempting to reconnect in ${delay / 1000}s...`,
-                });
+                if (reconnectAlert) {
+                    reconnectAlert.update({
+                        title: 'Reconnect',
+                        text: `Attempting to reconnect in ${delay / 1000}s...`,
+                    });
+                }
 
                 reconnectTimer = setTimeout(() => {
                     this.socket.connect();
