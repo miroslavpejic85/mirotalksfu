@@ -155,6 +155,7 @@ module.exports = {
          * Core Settings:
          * ------------------------
          * - enabled        : Enable recording functionality
+         * - uploadToS3     : Upload recording to AWS S3 bucket [true/false]
          * - endpoint       : Leave empty ('') to store recordings locally OR
          *   - Set to a valid URL (e.g., 'http://localhost:8080/') to:
          *      - Push recordings to a remote server
@@ -173,6 +174,7 @@ module.exports = {
          */
         recording: {
             enabled: process.env.RECORDING_ENABLED === 'true',
+            uploadToS3: process.env.RECORDING_UPLOAD_TO_S3 === 'true',
             endpoint: process.env.RECORDING_ENDPOINT || '',
             dir: 'rec',
             maxFileSize: 1 * 1024 * 1024 * 1024, // 1GB
@@ -548,7 +550,7 @@ module.exports = {
          *                (default: Streaming avatar instructions for MiroTalk SFU)
          */
         videoAI: {
-            enabled: process.env.VIDEOAI_ENABLED !== 'false',
+            enabled: process.env.VIDEOAI_ENABLED === 'true',
             basePath: 'https://api.heygen.com',
             apiKey: process.env.VIDEOAI_API_KEY || '',
             systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from MiroTalk SFU...',
@@ -806,6 +808,57 @@ module.exports = {
             getEndpoint(ip) {
                 return `https://get.geojs.io/v1/ip/geo/${ip}.json`;
             },
+        },
+
+        /**
+         * AWS S3 Storage Configuration
+         * ===========================
+         * Enables cloud file storage using Amazon Simple Storage Service (S3).
+         *
+         * Core Settings:
+         * --------------
+         * - enabled: Enable/disable AWS S3 integration [true/false]
+         *
+         * Service Setup:
+         * -------------
+         * 1. Create an S3 Bucket:
+         *    - Sign in to AWS Management Console
+         *    - Navigate to S3 service
+         *    - Click "Create bucket"
+         *    - Choose unique name (e.g., 'mirotalk')
+         *    - Select region (must match AWS_REGION in config)
+         *    - Enable desired settings (versioning, logging, etc.)
+         *
+         * 2. Get Security Credentials:
+         *    - Create IAM user with programmatic access
+         *    - Attach 'AmazonS3FullAccess' policy (or custom minimal policy)
+         *    - Save Access Key ID and Secret Access Key
+         *
+         * 3. Configure CORS (for direct uploads):
+         *    [
+         *      {
+         *        "AllowedHeaders": ["*"],
+         *        "AllowedMethods": ["PUT", "POST"],
+         *        "AllowedOrigins": ["*"],
+         *        "ExposeHeaders": []
+         *      }
+         *    ]
+         *
+         * Technical Details:
+         * -----------------
+         * - Default region: us-east-2 (Ohio)
+         * - Direct upload uses presigned URLs (expire after 1 hour by default)
+         * - Recommended permissions for direct upload:
+         *   - s3:PutObject
+         *   - s3:GetObject
+         *   - s3:DeleteObject
+         */
+        aws: {
+            enabled: process.env.AWS_S3_ENABLED === 'true',
+            accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'your-access-key-id',
+            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'your-secret-access-key',
+            region: process.env.AWS_REGION || 'us-east-2',
+            bucket: process.env.AWS_S3_BUCKET || 'mirotalk',
         },
     },
 
