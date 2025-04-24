@@ -861,7 +861,7 @@ function startServer() {
     });
 
     // ####################################################
-    // UTILITY FUNCTIONS
+    // RECORDING UTILITY
     // ####################################################
 
     function isValidRequest(req, fileName, roomId, checkContentType = true) {
@@ -887,10 +887,6 @@ function startServer() {
         throw new Error('Invalid file name format');
     }
 
-    // ####################################################
-    // RECORDING HANDLERS
-    // ####################################################
-
     function deleteFile(filePath) {
         if (!fs.existsSync(filePath)) return false;
 
@@ -901,6 +897,10 @@ function startServer() {
             log.error(`[Upload] Failed to delete local file ${filePath}`, err.message);
         }
     }
+
+    // ####################################################
+    // RECORDING HANDLERS
+    // ####################################################
 
     async function uploadToS3(filePath, fileName, roomId, bucket, s3Client) {
         if (!fs.existsSync(filePath)) return false;
@@ -952,7 +952,7 @@ function startServer() {
     }
 
     // ####################################################
-    // ROUTE HANDLER
+    // RECORDING ROUTE HANDLER
     // ####################################################
 
     app.post('/recSync', async (req, res) => {
