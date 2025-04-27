@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.31
+ * @version 1.8.32
  *
  */
 
@@ -4945,8 +4945,11 @@ class RoomClient {
         });
     }
 
-    async showMessage(data) {
-        if (!this.isChatOpen && this.showChatOnMessage) await this.toggleChat();
+    async showMessage(data, toggleChat = true) {
+        if (toggleChat && !this.isChatOpen && this.showChatOnMessage) { 
+            await this.toggleChat();
+        }
+
         this.setMsgAvatar('right', data.peer_name, data.peer_avatar);
         this.appendMessage(
             'right',
@@ -4957,6 +4960,7 @@ class RoomClient {
             data.to_peer_id,
             data.to_peer_name,
         );
+
         if (!this.showChatOnMessage) {
             this.userLog('info', `💬 New message from: ${data.peer_name}`, 'top-end');
         }
@@ -6470,7 +6474,7 @@ class RoomClient {
             to_peer_id: 'all',
             to_peer_name: 'all',
         };
-        this.showMessage(recAction);
+        this.showMessage(recAction, false);
 
         const recData = {
             type: 'recording',
