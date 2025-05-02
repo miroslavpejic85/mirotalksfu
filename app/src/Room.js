@@ -328,10 +328,17 @@ module.exports = class Room {
     }
 
     closeRouter() {
-        this.stopAudioLevelObserver();
-        this.stopActiveSpeakerObserver();
-        this.router.close();
-        log.debug('Router closed', { router_id: this.router.id });
+        if (this.router && !this.router.closed) {
+            this.router.close();
+            log.debug('Router closed', { router_id: this.router.id });
+        }
+    }
+
+    close() {
+        this.closeAudioLevelObserver();
+        this.closeActiveSpeakerObserver();
+        this.closeRouter();
+        log.debug('Room closed', { room_id: this.id });
     }
 
     // ####################################################
@@ -396,8 +403,8 @@ module.exports = class Room {
         }
     }
 
-    stopAudioLevelObserver() {
-        if (this.audioLevelObserver) {
+    closeAudioLevelObserver() {
+        if (this.audioLevelObserver && !this.audioLevelObserver.closed) {
             this.audioLevelObserver.close();
             this.audioLevelObserver = null;
             log.debug('Audio Level Observer closed');
@@ -438,8 +445,8 @@ module.exports = class Room {
         }
     }
 
-    stopActiveSpeakerObserver() {
-        if (this.activeSpeakerObserver) {
+    closeActiveSpeakerObserver() {
+        if (this.activeSpeakerObserver && !this.activeSpeakerObserver.closed) {
             this.activeSpeakerObserver.close();
             this.activeSpeakerObserver = null;
             log.debug('Active Speaker Observer closed');
@@ -544,7 +551,7 @@ module.exports = class Room {
         this.delPeer(peer);
 
         if (this.getPeersCount() === 0) {
-            this.closeRouter();
+            this.close();
         }
     }
 
