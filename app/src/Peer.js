@@ -92,6 +92,10 @@ module.exports = class Peer {
     // TRANSPORT
     // ####################################################
 
+    hasTransport(transport_id) {
+        return this.transports.has(transport_id);
+    }
+
     getTransports() {
         return JSON.parse(JSON.stringify([...this.transports]));
     }
@@ -109,16 +113,28 @@ module.exports = class Peer {
     }
 
     async connectTransport(transport_id, dtlsParameters) {
+        if (!transport_id || !dtlsParameters) {
+            throw new Error('Missing required parameters for connecting a transport');
+        }
+
         if (!this.transports.has(transport_id)) {
             throw new Error(`Transport with ID ${transport_id} not found`);
         }
 
+        const transport = this.transports.get(transport_id);
+
         try {
-            await this.transports.get(transport_id).connect({
-                dtlsParameters: dtlsParameters,
+            // Connect the transport
+            await transport.connect({ dtlsParameters });
+            log.debug('Transport connected successfully', {
+                transport_id,
+                peer_name: this.peer_name,
             });
         } catch (error) {
-            log.error(`Failed to connect transport with ID ${transport_id}`, error);
+            log.error(`Failed to connect transport with ID ${transport_id}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
             throw new Error(`Failed to connect transport with ID ${transport_id}`);
         }
 
@@ -173,6 +189,10 @@ module.exports = class Peer {
     }
 
     async createProducer(producerTransportId, producer_rtpParameters, producer_kind, producer_type) {
+        if (!producerTransportId || !producer_rtpParameters || !producer_kind || !producer_type) {
+            throw new Error('Missing required parameters for creating a producer');
+        }
+
         if (!this.transports.has(producerTransportId)) {
             throw new Error(`Producer transport with ID ${producerTransportId} not found`);
         }
@@ -186,8 +206,16 @@ module.exports = class Peer {
                 rtpParameters: producer_rtpParameters,
             });
         } catch (error) {
-            log.error(`Error creating producer for transport ID ${producerTransportId}:`, error);
+            log.error(`Error creating producer for transport ID ${producerTransportId}`, {
+                error: error.message,
+                producer_kind,
+                producer_type,
+            });
             throw new Error(`Failed to create producer for transport ID ${producerTransportId}`);
+        }
+
+        if (!producer) {
+            throw new Error(`Producer creation failed for transport ID ${producerTransportId}`);
         }
 
         const { id, appData, type, kind, rtpParameters } = producer;
@@ -207,7 +235,7 @@ module.exports = class Peer {
                 temporalLayer,
             });
         } else {
-            log.debug('Producer ----->', { type, kind });
+            log.debug('Producer created ----->', { type, kind });
         }
 
         producer.on('transportclose', () => {
@@ -222,23 +250,29 @@ module.exports = class Peer {
         if (!this.producers.has(producer_id)) return;
 
         const producer = this.getProducer(producer_id);
-        const { id, kind, type, appData } = producer;
 
         try {
             producer.close();
+
+            log.debug('Producer closed successfully', {
+                producer_id: producer.id,
+                peer_name: this.peer_name,
+                kind: producer.kind,
+                type: producer.type,
+                appData: producer.appData,
+            });
         } catch (error) {
-            log.warn('Close Producer', error.message);
+            log.error(`Error closing producer with ID ${producer_id}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
         }
 
         this.delProducer(producer_id);
 
-        log.debug('Producer closed and deleted', {
+        log.debug('Producer removed from peer', {
+            producer_id: producer.id,
             peer_name: this.peer_name,
-            kind: kind,
-            type: type,
-            appData: appData,
-            producer_id: id,
-            producer_closed: producer.closed,
         });
     }
 
@@ -263,6 +297,10 @@ module.exports = class Peer {
     }
 
     async createConsumer(consumer_transport_id, producerId, rtpCapabilities) {
+        if (!consumer_transport_id || !producerId || !rtpCapabilities) {
+            throw new Error('Missing required parameters for creating a consumer');
+        }
+
         if (!this.transports.has(consumer_transport_id)) {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
         }
@@ -275,12 +313,19 @@ module.exports = class Peer {
                 producerId,
                 rtpCapabilities,
                 enableRtx: true, // Enable NACK for OPUS.
-                paused: true,
-                ignoreDtx: true,
+                paused: true, // Start the consumer in a paused state
+                ignoreDtx: true, // Ignore DTX (Discontinuous Transmission)
             });
         } catch (error) {
-            log.error(`Error creating consumer for transport ID ${consumer_transport_id}`, error);
+            log.error(`Error creating consumer for transport ID ${consumer_transport_id}`, {
+                error: error.message,
+                producerId,
+            });
             throw new Error(`Failed to create consumer for transport ID ${consumer_transport_id}`);
+        }
+
+        if (!consumer) {
+            throw new Error(`Consumer creation failed for transport ID ${consumer_transport_id}`);
         }
 
         const { id, type, kind, rtpParameters, producerPaused } = consumer;
@@ -310,7 +355,7 @@ module.exports = class Peer {
                 });
             }
         } else {
-            log.debug('Consumer ----->', { type, kind });
+            log.debug('Consumer created ----->', { type, kind });
         }
 
         consumer.on('transportclose', () => {
@@ -319,14 +364,14 @@ module.exports = class Peer {
         });
 
         return {
-            consumer: consumer,
+            consumer,
             params: {
                 producerId,
-                id: id,
-                kind: kind,
-                rtpParameters: rtpParameters,
-                type: type,
-                producerPaused: producerPaused,
+                id,
+                kind,
+                rtpParameters,
+                type,
+                producerPaused,
             },
         };
     }
@@ -335,22 +380,28 @@ module.exports = class Peer {
         if (!this.consumers.has(consumer_id)) return;
 
         const consumer = this.getConsumer(consumer_id);
-        const { id, kind, type } = consumer;
 
         try {
             consumer.close();
+
+            log.debug('Consumer closed successfully', {
+                consumer_id: consumer.id,
+                peer_name: this.peer_name,
+                kind: consumer.kind,
+                type: consumer.type,
+            });
         } catch (error) {
-            log.warn('Close Consumer', error.message);
+            log.error(`Error closing consumer with ID ${consumer_id}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
         }
 
         this.delConsumer(consumer_id);
 
-        log.debug('Consumer closed and deleted', {
+        log.debug('Consumer removed from peer', {
+            consumer_id: consumer.id,
             peer_name: this.peer_name,
-            kind: kind,
-            type: type,
-            consumer_id: id,
-            consumer_closed: consumer.closed,
         });
     }
 };

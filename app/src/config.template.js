@@ -1448,6 +1448,8 @@ module.exports = {
                 },
             ],
 
+            iceConsentTimeout: 35, // Timeout for ICE consent (seconds)
+
             /**
              * Bandwidth Control Settings
              * Kubernetes implications:
