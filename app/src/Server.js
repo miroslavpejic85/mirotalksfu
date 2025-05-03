@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.36
+ * @version 1.8.37
  *
  */
 
@@ -1448,6 +1448,7 @@ function startServer() {
                 mattermost: config.integrations?.mattermost?.enabled ? config.integrations.mattermost : false,
                 slack: slackEnabled ? config.integrations?.slack : false,
                 chatGPT: config.integrations?.chatGPT?.enabled ? config.integrations.chatGPT : false,
+                deepSeek: config.integrations?.deepSeek?.enabled ? config.integrations.deepSeek : false,
                 email_alerts: config?.integrations?.email?.alert ? config.integrations.email : false,
             },
 
@@ -2397,6 +2398,7 @@ function startServer() {
                 case 'screen_cant_share':
                 case 'chat_cant_privately':
                 case 'chat_cant_chatgpt':
+                case 'chat_cant_deep_seek':
                 case 'media_cant_sharing':
                     room.broadCast(socket.id, 'updateRoomModerator', moderator);
                     break;
@@ -2639,6 +2641,49 @@ function startServer() {
                     log.error('ChatGPT', error);
                     cb({ message: error.message });
                 }
+            }
+        });
+
+        socket.on('getDeepSeek', async ({ time, room, name, prompt, context }, cb) => {
+            if (!roomExists(socket)) return;
+
+            if (!config?.integrations?.deepSeek?.enabled) return cb({ message: 'DeepSeek seems disabled, try later!' });
+
+            try {
+                // Add the prompt to the context
+                context.push({ role: 'user', content: prompt });
+                // Call DeepSeek's API to generate response
+                const response = await axios.post(
+                    `${config?.integrations?.deepSeek?.basePath}chat/completions`,
+                    {
+                        model: config?.integrations?.deepSeek?.model,
+                        messages: context,
+                        max_tokens: config?.integrations?.deepSeek?.max_tokens,
+                        temperature: config?.integrations?.deepSeek?.temperature,
+                    },
+                    {
+                        headers: {
+                            Authorization: `Bearer ${config?.integrations?.deepSeek?.apiKey}`,
+                            'Content-Type': 'application/json',
+                        },
+                    },
+                );
+                // Extract message from completion
+                const message = response.data.choices[0].message.content.trim();
+                // Add response to context
+                context.push({ role: 'assistant', content: message });
+                // Log conversation details
+                log.info('DeepSeek', {
+                    time: time,
+                    room: room,
+                    name: name,
+                    context: context,
+                });
+                // Callback response to client
+                cb({ message: message, context: context });
+            } catch (error) {
+                log.error('DeepSeek', error);
+                cb({ message: error.message });
             }
         });
 

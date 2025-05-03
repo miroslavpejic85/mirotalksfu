@@ -94,6 +94,7 @@ let BUTTONS = {
         chatMarkdownButton: true,
         chatSpeechStartButton: true,
         chatGPT: true,
+        deepSeek: true,
     },
     poll: {
         pollPinButton: true,
@@ -184,6 +185,7 @@ function handleRules(isPresenter) {
         switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
         switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
         switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
+        switchEveryoneCantChatDeepSeek.checked = localStorageSettings.moderator_chat_cant_deep_seek;
         switchEveryoneCantMediaSharing.checked = localStorageSettings.moderator_media_cant_sharing;
         switchDisconnectAllOnLeave.checked = localStorageSettings.moderator_disconnect_all_on_leave;
 
@@ -197,6 +199,7 @@ function handleRules(isPresenter) {
             screen_cant_share: switchEveryoneCantShareScreen.checked,
             chat_cant_privately: switchEveryoneCantChatPrivately.checked,
             chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
+            chat_cant_deep_seek: switchEveryoneCantChatDeepSeek.checked,
             media_cant_sharing: switchEveryoneCantMediaSharing.checked,
         };
         console.log('Rules moderator data ---->', moderatorData);

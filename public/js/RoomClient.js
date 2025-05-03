@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.36
+ * @version 1.8.37
  *
  */
 
@@ -104,6 +104,7 @@ const image = {
     lobby: '../images/lobby.png',
     email: '../images/email.png',
     chatgpt: '../images/chatgpt.png',
+    deepSeek: '../images/deepSeek.png',
     all: '../images/all.png',
     forbidden: '../images/forbidden.png',
     broadcasting: '../images/broadcasting.png',
@@ -267,6 +268,7 @@ class RoomClient {
             screen_cant_share: false,
             chat_cant_privately: false,
             chat_cant_chatgpt: false,
+            chat_cant_deep_seek: false,
             media_cant_sharing: false,
         };
 
@@ -330,6 +332,7 @@ class RoomClient {
 
         this.pollSelectedOptions = {};
         this.chatGPTContext = [];
+        this.deepSeekContext = [];
         this.chatMessages = [];
         this.leftMsgAvatar = null;
         this.rightMsgAvatar = null;
@@ -4773,7 +4776,7 @@ class RoomClient {
     }
 
     sendMessage() {
-        if (!this.thereAreParticipants() && !isChatGPTOn) {
+        if (!this.thereAreParticipants() && !isChatGPTOn && !isDeepSeekOn) {
             this.cleanMessage();
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
@@ -4825,12 +4828,14 @@ class RoomClient {
             peer_name: this.peer_name,
             peer_avatar: this.peer_avatar,
             peer_id: this.peer_id,
-            to_peer_id: 'ChatGPT',
-            to_peer_name: 'ChatGPT',
+            to_peer_id: '',
+            to_peer_name: '',
             peer_msg: peer_msg,
         };
 
         if (isChatGPTOn) {
+            data.to_peer_id = 'ChatGPT';
+            data.to_peer_name = 'ChatGPT';
             console.log('Send message:', data);
             this.socket.emit('message', data);
             this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
@@ -4869,7 +4874,60 @@ class RoomClient {
                 .catch((err) => {
                     console.log('ChatGPT error:', err);
                 });
-        } else {
+        }
+
+        if (isDeepSeekOn) {
+            data.to_peer_id = 'deepSeek';
+            data.to_peer_name = 'deepSeek';
+            console.log('Send message:', data);
+            this.socket.emit('message', data);
+            this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
+            this.appendMessage(
+                'left',
+                this.leftMsgAvatar,
+                this.peer_name,
+                this.peer_id,
+                peer_msg,
+                data.to_peer_id,
+                data.to_peer_name,
+            );
+            this.cleanMessage();
+
+            this.socket
+                .request('getDeepSeek', {
+                    time: getDataTimeString(),
+                    room: this.room_id,
+                    name: this.peer_name,
+                    prompt: peer_msg,
+                    context: this.deepSeekContext,
+                })
+                .then((completion) => {
+                    if (!completion) return;
+                    const { message, context } = completion;
+                    this.deepSeekContext = context ? context : [];
+                    console.log('Receive message:', message);
+                    this.setMsgAvatar('right', 'DeepSeek');
+                    this.appendMessage(
+                        'right',
+                        image.deepSeek,
+                        'DeepSeek',
+                        this.peer_id,
+                        message,
+                        'DeepSeek',
+                        'DeepSeek',
+                    );
+                    this.cleanMessage();
+                    this.streamingTask(message);
+                    this.speechInMessages && !VideoAI.active
+                        ? this.speechMessage(true, 'DeepSeek', message)
+                        : this.sound('message');
+                })
+                .catch((err) => {
+                    console.log('DeepSeek error:', err);
+                });
+        }
+
+        if (!isChatGPTOn || !isDeepSeekOn) {
             const participantsList = this.getId('participantsList');
             const participantsListItems = participantsList.getElementsByTagName('li');
             for (let i = 0; i < participantsListItems.length; i++) {
@@ -4980,7 +5038,7 @@ class RoomClient {
             // INCOMING PRIVATE MESSAGE
             if (li.id === data.peer_id && data.to_peer_id != 'all') {
                 li.classList.add('pulsate');
-                if (!['all', 'ChatGPT'].includes(data.to_peer_id)) {
+                if (!['all', 'ChatGPT', 'DeepSeek'].includes(data.to_peer_id)) {
                     this.getId(`${data.peer_id}-unread-msg`).classList.remove('hidden');
                 }
             }
@@ -5069,6 +5127,9 @@ class RoomClient {
             case 'ChatGPT':
                 chatGPTMessages.insertAdjacentHTML('beforeend', newMessageHTML);
                 break;
+            case 'DeepSeek':
+                deepSeekMessages.insertAdjacentHTML('beforeend', newMessageHTML);
+                break;
             case 'all':
                 chatPublicMessages.insertAdjacentHTML('beforeend', newMessageHTML);
                 break;
@@ -5079,8 +5140,8 @@ class RoomClient {
 
         const message = getId(`message-${chatMessagesId}`);
         if (message) {
-            if (getFromName === 'ChatGPT') {
-                // Stream the message for ChatGPT
+            if (['ChatGPT', 'DeepSeek'].includes(getFromName)) {
+                // Stream the message for ChatGPT or DeepSeek
                 this.streamMessage(message, getMsg, 100);
             } else {
                 // Process the message for other senders
@@ -5372,10 +5433,12 @@ class RoomClient {
                 }
                 // Remove child nodes from different message containers
                 removeAllChildNodes(chatGPTMessages);
+                removeAllChildNodes(deepSeekMessages);
                 removeAllChildNodes(chatPublicMessages);
                 removeAllChildNodes(chatPrivateMessages);
                 this.chatMessages = [];
                 this.chatGPTContext = [];
+                this.deepSeekContext = [];
                 this.sound('delete');
             }
         });
@@ -7401,6 +7464,13 @@ class RoomClient {
                     'top-end',
                 );
                 break;
+            case 'chat_cant_deep_seek':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: everyone can't chat with DeepSeek ${status}`,
+                    'top-end',
+                );
+                break;
             case 'media_cant_sharing':
                 this.userLog('info', `${icons.moderator} Moderator: everyone can't share media ${status}`, 'top-end');
                 break;
@@ -8784,7 +8854,7 @@ class RoomClient {
         const avatarImg = getParticipantAvatar(peer_name, peer_avatar);
 
         const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '') => {
-            const isSensitiveChat = !['all', 'ChatGPT'].includes(peer_id) && title.length > 15;
+            const isSensitiveChat = !['all', 'ChatGPT', 'DeepSeek'].includes(peer_id) && title.length > 15;
             const truncatedTitle = isSensitiveChat ? `${title.substring(0, 10)}*****` : title;
             return `
                 <img class="all-participants-img" 
@@ -8810,7 +8880,7 @@ class RoomClient {
         for (let i = 0; i < participantsListItems.length; i++) {
             participantsListItems[i].classList.remove('active');
             participantsListItems[i].classList.remove('pulsate'); // private new message to read
-            if (!['all', 'ChatGPT'].includes(peer_id)) {
+            if (!['all', 'ChatGPT', 'DeepSeek'].includes(peer_id)) {
                 // icon private new message to read
                 this.getId(`${peer_id}-unread-msg`).classList.add('hidden');
             }
@@ -8818,6 +8888,8 @@ class RoomClient {
         participant.classList.add('active');
 
         isChatGPTOn = false;
+        isDeepSeekOn = false;
+
         console.log('Display messages', peer_id);
 
         switch (peer_id) {
@@ -8828,6 +8900,19 @@ class RoomClient {
                 isChatGPTOn = true;
                 chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT');
                 this.getId('chatGPTMessages').style.display = 'block';
+                break;
+            case 'DeepSeek':
+                if (this._moderator.chat_cant_deep_seek) {
+                    return userLog(
+                        'warning',
+                        'The moderator does not allow you to chat with DeepSeek',
+                        'top-end',
+                        6000,
+                    );
+                }
+                isDeepSeekOn = true;
+                chatAbout.innerHTML = generateChatAboutHTML(image.deepSeek, 'DeepSeek');
+                this.getId('deepSeekMessages').style.display = 'block';
                 break;
             case 'all':
                 chatAbout.innerHTML = generateChatAboutHTML(image.all, 'Public chat', 'online', participantsCount);
@@ -8861,6 +8946,7 @@ class RoomClient {
 
     hidePeerMessages() {
         elemDisplay('chatGPTMessages', false);
+        elemDisplay('deepSeekMessages', false);
         elemDisplay('chatPublicMessages', false);
         elemDisplay('chatPrivateMessages', false);
     }

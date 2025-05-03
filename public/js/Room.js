@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.36
+ * @version 1.8.37
  *
  */
 
@@ -250,6 +250,7 @@ let isVideoControlsOn = false;
 let isChatPasteTxt = false;
 let isChatMarkdownOn = false;
 let isChatGPTOn = false;
+let isDeepSeekOn = false;
 let isSpeechSynthesisSupported = 'speechSynthesis' in window;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
@@ -2853,6 +2854,14 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    switchEveryoneCantChatDeepSeek.onchange = (e) => {
+        const chatCantDeepSeek = e.currentTarget.checked;
+        rc.updateRoomModerator({ type: 'chat_cant_deep_seek', status: chatCantDeepSeek });
+        rc.roomMessage('chat_cant_deep_seek', chatCantDeepSeek);
+        localStorageSettings.moderator_chat_cant_deep_seek = chatCantDeepSeek;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     switchEveryoneCantMediaSharing.onchange = (e) => {
         const mediaCantSharing = e.currentTarget.checked;
         rc.updateRoomModerator({ type: 'media_cant_sharing', status: mediaCantSharing });
@@ -4465,6 +4474,31 @@ function getParticipantsList(peers) {
         </li>`;
     }
 
+    const deepSeek = BUTTONS.chat.deepSeek !== undefined ? BUTTONS.chat.deepSeek : true;
+
+    // DEEP-SEEK
+    if (deepSeek) {
+        const deepSeek_active = rc.chatPeerName === 'DeepSeek' ? ' active' : '';
+
+        li += `
+        <li 
+            id="DeepSeek" 
+            data-to-id="DeepSeek"
+            data-to-name="DeepSeek"
+            class="clearfix${deepSeek_active}" 
+            onclick="rc.showPeerAboutAndMessages(this.id, 'DeepSeek', '', event)"
+        >
+            <img 
+                src="${image.deepSeek}"
+                alt="avatar"
+            />
+            <div class="about">
+                <div class="name">DeepSeek</div>
+                <div class="status"><i class="fa fa-circle online"></i> online</div>
+            </div>
+        </li>`;
+    }
+
     const public_chat_active = rc.chatPeerName === 'all' ? ' active' : '';
 
     // ALL
@@ -5351,7 +5385,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.36',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.37',
         html: `
             <br />
             <div id="about">

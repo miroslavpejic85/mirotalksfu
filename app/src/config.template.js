@@ -503,7 +503,7 @@ module.exports = {
          *
          * Advanced Settings:
          * -----------------
-         * - max_tokens: Maximum response length (default: 1000 tokens)
+         * - max_tokens: Maximum response length (default: 1024 tokens)
          * - temperature: Creativity control (0=strict, 1=creative) (default: 0)
          *
          * Usage Example:
@@ -512,6 +512,7 @@ module.exports = {
          *    - gpt-3.5-turbo (recommended)
          *    - gpt-4
          *    - gpt-4-turbo
+         *    - ...
          *
          * 2. Temperature Guide:
          *    - 0.0: Factual responses
@@ -523,8 +524,55 @@ module.exports = {
             basePath: process.env.CHATGPT_BASE_PATH || 'https://api.openai.com/v1/',
             apiKey: process.env.CHATGPT_API_KEY || '',
             model: process.env.CHATGPT_MODEL || 'gpt-3.5-turbo',
-            max_tokens: parseInt(process.env.CHATGPT_MAX_TOKENS) || 1000,
-            temperature: parseInt(process.env.CHATGPT_TEMPERATURE) || 0,
+            max_tokens: parseInt(process.env.CHATGPT_MAX_TOKENS) || 1024,
+            temperature: parseInt(process.env.CHATGPT_TEMPERATURE) || 0.7,
+        },
+
+        /**
+         * DeepDeek Integration Configuration
+         * ================================
+         * DeepDeek API integration for AI-powered chat functionality
+         *
+         * Setup Instructions:
+         * ------------------
+         * 1. Go to https://deepseek.com/
+         * 2. Create your DeepDeek account
+         * 3. Generate your API key at https://deepseek.com/account/api-keys
+         *
+         * Core Settings:
+         * -------------
+         * - enabled    : Enable/disable DeepDeek integration [true/false] (default: false)
+         * - basePath   : DeepDeek API endpoint (default: 'https://api.deepseek.com/v1/')
+         * - apiKey     : DeepDeek API secret key (ALWAYS store in .env)
+         * - model      : DeepDeek model version (default: 'deepdeek-chat')
+         *
+         * Advanced Settings:
+         * -----------------
+         * - max_tokens: Maximum response length (default: 1024 tokens)
+         * - temperature: Creativity control (0=strict, 1=creative) (default: 0)
+         *
+         * Usage Example:
+         * -------------
+         * 1. Supported Models:
+         *  - deepseek-chat (recommended)
+         *  - deepseek-coder
+         *  - deepseek-math
+         *  - deepseek-llm
+         *  - ...
+         *
+         * 2. Temperature Guide:
+         *  - 0.0: Factual responses
+         *  - 0.7: Balanced
+         *  - 1.0: Maximum creativity
+         *
+         */
+        deepSeek: {
+            enabled: process.env.DEEP_SEEK_ENABLED === 'true',
+            basePath: process.env.DEEP_SEEK_BASE_PATH || 'https://api.deepseek.com/v1/',
+            apiKey: process.env.DEEP_SEEK_API_KEY || '',
+            model: process.env.DEEP_SEEK_MODEL || 'deepseek-chat',
+            max_tokens: parseInt(process.env.DEEP_SEEK_MAX_TOKENS) || 1024,
+            temperature: parseInt(process.env.DEEP_SEEK_TEMPERATURE) || 0.7,
         },
 
         /**
