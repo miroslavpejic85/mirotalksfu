@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.37
+ * @version 1.8.38
  *
  */
 
@@ -2598,34 +2598,51 @@ function startServer() {
         });
 
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return cb({ message: 'Room not found' });
+            }
 
-            if (!config?.integrations?.chatGPT?.enabled) return cb({ message: 'ChatGPT seems disabled, try later!' });
+            if (!config?.integrations?.chatGPT?.enabled) {
+                return cb({ message: 'ChatGPT integration is disabled. Please try again later!' });
+            }
 
             // https://platform.openai.com/docs/api-reference/completions/create
             try {
+                if (!prompt || !Array.isArray(context)) {
+                    throw new Error('Invalid input: Prompt or context is missing or invalid');
+                }
                 // Add the prompt to the context
                 context.push({ role: 'user', content: prompt });
+
                 // Call OpenAI's API to generate response
                 const completion = await chatGPT.chat.completions.create({
                     model: config?.integrations?.chatGPT?.model || 'gpt-3.5-turbo',
                     messages: context,
-                    max_tokens: config?.integrations?.chatGPT?.max_tokens,
-                    temperature: config?.integrations?.chatGPT?.temperature,
+                    max_tokens: config?.integrations?.chatGPT?.max_tokens || 1024,
+                    temperature: config?.integrations?.chatGPT?.temperature || 0.7,
                 });
-                // Extract message from completion
+
+                // Extract the assistant's response
                 const message = completion.choices[0].message.content.trim();
+                if (!message) {
+                    throw new Error('ChatGPT returned an empty response.');
+                }
+
                 // Add response to context
                 context.push({ role: 'assistant', content: message });
-                // Log conversation details
-                log.info('ChatGPT', {
-                    time: time,
-                    room: room,
-                    name: name,
-                    context: context,
+
+                // Log the conversation details
+                log.info('ChatGPT Response', {
+                    time,
+                    room,
+                    name,
+                    prompt,
+                    response: message,
+                    context,
                 });
+
                 // Callback response to client
-                cb({ message: message, context: context });
+                cb({ message, context });
             } catch (error) {
                 if (error.name === 'APIError') {
                     log.error('ChatGPT', {
@@ -2635,31 +2652,40 @@ function startServer() {
                         code: error.code,
                         type: error.type,
                     });
-                    cb({ message: error.message });
+                    return cb({ message: `ChatGPT API Error: ${error.message}` });
                 } else {
-                    // Non-API error
-                    log.error('ChatGPT', error);
-                    cb({ message: error.message });
+                    // Handle general errors
+                    log.error('ChatGPT Error', error);
+                    cb({ message: `Error: ${error.message}` });
                 }
             }
         });
 
         socket.on('getDeepSeek', async ({ time, room, name, prompt, context }, cb) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                return cb({ message: 'Room not found' });
+            }
 
-            if (!config?.integrations?.deepSeek?.enabled) return cb({ message: 'DeepSeek seems disabled, try later!' });
+            if (!config?.integrations?.deepSeek?.enabled) {
+                return cb({ message: 'DeepSeek integration is disabled. Please try again later!' });
+            }
 
             try {
+                if (!prompt || !Array.isArray(context)) {
+                    throw new Error('Invalid input: Prompt or context is missing or invalid.');
+                }
+
                 // Add the prompt to the context
                 context.push({ role: 'user', content: prompt });
+
                 // Call DeepSeek's API to generate response
                 const response = await axios.post(
                     `${config?.integrations?.deepSeek?.basePath}chat/completions`,
                     {
-                        model: config?.integrations?.deepSeek?.model,
+                        model: config?.integrations?.deepSeek?.model || 'deepseek-chat',
                         messages: context,
-                        max_tokens: config?.integrations?.deepSeek?.max_tokens,
-                        temperature: config?.integrations?.deepSeek?.temperature,
+                        max_tokens: config?.integrations?.deepSeek?.max_tokens || 1024,
+                        temperature: config?.integrations?.deepSeek?.temperature || 0.7,
                     },
                     {
                         headers: {
@@ -2668,22 +2694,41 @@ function startServer() {
                         },
                     },
                 );
-                // Extract message from completion
-                const message = response.data.choices[0].message.content.trim();
+
+                // Extract the assistant's response
+                const message = response.data.choices[0]?.message?.content?.trim();
+                if (!message) {
+                    throw new Error('DeepSeek returned an empty response.');
+                }
+
                 // Add response to context
                 context.push({ role: 'assistant', content: message });
-                // Log conversation details
-                log.info('DeepSeek', {
-                    time: time,
-                    room: room,
-                    name: name,
-                    context: context,
+
+                // Log the conversation details
+                log.info('DeepSeek Response', {
+                    time,
+                    room,
+                    name,
+                    prompt,
+                    response: message,
+                    context,
                 });
-                // Callback response to client
-                cb({ message: message, context: context });
+
+                // Send the response back to the client
+                cb({ message, context });
             } catch (error) {
-                log.error('DeepSeek', error);
-                cb({ message: error.message });
+                // Handle API-specific errors
+                if (error.response) {
+                    log.error('DeepSeek API Error', {
+                        status: error.response.status,
+                        data: error.response.data,
+                    });
+                    return cb({ message: `DeepSeek API Error: ${error.response.data?.message || error.message}` });
+                }
+
+                // Handle general errors
+                log.error('DeepSeek Error', error);
+                cb({ message: `Error: ${error.message}` });
             }
         });
 
