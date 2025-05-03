@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.38
+ * @version 1.8.39
  *
  */
 
@@ -724,21 +724,36 @@ class RoomClient {
     }
 
     async loadDevice(routerRtpCapabilities) {
+        if (!routerRtpCapabilities) {
+            console.error('Router RTP Capabilities are required to load the device.');
+            this.userLog('error', 'Router RTP Capabilities are missing.', 'center', 6000);
+            return null;
+        }
+
         let device;
         try {
-            device = new this.mediasoupClient.Device();
+            device = await this.mediasoupClient.Device.factory();
+            console.log('Device created successfully:', device);
         } catch (error) {
             if (error.name === 'UnsupportedError') {
-                console.error('Browser not supported');
-                this.userLog('error', 'Browser not supported', 'center', 6000);
+                console.error('Browser not supported:', error);
+                this.userLog('error', 'Browser not supported. Please try a different browser.', 'center', 6000);
             } else {
-                console.error('Browser not supported: ', error);
-                this.userLog('error', 'Browser not supported: ' + error, 'center', 6000);
+                console.error('Error creating device:', error);
+                this.userLog('error', `Failed to create device: ${error.message}`, 'center', 6000);
             }
+            return null;
         }
-        await device.load({
-            routerRtpCapabilities,
-        });
+
+        try {
+            await device.load({ routerRtpCapabilities });
+            console.log('Device loaded successfully with router RTP capabilities:', device.rtpCapabilities);
+        } catch (error) {
+            console.error('Error loading device with router RTP capabilities:', error);
+            this.userLog('error', `Failed to load device: ${error.message}`, 'center', 6000);
+            return null;
+        }
+
         return device;
     }
 
