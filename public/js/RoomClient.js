@@ -383,6 +383,7 @@ class RoomClient {
         this.recSyncChunkSize = 1000000; // 1MB
 
         // Encodings
+        this.preferLocalCodecsOrder = false; // Prefer local codecs order 
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
@@ -746,8 +747,14 @@ class RoomClient {
         }
 
         try {
-            await device.load({ routerRtpCapabilities });
-            console.log('Device loaded successfully with router RTP capabilities:', device.rtpCapabilities);
+            await device.load({
+                routerRtpCapabilities,
+                preferLocalCodecsOrder: !!this.preferLocalCodecsOrder
+            });
+            console.log(
+                `Device loaded successfully with router RTP capabilities (preferLocalCodecsOrder: ${!!this.preferLocalCodecsOrder})`,
+                device.rtpCapabilities
+            );
         } catch (error) {
             console.error('Error loading device with router RTP capabilities:', error);
             this.userLog('error', `Failed to load device: ${error.message}`, 'center', 6000);
