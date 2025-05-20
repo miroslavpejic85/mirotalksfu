@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "1.8.44",
+    "version": "1.8.45",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -57,11 +57,11 @@
         "node": ">=18"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.810.0",
-        "@aws-sdk/lib-storage": "^3.810.0",
+        "@aws-sdk/client-s3": "^3.812.0",
+        "@aws-sdk/lib-storage": "^3.812.0",
         "@mattermost/client": "10.7.0",
         "@ngrok/ngrok": "1.5.1",
-        "@sentry/node": "^9.19.0",
+        "@sentry/node": "^9.21.0",
         "async-mutex": "^0.5.0",
         "axios": "^1.9.0",
         "chokidar": "^4.0.3",
@@ -70,7 +70,7 @@
         "cors": "2.8.5",
         "crypto-js": "4.2.0",
         "discord.js": "^14.19.3",
-        "dompurify": "^3.2.5",
+        "dompurify": "^3.2.6",
         "dotenv": "^16.5.0",
         "express": "5.1.0",
         "express-openid-connect": "^2.18.1",
@@ -84,7 +84,7 @@
         "mediasoup": "3.15.8",
         "mediasoup-client": "3.11.0",
         "nodemailer": "^7.0.3",
-        "openai": "^4.98.0",
+        "openai": "^4.100.0",
         "qs": "6.14.0",
         "sanitize-filename": "^1.6.3",
         "socket.io": "4.8.1",
@@ -95,14 +95,14 @@
         "@babel/core": "^7.27.1",
         "@babel/preset-env": "^7.27.2",
         "babel-loader": "^10.0.0",
-        "mocha": "^11.3.0",
+        "mocha": "^11.4.0",
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.10",
         "prettier": "3.5.3",
         "proxyquire": "^2.1.3",
         "should": "^13.2.3",
         "sinon": "^20.0.0",
-        "webpack": "^5.99.8",
+        "webpack": "^5.99.9",
         "webpack-cli": "^6.0.1"
     }
 }

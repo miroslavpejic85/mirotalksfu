@@ -323,7 +323,7 @@ module.exports = {
             baseURLDynamic: false, // Set true if your app has dynamic base URLs
 
             // ==================================================================================================
-            allow_rooms_creation_for_auth_users: process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS === 'true',
+            allow_rooms_creation_for_auth_users: process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS !== 'false',
             // ==================================================================================================
 
             // User identity requirements
