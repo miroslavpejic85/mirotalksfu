@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.47
+ * @version 1.8.48
  *
  */
 
@@ -1484,6 +1484,8 @@ function joinRoom(peer_name, room_id) {
 }
 
 function roomIsReady() {
+    startRoomSession();
+
     makeRoomPopupQR();
 
     if (peer_avatar && isImageURL(peer_avatar)) {
@@ -3541,6 +3543,9 @@ function handleRoomClientEvents() {
     });
     rc.on(RoomClient.EVENTS.exitRoom, () => {
         console.log('Room event: Client leave room');
+
+        endRoomSession();
+
         if (rc.isRecording() || recordingStatus.innerText != '0s') {
             rc.saveRecording('Room event: Client save recording before to exit');
         }
@@ -5374,6 +5379,61 @@ function showError(errorElement, message, delay = 5000) {
 }
 
 // ####################################################
+// HANDLE SESSION EXIT
+// ####################################################
+
+let preventExit = false;
+
+// Call this when the session starts (e.g., after joining a room)
+function startRoomSession() {
+    preventExit = true;
+    // Push a new state so the back button can be intercepted
+    history.pushState({ sessionActive: true }, '', location.href);
+}
+
+// Call this when the session ends (e.g., after leaving a room)
+function endRoomSession() {
+    preventExit = false;
+}
+
+// Intercept browser BACK button
+window.addEventListener('popstate', (event) => {
+    if (!preventExit) return;
+    // Show a custom confirmation dialog
+    Swal.fire({
+        background: swalBackground,
+        position: 'top',
+        title: 'Leave session?',
+        text: 'Are you sure you want to exit this session?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            preventExit = false;
+            // Actually go back in history
+            history.back();
+        } else {
+            // Stay in session: push state again to prevent exit
+            history.pushState({ sessionActive: true }, '', location.href);
+        }
+    });
+});
+
+// Intercept tab close, refresh, or direct URL navigation
+window.addEventListener('beforeunload', (e) => {
+    if (!preventExit) return;
+    // Modern browsers ignore custom messages, but this triggers the prompt
+    e.preventDefault();
+    e.returnValue = '';
+});
+
+// ####################################################
 // ABOUT
 // ####################################################
 
@@ -5385,7 +5445,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.47',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.48',
         html: `
             <br />
             <div id="about">
