@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.46
+ * @version 1.8.47
  *
  */
 
@@ -1304,6 +1304,8 @@ class RoomClient {
     }
 
     handleDisconnect(reason) {
+        endRoomSession();
+
         window.localStorage.isReconnected = true;
 
         console.log('Disconnected. Attempting to reconnect...');
@@ -1422,6 +1424,7 @@ class RoomClient {
         this.socket.once('connect', () => {
             console.log('Reconnected!');
             this.reconnectAttempts = 0;
+            startRoomSession();
             clearTimers();
         });
 
@@ -4899,8 +4902,8 @@ class RoomClient {
         }
 
         if (isDeepSeekOn) {
-            data.to_peer_id = 'deepSeek';
-            data.to_peer_name = 'deepSeek';
+            data.to_peer_id = 'DeepSeek';
+            data.to_peer_name = 'DeepSeek';
             console.log('Send message:', data);
             this.socket.emit('message', data);
             this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
@@ -4949,7 +4952,7 @@ class RoomClient {
                 });
         }
 
-        if (!isChatGPTOn || !isDeepSeekOn) {
+        if (!isChatGPTOn && !isDeepSeekOn) {
             const participantsList = this.getId('participantsList');
             const participantsListItems = participantsList.getElementsByTagName('li');
             for (let i = 0; i < participantsListItems.length; i++) {
