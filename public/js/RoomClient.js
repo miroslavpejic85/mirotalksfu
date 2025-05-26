@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.48
+ * @version 1.8.49
  *
  */
 
@@ -383,7 +383,7 @@ class RoomClient {
         this.recSyncChunkSize = 1000000; // 1MB
 
         // Encodings
-        this.preferLocalCodecsOrder = false; // Prefer local codecs order 
+        this.preferLocalCodecsOrder = false; // Prefer local codecs order
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
         this.forceH264 = false; // Force H264 codec for webcam and screen sharing
@@ -749,11 +749,11 @@ class RoomClient {
         try {
             await device.load({
                 routerRtpCapabilities,
-                preferLocalCodecsOrder: !!this.preferLocalCodecsOrder
+                preferLocalCodecsOrder: !!this.preferLocalCodecsOrder,
             });
             console.log(
                 `Device loaded successfully with router RTP capabilities (preferLocalCodecsOrder: ${!!this.preferLocalCodecsOrder})`,
-                device.rtpCapabilities
+                device.rtpCapabilities,
             );
         } catch (error) {
             console.error('Error loading device with router RTP capabilities:', error);
@@ -5324,8 +5324,8 @@ class RoomClient {
         if (!input || typeof input !== 'string') return false;
         try {
             const url = new URL(input);
-            return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg'].some(ext =>
-                url.pathname.toLowerCase().endsWith(ext)
+            return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg'].some((ext) =>
+                url.pathname.toLowerCase().endsWith(ext),
             );
         } catch (e) {
             return false;
@@ -7147,7 +7147,7 @@ class RoomClient {
     }
 
     openVideo(data) {
-        let d, vb, e, video, pn;
+        let d, vb, e, video, pn, fsBtn;
         let peer_name = data.peer_name;
         let video_url = data.video_url + (this.isMobileSafari ? '&enablejsapi=1&mute=1' : ''); // Safari need user interaction
         let is_youtube = data.is_youtube;
@@ -7162,6 +7162,8 @@ class RoomClient {
         vb.className = 'videoMenuBarShare fadein';
         e = this.createButton('__videoExit', 'fas fa-times');
         pn = this.createButton('__pinUnpin', html.pin);
+        fsBtn = this.createButton('__videoFS', html.fullScreen);
+
         if (is_youtube) {
             video = document.createElement('iframe');
             video.setAttribute('title', peer_name);
@@ -7179,20 +7181,17 @@ class RoomClient {
                     allowEscapeKey: false,
                     background: swalBackground,
                     position: 'top',
-                    // icon: 'info',
                     imageUrl: image.videoShare,
                     title: 'Unmute Video',
                     text: 'Tap the button below to unmute and play the video with sound.',
                     confirmButtonText: 'Unmute',
                     didOpen: () => {
-                        // Focus on the button when the popup opens
                         const unmuteButton = Swal.getConfirmButton();
                         if (unmuteButton) unmuteButton.focus();
                     },
                 }).then((result) => {
                     if (result.isConfirmed) {
                         if (video && video.contentWindow) {
-                            // Unmute the video and play
                             video.contentWindow.postMessage('{"event":"command","func":"unMute","args":""}', '*');
                             video.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
                         }
@@ -7213,10 +7212,76 @@ class RoomClient {
         video.setAttribute('width', '100%');
         video.setAttribute('height', '100%');
         vb.appendChild(e);
+        vb.appendChild(fsBtn);
         if (!this.isMobileDevice) vb.appendChild(pn);
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);
+
+        fsBtn.addEventListener('click', () => {
+            // Try to use the Fullscreen API
+            if (
+                video.requestFullscreen ||
+                video.webkitRequestFullscreen ||
+                video.mozRequestFullScreen ||
+                video.msRequestFullscreen
+            ) {
+                this.isFullScreen() ? this.goOutFullscreen(video) : this.goInFullscreen(video);
+            } else {
+                elemDisplay('__videoFS', false);
+
+                // Maximize video with CSS
+                video.style.position = 'fixed';
+                video.style.top = 0;
+                video.style.left = 0;
+                video.style.width = '100vw';
+                video.style.height = '100vh';
+                video.style.zIndex = 9999;
+
+                // Add a close/maximize button for fallback
+                let isMaximized = true;
+                const closeBtn = document.createElement('button');
+                closeBtn.innerText = isMaximized ? 'Minimize' : 'Maximize';
+                closeBtn.style.position = 'absolute';
+                closeBtn.style.top = '1px';
+                closeBtn.style.left = '1px';
+                closeBtn.style.zIndex = 10000;
+                closeBtn.style.background = 'rgba(0,0,0,0.5)';
+                closeBtn.style.color = '#fff';
+                closeBtn.style.border = 'none';
+                closeBtn.style.padding = '8px 12px';
+                closeBtn.style.borderRadius = '4px';
+                closeBtn.style.cursor = 'pointer';
+
+                closeBtn.onclick = () => {
+                    if (isMaximized) {
+                        video.style.position = '';
+                        video.style.top = '';
+                        video.style.left = '';
+                        video.style.width = '';
+                        video.style.height = '';
+                        video.style.zIndex = '';
+                        closeBtn.innerText = 'Maximize';
+                        isMaximized = false;
+                    } else {
+                        video.style.position = 'fixed';
+                        video.style.top = 0;
+                        video.style.left = 0;
+                        video.style.width = '100vw';
+                        video.style.height = '100vh';
+                        video.style.zIndex = 9999;
+                        closeBtn.innerText = 'Minimize';
+                        isMaximized = true;
+                    }
+                };
+
+                // Ensure only one button is added
+                if (!video.parentNode.querySelector('.mobile-video-close-btn')) {
+                    closeBtn.classList.add('mobile-video-close-btn');
+                    video.parentNode.appendChild(closeBtn);
+                }
+            }
+        });
 
         const exitVideoBtn = this.getId(e.id);
         exitVideoBtn.addEventListener('click', (e) => {
@@ -7231,6 +7296,7 @@ class RoomClient {
         if (!this.isMobileDevice) {
             this.setTippy(pn.id, 'Toggle Pin video player', 'bottom');
             this.setTippy(e.id, 'Close video player', 'bottom');
+            this.setTippy(fsBtn.id, 'Full screen', 'bottom');
         }
 
         handleAspectRatio();
