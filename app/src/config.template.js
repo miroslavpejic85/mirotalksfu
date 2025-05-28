@@ -1137,6 +1137,7 @@ module.exports = {
                 chatMarkdownButton: process.env.SHOW_CHAT_MARKDOWN !== 'false',
                 chatSpeechStartButton: process.env.SHOW_CHAT_SPEECH !== 'false',
                 chatGPT: process.env.ENABLE_CHAT_GPT !== 'false',
+                deepSeek: process.env.ENABLE_DEEP_SEEK !== 'false',
             },
 
             // Poll interface controls
