@@ -3656,8 +3656,9 @@ function getUUID() {
 
 function handleButtonsBar() {
     const showButtonsHandler = () => showButtons();
-    document.body.addEventListener('mousemove', showButtonsHandler); // for desktop
-    document.body.addEventListener('touchstart', showButtonsHandler); // for mobile
+    isDesktopDevice 
+        ? document.body.addEventListener('mousemove', showButtonsHandler)
+        : document.body.addEventListener('touchstart', showButtonsHandler);
 }
 
 function showButtons() {
