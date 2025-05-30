@@ -42,7 +42,7 @@ let BUTTONS = {
         broadcastingButton: true, // presenter
         lobbyButton: true, // presenter
         sendEmailInvitation: true, // presenter
-        micOptionsButton: true, // presenter
+        micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
         tabModerator: true, // presenter
         tabRecording: true,
@@ -123,14 +123,12 @@ function handleRules(isPresenter) {
         // ##################################
         // GUEST
         // ##################################
-        //BUTTONS.main.shareButton = false;
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.broadcastingButton = false;
         BUTTONS.settings.lobbyButton = false;
         BUTTONS.settings.sendEmailInvitation = false;
-        BUTTONS.settings.micOptionsButton = false;
         BUTTONS.settings.tabRTMPStreamingBtn = false;
         BUTTONS.settings.tabModerator = false;
         BUTTONS.videoOff.muteAudioButton = false;
@@ -140,8 +138,6 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.geolocationButton = false;
         BUTTONS.consumerVideo.banButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
-        //BUTTONS.consumerVideo.muteAudioButton = false;
-        //BUTTONS.consumerVideo.muteVideoButton = false;
         BUTTONS.whiteboard.whiteboardLockButton = false;
 
         //...

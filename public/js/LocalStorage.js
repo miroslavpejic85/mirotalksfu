@@ -31,9 +31,9 @@ class LocalStorage {
             moderator_chat_cant_deep_seek: false, // Everyone can't chat with DeepSeek
             moderator_media_cant_sharing: false, // Everyone can't share media
             moderator_disconnect_all_on_leave: false, // Disconnect all participants on leave room
-            mic_auto_gain_control: true,
-            mic_echo_cancellations: true,
-            mic_noise_suppression: true,
+            mic_auto_gain_control: false, // Automatic gain control
+            mic_echo_cancellations: true, // Echo cancellation
+            mic_noise_suppression: true, // Noise suppression
             mic_sample_rate: 0, // 0: 48000 Hz 1: 44100 Hz
             mic_sample_size: 0, // 0: 16 bits 1: 32 bits
             mic_channel_count: 0, // 0: 1(mono) 1: 2 (stereo)

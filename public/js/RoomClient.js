@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.52
+ * @version 1.8.53
  *
  */
 
@@ -2078,32 +2078,20 @@ class RoomClient {
     // ####################################################
 
     getAudioConstraints(deviceId) {
-        let constraints = {
+        return {
             audio: {
-                autoGainControl: true,
-                echoCancellation: true,
-                noiseSuppression: true,
+                autoGainControl: switchAutoGainControl.checked,
+                echoCancellation: switchNoiseSuppression.checked,
+                noiseSuppression: switchEchoCancellation.checked,
+                sampleRate: parseInt(sampleRateSelect.value),
+                sampleSize: parseInt(sampleSizeSelect.value),
+                channelCount: parseInt(channelCountSelect.value),
+                latency: parseInt(micLatencyRange.value),
+                volume: parseInt(micVolumeRange.value / 100),
                 deviceId: deviceId,
             },
             video: false,
         };
-        if (isRulesActive && isPresenter) {
-            constraints = {
-                audio: {
-                    autoGainControl: switchAutoGainControl.checked,
-                    echoCancellation: switchNoiseSuppression.checked,
-                    noiseSuppression: switchEchoCancellation.checked,
-                    sampleRate: parseInt(sampleRateSelect.value),
-                    sampleSize: parseInt(sampleSizeSelect.value),
-                    channelCount: parseInt(channelCountSelect.value),
-                    latency: parseInt(micLatencyRange.value),
-                    volume: parseInt(micVolumeRange.value / 100),
-                    deviceId: deviceId,
-                },
-                video: false,
-            };
-        }
-        return constraints;
     }
 
     getCameraConstraints() {
