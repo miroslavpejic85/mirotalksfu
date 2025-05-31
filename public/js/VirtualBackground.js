@@ -14,7 +14,7 @@ class VirtualBackground {
         this.isSupported = this.checkSupport();
         if (!this.isSupported) {
             console.warn(
-                '⚠️ MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+                '⚠️ MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
 
@@ -80,7 +80,7 @@ class VirtualBackground {
             pendingFrame.controller,
             pendingFrame.imageBitmap,
             pendingFrame.maskHandler,
-            this.lastSegmentationMask,
+            this.lastSegmentationMask
         );
     }
 
@@ -124,7 +124,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
 
@@ -239,7 +239,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
 
@@ -267,7 +267,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
 
@@ -302,7 +302,7 @@ class VirtualBackground {
         // Check if the required APIs are supported
         if (!this.isSupported) {
             throw new Error(
-                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.',
+                'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
 

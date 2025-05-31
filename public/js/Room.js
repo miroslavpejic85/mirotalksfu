@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.54
+ * @version 1.8.55
  *
  */
 
@@ -316,26 +316,26 @@ function initClient() {
         setTippy(
             'switchPushToTalk',
             'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
-            'right',
+            'right'
         );
         setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
         setTippy('lobbyRejectAllBtn', 'Reject', 'top');
         setTippy(
             'switchBroadcasting',
             'Broadcasting is the dissemination of audio or video content to a large audience (one to many)',
-            'right',
+            'right'
         );
         setTippy(
             'switchLobby',
             'Lobby mode lets you protect your meeting by only allowing people to enter after a formal approval by a moderator',
-            'right',
+            'right'
         );
         setTippy('initVideoAudioRefreshButton', 'Refresh audio/video devices', 'top');
         setTippy(
             'screenOptimizationLabel',
             'Detail: For high fidelity (screen sharing with text/graphics)<br />Motion: For high frame rate (video playback, game streaming',
             'right',
-            true,
+            true
         );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
@@ -347,12 +347,12 @@ function initClient() {
         setTippy(
             'switchHostOnlyRecording',
             'Only the host (presenter) has the capability to record the meeting',
-            'right',
+            'right'
         );
         setTippy(
             'switchH264Recording',
             'Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs',
-            'right',
+            'right'
         );
         setTippy('refreshVideoFiles', 'Refresh', 'left');
         setTippy('switchServerRecording', 'The recording will be stored on the server rather than locally', 'right');
@@ -603,7 +603,7 @@ async function enumerateVideoDevices(stream) {
                 }
                 if (!el) return;
                 await addChild(device, [el, eli]);
-            }),
+            })
         )
         .then(async () => {
             await stopTracks(stream);
@@ -651,7 +651,7 @@ async function enumerateAudioDevices(stream) {
                 }
                 if (!el) return;
                 await addChild(device, [el, eli]);
-            }),
+            })
         )
         .then(async () => {
             await stopTracks(stream);
@@ -1476,7 +1476,7 @@ function joinRoom(peer_name, room_id) {
             joinRoomWithScreen,
             isSpeechSynthesisSupported,
             transcription,
-            roomIsReady,
+            roomIsReady
         );
         handleRoomClientEvents();
         //notify ? shareRoom() : sound('joined');
@@ -2359,7 +2359,7 @@ async function changeCamera(deviceId) {
             initStream = camStream;
             console.log(
                 '04.5 ----> Success attached init cam video stream',
-                initStream.getVideoTracks()[0].getSettings(),
+                initStream.getVideoTracks()[0].getSettings()
             );
             checkInitConfig();
             camera = detectCameraFacingMode(camStream);
@@ -2442,7 +2442,7 @@ function handleMediaError(mediaType, err, redirectURL = false) {
     popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
 
     throw new Error(
-        `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`,
+        `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`
     );
 }
 
@@ -3014,7 +3014,7 @@ function handleKeyboardShortcuts() {
                         userLog(
                             'warning',
                             'The presenter has disabled your ability to open the document PIP',
-                            'top-end',
+                            'top-end'
                         );
                         break;
                     }
@@ -3114,7 +3114,7 @@ function handleInputs() {
             Object.keys(chatInputEmoji)
                 .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
                 .join('|'),
-            'gim',
+            'gim'
         );
         // Replace matching patterns with corresponding emojis
         this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
@@ -3645,7 +3645,7 @@ function getDataTimeStringFormat() {
 
 function getUUID() {
     const uuid4 = ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
     );
     if (window.localStorage.uuid) {
         return window.localStorage.uuid;
@@ -3772,7 +3772,7 @@ function isMobile(userAgent) {
 
 function isTablet(userAgent) {
     return /(ipad|tablet|(android(?!.*mobile))|(windows(?!.*phone)(.*touch))|kindle|playbook|silk|(puffin(?!.*(IP|AP|WP))))/.test(
-        userAgent,
+        userAgent
     );
 }
 
@@ -4173,7 +4173,7 @@ async function loadPDF(pdfData, pages) {
                     await page.render(renderContext).promise;
                     return canvas;
                 });
-            }),
+            })
         );
         return canvases.filter((canvas) => canvas !== null);
     } catch (error) {
@@ -4191,7 +4191,7 @@ async function pdfToImage(pdfData, canvas) {
                 new fabric.Image(await c, {
                     scaleX: scale,
                     scaleY: scale,
-                }),
+                })
             );
         });
     } catch (error) {
@@ -4368,7 +4368,7 @@ function whiteboardAction(data, emit = true) {
         userLog(
             'info',
             `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
-            'top-end',
+            'top-end'
         );
     }
 
@@ -5085,7 +5085,7 @@ function showImageSelector() {
 
     // Create clean virtual bg Image
     createImage('initCleanVbImg', image.user, 'Remove virtual background', 'cleanVb', () =>
-        handleVirtualBackground(null, null),
+        handleVirtualBackground(null, null)
     );
     // Create High Blur Image
     createImage('initHighBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
@@ -5094,7 +5094,7 @@ function showImageSelector() {
 
     // Create transparent virtual bg Image
     createImage('initTransparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
-        handleVirtualBackground(null, null, true),
+        handleVirtualBackground(null, null, true)
     );
 
     // Handle file upload (common logic for file selection)
@@ -5250,7 +5250,7 @@ async function applyVirtualBackground(videoElement, stream, blurLevel, backgroun
     } else if (backgroundImage) {
         videoElement.srcObject = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
             videoTrack,
-            backgroundImage,
+            backgroundImage
         );
         virtualBackgroundSelectedImage = backgroundImage;
         virtualBackgroundBlurLevel = null;
@@ -5450,7 +5450,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.54',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.55',
         html: `
             <br />
             <div id="about">

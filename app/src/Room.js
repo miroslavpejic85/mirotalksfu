@@ -225,7 +225,7 @@ module.exports = class Room {
         room,
         host = 'localhost',
         port = 1935,
-        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
     ) {
         if (!this.rtmp || !this.rtmp.enabled) {
             log.debug('[startRTMPfromURL] Server is not enabled or missing the config');
@@ -756,13 +756,13 @@ module.exports = class Room {
                 error: error.message,
             });
             throw new Error(
-                `Failed to create producer for peer ${peer.peer_name} with transport ID ${producerTransportId}`,
+                `Failed to create producer for peer ${peer.peer_name} with transport ID ${producerTransportId}`
             );
         }
 
         if (!peerProducer) {
             throw new Error(
-                `Failed to create producer for peer ${peer_name} with ID ${producerTransportId} for peer ${socket_id}`,
+                `Failed to create producer for peer ${peer_name} with ID ${producerTransportId} for peer ${socket_id}`
             );
         }
 
@@ -819,7 +819,7 @@ module.exports = class Room {
 
         if (!this.router.canConsume({ producerId, rtpCapabilities })) {
             throw new Error(
-                `Cannot consume producer for peer ${peer_name} with ID ${producerId} type ${type}, router validation failed`,
+                `Cannot consume producer for peer ${peer_name} with ID ${producerId} type ${type}, router validation failed`
             );
         }
 
@@ -834,13 +834,13 @@ module.exports = class Room {
                 error: error.message,
             });
             throw new Error(
-                `Failed to create consumer for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`,
+                `Failed to create consumer for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`
             );
         }
 
         if (!peerConsumer) {
             throw new Error(
-                `Consumer creation failed for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId}`,
+                `Consumer creation failed for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId}`
             );
         }
 

@@ -217,5 +217,5 @@ window.addEventListener(
             resizeTranscriptionRoom();
         };
     },
-    false,
+    false
 );

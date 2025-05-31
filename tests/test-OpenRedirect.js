@@ -79,7 +79,7 @@ describe('test-OpenRedirect', function () {
         res.redirect
             .calledWith(
                 301,
-                '/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30',
+                '/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=1&duration=00:00:30'
             )
             .should.be.true();
     });
@@ -95,7 +95,7 @@ describe('test-OpenRedirect', function () {
         res.redirect
             .calledWith(
                 301,
-                '/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token',
+                '/join?room=test&roomPassword=0&name=mirotalksfu&audio=1&video=1&screen=0&hide=0&notify=0&token=token'
             )
             .should.be.true();
     });

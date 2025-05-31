@@ -52,7 +52,7 @@ module.exports = class ServerApi {
                     hand: peer_hand,
                     os: os_name ? `${os_name} ${os_version}` : '',
                     browser: browser_name ? `${browser_name} ${browser_version}` : '',
-                }),
+                })
             );
             return {
                 roomId: id,

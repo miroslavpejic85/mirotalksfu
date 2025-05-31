@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.54
+ * @version 1.8.55
  *
  */
 
@@ -223,7 +223,7 @@ class RoomClient {
         joinRoomWithScreen,
         isSpeechSynthesisSupported,
         transcription,
-        successCallback,
+        successCallback
     ) {
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
@@ -475,14 +475,14 @@ class RoomClient {
 
                 if (room === 'notAllowed') {
                     console.warn(
-                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user',
+                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid room name for this user'
                     );
                     return this.userRoomNotAllowed();
                 }
 
                 if (room === 'unauthorized') {
                     console.warn(
-                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password',
+                        '00-WARNING ----> Room is Unauthorized for current user, please provide a valid username and password'
                     );
                     return this.userUnauthorized();
                 }
@@ -559,7 +559,7 @@ class RoomClient {
         // Get Router Capabilities
         const routerRtpCapabilities = await this.socket.request('getRouterRtpCapabilities');
         routerRtpCapabilities.headerExtensions = routerRtpCapabilities.headerExtensions.filter(
-            (ext) => ext.uri !== 'urn:3gpp:video-orientation',
+            (ext) => ext.uri !== 'urn:3gpp:video-orientation'
         );
 
         // Load device
@@ -753,7 +753,7 @@ class RoomClient {
             });
             console.log(
                 `Device loaded successfully with router RTP capabilities (preferLocalCodecsOrder: ${!!this.preferLocalCodecsOrder})`,
-                device.rtpCapabilities,
+                device.rtpCapabilities
             );
         } catch (error) {
             console.error('Error loading device with router RTP capabilities:', error);
@@ -1015,7 +1015,7 @@ class RoomClient {
             'Unable to reconnect. Please check your network.',
             'center',
             false,
-            true,
+            true
         );
 
         return false;
@@ -1675,13 +1675,13 @@ class RoomClient {
                         // Apply blur before sending it to WebRTC stream
                         stream = await virtualBackground.applyBlurToWebRTCStream(
                             videoTrack,
-                            virtualBackgroundBlurLevel,
+                            virtualBackgroundBlurLevel
                         );
                     } else if (virtualBackgroundSelectedImage) {
                         // Apply virtual background to WebRTC stream
                         stream = await virtualBackground.applyVirtualBackgroundToWebRTCStream(
                             videoTrack,
-                            virtualBackgroundSelectedImage,
+                            virtualBackgroundSelectedImage
                         );
                     } else if (virtualBackgroundTransparent) {
                         // Apply Transparent virtual background to WebRTC stream
@@ -1855,7 +1855,7 @@ class RoomClient {
                 this.userLog(
                     'error',
                     `Your device doesn't support the selected video quality (${videoQuality.value}), please select the another one.`,
-                    'top-end',
+                    'top-end'
                 );
             }
         }
@@ -1896,7 +1896,7 @@ class RoomClient {
 
         // Create clean virtual bg Image
         createImage('cleanVbImg', image.user, 'Remove virtual background', 'cleanVb', () =>
-            handleVirtualBackground(null, null),
+            handleVirtualBackground(null, null)
         );
         // Create High Blur Image
         createImage('highBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
@@ -1905,7 +1905,7 @@ class RoomClient {
 
         // Create transparent virtual bg Image
         createImage('transparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
-            handleVirtualBackground(null, null, true),
+            handleVirtualBackground(null, null, true)
         );
 
         // Handle file upload (common logic for file selection)
@@ -2457,7 +2457,7 @@ class RoomClient {
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
                 au = this.createButton(
                     this.peer_id + '__audio',
-                    this.peer_info.peer_audio ? html.audioOn : html.audioOff,
+                    this.peer_info.peer_audio ? html.audioOn : html.audioOff
                 );
                 au.style.cursor = 'default';
 
@@ -2523,7 +2523,7 @@ class RoomClient {
                 this.setAV(
                     this.audioConsumers.get(this.peer_id + '___pVolume'),
                     this.peer_id + '___pVolume',
-                    this.peer_info.peer_audio_volume,
+                    this.peer_info.peer_audio_volume
                 );
 
                 if (!isScreen) this.handleVP(elem.id, vp.id);
@@ -3065,7 +3065,7 @@ class RoomClient {
                     this.audioConsumers.get(remotePeerId + '___pVolume'),
                     remotePeerId + '___pVolume',
                     remotePeerAudioVolume,
-                    true,
+                    true
                 );
 
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
@@ -3149,7 +3149,7 @@ class RoomClient {
             handleAspectRatio();
             console.log(
                 '[removeConsumer - ' + consumer_kind + '] Video-element-count',
-                this.videoMediaContainer.childElementCount,
+                this.videoMediaContainer.childElementCount
             );
         }
 
@@ -4800,7 +4800,7 @@ class RoomClient {
             return this.userLog(
                 'warning',
                 `The message seems too long, with a maximum of ${this.chatMessageLength} characters allowed`,
-                'top-end',
+                'top-end'
             );
         }
 
@@ -4824,7 +4824,7 @@ class RoomClient {
                 'warning',
                 `Kindly refrain from spamming. Please wait ${this.chatMessageNotifyDelay / 1000} seconds before sending another message`,
                 'top-end',
-                this.chatMessageNotifyDelay,
+                this.chatMessageNotifyDelay
             );
         }
         this.chatMessageTimeLast = currentTime;
@@ -4859,7 +4859,7 @@ class RoomClient {
                 this.peer_id,
                 peer_msg,
                 data.to_peer_id,
-                data.to_peer_name,
+                data.to_peer_name
             );
             this.cleanMessage();
 
@@ -4902,7 +4902,7 @@ class RoomClient {
                 this.peer_id,
                 peer_msg,
                 data.to_peer_id,
-                data.to_peer_name,
+                data.to_peer_name
             );
             this.cleanMessage();
 
@@ -4927,7 +4927,7 @@ class RoomClient {
                         this.peer_id,
                         message,
                         'DeepSeek',
-                        'DeepSeek',
+                        'DeepSeek'
                     );
                     this.cleanMessage();
                     this.streamingTask(message);
@@ -4958,7 +4958,7 @@ class RoomClient {
                         this.peer_id,
                         peer_msg,
                         data.to_peer_id,
-                        data.to_peer_name,
+                        data.to_peer_name
                     );
                     this.cleanMessage();
                 }
@@ -5009,7 +5009,7 @@ class RoomClient {
                     this.peer_id,
                     peer_msg,
                     to_peer_id,
-                    toPeerName,
+                    toPeerName
                 );
                 if (!this.isChatOpen) this.toggleChat();
             }
@@ -5029,7 +5029,7 @@ class RoomClient {
             data.peer_id,
             data.peer_msg,
             data.to_peer_id,
-            data.to_peer_name,
+            data.to_peer_name
         );
 
         if (!this.showChatOnMessage) {
@@ -5313,7 +5313,7 @@ class RoomClient {
         try {
             const url = new URL(input);
             return ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.bmp', '.tiff', '.svg'].some((ext) =>
-                url.pathname.toLowerCase().endsWith(ext),
+                url.pathname.toLowerCase().endsWith(ext)
             );
         } catch (e) {
             return false;
@@ -5367,7 +5367,7 @@ class RoomClient {
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute(
             'allow',
-            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+            'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
         );
         iframe.setAttribute('allowfullscreen', 'allowfullscreen');
         div.appendChild(iframe);
@@ -6122,7 +6122,7 @@ class RoomClient {
                 audioStreams
                     .getTracks()
                     .filter((track) => track.kind === 'audio')
-                    .map((track) => new MediaStream([track])),
+                    .map((track) => new MediaStream([track]))
             );
 
             const audioMixerTracks = audioMixerStreams.getTracks();
@@ -6288,7 +6288,7 @@ class RoomClient {
 
     generateUUIDv4() {
         return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
-            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16),
+            (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
         );
     }
 
@@ -6328,7 +6328,7 @@ class RoomClient {
                         headers: {
                             'Content-Type': 'application/octet-stream',
                         },
-                    },
+                    }
                 );
                 console.log('Chunk synced successfully:', response.data);
             } catch (error) {
@@ -6363,7 +6363,7 @@ class RoomClient {
             if (rc.recording.recSyncServerRecording && rc.recording.recSyncServerToS3) {
                 try {
                     const response = await axios.post(
-                        `${rc.recording.recSyncServerEndpoint}/recSyncFinalize?fileName=` + rc.recServerFileName,
+                        `${rc.recording.recSyncServerEndpoint}/recSyncFinalize?fileName=` + rc.recServerFileName
                     );
                     console.log('Finalized and uploaded to S3:', response.data);
                     userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
@@ -6567,7 +6567,7 @@ class RoomClient {
             `${icons.user} ${peer_name} 
             <br /><br /> 
             <span>🔴 ${action}</span>
-            <br />`,
+            <br />`
         );
     }
 
@@ -6747,7 +6747,7 @@ class RoomClient {
                     <li>Size: ${this.bytesToSize(this.fileToSend.size)}</li>
                 </ul>`,
                 'all',
-                'all',
+                'all'
             );
             // send some metadata about our file to peers in the room
             this.socket.emit('fileInfo', fileInfo);
@@ -6791,7 +6791,7 @@ class RoomClient {
                 <li>Size: ${this.bytesToSize(this.incomingFileInfo.fileSize)}</li>
             </ul>`,
             'all',
-            'all',
+            'all'
         );
         receiveFileInfo.innerText = fileToReceiveInfo;
         receiveFileDiv.style.display = 'inline';
@@ -7157,7 +7157,7 @@ class RoomClient {
             video.setAttribute('title', peer_name);
             video.setAttribute(
                 'allow',
-                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
             );
             video.setAttribute('frameborder', '0');
             video.setAttribute('allowfullscreen', true);
@@ -7477,7 +7477,7 @@ class RoomClient {
                     : this.userLog(
                           'info',
                           `${icons.chat} Chat not will be shown, when you receive a message`,
-                          'top-end',
+                          'top-end'
                       );
                 break;
             case 'speechMessages':
@@ -7488,19 +7488,19 @@ class RoomClient {
                     ? this.userLog(
                           'info',
                           `${icons.transcript} Transcript will be shown, when you receive a message`,
-                          'top-end',
+                          'top-end'
                       )
                     : this.userLog(
                           'info',
                           `${icons.transcript} Transcript not will be shown, when you receive a message`,
-                          'top-end',
+                          'top-end'
                       );
                 break;
             case 'video_start_privacy':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone starts in privacy mode ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'audio_start_muted':
@@ -7513,42 +7513,42 @@ class RoomClient {
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't unmute themselves ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'video_cant_unhide':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't unhide themselves ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'screen_cant_share':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't share the screen ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'chat_cant_privately':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't chat privately ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'chat_cant_chatgpt':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't chat with ChatGPT ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'chat_cant_deep_seek':
                 this.userLog(
                     'info',
                     `${icons.moderator} Moderator: everyone can't chat with DeepSeek ${status}`,
-                    'top-end',
+                    'top-end'
                 );
                 break;
             case 'media_cant_sharing':
@@ -8215,7 +8215,7 @@ class RoomClient {
                         'warning',
                         'To use this feature, please toggle Hide self view before',
                         'top-end',
-                        6000,
+                        6000
                     );
                 }
                 const videoContainer = this.getId(videoContainerId);
@@ -8540,7 +8540,7 @@ class RoomClient {
                                 'warning',
                                 from_peer_name + '  ' + _PEER.audioOff + ' has closed yours audio',
                                 'top-end',
-                                10000,
+                                10000
                             );
                         }
                     }
@@ -8551,7 +8551,7 @@ class RoomClient {
                             mediaType.audio,
                             image.unmute,
                             'Enable Microphone',
-                            'Allow the presenter to enable your microphone?',
+                            'Allow the presenter to enable your microphone?'
                         );
                     }
                     break;
@@ -8562,7 +8562,7 @@ class RoomClient {
                             'warning',
                             from_peer_name + '  ' + _PEER.videoOff + ' has closed yours video',
                             'top-end',
-                            10000,
+                            10000
                         );
                     }
                     break;
@@ -8572,7 +8572,7 @@ class RoomClient {
                             mediaType.video,
                             image.unhide,
                             'Enable Camera',
-                            'Allow the presenter to enable your camera?',
+                            'Allow the presenter to enable your camera?'
                         );
                     }
                     break;
@@ -8584,7 +8584,7 @@ class RoomClient {
                                 'warning',
                                 from_peer_name + '  ' + _PEER.screenOff + ' has closed yours screen share',
                                 'top-end',
-                                10000,
+                                10000
                             );
                         }
                     }
@@ -8595,7 +8595,7 @@ class RoomClient {
                             mediaType.screen,
                             image.start,
                             'Start Screen share',
-                            'Allow the presenter to start your screen share?',
+                            'Allow the presenter to start your screen share?'
                         );
                     }
                     break;
@@ -8987,7 +8987,7 @@ class RoomClient {
                         'warning',
                         'The moderator does not allow you to chat with DeepSeek',
                         'top-end',
-                        6000,
+                        6000
                     );
                 }
                 isDeepSeekOn = true;
@@ -9158,7 +9158,7 @@ class RoomClient {
                             'warning',
                             peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',
                             'top-end',
-                            10000,
+                            10000
                         );
                         this.sound('raiseHand');
                     } else {
@@ -9192,7 +9192,7 @@ class RoomClient {
                 id,
                 `<div style="font-family: Arial, sans-serif; font-size: 14px; line-height: 1.5;">${peerInfoFormatted}</div>`,
                 'top-start',
-                true,
+                true
             );
         }
     }
@@ -9248,7 +9248,7 @@ class RoomClient {
             'Geolocation',
             'Geolocation requested. Please wait for confirmation...',
             6000,
-            'geolocation',
+            'geolocation'
         );
     }
 
@@ -9319,13 +9319,13 @@ class RoomClient {
                     }
                     rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: ${geoError}`);
                     rc.userLog('warning', geoError, 'top-end', 5000);
-                },
+                }
             );
         } else {
             rc.sendPeerGeoLocation(
                 peer_id,
                 'geoLocationKO',
-                `${rc.peer_name}: Geolocation is not supported by this browser`,
+                `${rc.peer_name}: Geolocation is not supported by this browser`
             );
             rc.userLog('warning', 'Geolocation is not supported by this browser', 'top-end', 5000);
         }
@@ -9430,7 +9430,7 @@ class RoomClient {
                         img.setAttribute('style', 'cursor:pointer; padding: 2px; border-radius: 5px;');
                         img.setAttribute(
                             'avatarData',
-                            avatar.avatar_id + '|' + avatar.avatar_name + '|' + avatar.preview_video_url,
+                            avatar.avatar_id + '|' + avatar.avatar_name + '|' + avatar.preview_video_url
                         );
                         img.onclick = () => {
                             const avatarImages = document.querySelectorAll('.avatarImg');
@@ -9647,7 +9647,7 @@ class RoomClient {
                         'warning',
                         'You’ve reached your quota limit for this demo account. Please consider upgrading for more features.',
                         6000,
-                        'top',
+                        'top'
                     );
                     break;
                 // ...
@@ -9754,7 +9754,7 @@ class RoomClient {
         }
         setTimeout(() => {
             this.streamingTask(
-                `Welcome to ${BRAND.app.name}! Please Open the Chat and navigate to the ChatGPT section. Feel free to ask me any questions you have.`,
+                `Welcome to ${BRAND.app.name}! Please Open the Chat and navigate to the ChatGPT section. Feel free to ask me any questions you have.`
             );
         }, 2000);
     }
@@ -9785,7 +9785,7 @@ class RoomClient {
                             task.action();
                             resolve();
                         }, task.delay);
-                    }),
+                    })
             );
         }, Promise.resolve());
     }
@@ -9967,7 +9967,7 @@ class RoomClient {
             return this.userLog(
                 'warning',
                 "The provided File is not valid. Please ensure it's .mp4, webm or ogg video file",
-                'top-end',
+                'top-end'
             );
         }
 
@@ -10024,7 +10024,7 @@ class RoomClient {
             return this.userLog(
                 'warning',
                 'The provided URL is not valid. Please ensure it links to an .mp4 video file',
-                'top-end',
+                'top-end'
             );
         }
 
@@ -10123,7 +10123,7 @@ class RoomClient {
                 'warning',
                 'Unable to start the RTMP stream. Please ensure the RTMP server is running. If the problem persists, contact the administrator',
                 'top-end',
-                6000,
+                6000
             );
         }
 

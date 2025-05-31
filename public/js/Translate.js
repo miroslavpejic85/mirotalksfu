@@ -17,7 +17,7 @@ function googleTranslateElementInit() {
             pageLanguage: 'en',
             autoDisplay: false,
         },
-        'google_translate_element',
+        'google_translate_element'
     );
 
     const language = BRAND?.app?.language || 'en';

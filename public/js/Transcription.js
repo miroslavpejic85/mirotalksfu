@@ -169,7 +169,7 @@ class Transcription {
             console.info('This Browser support Transcription');
         } else {
             console.warn(
-                'This browser not support Transcription, check out supported browsers: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API#browser_compatibility',
+                'This browser not support Transcription, check out supported browsers: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API#browser_compatibility'
             );
         }
     }
@@ -431,7 +431,7 @@ class Transcription {
             hide(transcriptionFooter);
             rc.msgPopup(
                 'info',
-                `${peer_name} wants to start transcriptions for this session, but your browser does not support it. Please use a Chromium-based browser like Google Chrome, Microsoft Edge, or Brave.`,
+                `${peer_name} wants to start transcriptions for this session, but your browser does not support it. Please use a Chromium-based browser like Google Chrome, Microsoft Edge, or Brave.`
             );
             return;
         }

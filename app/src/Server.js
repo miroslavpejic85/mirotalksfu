@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.54
+ * @version 1.8.55
  *
  */
 
@@ -427,7 +427,7 @@ function startServer() {
                     res.setHeader('Content-Type', 'application/javascript');
                 } //...
             },
-        }),
+        })
     );
     app.use(cors(corsOptions));
     app.use(compression());
@@ -752,7 +752,7 @@ function startServer() {
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
                 const roomExists = hostCfg.users.some(
-                    (user) => user.allowed_rooms && (user.allowed_rooms.includes(roomId) || roomList.has(roomId)),
+                    (user) => user.allowed_rooms && (user.allowed_rooms.includes(roomId) || roomList.has(roomId))
                 );
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
                 return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/whoAreYou/' + roomId);
@@ -840,7 +840,7 @@ function startServer() {
             });
 
             const isPresenter = Boolean(
-                hostCfg?.presenters?.join_first || hostCfg?.presenters?.list?.includes(username),
+                hostCfg?.presenters?.join_first || hostCfg?.presenters?.list?.includes(username)
             );
 
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
@@ -1354,7 +1354,7 @@ function startServer() {
 
         if (restApi.allowed && !restApi.allowed.slack) {
             return res.end(
-                '`This endpoint has been disabled`. Please contact the administrator for further information.',
+                '`This endpoint has been disabled`. Please contact the administrator for further information.'
             );
         }
 
@@ -1514,7 +1514,7 @@ function startServer() {
         ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝      ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝ started...
     
         `,
-            'font-family:monospace',
+            'font-family:monospace'
         );
 
         if (config?.integrations?.ngrok?.enabled && config?.integrations?.ngrok?.authToken !== '') {
@@ -1799,7 +1799,7 @@ function startServer() {
 
             if (room.isLobbyEnabled() && !isPresenter) {
                 log.debug(
-                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter',
+                    'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
                 );
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: peer_id,
@@ -1965,7 +1965,7 @@ function startServer() {
                     producerTransportId,
                     rtpParameters,
                     kind,
-                    appData.mediaType,
+                    appData.mediaType
                 );
 
                 log.debug('Produce', {
@@ -2346,7 +2346,7 @@ function startServer() {
                     socket.room_id,
                     socket.id,
                     data.from_peer_name,
-                    data.from_peer_uuid,
+                    data.from_peer_uuid
                 );
                 if (!isPresenter) return;
             }
@@ -2692,7 +2692,7 @@ function startServer() {
                             Authorization: `Bearer ${config?.integrations?.deepSeek?.apiKey}`,
                             'Content-Type': 'application/json',
                         },
-                    },
+                    }
                 );
 
                 // Extract the assistant's response
@@ -2801,7 +2801,7 @@ function startServer() {
                             'content-type': 'application/json',
                             'x-api-key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data };
@@ -2831,7 +2831,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data.data };
@@ -2861,7 +2861,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data };
@@ -2894,7 +2894,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data };
@@ -2926,7 +2926,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data };
@@ -2986,7 +2986,7 @@ function startServer() {
                             'Content-Type': 'application/json',
                             'X-Api-Key': config?.integrations?.videoAI?.apiKey,
                         },
-                    },
+                    }
                 );
 
                 const data = { response: response.data };
@@ -3538,7 +3538,7 @@ function startServer() {
                     },
                     {
                         timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
-                    },
+                    }
                 );
                 return response.data && response.data.message === true;
             } catch (error) {
@@ -3669,7 +3669,7 @@ function startServer() {
                         },
                         {
                             timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
-                        },
+                        }
                     );
                     log.debug('AXIOS roomExistsForUser', { room: room, exists: true });
                     return response.data && response.data.message === true;
@@ -3696,7 +3696,7 @@ function startServer() {
                     },
                     {
                         timeout: 5000, // Timeout set to 5 seconds (5000 milliseconds)
-                    },
+                    }
                 );
                 const allowedRooms = response.data ? response.data.message : {};
                 log.debug('AXIOS getUserAllowedRooms', allowedRooms);
@@ -3749,7 +3749,7 @@ function startServer() {
                             },
                             {
                                 timeout: hostCfg.users_api_timeout || 5000,
-                            },
+                            }
                         );
 
                         if (response.data && (response.data === true || response.data.message === true)) {
@@ -3791,7 +3791,7 @@ function startServer() {
 
                 log.debug(
                     isAllowed ? 'isRoomAllowedForUser - Room allowed' : 'isRoomAllowedForUser - Room not allowed',
-                    { room, username },
+                    { room, username }
                 );
                 return isAllowed;
             }
