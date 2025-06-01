@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.55
+ * @version 1.8.56
  *
  */
 
@@ -1151,7 +1151,7 @@ async function whoAreYou() {
         title: BRAND.app?.name,
         input: 'text',
         inputPlaceholder: 'Enter your email or name',
-        inputAttributes: { maxlength: 32, id: 'usernameInput' },
+        inputAttributes: { maxlength: 254, id: 'usernameInput' },
         inputValue: default_name,
         html: initUser, // Inject HTML
         confirmButtonText: `Join meeting`,
@@ -1163,7 +1163,10 @@ async function whoAreYou() {
         },
         inputValidator: (name) => {
             if (!name) return 'Please enter your email or name';
-            if (name.length > 30) return 'Name must be max 30 char';
+            const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name);
+            if ((isEmail && name.length > 254) || (!isEmail && name.length > 32)) {
+                return isEmail ? 'Email must be max 254 char' : 'Name must be max 32 char';
+            }
             name = filterXSS(name);
             if (isHtml(name)) return 'Invalid name!';
             if (!getCookie(room_id + '_name')) {
@@ -5450,7 +5453,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.55',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.56',
         html: `
             <br />
             <div id="about">
