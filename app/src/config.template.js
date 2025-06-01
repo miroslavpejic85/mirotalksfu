@@ -328,9 +328,9 @@ module.exports = {
 
             // User identity requirements
             peer_name: {
-                force: true, // Require identity provider authentication
-                email: true, // Request email claim
-                name: false, // Don't require full name
+                force: process.env.OIDC_USERNAME_FORCE !== 'false', // Require identity provider authentication
+                email: process.env.OIDC_USERNAME_AS_EMAIL !== 'false', // Request email claim
+                name: process.env.OIDC_USERNAME_AS_NAME === 'true', // Don't require full name
             },
 
             // Provider configuration
