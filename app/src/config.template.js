@@ -328,9 +328,9 @@ module.exports = {
 
             // User identity requirements
             peer_name: {
-                force: process.env.OIDC_FORCE_USERNAME !== 'false', // Require identity provider authentication
-                email: process.env.OIDC_EMAIL_AS_USERNAME !== 'false', // Request email claim
-                name: process.env.OIDC_NAME_AS_USERNAME === 'true', // Don't require full name
+                force: process.env.OIDC_FORCE_USERNAME !== 'false', // Forces the username to match the OIDC email or name. If true, the user won't be able to change their name when joining a room
+                email: process.env.OIDC_EMAIL_AS_USERNAME !== 'false', // Uses the OIDC email as the username.
+                name: process.env.OIDC_NAME_AS_USERNAME === 'true', // Uses the OIDC name as the username
             },
 
             // Provider configuration
