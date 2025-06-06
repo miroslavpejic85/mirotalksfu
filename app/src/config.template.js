@@ -497,15 +497,15 @@ module.exports = {
      * - Webhook setup: See integration guides for Slack/Mattermost
      */
     api: {
-        keySecret: process.env.API_SECRET || 'mirotalksfu_default_secret',
+        keySecret: process.env.API_KEY_SECRET || 'mirotalksfu_default_secret',
         allowed: {
             stats: process.env.API_ALLOW_STATS !== 'false',
-            meetings: false,
-            meeting: true,
-            join: true,
-            token: false,
-            slack: true,
-            mattermost: true,
+            meetings: process.env.API_ALLOW_MEETINGS === 'true',
+            meeting: process.env.API_ALLOW_MEETING !== 'false',
+            join: process.env.API_ALLOW_JOIN !== 'false',
+            token: process.env.API_ALLOW_TOKEN === 'true',
+            slack: process.env.API_ALLOW_SLACK !== 'false',
+            mattermost: process.env.API_ALLOW_MATTERMOST !== 'false',
         },
     },
 
