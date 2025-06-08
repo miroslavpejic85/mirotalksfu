@@ -647,6 +647,7 @@ module.exports = {
          * - port       : SMTP port (default: 587 for TLS)
          * - username   : SMTP auth username
          * - password   : SMTP auth password (store ONLY in .env)
+         * - from       : Sender email address (default: same as username)
          * - sendTo     : Recipient email for alerts
          *
          * Common Providers:
@@ -669,6 +670,7 @@ module.exports = {
             port: parseInt(process.env.EMAIL_PORT) || 587,
             username: process.env.EMAIL_USERNAME || 'your_username',
             password: process.env.EMAIL_PASSWORD || 'your_password',
+            from: process.env.EMAIL_FROM || process.env.EMAIL_USERNAME,
             sendTo: process.env.EMAIL_SEND_TO || 'sfu.mirotalk@gmail.com',
         },
 
@@ -1341,10 +1343,10 @@ module.exports = {
          */
         router: {
             // Enable audio level monitoring (for detecting who is speaking)
-            audioLevelObserverEnabled: true,
+            audioLevelObserverEnabled: process.env.MEDIASOUP_ROUTER_AUDIO_LEVEL_OBSERVER_ENABLED !== 'false',
 
             // Disable active speaker detection (uses more CPU)
-            activeSpeakerObserverEnabled: false,
+            activeSpeakerObserverEnabled: process.env.MEDIASOUP_ROUTER_ACTIVE_SPEAKER_OBSERVER_ENABLED === 'true',
 
             /**
              * Supported Media Codecs

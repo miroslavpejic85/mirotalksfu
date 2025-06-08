@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.61
+ * @version 1.8.62
  *
  */
 
@@ -237,6 +237,7 @@ class RoomClient {
         this.maxReconnectAttempts = 5;
         this.reconnectInterval = 3000;
         this.maxReconnectInterval = 15000;
+        this.silentReconnect = false;
 
         // Handle ICE
         this.iceRestarting = false;
@@ -291,6 +292,7 @@ class RoomClient {
         this.renderAIToken = null;
         this.peerConnection = null;
 
+        this.dominantSpeaker = false;
         this.isAudioAllowed = isAudioAllowed;
         this.isVideoAllowed = isVideoAllowed;
         this.isScreenAllowed = isScreenAllowed;
@@ -682,6 +684,12 @@ class RoomClient {
                 room.shareMediaData.action === 'open'
             ) {
                 this.shareVideoAction(room.shareMediaData);
+            }
+
+            // Dominant Speaker
+            this.dominantSpeaker = room.dominantSpeaker || false;
+            if (!this.dominantSpeaker) {
+                elemDisplay('dominantSpeakerFocusDiv', false);
             }
         }
 
@@ -1315,6 +1323,7 @@ class RoomClient {
 
         // Helper functions
         const showReconnectAlert = () => {
+            if (this.silentReconnect) return;
             this.sound('reconnect');
             reconnectAlert = Swal.fire({
                 background: swalBackground,
@@ -1331,6 +1340,7 @@ class RoomClient {
         };
 
         const showMaxAttemptsAlert = () => {
+            if (this.silentReconnect) return;
             this.sound('alert');
             Swal.fire({
                 allowOutsideClick: false,
@@ -8138,9 +8148,8 @@ class RoomClient {
     // HANDLE DOMINANT SPEAKER
     // ###################################################
 
-    handleDominantSpeaker(data) {
-        console.log('Dominant Speaker', data);
-        const { peer_id } = data;
+    handleDominantSpeakerHighlight(peer_id) {
+        // Highlight the peer name
         const peerNameElement = this.getId(peer_id + '__name');
         if (peerNameElement) {
             peerNameElement.style.color = 'lime';
@@ -8148,7 +8157,66 @@ class RoomClient {
                 peerNameElement.style.color = '#FFFFFF';
             }, 5000);
         }
-        //...
+    }
+
+    handleDominantSpeakerFocus(producer_id, consumer_id = null, timeout = 10000) {
+        // Find the consumer id for this producer
+        const consumerId = consumer_id ? consumer_id : this.getConsumerIdByProducerId(producer_id);
+
+        console.log('handleDominantSpeakerFocus', { consumersList: this.consumers, consumerId, producer_id });
+
+        if (!consumerId) return;
+
+        // Track the currently focused video container
+        if (!this._dominantSpeakerState) {
+            this._dominantSpeakerState = { prevConsumerId: null, timeout: null };
+        }
+
+        // Remove focus mode from previous dominant speaker if any
+        if (this._dominantSpeakerState.prevConsumerId && this._dominantSpeakerState.prevConsumerId !== consumerId) {
+            const prevVideoContainer = this.getId(this._dominantSpeakerState.prevConsumerId + '__video');
+            const prevFocusBtn = this.getId(this._dominantSpeakerState.prevConsumerId + '__hideALL');
+            if (prevVideoContainer && prevVideoContainer.hasAttribute('focus-mode') && prevFocusBtn) {
+                prevFocusBtn.click();
+            }
+        }
+
+        // Set focus mode for the new dominant speaker
+        const videoContainer = this.getId(consumerId + '__video');
+        const focusBtn = this.getId(consumerId + '__hideALL');
+        if (videoContainer && focusBtn && !videoContainer.hasAttribute('focus-mode')) {
+            focusBtn.click();
+        }
+
+        // Update the state
+        this._dominantSpeakerState.prevConsumerId = consumerId;
+
+        // Clear any previous timeout
+        if (this._dominantSpeakerState.timeout) {
+            clearTimeout(this._dominantSpeakerState.timeout);
+        }
+
+        // Set a timeout to remove focus after 'timeout' seconds of inactivity
+        this._dominantSpeakerState.timeout = setTimeout(() => {
+            // Remove focus mode if still focused
+            if (this._dominantSpeakerState.prevConsumerId) {
+                const prevVideoContainer = this.getId(this._dominantSpeakerState.prevConsumerId + '__video');
+                const prevFocusBtn = this.getId(this._dominantSpeakerState.prevConsumerId + '__hideALL');
+                if (prevVideoContainer && prevVideoContainer.hasAttribute('focus-mode') && prevFocusBtn) {
+                    prevFocusBtn.click();
+                }
+                this._dominantSpeakerState.prevConsumerId = null;
+            }
+        }, timeout); // 10 seconds
+    }
+
+    handleDominantSpeaker(data) {
+        console.log('Dominant Speaker', data);
+        const { peer_id, producer_id } = data;
+        this.handleDominantSpeakerHighlight(peer_id);
+        if (this.dominantSpeaker && switchDominantSpeakerFocus.checked) {
+            this.handleDominantSpeakerFocus(producer_id);
+        }
     }
 
     // ####################################################
@@ -8206,35 +8274,35 @@ class RoomClient {
     // HANDLE VIDEO
     // ###################################################
 
+    toggleFocusMode(videoContainerId, btnHa = null) {
+        if (isHideMeActive) {
+            this.userLog('warning', 'To use this feature, please toggle Hide self view before', 'top-end', 6000);
+            return;
+        }
+        const videoContainer = this.getId(videoContainerId);
+        isHideALLVideosActive = !isHideALLVideosActive;
+        if (btnHa) btnHa.style.color = isHideALLVideosActive ? 'lime' : 'white';
+        if (isHideALLVideosActive) {
+            videoContainer.style.width = '100%';
+            videoContainer.style.height = '100%';
+            videoContainer.setAttribute('focus-mode', 'true');
+        } else {
+            resizeVideoMedia();
+            videoContainer.removeAttribute('focus-mode');
+        }
+        const children = this.videoMediaContainer.children;
+        for (let child of children) {
+            if (child.id != videoContainerId) {
+                child.style.display = isHideALLVideosActive ? 'none' : 'block';
+            }
+        }
+    }
+
     handleHA(uid, videoContainerId) {
         let btnHa = this.getId(uid);
         if (btnHa) {
             btnHa.addEventListener('click', (e) => {
-                if (isHideMeActive) {
-                    return this.userLog(
-                        'warning',
-                        'To use this feature, please toggle Hide self view before',
-                        'top-end',
-                        6000
-                    );
-                }
-                const videoContainer = this.getId(videoContainerId);
-                isHideALLVideosActive = !isHideALLVideosActive;
-                e.target.style.color = isHideALLVideosActive ? 'lime' : 'white';
-                if (isHideALLVideosActive) {
-                    videoContainer.style.width = '100%';
-                    videoContainer.style.height = '100%';
-                    videoContainer.setAttribute('focus-mode', 'true');
-                } else {
-                    resizeVideoMedia();
-                    videoContainer.removeAttribute('focus-mode');
-                }
-                const children = this.videoMediaContainer.children;
-                for (let child of children) {
-                    if (child.id != videoContainerId) {
-                        child.style.display = isHideALLVideosActive ? 'none' : 'block';
-                    }
-                }
+                this.toggleFocusMode(videoContainerId, btnHa);
             });
         }
     }

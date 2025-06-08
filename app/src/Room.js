@@ -102,6 +102,7 @@ module.exports = class Room {
             videoAIEnabled: this.videoAIEnabled,
             thereIsPolls: this.thereIsPolls(),
             shareMediaData: this.shareMediaData,
+            dominantSpeaker: this.activeSpeakerObserverEnabled,
             peers: JSON.stringify([...this.peers]),
         };
     }
@@ -311,10 +312,16 @@ module.exports = class Room {
             .then((router) => {
                 this.router = router;
                 if (this.audioLevelObserverEnabled) {
-                    this.startAudioLevelObservation();
+                    log.info('Audio Level Observer enabled, starting observation...');
+                    this.startAudioLevelObservation().catch((err) => {
+                        log.error('Failed to start audio level observation', err);
+                    });
                 }
                 if (this.activeSpeakerObserverEnabled) {
-                    this.startActiveSpeakerObserver();
+                    log.info('Active Speaker Observer enabled, starting observation...');
+                    this.startActiveSpeakerObserver().catch((err) => {
+                        log.error('Failed to start active speaker observer', err);
+                    });
                 }
                 this.router.observer.on('close', () => {
                     log.info('---------------> Router is now closed as the last peer has left the room', {
@@ -385,9 +392,9 @@ module.exports = class Room {
                                     peer_name: peer_name,
                                     audioVolume: audioVolume,
                                 };
-                                // Uncomment the following line for debugging
                                 // log.debug('Sending audio volume', data);
                                 this.sendToAll('audioVolume', data);
+                                return;
                             }
                         });
                     });
@@ -401,6 +408,7 @@ module.exports = class Room {
     addProducerToAudioLevelObserver(producer) {
         if (this.audioLevelObserverEnabled) {
             this.audioLevelObserver.addProducer(producer);
+            log.info('Producer added to audio level observer', { producer });
         }
     }
 
@@ -417,25 +425,40 @@ module.exports = class Room {
     // ####################################################
 
     async startActiveSpeakerObserver() {
+        log.debug('Start activeSpeakerObserver for signaling dominant speaker...');
         this.activeSpeakerObserver = await this.router.createActiveSpeakerObserver();
         this.activeSpeakerObserver.on('dominantspeaker', (dominantSpeaker) => {
+            if (!dominantSpeaker.producer) {
+                return;
+            }
             log.debug('activeSpeakerObserver "dominantspeaker" event', dominantSpeaker.producer.id);
             this.peers.forEach((peer) => {
                 const { id, peer_audio, peer_name } = peer;
-                peer.producers.forEach((peerProducer) => {
-                    if (
-                        peerProducer.id === dominantSpeaker.producer.id &&
-                        peerProducer.kind === 'audio' &&
-                        peer_audio
-                    ) {
-                        const data = {
-                            peer_id: id,
-                            peer_name: peer_name,
-                        };
-                        // log.debug('Sending dominant speaker', data);
-                        this.sendToAll('dominantSpeaker', data);
+                if (peer.producers instanceof Map) {
+                    for (const peerProducer of peer.producers.values()) {
+                        if (
+                            peerProducer.id === dominantSpeaker.producer.id &&
+                            peerProducer.kind === 'audio' &&
+                            peer_audio
+                        ) {
+                            let videoProducerId = null;
+                            for (const p of peer.producers.values()) {
+                                if (p.kind === 'video') {
+                                    videoProducerId = p.id;
+                                    break;
+                                }
+                            }
+                            const data = {
+                                producer_id: videoProducerId,
+                                peer_id: id,
+                                peer_name: peer_name,
+                            };
+                            log.debug('Sending dominant speaker', data);
+                            this.sendToAll('dominantSpeaker', data);
+                            break;
+                        }
                     }
-                });
+                }
             });
         });
     }
@@ -443,6 +466,7 @@ module.exports = class Room {
     addProducerToActiveSpeakerObserver(producer) {
         if (this.activeSpeakerObserverEnabled) {
             this.activeSpeakerObserver.addProducer(producer);
+            log.info('Producer added to active speaker observer', { producer });
         }
     }
 

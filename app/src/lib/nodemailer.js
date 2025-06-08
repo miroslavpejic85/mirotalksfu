@@ -15,6 +15,7 @@ const EMAIL_HOST = emailConfig.host || false;
 const EMAIL_PORT = emailConfig.port || false;
 const EMAIL_USERNAME = emailConfig.username || false;
 const EMAIL_PASSWORD = emailConfig.password || false;
+const EMAIL_FROM = emailConfig.from || emailConfig.username;
 const EMAIL_SEND_TO = emailConfig.sendTo || false;
 
 if (EMAIL_ALERT && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD && EMAIL_SEND_TO) {
@@ -24,12 +25,16 @@ if (EMAIL_ALERT && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD 
         port: EMAIL_PORT,
         username: EMAIL_USERNAME,
         password: EMAIL_PASSWORD,
+        from: EMAIL_FROM,
+        to: EMAIL_SEND_TO,
     });
 }
 
+const IS_TLS_PORT = EMAIL_PORT === 465;
 const transport = nodemailer.createTransport({
     host: EMAIL_HOST,
     port: EMAIL_PORT,
+    secure: IS_TLS_PORT,
     auth: {
         user: EMAIL_USERNAME,
         pass: EMAIL_PASSWORD,
@@ -67,7 +72,7 @@ function sendEmailAlert(event, data) {
 function sendEmail(subject, body) {
     transport
         .sendMail({
-            from: EMAIL_USERNAME,
+            from: EMAIL_FROM,
             to: EMAIL_SEND_TO,
             subject: subject,
             html: body,

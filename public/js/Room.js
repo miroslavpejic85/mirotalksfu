@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.61
+ * @version 1.8.62
  *
  */
 
@@ -313,6 +313,11 @@ function initClient() {
         refreshMainButtonsToolTipPlacement();
         setTippy('closeEmojiPickerContainer', 'Close', 'bottom');
         setTippy('mySettingsCloseBtn', 'Close', 'bottom');
+        setTippy(
+            'switchDominantSpeakerFocus',
+            'If Active, When a participant speaks, their video will be focused and enlarged',
+            'right'
+        );
         setTippy(
             'switchPushToTalk',
             'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
@@ -2561,6 +2566,11 @@ function handleSelects() {
         rc.changeAudioDestination();
         refreshLsDevices();
     };
+    switchDominantSpeakerFocus.onchange = async (e) => {
+        localStorageSettings.dominant_speaker_focus = e.currentTarget.checked;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    }
     switchPushToTalk.onchange = async (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
         if (!producerExist && !isPushToTalkActive) {
@@ -3285,6 +3295,8 @@ function loadSettingsFromLocalStorage() {
     keepCustomTheme.checked = themeCustom.keep;
     selectTheme.disabled = themeCustom.keep;
     themeCustom.input.value = themeCustom.color;
+
+    switchDominantSpeakerFocus.checked = localStorageSettings.dominant_speaker_focus;
 
     switchAutoGainControl.checked = localStorageSettings.mic_auto_gain_control;
     switchEchoCancellation.checked = localStorageSettings.mic_echo_cancellations;
@@ -5453,7 +5465,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.61',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.62',
         html: `
             <br />
             <div id="about">

@@ -31,6 +31,7 @@ class LocalStorage {
             moderator_chat_cant_deep_seek: false, // Everyone can't chat with DeepSeek
             moderator_media_cant_sharing: false, // Everyone can't share media
             moderator_disconnect_all_on_leave: false, // Disconnect all participants on leave room
+            dominant_speaker_focus: false, // Focus on dominant speaker
             mic_auto_gain_control: false, // Automatic gain control
             mic_echo_cancellations: true, // Echo cancellation
             mic_noise_suppression: true, // Noise suppression

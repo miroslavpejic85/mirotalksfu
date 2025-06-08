@@ -205,6 +205,8 @@ module.exports = class Peer {
                 kind: producer_kind,
                 rtpParameters: producer_rtpParameters,
             });
+
+            this.addProducer(producer.id, producer);
         } catch (error) {
             log.error(`Error creating producer for transport ID ${producerTransportId}`, {
                 error: error.message,
@@ -221,8 +223,6 @@ module.exports = class Peer {
         const { id, appData, type, kind, rtpParameters } = producer;
 
         appData.mediaType = producer_type;
-
-        this.addProducer(id, producer);
 
         if (['simulcast', 'svc'].includes(type)) {
             const { scalabilityMode } = rtpParameters.encodings[0];
@@ -316,6 +316,8 @@ module.exports = class Peer {
                 paused: true, // Start the consumer in a paused state
                 ignoreDtx: true, // Ignore DTX (Discontinuous Transmission)
             });
+
+            this.addConsumer(consumer.id, consumer);
         } catch (error) {
             log.error(`Error creating consumer for transport ID ${consumer_transport_id}`, {
                 error: error.message,
@@ -329,8 +331,6 @@ module.exports = class Peer {
         }
 
         const { id, type, kind, rtpParameters, producerPaused } = consumer;
-
-        this.addConsumer(id, consumer);
 
         if (['simulcast', 'svc'].includes(type)) {
             // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
