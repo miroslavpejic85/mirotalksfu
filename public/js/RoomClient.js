@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.62
+ * @version 1.8.63
  *
  */
 
@@ -9352,7 +9352,7 @@ class RoomClient {
         });
     }
 
-    getPeerGeoLocation(peer_id) {
+    getPeerGeoLocation(peer_id, options = {}) {
         if ('geolocation' in navigator) {
             navigator.geolocation.getCurrentPosition(
                 function (position) {
@@ -9387,6 +9387,12 @@ class RoomClient {
                     }
                     rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: ${geoError}`);
                     rc.userLog('warning', geoError, 'top-end', 5000);
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0,
+                    ...options,
                 }
             );
         } else {
