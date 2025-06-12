@@ -1067,8 +1067,8 @@ class RoomClient {
         this.socket.io.on('reconnect', this.handleSocketReconnect);
         this.socket.io.on('reconnect_failed', this.handleSocketReconnectFailed);
         this.socket.on('connect', this.handleSocketConnect);
-        this.socket.on('disconnect', this.handleSocketDisconnect);
         this.socket.on('connect_error', this.handleSocketConnectionError);
+        this.socket.on('disconnect', this.handleSocketDisconnect);
         this.socket.on('consumerClosed', this.handleConsumerClosed);
         this.socket.on('setVideoOff', this.handleSetVideoOff);
         this.socket.on('removeMe', this.handleRemoveMe);
@@ -1383,12 +1383,7 @@ class RoomClient {
 
         const delay = Math.min(this.reconnectInterval * attempt, this.maxReconnectInterval);
 
-        if (this.reconnectAlert) {
-            this.reconnectAlert.update({
-                title: 'Reconnecting',
-                text: `Reconnection attempt in ${delay / 1000} seconds...`,
-            });
-        }
+        this.updateReconnectAlert(delay);
     }
 
     handleDisconnect(reason) {
@@ -1422,6 +1417,15 @@ class RoomClient {
         if (!this._isConnected) {
             this.closeReconnectAlert();
             this.showMaxAttemptsAlert();
+        }
+    }
+
+    updateReconnectAlert(delay) {
+        if (this.reconnectAlert) {
+            this.reconnectAlert.update({
+                title: 'Reconnecting',
+                text: `Reconnection attempt in ${delay / 1000} seconds...`,
+            });
         }
     }
 
