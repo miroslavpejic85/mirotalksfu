@@ -651,6 +651,7 @@ module.exports = class Room {
         });
 
         const { peer_name } = peer;
+        const { iceConsentTimeout = 35 } = this.webRtcTransport;
 
         transport.observer.on('newproducer', (producer) => {
             log.debug('---> new producer created [id:%s]', producer.id);
@@ -678,7 +679,7 @@ module.exports = class Room {
                         log.warn(`Closing transport ${transport.id} due to prolonged ICE disconnection`);
                         transport.close();
                     }
-                }, 5000); // Wait 5 seconds before closing
+                }, iceConsentTimeout * 1000); // Wait iceConsentTimeout seconds before closing
             } else if (iceState === 'closed') {
                 log.warn(`ICE state closed for transport ${transport.id}`);
                 transport.close();

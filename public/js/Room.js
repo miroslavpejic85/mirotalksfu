@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.63
+ * @version 1.8.64
  *
  */
 
@@ -34,9 +34,23 @@ const thisInfo = getInfo();
 const isEmbedded = window.self !== window.top;
 const showDocumentPipBtn = !isEmbedded && 'documentPictureInPicture' in window;
 
+/**
+ * Initializes a Socket.IO client instance with custom connection and reconnection options.
+ *
+ * @property {string[]} transports - The transport mechanisms to use. Default: ['polling', 'websocket']. Here, only ['websocket'] is used.
+ * @property {boolean} reconnection - Whether to automatically reconnect if connection is lost. Default: true.
+ * @property {number} reconnectionAttempts - Maximum number of reconnection attempts before giving up. Default: Infinity. Here, set to 10.
+ * @property {number} reconnectionDelay - How long to initially wait before attempting a new reconnection (in ms). Default: 1000. Here, set to 3000.
+ * @property {number} reconnectionDelayMax - Maximum amount of time to wait between reconnections (in ms). Default: 5000. Here, set to 15000.
+ * @property {number} timeout - Connection timeout before an error is emitted (in ms). Default: 20000.
+ */
 const socket = io({
     transports: ['websocket'],
-    reconnection: isDesktopDevice,
+    reconnection: true,
+    reconnectionAttempts: 10,
+    reconnectionDelay: 3000,
+    reconnectionDelayMax: 15000,
+    timeout: 20000,
 });
 
 let survey = {
@@ -201,6 +215,8 @@ const isMediaStreamTrackAndTransformerSupported = virtualBackground.checkSupport
 // ####################################################
 // DYNAMIC SETTINGS
 // ####################################################
+
+let preventExit = false;
 
 let virtualBackgroundBlurLevel;
 let virtualBackgroundSelectedImage;
@@ -2570,7 +2586,7 @@ function handleSelects() {
         localStorageSettings.dominant_speaker_focus = e.currentTarget.checked;
         lS.setSettings(localStorageSettings);
         e.target.blur();
-    }
+    };
     switchPushToTalk.onchange = async (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
         if (!producerExist && !isPushToTalkActive) {
@@ -5402,8 +5418,6 @@ function showError(errorElement, message, delay = 5000) {
 // HANDLE SESSION EXIT
 // ####################################################
 
-let preventExit = false;
-
 // Call this when the session starts (e.g., after joining a room)
 function startRoomSession() {
     preventExit = true;
@@ -5447,7 +5461,7 @@ window.addEventListener('popstate', (event) => {
 
 // Intercept tab close, refresh, or direct URL navigation
 window.addEventListener('beforeunload', (e) => {
-    if (!preventExit) return;
+    if (!preventExit || window.localStorage.isReconnected === 'true') return;
     // Modern browsers ignore custom messages, but this triggers the prompt
     e.preventDefault();
     e.returnValue = '';
@@ -5465,7 +5479,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.63',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.64',
         html: `
             <br />
             <div id="about">

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.63
+ * @version 1.8.64
  *
  */
 
@@ -225,6 +225,18 @@ class RoomClient {
         transcription,
         successCallback
     ) {
+        this.room_id = room_id;
+        this.peer_id = socket.id;
+        this.peer_name = peer_name;
+        this.peer_uuid = peer_uuid;
+        this.peer_info = peer_info;
+        this.peer_avatar = peer_info.peer_avatar;
+
+        // Device type
+        this.isDesktopDevice = peer_info.is_desktop_device;
+        this.isMobileDevice = peer_info.is_mobile_device;
+        this.isMobileSafari = this.isMobileDevice && peer_info.browser_name.toLowerCase().includes('safari');
+
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
         this.videoMediaContainer = videoMediaContainer;
@@ -233,28 +245,17 @@ class RoomClient {
 
         // Handle Socket
         this.socket = socket;
-        this.reconnectAttempts = 0;
+        this.reconnectAlert = null;
         this.maxReconnectAttempts = 5;
         this.reconnectInterval = 3000;
         this.maxReconnectInterval = 15000;
-        this.silentReconnect = false;
+        this.serverAwayShown = false;
+        this.silentReconnect = false; // If true, no popup will be shown on reconnect
 
         // Handle ICE
         this.iceRestarting = false;
         this.iceProducerRestarting = false;
         this.iceConsumerRestarting = false;
-
-        this.room_id = room_id;
-        this.peer_id = socket.id;
-        this.peer_name = peer_name;
-        this.peer_avatar = peer_info.peer_avatar;
-        this.peer_uuid = peer_uuid;
-        this.peer_info = peer_info;
-
-        // Device type
-        this.isDesktopDevice = peer_info.is_desktop_device;
-        this.isMobileDevice = peer_info.is_mobile_device;
-        this.isMobileSafari = this.isMobileDevice && peer_info.browser_name.toLowerCase().includes('safari');
 
         // RTMP selected file name
         this.selectedRtmpFilename = '';
@@ -1062,8 +1063,12 @@ class RoomClient {
     // ####################################################
 
     initSockets() {
+        this.socket.io.on('reconnect_attempt', this.handleSocketReconnectAttempt);
+        this.socket.io.on('reconnect', this.handleSocketReconnect);
+        this.socket.io.on('reconnect_failed', this.handleSocketReconnectFailed);
         this.socket.on('connect', this.handleSocketConnect);
         this.socket.on('disconnect', this.handleSocketDisconnect);
+        this.socket.on('connect_error', this.handleSocketConnectionError);
         this.socket.on('consumerClosed', this.handleConsumerClosed);
         this.socket.on('setVideoOff', this.handleSetVideoOff);
         this.socket.on('removeMe', this.handleRemoveMe);
@@ -1104,12 +1109,30 @@ class RoomClient {
 
     handleSocketConnect = () => {
         console.log('SocketOn Connected to signaling server!');
-        this.handleConnect();
     };
 
     handleSocketDisconnect = (reason) => {
         console.log(`SocketOn Disconnect Reason: ${reason}`);
         this.handleDisconnect(reason);
+    };
+
+    handleSocketConnectionError = (err) => {
+        console.log(`SocketOn Disconnect Error: ${err.message}`);
+    };
+
+    handleSocketReconnectAttempt = (attempt) => {
+        console.log(`SocketOn Reconnect Attempt: ${attempt}`);
+        this.handleReconnectAttempt(attempt);
+    };
+
+    handleSocketReconnect = () => {
+        console.log('SocketOn Reconnected to signaling server!');
+        this.handleReconnect();
+    };
+
+    handleSocketReconnectFailed = () => {
+        console.error('SocketOn Reconnect failed');
+        this.handleReconnectFailed();
     };
 
     handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
@@ -1303,146 +1326,109 @@ class RoomClient {
     };
 
     // ####################################################
-    // SOCKET CONNECT/DISCONNECT
+    // SOCKET RECONNECT/DISCONNECT
     // ####################################################
 
-    handleConnect() {
-        this._isConnected = true;
-        this.refreshBrowser();
+    showReconnectAlert(reason) {
+        if (this.silentReconnect) return;
+        this.reconnectAlert = Swal.fire({
+            background: swalBackground,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: false,
+            showConfirmButton: false,
+            position: 'top',
+            icon: 'warning',
+            title: 'Lost connection',
+            text: `${reason}, trying to reconnect...`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+    }
+
+    showMaxAttemptsAlert() {
+        if (this.silentReconnect) return;
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: false,
+            showConfirmButton: true,
+            background: swalBackground,
+            position: 'top',
+            icon: 'warning',
+            title: 'Unable to reconnect',
+            text: 'Please check your internet connection!',
+            icon: 'error',
+            confirmButtonText: 'Join Room',
+            confirmButtonColor: '#18392B',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.refreshBrowser();
+            }
+        });
+    }
+
+    showServerAwayMessage() {
+        if (this.serverAwayShown) return;
+        this.serverAwayShown = true;
+        console.warn('Server away or in maintenance, please wait...');
+        this.ServerAway();
+        this.exit(true);
+    }
+
+    attemptReconnect(attempt) {
+        if (this._isConnected || attempt >= this.maxReconnectAttempts) return;
+
+        const delay = Math.min(this.reconnectInterval * attempt, this.maxReconnectInterval);
+
+        if (this.reconnectAlert) {
+            this.reconnectAlert.update({
+                title: 'Reconnecting',
+                text: `Reconnection attempt in ${delay / 1000} seconds...`,
+            });
+        }
     }
 
     handleDisconnect(reason) {
         endRoomSession();
 
         window.localStorage.isReconnected = true;
-
         console.log('Disconnected. Attempting to reconnect...');
-        this.exit(true);
 
-        let reconnectAlert = null;
+        // Immediately save recording if active
+        if (this.isRecording()) {
+            this.saveRecording('Socket disconnected');
+        }
 
-        // Helper functions
-        const showReconnectAlert = () => {
-            if (this.silentReconnect) return;
-            this.sound('reconnect');
-            reconnectAlert = Swal.fire({
-                background: swalBackground,
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showDenyButton: false,
-                showConfirmButton: false,
-                icon: 'warning',
-                title: `Lost connection\n(${reason})`,
-                text: `The server may be under maintenance or your connection may have changed. Please ${this.isMobileDevice ? 'wait...' : 'check your connection.'}`,
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            });
-        };
+        this.serverAwayShown = false;
+        this._isConnected = false;
 
-        const showMaxAttemptsAlert = () => {
-            if (this.silentReconnect) return;
-            this.sound('alert');
-            Swal.fire({
-                allowOutsideClick: false,
-                allowEscapeKey: false,
-                showDenyButton: false,
-                showConfirmButton: true,
-                background: swalBackground,
-                title: 'Unable to reconnect',
-                text: 'Please check your internet connection!',
-                icon: 'error',
-                confirmButtonText: 'Join Room',
-                confirmButtonColor: '#18392B',
-                showClass: { popup: 'animate__animated animate__fadeInDown' },
-                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    this.refreshBrowser();
-                }
-            });
-        };
+        this.showReconnectAlert(reason);
+    }
 
-        const showServerAwayMessage = () => {
-            console.warn('Server away or in maintenance, please wait...');
-            this.ServerAway();
-        };
+    handleReconnectAttempt(attempt) {
+        attempt < this.maxReconnectAttempts ? this.attemptReconnect(attempt) : this.showServerAwayMessage();
+    }
 
-        // Show reconnect alert or save recording if necessary
-        this.isRecording() ? this.saveRecording('Socket disconnected') : showReconnectAlert();
+    handleReconnect() {
+        this._isConnected = true;
+        this.closeReconnectAlert();
+        this.refreshBrowser();
+    }
 
-        let serverAwayShown = false;
-        let reconnect;
-        let reconnectTimer;
-        let waitingTime = this.isMobileDevice ? 30000 : 6000;
+    handleReconnectFailed() {
+        if (!this._isConnected) {
+            this.closeReconnectAlert();
+            this.showMaxAttemptsAlert();
+        }
+    }
 
-        // Clear existing timers if any
-        const clearTimers = () => {
-            clearTimeout(reconnect);
-            clearTimeout(reconnectTimer);
-        };
-
-        // Handle connect_error events
-        this.socket.once('connect_error', () => {
-            clearTimers();
-        });
-        this.socket.on('connect_error', () => {
-            if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                this.reconnectAttempts++;
-                if (reconnectAlert) {
-                    reconnectAlert.update({
-                        title: 'Reconnect',
-                        text: `Attempting to reconnect ${this.reconnectAttempts}...`,
-                    });
-                }
-            } else {
-                if (!serverAwayShown) {
-                    showServerAwayMessage();
-                    serverAwayShown = true;
-                }
-            }
-        });
-
-        // Attempt reconnect after delay
-        const attemptReconnect = async () => {
-            if (this.reconnectAttempts < this.maxReconnectAttempts) {
-                this.reconnectAttempts++;
-                console.log(`Reconnection attempt ${this.reconnectAttempts}...`);
-
-                const delay = Math.min(this.reconnectInterval * this.reconnectAttempts, this.maxReconnectInterval);
-
-                if (reconnectAlert) {
-                    reconnectAlert.update({
-                        title: 'Reconnect',
-                        text: `Attempting to reconnect in ${delay / 1000}s...`,
-                    });
-                }
-
-                reconnectTimer = setTimeout(() => {
-                    this.socket.connect();
-                    attemptReconnect();
-                }, delay);
-            } else {
-                console.log('Reconnection limit reached!');
-                if (reconnectAlert) {
-                    reconnectAlert.close();
-                }
-                showMaxAttemptsAlert();
-            }
-        };
-
-        // Handle successful reconnection
-        this.socket.once('connect', () => {
-            console.log('Reconnected!');
-            this.reconnectAttempts = 0;
-            startRoomSession();
-            clearTimers();
-        });
-
-        //Start reconnect logic after a brief delay
-        reconnect = setTimeout(() => {
-            showReconnectAlert();
-            attemptReconnect();
-        }, waitingTime);
+    closeReconnectAlert() {
+        if (this.reconnectAlert) {
+            this.reconnectAlert.close();
+        }
     }
 
     // ####################################################
@@ -1457,7 +1443,8 @@ class RoomClient {
             showDenyButton: false,
             showConfirmButton: false,
             background: swalBackground,
-            imageUrl: image.poster,
+            position: 'top',
+            icon: 'warning',
             title: 'Server away',
             text: 'The server seems away or in maintenance, please wait until it come back up.',
             denyButtonText: `Leave room`,
@@ -1470,13 +1457,48 @@ class RoomClient {
         });
     }
 
+    removePeerInfoFromLocalStorage() {
+        try {
+            localStorage.removeItem('sfu_peer_info');
+        } catch (e) {
+            console.warn('Unable to remove sfu_peer_info from localStorage:', e);
+        }
+    }
+
+    updatePeerInfoInLocalStorage() {
+        try {
+            localStorage.setItem('sfu_peer_info', JSON.stringify(this.peer_info));
+        } catch (e) {
+            console.warn('Unable to save peer_info to localStorage:', e);
+        }
+    }
+
+    getPeerInfoFromLocalStorage() {
+        try {
+            const sfu_peer_info = localStorage.getItem('sfu_peer_info');
+            return sfu_peer_info ? JSON.parse(sfu_peer_info) : null;
+        } catch (e) {
+            console.warn('Unable to get sfu_peer_info from localStorage:', e);
+            return null;
+        }
+    }
+
     refreshBrowser() {
-        this.exit(true);
-        getPeerName() ? location.reload() : openURL(this.getReconnectDirectJoinURL());
+        endRoomSession();
+        this.updatePeerInfoInLocalStorage();
+        const reconnectDirectJoinURL = this.getReconnectDirectJoinURL();
+        setTimeout(() => {
+            this.exit(true);
+            openURL(reconnectDirectJoinURL);
+            this.removePeerInfoFromLocalStorage();
+        }, 100);
     }
 
     getReconnectDirectJoinURL() {
-        const { peer_audio, peer_video, peer_screen, peer_token } = this.peer_info;
+        const sfu_peer_info = this.getPeerInfoFromLocalStorage();
+        const { peer_presenter, peer_audio, peer_video, peer_screen, peer_token } = sfu_peer_info
+            ? sfu_peer_info
+            : this.peer_info;
         const baseUrl = `${window.location.origin}/join`;
         const queryParams = {
             room: this.room_id,
@@ -1486,7 +1508,7 @@ class RoomClient {
             video: peer_video,
             screen: peer_screen,
             notify: 0,
-            isPresenter: isPresenter || false,
+            isPresenter: peer_presenter || isPresenter,
         };
         if (peer_token) queryParams.token = peer_token;
         const url = `${baseUrl}?${Object.entries(queryParams)
@@ -1608,9 +1630,7 @@ class RoomClient {
             await this.produce(mediaType.screen, null, false, true);
             console.log('11 ----> START SCREEN MEDIA');
         }
-        // if (this.isScreenAllowed) {
-        //     this.shareScreen();
-        // }
+
         console.log('[startLocalMedia] - PRODUCER LABEL', this.producerLabel);
     }
 
@@ -1639,17 +1659,18 @@ class RoomClient {
             case mediaType.audio:
                 this.isAudioAllowed = true;
                 mediaConstraints = this.getAudioConstraints(deviceId);
+                this.peer_info.peer_audio = true;
                 audio = true;
                 break;
             case mediaType.video:
                 this.isVideoAllowed = true;
-                swapCamera
-                    ? (mediaConstraints = this.getCameraConstraints())
-                    : (mediaConstraints = this.getVideoConstraints(deviceId));
+                mediaConstraints = swapCamera ? this.getCameraConstraints() : this.getVideoConstraints(deviceId);
+                this.peer_info.peer_video = true;
                 video = true;
                 break;
             case mediaType.screen:
                 mediaConstraints = this.getScreenConstraints();
+                this.peer_info.peer_screen = true;
                 screen = true;
                 break;
             default:
@@ -2601,7 +2622,6 @@ class RoomClient {
         switch (type) {
             case mediaType.audio:
                 this.event(_EVENTS.pauseAudio);
-                this.setIsAudio(this.peer_id, false);
                 break;
             case mediaType.video:
                 this.event(_EVENTS.pauseVideo);
@@ -2632,7 +2652,6 @@ class RoomClient {
         switch (type) {
             case mediaType.audio:
                 this.event(_EVENTS.resumeAudio);
-                this.setIsAudio(this.peer_id, true);
                 break;
             case mediaType.video:
                 this.event(_EVENTS.resumeVideo);
@@ -2710,7 +2729,6 @@ class RoomClient {
             default:
                 break;
         }
-
         this.sound('left');
     }
 
@@ -9186,7 +9204,7 @@ class RoomClient {
                     break;
                 case 'hand':
                     this.peer_info.peer_hand = status;
-                    let peer_hand = this.getPeerHandBtn(peer_id);
+                    const peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
                         if (peer_hand) peer_hand.style.display = 'flex';
                         this.event(_EVENTS.raiseHand);
@@ -9219,7 +9237,7 @@ class RoomClient {
                 case 'screen':
                     break;
                 case 'hand':
-                    let peer_hand = this.getPeerHandBtn(peer_id);
+                    const peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
                         if (peer_hand) peer_hand.style.display = 'flex';
                         this.userLog(
