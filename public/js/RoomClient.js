@@ -1903,6 +1903,9 @@ class RoomClient {
     // ####################################################
 
     showVideoImageSelector() {
+        const imageGrid = document.getElementById('imageGrid');
+        const imageGridVideo = document.getElementById('imageGridVideo');
+
         elemDisplay('imageGridVideo', true, 'grid');
         if (imageGridVideo.innerHTML != '') return;
 
