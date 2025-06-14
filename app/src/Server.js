@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.65
+ * @version 1.8.66
  *
  */
 
@@ -1746,15 +1746,6 @@ function startServer() {
             const existingPeer = room.getPeer(socket.id);
             if (existingPeer) {
                 room.removePeer(socket.id);
-            }
-
-            // If you want to check by peer_uuid as well, you can do:
-            if (peer_uuid) {
-                for (const peer of room.getPeers()) {
-                    if (peer.peer_info?.peer_uuid === peer_uuid) {
-                        room.removePeer(peer.id);
-                    }
-                }
             }
 
             room.addPeer(new Peer(socket.id, data));
