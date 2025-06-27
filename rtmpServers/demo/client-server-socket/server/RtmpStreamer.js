@@ -28,7 +28,8 @@ console.log('FFmpeg', { platform, ffmpegPath });
 
 class RtmpStreamer {
     constructor(rtmpUrl, rtmpKey, socket) {
-        (this.socket = socket), (this.rtmpUrl = rtmpUrl);
+        this.socket = socket;
+        this.rtmpUrl = rtmpUrl;
         this.rtmpKey = rtmpKey;
         this.stream = new PassThrough();
         this.ffmpegStream = null;

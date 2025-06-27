@@ -2,7 +2,7 @@
     window;
     const e = document.documentElement;
     if ((e.classList.remove('no-js'), e.classList.add('js'), document.body.classList.contains('has-animations'))) {
-        (window.sr = ScrollReveal()).reveal('.feature, .pricing-table-inner', {
+        ((window.sr = ScrollReveal()).reveal('.feature, .pricing-table-inner', {
             duration: 600,
             distance: '20px',
             easing: 'cubic-bezier(0.5, -0.01, 0, 1.005)',
@@ -53,7 +53,7 @@
                 scale: [0.7, 1],
                 opacity: [0, 1],
                 easing: 'easeInOutExpo',
-            });
+            }));
     }
 })();
 
@@ -66,7 +66,7 @@
         let n = 0;
         return function () {
             let i = new Date().getTime();
-            if (!(i - n < e)) return (n = i), t.apply(void 0, arguments);
+            if (!(i - n < e)) return ((n = i), t.apply(void 0, arguments));
         };
     }
 
@@ -77,20 +77,20 @@
                 a = s.getAttribute('data-reveal-delay'),
                 l = s.getAttribute('data-reveal-offset') ? s.getAttribute('data-reveal-offset') : '200',
                 c = s.getAttribute('data-reveal-container') ? s.closest(s.getAttribute('data-reveal-container')) : s;
-            (n = l),
+            ((n = l),
                 c.getBoundingClientRect().top <= t - n &&
                     !s.classList.contains('is-revealed') &&
                     (a && 0 !== a
                         ? setTimeout(function () {
                               s.classList.add('is-revealed');
                           }, a)
-                        : s.classList.add('is-revealed'));
+                        : s.classList.add('is-revealed')));
         }
         !(function () {
             if (e.length > document.querySelectorAll('[class*=reveal-].is-revealed').length) return;
-            window.removeEventListener('load', i),
+            (window.removeEventListener('load', i),
                 window.removeEventListener('scroll', s),
-                window.removeEventListener('resize', a);
+                window.removeEventListener('resize', a));
         })();
     }
 
@@ -99,7 +99,7 @@
     }
 
     function a() {
-        (t = window.innerHeight), n(30, i());
+        ((t = window.innerHeight), n(30, i()));
     }
 
     e.length > 0 &&
@@ -109,16 +109,16 @@
         window.addEventListener('resize', a));
 })();
 
-!(function () {
+(!(function () {
     'use strict';
     const e = document.getElementsByClassName('accordion-header');
 
     function t(e, t) {
-        e.classList.add('is-active'), (t.style.maxHeight = t.scrollHeight + 'px');
+        (e.classList.add('is-active'), (t.style.maxHeight = t.scrollHeight + 'px'));
     }
 
     function n(e, t) {
-        e.classList.remove('is-active'), (t.style.maxHeight = null);
+        (e.classList.remove('is-active'), (t.style.maxHeight = null));
     }
 
     if (e.length > 0)
@@ -126,10 +126,10 @@
             const s = e[i],
                 a = s.parentNode,
                 l = s.nextElementSibling;
-            a.classList.contains('is-active') && t(a, l),
+            (a.classList.contains('is-active') && t(a, l),
                 s.addEventListener('click', function () {
                     a.classList.contains('is-active') ? n(a, l) : t(a, l);
-                });
+                }));
         }
 })(),
     (function () {
@@ -141,7 +141,7 @@
             detectionZone: void 0,
             swipeCallback: function () {},
             init: function (t, n) {
-                (e.swipeCallback = n),
+                ((e.swipeCallback = n),
                     t.addEventListener(
                         'touchstart',
                         function (t) {
@@ -152,20 +152,20 @@
                     t.addEventListener(
                         'touchend',
                         function (t) {
-                            (e.touchEndX = t.changedTouches[0].screenX), e.handleSwipeGesture();
+                            ((e.touchEndX = t.changedTouches[0].screenX), e.handleSwipeGesture());
                         },
                         !1
-                    );
+                    ));
             },
             handleSwipeGesture: function () {
                 let t, n;
-                e.touchEndX <= e.touchStartX && ((n = e.touchStartX - e.touchEndX), (t = 'left')),
+                (e.touchEndX <= e.touchStartX && ((n = e.touchStartX - e.touchEndX), (t = 'left')),
                     e.touchEndX >= e.touchStartX && ((n = e.touchEndX - e.touchStartX), (t = 'right')),
-                    n > e.minSwipePixels && 'undefined' !== t && e.swipe(t, n);
+                    n > e.minSwipePixels && 'undefined' !== t && e.swipe(t, n));
             },
             swipe: function (t, n) {
                 let i = {};
-                (i.direction = t), (i.movedPixels = n), e.swipeCallback(i);
+                ((i.direction = t), (i.movedPixels = n), e.swipeCallback(i));
             },
         };
         const t = document.getElementsByClassName('carousel-items');
@@ -177,7 +177,7 @@
                 s = n.getAttribute('data-carousel'),
                 a = e.parentNode.getElementsByClassName('carousel-bullet')[s],
                 l = 'next' === t ? a.nextElementSibling : a.previousElementSibling;
-            n.classList.remove('is-active'),
+            (n.classList.remove('is-active'),
                 a.classList.remove('is-active'),
                 i
                     ? (i.classList.add('is-active'), l.classList.add('is-active'))
@@ -189,18 +189,18 @@
                       : (e.lastElementChild.classList.add('is-active'),
                         e.parentNode
                             .getElementsByClassName('carousel-bullets')[0]
-                            .lastElementChild.classList.add('is-active'));
+                            .lastElementChild.classList.add('is-active')));
         }
 
         function i(e, t) {
             let n,
                 i = 0;
             for (let e = 0; e < t.length; e++)
-                (t[0].parentNode.style.minHeight = i + 'px'),
+                ((t[0].parentNode.style.minHeight = i + 'px'),
                     t[e].classList.add('is-loading'),
                     (n = t[e].offsetHeight),
                     t[e].classList.remove('is-loading'),
-                    n > i && (i = n);
+                    n > i && (i = n));
             t[0].parentNode.style.minHeight = i + 'px';
         }
 
@@ -215,21 +215,21 @@
                     o = 0,
                     r = l.getAttribute('data-autorotate');
                 const d = document.createElement('div');
-                (d.className = 'carousel-bullets'), l.parentNode.insertBefore(d, l.nextSibling);
+                ((d.className = 'carousel-bullets'), l.parentNode.insertBefore(d, l.nextSibling));
                 for (let e = 0; e < c.length; e++) {
-                    c[e].setAttribute('data-carousel', e), c[e].classList.contains('is-active') && (o = e);
+                    (c[e].setAttribute('data-carousel', e), c[e].classList.contains('is-active') && (o = e));
                     let t = document.createElement('button');
-                    (t.className = 'carousel-bullet'),
+                    ((t.className = 'carousel-bullet'),
                         t.setAttribute('data-bullet', e),
-                        l.parentNode.getElementsByClassName('carousel-bullets')[0].appendChild(t);
+                        l.parentNode.getElementsByClassName('carousel-bullets')[0].appendChild(t));
                 }
                 c[o].classList.add('is-active');
                 let u = l.parentNode.getElementsByClassName('carousel-bullet');
-                u[o].classList.add('is-active'),
+                (u[o].classList.add('is-active'),
                     i(0, c),
                     window.addEventListener('resize', function () {
                         i(0, c);
-                    });
+                    }));
                 let m = !1;
                 r &&
                     (m = setInterval(function () {
@@ -242,21 +242,21 @@
                         for (let e = 0; e < u.length; e++) u[e].classList.remove('is-active');
                         for (let e = 0; e < c.length; e++) c[e].classList.remove('is-active');
                         let n = this.getAttribute('data-bullet');
-                        c[n].classList.add('is-active'), this.classList.add('is-active'), s(m);
+                        (c[n].classList.add('is-active'), this.classList.add('is-active'), s(m));
                     });
                 }
                 e.init(l, function (e) {
-                    'left' === e.direction ? n(l, 'next') : 'right' === e.direction && n(l, 'prev'), s(m);
+                    ('left' === e.direction ? n(l, 'next') : 'right' === e.direction && n(l, 'prev'), s(m));
                 });
             }
     })(),
     (function () {
         'use strict';
-        document.documentElement.classList.remove('no-js'),
+        (document.documentElement.classList.remove('no-js'),
             document.documentElement.classList.add('js'),
             window.addEventListener('load', function () {
                 document.body.classList.add('is-loaded');
-            });
+            }));
     })(),
     (function () {
         'use strict';
@@ -264,12 +264,12 @@
             t = document.getElementById('header-nav');
         e &&
             (e.addEventListener('click', function () {
-                document.body.classList.toggle('off-nav-is-active'),
+                (document.body.classList.toggle('off-nav-is-active'),
                     t.classList.toggle('is-active'),
                     t.style.maxHeight ? (t.style.maxHeight = null) : (t.style.maxHeight = t.scrollHeight + 'px'),
                     'true' === this.getAttribute('aria-expanded')
                         ? this.setAttribute('aria-expanded', 'false')
-                        : this.setAttribute('aria-expanded', 'true');
+                        : this.setAttribute('aria-expanded', 'true'));
             }),
             document.addEventListener('click', function (n) {
                 n.target === t ||
@@ -303,19 +303,19 @@
                               i.querySelector('video').setAttribute('src', n.getAttribute('data-video'))),
                     n.addEventListener('click', function (e) {
                         let t;
-                        e.preventDefault(),
+                        (e.preventDefault(),
                             n.hasAttribute('aria-controls') &&
                                 (t = i) &&
-                                (document.body.classList.add('modal-is-active'), t.classList.add('is-active'));
+                                (document.body.classList.add('modal-is-active'), t.classList.add('is-active')));
                     }));
             }
-        document.addEventListener('click', function (e) {
+        (document.addEventListener('click', function (e) {
             (e.target.classList.contains('modal') || e.target.classList.contains('modal-close-trigger')) &&
                 (e.preventDefault(), n());
         }),
             document.addEventListener('keydown', function (e) {
                 27 === (e || window.event).keyCode && n();
-            });
+            }));
     })(),
     (function () {
         'use strict';
@@ -338,7 +338,7 @@
             let n = 0;
             return function () {
                 let i = new Date().getTime();
-                if (!(i - n < e)) return (n = i), t.apply(void 0, arguments);
+                if (!(i - n < e)) return ((n = i), t.apply(void 0, arguments));
             };
         }
 
@@ -351,20 +351,20 @@
                     c = s.getAttribute('data-reveal-container')
                         ? s.closest(s.getAttribute('data-reveal-container'))
                         : s;
-                (n = l),
+                ((n = l),
                     c.getBoundingClientRect().top <= t - n &&
                         !s.classList.contains('is-revealed') &&
                         (a && 0 !== a
                             ? setTimeout(function () {
                                   s.classList.add('is-revealed');
                               }, a)
-                            : s.classList.add('is-revealed'));
+                            : s.classList.add('is-revealed')));
             }
             !(function () {
                 if (e.length > document.querySelectorAll('[class*=reveal-].is-revealed').length) return;
-                window.removeEventListener('load', i),
+                (window.removeEventListener('load', i),
                     window.removeEventListener('scroll', s),
-                    window.removeEventListener('resize', a);
+                    window.removeEventListener('resize', a));
             })();
         }
 
@@ -373,7 +373,7 @@
         }
 
         function a() {
-            (t = window.innerHeight), n(30, i());
+            ((t = window.innerHeight), n(30, i()));
         }
 
         e.length > 0 &&
@@ -391,12 +391,12 @@
                 const o = (function (e) {
                     return e < 0.5 ? 2 * e * e : (4 - 2 * e) * e - 1;
                 })((c = Math.min(c, 1)));
-                window.scroll(0, a + s * o),
+                (window.scroll(0, a + s * o),
                     l < i &&
                         window.requestAnimationFrame((n) => {
                             const l = n || new Date().getTime();
                             t(e, l, i, s, a);
-                        });
+                        }));
             };
         if (e.length > 0)
             for (let n = 0; n < e.length; n++) {
@@ -416,4 +416,4 @@
                         });
                 });
             }
-    })();
+    })());
