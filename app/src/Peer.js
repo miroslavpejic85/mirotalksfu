@@ -170,7 +170,11 @@ module.exports = class Peer {
             throw new Error(`Producer transport with ID ${producerTransportId} not found`);
         }
 
-        const producerTransport = this.transports.get(producerTransportId);
+        const producerTransport = this.getTransport(producerTransportId);
+
+        if (!producerTransport) {
+            throw new Error(`Consumer transport with ID ${producerTransportId} not found for peer ${this.peer_name}`);
+        }
 
         let producer;
         try {
@@ -281,7 +285,11 @@ module.exports = class Peer {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
         }
 
-        const consumerTransport = this.transports.get(consumer_transport_id);
+        const consumerTransport = this.getTransport(consumer_transport_id);
+
+        if (!consumerTransport) {
+            throw new Error(`Consumer transport with ID ${consumer_transport_id} not found for peer ${this.peer_name}`);
+        }
 
         let consumer;
         try {

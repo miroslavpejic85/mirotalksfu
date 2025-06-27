@@ -799,6 +799,12 @@ module.exports = class Room {
 
         const { id } = peerProducer;
 
+        const producerTransport = peer.getTransport(producerTransportId);
+
+        if (!producerTransport) {
+            throw new Error(`Producer transport with ID ${producerTransportId} not found for peer ${peer_name}`);
+        }
+
         this.broadCast(socket_id, 'newProducers', [
             {
                 producer_id: id,
@@ -810,10 +816,12 @@ module.exports = class Room {
         ]);
 
         log.debug('Producer created successfully', {
+            producerTransportId,
             producer_id: id,
             peer_name: peer.peer_name,
             kind,
             type,
+            transport_state: `ICE:${producerTransport.iceState}, DTLS:${producerTransport.dtlsState}`,
         });
 
         return id;
@@ -875,6 +883,12 @@ module.exports = class Room {
             );
         }
 
+        const consumerTransport = peer.getTransport(consumer_transport_id);
+
+        if (!consumerTransport) {
+            throw new Error(`Consumer transport with ID ${consumer_transport_id} not found for peer ${peer_name}`);
+        }
+
         const { consumer, params } = peerConsumer;
         const { id, kind } = consumer;
 
@@ -895,11 +909,13 @@ module.exports = class Room {
         });
 
         log.debug('Consumer created successfully', {
+            consumer_transport_id,
             consumer_id: id,
             producer_id: producerId,
             peer_name,
             kind,
             type,
+            transport_state: `ICE:${consumerTransport.iceState}, DTLS:${consumerTransport.dtlsState}`,
         });
 
         return params;
