@@ -141,33 +141,6 @@ module.exports = class Peer {
         return true;
     }
 
-    close() {
-        this.transports.forEach((transport, transport_id) => {
-            try {
-                transport.close();
-                this.delTransport(transport_id);
-                log.debug('Closed and deleted peer transport', {
-                    transportInternal: transport.internal,
-                    transport_closed: transport.closed,
-                });
-            } catch (error) {
-                log.warn(`Error closing transport with ID ${transport_id}`, error.message);
-            }
-        });
-
-        const peerTransports = this.getTransports();
-        const peerProducers = this.getProducers();
-        const peerConsumers = this.getConsumers();
-
-        log.debug('CLOSE PEER - CHECK TRANSPORTS | PRODUCERS | CONSUMERS', {
-            peer_id: this.id,
-            peer_name: this.peer_name,
-            peerTransports: peerTransports,
-            peerProducers: peerProducers,
-            peerConsumers: peerConsumers,
-        });
-    }
-
     // ####################################################
     // PRODUCER
     // ####################################################
@@ -252,7 +225,9 @@ module.exports = class Peer {
         const producer = this.getProducer(producer_id);
 
         try {
-            producer.close();
+            if (!producer.closed) {
+                producer.close();
+            }
 
             log.debug('Producer closed successfully', {
                 producer_id: producer.id,
@@ -272,6 +247,7 @@ module.exports = class Peer {
 
         log.debug('Producer removed from peer', {
             producer_id: producer.id,
+            producer_closed: producer.closed,
             peer_name: this.peer_name,
         });
     }
@@ -382,7 +358,9 @@ module.exports = class Peer {
         const consumer = this.getConsumer(consumer_id);
 
         try {
-            consumer.close();
+            if (!consumer.closed) {
+                consumer.close();
+            }
 
             log.debug('Consumer closed successfully', {
                 consumer_id: consumer.id,
@@ -401,7 +379,75 @@ module.exports = class Peer {
 
         log.debug('Consumer removed from peer', {
             consumer_id: consumer.id,
+            consumer_closed: consumer.closed,
             peer_name: this.peer_name,
+        });
+    }
+
+    // ####################################################
+    // CLOSE PEER
+    // ####################################################
+
+    close() {
+        log.info('Starting peer cleanup', {
+            peer_id: this.id,
+            peer_name: this.peer_name,
+            transports: this.transports.size,
+            producers: this.producers.size,
+            consumers: this.consumers.size,
+        });
+
+        // Close all consumers first
+        for (const [consumer_id, consumer] of this.consumers.entries()) {
+            try {
+                if (!consumer.closed) {
+                    consumer.close();
+                }
+            } catch (error) {
+                log.warn('Error closing consumer during peer cleanup', {
+                    consumer_id,
+                    error: error.message,
+                });
+            }
+        }
+        this.consumers.clear();
+
+        // Close all producers
+        for (const [producer_id, producer] of this.producers.entries()) {
+            try {
+                if (!producer.closed) {
+                    producer.close();
+                }
+            } catch (error) {
+                log.warn('Error closing producer during peer cleanup', {
+                    producer_id,
+                    error: error.message,
+                });
+            }
+        }
+        this.producers.clear();
+
+        // Close all transports
+        for (const [transport_id, transport] of this.transports.entries()) {
+            try {
+                if (!transport.closed) {
+                    transport.close();
+                }
+            } catch (error) {
+                log.warn('Error closing transport during peer cleanup', {
+                    transport_id,
+                    error: error.message,
+                });
+            }
+        }
+        this.transports.clear();
+
+        log.info('Peer cleanup completed successfully', {
+            peer_id: this.id,
+            peer_name: this.peer_name,
+            transports: this.transports.size,
+            producers: this.producers.size,
+            consumers: this.consumers.size,
         });
     }
 };

@@ -677,12 +677,16 @@ module.exports = class Room {
                 setTimeout(() => {
                     if (transport.iceState === 'disconnected') {
                         log.warn(`Closing transport ${transport.id} due to prolonged ICE disconnection`);
-                        transport.close();
+                        if (!transport.closed) {
+                            transport.close();
+                        }
                     }
                 }, iceConsentTimeout * 1000); // Wait iceConsentTimeout seconds before closing
             } else if (iceState === 'closed') {
                 log.warn(`ICE state closed for transport ${transport.id}`);
-                transport.close();
+                if (!transport.closed) {
+                    transport.close();
+                }
             }
         });
 
@@ -701,7 +705,9 @@ module.exports = class Room {
                     transport_id: id,
                     dtlsState: dtlsState,
                 });
-                transport.close();
+                if (!transport.closed) {
+                    transport.close();
+                }
             }
         });
 

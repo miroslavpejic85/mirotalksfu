@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.69
+ * @version 1.8.70
  *
  */
 
@@ -3270,6 +3270,8 @@ function startServer() {
 
             room.removePeer(socket.id);
 
+            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
             if (room.getPeersCount() === 0) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
@@ -3288,8 +3290,6 @@ function startServer() {
 
                 log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
             }
-
-            room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
             if (isPresenter) removeIP(socket);
 
@@ -3424,7 +3424,7 @@ function startServer() {
                 peer_counts: peerCounts,
                 isPresenter: isPresenter,
             };
-            log.debug('[REMOVE ME DATA]', data);
+            log.debug('Peer removed from the room', data);
             return data;
         }
     });
