@@ -715,6 +715,7 @@ module.exports = class Room {
             log.debug('Transport closed', {
                 peer_name: peer_name,
                 transport_id: transport.id,
+                transport_closed: transport.closed
             });
         });
 

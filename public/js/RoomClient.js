@@ -1541,6 +1541,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
+                endRoomSession();
                 openURL((window.location.href = '/join/' + this.room_id));
             }
         });
