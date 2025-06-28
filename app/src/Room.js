@@ -619,6 +619,10 @@ module.exports = class Room {
             throw new Error('Error creating WebRTC Transport');
         }
 
+        if (!transport) {
+            throw new Error(`Transport not found for socket ID ${socket_id}`);
+        }
+
         if (transport.closed) {
             throw new Error('Transport is already closed');
         }
@@ -822,6 +826,8 @@ module.exports = class Room {
             peer_name: peer.peer_name,
             kind,
             type,
+            paused: peerProducer.paused,
+            appData: peerProducer.appData,
             transport_state: `ICE:${producerTransport.iceState}, DTLS:${producerTransport.dtlsState}`,
             codecs: rtpParameters.codecs?.map((c) => c.mimeType) || [],
         });
@@ -917,6 +923,8 @@ module.exports = class Room {
             peer_name,
             kind,
             type,
+            paused: consumer.paused,
+            producerPaused: consumer.producerPaused,
             transport_state: `ICE:${consumerTransport.iceState}, DTLS:${consumerTransport.dtlsState}`,
         });
 

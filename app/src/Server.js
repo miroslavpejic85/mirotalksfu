@@ -1434,8 +1434,6 @@ function startServer() {
                 mediasoup: {
                     listenInfos: config.mediasoup?.webRtcTransport?.listenInfos,
                     worker_bin: mediasoup?.workerBin,
-                    server_version: mediasoup?.version,
-                    client_version: mediasoupClient?.version,
                 },
                 rtmp: rtmpCfg?.enabled ? rtmpCfg : false,
                 videoAI: config.integrations?.videoAI?.enabled ? config.integrations.videoAI : false,
@@ -1475,6 +1473,8 @@ function startServer() {
             versions: {
                 app: packageJson?.version,
                 node: process.versions.node,
+                server_version: mediasoup?.version,
+                client_version: mediasoupClient?.version,
             },
         };
 
