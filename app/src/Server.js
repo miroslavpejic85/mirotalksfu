@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.72
+ * @version 1.8.71
  *
  */
 
@@ -1573,19 +1573,8 @@ function startServer() {
             }
 
             worker.on('died', () => {
-                log.error('Mediasoup worker died', worker.pid);
-
-                // Remove the dead worker from the workers array
-                const idx = workers.indexOf(worker);
-                if (idx !== -1) workers.splice(idx, 1);
-
-                // If no workers left, exit the process
-                if (workers.length === 0) {
-                    log.error('All mediasoup workers have died, exiting in 2 seconds...');
-                    setTimeout(() => process.exit(1), 2000);
-                } else {
-                    log.warn(`Mediasoup worker died (pid: ${worker.pid}), but ${workers.length} worker(s) remain.`);
-                }
+                log.error('Mediasoup worker died, exiting in 2 seconds...', worker.pid);
+                setTimeout(() => process.exit(1), 2000);
             });
 
             workers.push(worker);
