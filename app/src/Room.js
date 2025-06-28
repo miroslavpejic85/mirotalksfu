@@ -823,6 +823,7 @@ module.exports = class Room {
             kind,
             type,
             transport_state: `ICE:${producerTransport.iceState}, DTLS:${producerTransport.dtlsState}`,
+            codecs: rtpParameters.codecs?.map((c) => c.mimeType) || [],
         });
 
         return id;
