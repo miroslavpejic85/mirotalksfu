@@ -61,7 +61,11 @@ function sendEmailAlert(event, data) {
             subject = getJoinRoomSubject(data);
             body = getJoinRoomBody(data);
             break;
-        // ...
+        case 'alert':
+            subject = getAlertSubject(data);
+            body = getAlertBody(data);
+            break;
+        //...
         default:
             break;
     }
@@ -137,6 +141,46 @@ function getJoinRoomBody(data) {
             </tr>
             <tr>
                 <td>Date, Time</td>
+                <td>${currentDataTime}</td>
+            </tr>
+        </table>
+    `;
+}
+
+function getAlertSubject(data) {
+    const { subject } = data;
+    return subject || 'MiroTalk SFU - Alert';
+}
+
+function getAlertBody(data) {
+    const { body } = data;
+
+    const currentDataTime = getCurrentDataTime();
+
+    return `
+        <h1>🚨 Alert Notification</h1>
+        <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
+            }
+            td {
+                border: 1px solid #dddddd;
+                text-align: left;
+                padding: 8px;
+            }
+            tr:nth-child(even) {
+                background-color: #dddddd;
+            }
+        </style>
+        <table>
+            <tr>
+                <td>⚠️ Alert</td>
+                <td>${body}</td>
+            </tr>
+            <tr>
+                <td>🕒 Date, Time</td>
                 <td>${currentDataTime}</td>
             </tr>
         </table>

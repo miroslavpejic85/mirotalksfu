@@ -1573,8 +1573,14 @@ function startServer() {
             }
 
             worker.on('died', () => {
-                log.error('Mediasoup worker died, exiting in 2 seconds...', worker.pid);
-                setTimeout(() => process.exit(1), 2000);
+                log.error('Mediasoup worker died, exiting in 5 seconds...', worker.pid);
+
+                nodemailer.sendEmailAlert('alert', {
+                    subject: 'Worker Died',
+                    body: `The Worker with PID ${worker.pid} has died unexpectedly!`,
+                });
+
+                setTimeout(() => process.exit(1), 5000);
             });
 
             workers.push(worker);
