@@ -6,6 +6,7 @@ WORKDIR /src
 
 # Set environment variable to skip downloading prebuilt workers
 ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD="true"
+ENV NODE_ENV="production"
 
 # Install necessary system packages and dependencies
 RUN apt-get update \
@@ -19,9 +20,9 @@ RUN apt-get update \
 # Rename config.template.js to config.js
 COPY ./app/src/config.template.js ./app/src/config.js
 
-# Copy package.json and install npm dependencies
-COPY package.json .
-RUN npm install
+# Copy package*.json and install npm dependencies
+COPY package*.json ./
+RUN npm ci --only=production --silent
 
 # Cleanup unnecessary packages and files
 RUN apt-get purge -y --auto-remove \
