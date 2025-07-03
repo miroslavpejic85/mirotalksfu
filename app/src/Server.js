@@ -191,7 +191,7 @@ if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
     const originalError = console.error;
 
     console.warn = function (...args) {
-        Sentry.captureMessage(args.join(' '), 'warning');
+        //Sentry.captureMessage(args.join(' '), 'warning');
         originalWarn.apply(console, args);
     };
 
