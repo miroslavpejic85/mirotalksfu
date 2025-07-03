@@ -830,6 +830,7 @@ module.exports = {
          * Core Settings:
          * -------------
          * enabled              : Enable/disable Sentry [true/false] (default: false)
+         * logLevels            : Array of log levels to capture (default: ['error'])
          * DSN                  : Data Source Name (from Sentry dashboard)
          * tracesSampleRate     : Percentage of transactions to capture (0.0-1.0)
          *
@@ -842,6 +843,9 @@ module.exports = {
          */
         sentry: {
             enabled: process.env.SENTRY_ENABLED === 'true',
+            logLevels: process.env.SENTRY_LOG_LEVELS
+                ? process.env.SENTRY_LOG_LEVELS.split(splitChar).map((level) => level.trim())
+                : ['error'],
             DSN: process.env.SENTRY_DSN || '',
             tracesSampleRate: Math.min(Math.max(parseFloat(process.env.SENTRY_TRACES_SAMPLE_RATE) || 0.5, 0), 1),
         },

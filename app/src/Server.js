@@ -178,7 +178,7 @@ const restApi = {
 // Sentry monitoring
 const sentryEnabled = config.integrations?.sentry?.enabled || false;
 const sentryDSN = config.integrations.sentry.DSN;
-const sentryTracesSampleRate = parseFloat(config.integrations.sentry.tracesSampleRate || '0.0');
+const sentryTracesSampleRate = config.integrations.sentry.tracesSampleRate;
 if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
     log.info('Sentry monitoring started...');
 
@@ -187,20 +187,26 @@ if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
         tracesSampleRate: sentryTracesSampleRate,
     });
 
-    const originalWarn = console.warn;
-    const originalError = console.error;
+    // Accept logLevels as an array, e.g., ['warn', 'error']
+    const logLevels = config.integrations?.sentry?.logLevels || ['error'];
 
-    console.warn = function (...args) {
-        //Sentry.captureMessage(args.join(' '), 'warning');
-        originalWarn.apply(console, args);
-    };
-
-    console.error = function (...args) {
-        args[0] instanceof Error
-            ? Sentry.captureException(args[0])
-            : Sentry.captureException(new Error(args.join(' ')));
-        originalError.apply(console, args);
-    };
+    const originalConsole = {};
+    logLevels.forEach((level) => {
+        originalConsole[level] = console[level];
+        console[level] = function (...args) {
+            switch (level) {
+                case 'warn':
+                    Sentry.captureMessage(args.join(' '), 'warning');
+                    break;
+                case 'error':
+                    args[0] instanceof Error
+                        ? Sentry.captureException(args[0])
+                        : Sentry.captureException(new Error(args.join(' ')));
+                    break;
+            }
+            originalConsole[level].apply(console, args);
+        };
+    });
 
     // log.error('Sentry error', { foo: 'bar' });
     // log.warn('Sentry warning');
