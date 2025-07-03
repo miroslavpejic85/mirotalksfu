@@ -178,25 +178,32 @@ const restApi = {
 // Sentry monitoring
 const sentryEnabled = config.integrations?.sentry?.enabled || false;
 const sentryDSN = config.integrations.sentry.DSN;
-const sentryTracesSampleRate = config.integrations.sentry.tracesSampleRate;
-if (sentryEnabled) {
+const sentryTracesSampleRate = parseFloat(config.integrations.sentry.tracesSampleRate || '0.0');
+if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
+    log.info('Sentry monitoring started...');
+
     Sentry.init({
         dsn: sentryDSN,
-        integrations: [
-            Sentry.captureConsoleIntegration({
-                // ['log', 'info', 'warn', 'error', 'debug', 'assert']
-                levels: ['error'],
-            }),
-        ],
         tracesSampleRate: sentryTracesSampleRate,
     });
-    /*
-    log.log('test-log');
-    log.info('test-info');
-    log.warn('test-warning');
-    log.error('test-error');
-    log.debug('test-debug');
-*/
+
+    const originalWarn = console.warn;
+    const originalError = console.error;
+
+    console.warn = function (...args) {
+        Sentry.captureMessage(args.join(' '), 'warning');
+        originalWarn.apply(console, args);
+    };
+
+    console.error = function (...args) {
+        args[0] instanceof Error
+            ? Sentry.captureException(args[0])
+            : Sentry.captureException(new Error(args.join(' ')));
+        originalError.apply(console, args);
+    };
+
+    // log.error('Sentry error', { foo: 'bar' });
+    // log.warn('Sentry warning');
 }
 
 // Handle WebHook
