@@ -497,16 +497,12 @@ function startServer() {
     if (OIDC.enabled) {
         const getDynamicConfig = (host, protocol) => {
             const baseURL = `${protocol}://${host}`;
-
             const config = OIDC.baseUrlDynamic
                 ? {
                       ...OIDC.config,
                       baseURL,
                   }
                 : OIDC.config;
-
-            log.debug('OIDC baseURL', config.baseURL);
-
             return config;
         };
 
@@ -571,6 +567,9 @@ function startServer() {
         res.redirect('/'); // Redirect to the home page after logout
     });
 
+    // Favicon
+    app.get('/favicon.ico', (req, res) => res.status(204).end());
+
     // UI buttons configuration
     app.get('/config', (req, res) => {
         res.status(200).json({ message: config?.ui?.buttons || false });
@@ -628,7 +627,7 @@ function startServer() {
     app.post('/isRoomActive', (req, res) => {
         const { roomId } = checkXSS(req.body);
 
-        if (roomId && (hostCfg.protected || hostCfg.user_auth)) {
+        if (roomId && (hostCfg.protected || hostCfg.user_auth || OIDC.enabled)) {
             const roomActive = roomList.has(roomId);
             if (roomActive) log.debug('isRoomActive', { roomId, roomActive });
             res.status(200).json({ message: roomActive });
@@ -656,9 +655,7 @@ function startServer() {
             }
 
             if (!Validator.isValidRoomName(room)) {
-                return res.status(400).json({
-                    message: 'Invalid Room name!\nPath traversal pattern detected!',
-                });
+                return res.redirect('/');
             }
 
             let peerUsername = '';
@@ -708,7 +705,7 @@ function startServer() {
 
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     log.warn('Direct Room Join Unauthorized', room);
-                    return OIDC.enabled ? res.redirect('/') : res.redirect('/whoAreYou/' + room);
+                    return res.redirect('/whoAreYou/' + room);
                 }
             }
 
@@ -773,7 +770,7 @@ function startServer() {
             htmlInjector.injectHtml(views.room, res);
         } else {
             // Who are you?
-            !OIDC.enabled && hostCfg.protected ? res.redirect('/whoAreYou/' + roomId) : res.redirect('/');
+            OIDC.enabled || hostCfg.protected ? res.redirect('/whoAreYou/' + roomId) : res.redirect('/');
         }
     });
 
@@ -1185,12 +1182,12 @@ function startServer() {
     app.get('/:roomId', (req, res) => {
         const { roomId } = checkXSS(req.params);
 
-        if (!roomId) {
-            log.warn('/:roomId empty', roomId);
+        if (!Validator.isValidRoomName(roomId)) {
+            log.warn('/:roomId not valid', roomId);
             return res.redirect('/');
         }
 
-        log.debug('Detected roomId --> redirect to /join?room=roomId');
+        log.debug(`Detected roomId --> redirect to /join?room=${roomId}`);
         res.redirect(`/join/${roomId}`);
     });
 

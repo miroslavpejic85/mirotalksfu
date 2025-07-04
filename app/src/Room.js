@@ -670,7 +670,7 @@ module.exports = class Room {
         });
 
         transport.on('icestatechange', (iceState) => {
-            log.warn('ICE state changed', {
+            log.debug('ICE state changed', {
                 peer_name: peer_name,
                 transport_id: id,
                 iceState: iceState,

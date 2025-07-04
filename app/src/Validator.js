@@ -9,7 +9,12 @@ function isValidRoomName(input) {
         return false;
     }
     const room = checkXSS(input);
-    return !room ? false : !hasPathTraversal(room);
+
+    if (!room || ['false', 'undefined', '', null, undefined, 'favicon.ico'].includes(room.trim().toLowerCase())) {
+        return false;
+    }
+
+    return !hasPathTraversal(room);
 }
 
 function isValidRecFileNameFormat(input) {

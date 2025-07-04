@@ -226,12 +226,8 @@ function joinRoom() {
     const roomName = filterXSS(document.getElementById('roomName').value).trim().replace(/\s+/g, '-');
     const roomValid = isValidRoomName(roomName);
 
-    if (!roomName) {
-        popup('warning', 'Room name empty!\nPlease pick a room name.');
-        return;
-    }
     if (!roomValid) {
-        popup('warning', 'Invalid Room name!\nPath traversal pattern detected!');
+        typeWriter();
         return;
     }
 
@@ -244,6 +240,11 @@ function isValidRoomName(input) {
     if (!input || typeof input !== 'string') {
         return false;
     }
+
+    if (!input || ['false', 'undefined', ''].includes(input.trim().toLowerCase())) {
+        return false;
+    }
+
     const pathTraversalPattern = /(\.\.(\/|\\))+/;
     return !pathTraversalPattern.test(input);
 }
