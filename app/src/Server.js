@@ -816,13 +816,17 @@ function startServer() {
 
     // handle logged on host protected
     app.get('/logged', (req, res) => {
-        const ip = getIP(req);
-        if (allowedIP(ip)) {
-            res.redirect('/');
-            hostCfg.authenticated = true;
+        if (!OIDC.enabled && hostCfg.protected) {
+            const ip = getIP(req);
+            if (allowedIP(ip)) {
+                res.redirect('/');
+                hostCfg.authenticated = true;
+            } else {
+                hostCfg.authenticated = false;
+                res.redirect('/login');
+            }
         } else {
-            hostCfg.authenticated = false;
-            res.redirect('/login');
+            res.redirect('/');
         }
     });
 
