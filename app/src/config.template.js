@@ -1040,6 +1040,19 @@ module.exports = {
             },
 
             /**
+             * Who Are You? Section
+             * ---------------------
+             * Prompts users to identify themselves before joining a room.
+             * Customizable text and button labels.
+             */
+            whoAreYou: {
+                title: process.env.WHO_ARE_YOU_TITLE || 'Who are you?',
+                description: process.env.WHO_ARE_YOU_DESCRIPTION || "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
+                buttonLoginLabel: process.env.WHO_ARE_YOU_BUTTON_LOGIN_LABEL || 'LOGIN',
+                buttonJoinLabel: process.env.WHO_ARE_YOU_JOIN_LABEL || 'JOIN ROOM',
+            },
+
+            /**
              * About/Credits Section
              * ---------------------
              * Contains author information, version, and support links.

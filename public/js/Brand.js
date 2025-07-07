@@ -25,6 +25,11 @@ const poweredBy = document.getElementById('poweredBy');
 const sponsors = document.getElementById('sponsors');
 const advertisers = document.getElementById('advertisers');
 const footer = document.getElementById('footer');
+
+const whoAreYouTitle = document.getElementById('whoAreYouTitle');
+const whoAreYouDescription = document.getElementById('whoAreYouDescription');
+const presenterLoginButton = document.getElementById('presenterLoginButton');
+const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
 //...
 
 // app/src/config.js - ui.brand
@@ -62,9 +67,15 @@ let BRAND = {
         advertisers: true,
         footer: true,
     },
+    whoAreYou: {
+        title: 'Who are you?',
+        description: "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
+        buttonLoginLabel: 'LOGIN',
+        buttonJoinLabel: 'JOIN ROOM',
+    },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.8.83</strong>',
+        title: '<strong>WebRTC SFU v1.8.84</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -106,6 +117,8 @@ async function initialize() {
     customizeMetaTags();
 
     customizeApp();
+
+    customizeWhoAreYou();
 
     checkBrand();
 }
@@ -203,6 +216,21 @@ function customizeMetaTags() {
     }
     if (keywords && BRAND.meta?.keywords) {
         keywords.content = BRAND.meta.keywords;
+    }
+}
+
+function customizeWhoAreYou() {
+    if (whoAreYouTitle && BRAND.whoAreYou?.title) {
+        whoAreYouTitle.textContent = BRAND.whoAreYou.title;
+    }
+    if (whoAreYouDescription && BRAND.whoAreYou?.description) {
+        whoAreYouDescription.innerHTML = BRAND.whoAreYou.description;
+    }
+    if (presenterLoginButton && BRAND.whoAreYou?.buttonLoginLabel) {
+        presenterLoginButton.textContent = BRAND.whoAreYou.buttonLoginLabel;
+    }
+    if (guestJoinRoomButton && BRAND.whoAreYou?.buttonJoinLabel) {
+        guestJoinRoomButton.textContent = BRAND.whoAreYou.buttonJoinLabel;
     }
 }
 
