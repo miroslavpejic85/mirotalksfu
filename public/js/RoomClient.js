@@ -1,7 +1,5 @@
 'use strict';
 
-const { endSession } = require('@sentry/node');
-
 /**
  * MiroTalk SFU - Client component
  *
