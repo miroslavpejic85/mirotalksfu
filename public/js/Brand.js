@@ -69,13 +69,14 @@ let BRAND = {
     },
     whoAreYou: {
         title: 'Who are you?',
-        description: "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
+        description:
+            "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
         buttonLoginLabel: 'LOGIN',
         buttonJoinLabel: 'JOIN ROOM',
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.8.84</strong>',
+        title: '<strong>WebRTC SFU v1.8.85</strong>',
         html: `
             <button 
                 id="support-button" 

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.84
+ * @version 1.8.85
  *
  */
 
@@ -297,7 +297,8 @@ let isRoomLocked = false;
 
 let initStream = null;
 
-let scriptProcessor = null;
+let audioContext = null;
+let workletNode = null;
 
 // window.location.origin + '/join/' + roomId
 // window.location.origin + '/join/?room=' + roomId + '&token=' + myToken
@@ -755,37 +756,64 @@ function setupInitButtons() {
 
 async function getMicrophoneVolumeIndicator(stream) {
     if (isAudioContextSupported() && hasAudioTrack(stream)) {
-        stopMicrophoneProcessing();
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const microphone = audioContext.createMediaStreamSource(stream);
-        scriptProcessor = audioContext.createScriptProcessor(1024, 1, 1);
-        scriptProcessor.onaudioprocess = function (event) {
-            const inputBuffer = event.inputBuffer.getChannelData(0);
-            let sum = 0;
-            for (let i = 0; i < inputBuffer.length; i++) {
-                sum += inputBuffer[i] * inputBuffer[i];
-            }
-            const rms = Math.sqrt(sum / inputBuffer.length);
-            const volume = Math.max(0, Math.min(1, rms * 10));
-            updateVolumeIndicator(volume);
-        };
-        microphone.connect(scriptProcessor);
-        scriptProcessor.connect(audioContext.destination);
+        try {
+            stopMicrophoneProcessing();
+            console.log('Start microphone volume indicator for audio track', stream.getAudioTracks()[0]);
+            audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const microphone = audioContext.createMediaStreamSource(stream);
+            await audioContext.audioWorklet.addModule('/js/VolumeProcessor.js');
+            workletNode = new AudioWorkletNode(audioContext, 'volume-processor');
+
+            // Handle data from VolumeProcessor.js
+            workletNode.port.onmessage = (event) => {
+                const data = event.data;
+                switch (data.type) {
+                    case 'volumeIndicator':
+                        updateVolumeIndicator(data.volume);
+                        break;
+                    //...
+                    default:
+                        console.warn('Unknown message type from VolumeProcessor:', data.type);
+                        break;
+                }
+            };
+
+            microphone.connect(workletNode);
+            workletNode.connect(audioContext.destination);
+        } catch (error) {
+            console.error('Error initializing microphone volume indicator:', error);
+            stopMicrophoneProcessing();
+        }
+    } else {
+        console.warn('Microphone volume indicator not supported for this browser');
     }
 }
 
 function stopMicrophoneProcessing() {
-    if (scriptProcessor) {
-        scriptProcessor.disconnect();
-        scriptProcessor = null;
+    console.log('Stop microphone volume indicator');
+    if (workletNode) {
+        try {
+            workletNode.disconnect();
+        } catch (error) {
+            console.warn('Error disconnecting workletNode:', error);
+        }
+        workletNode = null;
     }
-    bars.forEach((bar) => {
-        bar.classList.toggle('inactive');
-    });
+    if (audioContext) {
+        try {
+            if (audioContext.state !== 'closed') {
+                audioContext.close();
+            }
+        } catch (error) {
+            console.warn('Error closing audioContext:', error);
+        }
+        audioContext = null;
+    }
 }
 
 function updateVolumeIndicator(volume) {
-    const activeBars = Math.ceil(volume * bars.length);
+    const normalizedVolume = Math.max(0, Math.min(1, volume));
+    const activeBars = Math.ceil(normalizedVolume * bars.length);
     bars.forEach((bar, index) => {
         bar.classList.toggle('active', index < activeBars);
     });
@@ -796,11 +824,13 @@ function isAudioContextSupported() {
 }
 
 function hasAudioTrack(mediaStream) {
+    if (!mediaStream) return false;
     const audioTracks = mediaStream.getAudioTracks();
     return audioTracks.length > 0;
 }
 
 function hasVideoTrack(mediaStream) {
+    if (!mediaStream) return false;
     const videoTracks = mediaStream.getVideoTracks();
     return videoTracks.length > 0;
 }
@@ -5479,7 +5509,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.84',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.85',
         html: `
             <br />
             <div id="about">
