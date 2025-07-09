@@ -1018,7 +1018,7 @@ body {
     margin: 0 2px;
     background-color: #ddd;
     border-radius: 5px;
-    transition: background-color 0.3s ease;
+    transition: all 0.3s ease;
 }
 
 .active {

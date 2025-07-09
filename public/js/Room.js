@@ -813,7 +813,7 @@ function stopMicrophoneProcessing() {
 
 function updateVolumeIndicator(volume) {
     const normalizedVolume = Math.max(0, Math.min(1, volume));
-    const activeBars = Math.ceil(normalizedVolume * bars.length);
+    const activeBars = Math.round(normalizedVolume * bars.length);
     bars.forEach((bar, index) => {
         bar.classList.toggle('active', index < activeBars);
     });
