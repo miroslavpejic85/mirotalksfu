@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.89
+ * @version 1.8.90
  *
  */
 
@@ -1787,7 +1787,7 @@ function handleButtons() {
         isButtonsBarOver = false;
     };
     exitButton.onclick = () => {
-        rc.exitRoom();
+        leaveRoom();
     };
     shareButton.onclick = () => {
         shareRoom(true);
@@ -3608,11 +3608,6 @@ function handleRoomClientEvents() {
         if (rc.isRecording() || recordingStatus.innerText != '0s') {
             rc.saveRecording('Room event: Client save recording before to exit');
         }
-        if (survey && survey.enabled) {
-            leaveFeedback();
-        } else {
-            redirectOnLeave();
-        }
     });
 }
 
@@ -3620,11 +3615,21 @@ function handleRoomClientEvents() {
 // UTILITY
 // ####################################################
 
+function leaveRoom() {
+    survey && survey.enabled
+        ? leaveFeedback()
+        : redirectOnLeave();
+}
+
 function leaveFeedback() {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         showDenyButton: true,
+        showCancelButton: true,
+        confirmButtonColor: 'green',
+        denyButtonColor: 'red',
+        cancelButtonColor: 'gray',
         background: swalBackground,
         imageUrl: image.feedback,
         position: 'top',
@@ -3632,18 +3637,22 @@ function leaveFeedback() {
         text: 'Do you want to rate your MiroTalk experience?',
         confirmButtonText: `Yes`,
         denyButtonText: `No`,
+        cancelButtonText: `Cancel`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
+            endRoomSession();
             openURL(survey.url);
-        } else {
+        } else if (result.isDenied) {
+            rc.exitRoom();
             redirectOnLeave();
         }
     });
 }
 
 function redirectOnLeave() {
+    endRoomSession();
     redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
 }
 
@@ -5510,7 +5519,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.89',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.90',
         html: `
             <br />
             <div id="about">
