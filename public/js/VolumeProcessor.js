@@ -1,7 +1,8 @@
-// volume-processor.js
+'use strict';
 class VolumeProcessor extends AudioWorkletProcessor {
     constructor() {
         super();
+        this.silenceThreshold = 0.01;
     }
 
     process(inputs, outputs, parameters) {
@@ -23,11 +24,13 @@ class VolumeProcessor extends AudioWorkletProcessor {
         const rms = Math.sqrt(sum / inputData.length);
         const volume = Math.max(0, Math.min(1, rms * 10));
 
-        // Send volume data for UI updates
-        this.port.postMessage({
-            type: 'volumeIndicator',
-            volume: volume,
-        });
+        // Only send if not silent
+        if (volume > this.silenceThreshold) {
+            this.port.postMessage({
+                type: 'volumeIndicator',
+                volume: volume,
+            });
+        }
 
         return true;
     }
