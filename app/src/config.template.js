@@ -343,8 +343,8 @@ module.exports = {
 
                 // Session configuration
                 secret: process.env.OIDC_SECRET || 'mirotalksfu-oidc-secret',
-                authRequired: false, // Whether all routes require authentication
-                auth0Logout: true, // Use provider's logout endpoint
+                authRequired: process.env.OIDC_AUTH_REQUIRED === 'true', // Whether all routes require authentication
+                auth0Logout: process.env.OIDC_AUTH_LOGOUT !== 'false', // Use provider's logout endpoint
 
                 // OAuth/OIDC flow parameters
                 authorizationParams: {
