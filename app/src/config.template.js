@@ -90,11 +90,15 @@ module.exports = {
          * - timeZone: IANA timezone (e.g., 'Europe/Rome')
          * - debug: Enable debug logging in non-production
          * - colors: Colorized console output
+         * - json: Log output in JSON format
+         * - json_pretty: Pretty-print JSON logs
          */
         console: {
             timeZone: 'UTC',
             debug: ENVIRONMENT !== 'production',
-            colors: true,
+            json: process.env.LOGS_JSON === 'true',
+            json_pretty: process.env.LOGS_JSON_PRETTY === 'true',
+            colors: process.env.LOGS_JSON === 'true' ? false : true,
         },
 
         /**
