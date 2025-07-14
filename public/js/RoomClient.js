@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.92
+ * @version 1.9.00
  *
  */
 
@@ -401,6 +401,9 @@ class RoomClient {
         this.myVideoEl = null;
         this.myAudioEl = null;
         this.showPeerInfo = false; // on peerName mouse hover show additional info
+
+        // Noise Suppression
+        this.RNNoiseProcessor = null;
 
         this.videoProducerId = null;
         this.screenProducerId = null;
@@ -1728,6 +1731,16 @@ class RoomClient {
                 }
             }
 
+            if (audio) {
+                /*
+                 * Initialize RNNoise Suppression if enabled and supported
+                 * This will only apply to audio tracks
+                 * and will not affect video tracks.
+                 */
+                this.initRNNoiseSuppression();
+                stream = await this.getRNNoiseSuppressionStream(stream);
+            }
+
             console.log('Supported Constraints', navigator.mediaDevices.getSupportedConstraints());
 
             const track = audio ? stream.getAudioTracks()[0] : stream.getVideoTracks()[0];
@@ -2115,22 +2128,66 @@ class RoomClient {
     }
 
     // ####################################################
+    // NOISE SUPPRESSION
+    // ####################################################
+
+    initRNNoiseSuppression() {
+        if (typeof RNNoiseProcessor === 'undefined') {
+            console.warn('RNNoiseProcessor is not available.');
+            return;
+        }
+
+        this.disableRNNoiseSuppression();
+
+        this.RNNoiseProcessor = new RNNoiseProcessor();
+    }
+
+    async getRNNoiseSuppressionStream(stream) {
+        if (!this.RNNoiseProcessor) {
+            console.warn('RNNoiseProcessor not initialized.');
+            return stream;
+        }
+
+        try {
+            const processedStream = await this.RNNoiseProcessor.startProcessing(stream);
+
+            if (localStorageSettings.mic_noise_suppression) {
+                this.RNNoiseProcessor.toggleNoiseSuppression();
+                switchNoiseSuppression.checked = this.RNNoiseProcessor.noiseSuppressionEnabled;
+            }
+
+            if (typeof labelNoiseSuppression !== 'undefined') {
+                labelNoiseSuppression.textContent = this.RNNoiseProcessor.noiseSuppressionEnabled
+                    ? '🔊 Noise Suppression'
+                    : '🔇 Noise Suppression';
+            }
+
+            return processedStream;
+        } catch (err) {
+            console.warn('RNNoiseProcessor failed, using original stream:', err);
+            return stream;
+        }
+    }
+
+    disableRNNoiseSuppression() {
+        if (this.RNNoiseProcessor) {
+            this.RNNoiseProcessor.stopProcessing();
+            this.RNNoiseProcessor = null;
+            console.warn('RNNoiseProcessor already initialized, stopping previous instance.');
+        }
+    }
+
+    // ####################################################
     // AUDIO/VIDEO/SCREEN CONSTRAINTS
     // ####################################################
 
     getAudioConstraints(deviceId) {
+        const audioConstraints = {};
+        if (deviceId) {
+            audioConstraints.deviceId = deviceId;
+        }
         return {
-            audio: {
-                autoGainControl: switchAutoGainControl.checked,
-                echoCancellation: switchNoiseSuppression.checked,
-                noiseSuppression: switchEchoCancellation.checked,
-                sampleRate: parseInt(sampleRateSelect.value),
-                sampleSize: parseInt(sampleSizeSelect.value),
-                channelCount: parseInt(channelCountSelect.value),
-                latency: parseInt(micLatencyRange.value),
-                volume: parseInt(micVolumeRange.value / 100),
-                deviceId: deviceId,
-            },
+            audio: audioConstraints,
             video: false,
         };
     }
@@ -3390,6 +3447,7 @@ class RoomClient {
         if (VideoAI.active) this.stopSession();
         if (this.rtmpFilestreamer) this.stopRTMP();
         if (this.rtmpUrlstreamer) this.stopRTMPfromURL();
+        if (this.RNNoiseProcessor) this.disableRNNoiseSuppression();
 
         const clean = () => {
             this._isConnected = false;

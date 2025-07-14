@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.8.92
+ * @version 1.9.00
  *
  */
 
@@ -1881,9 +1881,6 @@ function handleButtons() {
         await refreshMyAudioDevices();
         userLog('info', 'Refreshed audio devices', 'top-end');
     };
-    applyAudioOptionsButton.onclick = () => {
-        rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
-    };
     speakerTestBtn.onclick = () => {
         sound('ring', true);
     };
@@ -2703,49 +2700,6 @@ function handleSelects() {
         userLog('info', `Buttons always visible ${status}`, 'top-end');
         e.target.blur();
     };
-    // audio options
-    switchAutoGainControl.onchange = (e) => {
-        localStorageSettings.mic_auto_gain_control = e.currentTarget.checked;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    switchEchoCancellation.onchange = (e) => {
-        localStorageSettings.mic_echo_cancellations = e.currentTarget.checked;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    switchNoiseSuppression.onchange = (e) => {
-        localStorageSettings.mic_noise_suppression = e.currentTarget.checked;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    sampleRateSelect.onchange = (e) => {
-        localStorageSettings.mic_sample_rate = e.currentTarget.selectedIndex;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    sampleSizeSelect.onchange = (e) => {
-        localStorageSettings.mic_sample_size = e.currentTarget.selectedIndex;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    channelCountSelect.onchange = (e) => {
-        localStorageSettings.mic_channel_count = e.currentTarget.selectedIndex;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
-    micLatencyRange.oninput = (e) => {
-        localStorageSettings.mic_latency = e.currentTarget.value;
-        lS.setSettings(localStorageSettings);
-        micLatencyValue.innerText = e.currentTarget.value;
-        e.target.blur();
-    };
-    micVolumeRange.oninput = (e) => {
-        localStorageSettings.mic_volume = e.currentTarget.value;
-        lS.setSettings(localStorageSettings);
-        micVolumeValue.innerText = e.currentTarget.value;
-        e.target.blur();
-    };
     // recording
     switchHostOnlyRecording.onchange = (e) => {
         hostOnlyRecording = e.currentTarget.checked;
@@ -3343,18 +3297,7 @@ function loadSettingsFromLocalStorage() {
     themeCustom.input.value = themeCustom.color;
 
     switchDominantSpeakerFocus.checked = localStorageSettings.dominant_speaker_focus;
-
-    switchAutoGainControl.checked = localStorageSettings.mic_auto_gain_control;
-    switchEchoCancellation.checked = localStorageSettings.mic_echo_cancellations;
     switchNoiseSuppression.checked = localStorageSettings.mic_noise_suppression;
-    sampleRateSelect.selectedIndex = localStorageSettings.mic_sample_rate;
-    sampleSizeSelect.selectedIndex = localStorageSettings.mic_sample_size;
-    channelCountSelect.selectedIndex = localStorageSettings.mic_channel_count;
-
-    micLatencyRange.value = localStorageSettings.mic_latency || 50;
-    micLatencyValue.innerText = localStorageSettings.mic_latency || 50;
-    micVolumeRange.value = localStorageSettings.mic_volume || 100;
-    micVolumeValue.innerText = localStorageSettings.mic_volume || 100;
 
     screenOptimization.selectedIndex = localStorageSettings.screen_optimization;
     videoFps.selectedIndex = localStorageSettings.video_fps;
@@ -5517,7 +5460,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.8.92',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.00',
         html: `
             <br />
             <div id="about">
