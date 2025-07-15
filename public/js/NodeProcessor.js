@@ -21,6 +21,7 @@ class UIManager {
                 break;
             default:
                 console.log(printMessage);
+                break;
         }
     }
 
@@ -114,8 +115,8 @@ class RNNoiseProcessor {
             localStorageSettings.mic_noise_suppression = e.currentTarget.checked;
             lS.setSettings(localStorageSettings);
             userLog(
-                'info',
-                localStorageSettings.mic_noise_suppression ? 'Noise suppression enabled' : 'Noise suppression disabled',
+                localStorageSettings.mic_noise_suppression ? 'success' : 'info',
+                `Noise suppression ${localStorageSettings.mic_noise_suppression ? 'enabled' : 'disabled'}`,
                 'top-end',
                 3000
             );
