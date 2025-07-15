@@ -336,8 +336,13 @@ function initClient() {
             'right'
         );
         setTippy(
+            'switchNoiseSuppression',
+            'If Active, the audio will be processed to reduce background noise, making the voice clearer',
+            'right'
+        );
+        setTippy(
             'switchPushToTalk',
-            'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie.',
+            'If Active, When SpaceBar keydown the microphone will be resumed, on keyup will be paused, like a walkie-talkie',
             'right'
         );
         setTippy('lobbyAcceptAllBtn', 'Accept', 'top');
