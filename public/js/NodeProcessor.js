@@ -29,13 +29,8 @@ class UIManager {
             `Audio processing ${isProcessing ? 'started' : 'stopped'}`,
             isProcessing ? 'success' : 'info'
         );
-        if (noiseSuppressionEnabled) {
-            this.elements.labelNoiseSuppression.textContent = '🔊 Noise Suppression';
-            this.elements.labelNoiseSuppression.style.color = 'lime';
-        } else {
-            this.elements.labelNoiseSuppression.textContent = '🔇 Noise Suppression';
-            this.elements.labelNoiseSuppression.style.color = 'white';
-        }
+
+        this.elements.labelNoiseSuppression.style.color = noiseSuppressionEnabled ? 'lime' : 'white';
     }
 }
 

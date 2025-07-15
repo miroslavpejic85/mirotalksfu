@@ -2157,9 +2157,7 @@ class RoomClient {
             }
 
             if (typeof labelNoiseSuppression !== 'undefined') {
-                labelNoiseSuppression.textContent = this.RNNoiseProcessor.noiseSuppressionEnabled
-                    ? '🔊 Noise Suppression'
-                    : '🔇 Noise Suppression';
+                labelNoiseSuppression.style.color = this.RNNoiseProcessor.noiseSuppressionEnabled ? 'lime' : 'white';
             }
 
             return processedStream;
