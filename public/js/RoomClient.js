@@ -2180,10 +2180,8 @@ class RoomClient {
     // ####################################################
 
     getAudioConstraints(deviceId) {
-        const audioConstraints = {};
-        if (deviceId) {
-            audioConstraints.deviceId = deviceId;
-        }
+        let audioConstraints = {};
+        deviceId ? (audioConstraints.deviceId = deviceId) : (audioConstraints = true);
         return {
             audio: audioConstraints,
             video: false,
