@@ -3079,67 +3079,65 @@ function handleInputs() {
         }
     };
     chatMessage.oninput = function () {
-        if (!isChatPasteTxt) {
-            const chatInputEmoji = {
-                '<3': '❤️',
-                '</3': '💔',
-                ':D': '😀',
-                ':)': '😃',
-                ';)': '😉',
-                ':(': '😒',
-                ':p': '😛',
-                ';p': '😜',
-                ":'(": '😢',
-                ':+1:': '👍',
-                ':*': '😘',
-                ':O': '😲',
-                ':|': '😐',
-                ':*(': '😭',
-                XD: '😆',
-                ':B': '😎',
-                ':P': '😜',
-                '<(': '👎',
-                '>:(': '😡',
-                ':S': '😟',
-                ':X': '🤐',
-                ';(': '😥',
-                ':T': '😖',
-                ':@': '😠',
-                ':$': '🤑',
-                ':&': '🤗',
-                ':#': '🤔',
-                ':!': '😵',
-                ':W': '😷',
-                ':%': '🤒',
-                ':*!': '🤩',
-                ':G': '😬',
-                ':R': '😋',
-                ':M': '🤮',
-                ':L': '🥴',
-                ':C': '🥺',
-                ':F': '🥳',
-                ':Z': '🤢',
-                ':^': '🤓',
-                ':K': '🤫',
-                ':D!': '🤯',
-                ':H': '🧐',
-                ':U': '🤥',
-                ':V': '🤪',
-                ':N': '🥶',
-                ':J': '🥴',
-            };
-            // Create a regular expression pattern for all keys in chatInputEmoji
-            const regexPattern = new RegExp(
-                Object.keys(chatInputEmoji)
-                    .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
-                    .join('|'),
-                'gim'
-            );
-            // Replace matching patterns with corresponding emojis
-            this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
-        }
+        if (isChatPasteTxt) return;
+        const chatInputEmoji = {
+            '<3': '❤️',
+            '</3': '💔',
+            ':D': '😀',
+            ':)': '😃',
+            ';)': '😉',
+            ':(': '😒',
+            ':p': '😛',
+            ';p': '😜',
+            ":'(": '😢',
+            ':+1:': '👍',
+            ':*': '😘',
+            ':O': '😲',
+            ':|': '😐',
+            ':*(': '😭',
+            XD: '😆',
+            ':B': '😎',
+            ':P': '😜',
+            '<(': '👎',
+            '>:(': '😡',
+            ':S': '😟',
+            ':X': '🤐',
+            ';(': '😥',
+            ':T': '😖',
+            ':@': '😠',
+            ':$': '🤑',
+            ':&': '🤗',
+            ':#': '🤔',
+            ':!': '😵',
+            ':W': '😷',
+            ':%': '🤒',
+            ':*!': '🤩',
+            ':G': '😬',
+            ':R': '😋',
+            ':M': '🤮',
+            ':L': '🥴',
+            ':C': '🥺',
+            ':F': '🥳',
+            ':Z': '🤢',
+            ':^': '🤓',
+            ':K': '🤫',
+            ':D!': '🤯',
+            ':H': '🧐',
+            ':U': '🤥',
+            ':V': '🤪',
+            ':N': '🥶',
+            ':J': '🥴',
+        };
+        // Create a regular expression pattern for all keys in chatInputEmoji
+        const regexPattern = new RegExp(
+            Object.keys(chatInputEmoji)
+                .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
+                .join('|'),
+            'gim'
+        );
+        // Replace matching patterns with corresponding emojis
+        this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
         rc.checkLineBreaks();
-        isChatPasteTxt = false; // Reset after handling
     };
 
     chatMessage.onpaste = () => {
