@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.01
+ * @version 1.9.02
  *
  */
 
@@ -3079,65 +3079,67 @@ function handleInputs() {
         }
     };
     chatMessage.oninput = function () {
-        const chatInputEmoji = {
-            '<3': '❤️',
-            '</3': '💔',
-            ':D': '😀',
-            ':)': '😃',
-            ';)': '😉',
-            ':(': '😒',
-            ':p': '😛',
-            ';p': '😜',
-            ":'(": '😢',
-            ':+1:': '👍',
-            ':*': '😘',
-            ':O': '😲',
-            ':|': '😐',
-            ':*(': '😭',
-            XD: '😆',
-            ':B': '😎',
-            ':P': '😜',
-            '<(': '👎',
-            '>:(': '😡',
-            ':S': '😟',
-            ':X': '🤐',
-            ';(': '😥',
-            ':T': '😖',
-            ':@': '😠',
-            ':$': '🤑',
-            ':&': '🤗',
-            ':#': '🤔',
-            ':!': '😵',
-            ':W': '😷',
-            ':%': '🤒',
-            ':*!': '🤩',
-            ':G': '😬',
-            ':R': '😋',
-            ':M': '🤮',
-            ':L': '🥴',
-            ':C': '🥺',
-            ':F': '🥳',
-            ':Z': '🤢',
-            ':^': '🤓',
-            ':K': '🤫',
-            ':D!': '🤯',
-            ':H': '🧐',
-            ':U': '🤥',
-            ':V': '🤪',
-            ':N': '🥶',
-            ':J': '🥴',
-        };
-        // Create a regular expression pattern for all keys in chatInputEmoji
-        const regexPattern = new RegExp(
-            Object.keys(chatInputEmoji)
-                .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
-                .join('|'),
-            'gim'
-        );
-        // Replace matching patterns with corresponding emojis
-        this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
-
+        if (!isChatPasteTxt) {
+            const chatInputEmoji = {
+                '<3': '❤️',
+                '</3': '💔',
+                ':D': '😀',
+                ':)': '😃',
+                ';)': '😉',
+                ':(': '😒',
+                ':p': '😛',
+                ';p': '😜',
+                ":'(": '😢',
+                ':+1:': '👍',
+                ':*': '😘',
+                ':O': '😲',
+                ':|': '😐',
+                ':*(': '😭',
+                XD: '😆',
+                ':B': '😎',
+                ':P': '😜',
+                '<(': '👎',
+                '>:(': '😡',
+                ':S': '😟',
+                ':X': '🤐',
+                ';(': '😥',
+                ':T': '😖',
+                ':@': '😠',
+                ':$': '🤑',
+                ':&': '🤗',
+                ':#': '🤔',
+                ':!': '😵',
+                ':W': '😷',
+                ':%': '🤒',
+                ':*!': '🤩',
+                ':G': '😬',
+                ':R': '😋',
+                ':M': '🤮',
+                ':L': '🥴',
+                ':C': '🥺',
+                ':F': '🥳',
+                ':Z': '🤢',
+                ':^': '🤓',
+                ':K': '🤫',
+                ':D!': '🤯',
+                ':H': '🧐',
+                ':U': '🤥',
+                ':V': '🤪',
+                ':N': '🥶',
+                ':J': '🥴',
+            };
+            // Create a regular expression pattern for all keys in chatInputEmoji
+            const regexPattern = new RegExp(
+                Object.keys(chatInputEmoji)
+                    .map((key) => key.replace(/([()[{*+.$^\\|?])/g, '\\$1'))
+                    .join('|'),
+                'gim'
+            );
+            // Replace matching patterns with corresponding emojis
+            this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
+        }
         rc.checkLineBreaks();
+        isChatPasteTxt = false; // Reset after handling
     };
 
     chatMessage.onpaste = () => {
@@ -5465,7 +5467,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.01',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.02',
         html: `
             <br />
             <div id="about">
