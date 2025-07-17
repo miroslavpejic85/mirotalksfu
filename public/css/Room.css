@@ -446,10 +446,10 @@ body {
     }
 }
 
-@media screen and (max-width: 350px) {
+@media screen and (max-width: 360px) {
     #bottomButtons button {
-        width: 30px;
-        font-size: 0.6rem;
+        width: 32px;
+        font-size: 0.7rem;
     }
 }
 
