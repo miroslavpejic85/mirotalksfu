@@ -1692,7 +1692,7 @@ function hide(elem) {
 }
 
 function show(elem) {
-    if (elem.classList.contains('hidden')) elem.classList.toggle('hidden');
+    if (elem?.classList?.contains('hidden')) elem.classList.toggle('hidden');
 }
 
 function disable(elem, disabled) {
