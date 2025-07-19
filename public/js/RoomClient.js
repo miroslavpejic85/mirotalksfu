@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.03
+ * @version 1.9.04
  *
  */
 
@@ -6181,7 +6181,14 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
+    toggleVideoAudioTabs(disabled = false){
+        if (disabled) tabRoomBtn.click();
+        tabAudioDevicesBtn.disabled = disabled;
+        tabVideoDevicesBtn.disabled = disabled;
+    }
+
     handleRecordingError(error, popupLog = true) {
+        this.toggleVideoAudioTabs(false);
         console.error('Recording error', error);
         if (popupLog) this.userLog('error', error, 'top-end', 6000);
     }
@@ -6197,6 +6204,9 @@ class RoomClient {
 
     startRecording() {
         recordedBlobs = [];
+
+        // Toggle Video/Audio tabs
+        this.toggleVideoAudioTabs(true);
 
         // Get supported MIME types and set options
         const supportedMimeTypes = this.getSupportedMimeTypes();
@@ -6604,6 +6614,7 @@ class RoomClient {
 
     stopRecording() {
         if (this.mediaRecorder) {
+            this.toggleVideoAudioTabs(false);
             this._isRecording = false;
             this.mediaRecorder.stop();
             this.mediaRecorder = null;
