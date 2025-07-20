@@ -24,6 +24,7 @@ const dotenv = require('dotenv').config();
 const packageJson = require('../../package.json');
 const os = require('os');
 const fs = require('fs');
+const { Moderations } = require('openai/resources/moderations.js');
 const splitChar = ',';
 
 // ==============================================
@@ -1287,6 +1288,23 @@ module.exports = {
             enabled: process.env.STATS_ENABLED !== 'false',
             src: process.env.STATS_SRC || 'https://stats.mirotalk.com/script.js',
             id: process.env.STATS_ID || '41d26670-f275-45bb-af82-3ce91fe57756',
+        },
+    },
+
+    /**
+     * Global Moderation Settings
+     * ========================
+     * Controls room participant limits and moderation features.
+     * This section defines how many participants can join a room
+     * and whether moderation features are enabled.
+     *  Core Settings:
+     * - maxParticipants: Maximum number of participants allowed in a room
+     * - moderation: Object containing moderation settings
+     *  - room: Object containing room-specific moderation settings
+     */
+    moderation: {
+        room: {
+            maxParticipants: parseInt(process.env.ROOM_MAX_PARTICIPANTS) || 1000, // Maximum participants per room
         },
     },
 

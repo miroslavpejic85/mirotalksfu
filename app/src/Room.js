@@ -73,6 +73,8 @@ module.exports = class Room {
 
         // Share Media
         this.shareMediaData = {};
+
+        this.maxParticipants = config?.moderation?.room?.maxParticipants || 1000;
     }
 
     // ####################################################
@@ -104,6 +106,8 @@ module.exports = class Room {
             shareMediaData: this.shareMediaData,
             dominantSpeaker: this.activeSpeakerObserverEnabled,
             peers: JSON.stringify([...this.peers]),
+            maxParticipants: this.maxParticipants,
+            maxParticipantsReached: this.peers.size > this.maxParticipants,
         };
     }
 

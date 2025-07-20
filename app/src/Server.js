@@ -1483,6 +1483,13 @@ function startServer() {
                 redirect: config.features?.redirect?.enabled ? config.features.redirect : false,
             },
 
+            // Global Moderation & Management
+            moderation: {
+                room: {
+                    maxParticipants: config?.moderation?.room?.maxParticipants || 1000,
+                },
+            },
+
             // Version Information
             versions: {
                 app: packageJson?.version,

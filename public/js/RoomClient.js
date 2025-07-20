@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.04
+ * @version 1.9.05
  *
  */
 
@@ -473,6 +473,20 @@ class RoomClient {
             .request('join', data)
             .then(async (room) => {
                 console.log('##### JOIN ROOM #####', room);
+
+                if (room?.maxParticipantsReached) {
+                    console.warn('00-WARNING ----> Room is full, maximum participants reached!');
+                    endRoomSession();
+                    return popupHtmlMessage(
+                        null,
+                        image.forbidden,
+                        'Join Room',
+                        `Room is full, maximum participants${room?.maxParticipants ? ` (${room.maxParticipants})` : ''} reached!`,
+                        'center',
+                        '/',
+                        false
+                    );
+                }
 
                 if (room === 'invalid') {
                     console.warn('00-WARNING ----> Invalid Room name! Path traversal pattern detected!');
@@ -6181,7 +6195,7 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
-    toggleVideoAudioTabs(disabled = false){
+    toggleVideoAudioTabs(disabled = false) {
         if (disabled) tabRoomBtn.click();
         tabAudioDevicesBtn.disabled = disabled;
         tabVideoDevicesBtn.disabled = disabled;
