@@ -24,7 +24,6 @@ const dotenv = require('dotenv').config();
 const packageJson = require('../../package.json');
 const os = require('os');
 const fs = require('fs');
-const { Moderations } = require('openai/resources/moderations.js');
 const splitChar = ',';
 
 // ==============================================
