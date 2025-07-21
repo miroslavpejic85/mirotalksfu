@@ -1291,15 +1291,14 @@ module.exports = {
     },
 
     /**
-     * Global Moderation Settings
-     * ========================
-     * Controls room participant limits and moderation features.
-     * This section defines how many participants can join a room
-     * and whether moderation features are enabled.
-     *  Core Settings:
-     * - maxParticipants: Maximum number of participants allowed in a room
-     * - moderation: Object containing moderation settings
-     *  - room: Object containing room-specific moderation settings
+     * Moderation Configuration
+     * =======================
+     * Controls global moderation features.
+     *
+     * Core Settings:
+     * --------------
+     * - room.maxParticipants: Maximum number of participants allowed per room.
+     *   Adjust to limit room size and manage server load.
      */
     moderation: {
         room: {
