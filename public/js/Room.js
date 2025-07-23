@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.09
+ * @version 1.9.10
  * 
  */
 
@@ -3560,6 +3560,8 @@ function handleRoomClientEvents() {
         if (rc.isRecording() || recordingStatus.innerText != '0s') {
             rc.saveRecording('Room event: Client save recording before to exit');
         }
+
+        leaveRoom(false); // Don't touch :)
     });
 }
 
@@ -3567,16 +3569,16 @@ function handleRoomClientEvents() {
 // UTILITY
 // ####################################################
 
-function leaveRoom() {
-    survey && survey.enabled ? leaveFeedback() : redirectOnLeave();
+function leaveRoom(allowCancel = true) {
+    survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
 }
 
-function leaveFeedback() {
+function leaveFeedback(allowCancel) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
         showDenyButton: true,
-        showCancelButton: true,
+        showCancelButton: allowCancel,
         confirmButtonColor: 'green',
         denyButtonColor: 'red',
         cancelButtonColor: 'gray',
@@ -3593,7 +3595,6 @@ function leaveFeedback() {
     }).then((result) => {
         if (result.isConfirmed) {
             endRoomSession();
-            rc.exitRoom();
             openURL(survey.url);
         } else if (result.isDenied) {
             redirectOnLeave();
@@ -5470,7 +5471,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.09',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.10',
         html: `
             <br />
             <div id="about">
