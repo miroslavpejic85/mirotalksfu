@@ -3485,12 +3485,11 @@ class RoomClient {
                 .catch((e) => console.warn('Exit Room ', e))
                 .finally(() => {
                     clean();
+                    this.event(_EVENTS.exitRoom);
                 });
         } else {
             clean();
         }
-
-        this.event(_EVENTS.exitRoom);
     }
 
     exitRoom(disconnectAll = false) {
