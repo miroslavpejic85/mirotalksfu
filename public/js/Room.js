@@ -12,7 +12,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
  * @version 1.9.09
- *
+ * 
  */
 
 // ####################################################
