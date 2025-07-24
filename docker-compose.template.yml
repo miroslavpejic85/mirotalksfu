@@ -4,6 +4,13 @@ services:
         container_name: mirotalksfu
         hostname: mirotalksfu
         restart: unless-stopped
+        # The following ports are only required if 'network_mode: host' is NOT enabled.
+        # If you enable 'network_mode: host', you can comment out or remove the 'ports' section below.
+        # network_mode: 'host'
+        ports:
+            - '3010:3010/tcp'
+            - '40000-40100:40000-40100/tcp'
+            - '40000-40100:40000-40100/udp'
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
             - ./.env:/src/.env:ro
@@ -14,7 +21,3 @@ services:
             # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
             # - ./public/:/src/public/:ro
-        ports:
-            - '3010:3010/tcp'
-            - '40000-40100:40000-40100/tcp'
-            - '40000-40100:40000-40100/udp'
