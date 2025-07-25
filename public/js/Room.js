@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.11
+ * @version 1.9.12
  *
  */
 
@@ -1685,29 +1685,67 @@ function roomIsReady() {
     //show(restartICEButton); // TEST
 }
 
-function elemDisplay(element, display, mode = 'block') {
-    const elem = document.getElementById(element);
-    elem ? (elem.style.display = display ? mode : 'none') : console.error('elemDisplay not found', element);
+// ####################################################
+// UTILS
+// ####################################################
+
+function elemDisplay(elem, display, mode = 'block') {
+    elem = getId(elem);
+    if (!elem) {
+        elementNotFound(elem);
+        return;
+    }
+    elem.style.display = display ? mode : 'none';
 }
 
 function hide(elem) {
+    elem = typeof elem === 'string' ? getId(elem) : elem;
+    if (!elem || !elem.classList) {
+        elementNotFound(elem);
+        return;
+    }
     if (!elem.classList.contains('hidden')) elem.classList.toggle('hidden');
 }
 
 function show(elem) {
+    elem = typeof elem === 'string' ? getId(elem) : elem;
+    if (!elem || !elem.classList) {
+        elementNotFound(elem);
+        return;
+    }
     if (elem.classList.contains('hidden')) elem.classList.toggle('hidden');
 }
 
 function disable(elem, disabled) {
+    elem = typeof elem === 'string' ? getId(elem) : elem;
+    if (!elem) {
+        elementNotFound(elem);
+        return;
+    }
     elem.disabled = disabled;
 }
 
 function setColor(elem, color) {
+    elem = typeof elem === 'string' ? getId(elem) : elem;
+    if (!elem) {
+        elementNotFound(elem);
+        return;
+    }
     elem.style.color = color;
 }
 
 function getColor(elem) {
+    elem = typeof elem === 'string' ? getId(elem) : elem;
+    if (!elem) {
+        elementNotFound(elem);
+        return undefined;
+    }
     return elem.style.color;
+}
+
+function elementNotFound(element) {
+    console.error('Element Not Found', element);
+    return false;
 }
 
 // ####################################################
@@ -5476,7 +5514,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.11',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.12',
         html: `
             <br />
             <div id="about">
