@@ -1124,7 +1124,7 @@ module.exports = {
                 settingsButton: process.env.SHOW_SETTINGS !== 'false',
                 aboutButton: process.env.SHOW_ABOUT !== 'false',
                 exitButton: process.env.SHOW_EXIT_BUTTON !== 'false',
-                extraButton: process.env.SHOW_EXTRA_BUTTONS !== 'false',
+                extraButton: process.env.SHOW_EXTRA_BUTTON !== 'false',
             },
 
             // Settings panel buttons and options
