@@ -1107,6 +1107,7 @@ module.exports = {
                 shareQr: process.env.SHOW_SHARE_QR !== 'false',
                 shareButton: process.env.SHOW_SHARE_BUTTON !== 'false',
                 hideMeButton: process.env.SHOW_HIDE_ME !== 'false',
+                fullScreenButton: process.env.SHOW_FULLSCREEN_BUTTON !== 'false',
                 startAudioButton: process.env.SHOW_AUDIO_BUTTON !== 'false',
                 startVideoButton: process.env.SHOW_VIDEO_BUTTON !== 'false',
                 startScreenButton: process.env.SHOW_SCREEN_BUTTON !== 'false',
@@ -1123,6 +1124,7 @@ module.exports = {
                 settingsButton: process.env.SHOW_SETTINGS !== 'false',
                 aboutButton: process.env.SHOW_ABOUT !== 'false',
                 exitButton: process.env.SHOW_EXIT_BUTTON !== 'false',
+                extraButton: process.env.SHOW_EXTRA_BUTTONS !== 'false',
             },
 
             // Settings panel buttons and options

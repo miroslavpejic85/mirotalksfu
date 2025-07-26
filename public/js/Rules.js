@@ -18,6 +18,7 @@ let BUTTONS = {
         shareQr: true,
         shareButton: true, // for quest, presenter default true
         hideMeButton: true,
+        fullScreenButton: true,
         startAudioButton: true,
         startVideoButton: true,
         startScreenButton: true,
@@ -34,6 +35,7 @@ let BUTTONS = {
         settingsButton: true,
         aboutButton: true, // Please keep me always visible, thank you!
         exitButton: true,
+        extraButton: true,
     },
     settings: {
         fileSharing: true,
