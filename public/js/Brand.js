@@ -76,7 +76,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.9.13</strong>',
+        title: '<strong>WebRTC SFU v1.9.14</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -142,6 +142,8 @@ async function getBrand() {
                     clientBrand: BRAND,
                 });
                 window.sessionStorage.setItem(brandDataKey, JSON.stringify(serverBrand));
+            } else {
+                console.warn('FETCH BRAND SETTINGS - DISABLED');
             }
         } catch (error) {
             console.error('FETCH GET BRAND ERROR', error.message);

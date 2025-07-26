@@ -971,7 +971,13 @@ module.exports = {
              * Application Branding
              * --------------------
              * Core application identity and user interface text elements.
+             *
+             * Note:
+             * Set BRAND_HTML_INJECTION to 'false' to disable HTML injection.
+             * This allows for static branding in the public/views folder, without dynamic content injection.
              */
+            htmlInjection: process.env.BRAND_HTML_INJECTION !== 'false',
+
             app: {
                 language: process.env.UI_LANGUAGE || 'en',
                 name: process.env.APP_NAME || 'MiroTalk SFU',
