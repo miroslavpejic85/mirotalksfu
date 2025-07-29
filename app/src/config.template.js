@@ -1486,6 +1486,9 @@ module.exports = {
          * - Requires stable network identity (use StatefulSet)
          * - Needs NodePort/LoadBalancer with externalTrafficPolicy: Local
          * - Port ranges must be carefully allocated to avoid conflicts
+         *
+         * Optional Config:
+         * - https://mediasoup.discourse.group/t/mediasoup-3-17-0-released/6805
          */
         webRtcServerActive: process.env.SFU_SERVER === 'true', // Enable if SFU_SERVER=true
         webRtcServerOptions: {
