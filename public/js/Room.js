@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.17
+ * @version 1.9.18
  *
  */
 
@@ -197,6 +197,10 @@ const pickr = Pickr.create({
 // ####################################################
 
 const videoSelect = getId('videoSelect');
+const videoQuality = getId('videoQuality');
+const videoFps = getId('videoFps');
+const screenFps = getId('screenFps');
+const screenOptimization = getId('screenOptimization');
 const initVideoSelect = getId('initVideoSelect');
 const microphoneSelect = getId('microphoneSelect');
 const initMicrophoneSelect = getId('initMicrophoneSelect');
@@ -2456,7 +2460,7 @@ async function changeCamera(deviceId) {
         video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
-            deviceId: deviceId,
+            deviceId: { exact: deviceId },
             aspectRatio: 1.777,
         },
     };
@@ -2635,7 +2639,7 @@ function handleCameraMirror(video) {
 
 function handleSelects() {
     // devices options
-    videoSelect.onchange = () => {
+    videoSelect.onchange = (e) => {
         videoQuality.selectedIndex = 0;
         rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
         refreshLsDevices();
@@ -5525,7 +5529,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.17',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.18',
         html: `
             <br />
             <div id="about">

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.17
+ * @version 1.9.18
  *
  */
 
@@ -2260,7 +2260,7 @@ class RoomClient {
 
         // Add deviceId if provided
         if (deviceId) {
-            constraints.deviceId = deviceId;
+            constraints.deviceId = { exact: deviceId };
         }
 
         // Compose final constraints object
@@ -2757,6 +2757,16 @@ class RoomClient {
         }
 
         const producer_id = this.producerLabel.get(type);
+        const producer = this.producers.get(producer_id);
+
+        // Stop all tracks of the producer's stream
+        if (producer && producer.track) {
+            try {
+                producer.track.stop();
+            } catch (err) {
+                console.warn('Error stopping producer track:', err);
+            }
+        }
 
         const data = {
             peer_name: this.peer_name,
