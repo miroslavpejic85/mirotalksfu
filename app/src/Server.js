@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.18
+ * @version 1.9.20
  *
  */
 
@@ -298,6 +298,7 @@ const views = {
     about: path.join(__dirname, '../../', 'public/views/about.html'),
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
     login: path.join(__dirname, '../../', 'public/views/login.html'),
+    activeRooms: path.join(__dirname, '../../', 'public/views/activeRooms.html'),
     newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
     notFound: path.join(__dirname, '../../', 'public/views/404.html'),
     permission: path.join(__dirname, '../../', 'public/views/permission.html'),
@@ -623,6 +624,24 @@ function startServer() {
             }
         } else {
             htmlInjector.injectHtml(views.newRoom, res);
+        }
+    });
+
+    // Get Active rooms
+    app.get('/activeRooms', OIDCAuth, (req, res) => {
+        //log.info('/activeRooms');
+
+        if (!OIDC.enabled && hostCfg.protected) {
+            const ip = getIP(req);
+            if (allowedIP(ip)) {
+                res.redirect('/');
+                hostCfg.authenticated = true;
+            } else {
+                hostCfg.authenticated = false;
+                res.redirect('/login');
+            }
+        } else {
+            res.sendFile(views.activeRooms);
         }
     });
 
@@ -1397,6 +1416,34 @@ function startServer() {
             return res.end(meetingURL);
         }
         return res.end('`Wrong signature` - Verification failed!');
+    });
+
+    // ####################################################
+    // AUTHORIZED API IF ALLOWED
+    // ####################################################
+
+    // request active rooms endpoint
+    app.get(restApi.basePath + '/activeRooms', (req, res) => {
+        // Check if endpoint allowed
+        if (!config.ui?.rooms?.showActive) {
+            return res.status(403).json({
+                error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+            });
+        }
+        // check if user was authorized for the api call
+        const { host, authorization = config.api.keySecret } = req.headers;
+        const api = new ServerApi(host, authorization);
+
+        // Get active rooms
+        const activeRooms = api.getActiveRooms(roomList);
+        res.json({ activeRooms: activeRooms });
+
+        // log.debug the output if all done
+        log.debug('MiroTalk get active rooms - Authorized', {
+            header: req.headers,
+            body: req.body,
+            activeRooms: activeRooms,
+        });
     });
 
     // not match any of page before, so 404 not found

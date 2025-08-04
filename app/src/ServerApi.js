@@ -27,6 +27,14 @@ module.exports = class ServerApi {
         return { timestamp, totalRooms, totalUsers };
     }
 
+    getActiveRooms(roomList) {
+        return Array.from(roomList.entries()).map(([roomId, room]) => ({
+            id: roomId,
+            peers: room.peers.size,
+            join: 'https://' + this._host + '/' + roomId,
+        }));
+    }
+
     getMeetings(roomList) {
         const meetings = Array.from(roomList.entries()).map(([id, room]) => {
             const peers = Array.from(room.peers.values()).map(

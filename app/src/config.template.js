@@ -962,10 +962,20 @@ module.exports = {
          * Controls all aspects of the application's visual identity, content, and metadata.
          * Supports environment variable overrides for deployment-specific customization.
          *
+         * ==============================================
          * LICENSE REQUIRED:
-         * ----------------
+         * ==============================================
          * - https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
          */
+        rooms: {
+            /**
+             * Room Display Settings
+             * ---------------------
+             * - showActive: Show active rooms in the UI (default: false)
+             *   https://sfu.mirotalk.com/activeRooms
+             */
+            showActive: process.env.SHOW_ACTIVE_ROOMS === 'true',
+        },
         brand: {
             /**
              * Application Branding
