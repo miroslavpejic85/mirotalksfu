@@ -220,16 +220,14 @@ function customizeApp() {
 // WIDGET customize
 function customizeWidget() {
     if (BRAND.widget?.enabled) {
-        window.addEventListener('DOMContentLoaded', function () {
-            if (typeof MiroTalkWidget !== 'undefined') {
-                const domain = window.location.host;
-                const roomId = 'support-room';
-                const userName = 'guest-' + Math.floor(Math.random() * 10000);
-                new MiroTalkWidget(domain, roomId, userName, BRAND.widget);
-            } else {
-                console.error('MiroTalkWidget is not defined. Please check Widget.js loading.');
-            }
-        });
+        if (typeof MiroTalkWidget !== 'undefined') {
+            const domain = window.location.host;
+            const roomId = 'support-room';
+            const userName = 'guest-' + Math.floor(Math.random() * 10000);
+            new MiroTalkWidget(domain, roomId, userName, BRAND.widget);
+        } else {
+            console.error('MiroTalkWidget is not defined. Please check Widget.js loading.');
+        }
     }
 }
 
