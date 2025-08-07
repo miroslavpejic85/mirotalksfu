@@ -34,6 +34,28 @@ const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
 
 // app/src/config.js - ui.brand
 let BRAND = {
+    widget: {
+        enabled: false,
+        theme: 'dark',
+        widgetState: 'minimized',
+        widgetType: 'support',
+        supportWidget: {
+            position: 'top-right',
+            expertImages: [
+                'https://photo.cloudron.pocketsolution.net/uploads/original/95/7d/a5f7f7a2c89a5fee7affda5f013c.jpeg',
+            ],
+            checkOnlineStatus: false,
+            isOnline: true,
+            customMessages: {
+                heading: 'Need Help?',
+                subheading: 'Get instant support from our expert team!',
+                connectText: 'connect in < 5 seconds',
+                onlineText: 'We are online',
+                offlineText: 'We are offline',
+                poweredBy: 'Powered by MiroTalk SFU',
+            },
+        },
+    },
     app: {
         language: 'en',
         name: 'MiroTalk SFU',
@@ -76,7 +98,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.9.24</strong>',
+        title: '<strong>WebRTC SFU v1.9.25</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -118,6 +140,8 @@ async function initialize() {
     customizeMetaTags();
 
     customizeApp();
+
+    customizeWidget();
 
     customizeWhoAreYou();
 
@@ -190,6 +214,22 @@ function customizeApp() {
     }
     if (joinLastLabel && BRAND.app?.joinLastLabel) {
         joinLastLabel.innerText = BRAND.app.joinLastLabel;
+    }
+}
+
+// WIDGET customize
+function customizeWidget() {
+    if (BRAND.widget?.enabled) {
+        window.addEventListener('DOMContentLoaded', function () {
+            if (typeof MiroTalkWidget !== 'undefined') {
+                const domain = window.location.host;
+                const roomId = 'support-room';
+                const userName = 'guest-' + Math.floor(Math.random() * 10000);
+                new MiroTalkWidget(domain, roomId, userName, BRAND.widget);
+            } else {
+                console.error('MiroTalkWidget is not defined. Please check Widget.js loading.');
+            }
+        });
     }
 }
 
