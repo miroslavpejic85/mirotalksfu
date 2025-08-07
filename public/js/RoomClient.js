@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.22
+ * @version 1.9.23
  *
  */
 
@@ -739,8 +739,7 @@ class RoomClient {
 
         console.log('07.2 Participants Count ---->', participantsCount);
 
-        // notify && participantsCount == 1 ? shareRoom() : sound('joined');
-        if (notify && participantsCount == 1) {
+        if (BUTTONS.main.shareRoomPopup && notify && participantsCount == 1) {
             shareRoom();
         } else {
             if (this.isScreenAllowed) {

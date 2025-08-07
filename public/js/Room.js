@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.22
+ * @version 1.9.23
  *
  */
 
@@ -1545,7 +1545,6 @@ function joinRoom(peer_name, room_id) {
             roomIsReady
         );
         handleRoomClientEvents();
-        //notify ? shareRoom() : sound('joined');
     }
 }
 
@@ -1854,11 +1853,11 @@ function handleButtons() {
         shareRoom(true);
     };
     shareButton.onmouseenter = () => {
-        if (isMobileDevice || !BUTTONS.main.shareQr) return;
+        if (isMobileDevice || !BUTTONS.main.shareRoomQrOnHover) return;
         show(qrRoomPopupContainer);
     };
     shareButton.onmouseleave = () => {
-        if (isMobileDevice || !BUTTONS.main.shareQr) return;
+        if (isMobileDevice || !BUTTONS.main.shareRoomQrOnHover) return;
         hide(qrRoomPopupContainer);
     };
     hideMeButton.onclick = (e) => {
@@ -3439,7 +3438,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room event: Client pause audio');
         hide(stopAudioButton);
-        show(startAudioButton);
+        BUTTONS.main.startAudioButton && show(startAudioButton);
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
         audio = false;
@@ -3447,7 +3446,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room event: Client resume audio');
         hide(startAudioButton);
-        show(stopAudioButton);
+        BUTTONS.main.startAudioButton && show(stopAudioButton);
         setAudioButtonsDisabled(false);
         audio = true;
     });
@@ -3472,7 +3471,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
         hide(stopVideoButton);
-        show(startVideoButton);
+        BUTTONS.main.startVideoButton && show(startVideoButton);
         setColor(startVideoButton, 'red');
         setVideoButtonsDisabled(false);
         hideClassElements('videoMenuBar');
@@ -3481,7 +3480,7 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
         hide(startVideoButton);
-        show(stopVideoButton);
+        BUTTONS.main.startVideoButton && show(stopVideoButton);
         setVideoButtonsDisabled(false);
         isVideoPrivacyActive = false;
         hideClassElements('videoMenuBar');
@@ -5529,7 +5528,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.22',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.23',
         html: `
             <br />
             <div id="about">

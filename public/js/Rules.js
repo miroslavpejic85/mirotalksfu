@@ -15,7 +15,8 @@ const isRulesActive = true;
  */
 let BUTTONS = {
     main: {
-        shareQr: true,
+        shareRoomPopup: true,
+        shareRoomQrOnHover: true,
         shareButton: true, // for quest, presenter default true
         hideMeButton: true,
         fullScreenButton: true,
