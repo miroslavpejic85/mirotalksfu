@@ -1118,10 +1118,13 @@ module.exports = {
          * Organized by component/functionality area
          */
         buttons: {
-            // Main control buttons visible in the UI
-            main: {
+            // Popup Configuration
+            popup: {
                 shareRoomPopup: process.env.SHOW_SHARE_ROOM_POPUP !== 'false',
                 shareRoomQrOnHover: process.env.SHOW_SHARE_ROOM_QR_ON_HOVER !== 'false',
+            },
+            // Main control buttons visible in the UI
+            main: {
                 shareButton: process.env.SHOW_SHARE_BUTTON !== 'false',
                 hideMeButton: process.env.SHOW_HIDE_ME !== 'false',
                 fullScreenButton: process.env.SHOW_FULLSCREEN_BUTTON !== 'false',
@@ -1143,7 +1146,6 @@ module.exports = {
                 exitButton: process.env.SHOW_EXIT_BUTTON !== 'false',
                 extraButton: process.env.SHOW_EXTRA_BUTTON !== 'false',
             },
-
             // Settings panel buttons and options
             settings: {
                 fileSharing: process.env.ENABLE_FILE_SHARING !== 'false',

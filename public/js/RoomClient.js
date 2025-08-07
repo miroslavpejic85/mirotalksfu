@@ -739,7 +739,7 @@ class RoomClient {
 
         console.log('07.2 Participants Count ---->', participantsCount);
 
-        if (BUTTONS.main.shareRoomPopup && notify && participantsCount == 1) {
+        if (BUTTONS.popup.shareRoomPopup && notify && participantsCount == 1) {
             shareRoom();
         } else {
             if (this.isScreenAllowed) {

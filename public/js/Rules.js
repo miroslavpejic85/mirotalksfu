@@ -14,9 +14,11 @@ const isRulesActive = true;
  * Ensure that any changes made here are also reflected in the configuration file to maintain synchronization.
  */
 let BUTTONS = {
-    main: {
+    popup: {
         shareRoomPopup: true,
         shareRoomQrOnHover: true,
+    },
+    main: {
         shareButton: true, // for quest, presenter default true
         hideMeButton: true,
         fullScreenButton: true,

@@ -1853,11 +1853,11 @@ function handleButtons() {
         shareRoom(true);
     };
     shareButton.onmouseenter = () => {
-        if (isMobileDevice || !BUTTONS.main.shareRoomQrOnHover) return;
+        if (isMobileDevice || !BUTTONS.popup.shareRoomQrOnHover) return;
         show(qrRoomPopupContainer);
     };
     shareButton.onmouseleave = () => {
-        if (isMobileDevice || !BUTTONS.main.shareRoomQrOnHover) return;
+        if (isMobileDevice || !BUTTONS.popup.shareRoomQrOnHover) return;
         hide(qrRoomPopupContainer);
     };
     hideMeButton.onclick = (e) => {
