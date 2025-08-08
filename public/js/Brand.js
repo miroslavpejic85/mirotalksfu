@@ -36,6 +36,7 @@ const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
 let BRAND = {
     widget: {
         enabled: false,
+        roomId: 'support-room',
         theme: 'dark',
         widgetState: 'minimized',
         widgetType: 'support',
@@ -222,7 +223,7 @@ function customizeWidget() {
     if (BRAND.widget?.enabled) {
         if (typeof MiroTalkWidget !== 'undefined') {
             const domain = window.location.host;
-            const roomId = 'support-room';
+            const roomId = BRAND.widget?.roomId || 'support-room';
             const userName = 'guest-' + Math.floor(Math.random() * 10000);
             new MiroTalkWidget(domain, roomId, userName, BRAND.widget);
         } else {

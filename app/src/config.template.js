@@ -995,30 +995,30 @@ module.exports = {
              * Supports dynamic configuration via environment variables.
              */
             widget: {
-                enabled: process.env.BRAND_WIDGET_ENABLED === 'true',
-                domain: process.env.WIDGET_DOMAIN || null, // sfu.mirotalk.com
-                theme: process.env.BRAND_WIDGET_THEME || 'dark',
-                widgetState: process.env.BRAND_WIDGET_STATE || 'minimized',
-                widgetType: process.env.BRAND_WIDGET_TYPE || 'support',
+                enabled: process.env.WIDGET_ENABLED === 'true',
+                roomId: process.env.WIDGET_ROOM_ID || 'support-room',
+                theme: process.env.WIDGET_THEME || 'dark',
+                widgetState: process.env.WIDGET_STATE || 'minimized',
+                widgetType: process.env.WIDGET_TYPE || 'support',
                 supportWidget: {
-                    position: process.env.BRAND_WIDGET_SUPPORT_POSITION || 'top-right',
-                    expertImages: process.env.BRAND_WIDGET_SUPPORT_EXPERT_IMAGES
-                        ? process.env.BRAND_WIDGET_SUPPORT_EXPERT_IMAGES.split(splitChar)
+                    position: process.env.WIDGET_SUPPORT_POSITION || 'top-right',
+                    expertImages: process.env.WIDGET_SUPPORT_EXPERT_IMAGES
+                        ? process.env.WIDGET_SUPPORT_EXPERT_IMAGES.split(splitChar)
                               .map((url) => url.trim())
                               .filter(Boolean)
                         : [
                               'https://photo.cloudron.pocketsolution.net/uploads/original/95/7d/a5f7f7a2c89a5fee7affda5f013c.jpeg',
                           ],
-                    checkOnlineStatus: process.env.BRAND_WIDGET_SUPPORT_CHECK_ONLINE_STATUS === 'true',
-                    isOnline: process.env.BRAND_WIDGET_SUPPORT_IS_ONLINE !== 'false',
+                    checkOnlineStatus: process.env.WIDGET_SUPPORT_CHECK_ONLINE_STATUS === 'true',
+                    isOnline: process.env.WIDGET_SUPPORT_IS_ONLINE !== 'false',
                     customMessages: {
-                        heading: process.env.BRAND_WIDGET_SUPPORT_HEADING || 'Need Help?',
+                        heading: process.env.WIDGET_SUPPORT_HEADING || 'Need Help?',
                         subheading:
-                            process.env.BRAND_WIDGET_SUPPORT_SUBHEADING || 'Get instant support from our expert team!',
-                        connectText: process.env.BRAND_WIDGET_SUPPORT_CONNECT_TEXT || 'connect in < 5 seconds',
-                        onlineText: process.env.BRAND_WIDGET_SUPPORT_ONLINE_TEXT || 'We are online',
-                        offlineText: process.env.BRAND_WIDGET_SUPPORT_OFFLINE_TEXT || 'We are offline',
-                        poweredBy: process.env.BRAND_WIDGET_SUPPORT_POWERED_BY || 'Powered by MiroTalk SFU',
+                            process.env.WIDGET_SUPPORT_SUBHEADING || 'Get instant support from our expert team!',
+                        connectText: process.env.WIDGET_SUPPORT_CONNECT_TEXT || 'connect in < 5 seconds',
+                        onlineText: process.env.WIDGET_SUPPORT_ONLINE_TEXT || 'We are online',
+                        offlineText: process.env.WIDGET_SUPPORT_OFFLINE_TEXT || 'We are offline',
+                        poweredBy: process.env.WIDGET_SUPPORT_POWERED_BY || 'Powered by MiroTalk SFU',
                     },
                 },
             },
