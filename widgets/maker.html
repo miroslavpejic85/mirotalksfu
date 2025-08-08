@@ -500,6 +500,24 @@ Get instant support from our expert team!</textarea
                             placeholder="Powered by MiroTalk"
                         />
                     </div>
+
+                    <!-- New Expert Images field -->
+                    <div class="form-group">
+                        <label
+                            for="expert-images"
+                            class="tooltip"
+                            data-tooltip="Comma-separated list of expert avatar URLs"
+                        >
+                            Expert Images (comma separated)
+                        </label>
+                        <textarea
+                            id="expert-images"
+                            placeholder="https://i.pravatar.cc/40?img=1,https://i.pravatar.cc/40?img=2,https://i.pravatar.cc/40?img=3"
+                            style="height: 60px"
+                        >
+https://i.pravatar.cc/40?img=1,https://i.pravatar.cc/40?img=2,https://i.pravatar.cc/40?img=3</textarea
+                        >
+                    </div>
                 </div>
 
                 <!-- Generated Code -->
@@ -536,6 +554,7 @@ Get instant support from our expert team!</textarea
                 onlineText: document.getElementById('online-text'),
                 offlineText: document.getElementById('offline-text'),
                 poweredBy: document.getElementById('powered-by'),
+                expertImages: document.getElementById('expert-images'),
             };
 
             const generatedCode = document.getElementById('generated-code');
@@ -555,6 +574,9 @@ Get instant support from our expert team!</textarea
                     onlineText: form.onlineText.value || 'We are online',
                     offlineText: form.offlineText.value || 'We are offline',
                     poweredBy: form.poweredBy.value || 'Powered by MiroTalk',
+                    expertImages:
+                        form.expertImages.value ||
+                        'https://i.pravatar.cc/40?img=1,https://i.pravatar.cc/40?img=2,https://i.pravatar.cc/40?img=3',
                 };
 
                 const html = `<!doctype html>
@@ -576,6 +598,7 @@ Get instant support from our expert team!</textarea
         data-position="${config.position}"
         data-widget-state="${config.widgetState}"
         data-check-online="${config.checkOnline}"
+        data-expert-images="${escapeHtml(config.expertImages)}"
         data-heading="${escapeHtml(config.heading)}"
         data-subheading="${escapeHtml(config.subheading)}"
         data-connect-text="${escapeHtml(config.connectText)}"
@@ -643,6 +666,8 @@ Get instant support from our expert team!</textarea
                 form.onlineText.value = 'We are online';
                 form.offlineText.value = 'We are offline';
                 form.poweredBy.value = 'Powered by MiroTalk';
+                form.expertImages.value =
+                    'https://i.pravatar.cc/40?img=1,https://i.pravatar.cc/40?img=2,https://i.pravatar.cc/40?img=3';
 
                 generateCode();
             }
