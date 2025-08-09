@@ -5,6 +5,8 @@ const config = require('../config');
 const Logger = require('../Logger');
 const log = new Logger('NodeMailer');
 
+const APP_NAME = config.ui.brand.app.name || 'MiroTalk SFU';
+
 // ####################################################
 // EMAIL CONFIG
 // ####################################################
@@ -61,11 +63,14 @@ function sendEmailAlert(event, data) {
             subject = getJoinRoomSubject(data);
             body = getJoinRoomBody(data);
             break;
+        case 'widget':
+            subject = getWidgetRoomSubject(data);
+            body = getWidgetRoomBody(data);
+            break;
         case 'alert':
             subject = getAlertSubject(data);
             body = getAlertBody(data);
             break;
-        //...
         default:
             break;
     }
@@ -90,7 +95,7 @@ function sendEmail(subject, body) {
 
 function getJoinRoomSubject(data) {
     const { room_id } = data;
-    return `MiroTalk SFU - New user Join to Room ${room_id}`;
+    return `${APP_NAME} - New user Join to Room ${room_id}`;
 }
 function getJoinRoomBody(data) {
     const { peer_name, room_id, domain, os, browser } = data;
@@ -147,9 +152,26 @@ function getJoinRoomBody(data) {
     `;
 }
 
+// ==========
+// Widget
+// ==========
+
+function getWidgetRoomSubject(data) {
+    const { room_id } = data;
+    return `${APP_NAME} WIDGET - New user Wait for expert assistance in Room ${room_id}`;
+}
+
+function getWidgetRoomBody(data) {
+    return getJoinRoomBody(data);
+}
+
+// ==========
+// Alert
+// ==========
+
 function getAlertSubject(data) {
     const { subject } = data;
-    return subject || 'MiroTalk SFU - Alert';
+    return subject || `${APP_NAME} - Alert`;
 }
 
 function getAlertBody(data) {

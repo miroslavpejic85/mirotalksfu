@@ -1021,6 +1021,10 @@ module.exports = {
                         poweredBy: process.env.WIDGET_SUPPORT_POWERED_BY || 'Powered by MiroTalk SFU',
                     },
                 },
+                alert: {
+                    enabled: process.env.WIDGET_ALERT_ENABLED === 'true',
+                    type: process.env.WIDGET_ALERT_TYPE || 'email',
+                },
             },
 
             app: {

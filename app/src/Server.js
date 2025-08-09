@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.26
+ * @version 1.9.27
  *
  */
 
@@ -170,6 +170,15 @@ const hostCfg = {
     users_api_secret_key: config?.security?.host?.users_api_secret_key,
     api_room_exists: config?.security?.host?.api_room_exists,
     presenters: config?.security?.host?.presenters,
+};
+
+const widget = {
+    enabled: config?.ui?.brand?.widget?.enabled,
+    roomId: config?.ui?.brand?.widget?.roomId || 'support-room',
+    alert: {
+        enabled: config?.ui?.brand?.widget?.alert?.enabled,
+        type: config?.ui?.brand?.widget?.alert?.type || 'email',
+    },
 };
 
 const restApi = {
@@ -1900,15 +1909,32 @@ function startServer() {
                 }
             }
 
-            // SCENARIO: Notify when the first user join room and is awaiting assistance...
-            if (room.getPeersCount() === 1) {
-                nodemailer.sendEmailAlert('join', {
-                    room_id: room.id,
-                    peer_name: peer_name,
-                    domain: socket.handshake.headers.host.split(':')[0],
-                    os: os_name ? `${os_name} ${os_version}` : '',
-                    browser: browser_name ? `${browser_name} ${browser_version}` : '',
-                }); // config.email.alert: true
+            // Email body payload
+            const emailPayload = {
+                room_id: room.id,
+                peer_name: peer_name,
+                domain: socket.handshake.headers.host.split(':')[0],
+                os: os_name ? `${os_name} ${os_version}` : '',
+                browser: browser_name ? `${browser_name} ${browser_version}` : '',
+            };
+
+            const firstJoin = room.getPeersCount() === 1;
+
+            // SCENARIO: Notify when the first user join room and is awaiting assistance
+            if (firstJoin && !widget.alert.enabled) {
+                nodemailer.sendEmailAlert('join', emailPayload);
+            }
+
+            // SCENARIO: Notify when a user joins the widget room for expert assistance
+            if (firstJoin && widget.enabled && widget.alert && widget.alert.enabled && widget.roomId === room.id) {
+                switch (widget.alert.type) {
+                    case 'email':
+                        nodemailer.sendEmailAlert('widget', emailPayload);
+                        break;
+                    // case slack, discord, webhook, ...
+                    default:
+                        log.warn('Unknown alert type for widget', { type: widget.type });
+                }
             }
 
             // handle WebHook
