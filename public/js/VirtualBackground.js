@@ -43,7 +43,11 @@ class VirtualBackground {
 
     async initializeSegmentation() {
         // Initialize the segmentation model if not already done
-        if (this.initialized) return;
+        if (this.initialized) {
+            console.log('✅ Segmentation already initialized');
+            return;
+        }
+
         try {
             this.segmentation = new SelfieSegmentation({
                 locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${file}`,
@@ -85,6 +89,12 @@ class VirtualBackground {
     }
 
     processFrame(videoFrame, controller, imageBitmap, maskHandler, segmentationMask) {
+        if (!controller) {
+            console.warn('Controller invalid, closing frames');
+            this.closeFrames(videoFrame, imageBitmap);
+            return;
+        }
+
         try {
             const canvas = new OffscreenCanvas(videoFrame.displayWidth, videoFrame.displayHeight);
             const ctx = canvas.getContext('2d');
@@ -101,8 +111,16 @@ class VirtualBackground {
                 alpha: 'keep', // Ensure transparency is preserved
             });
 
-            // Enqueue the processed frame to continue the stream
-            controller.enqueue(processedFrame);
+            try {
+                // Enqueue the processed frame to continue the stream
+                controller.enqueue(processedFrame);
+            } catch (enqueueError) {
+                console.warn('Failed to enqueue frame', enqueueError);
+                // Close the processed frame if enqueue fails
+                if (!processedFrame.closed) {
+                    processedFrame.close();
+                }
+            }
         } catch (error) {
             console.error('❌ Frame processing error:', error);
         } finally {
@@ -127,6 +145,9 @@ class VirtualBackground {
                 'MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
             );
         }
+
+        // Stop current processing before starting new one
+        await this.stopCurrentProcessor();
 
         // Initialize segmentation if not already done
         await this.initializeSegmentation();
@@ -177,12 +198,14 @@ class VirtualBackground {
                     this.frameCounter++; // Increment frame counter
                 } catch (error) {
                     console.error('❌ Frame transformation error:', error);
-                } finally {
-                    // Close the video frame after processing
                     this.closeFrames(videoFrame, imageBitmap);
                 }
             },
-            flush: () => this.cleanPendingFrames(), // Clean up any pending frames when the stream ends
+            flush: () => {
+                // Clean up any pending frames when the stream ends
+                console.log('Transform stream flushing...');
+                this.cleanPendingFrames();
+            },
         });
 
         // Store active streams
@@ -190,13 +213,28 @@ class VirtualBackground {
         this.activeGenerator = generator;
         this.isProcessing = true;
 
-        // Start the processing pipeline
-        processor.readable
-            .pipeThrough(transformer)
-            .pipeTo(generator.writable)
-            .catch(async () => await this.stopCurrentProcessor());
+        try {
+            // Pipeline error handling without recursive calls
+            const pipelinePromise = processor.readable.pipeThrough(transformer).pipeTo(generator.writable);
 
-        return new MediaStream([generator]);
+            // Handle errors without awaiting (prevents blocking and recursion)
+            pipelinePromise.catch(() => {
+                // Only stop if we're still processing (avoid recursive calls)
+                if (this.isProcessing && this.activeProcessor) {
+                    console.log('Stopping processor due to pipeline error...');
+                    // Don't await this - let it run async to avoid recursion
+                    this.stopCurrentProcessor().catch((stopError) => {
+                        console.warn('Error during processor cleanup:', stopError);
+                    });
+                }
+            });
+
+            return new MediaStream([generator]);
+        } catch (error) {
+            console.error('Error setting up processing pipeline', error);
+            await this.stopCurrentProcessor();
+            throw error;
+        }
     }
 
     cleanPendingFrames() {
@@ -205,11 +243,15 @@ class VirtualBackground {
             const { videoFrame, imageBitmap } = this.pendingFrames.pop();
             this.closeFrames(videoFrame, imageBitmap);
         }
+        this.pendingFrames = [];
+        console.log('✅ Cleaned pending frames');
     }
 
     async stopCurrentProcessor() {
-        // Stop any ongoing processor and clean up resources
-        if (!this.activeProcessor) return;
+        if (!this.activeProcessor) {
+            console.warn('⚠️ No active processing to stop');
+            return;
+        }
 
         this.isProcessing = false;
         this.cleanPendingFrames();
@@ -227,7 +269,7 @@ class VirtualBackground {
 
             console.log('✅ Processor successfully stopped');
         } catch (error) {
-            console.error('❌ Processor shutdown error:', error);
+            console.error('❌ Processor shutdown error', error);
         } finally {
             // Reset active processor and generator
             this.activeProcessor = null;

@@ -99,7 +99,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.9.25</strong>',
+        title: '<strong>WebRTC SFU v1.9.26</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -227,7 +227,7 @@ function customizeWidget() {
             const userName = 'guest-' + Math.floor(Math.random() * 10000);
             new MiroTalkWidget(domain, roomId, userName, BRAND.widget);
         } else {
-            console.error('MiroTalkWidget is not defined. Please check Widget.js loading.');
+            console.warn('MiroTalkWidget is not defined in the current context. Please check Widget.js loading.');
         }
     }
 }

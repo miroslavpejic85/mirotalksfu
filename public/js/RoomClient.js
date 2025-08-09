@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.25
+ * @version 1.9.26
  *
  */
 
@@ -1956,6 +1956,7 @@ class RoomClient {
         );
         // Create High Blur Image
         createImage('highBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
+
         // Create Low Blur Image
         createImage('lowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
 
@@ -2112,16 +2113,16 @@ class RoomClient {
             virtualBackgroundSelectedImage = null;
             virtualBackgroundTransparent = null;
         } else if (backgroundImage) {
-            virtualBackgroundSelectedImage = backgroundImage;
             virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = backgroundImage;
             virtualBackgroundTransparent = null;
         } else if (backgroundTransparent) {
+            virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = null;
             virtualBackgroundTransparent = true;
-            virtualBackgroundBlurLevel = null;
-            virtualBackgroundSelectedImage = null;
         } else {
-            virtualBackgroundSelectedImage = null;
             virtualBackgroundBlurLevel = null;
+            virtualBackgroundSelectedImage = null;
             virtualBackgroundTransparent = null;
         }
 
