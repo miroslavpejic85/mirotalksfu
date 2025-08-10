@@ -331,12 +331,12 @@ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" \
 curl -X POST "http://localhost:3010/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"avatar":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited"}'
+     --data '{"room":"test","roomPassword":false,"avatar":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
 
 curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","avatar":false,"audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited"}'
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","avatar":false,"audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
 ```
 
 ### 5. Join Meeting with Token
