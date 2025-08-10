@@ -45,6 +45,13 @@ let BRAND = {
             expertImages: [
                 'https://photo.cloudron.pocketsolution.net/uploads/original/95/7d/a5f7f7a2c89a5fee7affda5f013c.jpeg',
             ],
+            buttons: {
+                audio: true,
+                video: true,
+                screen: true,
+                chat: true,
+                join: true,
+            },
             checkOnlineStatus: false,
             isOnline: true,
             customMessages: {
@@ -54,6 +61,10 @@ let BRAND = {
                 onlineText: 'We are online',
                 offlineText: 'We are offline',
                 poweredBy: 'Powered by MiroTalk SFU',
+            },
+            alert: {
+                enabled: false,
+                type: 'email',
             },
         },
     },
@@ -99,7 +110,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v1.9.28</strong>',
+        title: '<strong>WebRTC SFU v1.9.29</strong>',
         html: `
             <button 
                 id="support-button" 

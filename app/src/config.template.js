@@ -1009,6 +1009,13 @@ module.exports = {
                         : [
                               'https://photo.cloudron.pocketsolution.net/uploads/original/95/7d/a5f7f7a2c89a5fee7affda5f013c.jpeg',
                           ],
+                    buttons: {
+                        audio: process.env.WIDGET_SUPPORT_BUTTON_AUDIO !== 'false',
+                        video: process.env.WIDGET_SUPPORT_BUTTON_VIDEO !== 'false',
+                        screen: process.env.WIDGET_SUPPORT_BUTTON_SCREEN !== 'false',
+                        chat: process.env.WIDGET_SUPPORT_BUTTON_CHAT !== 'false',
+                        join: process.env.WIDGET_SUPPORT_BUTTON_JOIN !== 'false',
+                    },
                     checkOnlineStatus: process.env.WIDGET_SUPPORT_CHECK_ONLINE_STATUS === 'true',
                     isOnline: process.env.WIDGET_SUPPORT_IS_ONLINE !== 'false',
                     customMessages: {
