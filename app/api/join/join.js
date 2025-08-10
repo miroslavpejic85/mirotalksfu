@@ -23,6 +23,7 @@ async function getJoin() {
                 audio: false,
                 video: false,
                 screen: false,
+                chat: false,
                 hide: false,
                 notify: true,
                 duration: 'unlimited',

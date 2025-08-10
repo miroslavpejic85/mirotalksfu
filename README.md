@@ -108,7 +108,7 @@
 <br/>
 
 - You can `directly join a room` by using link like:
-- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=mirotalksfu&avatar=0&audio=0&video=0&screen=0&notify=0&duration=unlimited
+- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=mirotalksfu&avatar=0&audio=0&video=0&screen=0&chat=0&notify=0&duration=unlimited
 
     | Params       | Type           | Description               |
     | ------------ | -------------- | ------------------------- |
@@ -119,6 +119,7 @@
     | audio        | boolean        | Audio stream              |
     | video        | boolean        | Video stream              |
     | screen       | boolean        | Screen stream             |
+    | chat         | boolean        | Chat                      |
     | notify       | boolean        | Welcome message           |
     | hide         | boolean        | Hide myself               |
     | duration     | string         | Meeting duration HH:MM:SS |
@@ -344,12 +345,12 @@ curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
 curl -X POST "http://localhost:3010/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
 
 curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
 ```
 
 ### 6. Generate Token

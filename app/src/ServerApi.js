@@ -76,7 +76,7 @@ module.exports = class ServerApi {
 
     getJoinURL(data) {
         // Get data
-        const { room, roomPassword, name, avatar, audio, video, screen, hide, notify, duration, token } = data;
+        const { room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration, token } = data;
 
         const roomValue = room || uuidV4();
         const roomPasswordValue = roomPassword || false;
@@ -85,6 +85,7 @@ module.exports = class ServerApi {
         const audioValue = audio || false;
         const videoValue = video || false;
         const screenValue = screen || false;
+        const chatValue = chat || false;
         const hideValue = hide || false;
         const notifyValue = notify || false;
         const durationValue = duration || 'unlimited';
@@ -101,6 +102,7 @@ module.exports = class ServerApi {
             `&audio=${audioValue}` +
             `&video=${videoValue}` +
             `&screen=${screenValue}` +
+            `&chat=${chatValue}` +
             `&hide=${hideValue}` +
             `&notify=${notifyValue}` +
             `&duration=${durationValue}` +
