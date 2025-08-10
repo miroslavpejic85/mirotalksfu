@@ -176,6 +176,7 @@ describe('test-ServerAPI', () => {
                 audio: true,
                 video: false,
                 screen: false,
+                chat: false,
                 hide: false,
                 notify: false,
                 duration: '00:30:00',
@@ -186,7 +187,7 @@ describe('test-ServerAPI', () => {
 
             const result = serverApi.getJoinURL(data);
             result.should.equal(
-                'https://example.com/join?room=room1&roomPassword=password123&name=John%20Doe&avatar=test.jpg&audio=true&video=false&screen=false&hide=false&notify=false&duration=00:30:00&token=testToken'
+                'https://example.com/join?room=room1&roomPassword=password123&name=John%20Doe&avatar=test.jpg&audio=true&video=false&screen=false&chat=false&hide=false&notify=false&duration=00:30:00&token=testToken'
             );
 
             tokenStub.restore();
@@ -204,7 +205,7 @@ describe('test-ServerAPI', () => {
 
             const result = serverApi.getJoinURL({});
             result.should.equal(
-                'https://example.com/join?room=room1&roomPassword=false&name=User-123456&avatar=false&audio=false&video=false&screen=false&hide=false&notify=false&duration=unlimited'
+                'https://example.com/join?room=room1&roomPassword=false&name=User-123456&avatar=false&audio=false&video=false&screen=false&chat=false&hide=false&notify=false&duration=unlimited'
             );
         });
     });
