@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.32
+ * @version 1.9.33
  *
  */
 
@@ -871,7 +871,13 @@ function startServer() {
         const ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.body);
 
-        const { username, password } = checkXSS(req.body);
+        const safeBody = checkXSS(req.body) || {};
+        const { username, password } = safeBody;
+
+        if (!username || !password) {
+            log.warn('Login failed: missing username or password', req.body);
+            return res.status(400).json({ message: 'Missing username or password' });
+        }
 
         const isPeerValid = await isAuthPeer(username, password);
 
