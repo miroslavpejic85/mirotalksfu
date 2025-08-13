@@ -14,8 +14,6 @@
 
 <p align="center"><strong>MiroTalk SFU</strong> stands for <strong>Selective Forwarding Unit</strong>, built on <a href="https://mediasoup.org" target="_blank">Mediasoup</a>, a powerful media server that routes video/audio streams between participants. It offers a rich set of features for WebRTC meetings, webinars, and more. Simple, Secure, Scalable Real-Time Video Conferences with support for up to 8K resolution and 60fps. It's compatible with all major browsers and platforms.</p>
 
-<hr />
-
 <p align="center">
     <strong><a href="https://sfu.mirotalk.com/">Explore MiroTalk SFU</a></strong>
 </p>
@@ -275,6 +273,44 @@ To embed a meeting within `your service or app` using an iframe, you can use the
     style="height: 100vh; width: 100vw; border: 0px;"
 ></iframe>
 ```
+
+## WIdget
+
+<br/>
+
+To quickly add a support widget to your site, include the script in your `<head>` and place the widget `<div>` at the end of your `<body>`. Your support widget will be ready instantly!
+
+```html
+<!doctype html>
+<html>
+    <head>
+        <script src="https://sfu.mirotalk.com/js/Widget.js"></script>
+    </head>
+    <body>
+        <div
+            id="support-widget"
+            data-mirotalk-auto
+            data-domain="sfu.mirotalk.com"
+            data-room="support-room"
+            data-theme="dark"
+            data-widget-type="support"
+            data-widget-state="normal"
+            data-position="bottom-right"
+            data-check-online="false"
+            data-expert-images="https://i.pravatar.cc/40?img=1,https://i.pravatar.cc/40?img=2,https://i.pravatar.cc/40?img=3"
+            data-buttons="audio,video,screen,chat,join"
+            data-heading="Need Help?"
+            data-subheading="Get instant support from our expert team!"
+            data-connect-text="connect in &lt; 5 seconds"
+            data-online-text="We are online"
+            data-offline-text="We are offline"
+            data-powered-by="Powered by MiroTalk SFU"
+        ></div>
+    </body>
+</html>
+```
+
+**[Explore Integrations →](https://docs.mirotalk.com/mirotalk-sfu/integration/)**
 
 </details>
 
