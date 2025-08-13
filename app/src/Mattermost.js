@@ -77,12 +77,8 @@ class Mattermost {
     processInput(input, payload, req) {
         for (const cmd of [...this.commands, ...this.texts]) {
             if (input.trim() === cmd.name) {
-                switch (cmd.name) {
-                    case '/sfu':
-                        payload.text = `${cmd.message} ${this.getMeetingURL(req)}`;
-                        break;
-                    default:
-                        break;
+                if (cmd.message) {
+                    payload.text = `${cmd.message} ${this.getMeetingURL(req)}`;
                 }
                 return true;
             }
