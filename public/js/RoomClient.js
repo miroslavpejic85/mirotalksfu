@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.35
+ * @version 1.9.36
  *
  */
 
@@ -236,6 +236,8 @@ class RoomClient {
         this.isDesktopDevice = peer_info.is_desktop_device;
         this.isMobileDevice = peer_info.is_mobile_device;
         this.isMobileSafari = this.isMobileDevice && peer_info.browser_name.toLowerCase().includes('safari');
+
+        this.pendingSinkId = null; // store desired sink id until next user gesture
 
         this.localAudioEl = localAudioEl;
         this.remoteAudioEl = remoteAudioEl;
@@ -3562,39 +3564,88 @@ class RoomClient {
         console.log(who + ' Success attached media ' + type);
     }
 
+    hasUserActivation() {
+        if (navigator.userActivation) return !!navigator.userActivation.isActive;
+        if ('hasTransientUserActivation' in document) return !!document.hasTransientUserActivation;
+        return false;
+    }
+
+    runOnNextUserActivation(callback) {
+        const fire = (e) => {
+            cleanup();
+            try {
+                // Call synchronously to keep the user-activation
+                callback(e);
+            } catch (err) {
+                console.error('runOnNextUserActivation callback error:', err);
+            }
+        };
+        const cleanup = () => {
+            window.removeEventListener('pointerdown', fire, true);
+            window.removeEventListener('click', fire, true);
+            window.removeEventListener('mousedown', fire, true);
+            window.removeEventListener('touchstart', fire, true);
+            window.removeEventListener('keydown', fire, true);
+        };
+        const opts = { capture: true, once: true, passive: true };
+        window.addEventListener('pointerdown', fire, opts);
+        window.addEventListener('click', fire, opts);
+        window.addEventListener('mousedown', fire, opts);
+        window.addEventListener('touchstart', fire, opts);
+        window.addEventListener('keydown', fire, opts);
+    }
+
     async changeAudioDestination(audioElement = false) {
-        const audioDestination = speakerSelect.value;
-        if (audioElement) {
-            await this.attachSinkId(audioElement, audioDestination);
-        } else {
-            const audioElements = this.remoteAudioEl.querySelectorAll('audio');
-            audioElements.forEach(async (audioElement) => {
-                await this.attachSinkId(audioElement, audioDestination);
+        const sinkId = speakerSelect?.value;
+        if (!sinkId) return;
+
+        // Defer until a user gesture if needed
+        if (!this.hasUserActivation()) {
+            this.pendingSinkId = sinkId;
+            this.userLog('info', 'Click once to apply the selected speaker', 'top-end', 3000);
+            this.runOnNextUserActivation(() => {
+                const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
+                els.forEach((el) => this.attachSinkId(el, this.pendingSinkId));
+                this.pendingSinkId = null;
             });
+            return;
+        }
+
+        const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
+        for (const el of els) {
+            await this.attachSinkId(el, sinkId);
         }
     }
 
     async attachSinkId(elem, sinkId) {
-        if (typeof elem.sinkId !== 'undefined') {
-            elem.setSinkId(sinkId)
-                .then(() => {
-                    console.log(`Success, audio output device attached: ${sinkId}`);
-                })
-                .catch((err) => {
-                    let errorMessage = err;
-                    let speakerSelect = this.getId('speakerSelect');
-                    if (err.name === 'SecurityError')
-                        errorMessage = `You need to use HTTPS for selecting audio output device: ${err}`;
-                    console.error('Attach SinkId error: ', errorMessage);
-                    this.userLog('error', errorMessage, 'top-end', 6000);
-                    speakerSelect.selectedIndex = 0;
-                    refreshLsDevices();
-                });
-        } else {
-            const error = `Browser seems doesn't support output device selection.`;
+        if (typeof elem.setSinkId !== 'function') {
+            const error = `Browser doesn't support output device selection.`;
             console.warn(error);
             this.userLog('error', error, 'top-end', 6000);
+            return;
         }
+
+        return elem
+            .setSinkId(sinkId)
+            .then(() => console.log(`Success, audio output device attached: ${sinkId}`))
+            .catch((err) => {
+                const speakerSel = this.getId('speakerSelect');
+                if (err?.name === 'SecurityError') {
+                    const msg = `Use HTTPS to select audio output device: ${err.message || err}`;
+                    console.error('Attach SinkId error: ', msg);
+                    this.userLog('error', msg, 'top-end', 6000);
+                } else if (err?.name === 'NotAllowedError' || /user gesture/i.test(err?.message || '')) {
+                    // Retry on next user gesture
+                    this.userLog('info', 'Click once to allow changing the speaker', 'top-end', 4000);
+                    this.pendingSinkId = sinkId;
+                    this.runOnNextUserActivation(() => this.attachSinkId(elem, this.pendingSinkId));
+                } else {
+                    console.error('Attach SinkId error: ', err);
+                    this.userLog('error', err, 'top-end', 6000);
+                }
+                if (speakerSel) speakerSel.selectedIndex = 0;
+                refreshLsDevices();
+            });
     }
 
     event(evt) {
