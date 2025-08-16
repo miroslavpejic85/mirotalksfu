@@ -3833,9 +3833,11 @@ function startServer() {
                 log.debug('getUserAllowedRooms - user not found', username);
                 return false;
             }
+            log.debug('CONFIG getUserAllowedRooms', user.allowed_rooms);
             return user.allowed_rooms;
         }
 
+        log.debug('getUserAllowedRooms *');
         return ['*'];
     }
 
