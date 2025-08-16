@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.36
+ * @version 1.9.37
  *
  */
 
@@ -376,6 +376,7 @@ class RoomClient {
 
         // Recording
         this._isRecording = false;
+        this._recStartTs = null;
         this.mediaRecorder = null;
         this.audioRecorder = null;
         this.recScreenStream = null;
@@ -6506,6 +6507,7 @@ class RoomClient {
         console.log('MediaRecorder started: ', evt);
         rc.cleanLastRecordingInfo();
         rc.disableRecordingOptions();
+        rc._recStartTs = performance.now();
     }
 
     handleMediaRecorderData(evt) {
@@ -6596,15 +6598,20 @@ class RoomClient {
         switchHostOnlyRecording.disabled = disabled;
     }
 
+    getWebmFixerFn() {
+        const fn = window.FixWebmDuration;
+        return typeof fn === 'function' ? fn : null;
+    }
+
     handleLocalRecordingStop() {
         console.log('MediaRecorder Blobs: ', recordedBlobs);
 
         const dateTime = getDataTimeString();
         const type = recordedBlobs[0].type.includes('mp4') ? 'mp4' : 'webm';
-        const blob = new Blob(recordedBlobs, { type: 'video/' + type });
+        const rawBlob = new Blob(recordedBlobs, { type: 'video/' + type });
         const recFileName = `Rec_${dateTime}.${type}`;
         const currentDevice = this.isMobileDevice ? 'MOBILE' : 'PC';
-        const blobFileSize = bytesToSize(blob.size);
+        const blobFileSize = bytesToSize(rawBlob.size);
         const recTime = document.getElementById('recordingStatus');
         const recType = 'Locally';
         const recordingInfo = `
@@ -6622,7 +6629,27 @@ class RoomClient {
 
         this.saveLastRecordingInfo(recordingInfo);
         this.showRecordingInfo(recType, recordingInfo, recordingMsg);
-        this.saveRecordingInLocalDevice(blob, recFileName, recTime);
+
+        // Fix WebM duration to make it seekable
+        const fixWebmDuration = async (blob) => {
+            if (type !== 'webm') return blob;
+            try {
+                const fix = this.getWebmFixerFn();
+                const durationMs = this._recStartTs ? performance.now() - this._recStartTs : undefined;
+                const fixed = await fix(blob, durationMs);
+                return fixed || blob;
+            } catch (e) {
+                console.warn('WEBM duration fix failed, saving original blob:', e);
+                return blob;
+            } finally {
+                this._recStartTs = null;
+            }
+        };
+
+        (async () => {
+            const finalBlob = await fixWebmDuration(rawBlob);
+            this.saveRecordingInLocalDevice(finalBlob, recFileName, recTime);
+        })();
     }
 
     handleServerRecordingStop() {
