@@ -6687,8 +6687,7 @@ class RoomClient {
         if (window.localStorage.isReconnected === 'false') {
             Swal.fire({
                 background: swalBackground,
-                position: 'center',
-                icon: 'success',
+                position: 'top',
                 title: 'Recording',
                 html: `<div style="text-align: left;">
                 🔴 ${recType} Recording Info: 
