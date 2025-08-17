@@ -10,6 +10,26 @@ const loginBtn = document.getElementById('loginButton');
 const joinRoomForm = document.getElementById('joinRoomForm');
 const selectRoom = document.getElementById('selectRoom');
 const joinSelectRoomBtn = document.getElementById('joinSelectRoomButton');
+const generateRoomBtn = document.getElementById('generateRoomButton'); // ADD
+
+// Default handler (will be overridden for admin below)
+joinSelectRoomBtn.onclick = (e) => {
+    join();
+};
+
+// Generate random room -> fills the custom input (admin mode). Hidden for limited users.
+if (generateRoomBtn) {
+    generateRoomBtn.onclick = (e) => {
+        e.preventDefault();
+        const uuid = getUUID4();
+        const custom = document.getElementById('customRoomInput');
+        if (custom && custom.offsetParent !== null) {
+            custom.value = uuid;
+        } else if (selectRoom && selectRoom.style.display !== 'none') {
+            popup('warning', 'Random room is available for Admin users only');
+        }
+    };
+}
 
 usernameInput.onkeyup = (e) => {
     if (e.keyCode === 13) {
@@ -26,10 +46,6 @@ passwordInput.onkeyup = (e) => {
 
 loginBtn.onclick = (e) => {
     login();
-};
-
-joinSelectRoomBtn.onclick = (e) => {
-    join();
 };
 
 function login() {
@@ -59,12 +75,14 @@ function login() {
                 const token = response.data.message;
                 window.sessionStorage.peer_token = token;
 
-                // User (has access to some room)
+                // User (limited rooms)
                 const allowedRooms = response.data.allowedRooms;
                 if (allowedRooms && !allowedRooms.includes('*')) {
                     console.log('User detected with limited join room access!', allowedRooms);
                     loginForm.style.display = 'none';
                     joinRoomForm.style.display = 'block';
+                    // Hide random button for limited users
+                    if (generateRoomBtn) generateRoomBtn.style.display = 'none';
                     allowedRooms.forEach((room) => {
                         const option = document.createElement('option');
                         option.value = room;
@@ -74,7 +92,7 @@ function login() {
                     return;
                 }
 
-                // Admin (has access to all rooms)
+                // Admin (all rooms)
                 if (allowedRooms && allowedRooms.includes('*')) {
                     console.log('User detected with admin access!', allowedRooms);
                     loginForm.style.display = 'none';
@@ -87,6 +105,9 @@ function login() {
                     input.className = 'form-control mb-2';
                     selectRoom.parentNode.insertBefore(input, selectRoom);
                     selectRoom.style.display = 'none';
+                    // Show random button for admin
+                    if (generateRoomBtn) generateRoomBtn.style.display = 'block';
+                    // Join uses the custom input + token
                     joinSelectRoomBtn.onclick = () => {
                         const roomName = filterXSS(document.getElementById('customRoomInput').value);
                         if (roomName) {
@@ -137,8 +158,13 @@ function login() {
 }
 
 function join() {
-    //window.location.href = '/join/' + selectRoom.value;
     const username = filterXSS(document.getElementById('username').value);
     const roomId = filterXSS(document.getElementById('selectRoom').value);
     window.location.href = '/join/?room=' + roomId + '&name=' + username + '&token=' + window.sessionStorage.peer_token;
+}
+
+function getUUID4() {
+    return ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
+        (c ^ (crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))).toString(16)
+    );
 }
