@@ -10,7 +10,7 @@ const loginBtn = document.getElementById('loginButton');
 const joinRoomForm = document.getElementById('joinRoomForm');
 const selectRoom = document.getElementById('selectRoom');
 const joinSelectRoomBtn = document.getElementById('joinSelectRoomButton');
-const generateRoomBtn = document.getElementById('generateRoomButton'); // ADD
+const generateRoomBtn = document.getElementById('generateRoomButton');
 
 // Default handler (will be overridden for admin below)
 joinSelectRoomBtn.onclick = (e) => {
