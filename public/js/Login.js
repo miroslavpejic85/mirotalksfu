@@ -59,7 +59,7 @@ function login() {
                 const token = response.data.message;
                 window.sessionStorage.peer_token = token;
 
-                // Allowed rooms
+                // User (has access to some room)
                 const allowedRooms = response.data.allowedRooms;
                 if (allowedRooms && !allowedRooms.includes('*')) {
                     console.log('User detected with limited join room access!', allowedRooms);
@@ -74,16 +74,46 @@ function login() {
                     return;
                 }
 
-                if (room) {
-                    return (window.location.href = '/join/' + window.location.search);
-                    // return (window.location.href = '/join/?room=' + room + '&token=' + token);
-                }
-                if (roomPath && roomPath !== 'login') {
-                    return (window.location.href = '/join/' + roomPath);
-                    // return (window.location.href ='/join/?room=' + roomPath + '&token=' + token);
+                // Admin (has access to all rooms)
+                if (allowedRooms && allowedRooms.includes('*')) {
+                    loginForm.style.display = 'none';
+                    joinRoomForm.style.display = 'block';
+                    selectRoom.innerHTML = '';
+                    const input = document.createElement('input');
+                    input.type = 'text';
+                    input.id = 'customRoomInput';
+                    input.placeholder = 'Enter room name';
+                    input.className = 'form-control mb-2';
+                    selectRoom.parentNode.insertBefore(input, selectRoom);
+                    selectRoom.style.display = 'none';
+                    joinSelectRoomBtn.onclick = () => {
+                        const roomName = filterXSS(document.getElementById('customRoomInput').value);
+                        if (roomName) {
+                            window.location.href =
+                                '/join/?room=' +
+                                roomName +
+                                '&name=' +
+                                username +
+                                '&token=' +
+                                window.sessionStorage.peer_token;
+                        } else {
+                            popup('warning', 'Room name required');
+                        }
+                    };
+                    return;
                 }
 
-                return (window.location.href = '/logged');
+                if (room) {
+                    window.location.href = '/join/' + window.location.search;
+                    return;
+                }
+                if (roomPath && roomPath !== 'login') {
+                    window.location.href = '/join/' + roomPath;
+                    return;
+                }
+
+                window.location.href = '/logged';
+                return;
             })
             .catch(function (error) {
                 console.error(error);
