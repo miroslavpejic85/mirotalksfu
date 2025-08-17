@@ -103,6 +103,7 @@ function login() {
                     input.id = 'customRoomInput';
                     input.placeholder = 'Enter room name';
                     input.className = 'form-control mb-2';
+                    input.maxLength = 32;
                     selectRoom.parentNode.insertBefore(input, selectRoom);
                     selectRoom.style.display = 'none';
                     // Show random button for admin
