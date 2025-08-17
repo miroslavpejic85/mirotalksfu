@@ -3389,6 +3389,7 @@ function startServer() {
 
             if (!OIDC.enabled && hostCfg.protected) {
                 hostCfg.authenticated = false;
+                removeIP(socket);
             }
 
             socket.room_id = null;
@@ -3451,6 +3452,7 @@ function startServer() {
 
             if (!OIDC.enabled && hostCfg.protected) {
                 hostCfg.authenticated = false;
+                removeIP(socket);
             }
 
             callback('Successfully exited room');
