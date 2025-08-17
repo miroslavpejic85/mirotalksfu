@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.39
+ * @version 1.9.40
  *
  */
 
@@ -562,20 +562,19 @@ function startServer() {
     // Logout Route
     app.get('/logout', (req, res) => {
         if (OIDC.enabled) {
-            //
-            if (hostCfg.protected) {
-                const ip = authHost.getIP(req);
-                if (authHost.isAuthorizedIP(ip)) {
-                    authHost.deleteIP(ip);
-                }
-                hostCfg.authenticated = false;
-                //
-                log.debug('[OIDC] ------> Logout', {
-                    authenticated: hostCfg.authenticated,
-                    authorizedIPs: authHost.getAuthorizedIPs(),
-                });
-            }
             req.logout(); // Logout user
+        }
+        if (hostCfg.protected) {
+            const ip = authHost.getIP(req);
+            if (authHost.isAuthorizedIP(ip)) {
+                authHost.deleteIP(ip);
+            }
+            hostCfg.authenticated = false;
+            //
+            log.debug('[OIDC] ------> Logout', {
+                authenticated: hostCfg.authenticated,
+                authorizedIPs: authHost.getAuthorizedIPs(),
+            });
         }
         res.redirect('/'); // Redirect to the home page after logout
     });
@@ -597,14 +596,9 @@ function startServer() {
     app.get('/', OIDCAuth, (req, res) => {
         //log.debug('/ - hostCfg ----->', hostCfg);
         if (!OIDC.enabled && hostCfg.protected) {
-            const ip = getIP(req);
-            if (allowedIP(ip)) {
-                htmlInjector.injectHtml(views.landing, res);
-                hostCfg.authenticated = true;
-            } else {
-                hostCfg.authenticated = false;
-                res.redirect('/login');
-            }
+            hostCfg.authenticated = false;
+            res.redirect('/login');
+            return;
         } else {
             return htmlInjector.injectHtml(views.landing, res);
         }
@@ -623,14 +617,9 @@ function startServer() {
         //log.info('/newroom - hostCfg ----->', hostCfg);
 
         if (!OIDC.enabled && hostCfg.protected) {
-            const ip = getIP(req);
-            if (allowedIP(ip)) {
-                res.redirect('/');
-                hostCfg.authenticated = true;
-            } else {
-                hostCfg.authenticated = false;
-                res.redirect('/login');
-            }
+            hostCfg.authenticated = false;
+            res.redirect('/login');
+            return;
         } else {
             htmlInjector.injectHtml(views.newRoom, res);
         }
@@ -641,14 +630,9 @@ function startServer() {
         //log.info('/activeRooms');
 
         if (!OIDC.enabled && hostCfg.protected) {
-            const ip = getIP(req);
-            if (allowedIP(ip)) {
-                res.redirect('/');
-                hostCfg.authenticated = true;
-            } else {
-                hostCfg.authenticated = false;
-                res.redirect('/login');
-            }
+            hostCfg.authenticated = false;
+            res.redirect('/login');
+            return;
         } else {
             res.sendFile(views.activeRooms);
         }
@@ -851,8 +835,8 @@ function startServer() {
         if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
-                res.redirect('/');
                 hostCfg.authenticated = true;
+                res.redirect('/');
             } else {
                 hostCfg.authenticated = false;
                 res.redirect('/login');
@@ -3403,6 +3387,10 @@ function startServer() {
 
             if (isPresenter) removeIP(socket);
 
+            if (!OIDC.enabled && hostCfg.protected) {
+                hostCfg.authenticated = false;
+            }
+
             socket.room_id = null;
         });
 
@@ -3460,6 +3448,10 @@ function startServer() {
             if (isPresenter) removeIP(socket);
 
             socket.room_id = null;
+
+            if (!OIDC.enabled && hostCfg.protected) {
+                hostCfg.authenticated = false;
+            }
 
             callback('Successfully exited room');
         });
@@ -3941,6 +3933,10 @@ function startServer() {
             socket.handshake.headers['X-Forwarded-For'] ||
             socket.handshake.address
         );
+    }
+
+    function updateHostAuthenticatedFlag() {
+        hostCfg.authenticated = !hostCfg.protected || authHost.getAuthorizedIPs().length > 0;
     }
 
     function allowedIP(ip) {
