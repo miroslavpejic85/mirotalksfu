@@ -6,13 +6,11 @@ This example shows how to set up a server to listen for MiroTalk SFU webhook eve
 
 ### Step 1: Enable Webhooks
 
-Edit `app/src/config.js` to enable webhooks:
+Edit the `.env` to enable webhooks:
 
-```javascript
-webhook: {
-    enabled: true, // Enable webhook functionality
-    url: 'http://localhost:8888/webhook-endpoint', // Webhook server URL
-},
+```bash
+WEBHOOK_ENABLED=true
+WEBHOOK_URL=https://YOUR-DOMAIN-NAME/webhook-endpoint
 ```
 
 ---

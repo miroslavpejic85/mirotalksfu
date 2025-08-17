@@ -76,6 +76,7 @@ function login() {
 
                 // Admin (has access to all rooms)
                 if (allowedRooms && allowedRooms.includes('*')) {
+                    console.log('User detected with admin access!', allowedRooms);
                     loginForm.style.display = 'none';
                     joinRoomForm.style.display = 'block';
                     selectRoom.innerHTML = '';
