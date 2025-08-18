@@ -555,3 +555,7 @@ Try also [MiroTalk WEB](https://github.com/miroslavpejic85/mirotalkwebrtc) a pla
 This project is tested with [BrowserStack](https://www.browserstack.com).
 
 ---
+
+## Star History
+
+![Star History Chart](https://api.star-history.com/svg?repos=miroslavpejic85/mirotalksfu&type=Date&theme=auto)
