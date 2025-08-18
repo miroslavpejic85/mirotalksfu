@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.42
+ * @version 1.9.43
  *
  */
 
@@ -3430,12 +3430,7 @@ function startServer() {
                 log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
             }
 
-            if (isPresenter) removeIP(socket);
-
-            if (!OIDC.enabled && hostCfg.protected) {
-                hostCfg.authenticated = false;
-                removeIP(socket);
-            }
+            removeIP(socket);
 
             socket.room_id = null;
         });
@@ -3491,14 +3486,9 @@ function startServer() {
                 log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
             }
 
-            if (isPresenter) removeIP(socket);
+            removeIP(socket);
 
             socket.room_id = null;
-
-            if (!OIDC.enabled && hostCfg.protected) {
-                hostCfg.authenticated = false;
-                removeIP(socket);
-            }
 
             callback('Successfully exited room');
         });
@@ -4004,7 +3994,7 @@ function startServer() {
                 authHost.deleteIP(ip);
                 hostCfg.authenticated = false;
                 log.info('Remove IP from auth', {
-                    ip: ip,
+                    removedIp: ip,
                     authorizedIps: authHost.getAuthorizedIPs(),
                 });
             }
