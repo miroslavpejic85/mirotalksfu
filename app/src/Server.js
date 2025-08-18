@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.41
+ * @version 1.9.42
  *
  */
 
@@ -74,6 +74,7 @@ const { withFileLock } = require('./MutexManager');
 const { PassThrough } = require('stream');
 const { S3Client } = require('@aws-sdk/client-s3');
 const { Upload } = require('@aws-sdk/lib-storage');
+const { fixDurationOrRemux } = require('./FixDurationOrRemux');
 const cors = require('cors');
 const compression = require('compression');
 const socketIo = require('socket.io');
@@ -900,7 +901,7 @@ function startServer() {
     // RECORDING UTILITY
     // ####################################################
 
-    function isValidRequest(req, fileName, roomId, checkContentType = true) {
+    function isValidRequest(req, fileName, roomId, durationMs = false, checkContentType = true) {
         const contentType = req.headers['content-type'];
         if (checkContentType && contentType !== 'application/octet-stream') {
             throw new Error('Invalid content type');
@@ -912,6 +913,14 @@ function startServer() {
 
         if (!roomList || typeof roomList.has !== 'function' || !roomList.has(roomId)) {
             throw new Error('Invalid room ID');
+        }
+
+        if (
+            durationMs &&
+            typeof durationMs !== 'undefined' &&
+            (!Number.isFinite(Number(durationMs)) || Number(durationMs) <= 0)
+        ) {
+            throw new Error('Invalid durationMs');
         }
     }
 
@@ -1044,6 +1053,34 @@ function startServer() {
         }
     });
 
+    app.post('/recSyncFixWebm', async (req, res) => {
+        try {
+            const { fileName, durationMs } = checkXSS(req.query);
+            const roomId = getRoomIdFromFilename(fileName);
+
+            isValidRequest(req, fileName, roomId, durationMs, false);
+
+            const filePath = path.resolve(dir.rec, fileName);
+
+            if (!fs.existsSync(filePath)) {
+                return res.status(404).json({ message: 'File not found' });
+            }
+
+            if (durationMs && fs.existsSync(filePath)) {
+                try {
+                    fixDurationOrRemux(filePath, Number(durationMs));
+                } catch (e) {
+                    console.warn('Finalize fix skipped:', e?.message || e);
+                }
+            }
+
+            return res.status(200).json({ message: 'OK' });
+        } catch (err) {
+            console.error('recSyncFixWebm error', err);
+            return res.status(500).json({ message: 'Internal error' });
+        }
+    });
+
     app.post('/recSyncFinalize', async (req, res) => {
         try {
             const shouldUploadToS3 = config?.integrations?.aws?.enabled && config?.media?.recording?.uploadToS3;
@@ -1052,15 +1089,23 @@ function startServer() {
             }
             const start = Date.now();
 
-            const { fileName } = checkXSS(req.query);
+            const { fileName, durationMs } = checkXSS(req.query);
             const roomId = getRoomIdFromFilename(fileName);
 
-            isValidRequest(req, fileName, roomId, false);
+            isValidRequest(req, fileName, roomId, durationMs, false);
 
             const filePath = path.resolve(dir.rec, fileName);
 
             if (!fs.existsSync(filePath)) {
                 return res.status(500).json({ error: 'Rec Finalization failed file not exists' });
+            }
+
+            if (durationMs && fs.existsSync(filePath)) {
+                try {
+                    fixDurationOrRemux(filePath, Number(durationMs));
+                } catch (e) {
+                    log.warn('Finalize fix skipped:', e?.message || e);
+                }
             }
 
             const bucket = config?.integrations?.aws?.bucket;

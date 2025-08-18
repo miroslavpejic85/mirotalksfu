@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.41
+ * @version 1.9.42
  *
  */
 
@@ -6282,7 +6282,6 @@ class RoomClient {
     // ####################################################
 
     toggleVideoAudioTabs(disabled = false) {
-        if (disabled) tabRoomBtn.click();
         tabAudioDevicesBtn.disabled = disabled;
         tabVideoDevicesBtn.disabled = disabled;
     }
@@ -6558,6 +6557,50 @@ class RoomClient {
     }
 
     async handleMediaRecorderStop(evt) {
+        try {
+            console.log('MediaRecorder stopped: ', evt);
+            rc.recording.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
+            rc.disableRecordingOptions(false);
+
+            // If cloud sync is enabled, patch duration on the server
+            if (rc.recording.recSyncServerRecording) {
+                const durationMs = rc._recStartTs ? Math.round(performance.now() - rc._recStartTs) : undefined;
+
+                // Option S3: pass duration to your existing finalize endpoint (preferred if it uploads to S3)
+                if (rc.recording.recSyncServerToS3) {
+                    try {
+                        await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFinalize`, null, {
+                            params: { fileName: rc.recServerFileName, durationMs },
+                        });
+                        console.log('Finalized (with duration fix) and uploaded to S3');
+                        userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
+                    } catch (error) {
+                        let errorMessage = 'Finalization failed! ';
+                        if (error.response) errorMessage += error.response.data?.message || 'Server error';
+                        else if (error.request) errorMessage += 'No response from server';
+                        else errorMessage += error.message;
+                        userLog('warning', errorMessage, 'top-end', 3000);
+                    }
+                } else {
+                    // Option Disk: if you don’t use S3 finalize, call a dedicated “fix” endpoint
+                    try {
+                        await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFixWebm`, null, {
+                            params: { fileName: rc.recServerFileName, durationMs },
+                        });
+                        console.log('Server-side WEBM duration fixed for', rc.recServerFileName);
+                    } catch (error) {
+                        console.warn('WEBM duration server-side fix failed:', error?.message || error);
+                    }
+                }
+
+                rc._recStartTs = null;
+            }
+        } catch (err) {
+            console.error('Recording save failed', err);
+        }
+    }
+
+    async handleMediaRecorderStopOLD(evt) {
         try {
             console.log('MediaRecorder stopped: ', evt);
             rc.recording.recSyncServerRecording ? rc.handleServerRecordingStop() : rc.handleLocalRecordingStop();
