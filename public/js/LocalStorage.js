@@ -43,7 +43,6 @@ class LocalStorage {
             keep_buttons_visible: false, // Keep buttons always visible
             keyboard_shortcuts: false, // keyboard shortcuts
             host_only_recording: false, // presenter
-            rec_prioritize_h264: false, // Prioritize h.264 with AAC or h.264 with Opus codecs over VP8 with Opus or VP9 with Opus codecs
             rec_server: false, // The recording will be stored on the server rather than locally
             video_obj_fit: 2, // cover
             video_controls: 0, // off

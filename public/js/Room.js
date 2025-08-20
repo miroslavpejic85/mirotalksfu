@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.43
+ * @version 1.9.44
  *
  */
 
@@ -65,7 +65,6 @@ let redirect = {
 };
 
 let recCodecs = null;
-let recPrioritizeH264 = false;
 let isToggleExtraBtnClicked = false;
 
 const _PEER = {
@@ -2784,13 +2783,6 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
-    switchH264Recording.onchange = (e) => {
-        recPrioritizeH264 = e.currentTarget.checked;
-        rc.roomMessage('recPrioritizeH264', recPrioritizeH264);
-        localStorageSettings.rec_prioritize_h264 = recPrioritizeH264;
-        lS.setSettings(localStorageSettings);
-        e.target.blur();
-    };
     switchServerRecording.onchange = (e) => {
         rc.recording.recSyncServerRecording = e.currentTarget.checked;
         rc.roomMessage('recSyncServer', rc.recording.recSyncServerRecording);
@@ -3362,9 +3354,6 @@ function loadSettingsFromLocalStorage() {
     switchShare.checked = notify;
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
     switchShortcuts.checked = isShortcutsEnabled;
-
-    recPrioritizeH264 = localStorageSettings.rec_prioritize_h264;
-    switchH264Recording.checked = recPrioritizeH264;
 
     switchServerRecording.checked = localStorageSettings.rec_server;
 
@@ -5543,7 +5532,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.43',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.44',
         html: `
             <br />
             <div id="about">

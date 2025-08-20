@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.43
+ * @version 1.9.44
  *
  */
 
@@ -6293,8 +6293,7 @@ class RoomClient {
     }
 
     getSupportedMimeTypes() {
-        const possibleTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/mp4'];
-        possibleTypes.splice(recPrioritizeH264 ? 0 : 2, 0, 'video/mp4;codecs=h264,aac', 'video/webm;codecs=h264,opus');
+        const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/mp4'];
         console.log('POSSIBLE CODECS', possibleTypes);
         return possibleTypes.filter((mimeType) => {
             return MediaRecorder.isTypeSupported(mimeType);
@@ -7828,9 +7827,6 @@ class RoomClient {
                 break;
             case 'disconnect_all_on_leave':
                 this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
-                break;
-            case 'recPrioritizeH264':
-                this.userLog('info', `${icons.codecs} Recording prioritize h.264  ${status}`, 'top-end');
                 break;
             case 'recSyncServer':
                 this.userLog('info', `${icons.recSync} Server Sync Recording ${status}`, 'top-end');
