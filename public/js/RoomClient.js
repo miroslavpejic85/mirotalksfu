@@ -6293,7 +6293,7 @@ class RoomClient {
     }
 
     getSupportedMimeTypes() {
-        const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/webm;codecs=vp9,opus', 'video/mp4'];
+        const possibleTypes = ['video/webm;codecs=vp9,opus', 'video/webm;codecs=vp8,opus', 'video/mp4'];
         console.log('POSSIBLE CODECS', possibleTypes);
         return possibleTypes.filter((mimeType) => {
             return MediaRecorder.isTypeSupported(mimeType);
