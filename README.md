@@ -10,17 +10,20 @@
 <a href="https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970">![License: Extended](https://img.shields.io/badge/License-Extended_Commercial_Use-darkgreen.svg)</a>
 <a href="https://discord.gg/rgGYfeYW3N">![Community](https://img.shields.io/badge/Community-forum-pink.svg)</a>
 
+This project is proudly sponsored by
+
 </div>
 
-<p align="center"><strong>MiroTalk SFU</strong> stands for <strong>Selective Forwarding Unit</strong>, built on <a href="https://mediasoup.org" target="_blank">Mediasoup</a>, a powerful media server that routes video/audio streams between participants. It offers a rich set of features for WebRTC meetings, webinars, and more. Simple, Secure, Scalable Real-Time Video Conferences with support for up to 8K resolution and 60fps. It's compatible with all major browsers and platforms.</p>
-
-<hr/>
-
+<h1 align=center>Recall.ai - API for meeting recording</h1>
 <p align="center">
-    This project is proudly supported by <a href="https://www.recall.ai">Recall.ai</a> – an API for recording Zoom, Google Meet, Microsoft Teams, and in-person meetings.
+    <a href="https://www.recall.ai">Recall.ai</a> – an API for recording Zoom, Google Meet, Microsoft Teams, and in-person meetings.
 </p>
 
-<hr/>
+<hr />
+
+<br />
+
+<p align="center"><strong>MiroTalk SFU</strong> stands for <strong>Selective Forwarding Unit</strong>, built on <a href="https://mediasoup.org" target="_blank">Mediasoup</a>, a powerful media server that routes video/audio streams between participants. It offers a rich set of features for WebRTC meetings, webinars, and more. Simple, Secure, Scalable Real-Time Video Conferences with support for up to 8K resolution and 60fps. It's compatible with all major browsers and platforms.</p>
 
 <p align="center">
     <strong><a href="https://sfu.mirotalk.com/">Explore MiroTalk SFU</a></strong>
