@@ -34,6 +34,7 @@ INSTALL_DIR="${INSTALL_DIR:-/opt/mirotalksfu}"
 DOMAIN="${DOMAIN:-}"
 EMAIL="${EMAIL:-}"
 PUBLIC_IP="${PUBLIC_IP:-}"                 # оставь пустым для авто-детекта SFU (рекомендуется)
+SSH_PORT="${SSH_PORT:-22}"                 # порт SSH, открываемый в UFW
 
 # Профиль малого кластера по умолчанию
 SFU_MIN_PORT="${SFU_MIN_PORT:-40000}"
@@ -129,11 +130,25 @@ done
 
 # ------------ UFW ------------
 info "Настройка UFW (80/443 и UDP диапазон SFU)..."
-ufw allow 22/tcp || true
+UFW_ALREADY_ENABLED=0
+if ufw status | grep -q "Status: active"; then
+  echo -e "${YELLOW}⚠ UFW уже активен. Правила будут добавлены.${NC}"
+  UFW_ALREADY_ENABLED=1
+fi
+ufw allow ${SSH_PORT}/tcp || true
 ufw allow 80/tcp || true
 ufw allow 443/tcp || true
 ufw allow ${SFU_MIN_PORT}:${SFU_MAX_PORT}/udp || true
-ufw --force enable || true
+if [[ ${UFW_ALREADY_ENABLED} -eq 0 ]]; then
+  read -rp "Включить UFW? [y/N]: " UFW_CONFIRM
+  if [[ ${UFW_CONFIRM} =~ ^[Yy]$ ]]; then
+    ufw --force enable || true
+  else
+    echo -e "${YELLOW}⚠ UFW не был активирован.${NC}"
+  fi
+else
+  echo -e "${YELLOW}⚠ UFW уже активен, пропускаю enable.${NC}"
+fi
 ok "UFW базово настроен."
 
 # ------------ Клонирование проекта ------------
@@ -314,7 +329,17 @@ EOF_TURN
   ufw allow ${TURN_MIN_PORT}:${TURN_MAX_PORT}/udp || true
   if [[ "$TURN_TCP_ENABLE" == "1" ]]; then ufw allow ${TURN_MIN_PORT}:${TURN_MAX_PORT}/tcp || true; fi
   if [[ "$TURN_TLS_ENABLE" == "1" ]]; then ufw allow 5349/tcp || true; fi
-  ufw --force enable || true
+  if [[ ${UFW_ALREADY_ENABLED} -eq 0 ]]; then
+    read -rp "Включить UFW? [y/N]: " UFW_CONFIRM
+    if [[ ${UFW_CONFIRM} =~ ^[Yy]$ ]]; then
+      ufw --force enable || true
+      UFW_ALREADY_ENABLED=1
+    else
+      echo -e "${YELLOW}⚠ UFW не был активирован.${NC}"
+    fi
+  else
+    echo -e "${YELLOW}⚠ UFW уже активен, пропускаю enable.${NC}"
+  fi
   ok "UFW правила для TURN применены."
 
   # Построим ICE_SERVERS_JSON с учетом TURN
