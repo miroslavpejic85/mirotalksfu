@@ -408,13 +408,19 @@ ok "docker-compose.yml создан."
 info "Сборка и запуск контейнера..."
 $COMPOSE up -d --build --force-recreate
 
-info "Ожидание стабилизации контейнера (15 сек)..."
-sleep 15
+info "Ожидание запуска контейнера..."
+MAX_ATTEMPTS=15
+for ((i=1; i<=MAX_ATTEMPTS; i++)); do
+  if $COMPOSE ps --services --filter "status=running" | grep -q .; then
+    break
+  fi
+  sleep 1
+done
 
 $COMPOSE ps || true
 if ! $COMPOSE ps --services --filter "status=running" | grep -q .; then
   $COMPOSE logs --tail=200 || true
-  fail "Контейнер не запущен. Исправьте ошибки выше и повторите."
+  fail "Контейнер не запущен после ${MAX_ATTEMPTS} попыток. Исправьте ошибки выше и повторите."
 fi
 ok "Контейнер(ы) запущены."
 
