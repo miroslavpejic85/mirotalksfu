@@ -986,20 +986,20 @@ module.exports = {
              * Set BRAND_HTML_INJECTION to 'false' to disable HTML injection.
              * This allows for static branding in the public/views folder, without dynamic content injection.
              */
-            htmlInjection: process.env.BRAND_HTML_INJECTION !== 'false',
+            htmlInjection: process.env.BRAND_HTML_INJECTION !== 'true',
 
             app: {
                 language: process.env.UI_LANGUAGE || 'ru',
                 name: process.env.APP_NAME || 'Kremlevka',
                 title:
                     process.env.APP_TITLE ||
-                    '<h1>Kremlevka</h1> Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+                    '<h1>Кремлёвка</h1> Специальная связь.',
                 description:
                     process.env.APP_DESCRIPTION ||
                     'Start your next video call with a single click. No download, plug-in, or login is required.',
                 joinDescription: process.env.JOIN_DESCRIPTION || 'Pick a room name.<br />How about this one?',
-                joinButtonLabel: process.env.JOIN_BUTTON_LABEL || 'JOIN ROOM',
-                joinLastLabel: process.env.JOIN_LAST_LABEL || 'Your recent room:',
+                joinButtonLabel: process.env.JOIN_BUTTON_LABEL || 'Присоединиться',
+                joinLastLabel: process.env.JOIN_LAST_LABEL || 'История:',
             },
 
             /**
@@ -1008,7 +1008,7 @@ module.exports = {
              * Site-wide settings including icons and page-specific content.
              */
             site: {
-                title: process.env.SITE_TITLE || 'Kramlevka, Video Calls, Messaging',
+                title: process.env.SITE_TITLE || 'Кремлевка',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
                 appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
@@ -1050,7 +1050,7 @@ module.exports = {
              * Set to 'false' via environment variables to hide.
              */
             html: {
-                features: process.env.SHOW_FEATURES !== 'false',
+                features: process.env.SHOW_FEATURES !== 'true',
                 teams: process.env.SHOW_TEAMS !== 'false',
                 tryEasier: process.env.SHOW_TRY_EASIER !== 'false',
                 poweredBy: process.env.SHOW_POWERED_BY !== 'false',
@@ -1100,12 +1100,12 @@ module.exports = {
                     <br />
                     ${process.env.EMAIL_LABEL || 'Email'}: 
                     <a id="email-button" data-umami-event="Email button"
-                        href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}">
-                        ${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}
+                        href="mailto:${process.env.CONTACT_EMAIL || ' '}?subject=${process.env.EMAIL_SUBJECT || 'Kremlevka'}">
+                        ${process.env.CONTACT_EMAIL || ''}
                     </a>
                     <hr />
                     <span>
-                        &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'MiroTalk SFU, all rights reserved'}
+                        &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'Kremlevka, all rights reserved'}
                     </span>
                     <hr />
                     `,
@@ -1118,7 +1118,7 @@ module.exports = {
              * Supports dynamic configuration via environment variables.
              */
             widget: {
-                enabled: process.env.WIDGET_ENABLED === 'true',
+                enabled: process.env.WIDGET_ENABLED === 'false',
                 roomId: process.env.WIDGET_ROOM_ID || 'support-room',
                 theme: process.env.WIDGET_THEME || 'dark',
                 widgetState: process.env.WIDGET_STATE || 'minimized',
