@@ -10,8 +10,8 @@ config.ui.brand = {
     language: 'ru',
     name: 'Spectrum',
     title: '<h1>Spectrum</h1> Быстрые и безопасные видеовстречи.',
-    description: 'Создавайте комнату и приглашайте участников одним кликом.',
-    joinDescription: 'Выберите название комнаты и пригласите коллег.',
+    description: 'Защищенная линия связи.',
+    joinDescription: 'Введите код конференции.',
     joinButtonLabel: 'ВОЙТИ',
     joinLastLabel: 'Последняя использованная комната:'
   },
@@ -23,16 +23,14 @@ config.ui.brand = {
     newRoomDescription: 'Каждой комнате соответствует уникальный URL.'
   },
   meta: {
-    description: 'Spectrum — платформа видеовстреч с открытым исходным кодом.',
+    description: 'Spectrum — платформа видеовстреч.',
     keywords: 'spectrum, webrtc, видеозвонки, конференции, sfu'
   },
   og: {
     type: 'app-webrtc',
     siteName: 'Spectrum',
     title: 'Присоединяйтесь к встрече Spectrum',
-    description: 'Видеоконференции без установки и регистрации.',
-    image: 'https://example.com/images/spectrum-share.png',
-    url: 'https://example.com'
+    description: 'Видеоконференции без установки и регистрации.'
   },
   html: {
     features: true,
