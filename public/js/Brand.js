@@ -18,6 +18,7 @@ const joinDescription = document.getElementById('joinDescription');
 const joinRoomBtn = document.getElementById('joinRoomButton');
 const joinLastLabel = document.getElementById('joinLastLabel');
 
+const topSponsors = document.getElementById('topSponsors');
 const features = document.getElementById('features');
 const teams = document.getElementById('teams');
 const tryEasier = document.getElementById('tryEasier');
@@ -59,6 +60,7 @@ let BRAND = {
             'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
     },
     html: {
+        topSponsors: true,
         features: true,
         teams: true,
         tryEasier: true,
@@ -195,6 +197,7 @@ function setBrand(data) {
 
 // BRAND check
 function checkBrand() {
+    !BRAND.html.topSponsors && elementDisplay(topSponsors, false);
     !BRAND.html.features && elementDisplay(features, false);
     !BRAND.html.teams && elementDisplay(teams, false);
     !BRAND.html.tryEasier && elementDisplay(tryEasier, false);

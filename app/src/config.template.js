@@ -1050,6 +1050,7 @@ module.exports = {
              * Set to 'false' via environment variables to hide.
              */
             html: {
+                topSponsors: process.env.SHOW_TOP_SPONSORS !== 'false',
                 features: process.env.SHOW_FEATURES !== 'false',
                 teams: process.env.SHOW_TEAMS !== 'false',
                 tryEasier: process.env.SHOW_TRY_EASIER !== 'false',
