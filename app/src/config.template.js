@@ -974,7 +974,7 @@ module.exports = {
              * - showActive: Show active rooms in the UI (default: false)
              *   https://sfu.mirotalk.com/activeRooms
              */
-            showActive: process.env.SHOW_ACTIVE_ROOMS === 'true',
+            showActive: process.env.SHOW_ACTIVE_ROOMS === 'false',
         },
         brand: {
             /**
@@ -990,10 +990,10 @@ module.exports = {
 
             app: {
                 language: process.env.UI_LANGUAGE || 'ru',
-                name: process.env.APP_NAME || 'Spectrum',
+                name: process.env.APP_NAME || 'Kremlevka',
                 title:
                     process.env.APP_TITLE ||
-                    '<h1>Spectrum SFU</h1> Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+                    '<h1>Kremlevka</h1> Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
                 description:
                     process.env.APP_DESCRIPTION ||
                     'Start your next video call with a single click. No download, plug-in, or login is required.',
@@ -1008,7 +1008,7 @@ module.exports = {
              * Site-wide settings including icons and page-specific content.
              */
             site: {
-                title: process.env.SITE_TITLE || 'Spectrum SFU, Free Video Calls, Messaging and Screen Sharing',
+                title: process.env.SITE_TITLE || 'Kramlevka, Video Calls, Messaging',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
                 appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
@@ -1024,7 +1024,7 @@ module.exports = {
             meta: {
                 description:
                     process.env.META_DESCRIPTION ||
-                    'Spectrum for real-time video communications.',
+                    'Kremlevka for real-time video communications.',
                 keywords: process.env.META_KEYWORDS || 'webrtc, video calls, conference, screen sharing, mirotalk, sfu',
             },
 
