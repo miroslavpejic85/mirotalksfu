@@ -10,12 +10,12 @@
 #
 #  Запуск (пример):
 #    sudo DOMAIN="meet.example.com" EMAIL="admin@example.com" \
-#         ./mirotalk_sfu_install_caddy_smallcoturn_v2.sh
+#         ./install.sh
 #
 #    Опционально (включить TURN):
 #    sudo DOMAIN="meet.example.com" EMAIL="admin@example.com" \
 #         TURN_ENABLE=1 TURN_USER="miro" TURN_PASS="strong-password" \
-#         ./mirotalk_sfu_install_caddy_smallcoturn_v2.sh
+#         ./install.sh
 # ============================================================================
 
 set -euo pipefail
