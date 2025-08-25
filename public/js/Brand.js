@@ -36,8 +36,8 @@ const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
 let BRAND = {
     app: {
         language: 'en',
-        name: 'MiroTalk SFU',
-        title: 'MiroTalk SFU<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+        name: 'Kremlevka',
+        title: 'Kremlevka<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
         description:
             'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
         joinDescription: 'Pick a room name.<br />How about this one?',
@@ -45,7 +45,7 @@ let BRAND = {
         joinLastLabel: 'Your recent room:',
     },
     site: {
-        title: 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
+        title: 'Kremlevka, Free Video Calls, Messaging and Screen Sharing',
         icon: '../images/logo.svg',
         appleTouchIcon: '../images/logo.svg',
         newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
@@ -54,7 +54,7 @@ let BRAND = {
     },
     meta: {
         description:
-            'MiroTalk SFU powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
+            'Kremlevka powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
         keywords:
             'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
     },
@@ -98,12 +98,12 @@ let BRAND = {
             <a 
                 id="email-button" 
                 data-umami-event="Email button" 
-                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
+                href="mailto:miroslav.pejic.85@gmail.com?subject=Kremlevka info">
                 miroslav.pejic.85@gmail.com
             </a>
             <br /><br />
             <hr />
-            <span>&copy; 2025 MiroTalk SFU, all rights reserved</span>
+            <span>&copy; 2025 Kremlevka, all rights reserved</span>
             <hr />
         `,
     },
@@ -133,7 +133,7 @@ let BRAND = {
                 connectText: 'connect in < 5 seconds',
                 onlineText: 'We are online',
                 offlineText: 'We are offline',
-                poweredBy: 'Powered by MiroTalk SFU',
+                poweredBy: 'Powered by Kremlevka',
             },
             alert: {
                 enabled: false,

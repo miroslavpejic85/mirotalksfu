@@ -28,11 +28,11 @@ class MiroTalkWidget {
             customMessages: {
                 heading: 'Need a hand?',
                 subheading:
-                    'Hop on a <span style="font-weight: bold">Free 1:1 or Group Consultation</span> with a MiroTalk Expert right now!',
+                    'Hop on a <span style="font-weight: bold">Free 1:1 or Group Consultation</span> with a Kremlevka Expert right now!',
                 connectText: 'connect in < 10 seconds',
                 onlineText: 'We are online',
                 offlineText: 'We are offline',
-                poweredBy: 'Powered by <span class="mirotalk-powered-by">MiroTalk</span>',
+                poweredBy: 'Powered by <span class="mirotalk-powered-by">Kremlevka</span>',
             },
         },
     };
@@ -789,6 +789,6 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
     } catch (error) {
-        console.error('Failed to auto-initialize MiroTalk Widget:', error);
+        console.error('Failed to auto-initialize Kremlevka Widget:', error);
     }
 });

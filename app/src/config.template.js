@@ -636,7 +636,7 @@ module.exports = {
             enabled: process.env.VIDEOAI_ENABLED === 'true',
             basePath: 'https://api.heygen.com',
             apiKey: process.env.VIDEOAI_API_KEY || '',
-            systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from MiroTalk SFU...',
+            systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from Kremlevka...',
         },
 
         /**
@@ -1035,10 +1035,10 @@ module.exports = {
              */
             og: {
                 type: process.env.OG_TYPE || 'app-webrtc',
-                siteName: process.env.OG_SITE_NAME || 'Spectrum',
+                siteName: process.env.OG_SITE_NAME || 'Kremlevka',
                 title: process.env.OG_TITLE || 'Click the link to make a call.',
                 description:
-                    process.env.OG_DESCRIPTION || 'Spectrum provides real-time video calls and screen sharing.',
+                    process.env.OG_DESCRIPTION || 'Kremlevka provides real-time video calls and screen sharing.',
                 image: process.env.OG_IMAGE_URL || 'https://sfu.mirotalk.com/images/mirotalksfu.png',
                 url: process.env.OG_URL || 'https://sfu.mirotalk.com',
             },
@@ -1148,7 +1148,7 @@ module.exports = {
                         connectText: process.env.WIDGET_SUPPORT_CONNECT_TEXT || 'connect in < 5 seconds',
                         onlineText: process.env.WIDGET_SUPPORT_ONLINE_TEXT || 'We are online',
                         offlineText: process.env.WIDGET_SUPPORT_OFFLINE_TEXT || 'We are offline',
-                        poweredBy: process.env.WIDGET_SUPPORT_POWERED_BY || 'Powered by MiroTalk SFU',
+                        poweredBy: process.env.WIDGET_SUPPORT_POWERED_BY || 'Powered by Kremlevka',
                     },
                 },
                 alert: {
