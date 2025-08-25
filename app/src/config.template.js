@@ -989,11 +989,11 @@ module.exports = {
             htmlInjection: process.env.BRAND_HTML_INJECTION !== 'false',
 
             app: {
-                language: process.env.UI_LANGUAGE || 'en',
-                name: process.env.APP_NAME || 'MiroTalk SFU',
+                language: process.env.UI_LANGUAGE || 'ru',
+                name: process.env.APP_NAME || 'Spectrum',
                 title:
                     process.env.APP_TITLE ||
-                    '<h1>MiroTalk SFU</h1> Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+                    '<h1>Spectrum SFU</h1> Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
                 description:
                     process.env.APP_DESCRIPTION ||
                     'Start your next video call with a single click. No download, plug-in, or login is required.',
@@ -1008,7 +1008,7 @@ module.exports = {
              * Site-wide settings including icons and page-specific content.
              */
             site: {
-                title: process.env.SITE_TITLE || 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
+                title: process.env.SITE_TITLE || 'Spectrum SFU, Free Video Calls, Messaging and Screen Sharing',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
                 appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
@@ -1024,7 +1024,7 @@ module.exports = {
             meta: {
                 description:
                     process.env.META_DESCRIPTION ||
-                    'MiroTalk SFU powered by WebRTC and mediasoup for real-time video communications.',
+                    'Spectrum for real-time video communications.',
                 keywords: process.env.META_KEYWORDS || 'webrtc, video calls, conference, screen sharing, mirotalk, sfu',
             },
 
@@ -1035,10 +1035,10 @@ module.exports = {
              */
             og: {
                 type: process.env.OG_TYPE || 'app-webrtc',
-                siteName: process.env.OG_SITE_NAME || 'MiroTalk SFU',
+                siteName: process.env.OG_SITE_NAME || 'Spectrum',
                 title: process.env.OG_TITLE || 'Click the link to make a call.',
                 description:
-                    process.env.OG_DESCRIPTION || 'MiroTalk SFU provides real-time video calls and screen sharing.',
+                    process.env.OG_DESCRIPTION || 'Spectrum provides real-time video calls and screen sharing.',
                 image: process.env.OG_IMAGE_URL || 'https://sfu.mirotalk.com/images/mirotalksfu.png',
                 url: process.env.OG_URL || 'https://sfu.mirotalk.com',
             },
