@@ -8,29 +8,29 @@ config.ui.brand = {
   htmlInjection: true,
   app: {
     language: 'ru',
-    name: 'Spectrum',
-    title: '<h1>Spectrum</h1> Быстрые и безопасные видеовстречи.',
+    name: 'Kremlevka',
+    title: '<h1>Кремлёвка</h1> Быстрые и безопасные видеовстречи.',
     description: 'Защищенная линия связи.',
     joinDescription: 'Введите код конференции.',
     joinButtonLabel: 'ВОЙТИ',
-    joinLastLabel: 'Последняя использованная комната:'
+    joinLastLabel: 'История комнат:'
   },
   site: {
-    title: 'Spectrum – видеоконференции на базе WebRTC',
-    icon: '../images/spectrum-logo.svg',
-    appleTouchIcon: '../images/spectrum-logo.svg',
+    title: 'Кремлёвка – зашифрованые видеоконференции',
+    icon: '../images/mirotalk-logo.svg',
+    appleTouchIcon: '../images/mirotalk-logo.svg',
     newRoomTitle: 'Создайте комнату.<br/>Поделитесь ссылкой.<br/>Начните встречу.',
     newRoomDescription: 'Каждой комнате соответствует уникальный URL.'
   },
   meta: {
-    description: 'Spectrum — платформа видеовстреч.',
-    keywords: 'spectrum, webrtc, видеозвонки, конференции, sfu'
+    description: 'Кремлёвка — платформа видеовстреч.',
+    keywords: 'видеозвонки, конференции'
   },
   og: {
     type: 'app-webrtc',
-    siteName: 'Spectrum',
-    title: 'Присоединяйтесь к встрече Spectrum',
-    description: 'Видеоконференции без установки и регистрации.'
+    siteName: 'Kremlevka',
+    title: 'Kremlevka',
+    description: 'Зашифрованные видеоконференции.'
   },
   html: {
     features: false,
