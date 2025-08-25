@@ -41,7 +41,7 @@ config.ui.brand = {
     poweredBy: false,
     sponsors: false,
     advertisers: false,
-    footer: true
+    footer: false
   }
 };
 
