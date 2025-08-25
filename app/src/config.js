@@ -33,9 +33,9 @@ config.ui.brand = {
     description: 'Видеоконференции без установки и регистрации.'
   },
   html: {
-    features: true,
-    teams: true,
-    tryEasier: true,
+    features: false,
+    teams: false,
+    tryEasier: false,
     poweredBy: false,
     sponsors: false,
     advertisers: false,
