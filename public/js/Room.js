@@ -1225,7 +1225,7 @@ async function whoAreYou() {
         background: swalBackground,
         title: BRAND.app?.name,
         input: 'text',
-        inputPlaceholder: 'Введите вашу почту или имя',
+        inputPlaceholder: 'Введите ваше имя',
         inputAttributes: { maxlength: 254, id: 'usernameInput' },
         inputValue: default_name,
         html: initUser, // Inject HTML
@@ -1237,7 +1237,7 @@ async function whoAreYou() {
             hide(loadingDiv);
         },
         inputValidator: (name) => {
-            if (!name) return 'Пожалуйста, введите вашу почту или имя';
+            if (!name) return 'Пожалуйста, введите ваше имя';
             const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name);
             if ((isEmail && name.length > 254) || (!isEmail && name.length > 32)) {
                 return isEmail ? 'Email должен быть не длиннее 254 символов' : 'Имя должно быть не длиннее 32 символов';
