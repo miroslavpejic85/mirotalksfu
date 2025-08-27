@@ -1225,11 +1225,11 @@ async function whoAreYou() {
         background: swalBackground,
         title: BRAND.app?.name,
         input: 'text',
-        inputPlaceholder: 'Enter your email or name',
+        inputPlaceholder: 'Введите вашу почту или имя',
         inputAttributes: { maxlength: 254, id: 'usernameInput' },
         inputValue: default_name,
         html: initUser, // Inject HTML
-        confirmButtonText: `Join meeting`,
+        confirmButtonText: `Присоединиться к встрече`,
         customClass: { popup: 'init-modal-size' },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1237,13 +1237,13 @@ async function whoAreYou() {
             hide(loadingDiv);
         },
         inputValidator: (name) => {
-            if (!name) return 'Please enter your email or name';
+            if (!name) return 'Пожалуйста, введите вашу почту или имя';
             const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name);
             if ((isEmail && name.length > 254) || (!isEmail && name.length > 32)) {
-                return isEmail ? 'Email must be max 254 char' : 'Name must be max 32 char';
+                return isEmail ? 'Email должен быть не длиннее 254 символов' : 'Имя должно быть не длиннее 32 символов';
             }
             name = filterXSS(name);
-            if (isHtml(name)) return 'Invalid name!';
+            if (isHtml(name)) return 'Недопустимое имя!';
             if (!getCookie(room_id + '_name')) {
                 window.localStorage.peer_name = name;
             }
