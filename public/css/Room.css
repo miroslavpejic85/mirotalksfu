@@ -506,12 +506,16 @@ body {
     box-shadow: var(--box-shadow);
     border: var(--border);
     border-radius: 10px;
-    overflow-y: auto;
+    overflow-y: auto; /* Single overflow handling */
     overflow-x: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .mySettingsMain {
     display: flex;
+    flex: 1;
+    min-height: 0;
 }
 
 /* Medium screens */
@@ -596,8 +600,8 @@ body {
 
 .title {
     display: inline-flex;
-    justify-content: center; /* Vertical centering */
-    align-items: center; /* Horizontal centering */
+    justify-content: center;
+    align-items: center;
     text-align: left;
     color: white;
 }
@@ -612,8 +616,8 @@ body {
 .inline-check-box {
     margin-bottom: 20px;
     display: inline-flex;
-    justify-content: center; /* Vertical centering */
-    align-items: center; /* Horizontal centering */
+    justify-content: center;
+    align-items: center;
     text-align: left;
     color: white;
 }
@@ -733,7 +737,7 @@ body {
     width: 100%;
     border-collapse: collapse;
     border: var(--border);
-    table-layout: fixed; /* Ensures equal column width */
+    table-layout: fixed;
 }
 .file-table th,
 .file-table td {
@@ -892,6 +896,9 @@ body {
 .tabActions {
     position: relative;
     width: 65%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 @media screen and (max-width: 830px) {
@@ -905,6 +912,7 @@ body {
     .tabActions {
         width: 100%;
         border-radius: 10px;
+        overflow: visible;
     }
     .tabButtonText {
         display: none !important;
@@ -943,12 +951,12 @@ body {
     display: none;
     padding: 6px 12px;
     width: 100%;
-    max-height: 585px;
-    min-height: 700px;
+    flex: 1;
+    max-height: none;
+    min-height: auto;
     border-top: none;
     background-color: var(--body-bg);
-    overflow-x: hidden;
-    overflow-y: auto;
+    overflow: visible;
 }
 
 .tabcontent button {
