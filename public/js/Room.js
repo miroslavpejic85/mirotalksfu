@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.48
+ * @version 1.9.49
  *
  */
 
@@ -301,6 +301,7 @@ let isButtonsBarOver = false;
 let isRoomLocked = false;
 
 let initStream = null;
+let isInitVideoLoaded = false;
 
 let audioContext = null;
 let workletNode = null;
@@ -1118,6 +1119,9 @@ function getInfo() {
 async function whoAreYou() {
     console.log('04 ----> Who are you?');
 
+    // Initialize video loading state
+    isInitVideoLoaded = !isVideoAllowed;
+
     document.body.style.background = 'var(--body-bg)';
 
     try {
@@ -1168,6 +1172,7 @@ async function whoAreYou() {
 
     if (!BUTTONS.main.startVideoButton) {
         isVideoAllowed = false;
+        isInitVideoLoaded = true;
         elemDisplay('initVideo', false);
         elemDisplay('initVideoButton', false);
         elemDisplay('initAudioVideoButton', false);
@@ -1237,6 +1242,9 @@ async function whoAreYou() {
             hide(loadingDiv);
         },
         inputValidator: (name) => {
+            if (isVideoAllowed && !isInitVideoLoaded) {
+                return 'Please wait for video to initialize...';
+            }
             if (!name) return 'Please enter your email or name';
             const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name);
             if ((isEmail && name.length > 254) || (!isEmail && name.length > 32)) {
@@ -1343,6 +1351,7 @@ async function checkInitVideo(isVideoAllowed) {
         if (initVideoSelect.value) {
             initVideoContainerShow();
             await changeCamera(initVideoSelect.value);
+            isInitVideoLoaded = true;
         }
         sound('joined');
     } else {
@@ -1352,6 +1361,7 @@ async function checkInitVideo(isVideoAllowed) {
             initVideoContainerShow(false);
             sound('left');
         }
+        isInitVideoLoaded = !isVideoAllowed;
     }
     initVideoSelect.disabled = !isVideoAllowed;
 }
@@ -2491,10 +2501,12 @@ async function changeCamera(deviceId) {
             checkInitConfig();
             camera = detectCameraFacingMode(camStream);
             handleCameraMirror(initVideo);
+            isInitVideoLoaded = true;
         })
         .catch((error) => {
             console.error('[Error] changeCamera', error);
             handleMediaError('video/audio', error, '/');
+            isInitVideoLoaded = false;
         });
 
     if (isVideoAllowed) {
@@ -5536,7 +5548,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.48',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.49',
         html: `
             <br />
             <div id="about">
