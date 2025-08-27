@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.47
+ * @version 1.9.48
  *
  */
 
@@ -1680,6 +1680,7 @@ function roomIsReady() {
     BUTTONS.main.settingsButton && show(settingsButton);
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
+    BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
@@ -2238,6 +2239,9 @@ function handleButtons() {
     };
     stopRtmpURLButton.onclick = () => {
         rc.stopRTMPfromURL();
+    };
+    activeRoomsButton.onclick = () => {
+        rc.showActiveRooms();
     };
     fileShareButton.onclick = () => {
         rc.selectFileToShare(socket.id, true);
@@ -5532,7 +5536,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.45',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.48',
         html: `
             <br />
             <div id="about">

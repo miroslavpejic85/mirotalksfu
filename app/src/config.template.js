@@ -1196,6 +1196,7 @@ module.exports = {
             },
             // Settings panel buttons and options
             settings: {
+                activeRooms: process.env.SHOW_ROOMS !== 'false',
                 fileSharing: process.env.ENABLE_FILE_SHARING !== 'false',
                 lockRoomButton: process.env.SHOW_LOCK_ROOM !== 'false',
                 unlockRoomButton: process.env.SHOW_UNLOCK_ROOM !== 'false',

@@ -941,7 +941,6 @@ body {
 /* Style the tab content */
 .tabcontent {
     display: none;
-    margin-top: 15px;
     padding: 6px 12px;
     width: 100%;
     max-height: 585px;
