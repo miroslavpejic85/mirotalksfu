@@ -111,12 +111,13 @@ function login() {
                     // Join uses the custom input + token
                     joinSelectRoomBtn.onclick = () => {
                         const roomName = filterXSS(document.getElementById('customRoomInput').value);
+                        const displayname = response.data.displayname;
                         if (roomName) {
                             window.location.href =
                                 '/join/?room=' +
                                 roomName +
                                 '&name=' +
-                                username +
+                                displayname +
                                 '&token=' +
                                 window.sessionStorage.peer_token;
                         } else {

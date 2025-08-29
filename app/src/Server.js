@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.51
+ * @version 1.9.52
  *
  */
 
@@ -872,10 +872,15 @@ function startServer() {
                 hostCfg?.presenters?.join_first || hostCfg?.presenters?.list?.includes(username)
             );
 
+            const user = hostCfg.users.find((user) => user.displayname === username || user.username === username);
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             const allowedRooms = await getUserAllowedRooms(username, password);
 
-            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
+            log.info('login --------------> ', { displayName: user?.displayname || username });
+
+            return res
+                .status(200)
+                .json({ message: token, displayname: user?.displayname || username, allowedRooms: allowedRooms });
         }
 
         if (isPeerValid) {

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.51
+ * @version 1.9.52
  *
  */
 
@@ -1198,7 +1198,16 @@ async function whoAreYou() {
     let force_peer_name = false;
 
     try {
-        const { data: profile } = await axios.get('/profile', { timeout: 5000 });
+        // Prepare headers for profile request
+        const headers = {};
+        if (peer_token) {
+            headers.Authorization = `Bearer ${peer_token}`;
+        }
+
+        const { data: profile } = await axios.get('/profile', {
+            timeout: 5000,
+            headers: headers,
+        });
 
         if (profile) {
             console.log('AXIOS GET OIDC Profile retrieved successfully', profile);
@@ -5581,7 +5590,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.51',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.52',
         html: `
             <br />
             <div id="about">
