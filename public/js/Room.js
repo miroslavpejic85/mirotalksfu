@@ -3245,6 +3245,14 @@ function handleUsernameEmojiPicker() {
         getId('usernameInput').value += data.native;
         toggleUsernameEmoji();
     }
+
+    const initUsernameEmojiButton = getId('initUsernameEmojiButton');
+    const usernameEmoji = getId('usernameEmoji');
+    handleClickOutside(emojiUsernamePicker, initUsernameEmojiButton, () => {
+        if (usernameEmoji && !usernameEmoji.classList.contains('hidden')) {
+            usernameEmoji.classList.add('hidden');
+        }
+    });
 }
 
 function handleChatEmojiPicker() {
