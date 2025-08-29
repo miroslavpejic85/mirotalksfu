@@ -3245,15 +3245,6 @@ function handleUsernameEmojiPicker() {
         getId('usernameInput').value += data.native;
         toggleUsernameEmoji();
     }
-
-    const chatEmojiButton = getId('chatEmojiButton');
-    const chatEmoji = getId('chatEmoji');
-    handleClickOutside(emojiUsernamePicker, chatEmojiButton, () => {
-        if (chatEmoji && chatEmoji.classList.contains('show')) {
-            chatEmoji.classList.remove('show');
-            chatEmojiButton.style.color = '#FFFFFF';
-        }
-    });
 }
 
 function handleChatEmojiPicker() {
@@ -3268,6 +3259,15 @@ function handleChatEmojiPicker() {
         chatMessage.value += data.native;
         rc.toggleChatEmoji();
     }
+
+    const chatEmojiButton = getId('chatEmojiButton');
+    const chatEmoji = getId('chatEmoji');
+    handleClickOutside(emojiPicker, chatEmojiButton, () => {
+        if (chatEmoji && chatEmoji.classList.contains('show')) {
+            chatEmoji.classList.remove('show');
+            chatEmojiButton.style.color = '#FFFFFF';
+        }
+    });
 }
 
 function handleRoomEmojiPicker() {
