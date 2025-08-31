@@ -3640,8 +3640,7 @@ class RoomClient {
                     this.pendingSinkId = sinkId;
                     this.runOnNextUserActivation(() => this.attachSinkId(elem, this.pendingSinkId));
                 } else {
-                    console.error('Attach SinkId error: ', err);
-                    this.userLog('error', err, 'top-end', 6000);
+                    this.userLog('Attach SinkId error', err, 'top-end', 6000);
                 }
                 if (speakerSel) speakerSel.selectedIndex = 0;
                 refreshLsDevices();
