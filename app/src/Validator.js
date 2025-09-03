@@ -21,7 +21,7 @@ function isValidRecFileNameFormat(input) {
     if (!input || typeof input !== 'string') {
         return false;
     }
-    const validPattern = /^Rec_[a-zA-Z0-9_-]+\.webm$/;
+    const validPattern = /^Rec_[a-zA-Z0-9_.-]+\.webm$/;
     if (!validPattern.test(input)) {
         return false;
     }

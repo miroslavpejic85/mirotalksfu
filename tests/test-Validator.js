@@ -62,6 +62,7 @@ describe('test-Validator', () => {
             checkValidator.isValidRecFileNameFormat('Rec_Meeting1.webm').should.be.true();
             checkValidator.isValidRecFileNameFormat('Rec_Session_2024.webm').should.be.true();
             checkValidator.isValidRecFileNameFormat('Rec_Test.webm').should.be.true();
+            checkValidator.isValidRecFileNameFormat('Rec_Test.Room.webm').should.be.true();
         });
 
         it('should return false for recording file name format with path traversal', () => {
