@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.56
+ * @version 1.9.57
  *
  */
 
@@ -614,6 +614,13 @@ class RoomClient {
             this.peer_info.peer_presenter = isPresenter;
             this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
+
+            if (room?.globalLobby) {
+                localStorageSettings.lobby = true;
+                lS.setSettings(localStorageSettings);
+                console.warn('7.1-WARNING ----> GLOBAL Room Lobby detected, save the config');
+            }
+
             handleRules(isPresenter);
 
             // ###################################################################################################

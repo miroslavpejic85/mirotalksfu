@@ -1368,11 +1368,13 @@ module.exports = {
      * Core Settings:
      * --------------
      * - room.maxParticipants: Maximum number of participants allowed per room.
+     * - lobby: Enable/disable lobby feature for pre-approval of participants.
      *   Adjust to limit room size and manage server load.
      */
     moderation: {
         room: {
             maxParticipants: parseInt(process.env.ROOM_MAX_PARTICIPANTS) || 1000, // Maximum participants per room
+            lobby: process.env.ROOM_LOBBY === 'true', // Enable lobby feature
         },
     },
 
