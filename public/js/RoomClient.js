@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.59
+ * @version 1.9.60
  *
  */
 
@@ -515,6 +515,11 @@ class RoomClient {
                     this.event(_EVENTS.roomLock);
                     console.warn('00-WARNING ----> Room is Locked, Try to unlock by the password');
                     return this.unlockTheRoom();
+                }
+
+                if (room === 'isGlobalLobby') {
+                    console.warn('00-WARNING ----> Room GLOBAL Lobby Enabled, Try later presenter not in room');
+                    return this.presenterNotInRoom();
                 }
 
                 if (room === 'isLobby') {
@@ -8163,6 +8168,27 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) this.exit();
+        });
+    }
+
+    presenterNotInRoom() {
+        this.sound('lobby');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showDenyButton: true,
+            showConfirmButton: false,
+            background: swalBackground,
+            icon: 'warning',
+            title: 'Lobby enabled and no presenter available',
+            text: 'A presenter is required to start the meeting. Please try joining again later.',
+            denyButtonText: `Leave room`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            timer: 6000,
+            timerProgressBar: true,
+        }).then(() => {
+            this.exit();
         });
     }
 

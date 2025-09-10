@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.59
+ * @version 1.9.60
  *
  */
 
@@ -1923,7 +1923,7 @@ function startServer() {
                 return cb('isLocked');
             }
 
-            if ((room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
+            if (room.isLobbyEnabled() && !isPresenter) {
                 log.debug(
                     'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
                 );
@@ -1933,6 +1933,11 @@ function startServer() {
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
+            }
+
+            if (room.isGlobalLobbyEnabled() && !isPresenter) {
+                log.debug('The user is currently waiting to join the room because the global lobby is enabled');
+                return cb('isGlobalLobby');
             }
 
             if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
