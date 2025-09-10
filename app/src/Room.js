@@ -972,7 +972,7 @@ module.exports = class Room {
         return this._isLocked;
     }
     isLobbyEnabled() {
-        return this._isLobbyEnabled;
+        return this._isLobbyEnabled || this.globalLobby;
     }
     isHostOnlyRecording() {
         return this._hostOnlyRecording;
