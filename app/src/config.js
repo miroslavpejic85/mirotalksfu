@@ -43,4 +43,8 @@ config.ui.brand = {
   }
 };
 
+config.ui.buttons = config.ui.buttons || {};
+config.ui.buttons.popup = config.ui.buttons.popup || {};
+config.ui.buttons.popup.shareRoomPopup = false;
+
 module.exports = config;
