@@ -974,6 +974,9 @@ module.exports = class Room {
     isLobbyEnabled() {
         return this._isLobbyEnabled || this.globalLobby;
     }
+    isGlobalLobbyEnabled() {
+        return this.globalLobby;
+    }
     isHostOnlyRecording() {
         return this._hostOnlyRecording;
     }
