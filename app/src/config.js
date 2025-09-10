@@ -9,7 +9,7 @@ config.ui.brand = {
   app: {
     language: 'ru',
     name: 'Kremlevka',
-    title: '<h1>Кремлёвка</h1> Быстрые и безопасные видеовстречи.',
+    title: '<h1>Кремлёвка</h1> - надежная видеосвязь.',
     description: 'Защищенная линия связи.',
     joinDescription: 'Введите код конференции.',
     joinButtonLabel: 'ВОЙТИ',
@@ -19,7 +19,7 @@ config.ui.brand = {
     title: 'Кремлёвка – зашифрованые видеоконференции',
     icon: '../images/mirotalk-logo.svg',
     appleTouchIcon: '../images/mirotalk-logo.svg',
-    newRoomTitle: 'Создайте комнату.<br/>Поделитесь ссылкой.<br/>Начните встречу.',
+    newRoomTitle: 'Создайте комнату.',
     newRoomDescription: 'Каждой комнате соответствует уникальный URL.'
   },
   meta: {
