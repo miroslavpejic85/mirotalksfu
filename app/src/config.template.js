@@ -1092,9 +1092,9 @@ module.exports = {
                     <br />
                     ${process.env.AUTHOR_LABEL || 'Author'}: 
                     <a id="linkedin-button" data-umami-event="Linkedin button"
-                        href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com/in/miroslav-pejic-976a07101/'}" 
+                        href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com'}" 
                         target="_blank">
-                        ${process.env.AUTHOR_NAME || 'Miroslav Pejic'}
+                        ${process.env.AUTHOR_NAME || 'Secret relict'}
                     </a>
                     <br />
                     <br />
