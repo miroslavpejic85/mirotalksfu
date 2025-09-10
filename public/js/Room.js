@@ -605,17 +605,23 @@ async function refreshMyAudioDevices() {
     if (speakerSelect) speakerSelect.selectedIndex = speakerSelectIndex;
 }
 
+async function getUserMediaWithTimeout(constraints, timeout = 10000) {
+    const timer = new Promise((_, reject) =>
+        setTimeout(() => reject(new Error('Permission timeout')), timeout)
+    );
+    return Promise.race([navigator.mediaDevices.getUserMedia(constraints), timer]);
+}
+
 async function initEnumerateVideoDevices() {
     // allow the video
-    await navigator.mediaDevices
-        .getUserMedia({ video: true })
-        .then(async (stream) => {
-            await enumerateVideoDevices(stream);
-            isVideoAllowed = true;
-        })
-        .catch(() => {
-            isVideoAllowed = false;
-        });
+    try {
+        const stream = await getUserMediaWithTimeout({ video: true });
+        await enumerateVideoDevices(stream);
+        isVideoAllowed = true;
+    } catch (err) {
+        console.warn('[initEnumerateVideoDevices] video not allowed', err);
+        isVideoAllowed = false;
+    }
 }
 
 async function enumerateVideoDevices(stream) {
@@ -647,16 +653,15 @@ async function enumerateVideoDevices(stream) {
 
 async function initEnumerateAudioDevices() {
     // allow the audio
-    await navigator.mediaDevices
-        .getUserMedia({ audio: true })
-        .then(async (stream) => {
-            await enumerateAudioDevices(stream);
-            await getMicrophoneVolumeIndicator(stream);
-            isAudioAllowed = true;
-        })
-        .catch(() => {
-            isAudioAllowed = false;
-        });
+    try {
+        const stream = await getUserMediaWithTimeout({ audio: true });
+        await enumerateAudioDevices(stream);
+        await getMicrophoneVolumeIndicator(stream);
+        isAudioAllowed = true;
+    } catch (err) {
+        console.warn('[initEnumerateAudioDevices] audio not allowed', err);
+        isAudioAllowed = false;
+    }
 }
 
 async function enumerateAudioDevices(stream) {
