@@ -2178,11 +2178,22 @@ function handleButtons() {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
         console.log('START AUDIO producerExist --->', producerExist);
 
-        producerExist
-            ? await rc.resumeProducer(RoomClient.mediaType.audio)
-            : await rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+        if (producerExist) {
+            await rc.resumeProducer(RoomClient.mediaType.audio);
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+            return;
+        }
 
-        rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+        const audioProducer = await rc.produce(
+            RoomClient.mediaType.audio,
+            microphoneSelect.value
+        );
+
+        if (audioProducer) {
+            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+        } else {
+            setAudioButtonsDisabled(false);
+        }
     };
     stopAudioButton.onclick = async () => {
         if (isPushToTalkActive) return;
@@ -2204,7 +2215,14 @@ function handleButtons() {
         }
         setVideoButtonsDisabled(true);
         if (!isEnumerateVideoDevices) await initEnumerateVideoDevices();
-        await rc.produce(RoomClient.mediaType.video, videoSelect.value);
+        const videoProducer = await rc.produce(
+            RoomClient.mediaType.video,
+            videoSelect.value
+        );
+
+        if (!videoProducer) {
+            setVideoButtonsDisabled(false);
+        }
         // await rc.resumeProducer(RoomClient.mediaType.video);
     };
     stopVideoButton.onclick = () => {
@@ -2700,7 +2718,14 @@ function handleSelects() {
             console.log('Push-to-talk: start audio producer');
             setAudioButtonsDisabled(true);
             if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
-            await rc.produce(RoomClient.mediaType.audio, microphoneSelect.value);
+            const pttProducer = await rc.produce(
+                RoomClient.mediaType.audio,
+                microphoneSelect.value
+            );
+            if (!pttProducer) {
+                setAudioButtonsDisabled(false);
+                return;
+            }
             setTimeout(async function () {
                 await rc.pauseProducer(RoomClient.mediaType.audio);
                 rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
