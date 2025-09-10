@@ -517,11 +517,6 @@ class RoomClient {
                     return this.unlockTheRoom();
                 }
 
-                if (room === 'isGlobalLobby') {
-                    console.warn('00-WARNING ----> Room GLOBAL Lobby Enabled, Try later presenter not in room');
-                    return this.presenterNotInRoom();
-                }
-
                 if (room === 'isLobby') {
                     this.RoomIsLobby = true;
                     this.event(_EVENTS.lobbyOn);
@@ -620,10 +615,15 @@ class RoomClient {
             this.getId('isUserPresenter').innerText = isPresenter;
             window.localStorage.isReconnected = false;
 
+            // GLOBAL LOBBY ENABLED
             if (room?.globalLobby) {
-                localStorageSettings.lobby = true;
-                lS.setSettings(localStorageSettings);
-                console.warn('7.1-WARNING ----> GLOBAL Room Lobby detected, save the config');
+                if (isPresenter) {
+                    localStorageSettings.lobby = true;
+                    lS.setSettings(localStorageSettings);
+                    console.warn('7.1-WARNING ----> GLOBAL Room Lobby detected, save the config');
+                }
+                rc.roomAction('globalLobbyOn', true, false);
+                console.warn('7.1-WARNING ----> GLOBAL Room Lobby detected');
             }
 
             handleRules(isPresenter);

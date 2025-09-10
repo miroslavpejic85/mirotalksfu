@@ -107,6 +107,7 @@ module.exports = class Room {
             shareMediaData: this.shareMediaData,
             dominantSpeaker: this.activeSpeakerObserverEnabled,
             peers: JSON.stringify([...this.peers]),
+            peersCount: this.getPeersCount(),
             maxParticipants: this.maxParticipants,
             maxParticipantsReached: this.peers.size > this.maxParticipants,
             globalLobby: this.globalLobby,

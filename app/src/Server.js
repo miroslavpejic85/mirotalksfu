@@ -1923,7 +1923,7 @@ function startServer() {
                 return cb('isLocked');
             }
 
-            if (room.isLobbyEnabled() && !isPresenter) {
+            if ((room.isLobbyEnabled() || room.isGlobalLobbyEnabled()) && !isPresenter) {
                 log.debug(
                     'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
                 );
@@ -1933,11 +1933,6 @@ function startServer() {
                     lobby_status: 'waiting',
                 });
                 return cb('isLobby');
-            }
-
-            if (room.isGlobalLobbyEnabled() && !isPresenter) {
-                log.debug('The user is currently waiting to join the room because the global lobby is enabled');
-                return cb('isGlobalLobby');
             }
 
             if ((hostCfg.protected || hostCfg.user_auth) && isPresenter && !hostCfg.users_from_db) {
@@ -2408,6 +2403,10 @@ function startServer() {
                     if (!isPresenter) return;
                     room.setLocked(false);
                     room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
+                case 'globalLobbyOn':
+                    if (!room.isGlobalLobbyEnabled()) return;
+                    room.setLobbyEnabled(true);
                     break;
                 case 'lobbyOn':
                     if (!isPresenter) return;
