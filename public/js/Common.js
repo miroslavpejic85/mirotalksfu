@@ -1,5 +1,16 @@
 'use strict';
 
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js');
+    });
+}
+
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+if (isStandalone && window.localStorage.lastRoom && window.location.pathname === '/') {
+    window.location.href = '/join/?room=' + window.localStorage.lastRoom;
+}
+
 // ####################################################################
 // NEW ROOM
 // ####################################################################
