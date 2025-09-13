@@ -1330,6 +1330,7 @@ body {
 }
 .room-emoji-btn:hover {
     background: rgba(255, 255, 255, 0.18);
+    border-radius: 50%;
     transform: scale(1.15);
 }
 
