@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.60
+ * @version 1.9.61
  *
  */
 
@@ -336,7 +336,6 @@ function initClient() {
 
     if (!isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
-        setTippy('closeEmojiPickerContainer', 'Close', 'bottom');
         setTippy('mySettingsCloseBtn', 'Close', 'bottom');
         setTippy(
             'switchDominantSpeakerFocus',
@@ -1651,7 +1650,7 @@ function roomIsReady() {
         hide(transcriptionMaxBtn);
         hide(transcriptionMinBtn);
     } else {
-        rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
+        //rc.makeDraggable(emojiPickerContainer, emojiPickerHeader);
         rc.makeDraggable(chatRoom, chatHeader);
         rc.makeDraggable(pollRoom, pollHeader);
         //rc.makeDraggable(editorRoom, editorHeader);
@@ -3283,21 +3282,111 @@ function handleChatEmojiPicker() {
 }
 
 function handleRoomEmojiPicker() {
+    const soundEmojis = [
+        { emoji: '👍', shortcodes: ':+1:' },
+        { emoji: '👎', shortcodes: ':-1:' },
+        { emoji: '👌', shortcodes: ':ok_hand:' },
+        { emoji: '😀', shortcodes: ':grinning:' },
+        { emoji: '😃', shortcodes: ':smiley:' },
+        { emoji: '😂', shortcodes: ':joy:' },
+        { emoji: '😘', shortcodes: ':kissing_heart:' },
+        { emoji: '❤️', shortcodes: ':heart:' },
+        { emoji: '🎺', shortcodes: ':trumpet:' },
+        { emoji: '🎉', shortcodes: ':tada:' },
+        { emoji: '😮', shortcodes: ':open_mouth:' },
+        { emoji: '👏', shortcodes: ':clap:' },
+        { emoji: '✨', shortcodes: ':sparkles:' },
+        { emoji: '⭐', shortcodes: ':star:' },
+        { emoji: '🌟', shortcodes: ':star2:' },
+        { emoji: '💫', shortcodes: ':dizzy:' },
+        { emoji: '🚀', shortcodes: ':rocket:' },
+    ];
+
+    const header = document.createElement('div');
+    header.className = 'room-emoji-header';
+
+    const title = document.createElement('span');
+    title.textContent = 'Emoji Picker';
+    title.className = 'room-emoji-title';
+
+    const closeBtn = document.createElement('button');
+    closeBtn.className = 'room-emoji-close-btn';
+    closeBtn.innerHTML = '<i class="fa fa-times"></i>';
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    const tabContainer = document.createElement('div');
+    tabContainer.className = 'room-emoji-tab-container';
+
+    const allTab = document.createElement('button');
+    allTab.textContent = 'All';
+    allTab.className = 'room-emoji-tab active';
+
+    const soundTab = document.createElement('button');
+    soundTab.textContent = 'Sounds';
+    soundTab.className = 'room-emoji-tab';
+
+    tabContainer.appendChild(allTab);
+    tabContainer.appendChild(soundTab);
+
+    const emojiMartDiv = document.createElement('div');
+    emojiMartDiv.className = 'room-emoji-mart';
     const pickerRoomOptions = {
         theme: 'dark',
         onEmojiSelect: sendEmojiToRoom,
     };
-
     const emojiRoomPicker = new EmojiMart.Picker(pickerRoomOptions);
-    emojiPickerContainer.appendChild(emojiRoomPicker);
+    emojiMartDiv.appendChild(emojiRoomPicker);
+
+    const emojiGrid = document.createElement('div');
+    emojiGrid.className = 'room-emoji-grid';
+
+    function showEmojiGrid() {
+        emojiGrid.classList.add('visible');
+    }
+    function hideEmojiGrid() {
+        emojiGrid.classList.remove('visible');
+    }
+
+    soundEmojis.forEach(({ emoji, shortcodes }) => {
+        const btn = document.createElement('button');
+        btn.textContent = emoji;
+        btn.className = 'room-emoji-btn';
+        btn.onclick = () => sendEmojiToRoom({ native: emoji, shortcodes });
+        emojiGrid.appendChild(btn);
+    });
+
+    allTab.onclick = () => {
+        allTab.classList.add('active');
+        soundTab.classList.remove('active');
+        emojiMartDiv.style.display = 'block';
+        hideEmojiGrid();
+    };
+    soundTab.onclick = () => {
+        soundTab.classList.add('active');
+        allTab.classList.remove('active');
+        emojiMartDiv.style.display = 'none';
+        showEmojiGrid();
+    };
+
+    emojiPickerContainer.innerHTML = '';
+    emojiPickerContainer.appendChild(header);
+    emojiPickerContainer.appendChild(tabContainer);
+    emojiPickerContainer.appendChild(emojiMartDiv);
+    emojiPickerContainer.appendChild(emojiGrid);
     emojiPickerContainer.style.display = 'none';
+
+    if (!isMobileDevice) {
+        rc.makeDraggable(emojiPickerContainer, header);
+    }
 
     emojiRoomButton.onclick = () => {
         toggleEmojiPicker();
     };
-    closeEmojiPickerContainer.onclick = () => {
+    closeBtn.addEventListener('click', (e) => {
         toggleEmojiPicker();
-    };
+    });
 
     function sendEmojiToRoom(data) {
         console.log('Selected Emoji', data.native);
@@ -5585,7 +5674,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.60',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.61',
         html: `
             <br />
             <div id="about">
