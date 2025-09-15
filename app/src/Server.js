@@ -316,6 +316,7 @@ const views = {
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
     rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
+    vpns: path.join(__dirname, '../../', 'public/views/Vpns.html'),
 };
 
 const filesPath = [views.landing, views.newRoom, views.room, views.login];
@@ -845,6 +846,11 @@ function startServer() {
         } else {
             res.redirect('/');
         }
+    });
+
+    // vpns site html
+    app.get('/vpns', (req, res) => {
+        res.sendFile(views.vpns);
     });
 
     // ####################################################
