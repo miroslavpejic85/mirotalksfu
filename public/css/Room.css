@@ -183,6 +183,7 @@ body {
     padding: 12px;
     font-size: 1rem;
     box-sizing: border-box;
+    justify-self: center;
 }
 
 .init-actions {
