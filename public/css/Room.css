@@ -97,16 +97,38 @@ body {
 .init-modal-size {
     width: 1024px !important;
     height: auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+}
+
+.init-modal-size .swal2-header {
+    order: 1;
+}
+
+.init-modal-size .swal2-content {
+    order: 2;
+    display: contents;
+}
+
+.init-modal-size .swal2-html-container {
+    order: 5;
+    width: 100%;
+    margin: 0;
 }
 
 .init-user {
     display: flex;
+    gap: 24px;
     padding: 5px;
+    align-items: flex-start;
 }
 
 .init-video-container {
     position: relative;
-    width: 100%;
+    flex: 1 1 0;
+    min-width: 0;
 }
 
 .init-video-container video {
@@ -116,16 +138,12 @@ body {
 }
 
 .initComands {
-    width: 100%;
     display: flex;
+    flex: 0 0 360px;
+    max-width: 100%;
     flex-direction: column;
     gap: 20px;
-}
-
-.init-controls-top {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    margin-left: auto;
 }
 
 .init-controls {
@@ -155,20 +173,27 @@ body {
     margin-top: 0;
 }
 
+
 .init-name-input {
+    order: 2;
     width: 100%;
+    max-width: 360px;
     margin: 0;
+    margin-left: auto;
     padding: 12px;
     font-size: 1rem;
     box-sizing: border-box;
 }
 
 .init-actions {
+    order: 4;
     width: 100%;
+    max-width: 360px;
     display: flex;
     justify-content: flex-start;
     gap: 12px;
     margin: 0;
+    margin-left: auto;
     padding: 0;
 }
 
@@ -183,10 +208,13 @@ body {
 }
 
 .init-validation-message {
+    order: 3;
+    width: 100%;
+    max-width: 360px;
     margin: 0;
+    margin-left: auto;
     text-align: left;
     padding: 0;
-    width: 100%;
 }
 
 /*---------------------------
@@ -194,9 +222,6 @@ body {
 @media screen and (min-width: 1025px) {
     .init-modal-size {
         width: 1024px !important;
-    }
-    .init-user {
-        display: flex;
     }
     .init-video-container {
         padding: 10px;
@@ -208,12 +233,26 @@ body {
 @media screen and (max-width: 1024px) {
     .init-modal-size {
         width: auto !important;
+        gap: 12px;
     }
     .init-user {
         display: block;
+        gap: 0;
     }
     .init-video-container {
         padding: 0px;
+        width: 100%;
+    }
+    .initComands {
+        flex: none;
+        width: 100%;
+        margin-left: 0;
+    }
+    .init-name-input,
+    .init-validation-message,
+    .init-actions {
+        max-width: 100%;
+        margin-left: 0;
     }
     .init-modal-size {
         width: 480px !important;
