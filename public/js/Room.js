@@ -656,7 +656,6 @@ async function initEnumerateAudioDevices() {
     try {
         const stream = await getUserMediaWithTimeout({ audio: true });
         await enumerateAudioDevices(stream);
-        await getMicrophoneVolumeIndicator(stream);
         isAudioAllowed = true;
     } catch (err) {
         console.warn('[initEnumerateAudioDevices] audio not allowed', err);
@@ -2489,35 +2488,73 @@ async function changeCamera(deviceId) {
         elemDisplay('initVideo', true);
         initVideoContainerShow();
     }
-    const videoConstraints = {
+
+    const baseConstraints = {
         audio: false,
         video: {
             width: { ideal: 1280 },
             height: { ideal: 720 },
-            deviceId: { exact: deviceId },
             aspectRatio: 1.777,
         },
     };
-    await navigator.mediaDevices
-        .getUserMedia(videoConstraints)
-        .then(async (camStream) => {
-            initVideo.srcObject = camStream;
-            initStream = camStream;
-            console.log(
-                '04.5 ----> Success attached init cam video stream',
-                initStream.getVideoTracks()[0].getSettings()
-            );
-            checkInitConfig();
-            camera = detectCameraFacingMode(camStream);
-            handleCameraMirror(initVideo);
-        })
-        .catch((error) => {
-            console.error('[Error] changeCamera', error);
-            handleMediaError('video/audio', error, '/');
-        });
+
+    if (deviceId) {
+        baseConstraints.video.deviceId = { exact: deviceId };
+    }
+
+    try {
+        const camStream = await getUserMediaWithTimeout(baseConstraints);
+        updateInitVideoStream(camStream);
+    } catch (err) {
+        console.error('Error accessing init video device', err);
+        console.warn('Fallback to default constraints');
+
+        const fallbackConstraints = {
+            audio: false,
+            video: deviceId ? { deviceId: { exact: deviceId } } : true,
+        };
+
+        try {
+            const camStream = await getUserMediaWithTimeout(fallbackConstraints);
+            updateInitVideoStream(camStream);
+        } catch (fallbackErr) {
+            reloadBrowser(fallbackErr);
+            return;
+        }
+    }
 
     if (isVideoAllowed) {
         await loadVirtualBackgroundSettings();
+    }
+
+    function updateInitVideoStream(camStream) {
+        if (!camStream) return;
+
+        initVideo.srcObject = camStream;
+        initStream = camStream;
+
+        const videoTrack = initStream.getVideoTracks()[0];
+        const videoSettings = videoTrack ? videoTrack.getSettings() : undefined;
+        console.log('04.5 ----> Success attached init cam video stream', videoSettings);
+
+        checkInitConfig();
+        camera = detectCameraFacingMode(camStream);
+        handleCameraMirror(initVideo);
+    }
+
+    function reloadBrowser(err) {
+        console.error('[Error] changeCamera fallback failed', err);
+        if (initVideoSelect) initVideoSelect.selectedIndex = 0;
+        if (videoSelect) videoSelect.selectedIndex = 0;
+        try {
+            refreshLsDevices();
+        } catch (refreshError) {
+            console.warn('Unable to refresh local storage devices after camera error', refreshError);
+        }
+        setTimeout(() => {
+            location.reload();
+        }, 3000);
+        handleMediaError('video', err, '/');
     }
 }
 
@@ -2540,50 +2577,71 @@ function detectCameraFacingMode(stream) {
 function handleMediaError(mediaType, err, redirectURL = false) {
     sound('alert');
 
-    let errMessage = err;
-    let getUserMediaError = true;
+    let normalizedMediaType = 'media';
+    if (typeof mediaType === 'string') {
+        switch (mediaType) {
+            case 'screen':
+            case 'screenType':
+                normalizedMediaType = 'screen sharing';
+                break;
+            case 'video':
+            case 'videoType':
+            case 'cameraType':
+                normalizedMediaType = 'video';
+                break;
+            case 'audio':
+            case 'audioType':
+            case 'audioTab':
+                normalizedMediaType = 'audio';
+                break;
+            default:
+                normalizedMediaType = mediaType;
+                break;
+        }
+    }
+    const errorName = err?.name || 'UnknownError';
+    let errorMessage = err?.message || err || 'Unknown error';
+    let hasGetUserMediaError = true;
 
-    switch (err.name) {
+    switch (errorName) {
         case 'NotFoundError':
         case 'DevicesNotFoundError':
-            errMessage = 'Required track is missing';
+            errorMessage = 'Required track is missing';
             break;
         case 'NotReadableError':
         case 'TrackStartError':
-            errMessage = 'Already in use';
+            errorMessage = 'Already in use';
             break;
         case 'OverconstrainedError':
         case 'ConstraintNotSatisfiedError':
-            errMessage = 'Constraints cannot be satisfied by available devices';
+            errorMessage = 'Constraints cannot be satisfied by available devices';
             if (videoQuality.selectedIndex != 0) {
                 videoQuality.selectedIndex = rc.videoQualitySelectedIndex;
             }
             break;
         case 'NotAllowedError':
         case 'PermissionDeniedError':
-            errMessage = 'Permission denied in browser';
+            errorMessage = 'Permission denied in browser';
             break;
         case 'TypeError':
-            errMessage = 'Empty constraints object';
+            errorMessage = 'Empty constraints object';
             break;
         default:
-            getUserMediaError = false;
+            hasGetUserMediaError = false;
             break;
     }
 
     let html = `
-    <ul style="text-align: left">
-        <li>Media type: ${mediaType}</li>
-        <li>Error name: ${err.name}</li>
-        <li>
-            <p>Error message:</p>
-            <p style="color: red">${errMessage}</p>
-        </li>`;
+        <ul style="text-align: left">
+            <li>Media type: ${normalizedMediaType}</li>
+            <li>Error name: ${errorName}</li>
+            <li>Error message: <p style="color: red">${errorMessage}</p></li>`;
 
-    if (getUserMediaError) {
+    if (hasGetUserMediaError) {
         html += `
-        <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>`;
+            <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>`;
     }
+
     html += `
         </ul>
     `;
@@ -2591,7 +2649,7 @@ function handleMediaError(mediaType, err, redirectURL = false) {
     popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
 
     throw new Error(
-        `Access denied for ${mediaType} device [${err.name}]: ${errMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`
+        `Access denied for ${normalizedMediaType} device [${errorName}]: ${errorMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`
     );
 }
 
