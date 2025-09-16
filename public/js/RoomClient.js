@@ -1725,12 +1725,39 @@ class RoomClient {
         console.log(`Media constraints ${type}:`, mediaConstraints);
 
         try {
+            const userMedia =
+                typeof getUserMediaWithTimeout === 'function'
+                    ? getUserMediaWithTimeout
+                    : (constraints) => navigator.mediaDevices.getUserMedia(constraints);
+
             if (init) {
                 stream = initStream;
+            } else if (screen) {
+                stream = await navigator.mediaDevices.getDisplayMedia(mediaConstraints);
             } else {
-                stream = screen
-                    ? await navigator.mediaDevices.getDisplayMedia(mediaConstraints)
-                    : await navigator.mediaDevices.getUserMedia(mediaConstraints);
+                try {
+                    stream = await userMedia(mediaConstraints);
+                } catch (error) {
+                    console.error(`Error accessing ${type} device`, error);
+
+                    if (video) {
+                        console.warn('Fallback to default video constraints');
+                        const fallbackVideoConstraints = {
+                            audio: false,
+                            video: deviceId ? { deviceId: { exact: deviceId } } : true,
+                        };
+                        stream = await userMedia(fallbackVideoConstraints);
+                    } else if (audio) {
+                        console.warn('Fallback to default audio constraints');
+                        const fallbackAudioConstraints = {
+                            audio: deviceId ? { deviceId: { exact: deviceId } } : true,
+                            video: false,
+                        };
+                        stream = await userMedia(fallbackAudioConstraints);
+                    } else {
+                        throw error;
+                    }
+                }
 
                 // Handle Virtual Background and Blur using MediaPipe
                 if (video && isMediaStreamTrackAndTransformerSupported) {
