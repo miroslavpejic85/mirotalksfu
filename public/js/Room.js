@@ -1240,6 +1240,35 @@ async function whoAreYou() {
         willOpen: () => {
             hide(loadingDiv);
         },
+        didOpen: () => {
+            const popup = Swal.getPopup();
+            const input = popup ? popup.querySelector('.swal2-input') : null;
+            const actions = popup ? popup.querySelector('.swal2-actions') : null;
+            const initCommands = initUser.querySelector('.initComands');
+            const topControls = initCommands ? initCommands.querySelector('.init-controls-top') : null;
+            const confirmButton = popup ? popup.querySelector('.swal2-confirm') : null;
+            const validationMessage = popup ? popup.querySelector('.swal2-validation-message') : null;
+
+            if (input && topControls) {
+                topControls.appendChild(input);
+                input.classList.add('init-name-input');
+            }
+
+            if (actions && topControls) {
+                topControls.appendChild(actions);
+                actions.classList.add('init-actions');
+            }
+
+            if (confirmButton) {
+                confirmButton.classList.add('init-join-button');
+            }
+
+            if (validationMessage && topControls) {
+                const referenceNode = actions && actions.parentElement === topControls ? actions : null;
+                topControls.insertBefore(validationMessage, referenceNode);
+                validationMessage.classList.add('init-validation-message');
+            }
+        },
         inputValidator: (name) => {
             if (!name) return 'Пожалуйста, введите ваше имя';
             const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(name);
