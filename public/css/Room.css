@@ -117,6 +117,76 @@ body {
 
 .initComands {
     width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.init-controls-top {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.init-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.init-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.init-buttons button {
+    margin-top: 0;
+    margin-bottom: 0;
+}
+
+.init-selects {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.init-selects select {
+    margin-top: 0;
+}
+
+.init-name-input {
+    width: 100%;
+    margin: 0;
+    padding: 12px;
+    font-size: 1rem;
+    box-sizing: border-box;
+}
+
+.init-actions {
+    width: 100%;
+    display: flex;
+    justify-content: flex-start;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+}
+
+.init-actions .swal2-confirm {
+    width: 100%;
+    margin: 0;
+}
+
+.init-join-button {
+    height: 48px;
+    font-size: 1rem;
+}
+
+.init-validation-message {
+    margin: 0;
+    text-align: left;
+    padding: 0;
+    width: 100%;
 }
 
 /*---------------------------
