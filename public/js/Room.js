@@ -308,7 +308,7 @@ let workletNode = null;
 // window.location.origin + '/join/' + roomId
 // window.location.origin + '/join/?room=' + roomId + '&token=' + myToken
 
-let RoomURL = window.location.origin + '/join/' + room_id;
+let RoomURL = window.location.origin + '/join/' + room_id + '?name=Visitor';
 
 let isExiting = false;
 
