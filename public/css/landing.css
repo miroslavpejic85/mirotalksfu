@@ -1934,7 +1934,8 @@ main {
 
 .clients-size-logo {
     width: 240px;
-    height: auto;
+    height: 60px;
+    object-fit: contain;
 }
 
 .clients-logo {
