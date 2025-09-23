@@ -47,4 +47,15 @@ config.ui.buttons = config.ui.buttons || {};
 config.ui.buttons.popup = config.ui.buttons.popup || {};
 config.ui.buttons.popup.shareRoomPopup = true;
 
+const mediasoupConfig = config.mediasoup || {};
+config.mediasoup = {
+  ...mediasoupConfig,
+  webRtcTransport: {
+    ...mediasoupConfig.webRtcTransport,
+    initialAvailableOutgoingBitrate: 1500000,
+    minimumAvailableOutgoingBitrate: 600000,
+    maxIncomingBitrate: 2500000,
+  },
+};
+
 module.exports = config;
