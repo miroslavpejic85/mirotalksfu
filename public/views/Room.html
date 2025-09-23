@@ -1699,7 +1699,7 @@ access to use this app.
             </header>
             <main>
                 <div id="lobbyUsers">
-                    <table id="lobbyTb">
+                    <template id="lobbyTbTemplate">
                         <tr>
                             <th></th>
                             <th></th>
@@ -1712,6 +1712,9 @@ access to use this app.
                             <td><button id="lobbyAcceptAllBtn" class="fas fa-check"></button></td>
                             <td><button id="lobbyRejectAllBtn" class="fas fa-times"></button></td>
                         </tr>
+                    </template>
+
+                    <table id="lobbyTb">
                     </table>
                 </div>
             </main>

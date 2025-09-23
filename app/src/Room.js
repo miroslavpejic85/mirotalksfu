@@ -590,6 +590,14 @@ module.exports = class Room {
         }
     }
 
+    getPresenterPeers() {
+        return Array.from(this.peers.values()).filter((peer) => peer.peer_presenter);
+    }
+
+    getLobbyPeers() {
+        return Array.from(this.peers.values()).filter((peer) => peer.peer_lobby);
+    }
+
     // ####################################################
     // WebRTC TRANSPORT
     // ####################################################

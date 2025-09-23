@@ -355,6 +355,7 @@ class RoomClient {
         // Room Lobby
         this.RoomIsLobby = false;
         this.RoomLobbyAccepted = false;
+        this.lobbyPears = {};
 
         this.transcription = transcription;
 
@@ -738,8 +739,12 @@ class RoomClient {
         for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = this.peers.get(peer).peer_info;
             // console.log('07.1 ----> Remote Peer info', peer_info);
+            const { peer_id, peer_name, peer_avatar, peer_presenter, peer_video, peer_recording, peer_lobby } = peer_info;
 
-            const { peer_id, peer_name, peer_avatar, peer_presenter, peer_video, peer_recording } = peer_info;
+            if (peer_lobby) {
+                this.lobbyAddPear({peer_id, peer_avatar, peer_name});
+                continue;
+            }
 
             const canSetVideoOff = !isBroadcastingEnabled || (isBroadcastingEnabled && peer_presenter);
 
@@ -7881,45 +7886,15 @@ class RoomClient {
         switch (data.lobby_status) {
             case 'waiting':
                 if (!isRulesActive || isPresenter) {
-                    let lobbyTr = '';
-                    let peer_id = data.peer_id;
-                    let peer_name = data.peer_name;
-                    let peer_avatar = data.peer_avatar;
-
-                    const avatarImg =
-                        peer_avatar && this.isImageURL(peer_avatar)
-                            ? peer_avatar
-                            : this.isValidEmail(peer_name)
-                              ? this.genGravatar(peer_name, 32)
-                              : this.genAvatarSvg(peer_name, 32);
-
-                    let lobbyTb = this.getId('lobbyTb');
-                    let lobbyAccept = _PEER.acceptPeer;
-                    let lobbyReject = _PEER.ejectPeer;
-                    let lobbyAcceptId = `${peer_name}___${peer_id}___lobbyAccept`;
-                    let lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
-
-                    lobbyTr += `
-                    <tr id='${peer_id}'>
-                        <td><img src="${avatarImg}" /></td>
-                        <td>${peer_name}</td>
-                        <td><button id='${lobbyAcceptId}' onclick="rc.lobbyAction(this.id, 'accept')">${lobbyAccept}</button></td>
-                        <td><button id='${lobbyRejectId}' onclick="rc.lobbyAction(this.id, 'reject')">${lobbyReject}</button></td>
-                    </tr>
-                    `;
-
-                    lobbyTb.innerHTML += lobbyTr;
-                    lobbyParticipantsCount++;
-                    lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
-                    if (!isLobbyOpen) this.lobbyToggle();
-                    if (!this.isMobileDevice) {
-                        setTippy(lobbyAcceptId, 'Accept', 'top');
-                        setTippy(lobbyRejectId, 'Reject', 'top');
-                    }
+                    const {peer_id, peer_name, peer_avatar} = data;
+                    this.lobbyAddPear({peer_id, peer_name, peer_avatar});
                     this.userLog('info', peer_name + ' wants to join the meeting', 'top-end');
                 }
                 break;
             case 'accept':
+                if (this.lobbyRemovePearForPresenter(data)) {
+                    return
+                }
                 this.RoomLobbyAccepted = true;
                 await this.joinAllowed(data.room);
                 control.style.display = 'flex';
@@ -7927,6 +7902,9 @@ class RoomClient {
                 this.msgPopup('info', 'Your join meeting request was accepted by the moderator', 3000, 'top');
                 break;
             case 'reject':
+                if (this.lobbyRemovePearForPresenter(data)) {
+                    return
+                }
                 this.RoomLobbyAccepted = false;
                 this.sound('eject');
                 Swal.fire({
@@ -7951,6 +7929,24 @@ class RoomClient {
                 break;
         }
     }
+    
+    lobbyRemovePearForPresenter(data) {
+        const peers_id = data.peers_id?.length > 0 
+            ? data.peers_id 
+            : [data.peer_id]
+
+        // This current pear is in lobby accept request
+        // It means that most probably we this pear is eaitin in lobby right now
+        // so no need to update lobby list UI modal since there is no one
+        if (peers_id.includes(this.peer_id)) {
+            return false;
+        }
+
+        for (const peer_id of peers_id) {
+            this.lobbyRemovePear(peer_id);
+        }
+        return true;
+    }
 
     lobbyAction(id, lobby_status) {
         const words = id.split('___');
@@ -7961,19 +7957,17 @@ class RoomClient {
             peer_id: peer_id,
             peer_name: peer_name,
             lobby_status: lobby_status,
-            broadcast: false,
+            broadcast: true,
         };
         this.socket.emit('roomLobby', data);
-        const trElem = this.getId(peer_id);
-        trElem.parentNode.removeChild(trElem);
-        lobbyParticipantsCount--;
-        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
-        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+        this.lobbyRemovePear(peer_id);
     }
 
     lobbyAcceptAll() {
-        if (lobbyParticipantsCount > 0) {
-            const data = this.lobbyGetData('accept', this.lobbyGetPeerIds());
+        const lobbyPearsIds = this.lobbyGetPeerIds()
+        console.log('lobbyAcceptAll', lobbyPearsIds, lobbyPearsIds.length)
+        if (lobbyPearsIds.length > 0) {
+            const data = this.lobbyGetData('accept', lobbyPearsIds);
             this.socket.emit('roomLobby', data);
             this.lobbyRemoveAll();
         } else {
@@ -7982,8 +7976,9 @@ class RoomClient {
     }
 
     lobbyRejectAll() {
-        if (lobbyParticipantsCount > 0) {
-            const data = this.lobbyGetData('reject', this.lobbyGetPeerIds());
+        const lobbyPearsIds = this.lobbyGetPeerIds()
+        if (lobbyPearsIds.length > 0) {
+            const data = this.lobbyGetData('reject', lobbyPearsIds);
             this.socket.emit('roomLobby', data);
             this.lobbyRemoveAll();
         } else {
@@ -7992,44 +7987,67 @@ class RoomClient {
     }
 
     lobbyRemoveAll() {
-        let tr = lobbyTb.getElementsByTagName('tr');
-        for (let i = tr.length - 1; i >= 0; i--) {
-            if (tr[i].id && tr[i].id != 'lobbyAll') {
-                console.log('REMOVE LOBBY PEER ID ' + tr[i].id);
-                if (tr[i] && tr[i].parentElement) {
-                    tr[i].parentElement.removeChild(tr[i]);
-                }
-                lobbyParticipantsCount--;
-            }
-        }
-        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
-        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+        this.lobbyPears = {};
+        this.lobbyRefreshUi();
     }
 
     lobbyRemoveMe(peer_id) {
-        let tr = lobbyTb.getElementsByTagName('tr');
-        for (let i = tr.length - 1; i >= 0; i--) {
-            if (tr[i].id && tr[i].id == peer_id) {
-                console.log('REMOVE LOBBY PEER ID ' + tr[i].id);
-                if (tr[i] && tr[i].parentElement) {
-                    tr[i].parentElement.removeChild(tr[i]);
-                }
-                lobbyParticipantsCount--;
+        this.lobbyRemovePear(peer_id);
+    }
+
+    lobbyAddPear(data) {
+        this.lobbyPears[data.peer_id] = data;
+        this.lobbyRefreshUi();
+    }
+
+    lobbyRemovePear(peer_id) {
+        delete this.lobbyPears[peer_id];
+        this.lobbyRefreshUi();
+    }
+
+    lobbyRefreshUi() {
+        let lobbyTr = this.getId('lobbyTbTemplate').innerHTML;
+        const lobbyTb = this.getId('lobbyTb');
+
+        for (const peer_id of Object.keys(this.lobbyPears)) {
+            const {peer_name, peer_avatar} = this.lobbyPears[peer_id];
+
+            const avatarImg =
+                peer_avatar && this.isImageURL(peer_avatar)
+                    ? peer_avatar
+                    : this.isValidEmail(peer_name)
+                    ? this.genGravatar(peer_name, 32)
+                    : this.genAvatarSvg(peer_name, 32);
+
+            const lobbyAcceptId = `${peer_name}___${peer_id}___lobbyAccept`;
+            const lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
+
+            lobbyTr += `
+            <tr id='${peer_id}'>
+                <td><img src="${avatarImg}" /></td>
+                <td>${peer_name}</td>
+                <td><button id='${lobbyAcceptId}' onclick="rc.lobbyAction(this.id, 'accept')">${_PEER.acceptPeer}</button></td>
+                <td><button id='${lobbyRejectId}' onclick="rc.lobbyAction(this.id, 'reject')">${_PEER.ejectPeer}</button></td>
+            </tr>
+            `;
+
+            if (!this.isMobileDevice) {
+                setTippy(lobbyAcceptId, 'Accept', 'top');
+                setTippy(lobbyRejectId, 'Reject', 'top');
             }
         }
-        lobbyHeaderTitle.innerText = 'Lobby users (' + lobbyParticipantsCount + ')';
-        if (lobbyParticipantsCount == 0) this.lobbyToggle();
+        lobbyTb.innerHTML = lobbyTr;
+        lobbyHeaderTitle.innerText = 'Lobby users (' + this.lobbyParticipantsCount() + ')';
+        this.lobbyToggle();
+    }
+
+
+    lobbyParticipantsCount() {
+        return Object.keys(this.lobbyPears).length;
     }
 
     lobbyGetPeerIds() {
-        let peers_id = [];
-        let tr = lobbyTb.getElementsByTagName('tr');
-        for (let i = tr.length - 1; i >= 0; i--) {
-            if (tr[i].id && tr[i].id != 'lobbyAll') {
-                peers_id.push(tr[i].id);
-            }
-        }
-        return peers_id;
+        return Object.keys(this.lobbyPears)
     }
 
     lobbyGetData(status, peers_id = []) {
@@ -8044,7 +8062,8 @@ class RoomClient {
     }
 
     lobbyToggle() {
-        if (lobbyParticipantsCount > 0 && !isLobbyOpen) {
+        const isAllowed = !isRulesActive || isPresenter;
+        if (this.lobbyParticipantsCount() > 0 && isAllowed) {
             lobby.style.display = 'block';
             lobby.style.top = '50%';
             lobby.style.left = '50%';
@@ -8052,11 +8071,9 @@ class RoomClient {
                 lobby.style.width = '100%';
                 lobby.style.height = '100%';
             }
-            isLobbyOpen = true;
             this.sound('lobby');
         } else {
             lobby.style.display = 'none';
-            isLobbyOpen = false;
         }
     }
 

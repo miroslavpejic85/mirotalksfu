@@ -257,7 +257,6 @@ let isKeepButtonsVisible = false;
 let isShortcutsEnabled = false;
 let isBroadcastingEnabled = false;
 let isLobbyEnabled = false;
-let isLobbyOpen = false;
 let hostOnlyRecording = false;
 let isEnumerateAudioDevices = false;
 let isEnumerateVideoDevices = false;

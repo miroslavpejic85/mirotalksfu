@@ -1927,6 +1927,7 @@ function startServer() {
                 log.debug(
                     'The user is currently waiting to join the room because the lobby is enabled, and they are not a presenter'
                 );
+                peer.updatePeerInfo({ type: 'lobby', status: true });
                 room.broadCast(socket.id, 'roomLobby', {
                     peer_id: peer_id,
                     peer_name: peer_name,
@@ -1971,15 +1972,7 @@ function startServer() {
                 }
             }
 
-            // handle WebHook
-            if (webhook.enabled) {
-                // Trigger a POST request when a user joins
-                data.timestamp = log.getDateTime(false);
-                axios
-                    .post(webhook.url, { event: 'join', data })
-                    .then((response) => log.debug('Join event tracked:', response.data))
-                    .catch((error) => log.error('Error tracking join event:', error.message));
-            }
+            handleJoinWebHook(room.id, data.peer_info);
 
             cb(room.toJson());
         });
@@ -2460,12 +2453,24 @@ function startServer() {
                 broadcast: data.broadcast,
             });
 
-            if (data.peers_id && data.broadcast) {
-                for (let peer_id in data.peers_id) {
-                    room.sendTo(data.peers_id[peer_id], 'roomLobby', data);
+            const pears_id = data.peers_id ? data.peers_id : [data.peer_id];
+
+            // Also send to all presenters to update lobby UI on there side
+            const send_to_pears_id = pears_id.concat(room.getPresenterPeers().map((peer) => peer.id));
+
+            for (const peer_id of send_to_pears_id) {
+                room.sendTo(peer_id, 'roomLobby', data);
+            }
+
+            if (data.lobby_status === 'accept') { 
+                for (const peer_id of pears_id) {
+                    const peer = room.getPeer(peer_id);
+                    if (!peer.peer_lobby) continue;
+
+                    peer.updatePeerInfo({ type: 'lobby', status: false });
+                    
+                    handleJoinWebHook(room.id, peer.peer_info);
                 }
-            } else {
-                room.sendTo(data.peer_id, 'roomLobby', data);
             }
         });
 
@@ -3495,7 +3500,25 @@ function startServer() {
             callback('Successfully exited room');
         });
 
+        
         // Helpers
+
+        async function handleJoinWebHook(room_id, peer_info) {
+            // handle WebHook
+            if (webhook.enabled) {
+                // Trigger a POST request when a user joins
+                const data = {
+                    timestamp: log.getDateTime(false),
+                    room_id,
+                    peer_info,
+                };
+    
+                axios
+                    .post(webhook.url, { event: 'join', data })
+                    .then((response) => log.debug('Join event tracked:', response.data))
+                    .catch((error) => log.error('Error tracking join event:', error.message));
+                }
+        }
 
         function getRoomAndPeer(socket) {
             const room = getRoom(socket);
