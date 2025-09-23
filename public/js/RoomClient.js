@@ -739,10 +739,11 @@ class RoomClient {
         for (let peer of Array.from(this.peers.keys()).filter((id) => id !== this.peer_id)) {
             let peer_info = this.peers.get(peer).peer_info;
             // console.log('07.1 ----> Remote Peer info', peer_info);
-            const { peer_id, peer_name, peer_avatar, peer_presenter, peer_video, peer_recording, peer_lobby } = peer_info;
+            const { peer_id, peer_name, peer_avatar, peer_presenter, peer_video, peer_recording, peer_lobby } =
+                peer_info;
 
             if (peer_lobby) {
-                this.lobbyAddPear({peer_id, peer_avatar, peer_name});
+                this.lobbyAddPear({ peer_id, peer_avatar, peer_name });
                 continue;
             }
 
@@ -7886,14 +7887,14 @@ class RoomClient {
         switch (data.lobby_status) {
             case 'waiting':
                 if (!isRulesActive || isPresenter) {
-                    const {peer_id, peer_name, peer_avatar} = data;
-                    this.lobbyAddPear({peer_id, peer_name, peer_avatar});
+                    const { peer_id, peer_name, peer_avatar } = data;
+                    this.lobbyAddPear({ peer_id, peer_name, peer_avatar });
                     this.userLog('info', peer_name + ' wants to join the meeting', 'top-end');
                 }
                 break;
             case 'accept':
                 if (this.lobbyRemovePearForPresenter(data)) {
-                    return
+                    return;
                 }
                 this.RoomLobbyAccepted = true;
                 await this.joinAllowed(data.room);
@@ -7903,7 +7904,7 @@ class RoomClient {
                 break;
             case 'reject':
                 if (this.lobbyRemovePearForPresenter(data)) {
-                    return
+                    return;
                 }
                 this.RoomLobbyAccepted = false;
                 this.sound('eject');
@@ -7929,11 +7930,9 @@ class RoomClient {
                 break;
         }
     }
-    
+
     lobbyRemovePearForPresenter(data) {
-        const peers_id = data.peers_id?.length > 0 
-            ? data.peers_id 
-            : [data.peer_id]
+        const peers_id = data.peers_id?.length > 0 ? data.peers_id : [data.peer_id];
 
         // This current pear is in lobby accept request
         // It means that most probably we this pear is eaitin in lobby right now
@@ -7964,8 +7963,8 @@ class RoomClient {
     }
 
     lobbyAcceptAll() {
-        const lobbyPearsIds = this.lobbyGetPeerIds()
-        console.log('lobbyAcceptAll', lobbyPearsIds, lobbyPearsIds.length)
+        const lobbyPearsIds = this.lobbyGetPeerIds();
+        console.log('lobbyAcceptAll', lobbyPearsIds, lobbyPearsIds.length);
         if (lobbyPearsIds.length > 0) {
             const data = this.lobbyGetData('accept', lobbyPearsIds);
             this.socket.emit('roomLobby', data);
@@ -7976,7 +7975,7 @@ class RoomClient {
     }
 
     lobbyRejectAll() {
-        const lobbyPearsIds = this.lobbyGetPeerIds()
+        const lobbyPearsIds = this.lobbyGetPeerIds();
         if (lobbyPearsIds.length > 0) {
             const data = this.lobbyGetData('reject', lobbyPearsIds);
             this.socket.emit('roomLobby', data);
@@ -8010,14 +8009,14 @@ class RoomClient {
         const lobbyTb = this.getId('lobbyTb');
 
         for (const peer_id of Object.keys(this.lobbyPears)) {
-            const {peer_name, peer_avatar} = this.lobbyPears[peer_id];
+            const { peer_name, peer_avatar } = this.lobbyPears[peer_id];
 
             const avatarImg =
                 peer_avatar && this.isImageURL(peer_avatar)
                     ? peer_avatar
                     : this.isValidEmail(peer_name)
-                    ? this.genGravatar(peer_name, 32)
-                    : this.genAvatarSvg(peer_name, 32);
+                      ? this.genGravatar(peer_name, 32)
+                      : this.genAvatarSvg(peer_name, 32);
 
             const lobbyAcceptId = `${peer_name}___${peer_id}___lobbyAccept`;
             const lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
@@ -8041,13 +8040,12 @@ class RoomClient {
         this.lobbyToggle();
     }
 
-
     lobbyParticipantsCount() {
         return Object.keys(this.lobbyPears).length;
     }
 
     lobbyGetPeerIds() {
-        return Object.keys(this.lobbyPears)
+        return Object.keys(this.lobbyPears);
     }
 
     lobbyGetData(status, peers_id = []) {

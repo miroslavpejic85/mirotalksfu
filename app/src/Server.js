@@ -2462,13 +2462,13 @@ function startServer() {
                 room.sendTo(peer_id, 'roomLobby', data);
             }
 
-            if (data.lobby_status === 'accept') { 
+            if (data.lobby_status === 'accept') {
                 for (const peer_id of pears_id) {
                     const peer = room.getPeer(peer_id);
                     if (!peer.peer_lobby) continue;
 
                     peer.updatePeerInfo({ type: 'lobby', status: false });
-                    
+
                     handleJoinWebHook(room.id, peer.peer_info);
                 }
             }
@@ -3500,7 +3500,6 @@ function startServer() {
             callback('Successfully exited room');
         });
 
-        
         // Helpers
 
         async function handleJoinWebHook(room_id, peer_info) {
@@ -3512,12 +3511,12 @@ function startServer() {
                     room_id,
                     peer_info,
                 };
-    
+
                 axios
                     .post(webhook.url, { event: 'join', data })
                     .then((response) => log.debug('Join event tracked:', response.data))
                     .catch((error) => log.error('Error tracking join event:', error.message));
-                }
+            }
         }
 
         function getRoomAndPeer(socket) {
