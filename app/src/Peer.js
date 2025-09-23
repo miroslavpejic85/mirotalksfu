@@ -18,6 +18,7 @@ module.exports = class Peer {
             peer_video_privacy,
             peer_recording,
             peer_hand,
+            peer_lobby,
         } = peer_info;
 
         this.id = socket_id;
@@ -32,6 +33,7 @@ module.exports = class Peer {
         this.peer_video_privacy = peer_video_privacy;
         this.peer_recording = peer_recording;
         this.peer_hand = peer_hand;
+        this.peer_lobby = peer_lobby;
 
         this.transports = new Map();
         this.consumers = new Map();
@@ -82,6 +84,10 @@ module.exports = class Peer {
             case 'peerAudio':
                 this.peer_info.peer_audio_volume = data.volume;
                 this.peer_audio_volume = data.volume;
+                break;
+            case 'lobby':
+                this.peer_info.peer_lobby = data.status;
+                this.peer_lobby = data.status;
                 break;
             default:
                 break;
