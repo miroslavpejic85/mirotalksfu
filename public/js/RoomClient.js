@@ -2259,6 +2259,8 @@ class RoomClient {
 
         let constraints = {};
 
+        videoFps.disabled = false;
+
         switch (videoQuality.value) {
             case 'default':
                 constraints = createConstraints(1280, 720, 30, true);
@@ -2272,25 +2274,15 @@ class RoomClient {
                 constraints = createConstraints(640, 480, frameRate, isFirefox);
                 break;
             case 'hd':
+            case 'fhd':
+            case '2k':
+            case '4k':
+            case '6k':
+            case '8k':
                 constraints = createConstraints(1280, 720, frameRate, isFirefox);
                 break;
-            case 'fhd':
-                constraints = createConstraints(1920, 1080, frameRate, isFirefox);
-                break;
-            case '2k':
-                constraints = createConstraints(2560, 1440, frameRate, isFirefox);
-                break;
-            case '4k':
-                constraints = createConstraints(3840, 2160, frameRate, isFirefox);
-                break;
-            case '6k':
-                constraints = createConstraints(6144, 3456, frameRate, isFirefox);
-                break;
-            case '8k':
-                constraints = createConstraints(7680, 4320, frameRate, isFirefox);
-                break;
             default:
-                // fallback to HD
+                // fallback to HD 720p
                 constraints = createConstraints(1280, 720, frameRate, isFirefox);
                 break;
         }
@@ -2330,16 +2322,18 @@ class RoomClient {
         };
 
         const screenResolutionMap = {
+            default: { width: 1280, height: 720 },
             hd: { width: 1280, height: 720 },
-            fhd: { width: 1920, height: 1080 },
-            '2k': { width: 2560, height: 1440 },
-            '4k': { width: 3840, height: 2160 },
-            '6k': { width: 6144, height: 3456 },
-            '8k': { width: 7680, height: 4320 },
+            fhd: { width: 1280, height: 720 },
+            '2k': { width: 1280, height: 720 },
+            '4k': { width: 1280, height: 720 },
+            '6k': { width: 1280, height: 720 },
+            '8k': { width: 1280, height: 720 },
         };
 
-        // Default to Full HD if no match found in the screen resolution map
-        const { width, height } = screenResolutionMap[screenQuality.value] || { width: 1920, height: 1080 };
+        const fallbackResolution = screenResolutionMap.default;
+        // Default to HD 720p if no match found in the screen resolution map
+        const { width, height } = screenResolutionMap[screenQuality.value] || fallbackResolution;
 
         return screenBaseConstraints(width, height);
     }
@@ -2392,7 +2386,7 @@ class RoomClient {
                 console.log('WEBCAM ENCODING: VP9 or AV1 with SVC');
                 encodings = [
                     {
-                        maxBitrate: 5000000,
+                        maxBitrate: 2500000,
                         scalabilityMode: this.webcamScalabilityMode || 'L3T3_KEY',
                     },
                 ];
@@ -2401,7 +2395,7 @@ class RoomClient {
                 encodings = [
                     {
                         scaleResolutionDownBy: 1,
-                        maxBitrate: 5000000,
+                        maxBitrate: 2500000,
                         scalabilityMode: this.webcamScalabilityMode || 'L1T3',
                     },
                 ];
@@ -2472,7 +2466,7 @@ class RoomClient {
                 console.log('SCREEN ENCODING: VP9 or AV1 with SVC');
                 encodings = [
                     {
-                        maxBitrate: 5000000,
+                        maxBitrate: 2500000,
                         scalabilityMode: this.sharingScalabilityMode || 'L3T3',
                         dtx: true,
                     },
@@ -2482,7 +2476,7 @@ class RoomClient {
                 encodings = [
                     {
                         scaleResolutionDownBy: 1,
-                        maxBitrate: 5000000,
+                        maxBitrate: 2500000,
                         scalabilityMode: this.sharingScalabilityMode || 'L1T3',
                         dtx: true,
                     },
