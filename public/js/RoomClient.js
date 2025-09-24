@@ -14,7 +14,7 @@
  */
 
 const cfg = {
-    useAvatarSvg: true,
+    useAvatarSvg: false,
 };
 
 const html = {
