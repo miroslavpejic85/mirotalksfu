@@ -56,6 +56,7 @@ let BUTTONS = {
         pushToTalk: true,
         keyboardShortcuts: true,
         virtualBackground: true,
+        customNoiseSuppression: true,
     },
     producerVideo: {
         videoPictureInPicture: true,
