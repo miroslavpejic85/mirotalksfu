@@ -1124,10 +1124,8 @@ async function whoAreYou() {
         const serverButtons = response.data.message;
         if (serverButtons) {
             // Merge serverButtons into BUTTONS, keeping the existing keys in BUTTONS if they are not present in serverButtons
-            BUTTONS = {
-                ...BUTTONS, // Spread current BUTTONS first to keep existing keys
-                ...serverButtons, // Overwrite or add new keys from serverButtons
-            };
+            BUTTONS = mergeConfig(BUTTONS, serverButtons);
+
             console.log('04 ----> AXIOS ROOM BUTTONS SETTINGS', {
                 serverButtons: serverButtons,
                 clientButtons: BUTTONS,
@@ -1287,6 +1285,17 @@ async function whoAreYou() {
         hide(initMicrophoneSelect);
         hide(initSpeakerSelect);
     }
+}
+
+function mergeConfig(current, updated) {
+    for (const key of Object.keys(updated)) {
+        if (!current.hasOwnProperty(key) || typeof updated[key] !== 'object') {
+            current[key] = updated[key];
+        } else {
+            mergeConfig(current[key], updated[key]);
+        }
+    }
+    return current;
 }
 
 function handleAudio() {
@@ -1698,6 +1707,7 @@ function roomIsReady() {
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
+    !BUTTONS.settings.customNoiseSuppression && hide(noiseSuppressionButton);
     if (rc.recording.recSyncServerRecording) show(roomRecordingServer);
     BUTTONS.main.aboutButton && show(aboutButton);
     if (!isMobileDevice) show(pinUnpinGridDiv);

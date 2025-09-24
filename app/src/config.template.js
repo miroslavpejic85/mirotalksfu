@@ -1211,6 +1211,7 @@ module.exports = {
                 pushToTalk: process.env.ENABLE_PUSH_TO_TALK !== 'false',
                 keyboardShortcuts: process.env.SHOW_KEYBOARD_SHORTCUTS !== 'false',
                 virtualBackground: process.env.SHOW_VIRTUAL_BACKGROUND !== 'false',
+                customNoiseSuppression: process.env.CUSTOM_NOISE_SUPPRESSION_ENABLED !== 'false',
             },
 
             // Video controls for producer (local user)

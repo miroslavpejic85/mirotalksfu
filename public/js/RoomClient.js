@@ -1773,7 +1773,7 @@ class RoomClient {
                 }
             }
 
-            if (audio) {
+            if (audio && BUTTONS.settings.customNoiseSuppression) {
                 /*
                  * Initialize RNNoise Suppression if enabled and supported
                  * This will only apply to audio tracks
