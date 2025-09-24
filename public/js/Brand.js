@@ -35,28 +35,28 @@ const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
 // app/src/config.js - ui.brand
 let BRAND = {
     app: {
-        language: 'en',
+        language: 'ru',
         name: 'Kremlevka',
-        title: 'Kremlevka<br />Free browser based Real-time video calls.<br />Simple, Secure, Fast.',
+        title: 'Kremlevka<br />Бесплатные видеозвонки прямо в браузере.<br />Просто, безопасно, быстро.',
         description:
-            'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
-        joinDescription: 'Pick a room name.<br />How about this one?',
-        joinButtonLabel: 'JOIN ROOM',
-        joinLastLabel: 'Your recent room:',
+            'Начните видеозвонок в один клик. Не нужны загрузки, плагины или регистрация — сразу общайтесь, переписывайтесь и делитесь экраном.',
+        joinDescription: 'Введите название комнаты.<br />Можно использовать предложенный вариант.',
+        joinButtonLabel: 'ВОЙТИ В КОМНАТУ',
+        joinLastLabel: 'Недавняя комната:',
     },
     site: {
-        title: 'Kremlevka, Free Video Calls, Messaging and Screen Sharing',
+        title: 'Kremlevka — видеозвонки, сообщения и демонстрация экрана',
         icon: '../images/logo.svg',
         appleTouchIcon: '../images/logo.svg',
-        newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
+        newRoomTitle: 'Придумайте название.<br />Поделитесь ссылкой.<br />Начните конференцию.',
         newRoomDescription:
-            "Each room has its disposable URL. Just pick a room name and share your custom URL. It's that easy.",
+            'Каждая комната получает уникальный URL. Просто придумайте название и поделитесь ссылкой — это легко.',
     },
     meta: {
         description:
-            'Kremlevka powered by WebRTC and mediasoup, Real-time Simple Secure Fast video calls, messaging and screen sharing capabilities in the browser.',
+            'Kremlevka — защищённые видеозвонки, обмен сообщениями и демонстрация экрана в браузере.',
         keywords:
-            'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
+            'webrtc, mirotalk, видеозвонки, конференция, демонстрация экрана, sfu, связь, браузер, кремлёвка',
     },
     html: {
         features: true,
@@ -68,24 +68,24 @@ let BRAND = {
         footer: true,
     },
     whoAreYou: {
-        title: 'Who are you?',
+        title: 'Кто вы?',
         description:
-            "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
-        buttonLoginLabel: 'LOGIN',
-        buttonJoinLabel: 'JOIN ROOM',
+            'Если вы ведущий, авторизуйтесь сейчас.<br />Если вы гость, дождитесь подключения ведущего.',
+        buttonLoginLabel: 'ВОЙТИ',
+        buttonJoinLabel: 'ПРИСОЕДИНИТЬСЯ',
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
         title: '<strong>WebRTC SFU v1.9.45</strong>',
         html: `
-            <button 
-                id="support-button" 
-                data-umami-event="Support button" 
+            <button
+                id="support-button"
+                data-umami-event="Support button"
                 onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
-                <i class="fas fa-heart"></i> Support
+                <i class="fas fa-heart"></i> Поддержать проект
             </button>
             <br /><br /><br />
-            Author: 
+            Автор:
             <a 
                 id="linkedin-button" 
                 data-umami-event="Linkedin button" 
@@ -94,7 +94,7 @@ let BRAND = {
                 Miroslav Pejic
             </a>
             <br /><br />
-            Email: 
+            Почта:
             <a 
                 id="email-button" 
                 data-umami-event="Email button" 
@@ -103,7 +103,7 @@ let BRAND = {
             </a>
             <br /><br />
             <hr />
-            <span>&copy; 2025 Kremlevka, all rights reserved</span>
+            <span>&copy; 2025 Kremlevka, все права защищены</span>
             <hr />
         `,
     },
@@ -128,12 +128,12 @@ let BRAND = {
             checkOnlineStatus: false,
             isOnline: true,
             customMessages: {
-                heading: 'Need Help?',
-                subheading: 'Get instant support from our expert team!',
-                connectText: 'connect in < 5 seconds',
-                onlineText: 'We are online',
-                offlineText: 'We are offline',
-                poweredBy: 'Powered by Kremlevka',
+                heading: 'Нужна помощь?',
+                subheading: 'Получите поддержку от нашей команды за считанные секунды!',
+                connectText: 'свяжемся < 5 секунд',
+                onlineText: 'Мы онлайн',
+                offlineText: 'Мы офлайн',
+                poweredBy: 'Работает на Kremlevka',
             },
             alert: {
                 enabled: false,
