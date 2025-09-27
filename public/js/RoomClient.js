@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.72
+ * @version 1.9.73
  *
  */
 
@@ -2658,12 +2658,14 @@ class RoomClient {
                 };
 
                 if (this.isMobileDevice) {
+                    vb.classList.add('mobile-floating');
                     document.body.appendChild(vb);
-                    d.addEventListener('mouseleave', hideVideoMenu);
                 } else {
+                    vb.classList.remove('mobile-floating');
                     d.appendChild(vb);
-                    document.addEventListener('click', hideVideoMenu);
+                    d.addEventListener('mouseleave', hideVideoMenu);
                 }
+                vb.addEventListener('click', (e) => e.stopPropagation());
 
                 this.videoMediaContainer.appendChild(d);
 
@@ -3171,6 +3173,7 @@ class RoomClient {
                     vb.classList.remove('mobile-floating');
                     d.appendChild(vb);
                 }
+                vb.addEventListener('click', (e) => e.stopPropagation());
 
                 this.videoMediaContainer.appendChild(d);
 
@@ -3419,13 +3422,22 @@ class RoomClient {
         d.appendChild(h);
         d.appendChild(pm);
 
+        const hideVideoMenu = () => {
+            if (vb && !vb.classList.contains('hidden')) {
+                hide(vb);
+                setCamerasBorderNone();
+            }
+        };
+
         if (this.isMobileDevice) {
             vb.classList.add('mobile-floating');
             document.body.appendChild(vb);
         } else {
             vb.classList.remove('mobile-floating');
             d.appendChild(vb);
+            d.addEventListener('mouseleave', hideVideoMenu);
         }
+        vb.addEventListener('click', (e) => e.stopPropagation());
 
         this.videoMediaContainer.appendChild(d);
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
@@ -4602,9 +4614,18 @@ class RoomClient {
         };
         const hideDropdown = () => {
             hoverTimeout = setTimeout(() => eVc.classList.remove('show'), 200);
-            if (vb && !vb.classList.contains('hidden')) {
-                hide(vb);
-                setCamerasBorderNone();
+        };
+
+        // Toggle dropdown visibility (used on mobile and optionally elsewhere)
+        const toggleDropdown = (e) => {
+            if (e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+            if (eVc.classList.contains('show')) {
+                eVc.classList.remove('show');
+            } else {
+                showDropdown();
             }
         };
 
@@ -4615,19 +4636,15 @@ class RoomClient {
             eVc.addEventListener('mouseleave', hideDropdown);
             d.addEventListener('mouseleave', hideDropdown);
         } else {
-            eBtn.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                eVc.classList.toggle('show');
+            eBtn.addEventListener('click', toggleDropdown);
+            eVc.addEventListener('click', toggleDropdown);
+            // Optionally, close dropdown when clicking outside the tile, dropdown, and menu bar
+            document.addEventListener('click', (event) => {
+                const target = event.target;
+                if (!d.contains(target) && !eVc.contains(target) && !vb.contains(target)) {
+                    hideDropdown();
+                }
             });
-            // close if tapping outside
-            document.addEventListener(
-                'click',
-                (ev) => {
-                    if (!eVc.contains(ev.target) && ev.target !== eBtn) eVc.classList.remove('show');
-                },
-                { passive: true }
-            );
         }
     }
 
