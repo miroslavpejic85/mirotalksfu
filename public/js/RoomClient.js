@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.71
+ * @version 1.9.72
  *
  */
 
@@ -2649,8 +2649,22 @@ class RoomClient {
                 d.appendChild(pm);
                 d.appendChild(i);
                 d.appendChild(p);
-                //d.appendChild(vb);
-                document.body.appendChild(vb);
+
+                const hideVideoMenu = () => {
+                    if (vb && !vb.classList.contains('hidden')) {
+                        hide(vb);
+                        setCamerasBorderNone();
+                    }
+                };
+
+                if (this.isMobileDevice) {
+                    document.body.appendChild(vb);
+                    d.addEventListener('mouseleave', hideVideoMenu);
+                } else {
+                    d.appendChild(vb);
+                    document.addEventListener('click', hideVideoMenu);
+                }
+
                 this.videoMediaContainer.appendChild(d);
 
                 await this.attachMediaStream(elem, stream, type, 'Producer');
@@ -3105,8 +3119,6 @@ class RoomClient {
                 peerNameSpan.className = 'peer-name';
                 peerNameSpan.textContent = peer_name;
 
-                this.addCloseVBButton(peerNameHeader);
-
                 peerNameContainer.appendChild(peerNameSpan);
 
                 pv = document.createElement('input');
@@ -3133,10 +3145,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.ejectButton && buttonGroup.appendChild(ko);
 
                 eVc.appendChild(buttonGroup);
-                eDiv.appendChild(eBtn);
-                eDiv.appendChild(eVc);
-                vb.appendChild(eDiv);
-
+                vb.appendChild(eBtn);
                 vb.appendChild(au);
                 vb.appendChild(cm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
@@ -3153,14 +3162,23 @@ class RoomClient {
                 d.appendChild(i);
                 d.appendChild(p);
                 d.appendChild(pm);
-                //d.appendChild(vb);
-                document.body.appendChild(vb);
+                d.appendChild(eVc);
+
+                if (this.isMobileDevice) {
+                    vb.classList.add('mobile-floating');
+                    document.body.appendChild(vb);
+                } else {
+                    vb.classList.remove('mobile-floating');
+                    d.appendChild(vb);
+                }
+
                 this.videoMediaContainer.appendChild(d);
 
                 await this.attachMediaStream(elem, stream, type, 'Consumer');
 
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
+                this.handleVBEC(eBtn, eVc, vb, d);
                 this.handleVB(d.id, vb.id);
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
@@ -3400,9 +3418,15 @@ class RoomClient {
         d.appendChild(p);
         d.appendChild(h);
         d.appendChild(pm);
-        //d.appendChild(vb);
 
-        document.body.appendChild(vb);
+        if (this.isMobileDevice) {
+            vb.classList.add('mobile-floating');
+            document.body.appendChild(vb);
+        } else {
+            vb.classList.remove('mobile-floating');
+            d.appendChild(vb);
+        }
+
         this.videoMediaContainer.appendChild(d);
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
 
@@ -4569,19 +4593,51 @@ class RoomClient {
     // HANDLE VIDEO AND MENU BAR
     // ####################################################
 
+    handleVBEC(eBtn, eVc, vb, d) {
+        // Expand: hover for desktop, click for mobile
+        let hoverTimeout;
+        const showDropdown = () => {
+            clearTimeout(hoverTimeout);
+            eVc.classList.add('show');
+        };
+        const hideDropdown = () => {
+            hoverTimeout = setTimeout(() => eVc.classList.remove('show'), 200);
+            if (vb && !vb.classList.contains('hidden')) {
+                hide(vb);
+                setCamerasBorderNone();
+            }
+        };
+
+        if (!this.isMobileDevice) {
+            eBtn.addEventListener('mouseenter', showDropdown);
+            eBtn.addEventListener('mouseleave', hideDropdown);
+            eVc.addEventListener('mouseenter', showDropdown);
+            eVc.addEventListener('mouseleave', hideDropdown);
+            d.addEventListener('mouseleave', hideDropdown);
+        } else {
+            eBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                eVc.classList.toggle('show');
+            });
+            // close if tapping outside
+            document.addEventListener(
+                'click',
+                (ev) => {
+                    if (!eVc.contains(ev.target) && ev.target !== eBtn) eVc.classList.remove('show');
+                },
+                { passive: true }
+            );
+        }
+    }
+
     handleVB(videoId, videoBarId) {
         const videoPlayer = this.getId(videoId);
         const videoBar = this.getId(videoBarId);
         if (videoPlayer && videoBar) {
-            videoPlayer.addEventListener('click', async () => {
-                const videoMenuBar = rc.getEcN('videoMenuBar');
-                for (let i = 0; i < videoMenuBar.length; i++) {
-                    const menuBar = videoMenuBar[i];
-                    if (menuBar.id != videoBarId) {
-                        hide(menuBar);
-                    }
-                }
-
+            const eventType = this.isMobileDevice ? 'click' : 'mouseenter';
+            videoPlayer.addEventListener(eventType, async () => {
+                hideVideoMenuBar(videoBarId);
                 rc.resizeVideoMenuBar();
                 setCamerasBorderNone();
 
@@ -4614,18 +4670,8 @@ class RoomClient {
         const videoMenuBar = rc.getEcN('videoMenuBar');
         for (let i = 0; i < videoMenuBar.length; i++) {
             const menuBar = videoMenuBar[i];
-            menuBar.style.width = somethingPinned ? menuBarWidth : '100%';
+            menuBar.style.width = this.isMobileDevice && somethingPinned ? menuBarWidth : '100%';
         }
-    }
-
-    addCloseVBButton(containerElement) {
-        const closeBtn = document.createElement('div');
-        closeBtn.className = `${html.close} videoMenuBarClose`;
-        closeBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            hideClassElements('videoMenuBar');
-        });
-        containerElement.appendChild(closeBtn);
     }
 
     // ####################################################

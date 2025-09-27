@@ -74,7 +74,7 @@
 }
 
 .videoAvatarImage {
-    z-index: 7;
+    z-index: 1;
     position: absolute;
     display: none;
     width: var(--vmi-wh);
@@ -123,39 +123,43 @@
     background: rgba(0, 0, 0, 0.1);
 }
 
+/* Video Menu Bar */
 .videoMenuBar {
     z-index: 2;
-    position: fixed;
-    display: inline;
+    position: absolute; /* inside video feed by default */
     top: 0;
     left: 0;
-    padding: 15px;
     width: 100%;
-    font-size: small;
-    font-weight: bold;
-    text-align: center;
-    background: var(--body-bg);
-    cursor: default;
-    overflow: hidden;
-}
-
-.videoMenuBarClose {
-    position: absolute;
     display: flex;
-    top: 30px;
-    right: 30px;
-    padding: 10px;
-    border-radius: 50%;
-    color: white;
     align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
+    flex-direction: row-reverse; /* invert buttons order visually */
+    justify-content: flex-start; /* with row-reverse, this packs to the right */
+    flex-wrap: nowrap;
+    gap: clamp(2px, 1vw, 8px);
+    padding: clamp(4px, 1.2vw, 8px);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
     background: var(--body-bg);
+    /* box-shadow: var(--box-shadow); */
+    cursor: default;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none; /* Firefox */
+    white-space: nowrap;
+    -webkit-overflow-scrolling: touch;
 }
 
-.videoMenuBarClose:hover {
-    background: var(--btns-bg-color);
+/* Mobile floating menubar when appended to body */
+.videoMenuBar.mobile-floating {
+    z-index: 2;
+    position: fixed;
+    top: env(safe-area-inset-top, 0px);
+    left: 0;
+    right: 0;
+    width: 100vw;
+    border-radius: 0 0 10px 10px;
 }
 
 .videoAvatarMenuBar,
@@ -182,7 +186,7 @@
 .videoMenuBar button,
 .videoAvatarMenuBar button,
 .videoMenuBarShare button {
-    font-size: 1.2rem;
+    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
     float: right;
     color: #fff;
     background: transparent;
@@ -198,7 +202,14 @@
     transition: all 0.3s ease-in-out;
 }
 
-.expand-video .fa-bars {
+/* Touch-friendly sizing for buttons within menu bar */
+.videoMenuBar button {
+    min-width: 32px;
+    min-height: 32px;
+    flex: 0 0 auto;
+}
+
+.fa-bars {
     color: #66beff !important;
 }
 
@@ -208,29 +219,29 @@
 }
 
 .expand-video-content {
-    z-index: 1;
+    z-index: 5;
     display: none;
-    position: fixed;
-    right: 10px;
-    width: calc(100% - 20px);
-    max-width: 500px;
-    padding: 20px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    padding: 14px;
     border-radius: 5px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
+    overflow: auto;
 }
 
-.expand-video:hover .expand-video-content {
-    z-index: 1;
+.expand-video-content.show {
+    z-index: 5;
     display: grid !important;
     grid-gap: 5px 5px;
-    grid-template-columns: 50%;
+    grid-template-columns: 1fr 1fr;
     grid-template-areas:
         'header header'
         'controls controls';
     align-content: start;
     justify-items: start;
-    overflow-y: auto;
+    overflow: auto;
 }
 
 .peer-name-container {
@@ -244,8 +255,8 @@
 .expand-video-content .peer-name-header {
     grid-area: header;
     width: 100%;
-    padding: 40px;
-    height: 120px;
+    padding: 10px;
+    height: 100px;
     background: var(--btns-bg-color);
     background-size: cover;
     background-position: center;
@@ -258,7 +269,7 @@
 }
 
 .expand-video-content .peer-name {
-    font-size: 18px;
+    font-size: 12px;
     font-weight: bold;
     color: #fff;
     background: var(--body-bg);
@@ -286,20 +297,31 @@
 /* Individual Buttons */
 .expand-video-content .button-group button {
     text-align: center;
-    padding: 0 12px;
-    font-size: 16px;
+    padding: 0 10px;
+    font-size: 15px;
     color: #fff;
     background: var(--btns-bg-color);
-    min-width: 48px;
-    min-height: 48px;
+    min-width: 42px;
+    min-height: 42px;
     justify-content: center;
     align-items: center;
+    display: inline-flex; /* center icon + label */
+    gap: 6px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     border-radius: 10px;
     border: none;
     cursor: pointer;
     transition:
         background 0.2s ease,
         transform 0.1s ease;
+}
+
+/* Icon alignment inside buttons */
+.expand-video-content .button-group button i {
+    line-height: 1;
+    pointer-events: none; /* avoid accidental icon-only clicks interference */
 }
 
 /* Hover & Active Effects */
@@ -314,13 +336,16 @@
 
 @media (max-width: 600px) {
     .expand-video-content .button-group {
-        gap: 5px;
+        gap: 6px;
+        flex-wrap: wrap; /* allow wrapping on small screens */
+        justify-content: center;
     }
     .expand-video-content .button-group button {
         font-size: 14px;
-        min-width: 44px;
+        min-width: 44px; /* accessible tap target */
         min-height: 44px;
         padding: 0 8px;
+        border-radius: 8px;
     }
 }
 
@@ -333,6 +358,23 @@
     position: absolute;
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Keep peer name header on the left, controls on the right */
+.videoMenuBar .peer-name-header {
+    order: 9999; /* with row-reverse, last = leftmost */
+    padding: 0;
+    background: transparent;
+    height: auto;
+}
+.videoMenuBar .peer-name-header .peer-name-container {
+    margin: 0;
+    padding: 0;
+}
+.videoMenuBar .peer-name-header .peer-name {
+    background: transparent;
+    padding: 0;
+    font-size: 0.95rem;
 }
 
 .videoCircle {
@@ -414,20 +456,81 @@ input[type='range'] {
     }
 }
 
-@media screen and (max-width: 500px) {
-    .username {
-        font-size: 10px;
+@media (max-width: 800px) {
+    .videoMenuBar {
+        gap: 6px;
+        padding: 8px;
     }
-    .videoMenuBar input,
     .videoMenuBar button,
+    .videoAvatarMenuBar button,
     .videoMenuBarShare button {
         font-size: 1rem;
     }
     .expand-video-content {
-        min-width: 100%;
-        left: 0px;
+        right: 6px;
+        left: 6px;
+        width: auto;
+        max-width: none;
     }
-    .expand-video-content .peer-name {
-        font-size: 12px;
+}
+
+@media (max-width: 480px) {
+    /* Switch to a responsive grid for tighter screens */
+    .expand-video-content .button-group {
+        display: grid !important;
+        grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
+        gap: 6px;
+        justify-items: center;
+    }
+    .expand-video-content .button-group button {
+        min-width: unset; /* let grid control width */
+        width: 100%;
+        min-height: 44px;
+        padding: 8px;
+        font-size: 0.95rem;
+    }
+    .videoMenuBar {
+        gap: 4px;
+        padding: 6px;
+    }
+    .videoMenuBar button,
+    .videoAvatarMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.95rem;
+        min-width: 40px; /* compact tap target */
+        min-height: 40px;
+    }
+    .videoMenuBar input[type='range'] {
+        width: clamp(60px, 30vw, 140px);
+    }
+}
+
+@media (max-width: 360px) {
+    .expand-video-content .button-group {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
+    }
+    .expand-video-content .button-group button {
+        min-height: 40px;
+        padding: 6px;
+        font-size: 0.9rem;
+        border-radius: 8px;
+    }
+    .videoMenuBar {
+        gap: 4px;
+        padding: 6px;
+    }
+    .videoMenuBar button,
+    .videoAvatarMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.95rem;
+        min-width: 40px;
+        min-height: 40px;
+    }
+    .expand-video-content {
+        top: 6px;
+        right: 6px;
+        left: 6px;
+        padding: 12px;
     }
 }
