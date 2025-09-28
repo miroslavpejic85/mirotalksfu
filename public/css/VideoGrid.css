@@ -269,6 +269,7 @@
 }
 
 .expand-video-content .peer-name {
+    text-align: center;
     font-size: 12px;
     font-weight: bold;
     color: #fff;
@@ -332,21 +333,6 @@
 
 .expand-video-content .button-group button:active {
     transform: scale(0.95);
-}
-
-@media (max-width: 600px) {
-    .expand-video-content .button-group {
-        gap: 6px;
-        flex-wrap: wrap; /* allow wrapping on small screens */
-        justify-content: center;
-    }
-    .expand-video-content .button-group button {
-        font-size: 14px;
-        min-width: 44px; /* accessible tap target */
-        min-height: 44px;
-        padding: 0 8px;
-        border-radius: 8px;
-    }
 }
 
 .expand-video-content button:hover {
@@ -475,7 +461,6 @@ input[type='range'] {
 }
 
 @media (max-width: 480px) {
-    /* Switch to a responsive grid for tighter screens */
     .expand-video-content .button-group {
         display: grid !important;
         grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
@@ -497,7 +482,7 @@ input[type='range'] {
     .videoAvatarMenuBar button,
     .videoMenuBarShare button {
         font-size: 0.95rem;
-        min-width: 40px; /* compact tap target */
+        min-width: 40px;
         min-height: 40px;
     }
     .videoMenuBar input[type='range'] {
