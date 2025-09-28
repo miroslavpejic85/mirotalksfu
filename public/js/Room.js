@@ -3882,6 +3882,7 @@ function showButtons() {
     if (
         isButtonsBarOver ||
         isButtonsVisible ||
+        rc.isVideoBarDropDownOpen ||
         (isMobileDevice && rc.isChatOpen) ||
         (isMobileDevice && rc.isMySettingsOpen)
     )

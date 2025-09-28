@@ -310,6 +310,7 @@ class RoomClient {
         this.isMySettingsOpen = false;
 
         this._isConnected = false;
+        this.isVideoBarDropDownOpen = false;
         this.isDocumentOnFullScreen = false;
         this.isVideoOnFullScreen = false;
         this.isVideoFullScreenSupported = this.isFullScreenSupported();
@@ -4613,8 +4614,14 @@ class RoomClient {
         const eVc = this.getId(eVcId);
 
         if (eBtn && eVc) {
-            const showDropdown = () => eVc.classList.add('show');
-            const hideDropdown = () => eVc.classList.remove('show');
+            const showDropdown = () => {
+                eVc.classList.add('show');
+                rc.isVideoBarDropDownOpen = true;
+            };
+            const hideDropdown = () => {
+                eVc.classList.remove('show');
+                rc.isVideoBarDropDownOpen = false;
+            };
 
             const handleDocumentClick = (e) => {
                 if (!eBtn.contains(e.target) && !eVc.contains(e.target)) {
