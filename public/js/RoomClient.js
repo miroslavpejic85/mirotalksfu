@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.73
+ * @version 1.9.74
  *
  */
 
@@ -3078,6 +3078,7 @@ class RoomClient {
 
                 eVc = document.createElement('div');
                 eVc.className = 'expand-video-content';
+                eVc.id = id + '_videoExpandContent';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 mv = this.createButton(id + '__videoMirror', html.mirror);
@@ -3182,8 +3183,7 @@ class RoomClient {
 
                 this.isVideoPictureInPictureSupported && this.handlePIP(elem.id, pip.id);
                 this.isVideoFullScreenSupported && this.handleFS(elem.id, fs.id);
-                this.handleVBEC(eBtn, eVc, vb, d);
-                this.handleVB(d.id, vb.id);
+                this.handleVB(d.id, vb.id, eBtn.id, eVc.id);
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
@@ -4606,28 +4606,33 @@ class RoomClient {
     // HANDLE VIDEO AND MENU BAR
     // ####################################################
 
-    handleVBEC(eBtn, eVc, vb, d) {
-        const showDropdown = () => eVc.classList.add('show');
-        const hideDropdown = () => eVc.classList.remove('show');
-        const hideVideoBar = () => hide(vb) && hideDropdown();
-        if (!this.isMobileDevice) {
-            eBtn.addEventListener('mouseenter', showDropdown);
-            eBtn.addEventListener('mouseleave', hideDropdown);
-            eVc.addEventListener('mouseenter', showDropdown);
-            eVc.addEventListener('mouseleave', hideDropdown);
-            d.addEventListener('mouseleave', hideDropdown);
-        } else {
-            eBtn.addEventListener('click', showDropdown);
-            eVc.addEventListener('click', showDropdown);
-        }
-        document.addEventListener('click', hideVideoBar);
-    }
-
-    handleVB(videoId, videoBarId) {
+    handleVB(videoId, videoBarId, eBtnId = null, eVcId = null) {
         const videoPlayer = this.getId(videoId);
         const videoBar = this.getId(videoBarId);
+        const eBtn = this.getId(eBtnId);
+        const eVc = this.getId(eVcId);
+
+        if (eBtn && eVc) {
+            const showDropdown = () => eVc.classList.add('show');
+            const hideDropdown = () => eVc.classList.remove('show');
+
+            const handleDocumentClick = (e) => {
+                if (!eBtn.contains(e.target) && !eVc.contains(e.target)) {
+                    hideDropdown();
+                }
+            };
+
+            if (this.isDesktopDevice) {
+                eBtn.addEventListener('mouseenter', showDropdown);
+                eVc.addEventListener('mouseleave', hideDropdown);
+            } else {
+                eBtn.addEventListener('click', showDropdown);
+                document.addEventListener('click', handleDocumentClick);
+            }
+        }
+
         if (videoPlayer && videoBar) {
-            const eventType = this.isMobileDevice ? 'click' : 'mouseenter';
+            const eventType = this.isDesktopDevice ? 'mouseenter' : 'click';
             videoPlayer.addEventListener(eventType, async () => {
                 hideVideoMenuBar(videoBarId);
                 rc.resizeVideoMenuBar();
@@ -4641,12 +4646,18 @@ class RoomClient {
                         videoPlayer.style.setProperty('border', 'var(--videoBar-active)', 'important');
                     }
                 } else {
-                    animateCSS(videoBar, 'fadeOutUp').then((msg) => {
+                    animateCSS(videoBar, 'fadeOutUp').then(() => {
                         hide(videoBar);
                     });
                     videoPlayer.style.setProperty('border', 'none', 'important');
                 }
             });
+            if (this.isDesktopDevice) {
+                videoPlayer.addEventListener('mouseleave', () => {
+                    setCamerasBorderNone();
+                    hideVideoMenuBar('ALL');
+                });
+            }
         }
     }
 
