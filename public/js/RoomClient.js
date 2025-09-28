@@ -788,6 +788,7 @@ class RoomClient {
         let device;
         try {
             device = await this.mediasoupClient.Device.factory();
+            // device = await this.mediasoupClient.Device.factory({ handlerName: 'Safari12' }); // for testing only
             console.log('Device created successfully:', device.handlerName);
         } catch (error) {
             if (error.name === 'UnsupportedError') {
@@ -4606,29 +4607,9 @@ class RoomClient {
     // ####################################################
 
     handleVBEC(eBtn, eVc, vb, d) {
-        // Expand: hover for desktop, click for mobile
-        let hoverTimeout;
-        const showDropdown = () => {
-            clearTimeout(hoverTimeout);
-            eVc.classList.add('show');
-        };
-        const hideDropdown = () => {
-            hoverTimeout = setTimeout(() => eVc.classList.remove('show'), 200);
-        };
-
-        // Toggle dropdown visibility (used on mobile and optionally elsewhere)
-        const toggleDropdown = (e) => {
-            if (e) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-            if (eVc.classList.contains('show')) {
-                eVc.classList.remove('show');
-            } else {
-                showDropdown();
-            }
-        };
-
+        const showDropdown = () => eVc.classList.add('show');
+        const hideDropdown = () => eVc.classList.remove('show');
+        const hideVideoBar = () => hide(vb) && hideDropdown();
         if (!this.isMobileDevice) {
             eBtn.addEventListener('mouseenter', showDropdown);
             eBtn.addEventListener('mouseleave', hideDropdown);
@@ -4636,16 +4617,10 @@ class RoomClient {
             eVc.addEventListener('mouseleave', hideDropdown);
             d.addEventListener('mouseleave', hideDropdown);
         } else {
-            eBtn.addEventListener('click', toggleDropdown);
-            eVc.addEventListener('click', toggleDropdown);
-            // Optionally, close dropdown when clicking outside the tile, dropdown, and menu bar
-            document.addEventListener('click', (event) => {
-                const target = event.target;
-                if (!d.contains(target) && !eVc.contains(target) && !vb.contains(target)) {
-                    hideDropdown();
-                }
-            });
+            eBtn.addEventListener('click', showDropdown);
+            eVc.addEventListener('click', showDropdown);
         }
+        document.addEventListener('click', hideVideoBar);
     }
 
     handleVB(videoId, videoBarId) {
