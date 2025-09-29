@@ -1046,6 +1046,7 @@ async function checkInitConfig() {
 function getPeerInfo() {
     peer_info = {
         join_data_time: getDataTimeString(),
+        join_tz_offset: new Date().getTimezoneOffset(),
         peer_uuid: peer_uuid,
         peer_id: socket.id,
         peer_name: peer_name,
