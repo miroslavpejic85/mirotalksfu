@@ -4645,7 +4645,6 @@ class RoomClient {
                 rc.resizeVideoMenuBar();
                 setCamerasBorderNone();
                 if (videoBar.classList.contains('hidden')) {
-                    rc.sound('open');
                     show(videoBar);
                     animateCSS(videoBar, 'fadeInDown');
                     if (participantsCount > 1) {
