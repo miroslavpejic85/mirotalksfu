@@ -4641,9 +4641,9 @@ class RoomClient {
                 eVc.addEventListener('mouseleave', hideDropdown);
             } else {
                 eBtn.addEventListener('click', showDropdown);
-                eVc.addEventListener('click', hideDropdown);
                 document.addEventListener('click', handleDocumentClick);
             }
+            eVc.addEventListener('click', hideDropdown);
         }
 
         if (videoPlayer && videoBar) {
