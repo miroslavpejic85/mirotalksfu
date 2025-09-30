@@ -3686,6 +3686,7 @@ class RoomClient {
             .setSinkId(sinkId)
             .then(() => console.log(`Success, audio output device attached: ${sinkId}`))
             .catch((err) => {
+                console.error('Attach SinkId error: ', err);
                 const speakerSel = this.getId('speakerSelect');
                 if (err?.name === 'SecurityError') {
                     const msg = `Use HTTPS to select audio output device: ${err.message || err}`;
@@ -3697,7 +3698,7 @@ class RoomClient {
                     this.pendingSinkId = sinkId;
                     this.runOnNextUserActivation(() => this.attachSinkId(elem, this.pendingSinkId));
                 } else {
-                    this.userLog('Attach SinkId error', err, 'top-end', 6000);
+                    this.userLog('warning', 'Attach SinkId error', err, 'top-end', 6000);
                 }
                 if (speakerSel) speakerSel.selectedIndex = 0;
                 refreshLsDevices();
@@ -4658,6 +4659,9 @@ class RoomClient {
                     if (participantsCount > 1) {
                         videoPlayer.style.setProperty('border', 'var(--videoBar-active)', 'important');
                     }
+                } else {
+                    setCamerasBorderNone();
+                    hide(videoBar);
                 }
             });
 
