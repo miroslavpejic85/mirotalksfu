@@ -3167,13 +3167,14 @@ class RoomClient {
                 d.appendChild(i);
                 d.appendChild(p);
                 d.appendChild(pm);
-                d.appendChild(eVc);
 
                 if (this.isMobileDevice) {
                     vb.classList.add('mobile-floating');
+                    document.body.appendChild(eVc);
                     document.body.appendChild(vb);
                 } else {
                     vb.classList.remove('mobile-floating');
+                    d.appendChild(eVc);
                     d.appendChild(vb);
                 }
                 vb.addEventListener('click', (e) => e.stopPropagation());
@@ -3198,7 +3199,7 @@ class RoomClient {
                 this.handleGL(gl.id);
                 this.handleBAN(ban.id);
                 this.handleKO(ko.id);
-                this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
+                this.handlePN(elem.id, pn.id, d.id, remoteIsScreen, false, eVc.id);
                 this.handleZV(elem.id, d.id, remotePeerId);
                 this.popupPeerInfo(p.id, peer_info);
                 this.checkPeerInfoStatus(peer_info);
@@ -4466,10 +4467,11 @@ class RoomClient {
         }
     }
 
-    handlePN(elemId, pnId, camId, isScreen = false, isAvatar = false) {
+    handlePN(elemId, pnId, camId, isScreen = false, isAvatar = false, eVcId = null) {
         let videoPlayer = this.getId(elemId);
         let btnPn = this.getId(pnId);
         let cam = this.getId(camId);
+        let eVc = this.getId(eVcId);
         if (btnPn && videoPlayer && cam) {
             btnPn.addEventListener('click', () => {
                 if (this.isMobileDevice) return;
@@ -4483,6 +4485,7 @@ class RoomClient {
                     cam.style.width = '100%';
                     cam.style.height = '100%';
                     this.toggleVideoPin(pinVideoPosition.value);
+                    if (eVc) document.body.appendChild(eVc);
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
@@ -4495,6 +4498,10 @@ class RoomClient {
                     }
                     if (!isScreen && !isBroadcastingEnabled) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
+                    if (eVc) {
+                        document.body.removeChild(eVc);
+                        cam.appendChild(eVc);
+                    }
                     cam.className = 'Camera';
                     this.videoMediaContainer.appendChild(cam);
                     this.removeVideoPinMediaContainer();
@@ -4634,6 +4641,7 @@ class RoomClient {
                 eVc.addEventListener('mouseleave', hideDropdown);
             } else {
                 eBtn.addEventListener('click', showDropdown);
+                eVc.addEventListener('click', hideDropdown);
                 document.addEventListener('click', handleDocumentClick);
             }
         }
