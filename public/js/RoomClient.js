@@ -4485,7 +4485,7 @@ class RoomClient {
                     cam.style.width = '100%';
                     cam.style.height = '100%';
                     this.toggleVideoPin(pinVideoPosition.value);
-                    if (eVc) document.body.appendChild(eVc);
+                    if (eVc) this.videoPinMediaContainer.appendChild(eVc);
                     this.videoPinMediaContainer.appendChild(cam);
                     this.videoPinMediaContainer.style.display = 'block';
                     this.pinnedVideoPlayerId = elemId;
@@ -4499,7 +4499,7 @@ class RoomClient {
                     if (!isScreen && !isBroadcastingEnabled) videoPlayer.style.objectFit = 'var(--videoObjFit)';
                     this.videoPinMediaContainer.removeChild(cam);
                     if (eVc) {
-                        document.body.removeChild(eVc);
+                        this.videoPinMediaContainer.removeChild(eVc);
                         cam.appendChild(eVc);
                     }
                     cam.className = 'Camera';
