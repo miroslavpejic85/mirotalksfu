@@ -44,9 +44,10 @@
     display: inline-block;
     background: transparent;
     border-radius: 10px;
-    /* border: var(--border); */
     box-shadow: var(--box-shadow);
     animation: show 0.4s ease;
+    container-type: inline-size;
+    container-name: camera;
 }
 
 /* .Camera:hover {
@@ -186,7 +187,9 @@
 .videoMenuBar button,
 .videoAvatarMenuBar button,
 .videoMenuBarShare button {
-    font-size: clamp(0.9rem, 1.1vw, 1.05rem);
+    font-size: clamp(0.8rem, 1vw, 0.95rem);
+    min-width: 30px;
+    min-height: 30px;
     float: right;
     color: #fff;
     background: transparent;
@@ -442,80 +445,73 @@ input[type='range'] {
     }
 }
 
-@media (max-width: 800px) {
+@container camera (max-width: 260px) {
+    .videoMenuBar {
+        gap: 0px;
+        padding: 4px;
+    }
+    .videoMenuBar button,
+    .videoAvatarMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.7rem;
+        min-width: 24px;
+        min-height: 24px;
+    }
+    .videoMenuBar input[type='range'] {
+        width: clamp(20px, 20%, 40px);
+    }
+    .expand-video-content {
+        padding: 10px;
+    }
+}
+
+@container camera (min-width: 261px) and (max-width: 400px) {
+    .videoMenuBar {
+        gap: 2px;
+        padding: 3px;
+    }
+    .videoMenuBar button,
+    .videoAvatarMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.8rem;
+        min-width: 28px;
+        min-height: 28px;
+    }
+    .videoMenuBar input[type='range'] {
+        width: clamp(30px, 25%, 60px);
+    }
+}
+
+@container camera (min-width: 401px) and (max-width: 640px) {
     .videoMenuBar {
         gap: 6px;
         padding: 8px;
+    }
+    .videoMenuBar button,
+    .videoAvatarMenuBar button,
+    .videoMenuBarShare button {
+        font-size: 0.9rem;
+        min-width: 32px;
+        min-height: 32px;
+    }
+    .videoMenuBar input[type='range'] {
+        width: clamp(40px, 20%, 80px);
+    }
+}
+
+@container camera (min-width: 641px) {
+    .videoMenuBar {
+        gap: 8px;
+        padding: 10px;
     }
     .videoMenuBar button,
     .videoAvatarMenuBar button,
     .videoMenuBarShare button {
         font-size: 1rem;
-    }
-    .expand-video-content {
-        right: 6px;
-        left: 6px;
-        width: auto;
-        max-width: none;
-    }
-}
-
-@media (max-width: 480px) {
-    .expand-video-content .button-group {
-        display: grid !important;
-        grid-template-columns: repeat(auto-fit, minmax(56px, 1fr));
-        gap: 6px;
-        justify-items: center;
-    }
-    .expand-video-content .button-group button {
-        min-width: unset; /* let grid control width */
-        width: 100%;
-        min-height: 44px;
-        padding: 8px;
-        font-size: 0.95rem;
-    }
-    .videoMenuBar {
-        gap: 4px;
-        padding: 6px;
-    }
-    .videoMenuBar button,
-    .videoAvatarMenuBar button,
-    .videoMenuBarShare button {
-        font-size: 0.95rem;
-        min-width: 40px;
-        min-height: 40px;
+        min-width: 36px;
+        min-height: 36px;
     }
     .videoMenuBar input[type='range'] {
-        width: clamp(60px, 30vw, 140px);
-    }
-}
-
-@media (max-width: 360px) {
-    .expand-video-content .button-group {
-        grid-template-columns: repeat(3, 1fr);
-        gap: 5px;
-    }
-    .expand-video-content .button-group button {
-        min-height: 40px;
-        padding: 6px;
-        font-size: 0.9rem;
-        border-radius: 8px;
-    }
-    .videoMenuBar {
-        gap: 4px;
-        padding: 6px;
-    }
-    .videoMenuBar button,
-    .videoAvatarMenuBar button,
-    .videoMenuBarShare button {
-        font-size: 0.95rem;
-        min-width: 40px;
-        min-height: 40px;
-    }
-    .expand-video-content {
-        top: 6px;
-        right: 6px;
-        left: 6px;
-        padding: 12px;
+        width: clamp(50px, 20%, 100px);
     }
 }
