@@ -1,5 +1,25 @@
 'use strict';
 
+let autoFillRoomName = true;
+
+if (window.MiroTalkAutoFillRoomName === false) {
+    autoFillRoomName = false;
+} else {
+    try {
+        const brandData = window.sessionStorage.getItem('brandData');
+        if (brandData) {
+            const parsedBrand = JSON.parse(brandData);
+            if (parsedBrand?.app?.autoFillRoomName === false) {
+                autoFillRoomName = false;
+            }
+        }
+    } catch (error) {
+        console.warn('Unable to determine autoFillRoomName preference from brand data.', error);
+    }
+}
+
+window.MiroTalkAutoFillRoomName = autoFillRoomName;
+
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js');
@@ -7,7 +27,7 @@ if ('serviceWorker' in navigator) {
 }
 
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-if (isStandalone && window.localStorage.lastRoom && window.location.pathname === '/') {
+if (autoFillRoomName && isStandalone && window.localStorage.lastRoom && window.location.pathname === '/') {
     window.location.href = '/join/?room=' + window.localStorage.lastRoom;
 }
 
@@ -23,9 +43,12 @@ if (roomName) {
     const storedRoomId = window.sessionStorage.getItem('roomID');
 
     if (storedRoomId && storedRoomId !== 'false') {
-        roomName.value = storedRoomId;
         window.sessionStorage.removeItem('roomID');
-        joinRoom();
+
+        if (autoFillRoomName) {
+            roomName.value = storedRoomId;
+            joinRoom();
+        }
     }
 
     roomName.onkeyup = (e) => {
@@ -42,7 +65,7 @@ if (roomName) {
 
 const lastRoomContainer = document.getElementById('lastRoomContainer');
 const lastRoom = document.getElementById('lastRoom');
-const lastRoomName = window.localStorage.lastRoom ? window.localStorage.lastRoom : '';
+const lastRoomName = autoFillRoomName && window.localStorage.lastRoom ? window.localStorage.lastRoom : '';
 
 if (lastRoomContainer && lastRoom && lastRoomName) {
     lastRoomContainer.style.display = 'inline-flex';
@@ -90,7 +113,11 @@ function joinRoom() {
 
     //window.location.href = '/join/' + roomName;
     window.location.href = '/join/?room=' + roomName;
-    window.localStorage.lastRoom = roomName;
+    if (autoFillRoomName) {
+        window.localStorage.lastRoom = roomName;
+    } else {
+        window.localStorage.removeItem('lastRoom');
+    }
 }
 
 function isValidRoomName(input) {
