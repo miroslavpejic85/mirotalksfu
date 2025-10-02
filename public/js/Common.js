@@ -175,8 +175,6 @@ if (roomName) {
         roomName.value = window.sessionStorage.roomID;
         window.sessionStorage.roomID = false;
         joinRoom();
-    } else {
-        typeWriter();
     }
 
     roomName.onkeyup = (e) => {
