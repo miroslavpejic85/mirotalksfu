@@ -40,6 +40,7 @@ let BRAND = {
         title: 'Кремлёвка<br />Защищённая линия.<br />Безопасно, просто, быстро.',
         description:
             'Начните видеозвонок в один клик. Не нужны загрузки, плагины или регистрация — сразу общайтесь, переписывайтесь и делитесь экраном.',
+        autoFillRoomName: true,
         joinDescription: 'Введите название комнаты.<br />Можно использовать предложенный вариант.',
         joinButtonLabel: 'ВОЙТИ В КОМНАТУ',
         joinLastLabel: 'Недавняя комната:',
@@ -212,6 +213,8 @@ function elementDisplay(element, display, mode = 'block') {
 
 // APP customize
 function customizeApp() {
+    window.MiroTalkAutoFillRoomName = BRAND.app?.autoFillRoomName !== false;
+
     if (appTitle && BRAND.app?.title) {
         appTitle.innerHTML = BRAND.app?.title;
     }

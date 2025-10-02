@@ -997,6 +997,11 @@ module.exports = {
                 description:
                     process.env.APP_DESCRIPTION ||
                     'Start your next video call with a single click. No download, plug-in, or login is required.',
+                /**
+                 * Controls whether the UI remembers or pre-fills room names based on previous usage.
+                 * Set APP_AUTO_FILL_ROOM_NAME=false to require manual room entry every time.
+                 */
+                autoFillRoomName: process.env.APP_AUTO_FILL_ROOM_NAME !== 'false',
                 joinDescription: process.env.JOIN_DESCRIPTION || 'Pick a room name.<br />How about this one?',
                 joinButtonLabel: process.env.JOIN_BUTTON_LABEL || 'Присоединиться',
                 joinLastLabel: process.env.JOIN_LAST_LABEL || 'История:',
