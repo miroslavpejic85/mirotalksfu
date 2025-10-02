@@ -171,12 +171,12 @@ const roomName = document.getElementById('roomName');
 if (roomName) {
     roomName.value = '';
 
-    if (window.sessionStorage.roomID) {
-        roomName.value = window.sessionStorage.roomID;
-        window.sessionStorage.roomID = false;
+    const storedRoomId = window.sessionStorage.getItem('roomID');
+
+    if (storedRoomId && storedRoomId !== 'false') {
+        roomName.value = storedRoomId;
+        window.sessionStorage.removeItem('roomID');
         joinRoom();
-    } else {
-        typeWriter();
     }
 
     roomName.onkeyup = (e) => {
