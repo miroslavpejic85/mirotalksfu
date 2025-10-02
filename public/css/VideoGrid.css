@@ -192,7 +192,7 @@
     min-height: 30px;
     float: right;
     color: #fff;
-    background: transparent;
+    background: var(--body-bg);
     border-radius: 5px;
     display: inline;
     border: none;
