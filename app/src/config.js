@@ -47,6 +47,9 @@ config.ui.buttons = config.ui.buttons || {};
 config.ui.buttons.popup = config.ui.buttons.popup || {};
 config.ui.buttons.popup.shareRoomPopup = true;
 
+config.ui.buttons.main = config.ui.buttons.main || {};
+config.ui.buttons.main.raiseHandButton = false;
+
 const mediasoupConfig = config.mediasoup || {};
 config.mediasoup = {
   ...mediasoupConfig,

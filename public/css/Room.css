@@ -494,8 +494,8 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.2rem;
-    padding: 14px;
+    font-size: 1.4rem;
+    padding: 18px;
     background: var(--btns-bg-color);
     border-radius: 10px;
     border: none !important;
@@ -510,7 +510,7 @@ body {
 }
 
 #control button i {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
 }
 
 #exitButton {
@@ -548,9 +548,9 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 60px;
-    height: 60px;
-    font-size: 1.6rem;
+    width: 72px;
+    height: 72px;
+    font-size: 1.8rem;
     padding: 0;
     border-radius: 10px;
     background: var(--btns-bg-color);
@@ -565,23 +565,23 @@ body {
 
 @media screen and (max-width: 500px) {
     #control button {
-        padding: 16px;
+        padding: 20px;
     }
     #control button i {
-        font-size: 1.7rem;
+        font-size: 1.9rem;
     }
     #bottomButtons button {
-        width: 54px;
-        height: 54px;
-        font-size: 1.4rem;
+        width: 64px;
+        height: 64px;
+        font-size: 1.6rem;
     }
 }
 
 @media screen and (max-width: 360px) {
     #bottomButtons button {
-        width: 48px;
-        height: 48px;
-        font-size: 1.3rem;
+        width: 56px;
+        height: 56px;
+        font-size: 1.4rem;
     }
 }
 
