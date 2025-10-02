@@ -1978,7 +1978,7 @@ main {
 .outline-vpn-link {
     margin-top: 24px;
     display: flex;
-    justify-content: center;
+    justify-content: right;
 }
 
 @media (max-width: 640px) {
