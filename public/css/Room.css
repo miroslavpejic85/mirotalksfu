@@ -156,6 +156,8 @@ body {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
+    justify-content: center;
+    align-items: center;
 }
 
 .init-buttons button {
@@ -171,6 +173,11 @@ body {
 
 .init-selects select {
     margin-top: 0;
+}
+
+#initAudioVideoButton,
+#initUsernameEmojiButton {
+    display: none !important;
 }
 
 
