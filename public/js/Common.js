@@ -26,6 +26,8 @@ if ('serviceWorker' in navigator) {
     });
 }
 
+const urlParams = new URLSearchParams(window.location.search);
+
 const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
 if (autoFillRoomName && isStandalone && window.localStorage.lastRoom && window.location.pathname === '/') {
     window.location.href = '/join/?room=' + window.localStorage.lastRoom;
@@ -35,10 +37,21 @@ if (autoFillRoomName && isStandalone && window.localStorage.lastRoom && window.l
 // NEW ROOM
 // ####################################################################
 
-const roomName = document.getElementById('roomName');
+const roomNameInput = document.getElementById('roomName');
 
-if (roomName) {
-    roomName.value = '';
+if (roomNameInput) {
+    roomNameInput.value = '';
+
+    const roomFromQuery = getRoomFromQuery();
+    if (roomFromQuery) {
+        roomNameInput.value = roomFromQuery;
+        roomNameInput.placeholder = '';
+        roomNameInput.dataset.suggested = '';
+    } else {
+        setRoomSuggestion(getUUID4());
+    }
+
+    roomNameInput.addEventListener('input', handleRoomNameInputChange);
 
     const storedRoomId = window.sessionStorage.getItem('roomID');
 
@@ -46,12 +59,12 @@ if (roomName) {
         window.sessionStorage.removeItem('roomID');
 
         if (autoFillRoomName) {
-            roomName.value = storedRoomId;
+            roomNameInput.value = storedRoomId;
             joinRoom();
         }
     }
 
-    roomName.onkeyup = (e) => {
+    roomNameInput.onkeyup = (e) => {
         if (e.keyCode === 13) {
             e.preventDefault();
             joinRoom();
@@ -95,8 +108,31 @@ if (adultCnt) {
     };
 }
 
+function setRoomSuggestion(suggestedRoom) {
+    if (!roomNameInput || !suggestedRoom) {
+        if (roomNameInput && !suggestedRoom) {
+            roomNameInput.dataset.suggested = '';
+        }
+        return;
+    }
+
+    roomNameInput.placeholder = suggestedRoom;
+    roomNameInput.dataset.suggested = suggestedRoom;
+}
+
+function handleRoomNameInputChange() {
+    if (!roomNameInput) {
+        return;
+    }
+
+    if (roomNameInput.value.trim() === '' && !roomNameInput.dataset?.suggested) {
+        setRoomSuggestion(getUUID4());
+    }
+}
+
 function genRoom() {
-    document.getElementById('roomName').value = getUUID4();
+    const suggestedRoom = getUUID4();
+    setRoomSuggestion(suggestedRoom);
 }
 
 function getUUID4() {
@@ -105,16 +141,45 @@ function getUUID4() {
     );
 }
 
+function normalizeRoomName(input) {
+    if (!input || typeof input !== 'string') {
+        return '';
+    }
+
+    return input.trim().replace(/\s+/g, '-');
+}
+
+function getRoomFromQuery() {
+    const room = urlParams.get('room');
+    if (!room) {
+        return '';
+    }
+
+    return normalizeRoomName(filterXSS(room));
+}
+
 function joinRoom() {
-    const roomName = filterXSS(document.getElementById('roomName').value).trim().replace(/\s+/g, '-');
-    const roomValid = isValidRoomName(roomName);
+    if (!roomNameInput) {
+        return;
+    }
+
+    let room = normalizeRoomName(filterXSS(roomNameInput.value));
+
+    if (!room) {
+        const suggestedRoom = roomNameInput.dataset?.suggested
+            ? normalizeRoomName(filterXSS(roomNameInput.dataset.suggested))
+            : '';
+        room = suggestedRoom;
+    }
+
+    const roomValid = isValidRoomName(room);
 
     if (!roomValid) return;
 
-    //window.location.href = '/join/' + roomName;
-    window.location.href = '/join/?room=' + roomName;
+    //window.location.href = '/join/' + room;
+    window.location.href = '/join/?room=' + room;
     if (autoFillRoomName) {
-        window.localStorage.lastRoom = roomName;
+        window.localStorage.lastRoom = room;
     } else {
         window.localStorage.removeItem('lastRoom');
     }
@@ -147,9 +212,8 @@ function adultContent() {
 // PERMISSIONS
 // #########################################################
 
-const qs = new URLSearchParams(window.location.search);
-const room_id = filterXSS(qs.get('room_id'));
-const message = filterXSS(qs.get('message'));
+const room_id = filterXSS(urlParams.get('room_id'));
+const message = filterXSS(urlParams.get('message'));
 const showMessage = document.getElementById('message');
 console.log('Allow Camera or Audio', {
     room_id: room_id,
