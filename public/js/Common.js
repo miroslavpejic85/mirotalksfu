@@ -1,16 +1,16 @@
 'use strict';
 
-let autoFillRoomName = true;
+let autoFillRoomName = false;
 
-if (window.MiroTalkAutoFillRoomName === false) {
-    autoFillRoomName = false;
+if (window.MiroTalkAutoFillRoomName === true) {
+    autoFillRoomName = true;
 } else {
     try {
         const brandData = window.sessionStorage.getItem('brandData');
         if (brandData) {
             const parsedBrand = JSON.parse(brandData);
-            if (parsedBrand?.app?.autoFillRoomName === false) {
-                autoFillRoomName = false;
+            if (parsedBrand?.app?.autoFillRoomName === true) {
+                autoFillRoomName = true;
             }
         }
     } catch (error) {
