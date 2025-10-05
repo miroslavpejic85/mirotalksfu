@@ -284,12 +284,12 @@
 
 .expand-video-content .peer-name {
     text-align: center;
-    font-size: 12px;
+    font-size: 10px;
     font-weight: bold;
     color: #fff;
     background: var(--body-bg);
     border-radius: 10px;
-    padding: 6px;
+    padding: 5px;
     width: 100%;
 }
 
@@ -315,9 +315,10 @@
     padding: 0 10px;
     font-size: 15px;
     color: #fff;
-    background: var(--btns-bg-color);
+    background: #000000;
     min-width: 42px;
     min-height: 42px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     justify-content: center;
     align-items: center;
     display: inline-flex; /* center icon + label */
@@ -474,6 +475,12 @@ input[type='range'] {
     .expand-video-content {
         padding: 10px;
     }
+    .expand-video-content .button-group button {
+        font-size: 10px;
+        min-width: 28px;
+        min-height: 28px;
+        gap: 1px;
+    }
 }
 
 @container camera (min-width: 261px) and (max-width: 400px) {
@@ -490,6 +497,12 @@ input[type='range'] {
     }
     .videoMenuBar input[type='range'] {
         width: clamp(30px, 25%, 60px);
+    }
+    .expand-video-content .button-group button {
+        font-size: 15px;
+        min-width: 36px;
+        min-height: 36px;
+        gap: 3px;
     }
 }
 
@@ -508,6 +521,12 @@ input[type='range'] {
     .videoMenuBar input[type='range'] {
         width: clamp(40px, 20%, 80px);
     }
+    .expand-video-content .button-group button {
+        font-size: 15px;
+        min-width: 42px;
+        min-height: 42px;
+        gap: 6px;
+    }
 }
 
 @container camera (min-width: 641px) {
@@ -524,5 +543,11 @@ input[type='range'] {
     }
     .videoMenuBar input[type='range'] {
         width: clamp(50px, 20%, 100px);
+    }
+    .expand-video-content .button-group button {
+        font-size: 15px;
+        min-width: 42px;
+        min-height: 42px;
+        gap: 6px;
     }
 }
