@@ -191,28 +191,24 @@
     min-width: 36px;
     min-height: 36px;
     color: #fff;
-    background: #000000;
+    background: var(--body-bg);
     border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     border: none;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     transition:
         background 0.2s,
-        color 0.2s,
-        box-shadow 0.2s,
         transform 0.1s;
     outline: none;
     cursor: pointer;
-    margin: 0 2px;
 }
 
 .videoMenuBar button:hover,
 .videoAvatarMenuBar button:hover,
 .videoMenuBarShare button:hover {
     color: #fff;
-    background: var(--body-bg);
+    background: var(--btns-bg-color);
     box-shadow: 0 4px 16px rgba(58, 139, 253, 0.15);
 }
 
@@ -315,7 +311,7 @@
     padding: 0 10px;
     font-size: 15px;
     color: #fff;
-    background: #000000;
+    background: var(--body-bg);
     min-width: 42px;
     min-height: 42px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -342,7 +338,7 @@
 
 /* Hover & Active Effects */
 .expand-video-content .button-group button:hover {
-    background: var(--body-bg);
+    background: var(--btns-bg-color);
     transform: scale(1.05);
 }
 
