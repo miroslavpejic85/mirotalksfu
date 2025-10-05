@@ -197,9 +197,6 @@
     align-items: center;
     justify-content: center;
     border: none;
-    transition:
-        background 0.2s,
-        transform 0.1s;
     outline: none;
     cursor: pointer;
 }
@@ -209,7 +206,6 @@
 .videoMenuBarShare button:hover {
     color: #fff;
     background: var(--btns-bg-color);
-    box-shadow: 0 4px 16px rgba(58, 139, 253, 0.15);
 }
 
 /* Touch-friendly sizing for buttons within menu bar */
