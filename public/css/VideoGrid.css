@@ -187,22 +187,33 @@
 .videoMenuBar button,
 .videoAvatarMenuBar button,
 .videoMenuBarShare button {
-    font-size: clamp(0.8rem, 1vw, 0.95rem);
-    min-width: 30px;
-    min-height: 30px;
-    float: right;
+    font-size: clamp(0.9rem, 1vw, 1.05rem);
+    min-width: 36px;
+    min-height: 36px;
     color: #fff;
-    background: var(--body-bg);
-    border-radius: 5px;
-    display: inline;
+    background: #000000;
+    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     border: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition:
+        background 0.2s,
+        color 0.2s,
+        box-shadow 0.2s,
+        transform 0.1s;
+    outline: none;
+    cursor: pointer;
+    margin: 0 2px;
 }
 
 .videoMenuBar button:hover,
 .videoAvatarMenuBar button:hover,
 .videoMenuBarShare button:hover {
-    color: grey;
-    transition: all 0.3s ease-in-out;
+    color: #fff;
+    background: var(--body-bg);
+    box-shadow: 0 4px 16px rgba(58, 139, 253, 0.15);
 }
 
 /* Touch-friendly sizing for buttons within menu bar */
