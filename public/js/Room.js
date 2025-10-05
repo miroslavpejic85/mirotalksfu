@@ -2577,6 +2577,11 @@ function handleMediaError(mediaType, err, redirectURL = false) {
             break;
     }
 
+    if (mediaType === 'screenType' && err.name === 'NotAllowedError') {
+        console.warn('User cancelled the screen sharing prompt');
+        return;
+    }
+
     let html = `
     <ul style="text-align: left">
         <li>Media type: ${mediaType}</li>
