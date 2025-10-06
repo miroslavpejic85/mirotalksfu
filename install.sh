@@ -79,11 +79,11 @@ if [ "$answer" != "${answer#[Yy]}" ] ;then
     apt-get install -y python3.8 python3-pip
 
 
-    log "Install Node.js 18.x and npm"
+    log "Install Node.js 22.x and npm"
 
     apt install -y curl dirmngr apt-transport-https lsb-release ca-certificates
 
-    curl -fsSL https://deb.nodesource.com/setup_18.x | bash -
+    curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
 
     apt-get install -y nodejs
 

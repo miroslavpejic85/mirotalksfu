@@ -54,7 +54,7 @@
     "author": "Miroslav Pejic",
     "license": "AGPL-3.0",
     "engines": {
-        "node": ">=18"
+        "node": ">=22"
     },
     "dependencies": {
         "@aws-sdk/client-s3": "^3.901.0",
