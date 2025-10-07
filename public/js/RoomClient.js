@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.79
+ * @version 1.9.80
  *
  */
 
@@ -3075,11 +3075,14 @@ class RoomClient {
                 eDiv = document.createElement('div');
                 eDiv.className = 'expand-video';
 
-                eBtn = this.createButton(remotePeerId + '_videoExpandBtn', html.expand);
+                eBtn = this.createButton(
+                    remotePeerId + (type === mediaType.screen ? '_screen_' : '_video_') + '_expandBtn',
+                    html.expand
+                );
 
                 eVc = document.createElement('div');
                 eVc.className = 'expand-video-content';
-                eVc.id = id + '_videoExpandContent';
+                eVc.id = remotePeerId + (type === mediaType.screen ? '_screen_' : '_video_') + '_videoExpandContent';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
                 mv = this.createButton(id + '__videoMirror', html.mirror);
