@@ -10670,7 +10670,6 @@ class RoomClient {
     cleanNotifications() {
         getId('notifyEmailInput').value = '';
         getId('switchNotifyUserJoin').checked = false;
-        this.saveNotifications(false);
     }
 
     saveNotifications(validate = true) {
