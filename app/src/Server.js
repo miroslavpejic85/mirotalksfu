@@ -2558,6 +2558,8 @@ function startServer() {
             if (!isPresenter) return;
 
             room.updateRoomNotifications(data);
+
+            return cb({ message: true });
         });
 
         socket.on('updateRoomModerator', (dataObject) => {

@@ -1957,7 +1957,6 @@ function handleButtons() {
     };
     notifyEmailCleanBtn.onclick = () => {
         rc.cleanNotifications();
-        rc.saveNotifications();
     };
     saveNotificationsBtn.onclick = () => {
         rc.saveNotifications();
