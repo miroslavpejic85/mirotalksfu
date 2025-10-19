@@ -254,6 +254,9 @@ access to use this app.
                     <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
                         <p class="tabButtonText">Audio</p>
                     </button>
+                    <button id="tabNotificationsBtn" class="fas fa-bell tablinks hidden">
+                        <p class="tabButtonText">Notifications</p>
+                    </button>
                     <button id="tabModeratorBtn" class="fas fa-user-shield tablinks">
                         <p class="tabButtonText">Moderator</p>
                     </button>
@@ -603,6 +606,49 @@ access to use this app.
                             <hr />
                         </div>
                         <br />
+                    </div>
+
+                    <div id="tabNotifications" class="tabcontent">
+                        <span class="mod-title">Notifications mode</span>
+                        <hr />
+                        <div id="notificationsModeDiv">
+                            <div class="title">
+                                <i class="fas fa-envelope"></i>
+                                <p>Email</p>
+                            </div>
+                            <div class="input-container">
+                                <input
+                                    type="text"
+                                    id="notifyEmailInput"
+                                    class="form-control"
+                                    placeholder="Enter email"
+                                />
+                                <button id="notifyEmailCleanBtn"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </div>
+                        <br />
+                        <div class="title">
+                            <i class="fas fa-bell"></i>
+                            <p>Events:</p>
+                        </div>
+                        <table class="settingsTable">
+                            <tr id="notifyUserJoinBtn">
+                                <td>
+                                    <div class="title">
+                                        <i class="fas fa-user-plus"></i>
+                                        <p>First User Join</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md title">
+                                        <input id="switchNotifyUserJoin" class="form-check-input" type="checkbox" />
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                        <button id="saveNotificationsBtn" class="btn-custom">
+                            <i class="fas fa-save"></i> Save Notifications
+                        </button>
                     </div>
 
                     <div id="tabModerator" class="tabcontent">

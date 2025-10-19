@@ -1045,6 +1045,26 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Settings Notifications
+--------------------------------------------------------------*/
+
+#notificationsModeDiv input[type='text'] {
+    width: 100%;
+    color: #fff;
+    padding: 10px;
+    margin: 10px 0;
+    border: var(--border);
+    border-radius: 4px;
+}
+
+#notifyEmailCleanBtn {
+    height: 45px;
+    padding: 10px;
+    margin: 10px 0 10px 5px; /* top | right | bottom | left */
+    border: var(--border);
+}
+
+/*--------------------------------------------------------------
 # Transcription Room
 --------------------------------------------------------------*/
 

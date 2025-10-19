@@ -647,6 +647,7 @@ module.exports = {
          * Core Settings:
          * -------------
          * - alert      : Enable/disable email alerts [true/false] (default: false)
+         * - notify     : Enable/disable room email notifications [true/false] (default: false)
          * - host       : SMTP server address (default: 'smtp.gmail.com')
          * - port       : SMTP port (default: 587 for TLS)
          * - username   : SMTP auth username
@@ -670,6 +671,7 @@ module.exports = {
          */
         email: {
             alert: process.env.EMAIL_ALERTS_ENABLED === 'true',
+            notify: process.env.EMAIL_NOTIFICATIONS === 'true',
             host: process.env.EMAIL_HOST || 'smtp.gmail.com',
             port: parseInt(process.env.EMAIL_PORT) || 587,
             username: process.env.EMAIL_USERNAME || 'your_username',
@@ -1205,6 +1207,7 @@ module.exports = {
                 sendEmailInvitation: process.env.SHOW_EMAIL_INVITE !== 'false',
                 micOptionsButton: process.env.SHOW_MIC_OPTIONS !== 'false',
                 tabRTMPStreamingBtn: process.env.SHOW_RTMP_TAB !== 'false',
+                tabNotificationsBtn: process.env.SHOW_NOTIFICATIONS_TAB !== 'false',
                 tabModerator: process.env.SHOW_MODERATOR_TAB !== 'false',
                 tabRecording: process.env.SHOW_RECORDING_TAB !== 'false',
                 host_only_recording: process.env.HOST_ONLY_RECORDING !== 'false',

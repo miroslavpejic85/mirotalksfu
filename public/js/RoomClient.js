@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.83
+ * @version 1.9.84
  *
  */
 
@@ -7925,6 +7925,9 @@ class RoomClient {
             case 'customThemeKeep':
                 this.userLog('info', `${icons.theme} Custom theme keep ${status}`, 'top-end');
                 break;
+            case 'save_room_notifications':
+                this.userLog('success', 'Room notifications saved successfully', 'top-end');
+                break;
             default:
                 break;
         }
@@ -10658,6 +10661,78 @@ class RoomClient {
             console.error('Error: ' + err);
             this.userLog('error', 'Snapshot room error ' + err.message, 'top-end', 6000);
         }
+    }
+
+    // ####################################################
+    // ROOM NOTIFICATIONS
+    // ####################################################
+
+    cleanNotifications() {
+        getId('notifyEmailInput').value = '';
+        getId('switchNotifyUserJoin').checked = false;
+        this.saveNotifications(false);
+    }
+
+    saveNotifications(validate = true) {
+        if (validate && !this.isValidNotifications()) return;
+
+        const data = this.getNotificationsData();
+
+        if (!data) return;
+
+        this.setNotificationsData(data);
+    }
+
+    setNotificationsData(data) {
+        this.socket.emit('updateRoomNotifications', data, (response) => {
+            if (response.error) {
+                this.cleanNotifications();
+                this.userLog('warning', response.error, 'top-end', 6000);
+            } else {
+                this.roomMessage('save_room_notifications', true);
+            }
+        });
+    }
+
+    isValidNotifications() {
+        const notifyEmailInput = getId('notifyEmailInput');
+        if (!this.isValidEmail(notifyEmailInput.value)) {
+            notifyEmailInput.value = '';
+            this.userLog('warning', 'Email not valid', 'top-end', 6000);
+            return false;
+        }
+        return true;
+    }
+
+    getNotificationsData() {
+        const notifyEmailInput = getId('notifyEmailInput');
+        const switchNotifyUserJoin = getId('switchNotifyUserJoin');
+
+        return {
+            peer_name: this.peer_name,
+            peer_uuid: this.peer_uuid,
+            notifications: {
+                mode: {
+                    email: notifyEmailInput.value,
+                    //slack...
+                },
+                events: {
+                    join: switchNotifyUserJoin.checked,
+                    // leave...
+                },
+            },
+        };
+    }
+
+    // ####################################################
+    // HELPERS
+    // ####################################################
+
+    isValidEmail(email) {
+        if (!email || typeof email !== 'string') return false;
+        const e = email.trim();
+        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+        return re.test(e);
     }
 
     toggleVideoMirror() {

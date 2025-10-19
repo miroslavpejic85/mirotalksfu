@@ -1,6 +1,7 @@
 'use strict';
 
 const nodemailer = require('nodemailer');
+const { isValidEmail } = require('../Validator');
 const config = require('../config');
 const Logger = require('../Logger');
 const log = new Logger('NodeMailer');
@@ -13,6 +14,7 @@ const APP_NAME = config.ui.brand.app.name || 'MiroTalk SFU';
 
 const emailConfig = config.integrations?.email || {};
 const EMAIL_ALERT = emailConfig.alert || false;
+const EMAIL_NOTIFY = emailConfig.notify || false;
 const EMAIL_HOST = emailConfig.host || false;
 const EMAIL_PORT = emailConfig.port || false;
 const EMAIL_USERNAME = emailConfig.username || false;
@@ -20,9 +22,10 @@ const EMAIL_PASSWORD = emailConfig.password || false;
 const EMAIL_FROM = emailConfig.from || emailConfig.username;
 const EMAIL_SEND_TO = emailConfig.sendTo || false;
 
-if (EMAIL_ALERT && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD && EMAIL_SEND_TO) {
+if ((EMAIL_ALERT || EMAIL_NOTIFY) && EMAIL_HOST && EMAIL_PORT && EMAIL_USERNAME && EMAIL_PASSWORD && EMAIL_SEND_TO) {
     log.info('Email', {
         alert: EMAIL_ALERT,
+        notify: EMAIL_NOTIFY,
         host: EMAIL_HOST,
         port: EMAIL_PORT,
         username: EMAIL_USERNAME,
@@ -75,14 +78,50 @@ function sendEmailAlert(event, data) {
             break;
     }
 
-    if (subject && body) sendEmail(subject, body);
+    if (subject && body) {
+        sendEmail(subject, body);
+        return true;
+    }
+    return false;
 }
 
-function sendEmail(subject, body) {
+function sendEmailNotifications(event, data, notifications) {
+    if (!EMAIL_NOTIFY || !EMAIL_HOST || !EMAIL_PORT || !EMAIL_USERNAME || !EMAIL_PASSWORD) return;
+
+    log.info('sendEmailNotifications', {
+        event: event,
+        data: data,
+        notifications: notifications,
+    });
+
+    let subject = false;
+    let body = false;
+
+    switch (event) {
+        case 'join':
+            subject = getJoinRoomSubject(data);
+            body = getJoinRoomBody(data);
+            break;
+        // left...
+        default:
+            break;
+    }
+
+    const emailSendTo = notifications?.mode?.email;
+
+    if (subject && body && isValidEmail(emailSendTo)) {
+        sendEmail(subject, body, emailSendTo);
+        return true;
+    }
+    log.error('sendEmailNotifications: Invalid email', { email: emailTo });
+    return false;
+}
+
+function sendEmail(subject, body, emailSendTo = false) {
     transport
         .sendMail({
             from: EMAIL_FROM,
-            to: EMAIL_SEND_TO,
+            to: emailSendTo ? emailSendTo : EMAIL_SEND_TO,
             subject: subject,
             html: body,
         })
@@ -221,4 +260,5 @@ function getCurrentDataTime() {
 
 module.exports = {
     sendEmailAlert,
+    sendEmailNotifications,
 };

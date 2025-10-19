@@ -50,6 +50,7 @@ let BUTTONS = {
         sendEmailInvitation: true, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
+        tabNotificationsBtn: true, // presenter
         tabModerator: true, // presenter
         tabRecording: true,
         host_only_recording: true, // presenter
@@ -138,6 +139,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.sendEmailInvitation = false;
         BUTTONS.settings.tabRTMPStreamingBtn = false;
         BUTTONS.settings.tabModerator = false;
+        BUTTONS.settings.tabNotificationsBtn = false;
         BUTTONS.videoOff.muteAudioButton = false;
         BUTTONS.videoOff.geolocationButton = false;
         BUTTONS.videoOff.banButton = false;
@@ -224,6 +226,7 @@ function handleRules(isPresenter) {
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
+    !BUTTONS.settings.tabNotificationsBtn && hide(tabNotificationsBtn);
     !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
     if (BUTTONS.settings.host_only_recording) {
         show(recordingImage);
@@ -260,6 +263,7 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.unlockRoomButton = false;
     BUTTONS.settings.lobbyButton = false;
     BUTTONS.settings.tabRTMPStreamingBtn = false;
+    BUTTONS.settings.tabNotificationsBtn = false;
     BUTTONS.videoOff.muteAudioButton = false;
     BUTTONS.videoOff.geolocationButton = false;
     BUTTONS.videoOff.banButton = false;
@@ -296,5 +300,6 @@ function handleRulesBroadcasting() {
     elemDisplay('lobbyButton', false);
     elemDisplay('settingsButton', false);
     elemDisplay('tabRTMPStreamingBtn', false);
+    elemDisplay('tabNotificationsBtn', false);
     //...
 }

@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.83
+ * @version 1.9.84
  *
  */
 
@@ -1954,10 +1954,20 @@ function startServer() {
             };
 
             const firstJoin = room.getPeersCount() === 1;
+            const guestJoin = room.getPeersCount() === 2;
 
-            // SCENARIO: Notify when the first user join room and is awaiting assistance
+            // SCENARIO: Notify when the first user join room and is awaiting assistance (global email alert)
             if (firstJoin && !widget.alert.enabled) {
                 nodemailer.sendEmailAlert('join', emailPayload);
+            }
+
+            // SCENARIO: Notify when the first guest user join room and presenter in (room email notification)
+            if (guestJoin) {
+                const notifications = room.getRoomNotifications();
+                log.debug('Room notifications on guest join', { notifications: notifications });
+                if (notifications?.mode?.email && notifications?.events?.join) {
+                    nodemailer.sendEmailNotifications('join', emailPayload, notifications);
+                }
             }
 
             // SCENARIO: Notify when a user joins the widget room for expert assistance
@@ -2527,6 +2537,27 @@ function startServer() {
                 log.debug('updatePeerInfo broadcast data');
                 room.broadCast(socket.id, 'updatePeerInfo', data);
             }
+        });
+
+        socket.on('updateRoomNotifications', (dataObject, cb) => {
+            if (!roomExists(socket)) return;
+
+            if (config.integrations?.email?.notify !== true) {
+                const message =
+                    'The email notification has been disabled. Please contact the administrator for further information.';
+                log.debug(message);
+                return cb({ error: message });
+            }
+
+            const data = checkXSS(dataObject);
+
+            const room = getRoom(socket);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            room.updateRoomNotifications(data);
         });
 
         socket.on('updateRoomModerator', (dataObject) => {

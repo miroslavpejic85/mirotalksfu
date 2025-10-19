@@ -56,8 +56,16 @@ function hasPathTraversal(input) {
     return false;
 }
 
+function isValidEmail(email) {
+    if (!email || typeof email !== 'string') return false;
+    const e = email.trim();
+    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
+    return re.test(e);
+}
+
 module.exports = {
     isValidRoomName,
     isValidRecFileNameFormat,
     hasPathTraversal,
+    isValidEmail,
 };
