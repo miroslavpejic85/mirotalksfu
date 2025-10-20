@@ -2544,7 +2544,7 @@ function startServer() {
 
             if (config.integrations?.email?.notify !== true) {
                 const message =
-                    'The email notification has been disabled. Please contact the administrator for further information.';
+                    'Email notifications are disabled by the admin. Enable this feature in your self-hosted instance for full functionality.';
                 log.debug(message);
                 return cb({ error: message });
             }
