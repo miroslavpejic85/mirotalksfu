@@ -10670,6 +10670,7 @@ class RoomClient {
     cleanNotifications() {
         getId('notifyEmailInput').value = '';
         getId('switchNotifyUserJoin').checked = false;
+        return true;
     }
 
     saveNotifications(validate = true) {
@@ -10684,12 +10685,9 @@ class RoomClient {
 
     setNotificationsData(data) {
         this.socket.emit('updateRoomNotifications', data, (response) => {
-            if (response.error) {
-                this.cleanNotifications();
-                this.userLog('warning', response.error, 'top-end', 6000);
-            } else {
-                this.roomMessage('save_room_notifications', true);
-            }
+            response.error
+                ? this.cleanNotifications() && this.userLog('warning', response.error, 'top-end', 6000)
+                : this.roomMessage('save_room_notifications', true);
         });
     }
 
