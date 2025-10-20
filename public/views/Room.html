@@ -616,15 +616,7 @@ access to use this app.
                                 <i class="fas fa-envelope"></i>
                                 <p>Email</p>
                             </div>
-                            <div class="input-container">
-                                <input
-                                    type="text"
-                                    id="notifyEmailInput"
-                                    class="form-control"
-                                    placeholder="Enter email"
-                                />
-                                <button id="notifyEmailCleanBtn"><i class="fas fa-trash"></i></button>
-                            </div>
+                            <input type="text" id="notifyEmailInput" class="form-control" placeholder="Enter email" />
                         </div>
                         <br />
                         <div class="title">
@@ -646,9 +638,14 @@ access to use this app.
                                 </td>
                             </tr>
                         </table>
-                        <button id="saveNotificationsBtn" class="btn-custom">
-                            <i class="fas fa-save"></i> Save Notifications
-                        </button>
+                        <div class="buttons-container">
+                            <button id="notifyEmailCleanBtn" class="btn-custom">
+                                <i class="fas fa-trash"></i> Clean
+                            </button>
+                            <button id="saveNotificationsBtn" class="btn-custom">
+                                <i class="fas fa-save"></i> Save Notifications
+                            </button>
+                        </div>
                     </div>
 
                     <div id="tabModerator" class="tabcontent">

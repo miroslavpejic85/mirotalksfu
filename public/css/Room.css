@@ -783,6 +783,17 @@ body {
     align-items: center;
 }
 
+.input-container button {
+    flex: 1;
+    width: 20px;
+}
+
+.buttons-container {
+    display: flex;
+    justify-content: space-between;
+    gap: 6px;
+}
+
 #rtmpStreamURL,
 #rtmpLiveUrl {
     margin-top: 5px;
@@ -801,11 +812,6 @@ body {
 }
 #refreshVideoFiles:hover {
     background: var(--select-bg) !important;
-}
-
-.input-container button {
-    flex: 1;
-    width: 20px;
 }
 
 .btn-custom {
@@ -1058,10 +1064,7 @@ body {
 }
 
 #notifyEmailCleanBtn {
-    height: 45px;
-    padding: 10px;
-    margin: 10px 0 10px 5px; /* top | right | bottom | left */
-    border: var(--border);
+    width: 130px;
 }
 
 /*--------------------------------------------------------------
