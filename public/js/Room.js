@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.85
+ * @version 1.9.86
  *
  */
 
@@ -920,6 +920,11 @@ function getPeerName() {
         return 'Invalid name';
     }
     console.log('Direct join', { name: name });
+
+    if (isValidEmail(name)) {
+        getId('notifyEmailInput').value = name;
+    }
+
     return name;
 }
 
@@ -1258,6 +1263,10 @@ async function whoAreYou() {
             }
             setCookie(room_id + '_name', name, 30);
             peer_name = name;
+
+            if (isValidEmail(peer_name)) {
+                getId('notifyEmailInput').value = peer_name;
+            }
         },
     }).then(async () => {
         if (!usernameEmoji.classList.contains('hidden')) {
@@ -4000,6 +4009,11 @@ async function sound(name, force = false) {
     }
 }
 
+function isValidEmail(email) {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    return emailRegex.test(email);
+}
+
 async function isImageURL(url) {
     if (!url) return false;
     try {
@@ -5711,7 +5725,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.85',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.86',
         html: `
             <br />
             <div id="about">

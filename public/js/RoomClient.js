@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.85
+ * @version 1.9.86
  *
  */
 
@@ -3766,7 +3766,7 @@ class RoomClient {
     }
 
     isValidEmail(email) {
-        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
         return emailRegex.test(email);
     }
 
@@ -10724,13 +10724,6 @@ class RoomClient {
     // ####################################################
     // HELPERS
     // ####################################################
-
-    isValidEmail(email) {
-        if (!email || typeof email !== 'string') return false;
-        const e = email.trim();
-        const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
-        return re.test(e);
-    }
 
     toggleVideoMirror() {
         const peerVideo = this.getName(this.peer_id);

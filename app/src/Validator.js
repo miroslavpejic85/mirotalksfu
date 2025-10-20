@@ -57,10 +57,8 @@ function hasPathTraversal(input) {
 }
 
 function isValidEmail(email) {
-    if (!email || typeof email !== 'string') return false;
-    const e = email.trim();
-    const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[A-Za-z]{2,}$/;
-    return re.test(e);
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    return emailRegex.test(email);
 }
 
 module.exports = {
