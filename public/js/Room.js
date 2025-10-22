@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.87
+ * @version 1.9.88
  *
  */
 
@@ -4815,8 +4815,7 @@ function getParticipantsList(peers) {
                 aria-expanded="false"
                 style="float: right"
             >
-            <!-- <i class="fas fa-bars"></i> -->
-            <i class="fas fa-ellipsis-vertical"></i>
+            <i class="fas fa-bars"></i>
             </button>
             <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">`;
 
@@ -4901,8 +4900,7 @@ function getParticipantsList(peers) {
                             aria-expanded="false"
                             style="float: right"
                         >
-                        <!-- <i class="fas fa-bars"></i> -->
-                        <i class="fas fa-ellipsis-vertical"></i>
+                        <i class="fas fa-bars"></i>
                         </button>
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
 
@@ -4981,8 +4979,7 @@ function getParticipantsList(peers) {
                             aria-expanded="false"
                             style="float: right"
                         >
-                        <!-- <i class="fas fa-bars"></i> -->
-                        <i class="fas fa-ellipsis-vertical"></i>
+                        <i class="fas fa-bars"></i>
                         </button>
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
 
@@ -5725,7 +5722,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.87',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.88',
         html: `
             <br />
             <div id="about">
