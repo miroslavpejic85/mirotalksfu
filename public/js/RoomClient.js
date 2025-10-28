@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.90
+ * @version 1.9.91
  *
  */
 
@@ -3665,7 +3665,7 @@ class RoomClient {
         // Defer until a user gesture if needed
         if (!this.hasUserActivation()) {
             this.pendingSinkId = sinkId;
-            this.userLog('info', 'Click once to apply the selected speaker', 'top-end', 3000);
+            console.warn('Click once to apply the selected speaker');
             this.runOnNextUserActivation(() => {
                 const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
                 els.forEach((el) => this.attachSinkId(el, this.pendingSinkId));
