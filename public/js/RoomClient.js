@@ -8810,48 +8810,50 @@ class RoomClient {
     handleEmojiSound(cmd) {
         const path = '../sounds/emoji/';
         const ext = '.mp3';
+        const force = false; // force sound play even if sound effects are disabled
+
         switch (cmd.shortcodes) {
             case ':+1:':
             case ':ok_hand:':
-                this.sound('ok', true, path, ext);
+                this.sound('ok', force, path, ext);
                 break;
             case ':-1:':
-                this.sound('boo', true, path, ext);
+                this.sound('boo', force, path, ext);
                 break;
             case ':clap:':
-                this.sound('applause', true, path, ext);
+                this.sound('applause', force, path, ext);
                 break;
             case ':smiley:':
             case ':grinning:':
-                this.sound('smile', true, path, ext);
+                this.sound('smile', force, path, ext);
                 break;
             case ':joy:':
-                this.sound('laughs', true, path, ext);
+                this.sound('laughs', force, path, ext);
                 break;
             case ':tada:':
-                this.sound('congrats', true, path, ext);
+                this.sound('congrats', force, path, ext);
                 break;
             case ':open_mouth:':
-                this.sound('woah', true, path, ext);
+                this.sound('woah', force, path, ext);
                 break;
             case ':trumpet:':
-                this.sound('trombone', true, path, ext);
+                this.sound('trombone', force, path, ext);
                 break;
             case ':kissing_heart:':
-                this.sound('kiss', true, path, ext);
+                this.sound('kiss', force, path, ext);
                 break;
             case ':heart:':
             case ':hearts:':
-                this.sound('heart', true, path, ext);
+                this.sound('heart', force, path, ext);
                 break;
             case ':rocket:':
-                this.sound('rocket', true, path, ext);
+                this.sound('rocket', force, path, ext);
                 break;
             case ':sparkles:':
             case ':star:':
             case ':star2:':
             case ':dizzy:':
-                this.sound('tinkerbell', true, path, ext);
+                this.sound('tinkerbell', force, path, ext);
                 break;
             // ...
             default:
