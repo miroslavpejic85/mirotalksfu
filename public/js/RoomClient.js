@@ -8810,7 +8810,7 @@ class RoomClient {
     handleEmojiSound(cmd) {
         const path = '../sounds/emoji/';
         const ext = '.mp3';
-        const force = false; // force sound play even if sound effects are disabled
+        const force = true; // force sound play even if sound effects are disabled
 
         switch (cmd.shortcodes) {
             case ':+1:':
