@@ -1223,6 +1223,7 @@ module.exports = {
                 videoMirrorButton: process.env.SHOW_MIRROR_BUTTON !== 'false',
                 fullScreenButton: process.env.SHOW_FULLSCREEN !== 'false',
                 snapShotButton: process.env.SHOW_SNAPSHOT_BUTTON !== 'false',
+                focusVideoButton: process.env.SHOW_FOCUS_BUTTON !== 'false',
                 muteAudioButton: process.env.SHOW_MUTE_AUDIO !== 'false',
                 videoPrivacyButton: process.env.SHOW_PRIVACY_TOGGLE !== 'false',
                 audioVolumeInput: process.env.SHOW_VOLUME_CONTROL !== 'false',

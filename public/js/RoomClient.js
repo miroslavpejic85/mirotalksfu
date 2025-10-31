@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.91
+ * @version 1.9.92
  *
  */
 
@@ -2573,7 +2573,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, fs, pm, pb, pn, pv, mv;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -2601,6 +2601,7 @@ class RoomClient {
                 vb.className = 'videoMenuBar hidden';
 
                 pip = this.createButton(id + '__pictureInPicture', html.pip);
+                ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
@@ -2646,6 +2647,7 @@ class RoomClient {
                     vb.appendChild(pip);
                 BUTTONS.producerVideo.videoMirrorButton && vb.appendChild(mv);
                 BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
+                BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
 
                 if (!this.isMobileDevice) vb.appendChild(pn);
 
@@ -2683,6 +2685,7 @@ class RoomClient {
                 this.handleDD(elem.id, this.peer_id, true);
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
+                this.handleHA(ha.id, d.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.handleZV(elem.id, d.id, this.peer_id);
                 this.handlePV(id + '___' + pv.id);
@@ -2702,6 +2705,7 @@ class RoomClient {
 
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
+                    this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
                     this.setTippy(mv.id, 'Toggle mirror', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');

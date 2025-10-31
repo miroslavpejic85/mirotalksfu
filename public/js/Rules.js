@@ -64,6 +64,7 @@ let BUTTONS = {
         videoMirrorButton: true,
         fullScreenButton: true,
         snapShotButton: true,
+        focusVideoButton: true,
         muteAudioButton: true,
         videoPrivacyButton: true,
         audioVolumeInput: true,
