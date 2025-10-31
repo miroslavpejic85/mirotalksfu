@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.92
+ * @version 1.9.93
  *
  */
 
@@ -3638,8 +3638,12 @@ class RoomClient {
     }
 
     runOnNextUserActivation(callback) {
+        let fired = false;
+
         const fire = (e) => {
-            cleanup();
+            if (fired) return; // Prevent duplicate calls
+            fired = true;
+
             try {
                 // Call synchronously to keep the user-activation
                 callback(e);
@@ -3647,6 +3651,7 @@ class RoomClient {
                 console.error('runOnNextUserActivation callback error:', err);
             }
         };
+
         const cleanup = () => {
             window.removeEventListener('pointerdown', fire, true);
             window.removeEventListener('click', fire, true);
@@ -3654,12 +3659,17 @@ class RoomClient {
             window.removeEventListener('touchstart', fire, true);
             window.removeEventListener('keydown', fire, true);
         };
+
+        // Note: 'once: true' auto-removes listeners, but we return cleanup for manual removal if needed
         const opts = { capture: true, once: true, passive: true };
         window.addEventListener('pointerdown', fire, opts);
         window.addEventListener('click', fire, opts);
         window.addEventListener('mousedown', fire, opts);
         window.addEventListener('touchstart', fire, opts);
         window.addEventListener('keydown', fire, opts);
+
+        // Return cleanup function for manual removal if needed (e.g., component unmount)
+        return cleanup;
     }
 
     async changeAudioDestination(audioElement = false) {
@@ -3670,10 +3680,15 @@ class RoomClient {
         if (!this.hasUserActivation()) {
             this.pendingSinkId = sinkId;
             console.warn('Click once to apply the selected speaker');
-            this.runOnNextUserActivation(() => {
+            this.runOnNextUserActivation(async () => {
                 const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
-                els.forEach((el) => this.attachSinkId(el, this.pendingSinkId));
-                this.pendingSinkId = null;
+                for (const el of els) {
+                    await this.attachSinkId(el, this.pendingSinkId);
+                }
+                // Clear only if all succeeded or if pendingSinkId wasn't changed
+                if (this.pendingSinkId === sinkId) {
+                    this.pendingSinkId = null;
+                }
             });
             return;
         }
@@ -3694,7 +3709,13 @@ class RoomClient {
 
         return elem
             .setSinkId(sinkId)
-            .then(() => console.log(`Success, audio output device attached: ${sinkId}`))
+            .then(() => {
+                console.log(`Success, audio output device attached: ${sinkId}`);
+                // Clear pending sink id after successful attachment
+                if (this.pendingSinkId === sinkId) {
+                    this.pendingSinkId = null;
+                }
+            })
             .catch((err) => {
                 console.error('Attach SinkId error: ', err);
                 const speakerSel = this.getId('speakerSelect');
@@ -3706,7 +3727,12 @@ class RoomClient {
                     // Retry on next user gesture
                     this.userLog('info', 'Click once to allow changing the speaker', 'top-end', 4000);
                     this.pendingSinkId = sinkId;
-                    this.runOnNextUserActivation(() => this.attachSinkId(elem, this.pendingSinkId));
+                    this.runOnNextUserActivation(() => {
+                        // Check if pendingSinkId is still set before retrying
+                        if (this.pendingSinkId === sinkId) {
+                            this.attachSinkId(elem, this.pendingSinkId);
+                        }
+                    });
                 } else {
                     this.userLog('warning', 'Attach SinkId error', err, 'top-end', 6000);
                 }
