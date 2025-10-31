@@ -908,10 +908,10 @@ class RoomClient {
         });
 
         this.producerTransport.on('icegatheringstatechange', (state) => {
-            console.warn('Producer ICE gathering change state', {
-                state: state,
-                id: this.producerTransport.id,
-            });
+            const normalStates = new Set(['new', 'gathering', 'complete']);
+            normalStates.has(state)
+                ? console.log('Producer ICE gathering state', { state, id: this.producerTransport.id })
+                : console.warn('Unexpected Producer ICE gathering state', { state, id: this.producerTransport.id });
         });
 
         this.producerTransport.on('icecandidateerror', (error) => {
@@ -986,10 +986,10 @@ class RoomClient {
         });
 
         this.consumerTransport.on('icegatheringstatechange', (state) => {
-            console.warn('Consumer ICE gathering change state', {
-                state: state,
-                id: this.consumerTransport.id,
-            });
+            const normalStates = new Set(['new', 'gathering', 'complete']);
+            normalStates.has(state)
+                ? console.log('Consumer ICE gathering state', { state, id: this.consumerTransport.id })
+                : console.warn('Unexpected Consumer ICE gathering state', { state, id: this.consumerTransport.id });
         });
 
         this.consumerTransport.on('icecandidateerror', (error) => {
