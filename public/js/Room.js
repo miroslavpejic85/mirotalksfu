@@ -3905,11 +3905,12 @@ function handleButtonsBar() {
         : document.body.addEventListener('touchstart', showButtonsHandler);
 }
 
-function handleDropdownHover() {
+function handleDropdownHover(dropdownElement = null) {
     const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     if (!supportsHover) return;
 
-    const dropdowns = document.querySelectorAll('.dropdown');
+    const dropdowns = dropdownElement ? dropdownElement : document.querySelectorAll('.dropdown');
+    console.log(`Dropdown found: ${dropdowns.length}`);
 
     dropdowns.forEach((dropdown) => {
         const toggle = dropdown.querySelector('.dropdown-toggle');
@@ -3921,7 +3922,7 @@ function handleDropdownHover() {
 
         dropdown.addEventListener('mouseenter', () => {
             clearTimeout(timeoutId);
-            const bsDropdown = new bootstrap.Dropdown(toggle);
+            const bsDropdown = bootstrap.Dropdown.getInstance(toggle) || new bootstrap.Dropdown(toggle);
             bsDropdown.show();
         });
 
@@ -4766,56 +4767,10 @@ async function getRoomParticipants() {
     const lists = getParticipantsList(peers);
     participantsCount = peers.size;
     participantsList.innerHTML = lists;
-    attachParticipantsDropdownHover();
+    handleDropdownHover(participantsList.querySelectorAll('.dropdown'));
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
     console.log('*** Refresh Chat participant lists ***');
-}
-
-function attachParticipantsDropdownHover() {
-    const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    if (!supportsHover) {
-        console.log('Dropdown hover: Device does not support hover');
-        return;
-    }
-
-    const dropdowns = participantsList.querySelectorAll('.dropdown');
-    console.log('Dropdown hover: Found', dropdowns.length, 'dropdowns in participants list');
-
-    dropdowns.forEach((dropdown) => {
-        const toggle = dropdown.querySelector('.dropdown-toggle');
-        const menu = dropdown.querySelector('.dropdown-menu');
-
-        if (!toggle || !menu) {
-            console.log('Dropdown hover: Missing toggle or menu');
-            return;
-        }
-
-        let timeoutId;
-
-        dropdown.addEventListener('mouseenter', () => {
-            clearTimeout(timeoutId);
-            const bsDropdown = bootstrap.Dropdown.getInstance(toggle) || new bootstrap.Dropdown(toggle);
-            bsDropdown.show();
-        });
-
-        dropdown.addEventListener('mouseleave', () => {
-            timeoutId = setTimeout(() => {
-                const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
-                if (bsDropdown) {
-                    bsDropdown.hide();
-                }
-            }, 200);
-        });
-
-        menu.addEventListener('mouseenter', () => {
-            clearTimeout(timeoutId);
-        });
-
-        toggle.addEventListener('click', (e) => {
-            e.stopPropagation();
-        });
-    });
 }
 
 function getParticipantsList(peers) {
