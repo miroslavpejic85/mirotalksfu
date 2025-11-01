@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.94
+ * @version 1.9.95
  *
  */
 
@@ -3910,8 +3910,8 @@ function handleDropdownHover() {
     if (!supportsHover) return;
 
     const dropdowns = document.querySelectorAll('.dropdown');
-    
-    dropdowns.forEach(dropdown => {
+
+    dropdowns.forEach((dropdown) => {
         const toggle = dropdown.querySelector('.dropdown-toggle');
         const menu = dropdown.querySelector('.dropdown-menu');
 
@@ -3924,7 +3924,7 @@ function handleDropdownHover() {
             const bsDropdown = new bootstrap.Dropdown(toggle);
             bsDropdown.show();
         });
-        
+
         dropdown.addEventListener('mouseleave', () => {
             timeoutId = setTimeout(() => {
                 const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
@@ -3933,7 +3933,7 @@ function handleDropdownHover() {
                 }
             }, 200);
         });
-        
+
         menu.addEventListener('mouseenter', () => {
             clearTimeout(timeoutId);
         });
@@ -4766,9 +4766,56 @@ async function getRoomParticipants() {
     const lists = getParticipantsList(peers);
     participantsCount = peers.size;
     participantsList.innerHTML = lists;
+    attachParticipantsDropdownHover();
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
     console.log('*** Refresh Chat participant lists ***');
+}
+
+function attachParticipantsDropdownHover() {
+    const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!supportsHover) {
+        console.log('Dropdown hover: Device does not support hover');
+        return;
+    }
+
+    const dropdowns = participantsList.querySelectorAll('.dropdown');
+    console.log('Dropdown hover: Found', dropdowns.length, 'dropdowns in participants list');
+
+    dropdowns.forEach((dropdown) => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+
+        if (!toggle || !menu) {
+            console.log('Dropdown hover: Missing toggle or menu');
+            return;
+        }
+
+        let timeoutId;
+
+        dropdown.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+            const bsDropdown = bootstrap.Dropdown.getInstance(toggle) || new bootstrap.Dropdown(toggle);
+            bsDropdown.show();
+        });
+
+        dropdown.addEventListener('mouseleave', () => {
+            timeoutId = setTimeout(() => {
+                const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                if (bsDropdown) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+
+        menu.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+        });
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    });
 }
 
 function getParticipantsList(peers) {
@@ -4846,7 +4893,7 @@ function getParticipantsList(peers) {
     // ONLY PRESENTER CAN EXECUTE THIS CMD
     if (!isRulesActive || isPresenter) {
         li += `
-        <div style="class="dropdown">
+        <div class="dropdown">
             <button 
                 class="dropdown-toggle" 
                 type="button" 
@@ -4931,7 +4978,7 @@ function getParticipantsList(peers) {
                         <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> </div>
                     </div>
 
-                    <div style="class="dropdown">
+                    <div class="dropdown">
                         <button 
                             class="dropdown-toggle" 
                             type="button" 
@@ -5010,7 +5057,7 @@ function getParticipantsList(peers) {
                 // NO ROOM BROADCASTING
                 if (!isBroadcastingEnabled) {
                     li += `
-                    <div style="class="dropdown">
+                    <div class="dropdown">
                         <button 
                             class="dropdown-toggle" 
                             type="button" 
@@ -5762,7 +5809,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.94',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.95',
         html: `
             <br />
             <div id="about">
