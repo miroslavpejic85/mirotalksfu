@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.93
+ * @version 1.9.94
  *
  */
 
@@ -1738,6 +1738,7 @@ function roomIsReady() {
     loadSettingsFromLocalStorage();
     startSessionTimer();
     handleButtonsBar();
+    handleDropdownHover();
     checkButtonsBar();
     if (room_password) {
         lockRoomButton.click();
@@ -3904,6 +3905,45 @@ function handleButtonsBar() {
         : document.body.addEventListener('touchstart', showButtonsHandler);
 }
 
+function handleDropdownHover() {
+    const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (!supportsHover) return;
+
+    const dropdowns = document.querySelectorAll('.dropdown');
+    
+    dropdowns.forEach(dropdown => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+
+        if (!toggle || !menu) return;
+
+        let timeoutId;
+
+        dropdown.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+            const bsDropdown = new bootstrap.Dropdown(toggle);
+            bsDropdown.show();
+        });
+        
+        dropdown.addEventListener('mouseleave', () => {
+            timeoutId = setTimeout(() => {
+                const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
+                if (bsDropdown) {
+                    bsDropdown.hide();
+                }
+            }, 200);
+        });
+        
+        menu.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+        });
+
+        toggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+        });
+    });
+}
+
 function showButtons() {
     if (
         isButtonsBarOver ||
@@ -5722,7 +5762,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.93',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v1.9.94',
         html: `
             <br />
             <div id="about">
