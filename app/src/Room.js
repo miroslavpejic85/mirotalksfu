@@ -359,9 +359,11 @@ module.exports = class Room {
         }
     }
 
-    close() {
+    async close() {
         this.closeAudioLevelObserver();
         this.closeActiveSpeakerObserver();
+        if (this.isRtmpFileStreamerActive()) this.stopRTMP();
+        if (this.isRtmpUrlStreamerActive()) this.stopRTMPfromURL();
         this.closeRouter();
         log.debug('Room closed', { room_id: this.id });
     }

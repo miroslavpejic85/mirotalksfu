@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.96
+ * @version 1.9.97
  *
  */
 
@@ -3423,7 +3423,11 @@ function startServer() {
         });
 
         socket.on('disconnect', (reason) => {
-            if (!roomExists(socket)) return;
+            if (!roomExists(socket)) {
+                // Clean up socket listeners even if room doesn't exist
+                socket.removeAllListeners();
+                return;
+            }
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -3473,6 +3477,9 @@ function startServer() {
             removeIP(socket);
 
             socket.room_id = null;
+
+            // Clean up all socket event listeners to prevent memory leaks
+            socket.removeAllListeners();
         });
 
         socket.on('exitRoom', (_, callback) => {
@@ -4059,14 +4066,135 @@ function startServer() {
     }
 }
 
+// ####################################################
+// GRACEFUL SHUTDOWN HANDLERS
+// ####################################################
+
+let isShuttingDown = false;
+
+async function gracefulShutdown(signal) {
+    if (isShuttingDown) {
+        log.warn(`${signal} received again, forcing exit...`);
+        process.exit(1);
+    }
+
+    isShuttingDown = true;
+    log.info(`${signal} received, starting graceful shutdown...`);
+
+    try {
+        // 1. Stop accepting new connections
+        log.debug('Closing HTTP server...');
+        server.close(() => {
+            log.info('HTTP server closed');
+        });
+
+        // 2. Close all active rooms and notify peers
+        log.debug(`Closing ${roomList.size} active rooms...`);
+        for (const [roomId, room] of roomList.entries()) {
+            try {
+                // Notify all peers in the room
+                room.sendToAll('serverShutdown', { message: 'Server is shutting down' });
+
+                // Stop any active RTMP streams
+                if (room.isRtmpFileStreamerActive()) {
+                    await room.stopRTMP();
+                }
+                if (room.isRtmpUrlStreamerActive()) {
+                    await room.stopRTMPfromURL();
+                }
+
+                // Remove all peers from the room
+                const peers = room.getPeers();
+                for (const [peerId] of peers) {
+                    room.removePeer(peerId);
+                }
+
+                roomList.delete(roomId);
+            } catch (err) {
+                log.error(`Error closing room ${roomId}:`, err.message);
+            }
+        }
+
+        // 3. Close all RTMP streams
+        log.debug(`Closing ${Object.keys(streams).length} RTMP streams...`);
+        for (const [key, stream] of Object.entries(streams)) {
+            try {
+                if (stream && typeof stream.end === 'function') {
+                    stream.end();
+                }
+                delete streams[key];
+            } catch (err) {
+                log.error(`Error closing RTMP stream ${key}:`, err.message);
+            }
+        }
+
+        // 4. Disconnect all Socket.IO clients
+        log.debug('Disconnecting all Socket.IO clients...');
+        const sockets = await io.fetchSockets();
+        for (const socket of sockets) {
+            socket.disconnect(true);
+        }
+
+        // 5. Close Socket.IO server
+        log.debug('Closing Socket.IO server...');
+        io.close();
+
+        // 6. Close all mediasoup workers
+        log.debug(`Closing ${workers.length} mediasoup workers...`);
+        for (const worker of workers) {
+            try {
+                worker.close();
+            } catch (err) {
+                log.error('Error closing mediasoup worker:', err.message);
+            }
+        }
+
+        // 7. Cleanup HTML injector
+        log.debug('Cleaning up HTML injector...');
+        htmlInjector.cleanup();
+
+        // 8. Close ngrok if active
+        if (config?.integrations?.ngrok?.enabled) {
+            log.debug('Closing ngrok tunnel...');
+            await ngrok.kill();
+        }
+
+        log.info('Graceful shutdown completed successfully');
+        process.exit(0);
+    } catch (err) {
+        log.error('Error during graceful shutdown:', err.message);
+        process.exit(1);
+    }
+}
+
+// Set a timeout for forced shutdown if graceful shutdown takes too long
+function forceShutdown(signal) {
+    setTimeout(() => {
+        log.error(`Graceful shutdown timeout exceeded, forcing exit...`);
+        process.exit(1);
+    }, 30000); // 30 seconds timeout
+}
+
 process.on('SIGINT', () => {
     log.debug('PROCESS', 'SIGINT');
-    htmlInjector.cleanup();
-    process.exit();
+    forceShutdown('SIGINT');
+    gracefulShutdown('SIGINT');
 });
 
 process.on('SIGTERM', () => {
     log.debug('PROCESS', 'SIGTERM');
-    htmlInjector.cleanup();
-    process.exit();
+    forceShutdown('SIGTERM');
+    gracefulShutdown('SIGTERM');
+});
+
+// Handle uncaught exceptions and rejections
+process.on('uncaughtException', (err) => {
+    log.error('Uncaught Exception:', err);
+    forceShutdown('uncaughtException');
+    gracefulShutdown('uncaughtException');
+});
+
+process.on('unhandledRejection', (reason, promise) => {
+    log.error('Unhandled Rejection at:', promise, 'reason:', reason);
+    // Don't exit on unhandled rejection, just log it
 });
