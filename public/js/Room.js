@@ -1228,8 +1228,6 @@ async function whoAreYou() {
         console.error('AXIOS OIDC Error fetching profile', error.message || error);
     }
 
-    initUser.classList.toggle('hidden');
-
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -1280,6 +1278,9 @@ async function whoAreYou() {
         getPeerInfo();
         joinRoom(peer_name, room_id);
     });
+
+    // Show the init user container injected in Swal
+    initUser.classList.toggle('hidden');
 
     if (force_peer_name) {
         getId('usernameInput').disabled = true;
