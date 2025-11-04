@@ -171,7 +171,7 @@ module.exports = class Room {
                 fs.mkdirSync(folderPath, { recursive: true });
             }
             const files = fs.readdirSync(folderPath);
-            log.info('[getRTMP] Files', files);
+            log.debug('[getRTMP] Files', files);
             return files;
         } catch (error) {
             log.error(`[getRTMP] Error reading directory: ${error.message}`);
@@ -329,19 +329,19 @@ module.exports = class Room {
             .then((router) => {
                 this.router = router;
                 if (this.audioLevelObserverEnabled) {
-                    log.info('Audio Level Observer enabled, starting observation...');
+                    log.debug('Audio Level Observer enabled, starting observation...');
                     this.startAudioLevelObservation().catch((err) => {
                         log.error('Failed to start audio level observation', err);
                     });
                 }
                 if (this.activeSpeakerObserverEnabled) {
-                    log.info('Active Speaker Observer enabled, starting observation...');
+                    log.debug('Active Speaker Observer enabled, starting observation...');
                     this.startActiveSpeakerObserver().catch((err) => {
                         log.error('Failed to start active speaker observer', err);
                     });
                 }
                 this.router.observer.on('close', () => {
-                    log.info('---------------> Router is now closed as the last peer has left the room', {
+                    log.debug('---------------> Router is now closed as the last peer has left the room', {
                         room: this.id,
                     });
                 });
@@ -427,7 +427,7 @@ module.exports = class Room {
     addProducerToAudioLevelObserver(producer) {
         if (this.audioLevelObserverEnabled) {
             this.audioLevelObserver.addProducer(producer);
-            log.info('Producer added to audio level observer', { producer });
+            log.debug('Producer added to audio level observer', { producer });
         }
     }
 
@@ -485,7 +485,7 @@ module.exports = class Room {
     addProducerToActiveSpeakerObserver(producer) {
         if (this.activeSpeakerObserverEnabled) {
             this.activeSpeakerObserver.addProducer(producer);
-            log.info('Producer added to active speaker observer', { producer });
+            log.debug('Producer added to active speaker observer', { producer });
         }
     }
 

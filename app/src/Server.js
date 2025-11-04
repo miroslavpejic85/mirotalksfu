@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.99
+ * @version 2.0.00
  *
  */
 
@@ -876,7 +876,7 @@ function startServer() {
             const token = encodeToken({ username: username, password: password, presenter: isPresenter });
             const allowedRooms = await getUserAllowedRooms(username, password);
 
-            log.info('login -------------->', { displayName: user?.displayname || username });
+            log.debug('login -------------->', { displayName: user?.displayname || username });
 
             return res
                 .status(200)
@@ -1604,6 +1604,7 @@ function startServer() {
 
             // Version Information
             versions: {
+                environment: config.system?.info?.environment,
                 app: packageJson?.version,
                 node: process.versions.node,
                 server_version: mediasoup?.version,
@@ -1721,9 +1722,9 @@ function startServer() {
             /*
             setInterval(async () => {
                 const usage = await worker.getResourceUsage();
-                log.info('mediasoup Worker resource usage', { worker_pid: worker.pid, usage: usage });
+                log.debug('mediasoup Worker resource usage', { worker_pid: worker.pid, usage: usage });
                 const dump = await worker.dump();
-                log.info('mediasoup Worker dump', { worker_pid: worker.pid, dump: dump });
+                log.debug('mediasoup Worker dump', { worker_pid: worker.pid, dump: dump });
             }, 120000);
             */
         }
@@ -1788,7 +1789,7 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
-            log.info('User joined', data);
+            log.debug('User joined', data);
 
             if (!Validator.isValidRoomName(socket.room_id)) {
                 log.warn('[Join] - Invalid room name', socket.room_id);
@@ -1867,7 +1868,7 @@ function startServer() {
 
             // check if banned...
             if (room.isBanned(peer_uuid)) {
-                log.info('[Join] - peer is banned!', {
+                log.debug('[Join] - peer is banned!', {
                     room_id: data.room_id,
                     peer: {
                         name: peer_name,
@@ -1891,11 +1892,11 @@ function startServer() {
 
             const activeRooms = getActiveRooms();
 
-            log.info('[Join] - current active rooms', activeRooms);
+            log.debug('[Join] - current active rooms', activeRooms);
 
             const activeStreams = getRTMPActiveStreams();
 
-            log.info('[Join] - current active RTMP streams', activeStreams);
+            log.debug('[Join] - current active RTMP streams', activeStreams);
 
             if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
 
@@ -1915,7 +1916,7 @@ function startServer() {
                 presenters[socket.room_id][socket.id] = presenter;
             }
 
-            log.info('[Join] - Connected presenters grp by roomId', presenters);
+            log.debug('[Join] - Connected presenters grp by roomId', presenters);
 
             const isPresenter = peer_token
                 ? is_presenter
@@ -1929,7 +1930,7 @@ function startServer() {
                 });
             }
 
-            log.info('[Join] - Is Peer presenter', {
+            log.debug('[Join] - Is Peer presenter', {
                 roomId: socket.room_id,
                 peer_name: peer_name,
                 peer_presenter: isPresenter,
@@ -2451,7 +2452,7 @@ function startServer() {
                     room.broadCast(socket.id, 'roomAction', data.action);
                     break;
                 case 'isBanned':
-                    log.info('The user has been banned from the room due to spamming messages', data);
+                    log.debug('The user has been banned from the room due to spamming messages', data);
                     room.addBannedPeer(data.peer_uuid);
                     break;
                 default:
@@ -2794,7 +2795,7 @@ function startServer() {
                 return;
             }
 
-            log.info('message', data);
+            log.debug('message', data);
 
             data.to_peer_id == 'all'
                 ? room.broadCast(socket.id, 'message', data)
@@ -2836,7 +2837,7 @@ function startServer() {
                 context.push({ role: 'assistant', content: message });
 
                 // Log the conversation details
-                log.info('ChatGPT Response', {
+                log.debug('ChatGPT Response', {
                     time,
                     room,
                     name,
@@ -2909,7 +2910,7 @@ function startServer() {
                 context.push({ role: 'assistant', content: message });
 
                 // Log the conversation details
-                log.info('DeepSeek Response', {
+                log.debug('DeepSeek Response', {
                     time,
                     room,
                     name,
@@ -3482,7 +3483,7 @@ function startServer() {
 
                 delete presenters[socket.room_id];
 
-                log.info('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
+                log.debug('[Disconnect] - Last peer - current presenters grouped by roomId', presenters);
 
                 const activeRooms = getActiveRooms();
 
@@ -3541,7 +3542,7 @@ function startServer() {
 
                 delete presenters[socket.room_id];
 
-                log.info('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
+                log.debug('[REMOVE ME] - Last peer - current presenters grouped by roomId', presenters);
 
                 const activeRooms = getActiveRooms();
 
@@ -3710,7 +3711,7 @@ function startServer() {
                 // Presenter not in the presenters config list, disconnected, or peer_id changed...
                 for (const [existingPeerID, presenter] of Object.entries(presenters[room_id] || {})) {
                     if (presenter.peer_name === peer_name) {
-                        log.info('Presenter found', {
+                        log.debug('Presenter found', {
                             room: room_id,
                             peer_id: existingPeerID,
                             peer_name: peer_name,
@@ -4066,7 +4067,7 @@ function startServer() {
     function allowedIP(ip) {
         const authorizedIPs = authHost.getAuthorizedIPs();
         const authorizedIP = authHost.isAuthorizedIP(ip);
-        log.info('Allowed IPs', {
+        log.debug('Allowed IPs', {
             ip: ip,
             authorizedIP: authorizedIP,
             authorizedIPs: authorizedIPs,
@@ -4080,7 +4081,7 @@ function startServer() {
             if (ip && allowedIP(ip)) {
                 authHost.deleteIP(ip);
                 hostCfg.authenticated = false;
-                log.info('Remove IP from auth', {
+                log.debug('Remove IP from auth', {
                     removedIp: ip,
                     authorizedIps: authHost.getAuthorizedIPs(),
                 });

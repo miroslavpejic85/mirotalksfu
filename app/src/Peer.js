@@ -403,7 +403,7 @@ module.exports = class Peer {
     // ####################################################
 
     close() {
-        log.info('Starting peer cleanup', {
+        log.debug('Starting peer cleanup', {
             peer_id: this.id,
             peer_name: this.peer_name,
             transports: this.transports.size,
@@ -456,7 +456,7 @@ module.exports = class Peer {
         }
         this.transports.clear();
 
-        log.info('Peer cleanup completed successfully', {
+        log.debug('Peer cleanup completed successfully', {
             peer_id: this.id,
             peer_name: this.peer_name,
             transports: this.transports.size,
