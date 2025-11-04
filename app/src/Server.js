@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.97
+ * @version 1.9.98
  *
  */
 
@@ -4025,15 +4025,19 @@ function startServer() {
     }
 
     function getIP(req) {
-        return req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;
+        const forwarded = req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'];
+        if (forwarded) {
+            return forwarded.split(',')[0].trim();
+        }
+        return req.socket.remoteAddress || req.ip;
     }
 
     function getIpSocket(socket) {
-        return (
-            socket.handshake.headers['x-forwarded-for'] ||
-            socket.handshake.headers['X-Forwarded-For'] ||
-            socket.handshake.address
-        );
+        const forwarded = socket.handshake.headers['x-forwarded-for'] || socket.handshake.headers['X-Forwarded-For'];
+        if (forwarded) {
+            return forwarded.split(',')[0].trim();
+        }
+        return socket.handshake.address;
     }
 
     function updateHostAuthenticatedFlag() {
