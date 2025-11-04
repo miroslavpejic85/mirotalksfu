@@ -3465,7 +3465,7 @@ function startServer() {
                 };
                 // Trigger a POST request when a user disconnects
                 axios
-                    .post(webhook.url, { event: 'disconnect', data })
+                    .post(webhook.url, { event: 'disconnect', data }, { timeout: 5000 })
                     .then((response) => log.debug('Disconnect event tracked:', response.data))
                     .catch((error) => log.error('Error tracking disconnect event:', error.message));
             }
@@ -3524,7 +3524,7 @@ function startServer() {
                 };
                 // Trigger a POST request when a user exits
                 axios
-                    .post(webhook.url, { event: 'exit', data })
+                    .post(webhook.url, { event: 'exit', data }, { timeout: 5000 })
                     .then((response) => log.debug('ExitRoom event tracked:', response.data))
                     .catch((error) => log.error('Error tracking exitRoom event:', error.message));
             }
@@ -3572,7 +3572,7 @@ function startServer() {
                 };
 
                 axios
-                    .post(webhook.url, { event: 'join', data })
+                    .post(webhook.url, { event: 'join', data }, { timeout: 5000 })
                     .then((response) => log.debug('Join event tracked:', response.data))
                     .catch((error) => log.error('Error tracking join event:', error.message));
             }
