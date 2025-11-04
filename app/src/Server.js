@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 1.9.98
+ * @version 1.9.99
  *
  */
 
@@ -1491,6 +1491,25 @@ function startServer() {
     // not match any of page before, so 404 not found
     app.use((req, res) => {
         res.sendFile(views.notFound);
+    });
+
+    // Global error handler for URIError and other errors
+    app.use((err, req, res, next) => {
+        if (err instanceof URIError) {
+            log.warn('Malformed URI detected', {
+                url: req.url,
+                ip: getIP(req),
+                error: err.message,
+            });
+            return res.status(400).send({ status: 400, message: 'Invalid URL encoding' });
+        }
+        // Handle other errors
+        log.error('Unhandled error', {
+            url: req.url,
+            error: err.message,
+            stack: err.stack,
+        });
+        res.status(500).send({ status: 500, message: 'Internal server error' });
     });
 
     // ####################################################
