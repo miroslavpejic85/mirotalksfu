@@ -44,7 +44,7 @@ function fixDurationOrRemux(inputPath, durationMs) {
 
     if (hasFfmpeg() && (isWebm || isMp4)) {
         const ok = remuxWithFfmpeg(inputPath, isMp4 ? 'mp4' : 'webm');
-        log.info('ffmpeg detected remuxWithFfmpeg:', ok);
+        log.debug('ffmpeg detected remuxWithFfmpeg:', ok);
         if (ok) return true;
     }
 
@@ -53,11 +53,11 @@ function fixDurationOrRemux(inputPath, durationMs) {
         const outBuf = fixWebmDurationBuffer(inBuf, Number(durationMs));
         if (outBuf && outBuf.length) {
             fs.writeFileSync(inputPath, outBuf);
-            log.info('No ffmpeg detected fixWebmDurationBuffer - true');
+            log.debug('No ffmpeg detected fixWebmDurationBuffer - true');
             return true;
         }
     }
-    log.info('No ffmpeg detected fixWebmDurationBuffer - false');
+    log.debug('No ffmpeg detected fixWebmDurationBuffer - false');
     return false;
 }
 

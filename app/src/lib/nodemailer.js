@@ -53,7 +53,7 @@ const transport = nodemailer.createTransport({
 function sendEmailAlert(event, data) {
     if (!EMAIL_ALERT || !EMAIL_HOST || !EMAIL_PORT || !EMAIL_USERNAME || !EMAIL_PASSWORD || !EMAIL_SEND_TO) return;
 
-    log.info('sendEMailAlert', {
+    log.debug('sendEMailAlert', {
         event: event,
         data: data,
     });
@@ -88,7 +88,7 @@ function sendEmailAlert(event, data) {
 function sendEmailNotifications(event, data, notifications) {
     if (!EMAIL_NOTIFY || !EMAIL_HOST || !EMAIL_PORT || !EMAIL_USERNAME || !EMAIL_PASSWORD) return;
 
-    log.info('sendEmailNotifications', {
+    log.debug('sendEmailNotifications', {
         event: event,
         data: data,
         notifications: notifications,

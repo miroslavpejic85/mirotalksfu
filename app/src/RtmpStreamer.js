@@ -31,7 +31,7 @@ class RtmpStreamer {
             .audioBitrate('128k')
             .outputOptions(['-f flv'])
             .output(this.rtmpUrl)
-            .on('start', (commandLine) => this.log.info('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }))
+            .on('start', (commandLine) => this.log.debug('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }))
             .on('progress', (progress) => {
                 /* log.debug('Processing', progress); */
             })
@@ -42,7 +42,7 @@ class RtmpStreamer {
                 this.end();
             })
             .on('end', () => {
-                this.log.info('FFmpeg process ended', this.rtmpKey);
+                this.log.debug('FFmpeg process ended', this.rtmpKey);
                 this.end();
             })
             .run();
@@ -60,12 +60,12 @@ class RtmpStreamer {
         if (this.stream) {
             this.stream.end();
             this.stream = null;
-            this.log.info('RTMP streaming stopped', this.rtmpKey);
+            this.log.debug('RTMP streaming stopped', this.rtmpKey);
         }
         if (this.ffmpegStream && !this.ffmpegStream.killed) {
             this.ffmpegStream.kill('SIGTERM');
             this.ffmpegStream = null;
-            this.log.info('FFMPEG closed successfully', this.rtmpKey);
+            this.log.debug('FFMPEG closed successfully', this.rtmpKey);
         }
         this.run = false;
     }

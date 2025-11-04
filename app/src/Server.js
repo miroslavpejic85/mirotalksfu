@@ -3487,11 +3487,11 @@ function startServer() {
 
                 const activeRooms = getActiveRooms();
 
-                log.info('[Disconnect] - Last peer - current active rooms', activeRooms);
+                log.debug('[Disconnect] - Last peer - current active rooms', activeRooms);
 
                 const activeStreams = getRTMPActiveStreams();
 
-                log.info('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
+                log.debug('[Disconnect] - Last peer - current active RTMP streams', activeStreams);
             }
 
             removeIP(socket);
@@ -3546,11 +3546,11 @@ function startServer() {
 
                 const activeRooms = getActiveRooms();
 
-                log.info('[REMOVE ME] - Last peer - current active rooms', activeRooms);
+                log.debug('[REMOVE ME] - Last peer - current active rooms', activeRooms);
 
                 const activeStreams = getRTMPActiveStreams();
 
-                log.info('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
+                log.debug('[REMOVE ME] - Last peer - current active RTMP streams', activeStreams);
             }
 
             removeIP(socket);
@@ -3681,12 +3681,12 @@ function startServer() {
             if (room.isRtmpFileStreamerActive()) {
                 room.stopRTMP();
                 rtmpFileStreamsCount--;
-                log.info('[REMOVE ME] - Stop RTMP Stream From FIle', rtmpFileStreamsCount);
+                log.debug('[REMOVE ME] - Stop RTMP Stream From FIle', rtmpFileStreamsCount);
             }
             if (room.isRtmpUrlStreamerActive()) {
                 room.stopRTMPfromURL();
                 rtmpUrlStreamsCount--;
-                log.info('[REMOVE ME] - Stop RTMP Stream From URL', rtmpUrlStreamsCount);
+                log.debug('[REMOVE ME] - Stop RTMP Stream From URL', rtmpUrlStreamsCount);
             }
         }
     }

@@ -38,7 +38,7 @@ class RtmpFile {
                     '-f flv', // Output format
                 ])
                 .output(rtmpUrl)
-                .on('start', (commandLine) => log.info('ffmpeg process starting with command:', commandLine))
+                .on('start', (commandLine) => log.debug('ffmpeg process starting with command:', commandLine))
                 .on('progress', (progress) => {
                     /* log.debug('Processing', progress); */
                 })
@@ -49,13 +49,13 @@ class RtmpFile {
                     }
                 })
                 .on('end', () => {
-                    log.info('FFmpeg processing finished');
+                    log.debug('FFmpeg processing finished');
                     this.ffmpegProcess = null;
                     this.handleEnd();
                 })
                 .run();
 
-            log.info('RtmpFile started', rtmpUrl);
+            log.debug('RtmpFile started', rtmpUrl);
             return true;
         } catch (error) {
             log.error('Error starting RtmpFile', error.message);
@@ -68,7 +68,7 @@ class RtmpFile {
             try {
                 this.ffmpegProcess.kill('SIGTERM');
                 this.ffmpegProcess = null;
-                log.info('RtmpFile stopped');
+                log.debug('RtmpFile stopped');
                 return true;
             } catch (error) {
                 log.error('Error stopping RtmpFile', error.message);

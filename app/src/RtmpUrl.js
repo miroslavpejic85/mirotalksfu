@@ -34,7 +34,7 @@ class RtmpUrl {
                 .size('1280x720') // Scale video to 1280x720 resolution
                 .format('flv') // Set output format to FLV
                 .output(rtmpUrl)
-                .on('start', (commandLine) => log.info('ffmpeg process starting with command:', commandLine))
+                .on('start', (commandLine) => log.debug('ffmpeg process starting with command:', commandLine))
                 .on('progress', (progress) => {
                     /* log.debug('Processing', progress); */
                 })
@@ -45,13 +45,13 @@ class RtmpUrl {
                     }
                 })
                 .on('end', () => {
-                    log.info('FFmpeg processing finished');
+                    log.debug('FFmpeg processing finished');
                     this.ffmpegProcess = null;
                     this.handleEnd();
                 })
                 .run();
 
-            log.info('RtmpUrl started', rtmpUrl);
+            log.debug('RtmpUrl started', rtmpUrl);
             return true;
         } catch (error) {
             log.error('Error starting RtmpUrl', error.message);
@@ -64,7 +64,7 @@ class RtmpUrl {
             try {
                 this.ffmpegProcess.kill('SIGTERM');
                 this.ffmpegProcess = null;
-                log.info('RtmpUrl stopped');
+                log.debug('RtmpUrl stopped');
                 return true;
             } catch (error) {
                 log.error('Error stopping RtmpUrl', error.message);
