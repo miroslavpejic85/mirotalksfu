@@ -711,24 +711,25 @@ module.exports = class Room {
         });
 
         transport.on('icestatechange', (iceState) => {
-            log.debug('ICE state changed', {
+            const iceLog = {
                 peer_name: peer_name,
                 transport_id: id,
                 iceState: iceState,
-            });
+            };
+            log.debug('ICE state changed', iceLog);
 
             if (iceState === 'disconnected') {
-                log.warn(`ICE state disconnected for transport ${transport.id}, waiting before closing`);
+                log.debug('ICE state disconnected for transport waiting before closing', iceLog);
                 setTimeout(() => {
                     if (transport.iceState === 'disconnected') {
-                        log.warn(`Closing transport ${transport.id} due to prolonged ICE disconnection`);
+                        log.warn('Closing transport due to prolonged ICE disconnection', iceLog);
                         if (!transport.closed) {
                             transport.close();
                         }
                     }
                 }, iceConsentTimeout * 1000); // Wait iceConsentTimeout seconds before closing
             } else if (iceState === 'closed') {
-                log.warn(`ICE state closed for transport ${transport.id}`);
+                log.warn('ICE state closed, closing transport', iceLog);
                 if (!transport.closed) {
                     transport.close();
                 }
