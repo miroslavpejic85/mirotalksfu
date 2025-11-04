@@ -69,6 +69,7 @@ module.exports = {
          * - Used for diagnostics and optimization
          */
         info: {
+            environment: ENVIRONMENT,
             os: {
                 type: os.type(),
                 release: os.release(),
