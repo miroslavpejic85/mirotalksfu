@@ -1101,7 +1101,6 @@ module.exports = {
                         ${process.env.AUTHOR_NAME || 'Miroslav Pejic'}
                     </a>
                     <br />
-                    <br />
                     ${process.env.EMAIL_LABEL || 'Email'}: 
                     <a id="email-button" data-umami-event="Email button"
                         href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}">
