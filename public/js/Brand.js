@@ -67,6 +67,7 @@ let BRAND = {
         poweredBy: true,
         sponsors: true,
         advertisers: true,
+        supportUs: true,
         footer: true,
     },
     whoAreYou: {
@@ -191,8 +192,19 @@ async function getBrand() {
 
 // BRAND configurations
 function setBrand(data) {
-    BRAND = data;
+    BRAND = mergeBrand(BRAND, data);
     console.log('Set Brand done');
+}
+
+function mergeBrand(current, updated) {
+    for (const key of Object.keys(updated)) {
+        if (!current.hasOwnProperty(key) || typeof updated[key] !== 'object') {
+            current[key] = updated[key];
+        } else {
+            mergeBrand(current[key], updated[key]);
+        }
+    }
+    return current;
 }
 
 // BRAND check
@@ -204,6 +216,7 @@ function checkBrand() {
     !BRAND.html.poweredBy && elementDisplay(poweredBy, false);
     !BRAND.html.sponsors && elementDisplay(sponsors, false);
     !BRAND.html.advertisers && elementDisplay(advertisers, false);
+    !BRAND.html.supportUs && elementDisplay(supportUs, false);
     !BRAND.html.footer && elementDisplay(footer, false);
 }
 

@@ -1060,6 +1060,7 @@ module.exports = {
                 poweredBy: process.env.SHOW_POWERED_BY !== 'false',
                 sponsors: process.env.SHOW_SPONSORS !== 'false',
                 advertisers: process.env.SHOW_ADVERTISERS !== 'false',
+                supportUs: process.env.SHOW_SUPPORT_US !== 'false',
                 footer: process.env.SHOW_FOOTER !== 'false',
             },
 
