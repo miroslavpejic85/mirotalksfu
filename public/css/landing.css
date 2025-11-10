@@ -2148,7 +2148,7 @@ main {
 --------------------------------------------------------------*/
 
 #supportUs .cta-inner {
-    background: linear-gradient(135deg, rgba(0, 0, 0, 0.95) 60%, rgba(36, 40, 48, 0.25) 100%);
+    background: linear-gradient(135deg, #15181d 0%, #1d2026 50%, #242830 100%);
 }
 
 .support-us-content {
