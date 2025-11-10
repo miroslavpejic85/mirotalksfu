@@ -26,13 +26,13 @@ class MiroTalkWidget {
             checkOnlineStatus: false,
             isOnline: true,
             customMessages: {
-                heading: 'Need a hand?',
+                heading: 'Нужна помощь?',
                 subheading:
-                    'Hop on a <span style="font-weight: bold">Free 1:1 or Group Consultation</span> with a Kremlevka Expert right now!',
-                connectText: 'connect in < 10 seconds',
-                onlineText: 'We are online',
-                offlineText: 'We are offline',
-                poweredBy: 'Powered by <span class="mirotalk-powered-by">Kremlevka</span>',
+                    'Подключитесь к <span style="font-weight: bold">бесплатной личной или групповой консультации</span> со специалистом Kremlevka прямо сейчас!',
+                connectText: 'свяжемся меньше чем за 10 секунд',
+                onlineText: 'Мы онлайн',
+                offlineText: 'Мы офлайн',
+                poweredBy: 'Работает на <span class="mirotalk-powered-by">Kremlevka</span>',
             },
         },
     };
@@ -204,12 +204,12 @@ class MiroTalkWidget {
                 <div class="online-text" style="display: ${this.isOnline ? 'inline' : 'none'}">${customMessages.onlineText}</div>
                 <div class="offline-text" style="display: ${this.isOnline ? 'none' : 'inline'}">${customMessages.offlineText}</div>
                 <div class="widget-controls">
-                    <button class="minimize-btn" onclick="miroTalkWidgetAction('minimize', this)" title="Minimize">
+                    <button class="minimize-btn" onclick="miroTalkWidgetAction('minimize', this)" title="Свернуть">
                         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19 13H5v-2h14v2z"/>
                         </svg>
                     </button>
-                    <div class="close-btn" onclick="miroTalkWidgetAction('close', this)" title="Close">&times;</div>
+                    <div class="close-btn" onclick="miroTalkWidgetAction('close', this)" title="Закрыть">&times;</div>
                 </div>
             </div>
             <h2 class="main-heading">${customMessages.heading}</h2>
@@ -218,7 +218,7 @@ class MiroTalkWidget {
                 ${expertImages
                     .map(
                         (img, i) => `
-                    <img src="${img}" class="expert-img" alt="Expert consultant ${i + 1}" loading="lazy" />
+                    <img src="${img}" class="expert-img" alt="Эксперт-консультант ${i + 1}" loading="lazy" />
                 `
                     )
                     .join('')}
@@ -234,23 +234,23 @@ class MiroTalkWidget {
         const buttons = [];
 
         if (flags.audio) {
-            buttons.push({ action: 'startAudioCall', icon: this.getAudioIcon(), text: 'Start Audio Call' });
+            buttons.push({ action: 'startAudioCall', icon: this.getAudioIcon(), text: 'Начать аудиозвонок' });
         }
         if (flags.video) {
-            buttons.push({ action: 'startVideoCall', icon: this.getVideoIcon(), text: 'Start Video Call' });
+            buttons.push({ action: 'startVideoCall', icon: this.getVideoIcon(), text: 'Начать видеозвонок' });
         }
         if (flags.screen && navigator.mediaDevices && typeof navigator.mediaDevices.getDisplayMedia === 'function') {
-            buttons.push({ action: 'startScreenShare', icon: this.getScreenIcon(), text: 'Start Screen Share' });
+            buttons.push({ action: 'startScreenShare', icon: this.getScreenIcon(), text: 'Поделиться экраном' });
         }
         if (flags.chat) {
-            buttons.push({ action: 'startChat', icon: this.getChatIcon(), text: 'Start Chat' });
+            buttons.push({ action: 'startChat', icon: this.getChatIcon(), text: 'Начать чат' });
         }
         if (flags.join) {
-            buttons.push({ action: 'joinRoom', icon: this.getJoinIcon(), text: 'Join Room' });
+            buttons.push({ action: 'joinRoom', icon: this.getJoinIcon(), text: 'Войти в комнату' });
         }
 
         if (!buttons.length) {
-            return `<div class="no-actions">No actions available</div>`;
+            return `<div class="no-actions">Нет доступных действий</div>`;
         }
 
         return buttons
@@ -345,7 +345,7 @@ class MiroTalkWidget {
         const statusDot = this.createElement('div', {
             className: `status-dot ${this.isOnline ? 'online' : 'offline'}`,
         });
-        const textSpan = this.createElement('span', { textContent: 'Support' });
+        const textSpan = this.createElement('span', { textContent: 'Поддержка' });
 
         contentDiv.appendChild(statusDot);
         contentDiv.appendChild(textSpan);
@@ -374,7 +374,7 @@ class MiroTalkWidget {
         reopenerBtn.innerHTML = `
             <div class="reopener-content">
                 ${this.getUserIcon()}
-                <span>Support</span>
+                <span>Поддержка</span>
             </div>
         `;
 
@@ -502,7 +502,7 @@ class MiroTalkWidget {
     }
 
     supportOffline() {
-        alert('Sorry, support is currently offline.');
+        alert('Служба поддержки сейчас недоступна.');
     }
 
     // ============================================================================

@@ -26,7 +26,7 @@ if (generateRoomBtn) {
         if (custom && custom.offsetParent !== null) {
             custom.value = uuid;
         } else if (selectRoom && selectRoom.style.display !== 'none') {
-            popup('warning', 'Random room is available for Admin users only');
+            popup('warning', 'Случайная комната доступна только администраторам');
         }
     };
 }
@@ -101,7 +101,7 @@ function login() {
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.id = 'customRoomInput';
-                    input.placeholder = 'Enter room name';
+                    input.placeholder = 'Введите название комнаты';
                     input.className = 'form-control mb-2';
                     input.maxLength = 32;
                     selectRoom.parentNode.insertBefore(input, selectRoom);
@@ -120,7 +120,7 @@ function login() {
                                 '&token=' +
                                 window.sessionStorage.peer_token;
                         } else {
-                            popup('warning', 'Room name required');
+                            popup('warning', 'Необходимо указать название комнаты');
                         }
                     };
                     return;
@@ -140,20 +140,20 @@ function login() {
             })
             .catch(function (error) {
                 console.error(error);
-                popup('warning', 'Invalid credentials. Please try again.');
+                popup('warning', 'Неверные учетные данные. Попробуйте снова.');
             });
         return;
     }
     if (!username && !password) {
-        popup('warning', 'Username and Password required');
+        popup('warning', 'Требуются имя пользователя и пароль');
         return;
     }
     if (!username) {
-        popup('warning', 'Username required');
+        popup('warning', 'Необходимо указать имя пользователя');
         return;
     }
     if (!password) {
-        popup('warning', 'Password required');
+        popup('warning', 'Необходимо указать пароль');
         return;
     }
 }

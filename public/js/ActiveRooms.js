@@ -40,10 +40,10 @@ function getUUID() {
 }
 
 async function fetchRooms() {
-    setRoomsContent('<div class="empty">Loading...</div>');
+    setRoomsContent('<div class="empty">Загрузка...</div>');
     try {
         const res = await axios.get('/api/v1/activeRooms');
-        if (res.status !== 200) throw new Error('Failed to fetch active rooms');
+        if (res.status !== 200) throw new Error('Не удалось получить список активных комнат');
         allRooms = getRoomsData(res);
         renderRooms(allRooms);
     } catch (err) {
@@ -54,7 +54,7 @@ async function fetchRooms() {
 
 function renderRooms(rooms) {
     if (!rooms.length) {
-        setRoomsContent('<div class="empty">No active rooms found.</div>');
+        setRoomsContent('<div class="empty">Активные комнаты не найдены.</div>');
         return;
     }
     setRoomsContent(
@@ -70,9 +70,9 @@ function renderRooms(rooms) {
                     <i class="fa-solid fa-users"></i>
                     ${room.peers}
                 </div>
-                <div class="peer-label">${room.peers === 1 ? 'peer' : 'peers'}</div>
+                <div class="peer-label">${room.peers === 1 ? 'участник' : 'участников'}</div>
                 <a href="${room.join}" class="join-btn" target="_blank">
-                    <i class="fa-solid fa-sign-in-alt"></i> Join
+                    <i class="fa-solid fa-sign-in-alt"></i> Присоединиться
                 </a>
             </div>
         `
