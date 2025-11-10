@@ -1,12 +1,12 @@
 <!doctype html>
-<html lang="en">
+<html lang="ru">
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
         <!-- Title and Icon -->
 
-        <title id="title">Kremlevka RTMP Streamer</title>
+        <title id="title">Kremlevka — RTMP-стример</title>
         <link id="icon" rel="shortcut icon" href="../images/logo.svg" />
         <link id="appleTouchIcon" rel="apple-touch-icon" href="../images/logo.svg" />
 
@@ -53,14 +53,14 @@
             <button id="closePopup"><i class="fas fa-close"></i></button>
         </div>
         <div class="container fadein">
-            <h1>RTMP Streamer</h1>
+            <h1>RTMP-стример</h1>
             <div class="input-group-inline">
                 <input
                     id="apiSecret"
                     type="password"
                     value="mirotalkRtmpApiSecret"
-                    placeholder="API Secret"
-                    title="Enter the API secret here"
+                    placeholder="API-ключ"
+                    title="Введите здесь секретный ключ API"
                 />
             </div>
             <div class="input-group-inline">
@@ -70,27 +70,27 @@
                     value=""
                     placeholder="rtmp://server:port/app/streamKey"
                     readonly
-                    title="This is your RTMP live URL. It cannot be edited."
+                    title="Это ваш RTMP-адрес трансляции. Его нельзя изменить."
                 />
-                <button id="copy" title="Click to copy the RTMP URL"><i class="fas fa-paste"></i>&nbsp;Copy</button>
+                <button id="copy" title="Нажмите, чтобы скопировать RTMP-адрес"><i class="fas fa-paste"></i>&nbsp;Копировать</button>
             </div>
 
             <video id="video" width="640" height="480"></video>
 
             <div class="button-group">
-                <button id="startCamera" title="Click to start camera streaming">
-                    <i class="fas fa-video"></i>&nbsp;Start Streaming
+                <button id="startCamera" title="Нажмите, чтобы начать трансляцию с камеры">
+                    <i class="fas fa-video"></i>&nbsp;Запустить трансляцию
                 </button>
-                <button id="startScreen" title="Click to start screen streaming">
-                    <i class="fas fa-desktop"></i>&nbsp;Start Streaming
+                <button id="startScreen" title="Нажмите, чтобы начать трансляцию экрана">
+                    <i class="fas fa-desktop"></i>&nbsp;Запустить трансляцию
                 </button>
-                <button id="stop" disabled title="Click to stop streaming">
-                    <i class="fas fa-stop-circle"></i>&nbsp;Stop Streaming
+                <button id="stop" disabled title="Нажмите, чтобы остановить трансляцию">
+                    <i class="fas fa-stop-circle"></i>&nbsp;Остановить трансляцию
                 </button>
             </div>
         </div>
         <footer id="footer">
-            <p>&copy; 2025 Kremlevka, all rights reserved</p>
+            <p>&copy; 2025 Kremlevka, все права защищены</p>
         </footer>
     </body>
 </html>
