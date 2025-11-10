@@ -68,13 +68,13 @@ function checkRTMPEnabled() {
         .then((response) => {
             const { enabled } = response.data;
             if (!enabled) {
-                showPopup('The RTMP streaming feature has been disabled by the administrator', 'info');
+                showPopup('Функция RTMP-трансляции отключена администратором', 'info');
                 toggleButtons(true);
             }
         })
         .catch((error) => {
-            console.error('Error fetching RTMP status:', error);
-            showError(`Error fetching RTMP status: ${error.message}`);
+            console.error('Ошибка получения статуса RTMP:', error);
+            showError(`Ошибка получения статуса RTMP: ${error.message}`);
         });
 }
 
@@ -86,8 +86,8 @@ async function startCapture(constraints) {
         attachMediaStream(stream);
         return stream;
     } catch (err) {
-        console.error('Error accessing media devices.', err);
-        showError('Error accessing media devices. Please check your camera and microphone permissions.');
+        console.error('Ошибка доступа к медиадевайсам.', err);
+        showError('Не удалось получить доступ к устройствам. Проверьте разрешения на камеру и микрофон.');
     }
 }
 
@@ -97,8 +97,8 @@ async function startScreenCapture(constraints) {
         attachMediaStream(stream);
         return stream;
     } catch (err) {
-        console.error('Error accessing screen media.', err);
-        showError('Error accessing screen sharing. Please try again or check your screen sharing permissions.');
+        console.error('Ошибка доступа к захвату экрана.', err);
+        showError('Не удалось начать трансляцию экрана. Попробуйте снова или проверьте разрешения.');
     }
 }
 
@@ -120,7 +120,7 @@ async function initRTMP(stream) {
             },
         });
         const { rtmp } = response.data;
-        console.log('initRTMP response:', { res: response, rtmp: rtmp });
+        console.log('Ответ initRTMP:', { res: response, rtmp: rtmp });
         rtmpInput.value = rtmp;
         rtmpKey = new URL(rtmp).pathname.split('/').pop(); // Extract the RTMP key from the URL
         toggleButtons(true);
@@ -130,13 +130,13 @@ async function initRTMP(stream) {
         if (error.response) {
             const { status, data } = error.response;
             showPopup(data, 'info');
-            console.log('Init RTMP', {
+            console.log('Инициализация RTMP', {
                 status,
                 data,
             });
         } else {
-            showError('Error initializing RTMP. Please try again.');
-            console.error('Error initializing RTMP:', error);
+            showError('Ошибка инициализации RTMP. Попробуйте снова.');
+            console.error('Ошибка инициализации RTMP:', error);
         }
         stopStreaming();
         stopTracks(stream);
@@ -156,8 +156,8 @@ async function stopRTMP() {
             },
         });
     } catch (error) {
-        showError('Error stopping RTMP. Please try again.');
-        console.error('Error stopping RTMP:', error);
+        showError('Ошибка остановки RTMP. Попробуйте снова.');
+        console.error('Ошибка остановки RTMP:', error);
     }
 }
 
@@ -180,8 +180,8 @@ async function streamRTMPChunk(data) {
         } catch (error) {
             if (mediaRecorder) {
                 stopStreaming();
-                console.error('Error syncing chunk:', error.message);
-                showError(`Error syncing chunk: ${error.message}`);
+                console.error('Ошибка синхронизации блока:', error.message);
+                showError(`Ошибка синхронизации блока: ${error.message}`);
             }
         }
     }
@@ -214,7 +214,7 @@ async function startStreaming(stream) {
     }
 
     const supportedMimeTypes = getSupportedMimeTypes();
-    console.log('MediaRecorder supported options', supportedMimeTypes);
+    console.log('Поддерживаемые опции MediaRecorder', supportedMimeTypes);
     mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMimeTypes[0] });
 
     mediaRecorder.ondataavailable = async (event) => {
@@ -224,7 +224,7 @@ async function startStreaming(stream) {
     };
 
     mediaRecorder.onstop = (event) => {
-        console.log('Media recorder stopped');
+        console.log('Запись медиаданных остановлена');
         stopTracks(stream);
         mediaRecorder = null;
     };
@@ -296,11 +296,11 @@ function getRTMPScreenConstraints(screenFrameRate) {
 function copyRTMP() {
     const rtmpInput = document.getElementById('rtmp');
     if (!rtmpInput.value) {
-        return showPopup('No RTMP URL detected', 'info');
+        return showPopup('RTMP-адрес не обнаружен', 'info');
     }
     rtmpInput.select();
     document.execCommand('copy');
-    showPopup('Copied: ' + rtmpInput.value, 'success');
+    showPopup('Скопировано: ' + rtmpInput.value, 'success');
 }
 
 function setCustomTheme() {

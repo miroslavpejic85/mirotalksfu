@@ -142,7 +142,7 @@
         <script defer src="https://cdn.jsdelivr.net/npm/gifler@0.1.0/gifler.min.js"></script>
     </head>
     <body>
-        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <noscript>Для работы приложения необходимо включить JavaScript.</noscript>
 
         <div id="loadingDiv" class="center pulsate">
             <h1>Загрузка</h1>
@@ -318,7 +318,7 @@
                         </button>
                         <button id="sendEmailInvitation" class="hidden btn-custom">
                             <i class="fas fa-envelope-circle-check"></i>
-                            <p id="roomSendEmail" class="cp">Приглосить в email</p>
+                            <p id="roomSendEmail" class="cp">Пригласить по e-mail</p>
                         </button>
                         <hr />
                         <table class="settingsTable">
@@ -450,7 +450,7 @@
                             <p>Качество видео:</p>
                         </div>
                         <select id="videoQuality" class="form-select text-light bg-dark">
-                            <option value="default">🎥&nbsp;Default (HD&nbsp;720p)</option>
+                            <option value="default">🎥&nbsp;По умолчанию (HD&nbsp;720p)</option>
                             <option value="qvga">🎥&nbsp;QVGA</option>
                             <option value="vga">🎥&nbsp;VGA</option>
                             <option value="hd">🎥&nbsp;HD&nbsp;720p</option>
@@ -462,7 +462,7 @@
                                 <p>Качество экрана:</p>
                             </div>
                             <select id="screenQuality" class="form-select text-light bg-dark">
-                                <option value="default">🖥&nbsp;Default (HD&nbsp;720p)</option>
+                                <option value="default">🖥&nbsp;По умолчанию (HD&nbsp;720p)</option>
                                 <option value="hd">🖥&nbsp;HD&nbsp;720p</option>
                             </select>
                         </div>
@@ -470,12 +470,12 @@
                         <div id="ScreenOptimizationDiv" class="hidden">
                             <div class="title">
                                 <i class="fa-solid fa-rocket"></i>
-                                <p id="screenOptimizationLabel">Screen Optimization:</p>
+                                <p id="screenOptimizationLabel">Оптимизация экрана:</p>
                             </div>
                             <select id="screenOptimization" class="form-select text-light bg-dark">
-                                <option value="default">🖥&nbsp;None</option>
-                                <option value="detail">🖥&nbsp;Detail</option>
-                                <option value="motion">🖥&nbsp;Motion</option>
+                                <option value="default">🖥&nbsp;Без оптимизации</option>
+                                <option value="detail">🖥&nbsp;Детализация</option>
+                                <option value="motion">🖥&nbsp;Движение</option>
                             </select>
                         </div>
                         <hr />
@@ -485,11 +485,11 @@
                         </div>
                         <br />
                         <select id="videoFps" class="form-select text-light bg-dark">
-                            <option value="max">max frame-per-second</option>
-                            <option value="60">60 - frame-per-second</option>
-                            <option value="30">30 - frame-per-second</option>
-                            <option value="15">15 - frame-per-second</option>
-                            <option value="5">5 - frame-per-second</option>
+                            <option value="max">максимальное количество кадров в секунду</option>
+                            <option value="60">60 кадров в секунду</option>
+                            <option value="30">30 кадров в секунду</option>
+                            <option value="15">15 кадров в секунду</option>
+                            <option value="5">5 кадров в секунду</option>
                         </select>
                         <br />
                         <div id="ScreenFpsDiv" class="hidden">
@@ -499,11 +499,11 @@
                             </div>
                             <br />
                             <select id="screenFps" class="form-select text-light bg-dark">
-                                <option value="max">max frame-per-second</option>
-                                <option value="60">60 - frame-per-second</option>
-                                <option value="30">30 - frame-per-second</option>
-                                <option value="15">15 - frame-per-second</option>
-                                <option value="5">5 - frame-per-second</option>
+                                <option value="max">максимальное количество кадров в секунду</option>
+                                <option value="60">60 кадров в секунду</option>
+                                <option value="30">30 кадров в секунду</option>
+                                <option value="15">15 кадров в секунду</option>
+                                <option value="5">5 кадров в секунду</option>
                             </select>
                         </div>
                     </div>
@@ -740,7 +740,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-robot red"></i>
-                                        <p>Disable ChatGPT Access</p>
+                                        <p>Отключить доступ к ChatGPT</p>
                                     </div>
                                 </td>
                                 <td>
@@ -758,7 +758,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-robot red"></i>
-                                        <p>Disable DeepSeek Access</p>
+                                        <p>Отключить доступ к DeepSeek</p>
                                     </div>
                                 </td>
                                 <td>
@@ -776,7 +776,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fab fa-youtube red"></i>
-                                        <p>Disable Media Sharing</p>
+                                        <p>Отключить совместное использование медиа</p>
                                     </div>
                                 </td>
                                 <td>
@@ -794,7 +794,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-users-slash red"></i>
-                                        <p>Disconnect all on Exit</p>
+                                        <p>Отключать всех при выходе</p>
                                     </div>
                                 </td>
                                 <td>
@@ -819,7 +819,7 @@
                                     <td>
                                         <div class="title">
                                             <i class="fa-solid fa-user-shield"></i>
-                                            <p>Only host</p>
+                                            <p>Только ведущий</p>
                                         </div>
                                     </td>
                                     <td>
@@ -853,11 +853,11 @@
                         </div>
                         <button id="pauseRecButton" class="hidden btn-custom">
                             <i class="far fa-pause-circle"></i>
-                            <p>Pause recording</p>
+                            <p>Пауза записи</p>
                         </button>
                         <button id="resumeRecButton" class="hidden btn-custom">
                             <i class="far fa-play-circle"></i>
-                            <p>Resume recording</p>
+                            <p>Возобновить запись</p>
                         </button>
                         <div id="recordingTime" class="hidden">
                             <hr />
@@ -866,17 +866,17 @@
                                     <td>
                                         <div class="title">
                                             <i class="fa-solid fa-circle pulsate cr"></i>
-                                            <p>REC time:</p>
+                                            <p>Время записи:</p>
                                         </div>
                                     </td>
-                                    <td id="recordingStatus">0s</td>
+                                    <td id="recordingStatus">0 с</td>
                                 </tr>
                             </table>
                         </div>
                         <div id="recordingMessage" class="hidden">
                             <div class="title">
                                 <i class="fa-solid fa-ban fa-2xl"></i>
-                                <p>The presenter has disabled meeting recording.</p>
+                                <p>Докладчик отключил запись встречи.</p>
                             </div>
                         </div>
                         <br />
@@ -912,18 +912,18 @@
                                 <div id="avatarVideoAIcontainer"></div>
                                 <hr />
                                 <select id="avatarQuality" class="form-select text-light bg-dark">
-                                    <option value="low">Avatar Quality - Low</option>
-                                    <option value="medium" selected>Avatar Quality - Medium</option>
-                                    <option value="legacy_medium">Avatar Quality - Legacy medium</option>
-                                    <option value="high">Avatar Quality - High</option>
-                                    <option value="very_high" selected>Avatar Quality - Very high</option>
+                                    <option value="low">Качество аватара — низкое</option>
+                                    <option value="medium" selected>Качество аватара — среднее</option>
+                                    <option value="legacy_medium">Качество аватара — старое среднее</option>
+                                    <option value="high">Качество аватара — высокое</option>
+                                    <option value="very_high" selected>Качество аватара — очень высокое</option>
                                 </select>
                                 <select
                                     id="avatarVoiceIDs"
                                     name="avatarVoiceIDs"
                                     class="form-select text-light bg-dark"
                                 >
-                                    <option value="">Select Avatar Voice</option>
+                                    <option value="">Выберите голос аватара</option>
                                 </select>
                                 <div id="audio-container">
                                     <audio id="avatarPreviewAudio" controls></audio>
@@ -939,12 +939,12 @@
                     <div id="tabVideoShare" class="tabcontent">
                         <button id="videoShareButton" class="btn-custom">
                             <i class="fab fa-youtube"></i>
-                            <p>Share a Video or Audio</p>
+                            <p>Поделиться видео или аудио</p>
                         </button>
                         <br />
                         <button id="videoCloseBtn" class="hidden btn-custom">
                             <i class="fas fa-times"></i>
-                            <p>Close Video or Audio</p>
+                            <p>Закрыть видео или аудио</p>
                         </button>
                     </div>
 
@@ -984,7 +984,7 @@
                                 <hr />
                             </div>
                             <div id="rtmpFromUrl">
-                                <p>Stream from URL:</p>
+                                <p>Трансляция по URL:</p>
                                 <input
                                     id="rtmpStreamURL"
                                     type="text"
@@ -1027,7 +1027,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-user-shield"></i>
-                                        <p>Presenter:</p>
+                                        <p>Докладчик:</p>
                                         <p id="isUserPresenter">true</p>
                                     </div>
                                 </td>
@@ -1036,7 +1036,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-circle-info"></i>
-                                        <p>Extra info:</p>
+                                        <p>Дополнительная информация:</p>
                                     </div>
                                 </td>
                             </tr>
@@ -1054,7 +1054,7 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-keyboard"></i>
-                                        <p>Shortcuts</p>
+                                        <p>Горячие клавиши</p>
                                     </div>
                                 </td>
                                 <td>
@@ -1107,52 +1107,52 @@
                                     <tr>
                                         <td><i class="fa-solid fa-x"></i></td>
                                         <td><i class="fas fa-user"></i></td>
-                                        <td><strong>Вкл/выкл</strong> hide myself</td>
+                                        <td><strong>Вкл/выкл</strong> скрыть себя</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-r"></i></td>
                                         <td><i class="fas fa-record-vinyl"></i></td>
-                                        <td><strong>Вкл/выкл</strong> recording</td>
+                                        <td><strong>Вкл/выкл</strong> запись</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-j"></i></td>
                                         <td><i class="fas fa-face-smile"></i></td>
-                                        <td><strong>Вкл/выкл</strong> emoji</td>
+                                        <td><strong>Вкл/выкл</strong> эмодзи</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-k"></i></td>
                                         <td><i class="fas fa-closed-captioning"></i></td>
-                                        <td><strong>Вкл/выкл</strong> captions</td>
+                                        <td><strong>Вкл/выкл</strong> субтитры</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-p"></i></td>
                                         <td><i class="fas fa-square-poll-horizontal"></i></td>
-                                        <td><strong>Вкл/выкл</strong> polls</td>
+                                        <td><strong>Вкл/выкл</strong> опросы</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-e"></i></td>
                                         <td><i class="fas fa-pen-to-square"></i></td>
-                                        <td><strong>Вкл/выкл</strong> editor</td>
+                                        <td><strong>Вкл/выкл</strong> редактор</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-w"></i></td>
                                         <td><i class="fas fa-chalkboard-teacher"></i></td>
-                                        <td><strong>Вкл/выкл</strong> whiteboard</td>
+                                        <td><strong>Вкл/выкл</strong> доска</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-d"></i></td>
                                         <td><i class="fas fa-images"></i></td>
-                                        <td><strong>Вкл/выкл</strong> document PIP</td>
+                                        <td><strong>Вкл/выкл</strong> документ PIP</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-t"></i></td>
                                         <td><i class="fas fas fa-camera-retro"></i></td>
-                                        <td><strong>Snapshot</strong> screen/window/tab</td>
+                                        <td><strong>Снимок</strong> экрана/окна/вкладки</td>
                                     </tr>
                                     <tr>
                                         <td><i class="fa-solid fa-f"></i></td>
                                         <td><i class="fas fa-folder-open"></i></td>
-                                        <td><strong>Share</strong> the file</td>
+                                        <td><strong>Поделиться</strong> файлом</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -1163,11 +1163,11 @@
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-tv"></i>
-                            <p>Aspect ratio:</p>
+                            <p>Соотношение сторон:</p>
                         </div>
                         <br />
                         <select id="BtnAspectRatio" class="form-select text-light bg-dark">
-                            <option value="0">default</option>
+                            <option value="0">по умолчанию</option>
                             <option value="1">4:3</option>
                             <option value="2">16:9</option>
                             <option value="3">1:1</option>
@@ -1176,25 +1176,25 @@
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-film"></i>
-                            <p>Video Object fit:</p>
+                            <p>Подгонка изображения:</p>
                         </div>
                         <br />
                         <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
-                            <option value="fill">fill</option>
-                            <option value="contain">contain</option>
-                            <option value="cover">cover</option>
-                            <option value="scale-down">scale-down</option>
-                            <option value="none">none</option>
+                            <option value="fill">заполнение</option>
+                            <option value="contain">уместить</option>
+                            <option value="cover">обрезать</option>
+                            <option value="scale-down">уменьшить</option>
+                            <option value="none">нет</option>
                         </select>
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-circle-play"></i>
-                            <p>Video Controls:</p>
+                            <p>Элементы управления видео:</p>
                         </div>
                         <br />
                         <select id="BtnVideoControls" class="form-select text-light bg-dark">
-                            <option value="off">off</option>
-                            <option value="on">on</option>
+                            <option value="off">выкл.</option>
+                            <option value="on">вкл.</option>
                         </select>
                         <br />
                     </div>
@@ -1203,25 +1203,25 @@
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-palette"></i>
-                            <p>Theme:</p>
+                            <p>Тема:</p>
                         </div>
                         <br />
                         <select id="selectTheme" class="form-select text-light bg-dark">
-                            <option value="default">🔘 &nbsp;Default</option>
-                            <option value="dark">⚫ &nbsp;Dark</option>
-                            <option value="grey">⚪ &nbsp;Grey</option>
-                            <option value="green">🟢 &nbsp;Green</option>
-                            <option value="blue">🔵 &nbsp;Blue</option>
-                            <option value="red">🔴 &nbsp;Red</option>
-                            <option value="purple">🟣 &nbsp;Purple</option>
-                            <option value="orange">🟠 &nbsp;Orange</option>
-                            <option value="pink">🎀 &nbsp;Pink</option>
-                            <option value="yellow">🌕 &nbsp;Yellow</option>
+                            <option value="default">🔘 &nbsp;Стандартная</option>
+                            <option value="dark">⚫ &nbsp;Тёмная</option>
+                            <option value="grey">⚪ &nbsp;Серая</option>
+                            <option value="green">🟢 &nbsp;Зелёная</option>
+                            <option value="blue">🔵 &nbsp;Синяя</option>
+                            <option value="red">🔴 &nbsp;Красная</option>
+                            <option value="purple">🟣 &nbsp;Фиолетовая</option>
+                            <option value="orange">🟠 &nbsp;Оранжевая</option>
+                            <option value="pink">🎀 &nbsp;Розовая</option>
+                            <option value="yellow">🌕 &nbsp;Жёлтая</option>
                         </select>
                         <br />
                         <div class="title">
                             <i class="fas fa-fill-drip"></i>
-                            <p>Custom theme:</p>
+                            <p>Пользовательская тема:</p>
                         </div>
                         <br />
                         <input id="themeColorPicker" class="theme-color-picker" type="text" />
@@ -1229,7 +1229,7 @@
                         <div class="inline-check-box">
                             <div>
                                 <i class="fas fa-save"></i>
-                                <p>Keep custom</p>
+                                <p>Сохранить настройки</p>
                             </div>
                             <div class="form-check form-switch form-switch-md title">
                                 <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
@@ -1238,24 +1238,24 @@
                         <br />
                         <div class="title">
                             <i class="fa-solid fa-up-down-left-right"></i>
-                            <p>Buttons bar:</p>
+                            <p>Панель кнопок:</p>
                         </div>
                         <br />
                         <select id="BtnsBarPosition" class="form-select text-light bg-dark">
-                            <option value="vertical">Vertical</option>
-                            <option value="horizontal">Horizontal</option>
+                            <option value="vertical">Вертикально</option>
+                            <option value="horizontal">Горизонтально</option>
                         </select>
                         <br />
                         <div id="pinUnpinGridDiv" class="hidden">
                             <div class="title">
                                 <i class="fa-solid fa-map-pin"></i>
-                                <p>Pin video position:</p>
+                                <p>Позиция закреплённого видео:</p>
                             </div>
                             <br />
                             <select id="pinVideoPosition" class="form-select text-light bg-dark">
-                                <option value="vertical">Vertical</option>
-                                <option value="horizontal">Horizontal</option>
-                                <option value="top">Top</option>
+                                <option value="vertical">Вертикально</option>
+                                <option value="horizontal">Горизонтально</option>
+                                <option value="top">Сверху</option>
                             </select>
                         </div>
                         <br />
@@ -1300,7 +1300,7 @@
             <div id="receiveFileInfo"></div>
             <div id="receiveFilePercentage"></div>
             <progress id="receiveProgress" max="0" value="0"></progress>
-            <button id="receiveHideBtn"><i class="fas fa-eye-slash"></i>&nbsp; Hide</button>
+            <button id="receiveHideBtn"><i class="fas fa-eye-slash"></i>&nbsp; Скрыть</button>
             <button id="receiveAbortBtn"><i class="fas fa-stop-circle"></i>&nbsp; Прервать</button>
         </div>
 
@@ -1331,12 +1331,12 @@
                             <i class="fas fa-ellipsis-vertical"></i>
                         </button>
                         <div class="dropdown-menu text-start" aria-labelledby="whiteboardDropDownMenu">
-                            <button id="whiteboardImgFileBtn"><i class="far fa-image"></i> Add image file</button>
-                            <button id="whiteboardImgUrlBtn"><i class="fas fa-link"></i> Add image URL</button>
-                            <button id="whiteboardPdfFileBtn"><i class="far fa-file-pdf"></i> Add pdf file</button>
-                            <button id="whiteboardTextBtn"><i class="fas fa-spell-check"></i> Add text</button>
-                            <button id="whiteboardLineBtn"><i class="fas fa-slash"></i> Add line</button>
-                            <button id="whiteboardRectBtn"><i class="far fa-square"></i> Add rectangle</button>
+                            <button id="whiteboardImgFileBtn"><i class="far fa-image"></i> Добавить файл изображения</button>
+                            <button id="whiteboardImgUrlBtn"><i class="fas fa-link"></i> Добавить URL изображения</button>
+                            <button id="whiteboardPdfFileBtn"><i class="far fa-file-pdf"></i> Добавить PDF-файл</button>
+                            <button id="whiteboardTextBtn"><i class="fas fa-spell-check"></i> Добавить текст</button>
+                            <button id="whiteboardLineBtn"><i class="fas fa-slash"></i> Добавить линию</button>
+                            <button id="whiteboardRectBtn"><i class="far fa-square"></i> Добавить прямоугольник</button>
                             <button id="whiteboardTriangleBtn">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
@@ -1349,10 +1349,10 @@
                                 </svg>
                                 Add triangle
                             </button>
-                            <button id="whiteboardCircleBtn"><i class="far fa-circle"></i> Add circle</button>
-                            <button id="whiteboardSaveBtn"><i class="fas fa-save"></i> Save</button>
-                            <button id="whiteboardEraserBtn"><i class="fas fa-eraser"></i> Eraser</button>
-                            <button id="whiteboardCleanBtn"><i class="fas fa-trash"></i> Clean</button>
+                            <button id="whiteboardCircleBtn"><i class="far fa-circle"></i> Добавить круг</button>
+                            <button id="whiteboardSaveBtn"><i class="fas fa-save"></i> Сохранить</button>
+                            <button id="whiteboardEraserBtn"><i class="fas fa-eraser"></i> Ластик</button>
+                            <button id="whiteboardCleanBtn"><i class="fas fa-trash"></i> Очистить</button>
                         </div>
                     </div>
                 </div>
@@ -1370,7 +1370,7 @@
                 <div id="plist" class="people-list">
                     <!-- CHAT LIST OPTIONS -->
                     <div>
-                        <button id="chatShareRoomBtn"><i class="fas fa-user-plus"></i> Invite user</button>
+                        <button id="chatShareRoomBtn"><i class="fas fa-user-plus"></i> Пригласить пользователя</button>
                         <button id="chatHideParticipantsList" class="float-right">
                             <i class="fas fa-circle-arrow-left"></i>
                         </button>
@@ -1419,7 +1419,7 @@
                                     <img src="../images/all.png" alt="avatar" />
                                 </a>
                                 <div class="chat-about">
-                                    <h6 class="mb-0">Public chat</h6>
+                                    <h6 class="mb-0">Общий чат</h6>
                                 </div>
                             </div>
 
@@ -1559,7 +1559,7 @@
 
         <section id="pollRoom" class="pls-container fadein hidden">
             <div id="pollHeader" class="poll-header">
-                <h2 class="poll-h2">Polls</h2>
+                <h2 class="poll-h2">Опросы</h2>
                 <div class="poll-header-btns">
                     <button id="pollTogglePin" class="hidden">
                         <i class="fas fa-map-pin"></i>
@@ -1581,11 +1581,11 @@
             <div id="pollForm" class="poll-creation">
                 <form id="pollCreateForm" class="form">
                     <div class="form-group">
-                        <label for="question">Question:</label>
+                        <label for="question">Вопрос:</label>
                         <input type="text" id="question" name="question" required />
                     </div>
                     <div class="form-group">
-                        <label for="options">Options:</label>
+                        <label for="options">Варианты:</label>
                         <div id="optionsContainer">
                             <input type="text" name="option" class="option-input" required />
                         </div>
@@ -1673,10 +1673,10 @@
                                     </button>
                                 </li>
                                 <li>
-                                    <button id="transcriptionSaveBtn"><i class="fas fa-save"></i>&nbsp;Save</button>
+                                    <button id="transcriptionSaveBtn"><i class="fas fa-save"></i>&nbsp;Сохранить</button>
                                 </li>
                                 <li>
-                                    <button id="transcriptionCleanBtn"><i class="fas fa-trash"></i>&nbsp;Clean</button>
+                                    <button id="transcriptionCleanBtn"><i class="fas fa-trash"></i>&nbsp;Очистить</button>
                                 </li>
                             </ul>
                         </div>
@@ -1697,7 +1697,7 @@
 
         <section id="lobby" class="fadein center">
             <header id="lobbyHeader" class="lobby-header">
-                <div id="lobbyHeaderTitle" class="lobby-header-title">Lobby users</div>
+                <div id="lobbyHeaderTitle" class="lobby-header-title">Пользователи в лобби</div>
             </header>
             <main>
                 <div id="lobbyUsers">
@@ -1710,7 +1710,7 @@
                         </tr>
                         <tr id="lobbyAll">
                             <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
-                            <td>All</td>
+                            <td>Все</td>
                             <td><button id="lobbyAcceptAllBtn" class="fas fa-check"></button></td>
                             <td><button id="lobbyRejectAllBtn" class="fas fa-times"></button></td>
                         </tr>
