@@ -20,7 +20,8 @@ function googleTranslateElementInit() {
         'google_translate_element'
     );
 
-    const language = BRAND?.app?.language || 'en';
+    const hasBrandConfig = typeof BRAND !== 'undefined' && BRAND !== null;
+    const language = hasBrandConfig && BRAND.app && BRAND.app.language ? BRAND.app.language : 'en';
 
     console.log('Language', language);
 
