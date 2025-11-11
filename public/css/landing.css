@@ -1082,6 +1082,11 @@ label {
     border-radius: 6px;
     filter: brightness(1.1) saturate(1.2);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+    transform: translateY(-2px);
+    transition:
+        background 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.12s ease;
 }
 .button-block {
     display: flex;
@@ -1642,6 +1647,13 @@ main {
     display: inline-flex;
     justify-content: center;
 }
+
+.footer-copyright {
+    font-size: 14px;
+    line-height: 22px;
+    color: #8a94a7;
+}
+
 .footer-brand,
 .footer-links,
 .footer-social-links {
@@ -1914,6 +1926,21 @@ main {
 # Top Sponsors Section (Featured)
 --------------------------------------------------------------*/
 
+#topSponsors {
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.2) 0%, rgba(0, 0, 0, 0.05) 50%, transparent 100%);
+}
+
+#topSponsors .section-inner {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+#topSponsors .clients-inner {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 0 24px;
+}
+
 #topSponsors .clients-inner ul {
     display: flex;
     flex-direction: row;
@@ -1927,7 +1954,7 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 12px 28px;
+    padding: 2px 8px;
     width: 100%;
 }
 
@@ -1935,23 +1962,83 @@ main {
     display: flex;
     cursor: pointer;
     justify-content: center;
-    padding: 1rem;
-    border-radius: 1rem;
-    border: none !important;
-    background: #1d2026 !important;
-    background-image: radial-gradient(circle at bottom, #000000 0%, #000000 0%, #1d2026 100%) !important;
+    align-items: center;
+    padding: 0.625rem 1.125rem;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.04) !important;
+    background-color: #1a1d23 !important;
+    background-image: linear-gradient(
+        135deg,
+        rgba(26, 29, 35, 0.85) 0%,
+        rgba(31, 34, 40, 0.95) 50%,
+        rgba(26, 29, 35, 0.85) 100%
+    ) !important;
     width: 100%;
     max-width: 100%;
+    margin: 0 auto;
+    box-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.03) !important;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+#topSponsors .clients-logo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03) 0%, transparent 50%, rgba(0, 0, 0, 0.1) 100%);
+    pointer-events: none;
+}
+
+#topSponsors .clients-logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    transition: left 0.6s ease;
+}
+
+#topSponsors .clients-logo:hover::before {
+    left: 100%;
 }
 
 #topSponsors .clients-logo:hover {
-    transform: none !important;
+    transform: translateY(-2px) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.45),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    background-image: linear-gradient(
+        135deg,
+        rgba(31, 34, 40, 0.9) 0%,
+        rgba(36, 39, 45, 0.98) 50%,
+        rgba(31, 34, 40, 0.9) 100%
+    ) !important;
 }
 
 #topSponsors .clients-size-logo {
-    width: 240px;
-    height: 60px;
+    width: 220px;
+    height: 55px;
     object-fit: contain;
+    filter: brightness(0.98) contrast(1.12) saturate(1.05);
+    transition:
+        filter 0.35s ease,
+        transform 0.35s ease;
+    position: relative;
+    z-index: 2;
+}
+
+#topSponsors .clients-logo:hover .clients-size-logo {
+    filter: brightness(1.08) contrast(1.18) saturate(1.12);
+    transform: scale(1.01);
 }
 
 /*--------------------------------------------------------------
@@ -1983,29 +2070,71 @@ main {
     width: 200px;
     height: 60px;
     object-fit: contain;
-    transition: filter 0.3s ease;
-    filter: brightness(0.9) contrast(1.1);
+    transition:
+        filter 0.4s ease,
+        transform 0.4s ease;
+    filter: brightness(1) contrast(1.15) saturate(1.1);
+    position: relative;
+    z-index: 1;
 }
 
 .clients-size-logo:hover {
-    filter: brightness(1.1) contrast(1.15);
+    filter: brightness(1.15) contrast(1.2) saturate(1.15);
+    transform: scale(1.02);
 }
 
 .clients-logo {
     display: flex;
     cursor: pointer;
     justify-content: center;
-    padding: 1rem;
-    border-radius: 12px;
-    min-height: 90px !important;
+    align-items: center;
+    padding: 2rem 1.5rem !important;
+    border-radius: 20px;
+    border: none !important;
+    background-color: #1a1d23 !important;
+    background-image: linear-gradient(135deg, #1a1d23 0%, #1f2228 50%, #1a1d23 100%) !important;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100px !important;
     height: auto !important;
-    background: radial-gradient(circle at bottom, #000000 0%, #000000 0%, #1d2026 100%);
+    position: relative;
+    overflow: hidden;
+}
+
+.clients-logo::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.clients-logo::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+    transition: left 0.6s ease;
+}
+
+.clients-logo:hover::before {
+    left: 100%;
 }
 
 .clients-logo:hover {
-    background: radial-gradient(circle at bottom, #000000 0%, #000000 0%, #0e0e0e 100%);
-    border-color: rgba(255, 255, 255, 0.12) !important;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-4px) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    background-image: linear-gradient(135deg, #1f2228 0%, #24272d 50%, #1f2228 100%) !important;
 }
 
 @media (min-width: 1024px) {
@@ -2025,15 +2154,73 @@ main {
         grid-template-columns: repeat(2, 1fr);
         gap: 16px;
     }
-    
+
     .clients-size-logo {
         width: 150px;
         height: 50px;
     }
-    
+
     .clients-logo {
-        padding: 1rem;
+        padding: 1.5rem 1rem !important;
         min-height: 80px;
+        border-radius: 16px;
+        border-width: 1.5px !important;
+    }
+
+    #topSponsors {
+        padding: 32px 0;
+    }
+
+    #topSponsors .section-inner {
+        padding-top: 4px;
+        padding-bottom: 4px;
+    }
+
+    #topSponsors .clients-inner {
+        max-width: 100%;
+        padding: 0 16px;
+    }
+
+    #topSponsors .clients-inner li {
+        padding: 2px 8px;
+    }
+
+    #topSponsors .clients-logo {
+        padding: 0.75rem 1rem;
+        max-width: 100%;
+        border-radius: 10px;
+    }
+
+    #topSponsors .clients-size-logo {
+        width: 200px;
+        height: 50px;
+    }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+    #topSponsors .section-inner {
+        padding-top: 5px;
+        padding-bottom: 5px;
+    }
+
+    #topSponsors .clients-inner {
+        max-width: 100%;
+        padding: 0 20px;
+    }
+
+    #topSponsors .clients-inner li {
+        padding: 3px 10px;
+    }
+
+    #topSponsors .clients-logo {
+        padding: 0.8125rem 1.125rem;
+        max-width: 100%;
+        border-radius: 11px;
+    }
+
+    #topSponsors .clients-size-logo {
+        width: 210px;
+        height: 52px;
     }
 }
 
@@ -2332,7 +2519,6 @@ main {
     padding-top: 24px;
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
-
 
 @media (max-width: 900px) {
     .support-options {
