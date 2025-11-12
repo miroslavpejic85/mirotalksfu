@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.07
+ * @version 2.0.08
  *
  */
 
@@ -318,7 +318,7 @@ const views = {
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
 };
 
-const filesPath = [views.landing, views.newRoom, views.room, views.login];
+const filesPath = [views.landing, views.newRoom, views.room, views.login, views.whoAreYou];
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
@@ -820,7 +820,7 @@ function startServer() {
 
     // handle who are you: Presenter or Guest
     app.get('/whoAreYou/:roomId', (req, res) => {
-        res.sendFile(views.whoAreYou);
+        htmlInjector.injectHtml(views.whoAreYou, res);
     });
 
     // handle login if user_auth enabled
