@@ -2222,7 +2222,7 @@ class RoomClient {
             autoGainControl: true,
             noiseSuppression: false,
             sampleRate: 48000,
-            channelCount: 1,
+            channelCount: 2, // Stereo for better audio quality
         };
 
         if (deviceId) audioConstraints.deviceId = { exact: deviceId };
