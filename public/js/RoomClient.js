@@ -2222,7 +2222,7 @@ class RoomClient {
             autoGainControl: true,
             noiseSuppression: !BUTTONS.settings.customNoiseSuppression, // if disable using the built-in RNNoise suppression
             sampleRate: 48000,
-            channelCount: 1, // Stereo for better audio quality
+            channelCount: 2, // Stereo for better audio quality
         };
 
         if (deviceId) audioConstraints.deviceId = { exact: deviceId };
