@@ -14,9 +14,9 @@ services:
         volumes:
             - ./app/src/config.js:/src/app/src/config.js:ro
             - ./.env:/src/.env:ro
-            # Mandatory volume if `server.recording.enabled` is true in app/src/config.js
+            # Mandatory volume if `RECORDING_ENABLED=true` in the .env
             # - ./app/rec:/src/app/rec
-            # Mandatory volume if `server.rtmp.enabled.fromFile` is true in app/src/config.js
+            # Mandatory volume if `RTMP_FROM_FILE=true` in the .env
             # - ./app/rtmp:/src/app/rtmp
             # Optional volumes for real-time updates:
             # - ./app/:/src/app/:ro
