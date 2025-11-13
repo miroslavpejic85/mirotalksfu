@@ -57,7 +57,7 @@ let BUTTONS = {
         pushToTalk: true,
         keyboardShortcuts: true,
         virtualBackground: true,
-        customNoiseSuppression: true,
+        customNoiseSuppression: true, // use RNNoise else WebRTC built-in
     },
     producerVideo: {
         videoPictureInPicture: true,

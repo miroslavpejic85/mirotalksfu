@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.09
+ * @version 2.0.10
  *
  */
 
@@ -2220,7 +2220,7 @@ class RoomClient {
         const audioConstraints = {
             echoCancellation: true,
             autoGainControl: true,
-            noiseSuppression: false, // Disable using the built-in RNNoise suppression
+            noiseSuppression: !BUTTONS.settings.customNoiseSuppression, // if disable using the built-in RNNoise suppression
             sampleRate: 48000,
             channelCount: 1, // Stereo for better audio quality
         };
