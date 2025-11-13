@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.08
+ * @version 2.0.09
  *
  */
 
@@ -1822,7 +1822,7 @@ class RoomClient {
             };
 
             if (audio) {
-                console.log('AUDIO ENABLE OPUS');
+                console.log('AUDIO ENABLE OPUS (channelCount: 2)');
                 params.codecOptions = {
                     opusStereo: true,
                     opusDtx: true,
@@ -2220,9 +2220,9 @@ class RoomClient {
         const audioConstraints = {
             echoCancellation: true,
             autoGainControl: true,
-            noiseSuppression: false,
+            noiseSuppression: false, // Disable using the built-in RNNoise suppression
             sampleRate: 48000,
-            channelCount: 2, // Stereo for better audio quality
+            channelCount: 1, // Stereo for better audio quality
         };
 
         if (deviceId) audioConstraints.deviceId = { exact: deviceId };
