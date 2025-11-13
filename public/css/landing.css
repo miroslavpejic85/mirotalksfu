@@ -2459,22 +2459,53 @@ main {
     flex-direction: column;
     align-items: center;
     padding: 28px 20px;
-    background-color: #15181d !important;
-    background: linear-gradient(135deg, #15181d 0%, #1a1d23 50%, #15181d 100%) !important;
-    border: 1px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 12px;
+    background-color: #1a1d23 !important;
+    background-image: linear-gradient(135deg, #1a1d23 0%, #1f2228 50%, #1a1d23 100%) !important;
+    border: 2px solid rgba(255, 255, 255, 0.1) !important;
+    border-radius: 20px;
     text-decoration: none;
     color: #8a94a7 !important;
-    transition: all 0.3s ease;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     min-height: 160px;
+    position: relative;
+    overflow: hidden;
+    box-shadow:
+        0 4px 20px rgba(0, 0, 0, 0.6),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+}
+
+.support-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.support-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.04), transparent);
+    transition: left 0.6s ease;
+}
+
+.support-card:hover::before {
+    left: 100%;
 }
 
 .support-card:hover {
-    background-color: #1a1d23 !important;
-    background: linear-gradient(135deg, #1a1d23 0%, #1d2026 50%, #1a1d23 100%) !important;
-    border-color: rgba(255, 255, 255, 0.2) !important;
-    transform: translateY(-4px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6) !important;
+    transform: translateY(-4px) !important;
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.8),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
+    background-image: linear-gradient(135deg, #1f2228 0%, #24272d 50%, #1f2228 100%) !important;
 }
 
 .support-card-icon svg {
@@ -2491,6 +2522,8 @@ main {
     background: rgba(255, 255, 255, 0.08) !important;
     border-radius: 50%;
     transition: all 0.3s ease;
+    position: relative;
+    z-index: 1;
 }
 
 .support-card:hover .support-card-icon {
