@@ -305,21 +305,13 @@ const s3Client = new S3Client({
 // html views
 const views = {
     html: path.join(__dirname, '../../public/views'),
-    about: path.join(__dirname, '../../', 'public/views/about.html'),
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
-    login: path.join(__dirname, '../../', 'public/views/login.html'),
-    activeRooms: path.join(__dirname, '../../', 'public/views/activeRooms.html'),
-    newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
     notFound: path.join(__dirname, '../../', 'public/views/404.html'),
     permission: path.join(__dirname, '../../', 'public/views/permission.html'),
-    privacy: path.join(__dirname, '../../', 'public/views/privacy.html'),
     room: path.join(__dirname, '../../', 'public/views/Room.html'),
-    rtmpStreamer: path.join(__dirname, '../../', 'public/views/RtmpStreamer.html'),
-    whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
-    vpns: path.join(__dirname, '../../', 'public/views/Vpns.html'),
 };
 
-const filesPath = [views.landing, views.newRoom, views.room, views.login];
+const filesPath = [views.landing, views.room];
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
@@ -599,47 +591,14 @@ function startServer() {
         //log.debug('/ - hostCfg ----->', hostCfg);
         if (!OIDC.enabled && hostCfg.protected) {
             hostCfg.authenticated = false;
-            res.redirect('/login');
-            return;
-        } else {
-            return htmlInjector.injectHtml(views.landing, res);
+            return res
+                .status(403)
+                .send('Host protection requires authentication, which is disabled in this configuration.');
         }
-    });
-
-    // Route to display rtmp streamer
-    app.get('/rtmp', OIDCAuth, (req, res) => {
-        if (!rtmpCfg || !rtmpCfg.fromStream) {
-            return res.json({ message: 'The RTMP Streamer is currently disabled.' });
-        }
-        return res.sendFile(views.rtmpStreamer);
+        return htmlInjector.injectHtml(views.landing, res);
     });
 
     // set new room name and join
-    app.get('/newroom', OIDCAuth, (req, res) => {
-        //log.info('/newroom - hostCfg ----->', hostCfg);
-
-        if (!OIDC.enabled && hostCfg.protected) {
-            hostCfg.authenticated = false;
-            res.redirect('/login');
-            return;
-        } else {
-            htmlInjector.injectHtml(views.newRoom, res);
-        }
-    });
-
-    // Get Active rooms
-    app.get('/activeRooms', OIDCAuth, (req, res) => {
-        //log.info('/activeRooms');
-
-        if (!OIDC.enabled && hostCfg.protected) {
-            hostCfg.authenticated = false;
-            res.redirect('/login');
-            return;
-        } else {
-            res.sendFile(views.activeRooms);
-        }
-    });
-
     // Check if room active (exists)
     app.post('/isRoomActive', (req, res) => {
         const { roomId } = checkXSS(req.body);
@@ -703,13 +662,13 @@ function startServer() {
                                 username: username,
                                 room: room,
                             });
-                            return res.redirect('/whoAreYou/' + room);
+                            return res.redirect('/');
                         }
                     }
                 } catch (err) {
                     log.error('Direct Join JWT error', { error: err.message, token: token });
                     return hostCfg.protected || hostCfg.user_auth
-                        ? htmlInjector.injectHtml(views.login, res)
+                        ? res.status(403).send('Authentication is required to join rooms in this deployment.')
                         : htmlInjector.injectHtml(views.landing, res);
                 }
             } else {
@@ -723,7 +682,7 @@ function startServer() {
 
                 if (!allowRoomAccess && !roomAllowedForUser) {
                     log.warn('Direct Room Join Unauthorized', room);
-                    return res.redirect('/whoAreYou/' + room);
+                    return res.redirect('/');
                 }
             }
 
@@ -745,9 +704,8 @@ function startServer() {
 
             if (room && (hostCfg.authenticated || isPeerValid)) {
                 return htmlInjector.injectHtml(views.room, res);
-            } else {
-                return htmlInjector.injectHtml(views.login, res);
             }
+            return res.status(403).send('Authentication is required to join rooms in this deployment.');
         }
 
         return res.redirect('/');
@@ -775,7 +733,9 @@ function startServer() {
             if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
                 const roomExists = await roomExistsForUser(roomId);
                 log.debug('/join/:roomId exists from API endpoint', roomExists);
-                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/login');
+                return roomExists
+                    ? htmlInjector.injectHtml(views.room, res)
+                    : res.status(403).send('Authentication is required to access this room.');
             }
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
@@ -783,12 +743,14 @@ function startServer() {
                     (user) => user.allowed_rooms && (user.allowed_rooms.includes(roomId) || roomList.has(roomId))
                 );
                 log.debug('/join/:roomId exists from config allowed rooms', roomExists);
-                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/whoAreYou/' + roomId);
+                return roomExists
+                    ? htmlInjector.injectHtml(views.room, res)
+                    : res.status(403).send('Room access denied for this configuration.');
             }
             htmlInjector.injectHtml(views.room, res);
         } else {
             // Who are you?
-            OIDC.enabled || hostCfg.protected ? res.redirect('/whoAreYou/' + roomId) : res.redirect('/');
+            res.redirect('/');
         }
     });
 
@@ -802,105 +764,11 @@ function startServer() {
         res.sendFile(views.permission);
     });
 
-    // privacy policy
-    app.get('/privacy', (req, res) => {
-        res.sendFile(views.privacy);
-    });
-
-    // mirotalk about
-    app.get('/about', (req, res) => {
-        res.sendFile(views.about);
-    });
-
     // Get stats endpoint
     app.get('/stats', (req, res) => {
         const stats = config?.features?.stats || defaultStats;
         // log.debug('Send stats', stats);
         res.send(stats);
-    });
-
-    // handle who are you: Presenter or Guest
-    app.get('/whoAreYou/:roomId', (req, res) => {
-        res.sendFile(views.whoAreYou);
-    });
-
-    // handle login if user_auth enabled
-    app.get('/login', (req, res) => {
-        if (hostCfg.protected || hostCfg.user_auth) {
-            return htmlInjector.injectHtml(views.login, res);
-        }
-        res.redirect('/');
-    });
-
-    // handle logged on host protected
-    app.get('/logged', (req, res) => {
-        if (!OIDC.enabled && hostCfg.protected) {
-            const ip = getIP(req);
-            if (allowedIP(ip)) {
-                hostCfg.authenticated = true;
-                res.redirect('/');
-            } else {
-                hostCfg.authenticated = false;
-                res.redirect('/login');
-            }
-        } else {
-            res.redirect('/');
-        }
-    });
-
-    // vpns site html
-    app.get('/vpns', (req, res) => {
-        res.sendFile(views.vpns);
-    });
-
-    // ####################################################
-    // AXIOS
-    // ####################################################
-
-    // handle login on host protected
-    app.post('/login', async (req, res) => {
-        const ip = getIP(req);
-        log.debug(`Request login to host from: ${ip}`, req.body);
-
-        const safeBody = checkXSS(req.body) || {};
-        const { username, password } = safeBody;
-
-        if (!username || !password) {
-            log.warn('Login failed: missing username or password', req.body);
-            return res.status(400).json({ message: 'Missing username or password' });
-        }
-
-        const isPeerValid = await isAuthPeer(username, password);
-
-        if (hostCfg.protected && isPeerValid && !hostCfg.authenticated) {
-            const ip = getIP(req);
-            hostCfg.authenticated = true;
-            authHost.setAuthorizedIP(ip, true);
-            log.debug('HOST LOGIN OK', {
-                ip: ip,
-                authorized: authHost.isAuthorizedIP(ip),
-                authorizedIps: authHost.getAuthorizedIPs(),
-            });
-
-            const isPresenter = Boolean(
-                hostCfg?.presenters?.join_first || hostCfg?.presenters?.list?.includes(username)
-            );
-
-            const token = encodeToken({ username: username, password: password, presenter: isPresenter });
-            const allowedRooms = await getUserAllowedRooms(username, password);
-
-            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
-        }
-
-        if (isPeerValid) {
-            log.debug('PEER LOGIN OK', { ip: ip, authorized: true });
-            const isPresenter = hostCfg?.presenters?.list?.includes(username) || false;
-            const token = encodeToken({ username: username, password: password, presenter: isPresenter });
-            const allowedRooms = await getUserAllowedRooms(username, password);
-            return res.status(200).json({ message: token, allowedRooms: allowedRooms });
-        } else {
-            return res.status(401).json({ message: 'unauthorized' });
-        }
     });
 
     // ####################################################
