@@ -16,12 +16,8 @@ npm start
 
 ## Edit config.js
 
-In the MiroTalk SFU `app/src/config.js` file, change the endpoint to send recording chunks:
+In the MiroTalk SFU `.env` file, change the endpoint to send recording chunks:
 
-```js
-recording: {
-	endpoint: 'http://localhost:8080', // Change it with your Server endpoint
-	dir: 'rec',
-	enabled: true,
-},
+```bash
+RECORDING_ENDPOINT=http://localhost:8080
 ```
