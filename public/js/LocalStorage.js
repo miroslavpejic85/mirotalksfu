@@ -40,7 +40,7 @@ class LocalStorage {
             lobby: false, // default false
             pitch_bar: true, // volume indicator
             sounds: true, // room notify sounds
-            keep_buttons_visible: true, // Keep buttons always visible
+            keep_buttons_visible: false, // Keep buttons always visible
             keyboard_shortcuts: false, // keyboard shortcuts
             host_only_recording: false, // presenter
             rec_server: false, // The recording will be stored on the server rather than locally
