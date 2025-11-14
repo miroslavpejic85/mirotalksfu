@@ -16,6 +16,7 @@ npm-debug.log
 config.js
 docker-compose.yml
 docker-push.sh
+data
 rec
 rtmp
 

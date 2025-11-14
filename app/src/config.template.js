@@ -166,7 +166,7 @@ module.exports = {
          *      - Push recordings to a remote server
          *      - Store in cloud storage services
          *      - Send to processing pipelines
-         * - dir            : Storage directory for recordings
+         * - dir            : Storage directory for recordings (Relative to app/src/ default: app/rec)
          * - maxFileSize    : Maximum recording size (1GB default)
          *
          * Docker Note:
@@ -181,8 +181,8 @@ module.exports = {
             enabled: process.env.RECORDING_ENABLED === 'true',
             uploadToS3: process.env.RECORDING_UPLOAD_TO_S3 === 'true',
             endpoint: process.env.RECORDING_ENDPOINT || '',
-            dir: 'rec',
-            maxFileSize: 1 * 1024 * 1024 * 1024, // 1GB
+            dir: process.env.RECORDING_DIR || '../rec',
+            maxFileSize: process.env.RECORDING_MAX_FILE_SIZE || 1 * 1024 * 1024 * 1024, // 1GB
         },
 
         /**
@@ -204,7 +204,7 @@ module.exports = {
          * - secret             : Must match NodeMediaServer's config.js (default: 'mirotalkRtmpSecret')
          * - apiSecret          : WebRTC→RTMP API secret (default: 'mirotalkRtmpApiSecret')
          * - expirationHours    : Stream URL expiry in hours (default: 4)
-         * - dir                : Video storage directory (default: 'app/rtmp')
+         * - dir                : Video storage directory (Relative to app/src/ default: app/rtmp)
          * - ffmpegPath         : FFmpeg binary path (auto-detected)
          * - platform           : Current OS platform (auto-detected)
          *
@@ -254,7 +254,7 @@ module.exports = {
             secret: process.env.RTMP_SECRET || 'mirotalkRtmpSecret',
             apiSecret: process.env.RTMP_API_SECRET || 'mirotalkRtmpApiSecret',
             expirationHours: parseInt(process.env.RTMP_EXPIRATION_HOURS) || 4,
-            dir: 'rtmp',
+            dir: process.env.RTMP_DIR || '../rtmp',
             ffmpegPath: RTMP_FFMPEG_PATH,
             platform: PLATFORM,
         },

@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.13
+ * @version 2.0.14
  *
  */
 
@@ -267,8 +267,8 @@ const OIDC = config?.security?.oidc || { enabled: false };
 // directory
 const dir = {
     public: path.join(__dirname, '../../public'),
-    rec: path.join(__dirname, '../', config?.media?.recording?.dir || 'rec', '/'),
-    rtmp: path.join(__dirname, '../', config?.media?.rtmp?.dir || 'rtmp', '/'),
+    rec: path.join(__dirname, config?.media?.recording?.dir || 'rec'),
+    rtmp: path.join(__dirname, config?.media?.rtmp?.dir || 'rtmp'),
 };
 
 // Rec directory create and set max file size
@@ -3243,7 +3243,7 @@ function startServer() {
                 ? DEFAULT_HOST
                 : socket?.handshake?.headers?.host?.split(':')[0] || DEFAULT_HOST;
 
-            const rtmp = await room.startRTMP(socket.id, room, host, 1935, `../${rtmpDir}/${file}`);
+            const rtmp = await room.startRTMP(socket.id, room, host, 1935, `${rtmpDir}/${file}`);
 
             if (rtmp !== false) rtmpFileStreamsCount++;
 

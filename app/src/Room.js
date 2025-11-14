@@ -159,9 +159,9 @@ module.exports = class Room {
         return this.rtmpFileStreamer;
     }
 
-    async getRTMP(dir = 'rtmp') {
+    async getRTMP(dir = '../rtmp') {
         //
-        const folderPath = path.join(__dirname, '../', dir);
+        const folderPath = path.join(__dirname, dir);
         log.debug('[getRTMP] Files from dir', folderPath);
 
         try {
