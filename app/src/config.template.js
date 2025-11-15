@@ -910,6 +910,14 @@ module.exports = {
          * Core Settings:
          * --------------
          * - enabled: Enable/disable AWS S3 integration [true/false]
+         * - accessKeyId: AWS access key ID (store in .env)
+         * - secretAccessKey: AWS secret access key (store in .env)
+         * - region: AWS region where the S3 bucket is located
+         * - bucket: Name of the S3 bucket to use for storage
+         *
+         * Advanced Settings:
+         * - endpoint: Custom S3 endpoint URL (if empty to auto-resolve from region). Useful for S3-compatible services like MinIO, Wasabi, DigitalOcean Spaces, etc.
+         * - forcePathStyle: Set to true for S3-compatible services like MinIO, Wasabi, etc.
          *
          * Service Setup:
          * -------------
@@ -951,6 +959,8 @@ module.exports = {
             secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'your-secret-access-key',
             region: process.env.AWS_REGION || 'us-east-2',
             bucket: process.env.AWS_S3_BUCKET || 'mirotalk',
+            endpoint: process.env.AWS_S3_ENDPOINT || '',
+            forcePathStyle: process.env.AWS_S3_FORCE_PATH_STYLE === 'true',
         },
     },
 
