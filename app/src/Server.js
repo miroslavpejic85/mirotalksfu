@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.17
+ * @version 2.0.18
  *
  */
 
@@ -91,6 +91,7 @@ const sanitizeFilename = require('sanitize-filename');
 const helmet = require('helmet');
 const config = require('./config');
 const checkXSS = require('./XSS');
+const mime = require('mime-types');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
@@ -961,12 +962,17 @@ function startServer() {
             const fileStream = fs.createReadStream(filePath);
             const key = `recordings/${roomId}/${fileName}`;
 
+            const mimeType = mime.lookup(fileName) || 'application/octet-stream';
+
+            log.debug(`[Upload] Uploading ${fileName}`, { bucket: bucket, key: key, mimeType: mimeType });
+
             const upload = new Upload({
                 client: s3Client,
                 params: {
                     Bucket: bucket,
                     Key: key,
                     Body: fileStream,
+                    ContentType: mimeType,
                     Metadata: {
                         'room-id': roomId,
                         'file-name': fileName,

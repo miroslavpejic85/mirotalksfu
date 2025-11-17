@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.17
+ * @version 2.0.18
  *
  */
 
@@ -645,7 +645,7 @@ class RoomClient {
             // ###################################################################################################
             if (room.recording) this.recording = room.recording;
             if (room.recording && room.recording.recSyncServerRecording) {
-                console.log('07.1 WARNING ----> SERVER SYNC RECORDING ENABLED!');
+                console.log('07.1 WARNING ----> SERVER SYNC RECORDING ENABLED!', this.recording);
                 this.recording.recSyncServerRecording = localStorageSettings.rec_server;
                 if (BUTTONS.settings.tabRecording && !room.config.hostOnlyRecording) {
                     show(roomRecordingServer);
