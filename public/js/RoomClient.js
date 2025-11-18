@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.21
+ * @version 2.0.22
  *
  */
 
@@ -6406,6 +6406,31 @@ class RoomClient {
     // RECORDING
     // ####################################################
 
+    showRecServerSideAdvice() {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.recording,
+            title: 'Server Sync Recording Enabled',
+            html: `
+                <div style="text-align:left;">
+                    <b>Your recording session will be stored on the server.</b><br><br>
+                    If you do not agree, please switch off this option.<br>
+                    The recording will then be stored in your browser and downloaded to your device after stopping.
+                </div>
+            `,
+            showDenyButton: true,
+            confirmButtonText: 'OK',
+            denyButtonText: 'Switch Off',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isDenied) {
+                switchServerRecording.checked = false;
+            }
+        });
+    }
+
     toggleVideoAudioTabs(disabled = false) {
         tabAudioDevicesBtn.disabled = disabled;
         tabVideoDevicesBtn.disabled = disabled;
@@ -7975,31 +8000,6 @@ class RoomClient {
             default:
                 break;
         }
-    }
-
-    showRecServerSideAdvice() {
-        Swal.fire({
-            background: swalBackground,
-            position: 'center',
-            imageUrl: image.recording,
-            title: 'Server Sync Recording Enabled',
-            html: `
-                <div style="text-align:left;">
-                    <b>Your recording session will be stored on the server.</b><br><br>
-                    If you do not agree, please switch off this option.<br>
-                    The recording will then be stored in your browser and downloaded to your device after stopping.
-                </div>
-            `,
-            showDenyButton: true,
-            confirmButtonText: 'OK',
-            denyButtonText: 'Switch Off',
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isDenied) {
-                switchServerRecording.checked = false;
-            }
-        });
     }
 
     async roomPassword(data) {
