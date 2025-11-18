@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.19
+ * @version 2.0.20
  *
  */
 
@@ -283,6 +283,7 @@ let camera = 'user';
 
 let recTimer = null;
 let recElapsedTime = null;
+let recShowInfo = true;
 
 let wbCanvas = null;
 let wbIsLock = false;
@@ -1862,6 +1863,7 @@ function startRecordingTimer() {
 }
 function stopRecordingTimer() {
     clearInterval(recTimer);
+    recordingStatus.innerText = '0s';
 }
 
 // ####################################################
@@ -3795,6 +3797,10 @@ function handleRoomClientEvents() {
 // ####################################################
 
 function leaveRoom(allowCancel = true) {
+    if (rc.isRecording() || recordingStatus.innerText != '0s') {
+        recShowInfo = false;
+        rc.saveRecording('User is recording, cannot leave the room now');
+    }
     survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
 }
 
@@ -5774,7 +5780,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.19',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.20',
         html: `
             <br />
             <div id="about">

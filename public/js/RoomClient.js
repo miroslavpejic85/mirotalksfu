@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.19
+ * @version 2.0.20
  *
  */
 
@@ -6697,13 +6697,13 @@ class RoomClient {
                             params: { fileName: rc.recServerFileName, durationMs },
                         });
                         console.log('Finalized (with duration fix) and uploaded to S3');
-                        userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
+                        if (recShowInfo) userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
                     } catch (error) {
                         let errorMessage = 'Finalization failed! ';
                         if (error.response) errorMessage += error.response.data?.message || 'Server error';
                         else if (error.request) errorMessage += 'No response from server';
                         else errorMessage += error.message;
-                        userLog('warning', errorMessage, 'top-end', 3000);
+                        if (recShowInfo) userLog('warning', errorMessage, 'top-end', 3000);
                     }
                 } else {
                     // Option Disk: if you don’t use S3 finalize, call a dedicated “fix” endpoint
@@ -6849,6 +6849,7 @@ class RoomClient {
     }
 
     showRecordingInfo(recType, recordingInfo, recordingMsg = '') {
+        if (!recShowInfo) return;
         if (window.localStorage.isReconnected === 'false') {
             Swal.fire({
                 background: swalBackground,
