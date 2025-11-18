@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.18
+ * @version 2.0.19
  *
  */
 
@@ -296,13 +296,13 @@ if (rtmpEnabled) {
 // ####################################################
 
 const s3Client = new S3Client({
-    region: config?.integrations?.aws?.region, // Set your AWS region
+    region: config?.integrations?.s3?.region, // Set your AWS region
     credentials: {
-        accessKeyId: config?.integrations?.aws?.accessKeyId,
-        secretAccessKey: config?.integrations?.aws?.secretAccessKey,
+        accessKeyId: config?.integrations?.s3?.accessKeyId,
+        secretAccessKey: config?.integrations?.s3?.secretAccessKey,
     },
-    endpoint: config?.integrations?.aws?.endpoint || undefined,
-    forcePathStyle: config?.integrations?.aws?.forcePathStyle === true,
+    endpoint: config?.integrations?.s3?.endpoint || undefined,
+    forcePathStyle: config?.integrations?.s3?.forcePathStyle === true,
 });
 
 // html views
@@ -1096,7 +1096,7 @@ function startServer() {
 
     app.post('/recSyncFinalize', async (req, res) => {
         try {
-            const shouldUploadToS3 = config?.integrations?.aws?.enabled && config?.media?.recording?.uploadToS3;
+            const shouldUploadToS3 = config?.integrations?.s3?.enabled && config?.media?.recording?.uploadToS3;
             if (!shouldUploadToS3 || !serverRecordingEnabled) {
                 return res.status(403).json({ error: 'Recording disabled' });
             }
@@ -1121,7 +1121,7 @@ function startServer() {
                 }
             }
 
-            const bucket = config?.integrations?.aws?.bucket;
+            const bucket = config?.integrations?.s3?.bucket;
             const s3 = await uploadToS3(filePath, fileName, roomId, bucket, s3Client);
 
             const duration = ((Date.now() - start) / 1000).toFixed(2);

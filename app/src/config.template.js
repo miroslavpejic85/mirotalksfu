@@ -903,7 +903,7 @@ module.exports = {
         },
 
         /**
-         * AWS S3 Storage Configuration
+         * Example for AWS S3 Storage Configuration
          * ===========================
          * Enables cloud file storage using Amazon Simple Storage Service (S3).
          *
@@ -916,6 +916,7 @@ module.exports = {
          * - bucket: Name of the S3 bucket to use for storage
          *
          * Advanced Settings:
+         * --------------
          * - endpoint: Custom S3 endpoint URL (if empty to auto-resolve from region). Useful for S3-compatible services like MinIO, Wasabi, DigitalOcean Spaces, etc.
          * - forcePathStyle: Set to true for S3-compatible services like MinIO, Wasabi, etc.
          *
@@ -953,14 +954,14 @@ module.exports = {
          *   - s3:GetObject
          *   - s3:DeleteObject
          */
-        aws: {
-            enabled: process.env.AWS_S3_ENABLED === 'true',
-            accessKeyId: process.env.AWS_ACCESS_KEY_ID || 'your-access-key-id',
-            secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || 'your-secret-access-key',
-            region: process.env.AWS_REGION || 'us-east-2',
-            bucket: process.env.AWS_S3_BUCKET || 'mirotalk',
-            endpoint: process.env.AWS_S3_ENDPOINT || '',
-            forcePathStyle: process.env.AWS_S3_FORCE_PATH_STYLE === 'true',
+        s3: {
+            enabled: process.env.S3_ENABLED === 'true',
+            accessKeyId: process.env.S3_ACCESS_KEY_ID || 'your-access-key-id',
+            secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || 'your-secret-access-key',
+            region: process.env.S3_REGION || 'us-east-2',
+            bucket: process.env.S3_BUCKET || 'mirotalk',
+            endpoint: process.env.S3_ENDPOINT || '',
+            forcePathStyle: process.env.S3_FORCE_PATH_STYLE === 'true',
         },
     },
 
