@@ -20,20 +20,7 @@ if (window.MiroTalkAutoFillRoomName === true) {
 
 window.MiroTalkAutoFillRoomName = autoFillRoomName;
 
-const serviceWorkerEnabled = false; // Temporarily disabled to debug caching issues
-
-if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js');
-    });
-}
-
 const urlParams = new URLSearchParams(window.location.search);
-
-const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
-if (autoFillRoomName && isStandalone && window.localStorage.lastRoom && window.location.pathname === '/') {
-    window.location.href = '/join/?room=' + window.localStorage.lastRoom;
-}
 
 // ####################################################################
 // NEW ROOM
