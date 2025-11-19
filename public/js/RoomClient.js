@@ -6423,7 +6423,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.isConfirmed) {
-                survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
+                survey && survey.enabled ? leaveFeedback(true) : redirectOnLeave();
             }
         });
     }
