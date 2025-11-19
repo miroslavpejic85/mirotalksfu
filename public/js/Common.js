@@ -20,7 +20,9 @@ if (window.MiroTalkAutoFillRoomName === true) {
 
 window.MiroTalkAutoFillRoomName = autoFillRoomName;
 
-if ('serviceWorker' in navigator) {
+const serviceWorkerEnabled = false; // Temporarily disabled to debug caching issues
+
+if (serviceWorkerEnabled && 'serviceWorker' in navigator) {
     window.addEventListener('load', () => {
         navigator.serviceWorker.register('/sw.js');
     });
