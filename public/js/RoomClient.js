@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.23
+ * @version 2.0.24
  *
  */
 
@@ -6405,6 +6405,28 @@ class RoomClient {
     // ####################################################
     // RECORDING
     // ####################################################
+
+    popupRecordingOnLeaveRoom() {
+        Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.recording,
+            title: 'Recording is ON',
+            html: `
+                <div style="text-align:left;">
+                    <b>Please stop the recording before leaving the room.</b><br><br>
+                    If you leave the room while recording is active, the recording will be stopped automatically and downloaded to your device (if local recording is enabled).
+                </div>
+            `,
+            confirmButtonText: 'OK',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
+            }
+        });
+    }
 
     showRecServerSideAdvice() {
         Swal.fire({
