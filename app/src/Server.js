@@ -449,6 +449,20 @@ function startServer() {
             },
         })
     );
+
+    // Ensure critical static assets stay reachable even when service workers are disabled
+    app.get('/manifest.json', (req, res) => {
+        res.sendFile(path.join(dir.public, 'manifest.json'));
+    });
+
+    app.use(
+        '/svg',
+        express.static(path.join(dir.public, 'svg'), {
+            setHeaders: (res) => {
+                res.setHeader('Content-Type', 'image/svg+xml');
+            },
+        })
+    );
     app.use(cors(corsOptions));
     app.use(compression());
     app.use(express.json({ limit: '50mb' })); // Handles JSON payloads
