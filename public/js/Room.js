@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.22
+ * @version 2.0.23
  *
  */
 
@@ -3796,10 +3796,12 @@ function handleRoomClientEvents() {
 // UTILITY
 // ####################################################
 
-function leaveRoom(allowCancel = true) {
+async function leaveRoom(allowCancel = true) {
     if (rc.isRecording() || recordingStatus.innerText != '0s') {
         recShowInfo = false;
         rc.saveRecording('User is leaving the room, saving recording before exit');
+        // Sleep for 1 second to ensure recording is saved before leaving
+        await rc.sleep(1000);
     }
     survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
 }
