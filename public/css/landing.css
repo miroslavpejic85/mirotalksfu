@@ -2553,6 +2553,14 @@ main {
     border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
 }
 
+.support-footer a {
+    text-decoration: none;
+}
+
+.support-footer a:hover {
+    color: #fff !important;
+}
+
 @media (max-width: 900px) {
     .support-options {
         grid-template-columns: repeat(2, 1fr);
