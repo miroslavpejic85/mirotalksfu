@@ -25,6 +25,7 @@ const tryEasier = document.getElementById('tryEasier');
 const poweredBy = document.getElementById('poweredBy');
 const sponsors = document.getElementById('sponsors');
 const advertisers = document.getElementById('advertisers');
+const supportUs = document.getElementById('supportUs');
 const footer = document.getElementById('footer');
 
 const whoAreYouTitle = document.getElementById('whoAreYouTitle');
@@ -79,7 +80,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.0.28</strong>',
+        title: '<strong>WebRTC SFU v2.0.29</strong>',
         html: `
             <button 
                 id="support-button" 
