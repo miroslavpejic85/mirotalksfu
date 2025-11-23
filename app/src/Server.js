@@ -1637,7 +1637,6 @@ function startServer() {
 
             // Version Information
             versions: {
-                environment: config.system?.info?.environment,
                 app: packageJson?.version,
                 node: process.versions.node,
                 server_version: mediasoup?.version,
