@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.30
+ * @version 2.0.31
  *
  */
 
@@ -112,12 +112,18 @@ const packageJson = require('../../package.json');
 // Login attempts limit
 const rateLimit = require('express-rate-limit');
 const maxAttempts = config?.security?.host?.maxAttempts || 5;
-const minBlockTime = config?.security?.host?.minBlockTime || 15; // in minutes
+const minBlockTime = config?.security?.host?.minBlockTime || 15; // minutes
+// Extract client IP (supports proxies)
+const ipKeyGenerator = (req) =>
+    (req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || '').split(',')[0].trim() ||
+    req.socket?.remoteAddress ||
+    req.ip;
+// Create login rate limiter
 const loginLimiter = rateLimit({
-    windowMs: minBlockTime * 60 * 1000, // 15 minutes default
+    windowMs: minBlockTime * 60 * 1000,
     max: maxAttempts,
     message: 'Too many login attempts, please try again later.',
-    keyGenerator: (req) => req.body.username || ipKeyGenerator(req),
+    keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
 });
 
 // Branding configuration
