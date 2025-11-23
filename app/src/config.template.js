@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.0.29 - Configuration File
+ * MiroTalk SFU v2.0.30 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -381,6 +381,8 @@ module.exports = {
          * - protected      : Enable/disable host protection globally
          * - user_auth      : Require user authentication for host access
          * - users_from_db  : Fetch users from API/database instead of local config
+         * - maxAttempts    : Maximum login attempts before temporary block
+         * - minBlockTime   : Block duration in minutes after max attempts exceeded
          *
          * API Integration:
          * ---------------
@@ -415,6 +417,9 @@ module.exports = {
         host: {
             protected: process.env.HOST_PROTECTED === 'true',
             user_auth: process.env.HOST_USER_AUTH === 'true',
+
+            maxAttempts: process.env.HOST_MAX_LOGIN_ATTEMPTS || 5,
+            minBlockTime: process.env.HOST_MIN_LOGIN_BLOCK_TIME || 15, // in minutes
 
             users_from_db: process.env.HOST_USERS_FROM_DB === 'true',
             users_api_secret_key: process.env.USERS_API_SECRET || 'mirotalkweb_default_secret',

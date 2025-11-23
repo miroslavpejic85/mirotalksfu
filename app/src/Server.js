@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.29
+ * @version 2.0.30
  *
  */
 
@@ -108,6 +108,17 @@ const Discord = require('./Discord');
 const Mattermost = require('./Mattermost');
 const restrictAccessByIP = require('./middleware/IpWhitelist');
 const packageJson = require('../../package.json');
+
+// Login attempts limit
+const rateLimit = require('express-rate-limit');
+const maxAttempts = config?.security?.host?.maxAttempts || 5;
+const minBlockTime = config?.security?.host?.minBlockTime || 15; // in minutes
+const loginLimiter = rateLimit({
+    windowMs: minBlockTime * 60 * 1000, // 15 minutes default
+    max: maxAttempts,
+    message: 'Too many login attempts, please try again later.',
+    keyGenerator: (req) => req.body.username || ipKeyGenerator(req),
+});
 
 // Branding configuration
 const brandHtmlInjection = config?.ui?.brand?.htmlInjection ?? true;
@@ -855,7 +866,7 @@ function startServer() {
     // ####################################################
 
     // handle login on host protected
-    app.post('/login', async (req, res) => {
+    app.post('/login', loginLimiter, async (req, res) => {
         const ip = getIP(req);
         log.debug(`Request login to host from: ${ip}`, req.body);
 
