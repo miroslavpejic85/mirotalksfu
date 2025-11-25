@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.0.31 - Configuration File
+ * MiroTalk SFU v2.0.32 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1200,6 +1200,7 @@ module.exports = {
                 startScreenButton: process.env.SHOW_SCREEN_BUTTON !== 'false',
                 swapCameraButton: process.env.SHOW_SWAP_CAMERA !== 'false',
                 chatButton: process.env.SHOW_CHAT_BUTTON !== 'false',
+                participantsButton: process.env.SHOW_PARTICIPANTS_BUTTON !== 'false',
                 pollButton: process.env.SHOW_POLL_BUTTON !== 'false',
                 editorButton: process.env.SHOW_EDITOR_BUTTON !== 'false',
                 raiseHandButton: process.env.SHOW_RAISE_HAND !== 'false',

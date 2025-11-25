@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.31
+ * @version 2.0.32
  *
  */
 
@@ -483,6 +483,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('raiseHandButton', 'Raise your hand', bPlacement);
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
+        setTippy('participantsButton', 'Toggle participants list', bPlacement);
         setTippy('settingsButton', 'Toggle the settings', bPlacement);
         setTippy('exitButton', 'Leave room', bPlacement);
     }
@@ -1627,6 +1628,7 @@ function roomIsReady() {
         hide(tabRecordingBtn);
     }
     BUTTONS.main.chatButton && show(chatButton);
+    BUTTONS.main.participantsButton && show(participantsButton);
     BUTTONS.main.pollButton && show(pollButton);
     BUTTONS.main.editorButton && show(editorButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
@@ -2015,6 +2017,11 @@ function handleButtons() {
         if (isMobileDevice) {
             rc.toggleShowParticipants();
         }
+    };
+    participantsButton.onclick = async () => {
+        rc.toggleChat();
+        await rc.sleep(100);
+        rc.toggleShowParticipants();
     };
     // Polls
     pollButton.onclick = () => {
@@ -5793,7 +5800,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.31',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.32',
         html: `
             <br />
             <div id="about">

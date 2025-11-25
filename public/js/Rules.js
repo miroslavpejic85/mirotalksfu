@@ -27,6 +27,7 @@ let BUTTONS = {
         startScreenButton: true,
         swapCameraButton: true,
         chatButton: true,
+        participantsButton: true,
         pollButton: true,
         editorButton: true,
         raiseHandButton: true,
