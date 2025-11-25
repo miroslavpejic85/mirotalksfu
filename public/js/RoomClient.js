@@ -324,6 +324,7 @@ class RoomClient {
         this.isEditorLocked = false;
         this.isEditorPinned = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
+        this.isParticipantsOpen = false;
         this.speechInMessages = false;
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
@@ -4976,8 +4977,15 @@ class RoomClient {
     }
 
     async toggleParticipants() {
-        if (!this.isChatOpen) this.toggleChat();
-        await this.sleep(500);
+        this.isParticipantsOpen = !this.isParticipantsOpen;
+        if (!this.isParticipantsOpen && this.isChatOpen) {
+            this.toggleChat();
+            return;
+        }
+        if (!this.isChatOpen) {
+            this.toggleChat();
+            await this.sleep(500);
+        }
         if ((isDesktopDevice && this.isChatPinned) || !isDesktopDevice) {
             this.toggleShowParticipants();
         }
