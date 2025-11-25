@@ -2014,14 +2014,13 @@ function handleButtons() {
     };
     chatButton.onclick = () => {
         rc.toggleChat();
-        if (isMobileDevice) {
-            rc.toggleShowParticipants();
-        }
     };
     participantsButton.onclick = async () => {
-        rc.toggleChat();
-        await rc.sleep(100);
-        rc.toggleShowParticipants();
+        if (!rc.isChatOpen) rc.toggleChat();
+        await rc.sleep(500);
+        if ((isDesktopDevice && rc.isChatPinned) || !isDesktopDevice) {
+            rc.toggleShowParticipants();
+        }
     };
     // Polls
     pollButton.onclick = () => {
