@@ -4975,6 +4975,14 @@ class RoomClient {
         plist.style.position = this.isMobileDevice ? 'fixed' : 'absolute';
     }
 
+    async toggleParticipants() {
+        if (!this.isChatOpen) this.toggleChat();
+        await this.sleep(500);
+        if ((isDesktopDevice && this.isChatPinned) || !isDesktopDevice) {
+            this.toggleShowParticipants();
+        }
+    }
+
     toggleChatHistorySize(max = true) {
         const chatHistory = this.getId('chatHistory');
         chatHistory.style.minHeight = max ? 'calc(100vh - 210px)' : '490px';

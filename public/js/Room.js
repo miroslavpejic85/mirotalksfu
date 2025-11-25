@@ -2016,11 +2016,7 @@ function handleButtons() {
         rc.toggleChat();
     };
     participantsButton.onclick = async () => {
-        if (!rc.isChatOpen) rc.toggleChat();
-        await rc.sleep(500);
-        if ((isDesktopDevice && rc.isChatPinned) || !isDesktopDevice) {
-            rc.toggleShowParticipants();
-        }
+        rc.toggleParticipants();
     };
     // Polls
     pollButton.onclick = () => {
