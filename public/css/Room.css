@@ -2025,6 +2025,42 @@ hr {
     margin-bottom: 5px;
 }
 
+/* Empty chat illustration and message */
+.empty-chat-notice {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1.5rem;
+    text-align: center;
+    padding: 2rem 1rem;
+    opacity: 0.85;
+    transition: opacity 0.2s;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+}
+.empty-chat-img {
+    width: 50%;
+    max-width: 240px;
+    opacity: 0.8;
+    margin: 0 auto 0.5rem auto;
+}
+.empty-chat-title {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #e0e0e0;
+    margin: 0.5rem 0 0.2rem 0;
+}
+.empty-chat-desc {
+    color: #b0b0b0;
+    max-width: 350px;
+    margin: 0 auto;
+    font-size: 1rem;
+}
+
 /*
 z-index:
     - 1 videoMediaContainer
