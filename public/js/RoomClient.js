@@ -5578,7 +5578,6 @@ class RoomClient {
             if (result.isConfirmed) {
                 this.getId(id).remove();
                 this.sound('delete');
-                // Update empty chat notice after deleting a message
                 updateChatEmptyNotice();
             }
         });
@@ -5790,6 +5789,7 @@ class RoomClient {
                 this.chatMessages = [];
                 this.chatGPTContext = [];
                 this.deepSeekContext = [];
+                updateChatEmptyNotice();
                 this.sound('delete');
             }
         });

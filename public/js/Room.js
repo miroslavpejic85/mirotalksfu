@@ -1757,15 +1757,15 @@ function roomIsReady() {
 
 function updateChatEmptyNotice() {
     const chatLists = [
-        getId('chatPublicMessages'),
-        getId('chatPrivateMessages'),
         getId('chatGPTMessages'),
         getId('deepSeekMessages'),
-    ];
+        getId('chatPublicMessages'),
+        getId('chatPrivateMessages'),
+    ].filter(Boolean);
     const emptyNotice = getId('chatEmptyNotice');
     if (!emptyNotice) return;
-    const hasMessages = chatLists.some((ul) => ul && ul.children.length > 0);
-    emptyNotice.style.display = hasMessages ? 'none' : '';
+    const hasMessages = chatLists.some((ul) => ul.children.length > 0);
+    hasMessages ? emptyNotice.classList.add('hidden') : emptyNotice.classList.remove('hidden');
 }
 
 function elemDisplay(elem, display, mode = 'block') {
