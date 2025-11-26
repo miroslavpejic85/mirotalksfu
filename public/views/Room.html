@@ -1543,7 +1543,7 @@ access to use this app.
                     <!-- CHAT HISTORY -->
                     <div id="chatHistory" class="chat-history">
                         <!-- EMPTY CHAT ILLUSTRATION -->
-                        <div id="emptyChatNotice" class="empty-chat-notice">
+                        <div id="chatEmptyNotice" class="empty-chat-notice">
                             <img alt="Empty chat illustration" class="empty-chat-img" src="../svg/emptyChat.svg" />
                             <h5 class="empty-chat-title">Start Conversation</h5>
                             <p class="empty-chat-desc">
@@ -1737,7 +1737,16 @@ access to use this app.
                         <button id="transcriptionCloseBtn" class="fas fa-times"></button>
                     </div>
                 </header>
-                <main id="transcriptionChat" class="transcription-chat"></main>
+                <main id="transcriptionChat" class="transcription-chat">
+                    <!-- EMPTY TRANSCRIPTION ILLUSTRATION -->
+                    <div id="transcriptionEmptyNotice" class="empty-chat-notice">
+                        <img alt="Empty chat illustration" class="empty-chat-img" src="../svg/emptyTranscription.svg" />
+                        <h5 class="empty-chat-title">Start Transcription</h5>
+                        <p class="empty-chat-desc">
+                            There are no transcriptions here yet. Start transcription by clicking the "Start" button.
+                        </p>
+                    </div>
+                </main>
                 <div id="transcriptionFooter" class="transcription-inputarea">
                     <select id="transcriptionLanguage" class="form-select text-light bg-dark"></select>
                     <select id="transcriptionDialect" class="form-select text-light bg-dark"></select>

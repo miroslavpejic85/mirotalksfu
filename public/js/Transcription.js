@@ -181,6 +181,13 @@ class Transcription {
         }
     }
 
+    showTranscriptionEmptyNoticeIfNoTranscriptions() {
+        const transcriptions = transcriptionChat.querySelectorAll('.msg-transcription-text');
+        transcriptions.length === 0
+            ? transcriptionEmptyNotice.classList.remove('hidden')
+            : transcriptionEmptyNotice.classList.add('hidden');
+    }
+
     handleTranscript(transcriptionData) {
         console.log('TRANSCRIPTION TEXT', transcriptionData.text_data);
 
@@ -225,6 +232,8 @@ class Transcription {
             name: peer_name,
             caption: text_data,
         });
+
+        this.showTranscriptionEmptyNoticeIfNoTranscriptions();
         rc.sound('transcript');
     }
 
@@ -375,7 +384,7 @@ class Transcription {
         if (this.transcripts.length != 0) {
             Swal.fire({
                 background: swalBackground,
-                position: 'center',
+                position: 'top',
                 title: 'Clean up all transcripts?',
                 imageUrl: image.delete,
                 showDenyButton: true,
@@ -385,12 +394,12 @@ class Transcription {
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
                 if (result.isConfirmed) {
-                    let captions = transcriptionChat.firstChild;
-                    while (captions) {
-                        transcriptionChat.removeChild(captions);
-                        captions = transcriptionChat.firstChild;
-                    }
+                    const transcriptions = transcriptionChat.querySelectorAll('.msg-transcription');
+                    transcriptions.forEach((transcription) => transcriptionChat.removeChild(transcription));
+
                     this.transcripts = [];
+
+                    this.showTranscriptionEmptyNoticeIfNoTranscriptions();
                     rc.sound('delete');
                 }
             });

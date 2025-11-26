@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.35
+ * @version 2.0.36
  *
  */
 
@@ -1755,14 +1755,14 @@ function roomIsReady() {
 // UTILS
 // ####################################################
 
-function updateEmptyChatNotice() {
+function updateChatEmptyNotice() {
     const chatLists = [
         getId('chatPublicMessages'),
         getId('chatPrivateMessages'),
         getId('chatGPTMessages'),
         getId('deepSeekMessages'),
     ];
-    const emptyNotice = getId('emptyChatNotice');
+    const emptyNotice = getId('chatEmptyNotice');
     if (!emptyNotice) return;
     const hasMessages = chatLists.some((ul) => ul && ul.children.length > 0);
     emptyNotice.style.display = hasMessages ? 'none' : '';
@@ -5818,7 +5818,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.35',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.36',
         html: `
             <br />
             <div id="about">

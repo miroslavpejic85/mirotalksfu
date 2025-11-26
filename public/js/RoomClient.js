@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.35
+ * @version 2.0.36
  *
  */
 
@@ -5506,7 +5506,7 @@ class RoomClient {
 
         chatMessagesId++;
         // Update empty chat notice after adding a message
-        updateEmptyChatNotice();
+        updateChatEmptyNotice();
     }
 
     streamMessage(element, message, speed = 100) {
@@ -5566,7 +5566,7 @@ class RoomClient {
     deleteMessage(id) {
         Swal.fire({
             background: swalBackground,
-            position: 'center',
+            position: 'top',
             title: 'Delete this Message?',
             imageUrl: image.delete,
             showDenyButton: true,
@@ -5579,7 +5579,7 @@ class RoomClient {
                 this.getId(id).remove();
                 this.sound('delete');
                 // Update empty chat notice after deleting a message
-                if (typeof updateEmptyChatNotice === 'function') updateEmptyChatNotice();
+                updateChatEmptyNotice();
             }
         });
     }
@@ -5767,7 +5767,7 @@ class RoomClient {
         }
         Swal.fire({
             background: swalBackground,
-            position: 'center',
+            position: 'top',
             title: 'Clean up all chat Messages?',
             imageUrl: image.delete,
             showDenyButton: true,
