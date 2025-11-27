@@ -872,7 +872,7 @@ body {
 .dropdown-menu {
     position: fixed;
     /* max-height: 300px; */
-    border: none;
+    border: none !important;
     border-radius: 10px !important;
     background: var(--body-bg) !important;
     box-shadow: var(--box-shadow);
