@@ -59,8 +59,8 @@
     align-self: center;
     overflow: hidden;
     display: inline-block;
-    background: transparent;
     border-radius: 10px;
+    background: var(--body-bg);
     box-shadow: var(--box-shadow);
     animation: show 0.4s ease;
     container-type: inline-size;

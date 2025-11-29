@@ -8,7 +8,7 @@
     max-height: 700px;
     border-radius: 10px;
     background: var(--body-bg);
-    border: var(--border);
+    /* border: var(--border); */
     box-shadow: var(--box-shadow);
     overflow: hidden;
     transition: max-width 0.5s ease-in-out;

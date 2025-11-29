@@ -1147,7 +1147,7 @@ body {
     min-height: var(--transcription-height);
     min-width: var(--transcription-width);
     background: var(--trx-bg);
-    border: var(--border);
+    /* border: var(--border); */
     border-radius: 10px;
     box-shadow: var(--box-shadow);
     resize: both;
@@ -1272,8 +1272,8 @@ body {
 .transcription-inputarea {
     display: inline-flex;
     padding: 10px;
-    border: none;
-    border: var(--border);
+    background: var(--body-bg);
+    border: none !important;
 }
 
 .transcription-inputarea select {

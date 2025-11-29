@@ -17,7 +17,7 @@
     min-height: var(--msger-height);
     padding: 3px;
     background: var(--msger-bg);
-    border: var(--border);
+    /* border: var(--border); */
     border-radius: 10px;
     box-shadow: var(--box-shadow);
     transition:
@@ -117,7 +117,7 @@
 .chat-app .chat {
     position: relative;
     margin-left: 300px;
-    border-left: var(--border);
+    /* border-left: var(--border); */
     border-radius: 10px;
     /* border: 1px solid lime; */
 }
@@ -134,7 +134,6 @@
 }
 
 .all-participants-img {
-    border: var(--border);
     width: 40px;
     margin-right: 5px;
     cursor: pointer;
@@ -369,7 +368,7 @@ input[type='text'] {
     padding: 8px 16px;
     background: var(--body-bg);
     border-radius: 5px;
-    border: var(--border);
+    /* border: var(--border); */
     transition: all 0.3s ease-in-out;
 }
 

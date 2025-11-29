@@ -4,7 +4,7 @@
     padding: 20px;
     width: var(--editor-container-width);
     height: var(--editor-container-height);
-    border: var(--border);
+    /* border: var(--border); */
     border-radius: 10px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
