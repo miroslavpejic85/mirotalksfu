@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.39
+ * @version 2.0.40
  *
  */
 
@@ -425,6 +425,14 @@ class RoomClient {
         this.debug = false;
         this.debug ? window.localStorage.setItem('debug', 'mediasoup*') : window.localStorage.removeItem('debug');
 
+        // TEST PURPOSES
+        this.test = {
+            device: {
+                enabled: false,
+                handlerName: 'Chrome111', // |Chrome74|Firefox120|Safari12|ReactNative106|
+            },
+        };
+
         console.log('06 ----> Load MediaSoup Client v', mediasoupClient.version);
         console.log('06.1 ----> PEER_ID', this.peer_id);
 
@@ -789,8 +797,10 @@ class RoomClient {
 
         let device;
         try {
-            device = await this.mediasoupClient.Device.factory();
-            // device = await this.mediasoupClient.Device.factory({ handlerName: 'Safari12' }); // for testing only
+            device = this.test.device.enabled
+                ? await this.mediasoupClient.Device.factory({ handlerName: this.test.device.handlerName })
+                : await this.mediasoupClient.Device.factory();
+
             console.log('Device created successfully:', device.handlerName);
         } catch (error) {
             if (error.name === 'UnsupportedError') {
@@ -9884,8 +9894,22 @@ class RoomClient {
                         case error.UNKNOWN_ERROR:
                             geoError = 'An unknown error occurred';
                             break;
-                        default:
+                        case 'NOT_SUPPORTED':
+                            geoError = 'Geolocation is not supported by this browser';
                             break;
+                        default:
+                            geoError =
+                                'Unable to retrieve your location. Please ensure location services are enabled in your device and browser settings, and try again';
+                            break;
+                    }
+                    // Add suggestion for unknown errors
+                    if (
+                        error.code === error.UNKNOWN_ERROR ||
+                        error.code === undefined ||
+                        geoError.startsWith('Unable to retrieve')
+                    ) {
+                        geoError +=
+                            ' If the problem persists, check your device and browser location permissions, and ensure you have a clear view of the sky (for GPS)';
                     }
                     rc.sendPeerGeoLocation(peer_id, 'geoLocationKO', `${rc.peer_name}: ${geoError}`);
                     rc.userLog('warning', geoError, 'top-end', 5000);
