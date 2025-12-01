@@ -1868,6 +1868,14 @@ progress {
 
 .wb-shortcuts-text {
     margin: 10px 0 5px 0;
+    color: #66beff;
+    font-weight: 600;
+    font-size: 1.05rem;
+    letter-spacing: 0.02em;
+    background: rgba(102, 190, 255, 0.08);
+    padding: 6px 12px;
+    border-radius: 6px;
+    display: inline-block;
 }
 
 .wb-shortcuts-list {
