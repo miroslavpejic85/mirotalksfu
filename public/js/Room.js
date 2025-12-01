@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.40
+ * @version 2.0.41
  *
  */
 
@@ -292,8 +292,12 @@ let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
 let wbIsEraser = false;
+let wbIsVanishing = false;
 let wbIsBgTransparent = false;
 let wbPop = [];
+let wbHistory = [];
+let wbHistoryStep = 0;
+let wbVanishingObjects = [];
 let coords = {};
 
 let isButtonsVisible = false;
@@ -408,6 +412,7 @@ function initClient() {
         setTippy('wbBackgroundColorEl', 'Background color', 'bottom');
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
+        setTippy('whiteboardVanishingBtn', 'Vanishing pen (disappears in 5s)', 'bottom');
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
@@ -2356,6 +2361,9 @@ function handleButtons() {
     whiteboardPencilBtn.onclick = () => {
         whiteboardIsDrawingMode(true);
     };
+    whiteboardVanishingBtn.onclick = () => {
+        whiteboardIsVanishingMode(true);
+    };
     whiteboardObjectBtn.onclick = () => {
         whiteboardIsDrawingMode(false);
     };
@@ -2379,6 +2387,9 @@ function handleButtons() {
     };
     whiteboardTextBtn.onclick = () => {
         whiteboardAddObj('text');
+    };
+    whiteboardStickyNoteBtn.onclick = () => {
+        whiteboardAddObj('stickyNote');
     };
     whiteboardLineBtn.onclick = () => {
         whiteboardAddObj('line');
@@ -4206,7 +4217,9 @@ function whiteboardCenter() {
 function setupWhiteboard() {
     setupWhiteboardCanvas();
     setupWhiteboardCanvasSize();
-    setupWhiteboardLocalListners();
+    setupWhiteboardLocalListeners();
+    setupWhiteboardShortcuts();
+    setupWhiteboardDragAndDrop();
 }
 
 function setupWhiteboardCanvas() {
@@ -4214,6 +4227,10 @@ function setupWhiteboardCanvas() {
     wbCanvas.freeDrawingBrush.color = '#FFFFFF';
     wbCanvas.freeDrawingBrush.width = 3;
     whiteboardIsDrawingMode(true);
+
+    // Initialize history with empty canvas state
+    wbHistory = [JSON.stringify(wbCanvas.toJSON())];
+    wbHistoryStep = 0;
 }
 
 function setupWhiteboardCanvasSize() {
@@ -4297,12 +4314,28 @@ function whiteboardIsDrawingMode(status) {
     wbCanvas.isDrawingMode = status;
     if (status) {
         setColor(whiteboardPencilBtn, 'green');
+        setColor(whiteboardVanishingBtn, 'white');
+        setColor(whiteboardObjectBtn, 'white');
+        setColor(whiteboardEraserBtn, 'white');
+        wbIsEraser = false;
+        wbIsVanishing = false;
+    } else {
+        setColor(whiteboardPencilBtn, 'white');
+        setColor(whiteboardObjectBtn, 'green');
+    }
+}
+
+function whiteboardIsVanishingMode(status) {
+    wbCanvas.isDrawingMode = status;
+    wbIsVanishing = status;
+    if (status) {
+        setColor(whiteboardVanishingBtn, 'green');
+        setColor(whiteboardPencilBtn, 'white');
         setColor(whiteboardObjectBtn, 'white');
         setColor(whiteboardEraserBtn, 'white');
         wbIsEraser = false;
     } else {
-        setColor(whiteboardPencilBtn, 'white');
-        setColor(whiteboardObjectBtn, 'green');
+        setColor(whiteboardVanishingBtn, 'white');
     }
 }
 
@@ -4353,6 +4386,9 @@ function whiteboardAddObj(type) {
             });
             addWbCanvasObj(text);
             break;
+        case 'stickyNote':
+            createStickyNote();
+            break;
         case 'line':
             const line = new fabric.Line([50, 100, 200, 200], {
                 top: 0,
@@ -4399,6 +4435,125 @@ function whiteboardAddObj(type) {
         default:
             break;
     }
+}
+
+function whiteboardEraseObject() {
+    if (wbCanvas && typeof wbCanvas.getActiveObjects === 'function') {
+        const activeObjects = wbCanvas.getActiveObjects();
+        if (activeObjects && activeObjects.length > 0) {
+            // Remove all selected objects
+            activeObjects.forEach((obj) => {
+                wbCanvas.remove(obj);
+            });
+            wbCanvas.discardActiveObject();
+            wbCanvas.requestRenderAll();
+            wbCanvasToJson();
+        }
+    }
+}
+
+function whiteboardCloneObject() {
+    if (wbCanvas && typeof wbCanvas.getActiveObjects === 'function') {
+        const activeObjects = wbCanvas.getActiveObjects();
+        if (activeObjects && activeObjects.length > 0) {
+            activeObjects.forEach((obj, idx) => {
+                obj.clone((cloned) => {
+                    // Offset each clone for visibility
+                    cloned.set({
+                        left: obj.left + 30 + idx * 10,
+                        top: obj.top + 30 + idx * 10,
+                        evented: true,
+                    });
+                    wbCanvas.add(cloned);
+                    wbCanvas.setActiveObject(cloned);
+                    wbCanvasToJson();
+                });
+            });
+            wbCanvas.requestRenderAll();
+        }
+    }
+}
+
+function wbHandleVanishingObjects() {
+    // Handle vanishing pen objects
+    if (wbIsVanishing && wbCanvas._objects.length > 0) {
+        const lastObject = wbCanvas._objects[wbCanvas._objects.length - 1];
+        if (lastObject && lastObject.type === 'path') {
+            wbVanishingObjects.push(lastObject);
+            setTimeout(() => {
+                wbCanvas.remove(lastObject);
+                wbCanvas.renderAll();
+                wbCanvasToJson();
+                const index = wbVanishingObjects.indexOf(lastObject);
+                if (index > -1) {
+                    wbVanishingObjects.splice(index, 1);
+                }
+            }, 5000);
+        }
+    }
+}
+
+function createStickyNote() {
+    Swal.fire({
+        background: swalBackground,
+        title: 'Create Sticky Note',
+        html: `
+            <textarea id="stickyNoteText" class="form-control" rows="4" placeholder="Type your note here...">Note</textarea>
+            <br>
+            <label for="stickyNoteColor">Background Color:</label>
+            <input id="stickyNoteColor" type="color" value="#FFEB3B" style="width: 100%; height: 40px; cursor: pointer;">
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Create',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        preConfirm: () => {
+            return {
+                text: document.getElementById('stickyNoteText').value,
+                color: document.getElementById('stickyNoteColor').value,
+            };
+        },
+    }).then((result) => {
+        if (result.isConfirmed) {
+            const noteData = result.value;
+
+            // Create sticky note background (rectangle)
+            const noteRect = new fabric.Rect({
+                left: 100,
+                top: 100,
+                width: 200,
+                height: 150,
+                fill: noteData.color,
+                stroke: '#D4AF37',
+                strokeWidth: 2,
+                shadow: 'rgba(0,0,0,0.3) 5px 5px 10px',
+                rx: 5,
+                ry: 5,
+            });
+
+            // Create text for sticky note
+            const noteText = new fabric.Textbox(noteData.text, {
+                left: 110,
+                top: 110,
+                width: 180,
+                fontSize: 14,
+                fontFamily: 'Arial',
+                fill: '#000000',
+                textAlign: 'left',
+                editable: true,
+            });
+
+            // Group rectangle and text together
+            const stickyNoteGroup = new fabric.Group([noteRect, noteText], {
+                left: 100,
+                top: 100,
+                selectable: true,
+                hasControls: true,
+            });
+
+            addWbCanvasObj(stickyNoteGroup);
+        }
+    });
 }
 
 function setupFileSelection(title, accept, renderToCanvas) {
@@ -4571,7 +4726,7 @@ function addWbCanvasObj(obj) {
     }
 }
 
-function setupWhiteboardLocalListners() {
+function setupWhiteboardLocalListeners() {
     wbCanvas.on('mouse:down', function (e) {
         mouseDown(e);
     });
@@ -4583,6 +4738,12 @@ function setupWhiteboardLocalListners() {
     });
     wbCanvas.on('object:added', function () {
         objectAdded();
+    });
+    wbCanvas.on('object:modified', function () {
+        saveWbCanvasState();
+    });
+    wbCanvas.on('object:removed', function () {
+        saveWbCanvasState();
     });
 }
 
@@ -4610,8 +4771,11 @@ function mouseMove() {
 }
 
 function objectAdded() {
-    if (!wbIsRedoing) wbPop = [];
+    if (!wbIsRedoing) {
+        saveWbCanvasState();
+    }
     wbIsRedoing = false;
+    wbHandleVanishingObjects();
 }
 
 function wbCanvasBackgroundColor(color) {
@@ -4622,16 +4786,49 @@ function wbCanvasBackgroundColor(color) {
 }
 
 function wbCanvasUndo() {
-    if (wbCanvas._objects.length > 0) {
-        wbPop.push(wbCanvas._objects.pop());
-        wbCanvas.renderAll();
+    if (wbHistoryStep > 0) {
+        wbIsRedoing = true;
+        wbHistoryStep--;
+        const previousState = wbHistory[wbHistoryStep];
+        wbCanvas.loadFromJSON(previousState, function () {
+            wbCanvas.renderAll();
+            wbIsRedoing = false;
+            wbCanvasToJson();
+        });
     }
 }
 
 function wbCanvasRedo() {
-    if (wbPop.length > 0) {
+    if (wbHistoryStep < wbHistory.length - 1) {
         wbIsRedoing = true;
-        wbCanvas.add(wbPop.pop());
+        wbHistoryStep++;
+        const nextState = wbHistory[wbHistoryStep];
+        wbCanvas.loadFromJSON(nextState, function () {
+            wbCanvas.renderAll();
+            wbIsRedoing = false;
+            wbCanvasToJson();
+        });
+    }
+}
+
+function saveWbCanvasState() {
+    if (wbIsRedoing) return;
+
+    const json = JSON.stringify(wbCanvas.toJSON());
+
+    // Remove any redo states if we're not at the end
+    if (wbHistoryStep < wbHistory.length - 1) {
+        wbHistory = wbHistory.slice(0, wbHistoryStep + 1);
+    }
+
+    // Add new state
+    wbHistory.push(json);
+    wbHistoryStep++;
+
+    // Limit history to 50 states to prevent memory issues
+    if (wbHistory.length > 50) {
+        wbHistory.shift();
+        wbHistoryStep--;
     }
 }
 
@@ -4657,17 +4854,30 @@ function wbUpdate() {
 }
 
 function wbCanvasToJson() {
-    if (!isPresenter && wbIsLock) return;
-    if (rc.thereAreParticipants()) {
-        let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
-        rc.socket.emit('wbCanvasToJson', wbCanvasJson);
+    console.log('wbCanvasToJson called');
+    if (!isPresenter && wbIsLock) {
+        console.log('Not presenter and whiteboard is locked. Exiting');
+        return;
     }
+    if (!rc.thereAreParticipants()) {
+        console.log('No participants. Exiting');
+        return;
+    }
+    let wbCanvasJson = JSON.stringify(wbCanvas.toJSON());
+    console.log('Emitting wbCanvasToJson');
+    rc.socket.emit('wbCanvasToJson', wbCanvasJson);
 }
 
 function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
-    wbCanvas.loadFromJSON(json);
-    wbCanvas.renderAll();
+    wbIsRedoing = true; // Prevent saving to history when loading from network
+    wbCanvas.loadFromJSON(json, function () {
+        wbCanvas.renderAll();
+        wbIsRedoing = false;
+        // Reset history when receiving canvas from network
+        wbHistory = [json];
+        wbHistoryStep = 0;
+    });
     if (!isPresenter && !wbCanvas.isDrawingMode && wbIsLock) {
         wbDrawing(false);
     }
@@ -4745,6 +4955,8 @@ function whiteboardAction(data, emit = true) {
             break;
         case 'clear':
             wbCanvas.clear();
+            wbCanvas.renderAll();
+            saveWbCanvasState();
             break;
         case 'lock':
             if (!isPresenter) {
@@ -4778,6 +4990,145 @@ function wbDrawing(status) {
     wbCanvas.selection = status; // Disable object selection
     wbCanvas.forEachObject(function (obj) {
         obj.selectable = status; // Make all objects unselectable
+    });
+}
+
+// ####################################################
+// HANDLE WHITEBOARD DRAG AND DROP
+// ####################################################
+
+function setupWhiteboardDragAndDrop() {
+    if (!wbCanvas) return;
+
+    // Prevent default drag behaviors
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach((eventName) => {
+        wbCanvas.upperCanvasEl.addEventListener(eventName, preventDefaults, false);
+    });
+
+    function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+    }
+
+    // Highlight drop area
+    ['dragenter', 'dragover'].forEach((eventName) => {
+        wbCanvas.upperCanvasEl.addEventListener(
+            eventName,
+            () => {
+                wbCanvas.upperCanvasEl.style.border = '1px dashed #fff';
+            },
+            false
+        );
+    });
+
+    ['dragleave', 'drop'].forEach((eventName) => {
+        wbCanvas.upperCanvasEl.addEventListener(
+            eventName,
+            () => {
+                wbCanvas.upperCanvasEl.style.border = '';
+            },
+            false
+        );
+    });
+
+    // Handle dropped files
+    wbCanvas.upperCanvasEl.addEventListener('drop', handleWhiteboardDrop, false);
+}
+
+function handleWhiteboardDrop(e) {
+    const dt = e.dataTransfer;
+    const files = dt.files;
+
+    if (files.length === 0) return;
+
+    const file = files[0];
+    const fileType = file.type;
+
+    switch (true) {
+        case fileType.startsWith('image/'):
+            renderImageToCanvas(file);
+            break;
+        case fileType === 'application/pdf':
+            renderPdfToCanvas(file);
+            break;
+        default:
+            userLog('warning', `Unsupported file type: ${fileType}. Please drop an image or PDF file.`, 'top-end');
+            break;
+    }
+}
+
+// ####################################################
+// HANDLE WHITEBOARD SHORTCUTS
+// ####################################################
+
+function setupWhiteboardShortcuts() {
+    document.addEventListener('keydown', (event) => {
+        if (!wbIsOpen) return;
+
+        // Whiteboard clone shortcut: Cmd+C/Ctrl+C
+        if ((event.key === 'c' || event.key === 'C') && (event.ctrlKey || event.metaKey)) {
+            whiteboardCloneObject();
+            event.preventDefault();
+            return;
+        }
+        // Whiteboard erase shortcut: Cmd+X/Ctrl+X
+        if ((event.key === 'x' || event.key === 'X') && (event.ctrlKey || event.metaKey)) {
+            whiteboardEraseObject();
+            event.preventDefault();
+            return;
+        }
+
+        // Whiteboard undo shortcuts: Cmd+Z/Ctrl+Z
+        if ((event.key === 'z' || event.key === 'Z') && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
+            wbCanvasUndo();
+            event.preventDefault();
+            return;
+        }
+        // Whiteboard Redo shortcuts: Cmd+Shift+Z/Ctrl+Shift+Z or Cmd+Y/Ctrl+Y
+        if (
+            ((event.key === 'z' || event.key === 'Z') && (event.ctrlKey || event.metaKey) && event.shiftKey) ||
+            ((event.key === 'y' || event.key === 'Y') && (event.ctrlKey || event.metaKey))
+        ) {
+            wbCanvasRedo();
+            event.preventDefault();
+            return;
+        }
+
+        // Use event.code and check for Alt+Meta (Mac) or Alt+Ctrl (Windows/Linux)
+        if (event.code && event.altKey && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
+            switch (event.code) {
+                case 'KeyT': // Text
+                    whiteboardAddObj('text');
+                    event.preventDefault();
+                    break;
+                case 'KeyL': // Line
+                    whiteboardAddObj('line');
+                    event.preventDefault();
+                    break;
+                case 'KeyC': // Circle
+                    whiteboardAddObj('circle');
+                    event.preventDefault();
+                    break;
+                case 'KeyR': // Rectangle
+                    whiteboardAddObj('rect');
+                    event.preventDefault();
+                    break;
+                case 'KeyG': // Triangle (G for Geometry)
+                    whiteboardAddObj('triangle');
+                    event.preventDefault();
+                    break;
+                case 'KeyI': // Image (from file)
+                    whiteboardAddObj('imgFile');
+                    event.preventDefault();
+                    break;
+                case 'KeyP': // PDF (from file)
+                    whiteboardAddObj('pdfFile');
+                    event.preventDefault();
+                    break;
+                default:
+                    break;
+            }
+        }
     });
 }
 
@@ -5835,7 +6186,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.40',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.41',
         html: `
             <br />
             <div id="about">
