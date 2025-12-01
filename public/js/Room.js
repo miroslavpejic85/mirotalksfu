@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.41
+ * @version 2.0.42
  *
  */
 
@@ -2408,6 +2408,9 @@ function handleButtons() {
     };
     whiteboardCleanBtn.onclick = () => {
         confirmClearBoard();
+    };
+    whiteboardShortcutsBtn.onclick = () => {
+        showWhiteboardShortcuts();
     };
     whiteboardCloseBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('close'));
@@ -4910,6 +4913,23 @@ function confirmClearBoard() {
     });
 }
 
+function showWhiteboardShortcuts() {
+    const whiteboardShortcutsContent = getId('whiteboardShortcutsContent');
+    if (!whiteboardShortcutsContent) {
+        console.error('Whiteboard shortcuts content not found');
+        return;
+    }
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        title: 'Whiteboard Shortcuts',
+        html: whiteboardShortcutsContent.innerHTML,
+        confirmButtonText: 'Got it!',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+}
+
 function toggleLockUnlockWhiteboard() {
     wbIsLock = !wbIsLock;
 
@@ -5117,12 +5137,28 @@ function setupWhiteboardShortcuts() {
                     whiteboardAddObj('triangle');
                     event.preventDefault();
                     break;
+                case 'KeyN': // Sticky Note
+                    whiteboardAddObj('stickyNote');
+                    event.preventDefault();
+                    break;
+                case 'KeyU': // Image (from URL)
+                    whiteboardAddObj('imgUrl');
+                    event.preventDefault();
+                    break;
+                case 'KeyV': // Vanishing Pen
+                    whiteboardIsVanishingMode(!wbIsVanishing);
+                    event.preventDefault();
+                    break;
                 case 'KeyI': // Image (from file)
                     whiteboardAddObj('imgFile');
                     event.preventDefault();
                     break;
                 case 'KeyP': // PDF (from file)
                     whiteboardAddObj('pdfFile');
+                    event.preventDefault();
+                    break;
+                case 'KeyQ': // Clear Board
+                    confirmClearBoard();
                     event.preventDefault();
                     break;
                 default:
@@ -6186,7 +6222,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.41',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.42',
         html: `
             <br />
             <div id="about">

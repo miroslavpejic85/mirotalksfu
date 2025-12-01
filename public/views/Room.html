@@ -1402,12 +1402,45 @@ access to use this app.
                             <button id="whiteboardSaveBtn"><i class="fas fa-save"></i> Save</button>
                             <button id="whiteboardEraserBtn"><i class="fas fa-eraser"></i> Eraser</button>
                             <button id="whiteboardCleanBtn"><i class="fas fa-trash"></i> Clean</button>
+                            <button id="whiteboardShortcutsBtn"><i class="fas fa-keyboard"></i> Shortcuts</button>
                         </div>
                     </div>
                 </div>
             </header>
             <main>
                 <canvas id="wbCanvas"></canvas>
+                <div id="whiteboardShortcutsContent">
+                    <div class="wb-shortcuts-container">
+                        <h3 class="wb-shortcuts-title"><i class="fas fa-keyboard"></i> General</h3>
+                        <pre class="wb-shortcuts-code">
+Clone:  ⌘/Ctrl + C
+Erase:  ⌘/Ctrl + X
+Undo:   ⌘/Ctrl + Z
+Redo:   ⌘/Ctrl + Shift + Z or ⌘/Ctrl + Y</pre
+                        >
+
+                        <h3 class="wb-shortcuts-title"><i class="fas fa-pencil-alt"></i> Create Objects</h3>
+                        <p class="wb-shortcuts-text"><strong>Hold:</strong></p>
+                        <ul class="wb-shortcuts-list">
+                            <li>• Alt + Cmd (Mac)</li>
+                            <li>• Alt + Ctrl (Win/Linux)</li>
+                        </ul>
+                        <p class="wb-shortcuts-text"><strong>Then press:</strong></p>
+                        <pre class="wb-shortcuts-code">
+T = Text
+L = Line
+C = Circle
+R = Rectangle
+G = Triangle
+N = Sticky Note
+V = Vanishing Pen
+U = Image URL
+I = Image
+P = PDF
+Q = Clear all</pre
+                        >
+                    </div>
+                </div>
             </main>
         </section>
 

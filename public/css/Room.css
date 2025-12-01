@@ -1844,6 +1844,42 @@ progress {
     padding: 0;
 }
 
+/* Whiteboard Shortcuts Styles */
+#whiteboardShortcutsContent {
+    display: none;
+}
+
+.wb-shortcuts-container {
+    text-align: left;
+    font-family: monospace;
+}
+
+.wb-shortcuts-title {
+    margin-top: 20px;
+}
+
+.wb-shortcuts-code {
+    background: var(--body-bg);
+    padding: 10px;
+    border-radius: 5px;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.wb-shortcuts-text {
+    margin: 10px 0 5px 0;
+}
+
+.wb-shortcuts-list {
+    list-style: none;
+    padding-left: 0;
+    margin: 5px 0;
+}
+
+.wb-shortcuts-list li {
+    margin: 5px 0;
+}
+
 /*--------------------------------------------------------------
 # Video exit, pin/Unpin btn
 --------------------------------------------------------------*/
