@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.44
+ * @version 2.0.45
  *
  */
 
@@ -411,6 +411,7 @@ function initClient() {
         setTippy('wbDrawingColorEl', 'Drawing color', 'bottom');
         setTippy('whiteboardPencilBtn', 'Drawing mode', 'bottom');
         setTippy('whiteboardVanishingBtn', 'Vanishing pen (disappears in 5s)', 'bottom');
+        setTippy('whiteboardEraserBtn', 'Eraser', 'bottom');
         setTippy('whiteboardObjectBtn', 'Object mode', 'bottom');
         setTippy('whiteboardUndoBtn', 'Undo', 'bottom');
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
@@ -2969,6 +2970,9 @@ function handleSelects() {
     whiteboardGhostButton.onclick = (e) => {
         wbIsBgTransparent = !wbIsBgTransparent;
         wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
+        if (BUTTONS.main.extraButton) {
+            wbIsBgTransparent ? hide(toggleExtraButton) : show(toggleExtraButton);
+        }
     };
     whiteboardGridBtn.onclick = (e) => {
         toggleCanvasGrid();
@@ -4998,7 +5002,12 @@ function whiteboardAction(data, emit = true) {
             }
             break;
         case 'close':
-            if (wbIsOpen) toggleWhiteboard();
+            if (wbIsOpen) {
+                toggleWhiteboard();
+                if (BUTTONS.main.extraButton) {
+                    show(toggleExtraButton);
+                }
+            }
             break;
         default:
             break;
@@ -6223,7 +6232,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.44',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.45',
         html: `
             <br />
             <div id="about">
