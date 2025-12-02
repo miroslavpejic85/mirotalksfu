@@ -4503,20 +4503,41 @@ function createStickyNote() {
         background: swalBackground,
         title: 'Create Sticky Note',
         html: `
-            <textarea id="stickyNoteText" class="form-control" rows="4" placeholder="Type your note here...">Note</textarea>
-            <br>
-            <label for="stickyNoteColor">Background Color:</label>
-            <input id="stickyNoteColor" type="color" value="#FFEB3B" style="width: 100%; height: 40px; cursor: pointer;">
+        <div class="sticky-note-form">
+            <textarea id="stickyNoteText" class="sticky-note-textarea" rows="4" placeholder="Type your note here...">Note</textarea>
+            <div class="sticky-note-colors-row">
+                <div class="sticky-note-color-group">
+                    <label for="stickyNoteColor" class="sticky-note-color-label">
+                        <i class="fas fa-palette"></i> Background
+                    </label>
+                    <input id="stickyNoteColor" type="color" value="#FFEB3B" class="sticky-note-color-input">
+                </div>
+                <div class="sticky-note-color-group">
+                    <label for="stickyNoteTextColor" class="sticky-note-color-label">
+                        <i class="fas fa-font"></i> Text
+                    </label>
+                    <input id="stickyNoteTextColor" type="color" value="#000000" class="sticky-note-color-input">
+                </div>
+            </div>
+        </div>
         `,
         showCancelButton: true,
         confirmButtonText: 'Create',
+        cancelButtonText: 'Cancel',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         preConfirm: () => {
             return {
-                text: document.getElementById('stickyNoteText').value,
-                color: document.getElementById('stickyNoteColor').value,
+                text: getId('stickyNoteText').value,
+                color: getId('stickyNoteColor').value,
+                textColor: getId('stickyNoteTextColor').value,
             };
+        },
+        didOpen: () => {
+            // Focus textarea for quick typing
+            setTimeout(() => {
+                getId('stickyNoteText').focus();
+            }, 100);
         },
     }).then((result) => {
         if (result.isConfirmed) {
@@ -4526,26 +4547,33 @@ function createStickyNote() {
             const noteRect = new fabric.Rect({
                 left: 100,
                 top: 100,
-                width: 200,
-                height: 150,
+                width: 220,
+                height: 160,
                 fill: noteData.color,
-                stroke: '#D4AF37',
-                strokeWidth: 2,
-                shadow: 'rgba(0,0,0,0.3) 5px 5px 10px',
-                rx: 5,
-                ry: 5,
+                shadow: 'rgba(0,0,0,0.18) 0px 4px 12px',
+                rx: 14,
+                ry: 14,
             });
 
             // Create text for sticky note
             const noteText = new fabric.Textbox(noteData.text, {
                 left: 110,
                 top: 110,
-                width: 180,
-                fontSize: 14,
-                fontFamily: 'Arial',
-                fill: '#000000',
+                width: 200,
+                fontSize: 18,
+                fontFamily: 'Segoe UI, Arial, sans-serif',
+                fill: noteData.textColor,
                 textAlign: 'left',
                 editable: true,
+                fontWeight: 'bold',
+                shadow: new fabric.Shadow({
+                    color: 'rgba(255,255,255,0.18)',
+                    blur: 2,
+                    offsetX: 1,
+                    offsetY: 1,
+                }),
+                padding: 8,
+                cornerSize: 8,
             });
 
             // Group rectangle and text together
@@ -4554,6 +4582,20 @@ function createStickyNote() {
                 top: 100,
                 selectable: true,
                 hasControls: true,
+                hoverCursor: 'pointer',
+            });
+
+            // Make the text editable by handling double-click events
+            stickyNoteGroup.on('mousedblclick', function () {
+                noteText.enterEditing();
+                noteText.hiddenTextarea && noteText.hiddenTextarea.focus();
+            });
+
+            // Exit editing when clicking outside the noteText
+            wbCanvas.on('mouse:down', function (e) {
+                if (noteText.isEditing && e.target !== noteText) {
+                    noteText.exitEditing();
+                }
             });
 
             addWbCanvasObj(stickyNoteGroup);

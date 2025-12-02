@@ -1888,6 +1888,78 @@ progress {
     margin: 5px 0;
 }
 
+/* Sticky Note Dialog Styles */
+.sticky-note-form {
+    display: flex;
+    background: var(--body-bg);
+    flex-direction: column;
+    gap: 1.2rem;
+    padding: 0.5rem;
+}
+
+.sticky-note-colors-row {
+    display: flex;
+    gap: 1rem;
+    width: 100%;
+}
+
+.sticky-note-textarea {
+    width: 100%;
+    padding: 12px;
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 8px;
+    background: rgba(255, 235, 59, 0.05);
+    color: var(--text-color, #ffffff);
+    font-size: 1rem;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    resize: vertical;
+    transition: all 0.3s ease;
+}
+
+.sticky-note-color-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.sticky-note-color-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-color, #ffffff);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.sticky-note-color-input {
+    width: 100%;
+    height: 50px;
+    border: none !important;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.sticky-note-color-input:hover {
+    transform: scale(1.01);
+}
+
+.sticky-note-color-input::-webkit-color-swatch-wrapper {
+    padding: 4px;
+}
+
+.sticky-note-color-input::-webkit-color-swatch {
+    border: none;
+    border-radius: 6px;
+}
+
+.sticky-note-color-input::-moz-color-swatch {
+    border: none;
+    border-radius: 6px;
+}
+
 /*--------------------------------------------------------------
 # Video exit, pin/Unpin btn
 --------------------------------------------------------------*/
