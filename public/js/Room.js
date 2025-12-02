@@ -4796,7 +4796,9 @@ function setupWhiteboardLocalListeners() {
 function mouseDown(e) {
     wbIsDrawing = true;
     if (wbIsEraser && e.target) {
-        wbPop.push(e.target); // To allow redo
+        if (!wbVanishingObjects.includes(e.target)) {
+            wbPop.push(e.target); // To allow redo
+        }
         wbCanvas.remove(e.target);
         return;
     }
@@ -4832,7 +4834,10 @@ function wbCanvasBackgroundColor(color) {
 
 function wbCanvasUndo() {
     if (wbCanvas._objects.length > 0) {
-        wbPop.push(wbCanvas._objects.pop());
+        const obj = wbCanvas._objects.pop();
+        if (!wbVanishingObjects.includes(obj)) {
+            wbPop.push(obj);
+        }
         wbCanvas.renderAll();
     }
 }
