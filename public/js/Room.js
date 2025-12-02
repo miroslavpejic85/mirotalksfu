@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.42
+ * @version 2.0.43
  *
  */
 
@@ -295,8 +295,6 @@ let wbIsEraser = false;
 let wbIsVanishing = false;
 let wbIsBgTransparent = false;
 let wbPop = [];
-let wbHistory = [];
-let wbHistoryStep = 0;
 let wbVanishingObjects = [];
 let coords = {};
 
@@ -4230,10 +4228,6 @@ function setupWhiteboardCanvas() {
     wbCanvas.freeDrawingBrush.color = '#FFFFFF';
     wbCanvas.freeDrawingBrush.width = 3;
     whiteboardIsDrawingMode(true);
-
-    // Initialize history with empty canvas state
-    wbHistory = [JSON.stringify(wbCanvas.toJSON())];
-    wbHistoryStep = 0;
 }
 
 function setupWhiteboardCanvasSize() {
@@ -4742,12 +4736,6 @@ function setupWhiteboardLocalListeners() {
     wbCanvas.on('object:added', function () {
         objectAdded();
     });
-    wbCanvas.on('object:modified', function () {
-        saveWbCanvasState();
-    });
-    wbCanvas.on('object:removed', function () {
-        saveWbCanvasState();
-    });
 }
 
 function mouseDown(e) {
@@ -4774,9 +4762,7 @@ function mouseMove() {
 }
 
 function objectAdded() {
-    if (!wbIsRedoing) {
-        saveWbCanvasState();
-    }
+    if (!wbIsRedoing) wbPop = [];
     wbIsRedoing = false;
     wbHandleVanishingObjects();
 }
@@ -4789,49 +4775,16 @@ function wbCanvasBackgroundColor(color) {
 }
 
 function wbCanvasUndo() {
-    if (wbHistoryStep > 0) {
-        wbIsRedoing = true;
-        wbHistoryStep--;
-        const previousState = wbHistory[wbHistoryStep];
-        wbCanvas.loadFromJSON(previousState, function () {
-            wbCanvas.renderAll();
-            wbIsRedoing = false;
-            wbCanvasToJson();
-        });
+    if (wbCanvas._objects.length > 0) {
+        wbPop.push(wbCanvas._objects.pop());
+        wbCanvas.renderAll();
     }
 }
 
 function wbCanvasRedo() {
-    if (wbHistoryStep < wbHistory.length - 1) {
+    if (wbPop.length > 0) {
         wbIsRedoing = true;
-        wbHistoryStep++;
-        const nextState = wbHistory[wbHistoryStep];
-        wbCanvas.loadFromJSON(nextState, function () {
-            wbCanvas.renderAll();
-            wbIsRedoing = false;
-            wbCanvasToJson();
-        });
-    }
-}
-
-function saveWbCanvasState() {
-    if (wbIsRedoing) return;
-
-    const json = JSON.stringify(wbCanvas.toJSON());
-
-    // Remove any redo states if we're not at the end
-    if (wbHistoryStep < wbHistory.length - 1) {
-        wbHistory = wbHistory.slice(0, wbHistoryStep + 1);
-    }
-
-    // Add new state
-    wbHistory.push(json);
-    wbHistoryStep++;
-
-    // Limit history to 50 states to prevent memory issues
-    if (wbHistory.length > 50) {
-        wbHistory.shift();
-        wbHistoryStep--;
+        wbCanvas.add(wbPop.pop());
     }
 }
 
@@ -4873,13 +4826,10 @@ function wbCanvasToJson() {
 
 function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
-    wbIsRedoing = true; // Prevent saving to history when loading from network
+    wbIsRedoing = true;
     wbCanvas.loadFromJSON(json, function () {
         wbCanvas.renderAll();
         wbIsRedoing = false;
-        // Reset history when receiving canvas from network
-        wbHistory = [json];
-        wbHistoryStep = 0;
     });
     if (!isPresenter && !wbCanvas.isDrawingMode && wbIsLock) {
         wbDrawing(false);
@@ -4976,7 +4926,6 @@ function whiteboardAction(data, emit = true) {
         case 'clear':
             wbCanvas.clear();
             wbCanvas.renderAll();
-            saveWbCanvasState();
             break;
         case 'lock':
             if (!isPresenter) {
@@ -6222,7 +6171,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.42',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.43',
         html: `
             <br />
             <div id="about">
