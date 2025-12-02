@@ -1930,9 +1930,7 @@ progress {
 
 .wb-shortcuts-list li:hover {
     background: rgba(255, 215, 0, 0.15);
-    transform: translateX(4px);
     border-left: 3px solid #ffd700;
-    padding-left: 0.8rem;
 }
 
 /* Sticky Note Dialog Styles */
