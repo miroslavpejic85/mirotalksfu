@@ -4472,20 +4472,28 @@ function whiteboardCloneObject() {
 }
 
 function wbHandleVanishingObjects() {
-    // Handle vanishing pen objects
     if (wbIsVanishing && wbCanvas._objects.length > 0) {
-        const lastObject = wbCanvas._objects[wbCanvas._objects.length - 1];
-        if (lastObject && lastObject.type === 'path') {
-            wbVanishingObjects.push(lastObject);
+        const obj = wbCanvas._objects[wbCanvas._objects.length - 1];
+        if (obj && obj.type === 'path') {
+            wbVanishingObjects.push(obj);
+            const fadeDuration = 1000,
+                vanishTimeout = 5000;
             setTimeout(() => {
-                wbCanvas.remove(lastObject);
+                const start = performance.now();
+                function fade(ts) {
+                    const p = Math.min((ts - start) / fadeDuration, 1);
+                    obj.set('opacity', 1 - p);
+                    wbCanvas.requestRenderAll();
+                    if (p < 1) requestAnimationFrame(fade);
+                }
+                requestAnimationFrame(fade);
+            }, vanishTimeout - fadeDuration);
+            setTimeout(() => {
+                wbCanvas.remove(obj);
                 wbCanvas.renderAll();
                 wbCanvasToJson();
-                const index = wbVanishingObjects.indexOf(lastObject);
-                if (index > -1) {
-                    wbVanishingObjects.splice(index, 1);
-                }
-            }, 5000);
+                wbVanishingObjects.splice(wbVanishingObjects.indexOf(obj), 1);
+            }, vanishTimeout);
         }
     }
 }
@@ -5049,7 +5057,7 @@ function setupWhiteboardShortcuts() {
 
         // Whiteboard undo shortcuts: Cmd+Z/Ctrl+Z
         if ((event.key === 'z' || event.key === 'Z') && (event.ctrlKey || event.metaKey) && !event.shiftKey) {
-            wbCanvasUndo();
+            whiteboardAction(getWhiteboardAction('undo'));
             event.preventDefault();
             return;
         }
@@ -5058,7 +5066,7 @@ function setupWhiteboardShortcuts() {
             ((event.key === 'z' || event.key === 'Z') && (event.ctrlKey || event.metaKey) && event.shiftKey) ||
             ((event.key === 'y' || event.key === 'Y') && (event.ctrlKey || event.metaKey))
         ) {
-            wbCanvasRedo();
+            whiteboardAction(getWhiteboardAction('redo'));
             event.preventDefault();
             return;
         }
