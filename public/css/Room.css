@@ -1740,7 +1740,34 @@ progress {
     border: var(--border);
     box-shadow: var(--box-shadow);
     border-radius: 10px;
+    box-sizing: border-box;
     /* overflow: hidden; */
+}
+
+/* Mobile optimizations */
+@media (max-width: 768px) {
+    #whiteboard {
+        padding: 5px;
+        border-radius: 5px;
+    }
+    
+    .whiteboard-header {
+        padding: 2px;
+    }
+    
+    .whiteboard-header-title button,
+    .whiteboard-header-options button {
+        padding: 5px;
+        font-size: 0.75rem;
+        min-width: 28px;
+        height: 28px;
+    }
+    
+    .whiteboardColorPicker {
+        width: 16px;
+        height: 12px;
+        margin: 1px;
+    }
 }
 
 /* #wbCanvas {
@@ -1939,26 +1966,34 @@ progress {
     background: var(--body-bg);
     flex-direction: column;
     gap: 1.2rem;
-    padding: 0.5rem;
+    padding: 1.2rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+    border: 1px solid rgba(255, 215, 0, 0.18);
+    max-width: 100%;
+    box-sizing: border-box;
 }
 
 .sticky-note-colors-row {
     display: flex;
     gap: 1rem;
     width: 100%;
+    flex-wrap: wrap;
 }
 
 .sticky-note-textarea {
     width: 100%;
     padding: 12px;
     border: 2px solid rgba(255, 215, 0, 0.3);
-    border-radius: 8px;
-    background: rgba(255, 235, 59, 0.05);
+    border-radius: 10px;
+    background: rgba(255, 235, 59, 0.07);
     color: var(--text-color, #ffffff);
     font-size: 1rem;
     font-family: 'Segoe UI', Arial, sans-serif;
     resize: vertical;
     transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(255, 215, 0, 0.08);
+    box-sizing: border-box;
 }
 
 .sticky-note-color-group {
@@ -1966,7 +2001,7 @@ progress {
     flex-direction: column;
     gap: 0.5rem;
     flex: 1;
-    min-width: 0;
+    min-width: 120px;
 }
 
 .sticky-note-color-label {
@@ -1982,9 +2017,10 @@ progress {
     width: 100%;
     height: 50px;
     border: none !important;
-    border-radius: 8px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
+    box-shadow: 0 1px 4px rgba(255, 215, 0, 0.07);
 }
 
 .sticky-note-color-input:hover {
@@ -1993,16 +2029,41 @@ progress {
 
 .sticky-note-color-input::-webkit-color-swatch-wrapper {
     padding: 4px;
+    border-radius: 10px;
 }
 
 .sticky-note-color-input::-webkit-color-swatch {
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
 }
 
 .sticky-note-color-input::-moz-color-swatch {
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+}
+
+/* Responsive styles for small screens */
+@media (max-width: 600px) {
+    .sticky-note-form {
+        padding: 0.7rem;
+        border-radius: 8px;
+        gap: 0.7rem;
+    }
+    .sticky-note-colors-row {
+        flex-direction: column;
+        gap: 0.7rem;
+    }
+    .sticky-note-color-group {
+        min-width: 0;
+    }
+    .sticky-note-textarea {
+        font-size: 0.95rem;
+        padding: 8px;
+    }
+    .sticky-note-color-input {
+        height: 38px;
+        border-radius: 8px;
+    }
 }
 
 /*--------------------------------------------------------------

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.45
+ * @version 2.0.46
  *
  */
 
@@ -96,8 +96,9 @@ const Base64Prefix = 'data:application/pdf;base64,';
 // Whiteboard
 const wbImageInput = 'image/*';
 const wbPdfInput = 'application/pdf';
-const wbWidth = 1366;
-const wbHeight = 768;
+// Reference dimensions for whiteboard (16:9 aspect ratio)
+const wbReferenceWidth = 1920;
+const wbReferenceHeight = 1080;
 const wbGridSize = 20;
 const wbStroke = '#cccccc63';
 let wbGridLines = [];
@@ -4217,6 +4218,7 @@ function toggleWhiteboard() {
 function whiteboardCenter() {
     whiteboard.style.top = '50%';
     whiteboard.style.left = '50%';
+    whiteboard.style.transform = 'translate(-50%, -50%)';
 }
 
 function setupWhiteboard() {
@@ -4225,6 +4227,7 @@ function setupWhiteboard() {
     setupWhiteboardLocalListeners();
     setupWhiteboardShortcuts();
     setupWhiteboardDragAndDrop();
+    setupWhiteboardResizeListener();
 }
 
 function setupWhiteboardCanvas() {
@@ -4235,18 +4238,30 @@ function setupWhiteboardCanvas() {
 }
 
 function setupWhiteboardCanvasSize() {
-    const optimalSize = [wbWidth, wbHeight];
-    const scaleFactorX = window.innerWidth / optimalSize[0];
-    const scaleFactorY = window.innerHeight / optimalSize[1];
-    const scaleFactor = Math.min(scaleFactorX, scaleFactorY, 1);
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
 
-    const newWidth = optimalSize[0] * scaleFactor;
-    const newHeight = optimalSize[1] * scaleFactor;
+    const containerPadding = isMobileDevice ? 10 : 20;
+    const headerHeight = isMobileDevice ? 40 : 60;
+    const extraMargin = 20;
+    
+    const availableWidth = viewportWidth - containerPadding - extraMargin;
+    const availableHeight = viewportHeight - containerPadding - headerHeight - extraMargin;
 
-    wbCanvas.setWidth(newWidth);
-    wbCanvas.setHeight(newHeight);
-    wbCanvas.setZoom(scaleFactor);
-    setWhiteboardSize(newWidth, newHeight);
+    const scaleX = availableWidth / wbReferenceWidth;
+    const scaleY = availableHeight / wbReferenceHeight;
+    const scale = Math.min(scaleX, scaleY);
+
+    const canvasWidth = wbReferenceWidth * scale;
+    const canvasHeight = wbReferenceHeight * scale;
+
+    wbCanvas.setWidth(canvasWidth);
+    wbCanvas.setHeight(canvasHeight);
+    wbCanvas.setZoom(scale);
+
+    setWhiteboardSize(canvasWidth + containerPadding, canvasHeight + headerHeight + containerPadding);
+
+    whiteboardCenter();
 
     wbCanvas.calcOffset();
     wbCanvas.renderAll();
@@ -4255,6 +4270,25 @@ function setupWhiteboardCanvasSize() {
 function setWhiteboardSize(w, h) {
     document.documentElement.style.setProperty('--wb-width', w);
     document.documentElement.style.setProperty('--wb-height', h);
+}
+
+function setupWhiteboardResizeListener() {
+    let resizeTimer;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+            if (wbCanvas && wbIsOpen) {
+                setupWhiteboardCanvasSize();
+            }
+        }, 250);
+    });
+    window.addEventListener('orientationchange', () => {
+        setTimeout(() => {
+            if (wbCanvas && wbIsOpen) {
+                setupWhiteboardCanvasSize();
+            }
+        }, 300);
+    });
 }
 
 function drawCanvasGrid() {
@@ -4889,7 +4923,7 @@ function JsonToWbCanvas(json) {
     if (!wbIsOpen) toggleWhiteboard();
     wbIsRedoing = true;
     wbCanvas.loadFromJSON(json, function () {
-        wbCanvas.renderAll();
+        setupWhiteboardCanvasSize();
         wbIsRedoing = false;
     });
     if (!isPresenter && !wbCanvas.isDrawingMode && wbIsLock) {
@@ -6237,7 +6271,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.45',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.46',
         html: `
             <br />
             <div id="about">
