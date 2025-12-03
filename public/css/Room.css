@@ -1734,6 +1734,8 @@ progress {
     position: absolute;
     margin: auto;
     padding: 10px;
+    max-width: 100vw;
+    max-height: 100vh;
     width: var(--wb-width);
     height: var(--wb-height);
     background: var(--wb-bg);
