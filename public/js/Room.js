@@ -4312,6 +4312,7 @@ function drawCanvasGrid() {
     wbCanvas.add(gridGroup);
     gridGroup.sendToBack();
     wbCanvas.renderAll();
+    setColor(whiteboardGridBtn, 'green');
 }
 
 function createGridLine(x1, y1, x2, y2) {
@@ -4329,6 +4330,7 @@ function removeCanvasGrid() {
     });
     wbGridLines = [];
     wbCanvas.renderAll();
+    setColor(whiteboardGridBtn, 'white');
 }
 
 function toggleCanvasGrid() {
