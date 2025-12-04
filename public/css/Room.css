@@ -1752,11 +1752,11 @@ progress {
         padding: 5px;
         border-radius: 5px;
     }
-    
+
     .whiteboard-header {
         padding: 2px;
     }
-    
+
     .whiteboard-header-title button,
     .whiteboard-header-options button {
         padding: 5px;
@@ -1764,7 +1764,7 @@ progress {
         min-width: 28px;
         height: 28px;
     }
-    
+
     .whiteboardColorPicker {
         width: 16px;
         height: 12px;
