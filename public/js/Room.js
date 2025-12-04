@@ -4889,7 +4889,6 @@ function wbCanvasRedo() {
 function wbCanvasClear() {
     wbCanvas.clear();
     wbCanvas.renderAll();
-    setColor(whiteboardGridBtn, 'white');
 }
 
 function wbCanvasSaveImg() {
@@ -5029,6 +5028,7 @@ function whiteboardAction(data, emit = true) {
             break;
         case 'clear':
             wbCanvasClear();
+            removeCanvasGrid();
             break;
         case 'lock':
             if (!isPresenter) {
