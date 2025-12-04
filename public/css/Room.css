@@ -2002,6 +2002,66 @@ hr {
     margin-bottom: 5px;
 }
 
+.media-start-button {
+    align-items: center;
+    border-radius: 12px;
+    display: inline-flex;
+    font-weight: 700;
+    gap: 10px;
+    padding: 12px 18px;
+    text-transform: none;
+}
+
+.media-start-button i {
+    font-size: 1.2rem;
+}
+
+.media-start-button span {
+    font-size: 1rem;
+}
+
+.permission-overlay {
+    align-items: center;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    inset: 0;
+    justify-content: center;
+    padding: 20px;
+    position: fixed;
+    z-index: 15;
+}
+
+.permission-banner {
+    background: var(--body-bg);
+    border: 1px solid var(--text-color);
+    border-radius: 16px;
+    color: var(--text-color);
+    max-width: 640px;
+    padding: 24px;
+    text-align: left;
+    width: 100%;
+}
+
+.permission-banner p {
+    margin-bottom: 16px;
+}
+
+.permission-banner ul {
+    margin: 0 0 16px 20px;
+    padding: 0;
+}
+
+.permission-retry {
+    background: #2196f3;
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 1rem;
+    font-weight: 700;
+    padding: 10px 18px;
+}
+
 /*
 z-index:
     - 1 videoMediaContainer
