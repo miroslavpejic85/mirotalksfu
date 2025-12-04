@@ -21,6 +21,8 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
 
 console.log('Window Location', window.location);
 
+const autoStartDevices = false; // не дёргать getUserMedia автоматически
+
 const userAgent = navigator.userAgent;
 const parser = new UAParser(userAgent);
 const parserResult = parser.getResult();
@@ -90,6 +92,16 @@ const _PEER = {
 const initUser = document.getElementById('initUser');
 const initVideoContainerClass = document.querySelector('.init-video-container');
 const bars = document.querySelectorAll('.volume-bar');
+const permissionOverlay = getId('permissionOverlay');
+const permissionMessage = getId('permissionMessage');
+const permissionRetryButton = getId('permissionRetryButton');
+
+if (permissionRetryButton) {
+    permissionRetryButton.onclick = () => {
+        hidePermissionOverlay();
+        if (permissionRetryCallback) permissionRetryCallback();
+    };
+}
 
 const Base64Prefix = 'data:application/pdf;base64,';
 
@@ -276,6 +288,9 @@ let isSpeechSynthesisSupported = 'speechSynthesis' in window;
 let joinRoomWithoutAudioVideo = true;
 let joinRoomWithScreen = false;
 
+let permissionDeniedCounters = { audio: 0, video: 0 };
+let permissionRetryCallback = null;
+
 let audio = false;
 let video = false;
 let screen = false;
@@ -445,7 +460,11 @@ function initClient() {
         setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
     }
     setupWhiteboard();
-    initEnumerateDevices();
+    if (autoStartDevices) {
+        initEnumerateDevices();
+    } else {
+        initRoom();
+    }
     setupInitButtons();
 }
 
@@ -612,19 +631,75 @@ async function getUserMediaWithTimeout(constraints, timeout = 10000) {
     return Promise.race([navigator.mediaDevices.getUserMedia(constraints), timer]);
 }
 
-async function initEnumerateVideoDevices() {
-    // allow the video
+function getPermissionMessage(mediaType, blocked = false) {
+    const target = mediaType === 'audio' ? 'микрофону' : 'камере';
+    if (blocked) {
+        return 'Вы заблокировали доступ к камере/микрофону в настройках сайта. Откройте настройки сайта в браузере и разрешите доступ, затем обновите страницу.';
+    }
+    return `Чтобы включить доступ к ${target}, разрешите его в настройках сайта (значок замка в адресной строке) и нажмите «Повторить».`;
+}
+
+function showPermissionOverlay(mediaType, blocked = false, onRetry = null) {
+    const tips = blocked
+        ? ''
+        : `<ul>
+                <li>Убедитесь, что доступ не запрещён в настройках сайта.</li>
+                <li>Выберите корректные устройства, если браузер предложит.</li>
+                <li>Повторите попытку, нажав «Повторить» ниже.</li>
+            </ul>`;
+
+    permissionRetryCallback = typeof onRetry === 'function' ? onRetry : null;
+    permissionMessage.innerHTML = `${getPermissionMessage(mediaType, blocked)}${tips}`;
+    permissionOverlay.dataset.mediaType = mediaType;
+    permissionOverlay.classList.remove('hidden');
+}
+
+function hidePermissionOverlay() {
+    permissionOverlay.classList.add('hidden');
+    permissionOverlay.dataset.mediaType = '';
+    permissionMessage.innerHTML = '';
+    permissionRetryCallback = null;
+}
+
+async function requestMedia(mediaType, constraints, onRetry) {
+    hidePermissionOverlay();
+    const requestConstraints = constraints
+        ? constraints
+        : mediaType === 'video'
+          ? { video: true }
+          : { audio: true };
+
     try {
-        const stream = await getUserMediaWithTimeout({ video: true });
-        await enumerateVideoDevices(stream);
-        isVideoAllowed = true;
+        const stream = await getUserMediaWithTimeout(requestConstraints);
+        permissionDeniedCounters[mediaType] = 0;
+        return stream;
     } catch (err) {
-        console.warn('[initEnumerateVideoDevices] video not allowed', err);
-        isVideoAllowed = false;
+        const name = err?.name || '';
+        if (['NotAllowedError', 'SecurityError', 'PermissionDeniedError'].includes(name)) {
+            permissionDeniedCounters[mediaType] = permissionDeniedCounters[mediaType] + 1;
+            const blocked = permissionDeniedCounters[mediaType] > 1;
+            showPermissionOverlay(mediaType, blocked, onRetry);
+        } else {
+            handleMediaError(mediaType, err);
+        }
+        throw err;
     }
 }
 
-async function enumerateVideoDevices(stream) {
+async function initEnumerateVideoDevices(keepStream = false, onRetry = null) {
+    try {
+        const stream = await requestMedia('video', { video: true }, onRetry);
+        await enumerateVideoDevices(stream, keepStream);
+        isVideoAllowed = true;
+        return stream;
+    } catch (err) {
+        console.warn('[initEnumerateVideoDevices] video not allowed', err);
+        isVideoAllowed = false;
+        if (keepStream) throw err;
+    }
+}
+
+async function enumerateVideoDevices(stream, keepStream = false) {
     console.log('02 ----> Get Video Devices');
 
     if (videoSelect) videoSelect.innerHTML = '';
@@ -646,24 +721,25 @@ async function enumerateVideoDevices(stream) {
             })
         )
         .then(async () => {
-            await stopTracks(stream);
+            if (!keepStream) await stopTracks(stream);
             isEnumerateVideoDevices = true;
         });
 }
 
-async function initEnumerateAudioDevices() {
-    // allow the audio
+async function initEnumerateAudioDevices(keepStream = false, onRetry = null) {
     try {
-        const stream = await getUserMediaWithTimeout({ audio: true });
-        await enumerateAudioDevices(stream);
+        const stream = await requestMedia('audio', { audio: true }, onRetry);
+        await enumerateAudioDevices(stream, keepStream);
         isAudioAllowed = true;
+        return stream;
     } catch (err) {
         console.warn('[initEnumerateAudioDevices] audio not allowed', err);
         isAudioAllowed = false;
+        if (keepStream) throw err;
     }
 }
 
-async function enumerateAudioDevices(stream) {
+async function enumerateAudioDevices(stream, keepStream = false) {
     console.log('03 ----> Get Audio Devices');
 
     if (microphoneSelect) microphoneSelect.innerHTML = '';
@@ -692,7 +768,7 @@ async function enumerateAudioDevices(stream) {
             })
         )
         .then(async () => {
-            await stopTracks(stream);
+            if (!keepStream) await stopTracks(stream);
             isEnumerateAudioDevices = true;
             speakerSelect.disabled = !sinkId;
             // Check if there is speakers
@@ -2188,35 +2264,89 @@ function handleButtons() {
             toggleExtraButtons();
         }
     };
-    startAudioButton.onclick = async () => {
+
+    async function handleStartAudioClick() {
         const moderator = rc.getModerator();
         if (moderator.audio_cant_unmute) {
             return userLog('warning', 'The moderator does not allow you to unmute', 'top-end', 6000);
         }
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
-        if (!isEnumerateAudioDevices) await initEnumerateAudioDevices();
 
-        const producerExist = rc.producerExist(RoomClient.mediaType.audio);
-        console.log('START AUDIO producerExist --->', producerExist);
+        try {
+            const producerExist = rc.producerExist(RoomClient.mediaType.audio);
+            console.log('START AUDIO producerExist --->', producerExist);
 
-        if (producerExist) {
-            await rc.resumeProducer(RoomClient.mediaType.audio);
-            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
-            return;
-        }
+            if (producerExist) {
+                await rc.resumeProducer(RoomClient.mediaType.audio);
+                rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+                return;
+            }
 
-        const audioProducer = await rc.produce(
-            RoomClient.mediaType.audio,
-            microphoneSelect.value
-        );
+            const stream = await initEnumerateAudioDevices(true, handleStartAudioClick);
+            if (!stream) return;
+            initStream = stream;
 
-        if (audioProducer) {
-            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
-        } else {
+            const audioProducer = await rc.produce(
+                RoomClient.mediaType.audio,
+                microphoneSelect.value,
+                false,
+                true
+            );
+
+            if (audioProducer) {
+                rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+            } else {
+                setAudioButtonsDisabled(false);
+            }
+        } catch (error) {
+            console.error('START AUDIO ERROR', error);
+            setAudioButtonsDisabled(false);
+        } finally {
             setAudioButtonsDisabled(false);
         }
-    };
+    }
+
+    async function handleStartVideoClick() {
+        const moderator = rc.getModerator();
+        if (moderator.video_cant_unhide) {
+            return userLog('warning', 'The moderator does not allow you to unhide', 'top-end', 6000);
+        }
+        setVideoButtonsDisabled(true);
+
+        try {
+            const producerExist = rc.producerExist(RoomClient.mediaType.video);
+            console.log('START VIDEO producerExist --->', producerExist);
+
+            if (producerExist) {
+                await rc.resumeProducer(RoomClient.mediaType.video);
+                rc.updatePeerInfo(peer_name, socket.id, 'video', true);
+                return;
+            }
+
+            const stream = await initEnumerateVideoDevices(true, handleStartVideoClick);
+            if (!stream) return;
+            initStream = stream;
+
+            const videoProducer = await rc.produce(
+                RoomClient.mediaType.video,
+                videoSelect.value,
+                false,
+                true
+            );
+
+            if (!videoProducer) {
+                setVideoButtonsDisabled(false);
+            }
+            // await rc.resumeProducer(RoomClient.mediaType.video);
+        } catch (error) {
+            console.error('START VIDEO ERROR', error);
+            setVideoButtonsDisabled(false);
+        } finally {
+            setVideoButtonsDisabled(false);
+        }
+    }
+    startAudioButton.onclick = () => handleStartAudioClick();
     stopAudioButton.onclick = async () => {
         if (isPushToTalkActive) return;
         setAudioButtonsDisabled(true);
@@ -2230,23 +2360,7 @@ function handleButtons() {
 
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
     };
-    startVideoButton.onclick = async () => {
-        const moderator = rc.getModerator();
-        if (moderator.video_cant_unhide) {
-            return userLog('warning', 'The moderator does not allow you to unhide', 'top-end', 6000);
-        }
-        setVideoButtonsDisabled(true);
-        if (!isEnumerateVideoDevices) await initEnumerateVideoDevices();
-        const videoProducer = await rc.produce(
-            RoomClient.mediaType.video,
-            videoSelect.value
-        );
-
-        if (!videoProducer) {
-            setVideoButtonsDisabled(false);
-        }
-        // await rc.resumeProducer(RoomClient.mediaType.video);
-    };
+    startVideoButton.onclick = () => handleStartVideoClick();
     stopVideoButton.onclick = () => {
         setVideoButtonsDisabled(true);
         rc.closeProducer(RoomClient.mediaType.video);
