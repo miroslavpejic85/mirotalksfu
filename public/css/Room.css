@@ -1817,10 +1817,11 @@ progress {
 
 .whiteboard-header-options .dropdown-menu {
     max-height: calc(var(--wb-height) * 1px) !important;
+    max-width: 130px;
 }
 
 .whiteboard-header-options .dropdown-menu button {
-    width: 160px;
+    width: 100%;
 }
 .whiteboard-header-options .dropdown-menu button:hover {
     background: var(--body-bg);
