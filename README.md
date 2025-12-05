@@ -141,36 +141,20 @@ This project is proudly sponsored by
 
 <br/>
 
-When [host.protected](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) or `host.user_auth` is enabled, the host/users can provide a valid token for direct joining the room as specified in the `app/src/config.js` file.
+When [`HOST_PROTECTED`](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) or `HOST_USER_AUTH` is enabled, hosts and users must provide a valid token to join a room directly. Token requirements and configuration details are specified in the `app/src/config.js` file.
 
-| Params           | Value                                                                            | Description                                                                            |
-| ---------------- | -------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| `host.protected` | `true` if protection is enabled, `false` if not (default false)                  | Requires the host to provide a valid username and password during room initialization. |
-| `host.user_auth` | `true` if user authentication is required, `false` if not (default false).       | Determines whether host authentication is required.                                    |
-| `host.users`     | JSON array with user objects: `{"username": "username", "password": "password"}` | List of valid host users with their credentials.                                       |
+In the configuration file `.env`, you can enable security measures for your video conferencing room using the following parameters:
 
-Example:
+- `HOST_PROTECTED`: Set to `true` to require the host to provide a valid username and password during room initialization. Default is `false`.
+- `HOST_USER_AUTH`: Set to `true` to enable user authentication for hosts. Default is `false`.
+- `HOST_USERS`: Define host users in the format: username:password:displayName:allowedRooms (room1,room2...)
 
-```js
-    host: {
-        protected: true,
-        user_auth: true,
-        users: [
-            {
-                username: 'username',
-                password: 'password',
-                displayname: 'displayname',
-                allowed_rooms: ['*'],
-            },
-            {
-                username: 'username2',
-                password: 'password2',
-                displayname: 'displayname2',
-                allowed_rooms: ['room1', 'room2'],
-            },
-            //...
-        ],
-    },
+Example Configuration:
+
+```bash
+HOST_PROTECTED=true
+HOST_USER_AUTH=false
+HOST_USERS="user1:pass1:user-1:*|user2@mail.com:pass2:user-2:*|user3:pass3:user-3:room1,room2"
 ```
 
 </details>
