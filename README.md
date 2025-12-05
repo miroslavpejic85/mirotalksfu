@@ -269,6 +269,48 @@ $ docker-compose down
 </details>
 
 <details open>
+<summary>Self-Hosting</summary>
+
+</br>
+
+![setup](/public/images/self-hosting.png)
+
+## **Requirements**
+
+- A `clean server` running **Ubuntu 22.04 or 24.04 LTS**
+- **Root access** to the Server
+- A **domain or subdomain** pointing to your server’s public IPv4
+
+---
+
+## Note
+
+When **prompted**, simply **enter your domain or subdomain**. Then wait for the installation to complete.
+
+```bash
+# Install MiroTalk SFU
+wget -qO sfu-install.sh https://docs.mirotalk.com/scripts/sfu/sfu-install.sh \
+  && chmod +x sfu-install.sh \
+  && ./sfu-install.sh
+```
+
+```bash
+# Uninstall MiroTalk SFU
+wget -qO sfu-uninstall.sh https://docs.mirotalk.com/scripts/sfu/sfu-uninstall.sh \
+  && chmod +x sfu-uninstall.sh \
+  && ./sfu-uninstall.sh
+```
+
+```bash
+# Update MiroTalk SFU
+wget -qO sfu-update.sh https://docs.mirotalk.com/scripts/sfu/sfu-update.sh \
+  && chmod +x sfu-update.sh \
+  && ./sfu-update.sh
+```
+
+</details>
+
+<details open>
 <summary>Embed a meeting</summary>
 
 <br/>
