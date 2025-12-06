@@ -20,4 +20,3 @@ coverage
 
 # personal env
 .env
-.env.*
