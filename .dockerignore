@@ -1,0 +1,25 @@
+# git folder
+**/.git
+.git
+.gitignore
+
+# npm
+node_modules
+npm-debug.log
+yarn-error.log
+
+# build artifacts
+dist
+coverage
+
+# mac
+.DS_Store
+
+# cache
+.cache
+
+# personal env
+.env
+.env.*
+
+node_modules
