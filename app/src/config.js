@@ -3,6 +3,7 @@
 const base = require('./config.template.js');
 const config = { ...base };
 
+// ---------- UI / БРЕНД KREMLEVKA ----------
 config.ui = config.ui || {};
 config.ui.brand = {
   htmlInjection: true,
@@ -43,6 +44,7 @@ config.ui.brand = {
   }
 };
 
+// Кнопки UI
 config.ui.buttons = config.ui.buttons || {};
 config.ui.buttons.popup = config.ui.buttons.popup || {};
 config.ui.buttons.popup.shareRoomPopup = true;
@@ -50,6 +52,7 @@ config.ui.buttons.popup.shareRoomPopup = true;
 config.ui.buttons.main = config.ui.buttons.main || {};
 config.ui.buttons.main.raiseHandButton = false;
 
+// Небольшой тюнинг битрейтов Mediasoup SFU
 const mediasoupConfig = config.mediasoup || {};
 config.mediasoup = {
   ...mediasoupConfig,
