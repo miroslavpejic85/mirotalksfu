@@ -1,38 +1,25 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 :root {
-    --bg-main: #f8f4f0;
-    --bg-surface: #ffffff;
-
-    --primary-blue: #2f6fd6;
-    --primary-blue-soft: #e0edff;
-
-    --accent-red: #e5483f;
-    --accent-red-soft: #ffe1e0;
-
-    --border-soft: #e1e4ed;
-    --text-main: #1b1e28;
-    --text-muted: #5c6475;
-
-    --body-bg: var(--bg-main);
-    --border: 1px solid var(--border-soft);
+    --body-bg: radial-gradient(#393939, #000000);
+    --border: 0.5px solid rgb(255 255 255 / 32%);
     --border-radius: 1rem;
     --msger-width: 800px;
     --msger-height: 700px;
     --msger-bubble-width: 85%;
-    --msger-bg: var(--bg-surface);
+    --msger-bg: radial-gradient(#393939, #000000);
     --wb-width: 800px;
     --wb-height: 600px;
-    --wb-bg: var(--bg-surface);
-    --select-bg: var(--bg-surface);
-    --left-msg-bg: var(--primary-blue-soft);
-    --right-msg-bg: var(--primary-blue);
-    --private-msg-bg: var(--accent-red-soft);
-    --box-shadow: 0 10px 30px rgba(27, 30, 40, 0.1);
+    --wb-bg: radial-gradient(#393939, #000000);
+    --select-bg: #2c2c2c;
+    --left-msg-bg: #252d31;
+    --right-msg-bg: #056162;
+    --private-msg-bg: #6b1226;
+    --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
-    --settings-bg: var(--bg-surface);
-    --tab-btn-active: var(--primary-blue-soft);
-    --btns-bg-color: rgba(255, 255, 255, 0.92);
+    --settings-bg: radial-gradient(#393939, #000000);
+    --tab-btn-active: rgb(42 42 42 / 70%);
+    --btns-bg-color: rgba(0, 0, 0, 0.7);
     /* buttons bar horizontal */
     --btns-top: 50%;
     --btns-right: 0%;
@@ -59,7 +46,7 @@
 
     --transcription-height: 680px;
     --transcription-width: 420px;
-    --trx-bg: var(--bg-surface);
+    --trx-bg: radial-gradient(#393939, #000000);
 
     --editor-container-width: 100%;
     --editor-container-height: 100%;
@@ -69,18 +56,12 @@
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
 
-    --dd-color: var(--text-main);
+    --dd-color: #ffffff;
 
-    --videoBar-active: 2px solid var(--primary-blue);
+    --videoBar-active: 0.1px solid rgba(102, 190, 255, 0.32);
 }
 
 * {
     outline: none;
     font-family: 'Montserrat';
-}
-
-body {
-    background-color: var(--bg-main);
-    color: var(--text-main);
-    line-height: 1.5;
 }
