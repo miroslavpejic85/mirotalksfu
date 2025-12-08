@@ -39,7 +39,64 @@ body {
     height: 100%;
     overflow: hidden;
     background: var(--body-bg);
+    color: var(--text-main);
     /*background: url('../images/background.jpg');*/
+}
+
+/*--------------------------------------------------------------
+# Buttons theme
+--------------------------------------------------------------*/
+
+.btn-primary,
+button.btn-primary {
+    background-color: var(--primary-blue);
+    border: 1px solid var(--primary-blue);
+    color: #ffffff;
+    box-shadow: 0 0 0 0 transparent;
+}
+
+.btn-primary:hover,
+button.btn-primary:hover {
+    filter: brightness(0.9);
+}
+
+.btn-primary:focus,
+button.btn-primary:focus {
+    box-shadow: 0 0 0 4px var(--primary-blue-soft);
+}
+
+.btn-secondary,
+button.btn-secondary {
+    background-color: var(--bg-surface);
+    border: 1px solid var(--primary-blue-soft);
+    color: var(--primary-blue);
+}
+
+.btn-secondary:hover,
+button.btn-secondary:hover {
+    background-color: var(--primary-blue-soft);
+}
+
+.btn-secondary:focus,
+button.btn-secondary:focus {
+    box-shadow: 0 0 0 4px var(--primary-blue-soft);
+}
+
+.btn-danger,
+button.btn-danger {
+    background-color: var(--accent-red);
+    border: 1px solid var(--accent-red);
+    color: #ffffff;
+}
+
+.btn-danger:hover,
+button.btn-danger:hover {
+    filter: brightness(0.92);
+}
+
+.btn-danger:focus,
+button.btn-danger:focus {
+    box-shadow: 0 0 0 4px var(--accent-red-soft);
 }
 
 /*--------------------------------------------------------------
@@ -67,17 +124,20 @@ body {
 --------------------------------------------------------------*/
 
 #loadingDiv {
-    color: #fff;
+    color: var(--text-main);
     padding: 30px;
     text-align: center;
     border-radius: 10px;
-    background: rgba(0, 0, 0, 0.7);
+    background: var(--bg-surface);
+    border: var(--border);
+    box-shadow: var(--box-shadow);
 }
 #loadingDiv h1 {
     padding: 10px;
     font-size: 60px;
     font-family: 'Montserrat';
     border-radius: 10px;
+    color: var(--primary-blue);
 }
 #loadingDiv img {
     margin-top: 5px;
@@ -272,7 +332,7 @@ body {
     margin-top: 15px;
     padding: 10px;
     background-color: var(--select-bg) !important;
-    color: white;
+    color: var(--text-main);
     border: var(--border);
     border-radius: 5px;
     box-shadow: none;
@@ -288,12 +348,13 @@ body {
     font-size: 1.2rem;
     border: var(--border);
     border-radius: 5px;
-    background-color: transparent;
+    background-color: var(--bg-surface);
+    color: var(--primary-blue);
 }
 
 .init-user button:hover {
-    color: white;
-    background: var(--body-bg);
+    color: var(--primary-blue);
+    background: var(--primary-blue-soft);
 }
 
 /*--------------------------------------------------------------
@@ -506,7 +567,7 @@ body {
 
 #control button:hover {
     transform: translateY(-3px);
-    background: var(--body-bg) !important;
+    background: var(--primary-blue-soft) !important;
 }
 
 #control button i {
@@ -514,11 +575,11 @@ body {
 }
 
 #exitButton {
-    color: red;
+    color: var(--accent-red);
 }
 
 #toggleExtraButton {
-    color: #66beff;
+    color: var(--primary-blue);
 }
 
 /*--------------------------------------------------------------
@@ -540,8 +601,10 @@ body {
     justify-content: center;
     gap: 0.5rem;
     border-radius: 10px;
-    border: none !important;
-    /* box-shadow: var(--box-shadow); */
+    border: var(--border);
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(8px);
+    box-shadow: var(--box-shadow);
 }
 
 #bottomButtons button {
@@ -554,13 +617,14 @@ body {
     padding: 0;
     border-radius: 10px;
     background: var(--btns-bg-color);
+    color: var(--text-main);
     border: none !important;
     transition: all 0.3s ease-in-out;
 }
 
 #bottomButtons button:hover {
     transform: var(--btns-hover-scale);
-    background: var(--body-bg) !important;
+    background: var(--primary-blue-soft) !important;
 }
 
 @media screen and (max-width: 500px) {
@@ -603,7 +667,7 @@ body {
     align-items: center;
     flex-direction: column;
     padding: 10px;
-    background: var(--body-bg);
+    background: var(--bg-surface);
     border: var(--border);
     border-radius: var(--border-radius);
     box-shadow: var(--box-shadow);
@@ -611,7 +675,7 @@ body {
 
 #qrText {
     margin-top: 10px;
-    color: #fff;
+    color: var(--text-main);
     font-size: 16px;
     font-weight: bold;
     text-align: center;
@@ -684,7 +748,7 @@ body {
 #mySettings p {
     display: inline-flex;
     margin: auto;
-    color: #fff;
+    color: var(--text-main);
     padding: 5px;
     background: transparent;
 }
@@ -694,7 +758,7 @@ body {
     width: auto;
     max-width: 310px;
     height: 40px;
-    color: #fff;
+    color: var(--text-main);
     background-color: var(--select-bg) !important;
     border: var(--border);
     border-radius: 5px;
@@ -731,7 +795,7 @@ body {
     justify-content: center; /* Vertical centering */
     align-items: center; /* Horizontal centering */
     text-align: left;
-    color: white;
+    color: var(--text-main);
 }
 
 /* Responsive adjustments */
@@ -747,7 +811,7 @@ body {
     justify-content: center; /* Vertical centering */
     align-items: center; /* Horizontal centering */
     text-align: left;
-    color: white;
+    color: var(--text-main);
 }
 
 #recordingImage {
