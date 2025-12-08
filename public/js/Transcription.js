@@ -367,7 +367,7 @@ class Transcription {
             document.body.removeChild(a);
             rc.sound('download');
         } else {
-            userLog('info', "There isn't transcriptions to save", 'top-end');
+            userLog('info', 'Нет транскриптов для сохранения', 'top-end');
         }
     }
 
@@ -376,11 +376,11 @@ class Transcription {
             Swal.fire({
                 background: swalBackground,
                 position: 'center',
-                title: 'Clean up all transcripts?',
+                title: 'Очистить все транскрипты?',
                 imageUrl: image.delete,
                 showDenyButton: true,
-                confirmButtonText: `Yes`,
-                denyButtonText: `No`,
+                confirmButtonText: `Да`,
+                denyButtonText: `Нет`,
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
@@ -395,7 +395,7 @@ class Transcription {
                 }
             });
         } else {
-            userLog('info', "There isn't transcriptions to delete", 'top-end');
+            userLog('info', 'Нет транскриптов для удаления', 'top-end');
         }
     }
 
@@ -431,7 +431,7 @@ class Transcription {
             hide(transcriptionFooter);
             rc.msgPopup(
                 'info',
-                `${peer_name} wants to start transcriptions for this session, but your browser does not support it. Please use a Chromium-based browser like Google Chrome, Microsoft Edge, or Brave.`
+                `${peer_name} хочет запустить транскрипцию для этой сессии, но ваш браузер это не поддерживает. Пожалуйста, используйте браузер на Chromium, например Google Chrome, Microsoft Edge или Brave.`
             );
             return;
         }
@@ -445,10 +445,10 @@ class Transcription {
             background: swalBackground,
             position: 'center',
             imageUrl: image.transcription,
-            title: 'Start Transcription',
-            text: `${peer_name} wants to start the transcriptions for this session. Would you like to enable them?`,
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            title: 'Запустить транскрипцию',
+            text: `${peer_name} хочет включить транскрипцию для этой сессии. Разрешить?`,
+            confirmButtonText: `Да`,
+            denyButtonText: `Нет`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {

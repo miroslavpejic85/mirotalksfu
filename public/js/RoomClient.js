@@ -1366,8 +1366,8 @@ class RoomClient {
             showConfirmButton: false,
             position: 'top',
             icon: 'warning',
-            title: 'Lost connection',
-            text: `${reason}, trying to reconnect...`,
+            title: 'Соединение потеряно',
+            text: `${reason}, пытаемся переподключиться...`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         });
@@ -1383,10 +1383,10 @@ class RoomClient {
             background: swalBackground,
             position: 'top',
             icon: 'warning',
-            title: 'Unable to reconnect',
-            text: 'Please check your internet connection!',
+            title: 'Не удалось переподключиться',
+            text: 'Пожалуйста, проверьте подключение к интернету!',
             icon: 'error',
-            confirmButtonText: 'Join Room',
+            confirmButtonText: 'Войти в комнату',
             confirmButtonColor: '#18392B',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1450,8 +1450,8 @@ class RoomClient {
     updateReconnectAlert(delay) {
         if (this.reconnectAlert) {
             this.reconnectAlert.update({
-                title: 'Reconnecting',
-                text: `Reconnection attempt in ${delay / 1000} seconds...`,
+                title: 'Повторное подключение',
+                text: `Попытка переподключения через ${delay / 1000} секунд...`,
             });
         }
     }
@@ -1476,9 +1476,9 @@ class RoomClient {
             background: swalBackground,
             position: 'top',
             icon: 'warning',
-            title: 'Server away',
-            text: 'The server seems away or in maintenance, please wait until it come back up.',
-            denyButtonText: `Leave room`,
+            title: 'Сервер недоступен',
+            text: 'Похоже, сервер отсутствует или на обслуживании. Пожалуйста, подождите, пока он снова станет доступен.',
+            denyButtonText: `Покинуть комнату`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -1560,10 +1560,10 @@ class RoomClient {
             background: swalBackground,
             imageUrl: image.user,
             position: 'center',
-            title: 'Username',
-            html: `The Username is already in use. <br/> Please try with another one`,
+            title: 'Имя пользователя',
+            html: `Это имя уже занято. <br/> Пожалуйста, попробуйте другое`,
             showDenyButton: false,
-            confirmButtonText: `OK`,
+            confirmButtonText: `ОК`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -1608,12 +1608,12 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             imageUrl: image.broadcasting,
-            title: 'Room broadcasting Enabled',
-            text: 'Would you like to continue the room broadcast?',
+            title: 'Трансляция комнаты включена',
+            text: 'Хотите продолжить трансляцию комнаты?',
             showDenyButton: true,
             confirmButtonColor: '#18392B',
-            confirmButtonText: `Yes`,
-            denyButtonText: `No`,
+            confirmButtonText: `Да`,
+            denyButtonText: `Нет`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
