@@ -1066,8 +1066,8 @@ function getRoomDuration() {
             Swal.fire({
                 background: swalBackground,
                 position: 'center',
-                title: 'Time Limit Reached',
-                text: 'The room has reached its time limit and will close shortly',
+                title: 'Лимит времени достигнут',
+                text: 'Время комнаты истекло, она скоро закроется',
                 icon: 'warning',
                 timer: 6000, // 6 seconds
                 timerProgressBar: true,
@@ -1513,22 +1513,22 @@ async function shareRoom(useNavigator = false) {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: 'Share the room',
+            title: 'Поделиться комнатой',
             html: `
             <div id="qrRoomContainer">
                 <canvas id="qrRoom"></canvas>
             </div>
             <br/>
-            <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
+            <p style="background:transparent; color:rgb(8, 189, 89);">Присоединяйтесь с мобильного устройства</p>
+            <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">Приложения не нужны: просто считайте QR‑код камерой телефона или пригласите кого‑то, отправив эту ссылку</p>
             <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
             showDenyButton: true,
             showCancelButton: true,
             cancelButtonColor: 'red',
             denyButtonColor: 'green',
-            confirmButtonText: `Copy URL`,
-            denyButtonText: `Email invite`,
-            cancelButtonText: `Close`,
+            confirmButtonText: `Скопировать ссылку`,
+            denyButtonText: `Пригласить по email`,
+            cancelButtonText: `Закрыть`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -1578,7 +1578,7 @@ function copyRoomURL() {
     tmpInput.setSelectionRange(0, 99999); // For mobile devices
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
-    userLog('info', 'Meeting URL copied to clipboard 👍', 'top-end');
+    userLog('info', 'Ссылка на встречу скопирована в буфер 👍', 'top-end');
 }
 
 function copyToClipboard(txt, showTxt = true) {
@@ -1590,8 +1590,8 @@ function copyToClipboard(txt, showTxt = true) {
     navigator.clipboard.writeText(tmpInput.value);
     document.body.removeChild(tmpInput);
     showTxt
-        ? userLog('info', `${txt} copied to clipboard 👍`, 'top-end')
-        : userLog('info', `Copied to clipboard 👍`, 'top-end');
+        ? userLog('info', `${txt} скопировано в буфер 👍`, 'top-end')
+        : userLog('info', `Скопировано в буфер 👍`, 'top-end');
 }
 
 function shareRoomByEmail() {
@@ -1601,10 +1601,10 @@ function shareRoomByEmail() {
         background: swalBackground,
         imageUrl: image.email,
         position: 'center',
-        title: 'Select a Date and Time',
+        title: 'Выберите дату и время',
         html: '<input type="text" id="datetimePicker" class="flatpickr" />',
         showCancelButton: true,
-        confirmButtonText: 'OK',
+        confirmButtonText: 'ОК',
         cancelButtonColor: 'red',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1616,8 +1616,8 @@ function shareRoomByEmail() {
                     ? 'Password: ' + (room_password || rc.RoomPassword) + newLine
                     : '';
             const email = '';
-            const emailSubject = `Please join our ${BRAND.app.name} Video Chat Meeting`;
-            const emailBody = `The meeting is scheduled at: ${newLine} DateTime: ${selectedDateTime} ${newLine}${roomPassword}Click to join: ${RoomURL} ${newLine}`;
+            const emailSubject = `Пожалуйста, подключитесь к нашей встрече ${BRAND.app.name}`;
+            const emailBody = `Встреча запланирована: ${newLine} Дата и время: ${selectedDateTime} ${newLine}${roomPassword}Ссылка для входа: ${RoomURL} ${newLine}`;
             document.location = 'mailto:' + email + '?subject=' + emailSubject + '&body=' + emailBody;
         },
     });
@@ -2743,25 +2743,25 @@ function handleMediaError(mediaType, err, redirectURL = false) {
     switch (errorName) {
         case 'NotFoundError':
         case 'DevicesNotFoundError':
-            errorMessage = 'Required track is missing';
+            errorMessage = 'Необходимая дорожка отсутствует';
             break;
         case 'NotReadableError':
         case 'TrackStartError':
-            errorMessage = 'Already in use';
+            errorMessage = 'Устройство уже используется';
             break;
         case 'OverconstrainedError':
         case 'ConstraintNotSatisfiedError':
-            errorMessage = 'Constraints cannot be satisfied by available devices';
+            errorMessage = 'Доступные устройства не удовлетворяют ограничениям';
             if (videoQuality.selectedIndex != 0) {
                 videoQuality.selectedIndex = rc.videoQualitySelectedIndex;
             }
             break;
         case 'NotAllowedError':
         case 'PermissionDeniedError':
-            errorMessage = 'Permission denied in browser';
+            errorMessage = 'Доступ запрещён в браузере';
             break;
         case 'TypeError':
-            errorMessage = 'Empty constraints object';
+            errorMessage = 'Пустой объект ограничений';
             break;
         default:
             hasGetUserMediaError = false;
@@ -2770,23 +2770,23 @@ function handleMediaError(mediaType, err, redirectURL = false) {
 
     let html = `
         <ul style="text-align: left">
-            <li>Media type: ${normalizedMediaType}</li>
-            <li>Error name: ${errorName}</li>
-            <li>Error message: <p style="color: red">${errorMessage}</p></li>`;
+            <li>Тип медиа: ${normalizedMediaType}</li>
+            <li>Название ошибки: ${errorName}</li>
+            <li>Сообщение об ошибке: <p style=\"color: red\">${errorMessage}</p></li>`;
 
     if (hasGetUserMediaError) {
         html += `
-            <li>Common: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">getUserMedia errors</a></li>`;
+            <li>Частые: <a href="https://blog.addpipe.com/common-getusermedia-errors" target="_blank">ошибки getUserMedia</a></li>`;
     }
 
     html += `
         </ul>
     `;
 
-    popupHtmlMessage(null, image.forbidden, 'Access denied', html, 'center', redirectURL);
+    popupHtmlMessage(null, image.forbidden, 'Доступ запрещён', html, 'center', redirectURL);
 
     throw new Error(
-        `Access denied for ${normalizedMediaType} device [${errorName}]: ${errorMessage} check the common getUserMedia errors: https://blog.addpipe.com/common-getusermedia-errors/`
+        `Доступ к устройству ${normalizedMediaType} запрещён [${errorName}]: ${errorMessage}. См. типичные ошибки getUserMedia: https://blog.addpipe.com/common-getusermedia-errors/`
     );
 }
 
@@ -3869,11 +3869,11 @@ function leaveFeedback(allowCancel) {
         background: swalBackground,
         imageUrl: image.feedback,
         position: 'top',
-        title: 'Leave a feedback',
-        text: 'Do you want to rate your Kremlevka experience?',
-        confirmButtonText: `Yes`,
-        denyButtonText: `No`,
-        cancelButtonText: `Cancel`,
+        title: 'Оставьте отзыв',
+        text: 'Хотите оценить свой опыт использования Kremlevka?',
+        confirmButtonText: `Да`,
+        denyButtonText: `Нет`,
+        cancelButtonText: `Отмена`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -4263,10 +4263,10 @@ function whiteboardAddObj(type) {
         case 'imgUrl':
             Swal.fire({
                 background: swalBackground,
-                title: 'Image URL',
+                title: 'URL изображения',
                 input: 'text',
                 showCancelButton: true,
-                confirmButtonText: 'OK',
+                confirmButtonText: 'ОК',
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             }).then((result) => {
@@ -4277,16 +4277,16 @@ function whiteboardAddObj(type) {
                             addWbCanvasObj(myImg);
                         });
                     } else {
-                        userLog('error', 'The URL is not a valid image', 'top-end');
+                        userLog('error', 'Этот URL не содержит допустимое изображение', 'top-end');
                     }
                 }
             });
             break;
         case 'imgFile':
-            setupFileSelection('Select the image', wbImageInput, renderImageToCanvas);
+            setupFileSelection('Выберите изображение', wbImageInput, renderImageToCanvas);
             break;
         case 'pdfFile':
-            setupFileSelection('Select the PDF', wbPdfInput, renderPdfToCanvas);
+            setupFileSelection('Выберите PDF', wbPdfInput, renderPdfToCanvas);
             break;
         case 'text':
             const text = new fabric.IText('Lorem Ipsum', {
@@ -4356,7 +4356,7 @@ function setupFileSelection(title, accept, renderToCanvas) {
         input: 'file',
         html: `
         <div id="dropArea">
-            <p>Drag and drop your file here</p>
+            <p>Перетащите файл сюда</p>
         </div>
         `,
         inputAttributes: {
@@ -4371,8 +4371,8 @@ function setupFileSelection(title, accept, renderToCanvas) {
             dropArea.addEventListener('drop', handleDrop);
         },
         showDenyButton: true,
-        confirmButtonText: `OK`,
-        denyButtonText: `Cancel`,
+        confirmButtonText: `ОК`,
+        denyButtonText: `Отмена`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -4631,11 +4631,11 @@ function confirmClearBoard() {
         background: swalBackground,
         imageUrl: image.delete,
         position: 'center',
-        title: 'Clean the board',
-        text: 'Are you sure you want to clean the board?',
+        title: 'Очистить доску',
+        text: 'Вы уверены, что хотите очистить доску?',
         showDenyButton: true,
-        confirmButtonText: `Yes`,
-        denyButtonText: `No`,
+        confirmButtonText: `Да`,
+        denyButtonText: `Нет`,
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
@@ -4661,7 +4661,7 @@ function toggleLockUnlockWhiteboard() {
     whiteboardAction(getWhiteboardAction(action));
 
     if (wbIsLock) {
-        userLog('info', 'The whiteboard is locked. \n The participants cannot interact with it.', 'top-right');
+        userLog('info', 'Доска заблокирована. \n Участники не могут взаимодействовать с ней.', 'top-right');
         sound('locked');
     }
 }
@@ -5715,12 +5715,12 @@ window.addEventListener('popstate', (event) => {
     Swal.fire({
         background: swalBackground,
         position: 'top',
-        title: 'Leave session?',
-        text: 'Are you sure you want to exit this session?',
+        title: 'Выйти из сессии?',
+        text: 'Вы уверены, что хотите завершить эту сессию?',
         icon: 'warning',
         showCancelButton: true,
-        confirmButtonText: 'Yes',
-        cancelButtonText: 'No',
+        confirmButtonText: 'Да',
+        cancelButtonText: 'Нет',
         confirmButtonColor: '#3085d6',
         cancelButtonColor: '#d33',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -5765,24 +5765,24 @@ function showAbout() {
                     BRAND.about?.html && BRAND.about.html.trim() !== ''
                         ? BRAND.about.html
                         : `
-                            <button 
-                                id="support-button" 
-                                data-umami-event="Support button" 
-                                onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
-                                <i class="fas fa-heart"></i> Support
+                                <button
+                                    id="support-button"
+                                    data-umami-event="Support button"
+                                    onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
+                                <i class="fas fa-heart"></i> Поддержать
                             </button>
                             <br /><br /><br />
-                            Author: 
-                            <a 
-                                id="linkedin-button" 
-                                data-umami-event="Linkedin button" 
-                                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" 
-                                target="_blank"> 
+                            Автор:
+                            <a
+                                id="linkedin-button"
+                                data-umami-event="Linkedin button"
+                                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
+                                target="_blank">
                                 Miroslav Pejic
                             </a>
                             <br /><br />
-                            Email: 
-                            <a 
+                            Электронная почта:
+                            <a
                                 id="email-button" 
                                 data-umami-event="Email button" 
                                 href="mailto:miroslav.pejic.85@gmail.com?subject=Kremlevka info">
