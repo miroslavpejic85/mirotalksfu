@@ -18,6 +18,7 @@
     vertical-align: middle;
     overflow: hidden;
     transition: opacity 500ms;
+    background: var(--bg-main);
     /* border: 3px solid blue; */
 }
 
@@ -42,9 +43,9 @@
     align-self: center;
     overflow: hidden;
     display: inline-block;
-    background: transparent;
+    background: var(--bg-surface);
     border-radius: 10px;
-    /* border: var(--border); */
+    border: var(--border);
     box-shadow: var(--box-shadow);
     animation: show 0.4s ease;
 }
@@ -62,7 +63,7 @@
     position: absolute;
     display: none;
     top: 0;
-    color: rgb(0, 255, 71);
+    color: var(--primary-blue);
     font-size: 14px;
     align-items: center;
     padding: 5px;
@@ -70,7 +71,7 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.4);
+    background: var(--primary-blue-soft);
 }
 
 .videoAvatarImage {
@@ -136,7 +137,8 @@
     font-weight: bold;
     text-align: center;
     background: var(--bg-surface);
-    border-bottom: var(--border);
+    border-bottom: 1px solid var(--border-soft);
+    color: var(--text-main);
     cursor: default;
     overflow: hidden;
 }
@@ -197,12 +199,12 @@
 .videoMenuBar button:hover,
 .videoAvatarMenuBar button:hover,
 .videoMenuBarShare button:hover {
-    color: grey;
+    color: var(--text-muted);
     transition: all 0.3s ease-in-out;
 }
 
 .expand-video .fa-bars {
-    color: #66beff !important;
+    color: var(--primary-blue) !important;
 }
 
 .expand-video .dropdown-button {
@@ -219,7 +221,8 @@
     max-width: 500px;
     padding: 20px;
     border-radius: 5px;
-    background: var(--body-bg);
+    background: var(--bg-surface);
+    border: var(--border);
     box-shadow: var(--box-shadow);
 }
 
@@ -263,8 +266,8 @@
 .expand-video-content .peer-name {
     font-size: 18px;
     font-weight: bold;
-    color: #fff;
-    background: var(--body-bg);
+    color: var(--text-main);
+    background: var(--primary-blue-soft);
     border-radius: 10px;
     padding: 6px;
     width: 100%;
@@ -291,8 +294,8 @@
     text-align: center;
     padding: 0 12px;
     font-size: 16px;
-    color: #fff;
-    background: var(--btns-bg-color);
+    color: var(--primary-blue);
+    background: var(--primary-blue-soft);
     min-width: 48px;
     min-height: 48px;
     justify-content: center;
@@ -307,7 +310,7 @@
 
 /* Hover & Active Effects */
 .expand-video-content .button-group button:hover {
-    background: var(--body-bg);
+    background: var(--bg-surface);
     transform: scale(1.05);
 }
 
@@ -328,8 +331,8 @@
 }
 
 .expand-video-content button:hover {
-    color: white;
-    background: var(--body-bg);
+    color: var(--primary-blue);
+    background: var(--bg-surface);
 }
 
 #videoMediaContainer video {
@@ -401,7 +404,7 @@ video:fullscreen {
 
 input[type='range'] {
     /* display: none; */
-    color: #fff;
+    color: var(--primary-blue);
     width: 50px;
     cursor: pointer;
 }

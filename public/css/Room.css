@@ -38,7 +38,7 @@ body {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: var(--body-bg);
+    background: var(--bg-main);
     color: var(--text-main);
     /*background: url('../images/background.jpg');*/
 }
@@ -506,7 +506,7 @@ button.btn-danger:focus {
 
 .show-error {
     margin-top: 10px !important;
-    color: red !important;
+    color: var(--accent-red) !important;
     opacity: 0 !important;
     transition: opacity 0.5s ease-in-out !important;
     display: none;
@@ -590,7 +590,7 @@ button.btn-danger:focus {
     z-index: 3;
     position: fixed;
     display: none;
-    padding: 5px;
+    padding: 8px 10px;
     top: var(--bottom-btns-top);
     left: var(--bottom-btns-left);
     bottom: var(--bottom-btns-bottom);
@@ -599,12 +599,13 @@ button.btn-danger:focus {
     margin-bottom: var(--bottom-btns-margin-bottom);
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
+    gap: 0.75rem;
     border-radius: 10px;
     border: var(--border);
     background: rgba(255, 255, 255, 0.92);
     backdrop-filter: blur(8px);
     box-shadow: var(--box-shadow);
+    flex-wrap: wrap;
 }
 
 #bottomButtons button {
@@ -627,6 +628,20 @@ button.btn-danger:focus {
     background: var(--primary-blue-soft) !important;
 }
 
+@media screen and (max-width: 768px) {
+    #bottomButtons {
+        width: calc(100% - 24px);
+        gap: 0.65rem;
+        padding: 10px 12px;
+        border-radius: 14px;
+    }
+    #bottomButtons button {
+        width: 68px;
+        height: 68px;
+        font-size: 1.6rem;
+    }
+}
+
 @media screen and (max-width: 500px) {
     #control button {
         padding: 20px;
@@ -637,7 +652,7 @@ button.btn-danger:focus {
     #bottomButtons button {
         width: 64px;
         height: 64px;
-        font-size: 1.6rem;
+        font-size: 1.5rem;
     }
 }
 
@@ -899,7 +914,7 @@ button.btn-danger:focus {
     margin: 20px 0;
     font-size: 16px;
     text-align: left;
-    color: #fff;
+    color: var(--text-main);
     border-radius: 10px;
     background: var(--body-bg);
 }
@@ -913,7 +928,7 @@ button.btn-danger:focus {
     font-weight: bold;
 }
 #shortcutsTable td i {
-    color: #007bff;
+    color: var(--primary-blue);
 }
 #shortcutsTable tr:nth-child(even) {
     background: var(--body-bg);
@@ -925,7 +940,7 @@ button.btn-danger:focus {
 
 .file-table {
     margin-top: 10px;
-    color: #fff;
+    color: var(--text-main);
     width: 100%;
     border-collapse: collapse;
     border: var(--border);
@@ -952,7 +967,7 @@ button.btn-danger:focus {
     width: 8px;
 }
 .file-table tbody::-webkit-scrollbar-thumb {
-    background: #888;
+    background: var(--border-soft);
     border-radius: 4px;
 }
 .file-item {
@@ -967,7 +982,7 @@ button.btn-danger:focus {
     margin-top: 20px;
     margin-left: 5px;
     font-weight: bold;
-    color: #888;
+    color: var(--text-muted);
 }
 
 .input-container {
@@ -980,7 +995,7 @@ button.btn-danger:focus {
     margin-top: 5px;
     padding: 10px;
     width: 100%;
-    color: #fff;
+    color: var(--text-main);
     border: none;
     background: var(--select-bg) !important;
 }
@@ -1043,8 +1058,8 @@ button.btn-danger:focus {
 }
 
 .dropdown-menu button:hover {
-    background: var(--body-bg);
-    color: #ffffff;
+    background: var(--primary-blue-soft);
+    color: var(--primary-blue);
 }
 
 .dropdown-menu button i,
@@ -1204,7 +1219,7 @@ button.btn-danger:focus {
     display: flex;
     align-items: center;
     width: 100%;
-    background-color: var(--body-bg);
+    background-color: var(--bg-surface);
     border-radius: 8px;
 }
 
@@ -1212,17 +1227,17 @@ button.btn-danger:focus {
     flex: 1;
     height: 5px;
     margin: 0 2px;
-    background-color: #ddd;
+    background-color: var(--border-soft);
     border-radius: 5px;
     transition: all 0.3s ease;
 }
 
 .active {
-    background-color: #3498db;
+    background-color: var(--primary-blue);
 }
 
 .inactive {
-    background-color: #ddd;
+    background-color: var(--border-soft);
 }
 
 /*--------------------------------------------------------------
@@ -1271,8 +1286,8 @@ button.btn-danger:focus {
     display: flex;
     justify-content: space-between;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
-    color: #666;
+    background: var(--primary-blue-soft);
+    color: var(--primary-blue);
     cursor: move;
 }
 
@@ -1281,7 +1296,7 @@ button.btn-danger:focus {
     border: none;
     transition: all 0.3s ease-in-out;
     background: transparent;
-    color: #fff;
+    color: var(--primary-blue);
     border-radius: 5px;
     transition: background 0.23s;
 }
@@ -1305,7 +1320,7 @@ button.btn-danger:focus {
     background: transparent;
 }
 .transcription-chat::-webkit-scrollbar-thumb {
-    background: black;
+    background: var(--border-soft);
 }
 
 /*--------------------------------------------------------------

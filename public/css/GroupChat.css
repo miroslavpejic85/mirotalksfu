@@ -144,7 +144,7 @@
 }
 
 .all-participants-img:hover {
-    background-color: #1d8ecd;
+    background-color: var(--primary-blue);
     transition: all 0.3s ease-in-out;
 }
 
@@ -308,7 +308,7 @@
     color: #e47297;
 }
 .me {
-    color: #1d8ecd;
+    color: var(--primary-blue);
 }
 
 .float-right {
