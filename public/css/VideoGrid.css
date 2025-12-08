@@ -86,12 +86,12 @@
 .audio {
     position: absolute;
     right: 0;
-    color: #fff;
+    color: var(--text-main);
     margin: 5px;
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--primary-blue-soft);
 }
 
 .username {
@@ -99,7 +99,7 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    color: #fff;
+    color: var(--text-main);
     font-size: 10px;
     display: flex;
     align-items: center;
@@ -108,19 +108,20 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: var(--body-bg);
+    background: var(--bg-surface);
+    border: var(--border);
 }
 
 .fscreen {
     position: absolute;
     right: 0;
     bottom: 0px;
-    color: #fff;
+    color: var(--text-main);
     margin: 5px;
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: rgba(0, 0, 0, 0.1);
+    background: var(--primary-blue-soft);
 }
 
 .videoMenuBar {
@@ -134,7 +135,8 @@
     font-size: small;
     font-weight: bold;
     text-align: center;
-    background: var(--body-bg);
+    background: var(--bg-surface);
+    border-bottom: var(--border);
     cursor: default;
     overflow: hidden;
 }
@@ -146,16 +148,17 @@
     right: 30px;
     padding: 10px;
     border-radius: 50%;
-    color: white;
+    color: var(--text-main);
     align-items: center;
     justify-content: center;
     cursor: pointer;
     user-select: none;
-    background: var(--body-bg);
+    background: var(--bg-surface);
+    border: var(--border);
 }
 
 .videoMenuBarClose:hover {
-    background: var(--btns-bg-color);
+    background: var(--primary-blue-soft);
 }
 
 .videoAvatarMenuBar,
@@ -169,7 +172,7 @@
     top: 0;
     left: 0;
     padding: 10px;
-    background: rgba(0, 0, 0, 0.2);
+    background: var(--primary-blue-soft);
     font-size: small;
     font-weight: bold;
     text-align: center;
@@ -184,7 +187,7 @@
 .videoMenuBarShare button {
     font-size: 1.2rem;
     float: right;
-    color: #fff;
+    color: var(--text-main);
     background: transparent;
     border-radius: 5px;
     display: inline;
