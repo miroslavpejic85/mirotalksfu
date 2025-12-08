@@ -18,7 +18,6 @@
     vertical-align: middle;
     overflow: hidden;
     transition: opacity 500ms;
-    background: var(--bg-main);
     /* border: 3px solid blue; */
 }
 
@@ -43,9 +42,9 @@
     align-self: center;
     overflow: hidden;
     display: inline-block;
-    background: var(--bg-surface);
+    background: transparent;
     border-radius: 10px;
-    border: var(--border);
+    /* border: var(--border); */
     box-shadow: var(--box-shadow);
     animation: show 0.4s ease;
 }
@@ -63,7 +62,7 @@
     position: absolute;
     display: none;
     top: 0;
-    color: var(--primary-blue);
+    color: rgb(0, 255, 71);
     font-size: 14px;
     align-items: center;
     padding: 5px;
@@ -71,7 +70,7 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.4);
 }
 
 .videoAvatarImage {
@@ -87,12 +86,12 @@
 .audio {
     position: absolute;
     right: 0;
-    color: var(--text-main);
+    color: #fff;
     margin: 5px;
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .username {
@@ -100,7 +99,7 @@
     position: absolute;
     right: 0;
     bottom: 0;
-    color: var(--text-main);
+    color: #fff;
     font-size: 10px;
     display: flex;
     align-items: center;
@@ -109,20 +108,19 @@
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: var(--bg-surface);
-    border: var(--border);
+    background: var(--body-bg);
 }
 
 .fscreen {
     position: absolute;
     right: 0;
     bottom: 0px;
-    color: var(--text-main);
+    color: #fff;
     margin: 5px;
     width: auto;
     height: 25px;
     border-radius: 5px;
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.1);
 }
 
 .videoMenuBar {
@@ -136,9 +134,7 @@
     font-size: small;
     font-weight: bold;
     text-align: center;
-    background: var(--bg-surface);
-    border-bottom: 1px solid var(--border-soft);
-    color: var(--text-main);
+    background: var(--body-bg);
     cursor: default;
     overflow: hidden;
 }
@@ -150,17 +146,16 @@
     right: 30px;
     padding: 10px;
     border-radius: 50%;
-    color: var(--text-main);
+    color: white;
     align-items: center;
     justify-content: center;
     cursor: pointer;
     user-select: none;
-    background: var(--bg-surface);
-    border: var(--border);
+    background: var(--body-bg);
 }
 
 .videoMenuBarClose:hover {
-    background: var(--primary-blue-soft);
+    background: var(--btns-bg-color);
 }
 
 .videoAvatarMenuBar,
@@ -174,7 +169,7 @@
     top: 0;
     left: 0;
     padding: 10px;
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.2);
     font-size: small;
     font-weight: bold;
     text-align: center;
@@ -189,7 +184,7 @@
 .videoMenuBarShare button {
     font-size: 1.2rem;
     float: right;
-    color: var(--text-main);
+    color: #fff;
     background: transparent;
     border-radius: 5px;
     display: inline;
@@ -199,12 +194,12 @@
 .videoMenuBar button:hover,
 .videoAvatarMenuBar button:hover,
 .videoMenuBarShare button:hover {
-    color: var(--text-muted);
+    color: grey;
     transition: all 0.3s ease-in-out;
 }
 
 .expand-video .fa-bars {
-    color: var(--primary-blue) !important;
+    color: #66beff !important;
 }
 
 .expand-video .dropdown-button {
@@ -221,8 +216,7 @@
     max-width: 500px;
     padding: 20px;
     border-radius: 5px;
-    background: var(--bg-surface);
-    border: var(--border);
+    background: var(--body-bg);
     box-shadow: var(--box-shadow);
 }
 
@@ -266,8 +260,8 @@
 .expand-video-content .peer-name {
     font-size: 18px;
     font-weight: bold;
-    color: var(--text-main);
-    background: var(--primary-blue-soft);
+    color: #fff;
+    background: var(--body-bg);
     border-radius: 10px;
     padding: 6px;
     width: 100%;
@@ -294,8 +288,8 @@
     text-align: center;
     padding: 0 12px;
     font-size: 16px;
-    color: var(--primary-blue);
-    background: var(--primary-blue-soft);
+    color: #fff;
+    background: var(--btns-bg-color);
     min-width: 48px;
     min-height: 48px;
     justify-content: center;
@@ -310,7 +304,7 @@
 
 /* Hover & Active Effects */
 .expand-video-content .button-group button:hover {
-    background: var(--bg-surface);
+    background: var(--body-bg);
     transform: scale(1.05);
 }
 
@@ -331,8 +325,8 @@
 }
 
 .expand-video-content button:hover {
-    color: var(--primary-blue);
-    background: var(--bg-surface);
+    color: white;
+    background: var(--body-bg);
 }
 
 #videoMediaContainer video {
@@ -404,7 +398,7 @@ video:fullscreen {
 
 input[type='range'] {
     /* display: none; */
-    color: var(--primary-blue);
+    color: #fff;
     width: 50px;
     cursor: pointer;
 }
