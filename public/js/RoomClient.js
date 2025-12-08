@@ -3367,7 +3367,7 @@ class RoomClient {
         }
 
         i = document.createElement('img');
-        i.className = 'videoAvatarImage center'; // pulsate
+        i.className = 'videoAvatarImage';
         i.id = peer_id + '__img';
 
         p = document.createElement('p');
