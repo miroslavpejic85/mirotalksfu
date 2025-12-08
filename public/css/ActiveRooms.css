@@ -1,12 +1,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 :root {
-    --primary-bg: #1e2229;
-    --card-bg: #15181d;
-    --accent: #1870d7;
-    --accent2: #2186ff;
-    --text: #f6f8fa;
-    --card-shadow: 0 2px 8px #15181d;
+    --primary-bg: var(--bg-main);
+    --card-bg: var(--bg-surface);
+    --accent: var(--primary-blue);
+    --accent2: var(--primary-blue-soft);
+    --text: var(--text-main);
+    --card-shadow: 0 8px 24px rgba(27, 30, 40, 0.12);
 }
 
 body {
@@ -21,14 +21,15 @@ body {
     max-width: 1200px;
     margin: 40px auto;
     background: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: var(--card-shadow);
     padding: 32px;
+    border: 1px solid var(--border-soft);
 }
 
 h1 {
     text-align: center;
-    color: var(--accent2);
+    color: var(--accent);
     margin-bottom: 32px;
     letter-spacing: 1px;
 }
@@ -37,22 +38,24 @@ h1 {
     display: flex;
     justify-content: center;
     margin-bottom: 28px;
+    gap: 8px;
 }
 
 .search-input {
     padding: 10px 16px;
-    border-radius: 6px 0 0 6px;
-    border: none;
+    border-radius: 10px;
+    border: 1px solid var(--border-soft);
     font-size: 1.1em;
-    background: #23262e;
+    background: var(--bg-surface);
     color: var(--text);
     outline: none;
     width: 220px;
+    box-shadow: inset 0 1px 2px rgba(27, 30, 40, 0.06);
 }
 
 .search-btn {
     padding: 10px 20px;
-    border-radius: 0 6px 6px 0;
+    border-radius: 10px;
     border: none;
     background: var(--accent);
     color: #fff;
@@ -60,10 +63,11 @@ h1 {
     cursor: pointer;
     font-weight: bold;
     transition: background 0.2s;
+    box-shadow: 0 6px 18px rgba(47, 111, 214, 0.25);
 }
 
 .search-btn:hover {
-    background: var(--accent2);
+    background: #2558ae;
 }
 
 .rooms {
@@ -74,10 +78,10 @@ h1 {
 }
 
 .room-card {
-    background: var(--accent);
-    border-radius: 12px;
-    box-shadow: 0 1px 6px #15181d;
-    padding: 32px 24px;
+    background: var(--card-bg);
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+    padding: 28px 20px;
     min-height: 220px;
     text-align: center;
     transition:
@@ -88,16 +92,18 @@ h1 {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
+    border: 1px solid var(--border-soft);
 }
 
 .room-card:hover {
     cursor: pointer;
     transform: translateY(-4px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(47, 111, 214, 0.15);
 }
 
 .room-title {
     font-size: 1.15em;
-    color: #f6f8fa;
+    color: var(--text-main);
     margin-bottom: 14px;
     font-weight: bold;
     letter-spacing: 0.5px;
@@ -108,7 +114,7 @@ h1 {
 
 .peer-count {
     font-size: 2.3em;
-    color: #ffd700;
+    color: var(--accent);
     font-weight: bold;
     margin-bottom: 8px;
     margin-top: auto;
@@ -117,15 +123,14 @@ h1 {
 
 .peer-label {
     font-size: 0.9em;
-    color: #f6f8fa;
-    opacity: 0.7;
+    color: var(--text-muted);
     margin-bottom: 60px;
     align-self: center;
 }
 
 .empty {
     text-align: center;
-    color: #b3c6e0;
+    color: var(--text-muted);
     margin-top: 40px;
     font-size: 1.2em;
 }
@@ -134,20 +139,20 @@ h1 {
     display: block;
     margin: 0 auto 32px auto;
     padding: 10px 28px;
-    background: var(--accent2);
+    background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 7px;
+    border-radius: 10px;
     cursor: pointer;
     font-size: 1.1em;
     font-weight: bold;
     letter-spacing: 0.5px;
-    box-shadow: 0 1px 4px #15181d;
+    box-shadow: 0 6px 18px rgba(47, 111, 214, 0.25);
     transition: background 0.2s;
 }
 
 .refresh-btn:hover {
-    background: var(--accent);
+    background: #2558ae;
 }
 
 .join-btn {
@@ -158,24 +163,25 @@ h1 {
     bottom: 18px;
     transform: translateX(-50%);
     padding: 10px 24px;
-    background: var(--accent2);
+    background: var(--accent);
     color: #fff;
-    border-radius: 6px;
+    border-radius: 10px;
     font-size: 1em;
     font-weight: bold;
     text-decoration: none;
     transition: background 0.2s;
-    box-shadow: 0 1px 4px #15181d;
+    box-shadow: 0 6px 18px rgba(47, 111, 214, 0.25);
 }
 
 .join-btn:hover {
-    background: var(--accent);
+    background: #2558ae;
 }
 
 @media (max-width: 900px) {
     .container {
         max-width: 98vw;
         padding: 16px;
+        margin: 24px auto;
     }
     .rooms {
         gap: 16px;
@@ -187,7 +193,7 @@ h1 {
         grid-template-columns: 1fr;
     }
     .room-card {
-        padding: 20px 10px;
+        padding: 20px 14px;
     }
     .peer-label {
         margin-bottom: 70px;

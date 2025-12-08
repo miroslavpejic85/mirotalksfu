@@ -78,3 +78,9 @@
     outline: none;
     font-family: 'Montserrat';
 }
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-main);
+    line-height: 1.5;
+}
