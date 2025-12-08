@@ -20,7 +20,6 @@
     border: var(--border);
     border-radius: 10px;
     box-shadow: var(--box-shadow);
-    color: var(--text-main);
     transition:
         background 1s,
         width 0.5s ease-in-out;
@@ -48,7 +47,6 @@
     width: 300px;
     height: 99%;
     background: var(--msger-bg);
-    color: var(--text-main);
     overflow-y: auto;
     overflow-x: hidden;
     /* border: 1px solid lime; */
@@ -70,16 +68,16 @@
 }
 
 .people-list .chat-list li:hover {
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.2);
     cursor: pointer;
 }
 
 .people-list .chat-list li.active {
-    background: var(--primary-blue-soft);
+    background: rgba(0, 0, 0, 0.2);
 }
 
 .people-list .chat-list li .name {
-    color: var(--text-main);
+    color: #fff;
     font-size: 15px;
 }
 
@@ -105,7 +103,7 @@
 }
 
 .people-list .status {
-    color: var(--text-muted);
+    color: #999;
     font-size: 13px;
 }
 
@@ -131,7 +129,6 @@
     height: 70px;
     max-height: 70px;
     cursor: move;
-    background: var(--bg-surface);
     /* overflow-x: auto; */
     /* border: 1px solid lime; */
 }
@@ -144,7 +141,7 @@
 }
 
 .all-participants-img:hover {
-    background-color: var(--primary-blue);
+    background-color: #1d8ecd;
     transition: all 0.3s ease-in-out;
 }
 
@@ -157,11 +154,11 @@
 .chat .chat-header .chat-about {
     float: left;
     padding-left: 10px;
-    color: var(--text-main);
+    color: #fff;
 }
 
 .chat .chat-header .status {
-    color: var(--text-muted);
+    color: #999;
     font-size: 13px;
 }
 
@@ -308,7 +305,7 @@
     color: #e47297;
 }
 .me {
-    color: var(--primary-blue);
+    color: #1d8ecd;
 }
 
 .float-right {
