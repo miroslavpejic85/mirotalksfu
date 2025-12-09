@@ -2361,10 +2361,10 @@ function handleButtons() {
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
     };
     startVideoButton.onclick = () => handleStartVideoClick();
-    stopVideoButton.onclick = () => {
+    stopVideoButton.onclick = async () => {
         setVideoButtonsDisabled(true);
-        rc.closeProducer(RoomClient.mediaType.video);
-        // await rc.pauseProducer(RoomClient.mediaType.video);
+        await rc.pauseProducer(RoomClient.mediaType.video);
+        rc.updatePeerInfo(peer_name, socket.id, 'video', false);
     };
     startScreenButton.onclick = async () => {
         const moderator = rc.getModerator();
