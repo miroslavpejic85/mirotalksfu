@@ -468,7 +468,7 @@ body {
 #control {
     z-index: 3;
     position: absolute;
-    display: none;
+    display: none !important;
     padding: 5px;
 
     top: var(--btns-top);
@@ -519,6 +519,7 @@ body {
 
 #toggleExtraButton {
     color: #66beff;
+    display: none !important;
 }
 
 /*--------------------------------------------------------------
