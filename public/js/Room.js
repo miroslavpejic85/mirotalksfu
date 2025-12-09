@@ -3982,19 +3982,10 @@ function showButtons() {
 }
 
 function checkButtonsBar() {
-    if (localStorageSettings.keep_buttons_visible) {
-        control.style.display = 'flex';
-        toggleExtraButton.innerHTML = icons.up;
-        bottomButtons.style.display = 'flex';
-        isButtonsVisible = true;
-    } else {
-        if (!isButtonsBarOver) {
-            control.style.display = 'none';
-            toggleExtraButton.innerHTML = icons.up;
-            bottomButtons.style.display = 'none';
-            isButtonsVisible = false;
-        }
-    }
+    control.style.display = 'flex';
+    toggleExtraButton.innerHTML = icons.up;
+    bottomButtons.style.display = 'flex';
+    isButtonsVisible = true;
     setTimeout(() => {
         checkButtonsBar();
     }, 10000);
