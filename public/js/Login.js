@@ -75,6 +75,17 @@ function login() {
                 const token = response.data.message;
                 window.sessionStorage.peer_token = token;
 
+                // Redirect to room if specified in URL
+                if (room) {
+                    window.location.href = '/join/' + window.location.search;
+                    return;
+                }
+                // Redirect to room if specified in path
+                if (roomPath && roomPath !== 'login') {
+                    window.location.href = '/join/' + roomPath;
+                    return;
+                }
+
                 // User (limited rooms)
                 const allowedRooms = response.data.allowedRooms;
                 if (allowedRooms && !allowedRooms.includes('*')) {
@@ -124,15 +135,6 @@ function login() {
                             popup('warning', 'Room name required');
                         }
                     };
-                    return;
-                }
-
-                if (room) {
-                    window.location.href = '/join/' + window.location.search;
-                    return;
-                }
-                if (roomPath && roomPath !== 'login') {
-                    window.location.href = '/join/' + roomPath;
                     return;
                 }
 
