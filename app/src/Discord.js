@@ -29,7 +29,7 @@ class Discord {
     }
 
     setupEventHandlers() {
-        this.discordClient.once('ready', () => {
+        this.discordClient.once('clientReady', () => {
             log.info(`Discord Bot Logged in as ${this.discordClient.user.tag}!`, '😎');
         });
 
