@@ -201,6 +201,14 @@ function resizeTranscriptionRoom() {
         : transcription.minimize();
 }
 
+function addCameraTransitionEffect() {
+    const Cameras = document.getElementsByClassName('Camera');
+    for (let cam of Cameras) {
+        cam.style.transition = 'all 0.3s cubic-bezier(0.4,0,0.2,1)';
+        cam.style.willChange = 'width, height, margin';
+    }
+}
+
 // ####################################################
 // WINDOW LOAD/RESIZE EVENT
 // ####################################################
@@ -210,12 +218,17 @@ window.addEventListener(
     function (event) {
         resizeVideoMedia();
         resizeMainButtons();
-        window.onresize = function () {
-            resizeVideoMedia();
-            resizeMainButtons();
-            resizeChatRoom();
-            resizeTranscriptionRoom();
-        };
+        let resizeTimeout;
+        window.addEventListener('resize', function () {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(function () {
+                addCameraTransitionEffect();
+                resizeVideoMedia();
+                resizeMainButtons();
+                resizeChatRoom();
+                resizeTranscriptionRoom();
+            }, 100);
+        });
     },
     false
 );
