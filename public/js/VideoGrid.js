@@ -68,18 +68,22 @@ function resizeVideoMedia() {
 
     resetZoom();
 
-    // loop (i recommend you optimize this)
-    let i = 1;
-    while (i < 5000) {
-        let w = Area(i, Cameras.length, Width, Height, Margin);
-        if (w === false) {
-            max = i - 1;
-            break;
+    // Optimized: binary search for best tile size
+    let low = 1;
+    let high = Math.min(Width, Height);
+    let best = 1;
+    while (low <= high) {
+        let mid = Math.floor((low + high) / 2);
+        let w = Area(mid, Cameras.length, Width, Height, Margin);
+        if (w !== false) {
+            best = mid;
+            low = mid + 1;
+        } else {
+            high = mid - 1;
         }
-        i++;
     }
 
-    max = max - Margin * 2;
+    max = best - Margin * 2;
     setWidth(Cameras, max, bigWidth, Margin, Height, isOneVideoElement);
     document.documentElement.style.setProperty('--vmi-wh', max / 3 + 'px');
 }
@@ -201,14 +205,6 @@ function resizeTranscriptionRoom() {
         : transcription.minimize();
 }
 
-function addCameraTransitionEffect() {
-    const Cameras = document.getElementsByClassName('Camera');
-    for (let cam of Cameras) {
-        cam.style.transition = 'all 0.3s cubic-bezier(0.4,0,0.2,1)';
-        cam.style.willChange = 'width, height, margin';
-    }
-}
-
 // ####################################################
 // WINDOW LOAD/RESIZE EVENT
 // ####################################################
@@ -220,14 +216,13 @@ window.addEventListener(
         resizeMainButtons();
         let resizeTimeout;
         window.addEventListener('resize', function () {
-            clearTimeout(resizeTimeout);
-            resizeTimeout = setTimeout(function () {
-                addCameraTransitionEffect();
+            if (resizeTimeout) cancelAnimationFrame(resizeTimeout);
+            resizeTimeout = requestAnimationFrame(function () {
                 resizeVideoMedia();
                 resizeMainButtons();
                 resizeChatRoom();
                 resizeTranscriptionRoom();
-            }, 100);
+            });
         });
     },
     false
