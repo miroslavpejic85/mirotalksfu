@@ -61,9 +61,17 @@ function isValidEmail(email) {
     return emailRegex.test(email);
 }
 
+function isValidData(data) {
+    if (!data || typeof data !== 'object') {
+        return false;
+    }
+    return Object.keys(data).length > 0;
+}
+
 module.exports = {
     isValidRoomName,
     isValidRecFileNameFormat,
     hasPathTraversal,
     isValidEmail,
+    isValidData,
 };

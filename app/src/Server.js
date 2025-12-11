@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.53
+ * @version 2.0.54
  *
  */
 
@@ -2388,13 +2388,15 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            log.debug('cmd', data);
+
+            if (!Validator.isValidData(data)) return;
+
             const room = getRoom(socket);
 
             const peer = getPeer(socket);
 
             if (!room || !peer) return;
-
-            log.debug('cmd', data);
 
             switch (data.type) {
                 case 'privacy':
@@ -2424,11 +2426,13 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            log.debug('Room action:', data);
+
+            if (!Validator.isValidData(data)) return;
+
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
 
             const room = getRoom(socket);
-
-            log.debug('Room action:', data);
 
             switch (data.action) {
                 case 'broadcasting':
@@ -2543,6 +2547,8 @@ function startServer() {
 
             log.debug('Peer action', data);
 
+            if (!Validator.isValidData(data)) return;
+
             const presenterActions = [
                 'mute',
                 'unmute',
@@ -2583,6 +2589,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             peer.updatePeerInfo(data);
 
             if (data.broadcast) {
@@ -2603,6 +2611,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             const room = getRoom(socket);
 
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
@@ -2618,6 +2628,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             const room = getRoom(socket);
 
@@ -2648,6 +2660,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             const room = getRoom(socket);
 
@@ -2681,6 +2695,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             if (!isValidFileName(data.fileName)) {
                 log.debug('File name not valid', data);
                 return;
@@ -2706,6 +2722,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             const room = getRoom(socket);
 
             room.broadCast(socket.id, 'fileAbort', data);
@@ -2716,6 +2734,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             const room = getRoom(socket);
 
             room.broadCast(socket.id, 'receiveFileAbort', data);
@@ -2725,6 +2745,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             if (data.action == 'open' && !isValidHttpURL(data.video_url)) {
                 log.debug('Video src not valid', data);
@@ -2761,6 +2783,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             const room = getRoom(socket);
 
             log.debug('Whiteboard', data);
@@ -2771,6 +2795,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             log.debug('Video off data', data.peer_name);
 
@@ -2783,6 +2809,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             log.debug('Recording action', data);
 
@@ -2810,6 +2838,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -3256,6 +3286,9 @@ function startServer() {
             }
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return cb(false);
+
             const { peer_name, peer_uuid, file } = data;
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
@@ -3305,6 +3338,9 @@ function startServer() {
             }
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return cb(false);
+
             const { peer_name, peer_uuid, inputVideoURL } = data;
             const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
             if (!isPresenter) return cb(false);
@@ -3350,6 +3386,8 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            if (!Validator.isValidData(data)) return;
+
             const { question, options } = data;
 
             const room = getRoom(socket);
@@ -3371,6 +3409,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
 
@@ -3403,6 +3443,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
 
             const { index, question, options } = data;
 
