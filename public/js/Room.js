@@ -5206,6 +5206,7 @@ function setupWhiteboardShortcuts() {
                     event.preventDefault();
                     break;
                 case 'KeyV': // Vanishing Pen
+                    whiteboardResetAllMode();
                     whiteboardIsVanishingMode(!wbIsVanishing);
                     event.preventDefault();
                     break;
