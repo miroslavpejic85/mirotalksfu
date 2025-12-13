@@ -4386,6 +4386,8 @@ function whiteboardIsEraserMode(status) {
 }
 
 function whiteboardAddObj(type) {
+    wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
+
     switch (type) {
         case 'imgUrl':
             Swal.fire({
