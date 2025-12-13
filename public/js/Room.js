@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.56
+ * @version 2.0.57
  *
  */
 
@@ -292,7 +292,9 @@ let wbIsLock = false;
 let wbIsDrawing = false;
 let wbIsOpen = false;
 let wbIsRedoing = false;
+let wbIsObject = false;
 let wbIsEraser = false;
+let wbIsPencil = false;
 let wbIsVanishing = false;
 let wbIsBgTransparent = false;
 let wbPop = [];
@@ -2359,13 +2361,16 @@ function handleButtons() {
         rc.snapshotRoom();
     };
     whiteboardPencilBtn.onclick = () => {
-        whiteboardIsDrawingMode(true);
+        whiteboardResetAllMode();
+        whiteboardIsPencilMode(true);
     };
     whiteboardVanishingBtn.onclick = () => {
+        whiteboardResetAllMode();
         whiteboardIsVanishingMode(true);
     };
     whiteboardObjectBtn.onclick = () => {
-        whiteboardIsDrawingMode(false);
+        whiteboardResetAllMode();
+        whiteboardIsObjectMode(true);
     };
     whiteboardUndoBtn.onclick = () => {
         whiteboardAction(getWhiteboardAction('undo'));
@@ -2404,7 +2409,8 @@ function handleButtons() {
         whiteboardAddObj('circle');
     };
     whiteboardEraserBtn.onclick = () => {
-        whiteboardIsEraser(true);
+        whiteboardResetAllMode();
+        whiteboardIsEraserMode(true);
     };
     whiteboardCleanBtn.onclick = () => {
         confirmClearBoard();
@@ -2963,7 +2969,8 @@ function handleSelects() {
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
-        whiteboardIsDrawingMode(true);
+        whiteboardResetAllMode();
+        whiteboardIsPencilMode(true);
     };
     wbBackgroundColorEl.onchange = () => {
         setWhiteboardBgColor(wbBackgroundColorEl.value);
@@ -4234,7 +4241,7 @@ function setupWhiteboardCanvas() {
     wbCanvas = new fabric.Canvas('wbCanvas');
     wbCanvas.freeDrawingBrush.color = '#FFFFFF';
     wbCanvas.freeDrawingBrush.width = 3;
-    whiteboardIsDrawingMode(true);
+    whiteboardIsPencilMode(true);
 }
 
 function setupWhiteboardCanvasSize() {
@@ -4348,38 +4355,32 @@ function setWhiteboardBgColor(color) {
     whiteboardAction(data);
 }
 
-function whiteboardIsDrawingMode(status) {
+function whiteboardResetAllMode() {
+    whiteboardIsPencilMode(false);
+    whiteboardIsVanishingMode(false);
+    whiteboardIsObjectMode(false);
+    whiteboardIsEraserMode(false);
+}
+
+function whiteboardIsPencilMode(status) {
     wbCanvas.isDrawingMode = status;
-    if (status) {
-        setColor(whiteboardPencilBtn, 'green');
-        setColor(whiteboardVanishingBtn, 'white');
-        setColor(whiteboardObjectBtn, 'white');
-        setColor(whiteboardEraserBtn, 'white');
-        wbIsEraser = false;
-        wbIsVanishing = false;
-    } else {
-        setColor(whiteboardPencilBtn, 'white');
-        setColor(whiteboardVanishingBtn, 'white');
-        setColor(whiteboardObjectBtn, 'green');
-    }
+    wbIsPencil = status;
+    setColor(whiteboardPencilBtn, wbIsPencil ? 'green' : 'white');
 }
 
 function whiteboardIsVanishingMode(status) {
     wbCanvas.isDrawingMode = status;
     wbIsVanishing = status;
-    if (status) {
-        setColor(whiteboardVanishingBtn, 'green');
-        setColor(whiteboardPencilBtn, 'white');
-        setColor(whiteboardObjectBtn, 'white');
-        setColor(whiteboardEraserBtn, 'white');
-        wbIsEraser = false;
-    } else {
-        setColor(whiteboardVanishingBtn, 'white');
-    }
+    wbCanvas.freeDrawingBrush.color = wbIsVanishing ? 'yellow' : wbDrawingColorEl.value;
+    setColor(whiteboardVanishingBtn, wbIsVanishing ? 'green' : 'white');
 }
 
-function whiteboardIsEraser(status) {
-    whiteboardIsDrawingMode(false);
+function whiteboardIsObjectMode(status) {
+    wbIsObject = status;
+    setColor(whiteboardObjectBtn, status ? 'green' : 'white');
+}
+
+function whiteboardIsEraserMode(status) {
     wbIsEraser = status;
     setColor(whiteboardEraserBtn, wbIsEraser ? 'green' : 'white');
 }
@@ -4738,7 +4739,8 @@ async function renderPdfToCanvas(wbCanvasPdf) {
         reader.onload = async function (event) {
             wbCanvas.requestRenderAll();
             await pdfToImage(event.target.result, wbCanvas);
-            whiteboardIsDrawingMode(false);
+            whiteboardResetAllMode();
+            whiteboardIsObjectMode(true);
             wbCanvasToJson();
         };
         reader.readAsDataURL(wbCanvasPdf);
@@ -4808,7 +4810,8 @@ async function pdfToImage(pdfData, canvas) {
 function addWbCanvasObj(obj) {
     if (obj) {
         wbCanvas.add(obj).setActiveObject(obj);
-        whiteboardIsDrawingMode(false);
+        whiteboardResetAllMode();
+        whiteboardIsObjectMode(true);
         wbCanvasToJson();
     } else {
         console.error('Invalid input. Expected an obj of canvas elements');
@@ -6279,7 +6282,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.56',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.57',
         html: `
             <br />
             <div id="about">
