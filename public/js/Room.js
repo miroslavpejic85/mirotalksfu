@@ -4334,9 +4334,7 @@ function setupQuickDeviceSwitchDropdowns() {
             if (deviceChangeFrame) cancelAnimationFrame(deviceChangeFrame);
             deviceChangeFrame = requestAnimationFrame(async () => {
                 try {
-                    if (typeof refreshMyAudioVideoDevices === 'function') {
-                        await refreshMyAudioVideoDevices();
-                    }
+                    await refreshMyAudioVideoDevices();
                 } catch (err) {
                     // ignore
                 }
