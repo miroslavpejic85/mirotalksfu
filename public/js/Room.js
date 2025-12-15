@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.58
+ * @version 2.0.60
  *
  */
 
@@ -207,6 +207,17 @@ const microphoneSelect = getId('microphoneSelect');
 const initMicrophoneSelect = getId('initMicrophoneSelect');
 const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
+
+const startVideoBtn = getId('startVideoButton');
+const startAudioBtn = getId('startAudioButton');
+const stopVideoBtn = getId('stopVideoButton');
+const stopAudioBtn = getId('stopAudioButton');
+const videoDropdown = getId('startVideoDeviceDropdown');
+const audioDropdown = getId('startAudioDeviceDropdown');
+const videoToggle = getId('startVideoDeviceMenuButton');
+const audioToggle = getId('startAudioDeviceMenuButton');
+const videoMenu = getId('startVideoDeviceMenu');
+const audioMenu = getId('startAudioDeviceMenu');
 
 // ####################################################
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
@@ -1768,6 +1779,7 @@ function roomIsReady() {
     startSessionTimer();
     handleButtonsBar();
     handleDropdownHover();
+    setupQuickDeviceSwitchDropdowns();
     checkButtonsBar();
     if (room_password) {
         lockRoomButton.click();
@@ -2763,7 +2775,8 @@ function handleSelects() {
     // devices options
     videoSelect.onchange = (e) => {
         videoQuality.selectedIndex = 0;
-        rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
+        // If video is currently OFF, just update selection for the next start.
+        if (video) rc.closeThenProduce(RoomClient.mediaType.video, videoSelect.value);
         refreshLsDevices();
     };
     videoQuality.onchange = () => {
@@ -2788,7 +2801,8 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
     };
     microphoneSelect.onchange = () => {
-        rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
+        // If audio is currently OFF, just update selection for the next start.
+        if (audio) rc.closeThenProduce(RoomClient.mediaType.audio, microphoneSelect.value);
         refreshLsDevices();
     };
     speakerSelect.onchange = () => {
@@ -4209,6 +4223,128 @@ function handleClickOutside(targetElement, triggerElement, callback, minWidth = 
 
 function getId(id) {
     return document.getElementById(id);
+}
+
+// ####################################################
+// QUICK DEVICE SWITCH (Start Audio/Video dropdowns)
+// ####################################################
+
+function setupQuickDeviceSwitchDropdowns() {
+    // For now keep this feature only for desktop devices
+    if (!isDesktopDevice) return;
+
+    if (
+        !startVideoBtn ||
+        !startAudioBtn ||
+        !stopVideoBtn ||
+        !stopAudioBtn ||
+        !videoDropdown ||
+        !audioDropdown ||
+        !videoToggle ||
+        !audioToggle
+    ) {
+        return;
+    }
+
+    function syncVisibility() {
+        // Keep dropdown visible while either Start or Stop button is visible
+        const showVideo = !startVideoBtn.classList.contains('hidden') || !stopVideoBtn.classList.contains('hidden');
+        const showAudio = !startAudioBtn.classList.contains('hidden') || !stopAudioBtn.classList.contains('hidden');
+        videoDropdown.classList.toggle('hidden', !showVideo);
+        audioDropdown.classList.toggle('hidden', !showAudio);
+    }
+
+    function buildMenu(menuEl, selectEl, emptyLabel) {
+        if (!menuEl || !selectEl) return;
+
+        menuEl.innerHTML = '';
+        const options = Array.from(selectEl.options || []).filter((o) => o && o.value);
+
+        if (options.length === 0) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.disabled = true;
+            btn.textContent = emptyLabel;
+            menuEl.appendChild(btn);
+            return;
+        }
+
+        options.forEach((opt) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+
+            const isSelected = opt.value === selectEl.value;
+            const label = opt.textContent || opt.label || opt.value;
+
+            btn.replaceChildren();
+            if (isSelected) {
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-check';
+                btn.appendChild(icon);
+                btn.appendChild(document.createTextNode(` ${label}`));
+            } else {
+                const spacer = document.createElement('span');
+                spacer.style.display = 'inline-block';
+                spacer.style.width = '1.25em';
+                btn.appendChild(spacer);
+                btn.appendChild(document.createTextNode(label));
+            }
+
+            btn.addEventListener('click', () => {
+                if (selectEl.value === opt.value) return;
+                selectEl.value = opt.value;
+                selectEl.dispatchEvent(new Event('change'));
+                buildMenu(menuEl, selectEl, emptyLabel);
+            });
+
+            menuEl.appendChild(btn);
+        });
+    }
+
+    function rebuildVideoMenu() {
+        buildMenu(videoMenu, videoSelect, 'No cameras found');
+    }
+
+    function rebuildAudioMenu() {
+        buildMenu(audioMenu, microphoneSelect, 'No microphones found');
+    }
+
+    // Build menus when opening (click or hover)
+    videoDropdown.addEventListener('show.bs.dropdown', rebuildVideoMenu);
+    audioDropdown.addEventListener('show.bs.dropdown', rebuildAudioMenu);
+    videoToggle.addEventListener('mouseenter', rebuildVideoMenu);
+    audioToggle.addEventListener('mouseenter', rebuildAudioMenu);
+
+    // Keep UI synced when settings panel changes device
+    if (videoSelect) videoSelect.addEventListener('change', rebuildVideoMenu);
+    if (microphoneSelect) microphoneSelect.addEventListener('change', rebuildAudioMenu);
+
+    // Keep arrow buttons visible only when Start buttons are visible
+    syncVisibility();
+    const observer = new MutationObserver(syncVisibility);
+    observer.observe(startVideoBtn, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(startAudioBtn, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(stopVideoBtn, { attributes: true, attributeFilter: ['class'] });
+    observer.observe(stopAudioBtn, { attributes: true, attributeFilter: ['class'] });
+
+    // Re-enumerate & refresh lists on hardware changes
+    if (navigator.mediaDevices) {
+        let deviceChangeFrame;
+        navigator.mediaDevices.addEventListener('devicechange', () => {
+            if (deviceChangeFrame) cancelAnimationFrame(deviceChangeFrame);
+            deviceChangeFrame = requestAnimationFrame(async () => {
+                try {
+                    if (typeof refreshMyAudioVideoDevices === 'function') {
+                        await refreshMyAudioVideoDevices();
+                    }
+                } catch (err) {
+                    // ignore
+                }
+                rebuildVideoMenu();
+                rebuildAudioMenu();
+            });
+        });
+    }
 }
 
 // ####################################################
@@ -6285,7 +6421,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.58',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.60',
         html: `
             <br />
             <div id="about">

@@ -436,6 +436,46 @@ body {
     transition: all 0.3s ease-in-out;
 }
 
+/* Quick device picker (Start Audio/Video) */
+#bottomButtons .device-dropdown-toggle {
+    width: 28px;
+    padding: 10px 6px;
+}
+
+#bottomButtons .device-dropdown-toggle i {
+    font-size: 0.9rem;
+}
+
+/* Override bottomButtons button rule for dropdown menu items */
+#bottomButtons .dropdown-menu button {
+    width: auto;
+    font-size: 0.8em;
+    padding: 8px 16px;
+    border-radius: 0;
+    background: none;
+    transition: background 0.2s;
+}
+
+/* Quick device picker dropdown menu: keep items left-aligned and avoid wrapping */
+#bottomButtons #startAudioDeviceMenu,
+#bottomButtons #startVideoDeviceMenu {
+    min-width: 280px;
+    max-width: calc(100vw - 24px);
+    text-align: left;
+}
+
+#bottomButtons #startAudioDeviceMenu button,
+#bottomButtons #startVideoDeviceMenu button {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    text-align: left;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+}
+
 #bottomButtons button:hover {
     transform: var(--btns-hover-scale);
     background: var(--body-bg) !important;
