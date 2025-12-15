@@ -443,6 +443,7 @@ body {
 }
 
 #bottomButtons .device-dropdown-toggle i {
+    color: #fff !important;
     font-size: 0.9rem;
 }
 
