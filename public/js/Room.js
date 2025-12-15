@@ -4310,8 +4310,8 @@ function setupQuickDeviceSwitchDropdowns() {
     }
 
     // Build menus when opening (click or hover)
-    videoDropdown.addEventListener('show.bs.dropdown', rebuildVideoMenu);
-    audioDropdown.addEventListener('show.bs.dropdown', rebuildAudioMenu);
+    videoDropdown.addEventListener('click', rebuildVideoMenu);
+    audioDropdown.addEventListener('click', rebuildAudioMenu);
     videoToggle.addEventListener('mouseenter', rebuildVideoMenu);
     audioToggle.addEventListener('mouseenter', rebuildAudioMenu);
 
