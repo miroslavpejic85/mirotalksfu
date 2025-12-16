@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.62
+ * @version 2.0.63
  *
  */
 
@@ -4254,12 +4254,31 @@ function setupQuickDeviceSwitchDropdowns() {
         audioDropdown.classList.toggle('hidden', !showAudio);
     }
 
-    function buildMenu(menuEl, selectEl, emptyLabel) {
-        if (!menuEl || !selectEl) return;
+    function appendMenuHeader(menuEl, iconClass, title) {
+        const header = document.createElement('div');
+        header.className = 'device-menu-header';
 
-        menuEl.innerHTML = '';
+        const icon = document.createElement('i');
+        icon.className = iconClass;
+
+        const text = document.createElement('span');
+        text.textContent = title;
+
+        header.appendChild(icon);
+        header.appendChild(text);
+        menuEl.appendChild(header);
+    }
+
+    function appendMenuDivider(menuEl) {
+        const divider = document.createElement('div');
+        divider.className = 'device-menu-divider';
+        menuEl.appendChild(divider);
+    }
+
+    function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn) {
+        if (!selectEl) return;
+
         const options = Array.from(selectEl.options || []).filter((o) => o && o.value);
-
         if (options.length === 0) {
             const btn = document.createElement('button');
             btn.type = 'button';
@@ -4294,19 +4313,47 @@ function setupQuickDeviceSwitchDropdowns() {
                 if (selectEl.value === opt.value) return;
                 selectEl.value = opt.value;
                 selectEl.dispatchEvent(new Event('change'));
-                buildMenu(menuEl, selectEl, emptyLabel);
+                if (typeof rebuildFn === 'function') rebuildFn();
             });
 
             menuEl.appendChild(btn);
         });
     }
 
+    function buildVideoMenu() {
+        if (!videoMenu || !videoSelect) return;
+        videoMenu.innerHTML = '';
+        appendSelectOptions(videoMenu, videoSelect, 'No cameras found', buildVideoMenu);
+    }
+
+    function buildAudioMenu() {
+        if (!audioMenu) return;
+
+        audioMenu.innerHTML = '';
+
+        appendMenuHeader(audioMenu, 'fas fa-microphone', 'Microphones');
+        appendSelectOptions(audioMenu, microphoneSelect, 'No microphones found', buildAudioMenu);
+
+        appendMenuDivider(audioMenu);
+
+        appendMenuHeader(audioMenu, 'fas fa-volume-high', 'Speakers');
+        if (!speakerSelect || speakerSelect.disabled) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.disabled = true;
+            btn.textContent = 'Speaker selection not supported';
+            audioMenu.appendChild(btn);
+            return;
+        }
+        appendSelectOptions(audioMenu, speakerSelect, 'No speakers found', buildAudioMenu);
+    }
+
     function rebuildVideoMenu() {
-        buildMenu(videoMenu, videoSelect, 'No cameras found');
+        buildVideoMenu();
     }
 
     function rebuildAudioMenu() {
-        buildMenu(audioMenu, microphoneSelect, 'No microphones found');
+        buildAudioMenu();
     }
 
     // Build menus when opening (click or hover)
@@ -4318,6 +4365,7 @@ function setupQuickDeviceSwitchDropdowns() {
     // Keep UI synced when settings panel changes device
     if (videoSelect) videoSelect.addEventListener('change', rebuildVideoMenu);
     if (microphoneSelect) microphoneSelect.addEventListener('change', rebuildAudioMenu);
+    if (speakerSelect) speakerSelect.addEventListener('change', rebuildAudioMenu);
 
     // Keep arrow buttons visible only when Start buttons are visible
     syncVisibility();
@@ -6419,7 +6467,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.62',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.63',
         html: `
             <br />
             <div id="about">
