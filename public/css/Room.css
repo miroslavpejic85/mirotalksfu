@@ -453,6 +453,17 @@ body {
     font-size: 0.9rem;
 }
 
+#bottomButtons .dropup .dropdown-menu {
+    z-index: 9999;
+    position: absolute;
+    left: 0;
+    padding: 10px 5px;
+    bottom: 14px !important;
+    border: var(--border);
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
+}
+
 /* Override bottomButtons button rule for dropdown menu items */
 #bottomButtons .dropdown-menu button {
     width: auto;
@@ -466,15 +477,17 @@ body {
 /* Quick device picker dropdown menu: keep items left-aligned and avoid wrapping */
 #bottomButtons #startAudioDeviceMenu,
 #bottomButtons #startVideoDeviceMenu {
-    min-width: 280px;
-    max-width: calc(100vw - 24px);
+    min-width: 280px !important;
+    max-width: calc(100vw - 24px) !important;
     text-align: left;
+    border: var(--border) !important;
 }
 
 #bottomButtons #startAudioDeviceMenu button,
 #bottomButtons #startVideoDeviceMenu button {
     display: flex;
     width: 100%;
+    height: 35px;
     align-items: center;
     justify-content: flex-start;
     text-align: left;
