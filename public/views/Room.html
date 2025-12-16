@@ -222,44 +222,49 @@ access to use this app.
 
         <div id="bottomButtons" class="fadein">
             <button id="toggleExtraButton" class="hidden"><i class="fas fa-chevron-down"></i></button>
-            <button id="startAudioButton" class="hidden"><i class="fas fa-microphone-slash"></i></button>
-            <button id="stopAudioButton" class="hidden"><i class="fas fa-microphone"></i></button>
-            <div id="startAudioDeviceDropdown" class="dropdown dropup hidden">
-                <button
-                    id="startAudioDeviceMenuButton"
-                    class="dropdown-toggle device-dropdown-toggle"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    aria-label="Select microphone"
-                >
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-                <div
-                    id="startAudioDeviceMenu"
-                    class="dropdown-menu text-start"
-                    aria-labelledby="startAudioDeviceMenuButton"
-                ></div>
+            <div id="startAudioSplit" class="split-btn">
+                <button id="startAudioButton" class="hidden"><i class="fas fa-microphone-slash"></i></button>
+                <button id="stopAudioButton" class="hidden"><i class="fas fa-microphone"></i></button>
+                <div id="startAudioDeviceDropdown" class="dropdown dropup hidden">
+                    <button
+                        id="startAudioDeviceMenuButton"
+                        class="dropdown-toggle device-dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Select microphone"
+                    >
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <div
+                        id="startAudioDeviceMenu"
+                        class="dropdown-menu text-start"
+                        aria-labelledby="startAudioDeviceMenuButton"
+                    ></div>
+                </div>
             </div>
-            <button id="startVideoButton" class="hidden"><i class="fas fa-video-slash"></i></button>
-            <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i></button>
-            <div id="startVideoDeviceDropdown" class="dropdown dropup hidden">
-                <button
-                    id="startVideoDeviceMenuButton"
-                    class="dropdown-toggle device-dropdown-toggle"
-                    type="button"
-                    data-bs-toggle="dropdown"
-                    aria-expanded="false"
-                    aria-label="Select camera"
-                >
-                    <i class="fas fa-chevron-up"></i>
-                </button>
-                <div
-                    id="startVideoDeviceMenu"
-                    class="dropdown-menu text-start"
-                    aria-labelledby="startVideoDeviceMenuButton"
-                ></div>
+            <div id="startVideoSplit" class="split-btn">
+                <button id="startVideoButton" class="hidden"><i class="fas fa-video-slash"></i></button>
+                <button id="stopVideoButton" class="hidden"><i class="fas fa-video"></i></button>
+                <div id="startVideoDeviceDropdown" class="dropdown dropup hidden">
+                    <button
+                        id="startVideoDeviceMenuButton"
+                        class="dropdown-toggle device-dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Select camera"
+                    >
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <div
+                        id="startVideoDeviceMenu"
+                        class="dropdown-menu text-start"
+                        aria-labelledby="startVideoDeviceMenuButton"
+                    ></div>
+                </div>
             </div>
+
             <button id="swapCameraButton" class="hidden"><i class="fas fa-camera-rotate"></i></button>
             <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i></button>
             <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i></button>
