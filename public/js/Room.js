@@ -4231,7 +4231,16 @@ function getId(id) {
 
 function setupQuickDeviceSwitchDropdowns() {
     // For now keep this feature only for desktop devices
-    if (!isDesktopDevice) return;
+    if (!isDesktopDevice) {
+        document.querySelectorAll('#bottomButtons .split-btn').forEach((group) => {
+            group.querySelectorAll('button').forEach((button) => {
+                button.style.setProperty('border-radius', '10px', 'important');
+            });
+            const toggle = group.querySelector('.device-dropdown-toggle');
+            if (toggle) toggle.style.setProperty('border-left', 'none', 'important');
+        });
+        return;
+    }
 
     if (
         !startVideoBtn ||
