@@ -427,8 +427,9 @@ body {
 }
 
 #bottomButtons button {
-    width: 48px;
-    font-size: 1.4rem;
+    width: 50px;
+    height: 50px;
+    font-size: 1.6rem;
     padding: 10px;
     border-radius: 10px;
     background: var(--btns-bg-color);
@@ -438,8 +439,13 @@ body {
 
 /* Quick device picker (Start Audio/Video) */
 #bottomButtons .device-dropdown-toggle {
-    width: 28px;
-    padding: 10px 6px;
+    width: 25px;
+    height: 50px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
 }
 
 #bottomButtons .device-dropdown-toggle i {
@@ -468,13 +474,14 @@ body {
 #bottomButtons #startAudioDeviceMenu button,
 #bottomButtons #startVideoDeviceMenu button {
     display: flex;
+    width: 100%;
     align-items: center;
     justify-content: flex-start;
     text-align: left;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    width: 100%;
+    transform: none !important;
 }
 
 #bottomButtons button:hover {
@@ -489,9 +496,17 @@ body {
     }
     #bottomButtons button {
         width: 38px;
+        height: 38px;
         font-size: 0.95rem;
         padding: 8px;
         margin: 0 1px;
+    }
+    #bottomButtons .device-dropdown-toggle {
+        width: 19px;
+        height: 38px;
+    }
+    #bottomButtons .device-dropdown-toggle i {
+        font-size: 0.8rem;
     }
 }
 
@@ -502,9 +517,17 @@ body {
     }
     #bottomButtons button {
         width: 28px;
+        height: 28px;
         font-size: 0.65rem;
         padding: 6px;
         margin: 0 1px;
+    }
+    #bottomButtons .device-dropdown-toggle {
+        width: 14px;
+        height: 28px;
+    }
+    #bottomButtons .device-dropdown-toggle i {
+        font-size: 0.7rem;
     }
 }
 
