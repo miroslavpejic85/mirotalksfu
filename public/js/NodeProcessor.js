@@ -141,9 +141,17 @@ class RNNoiseProcessor {
         try {
             this.uiManager.updateStatus('🎤 Starting audio processing...', 'info');
 
-            this.audioContext = new AudioContext();
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
             const sampleRate = this.audioContext.sampleRate;
             this.uiManager.updateStatus(`🎵 Audio context created with sample rate: ${sampleRate}Hz`, 'info');
+
+            if (this.audioContext.state === 'suspended') {
+                try {
+                    await this.audioContext.resume();
+                } catch (e) {
+                    // ignore
+                }
+            }
 
             this.mediaStream = mediaStream;
             if (!this.mediaStream.getAudioTracks().length) {
@@ -174,14 +182,24 @@ class RNNoiseProcessor {
             return this.destinationNode.stream;
         } catch (error) {
             this.uiManager.updateStatus('❌ Error: ' + error.message, 'error');
+            console.error('RNNoise startProcessing error:', error);
+            this.stopProcessing();
+            return null;
         }
     }
 
     stopProcessing() {
-        if (this.mediaStream) {
-            this.mediaStream.getTracks().forEach((track) => track.stop());
-            this.mediaStream = null;
-        }
+        this.mediaStream = null;
+
+        try {
+            this.sourceNode?.disconnect();
+        } catch (e) {}
+        try {
+            this.workletNode?.disconnect();
+        } catch (e) {}
+        try {
+            this.destinationNode?.stream?.getTracks?.().forEach((t) => t.stop());
+        } catch (e) {}
 
         if (this.audioContext && this.audioContext.state !== 'closed') {
             this.audioContext.close();

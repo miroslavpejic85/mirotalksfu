@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.64
+ * @version 2.0.65
  *
  */
 
@@ -2231,7 +2231,11 @@ class RoomClient {
 
     disableRNNoiseSuppression() {
         if (this.RNNoiseProcessor) {
-            this.RNNoiseProcessor.stopProcessing();
+            try {
+                this.RNNoiseProcessor.stopProcessing();
+            } catch (err) {
+                // ignore
+            }
             this.RNNoiseProcessor = null;
             console.warn('RNNoiseProcessor already initialized, stopping previous instance.');
         }

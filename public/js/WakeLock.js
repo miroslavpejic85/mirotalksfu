@@ -43,7 +43,7 @@ async function requestWakeLock() {
 
 async function releaseWakeLock() {
     if (isDesktopDevice) return;
-    try { 
+    try {
         await wakeLockSentinel?.release();
         userLog('info', '⚪ Wake Lock released');
     } catch {}
@@ -72,4 +72,3 @@ document.addEventListener('enterpictureinpicture', releaseWakeLock);
 document.addEventListener('leavepictureinpicture', syncWakeLockDebounced);
 
 window.addEventListener('pagehide', releaseWakeLock);
-
