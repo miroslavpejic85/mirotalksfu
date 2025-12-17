@@ -123,6 +123,7 @@
         <script defer src="../js/FixWebmDuration.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/Room.js"></script>
+        <script defer src="../js/wakeLock.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/fabric@5.3.0-browser/dist/fabric.min.js"></script>
@@ -431,6 +432,19 @@ access to use this app.
                                 <td>
                                     <div class="form-check form-switch form-switch-md">
                                         <input id="switchKeepButtonsVisible" class="form-check-input" type="checkbox" />
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr id="keepAwakeButton">
+                                <td>
+                                    <div class="title">
+                                        <i class="fa-solid fa-mobile-screen"></i>
+                                        <p>Keep awake</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input id="switchKeepAwake" class="form-check-input" type="checkbox" />
                                     </div>
                                 </td>
                             </tr>

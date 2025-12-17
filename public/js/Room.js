@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.63
+ * @version 2.0.64
  *
  */
 
@@ -409,6 +409,7 @@ function initClient() {
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
+        setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('recordingImage', 'Toggle recording', 'right');
@@ -2900,6 +2901,17 @@ function handleSelects() {
         userLog('info', `Buttons always visible ${status}`, 'top-end');
         e.target.blur();
     };
+
+    // Wake Lock for mobile/tablet
+    if (!isDesktopDevice && isWakeLockSupported()) {
+        switchKeepAwake.onchange = async (e) => {
+            e.target.blur();
+            applyKeepAwake(e.currentTarget.checked);
+        };
+    } else {
+        hide(keepAwakeButton);
+    }
+
     // recording
     switchHostOnlyRecording.onchange = (e) => {
         hostOnlyRecording = e.currentTarget.checked;
@@ -3675,6 +3687,7 @@ function handleRoomClientEvents() {
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
         audio = true;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.pauseAudio, () => {
         console.log('Room event: Client pause audio');
@@ -3683,6 +3696,7 @@ function handleRoomClientEvents() {
         setColor(startAudioButton, 'red');
         setAudioButtonsDisabled(false);
         audio = false;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.resumeAudio, () => {
         console.log('Room event: Client resume audio');
@@ -3690,6 +3704,7 @@ function handleRoomClientEvents() {
         BUTTONS.main.startAudioButton && show(stopAudioButton);
         setAudioButtonsDisabled(false);
         audio = true;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.stopAudio, () => {
         console.log('Room event: Client stop audio');
@@ -3698,6 +3713,7 @@ function handleRoomClientEvents() {
         setAudioButtonsDisabled(false);
         stopMicrophoneProcessing();
         audio = false;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.startVideo, () => {
         console.log('Room event: Client start video');
@@ -3708,6 +3724,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
         video = true;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.pauseVideo, () => {
         console.log('Room event: Client pause video');
@@ -3717,6 +3734,7 @@ function handleRoomClientEvents() {
         setVideoButtonsDisabled(false);
         hideClassElements('videoMenuBar');
         video = false;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.resumeVideo, () => {
         console.log('Room event: Client resume video');
@@ -3726,6 +3744,7 @@ function handleRoomClientEvents() {
         isVideoPrivacyActive = false;
         hideClassElements('videoMenuBar');
         video = true;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.stopVideo, () => {
         console.log('Room event: Client stop video');
@@ -3736,6 +3755,7 @@ function handleRoomClientEvents() {
         hideClassElements('videoMenuBar');
         // if (isParticipantsListOpen) getRoomParticipants();
         video = false;
+        applyKeepAwake(audio);
     });
     rc.on(RoomClient.EVENTS.startScreen, () => {
         console.log('Room event: Client start screen');
@@ -3912,7 +3932,7 @@ function redirectOnLeave() {
     redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
 }
 
-function userLog(icon, message, position, timer = 3000) {
+function userLog(icon, message, position = 'top-end', timer = 3000) {
     const Toast = Swal.mixin({
         background: swalBackground,
         toast: true,
@@ -6476,7 +6496,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.63',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.64',
         html: `
             <br />
             <div id="about">
