@@ -794,7 +794,7 @@ function setupInitButtons() {
         toggleUsernameEmoji();
     };
     initExitButton.onclick = () => {
-        initLeaveRoom();
+        initLeaveMeeting();
     };
 }
 
@@ -2473,7 +2473,7 @@ function setButtonsInit() {
         setTippy('initVideoMirrorButton', 'Toggle video mirror', 'top');
         setTippy('initVirtualBackgroundButton', 'Set Virtual Background or Blur', 'top');
         setTippy('initUsernameEmojiButton', 'Toggle username emoji', 'top');
-        setTippy('initExitButton', 'Leave room', 'top');
+        setTippy('initExitButton', 'Leave meeting', 'top');
     }
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
@@ -3883,7 +3883,7 @@ function handleRoomClientEvents() {
 // UTILITY
 // ####################################################
 
-function initLeaveRoom() {
+function initLeaveMeeting() {
     openURL('/');
 }
 
