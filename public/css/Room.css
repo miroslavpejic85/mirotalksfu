@@ -150,6 +150,10 @@ body {
     .init-modal-size {
         width: 480px !important;
     }
+    .init-user button {
+        width: 42px !important;
+        height: 42px !important;
+    }
 }
 
 .init-user select {
