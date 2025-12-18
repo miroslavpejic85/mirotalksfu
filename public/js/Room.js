@@ -3884,7 +3884,7 @@ function handleRoomClientEvents() {
 // ####################################################
 
 function initLeaveMeeting() {
-    openURL('/');
+    openURL('/newroom');
 }
 
 async function leaveRoom(allowCancel = true) {
