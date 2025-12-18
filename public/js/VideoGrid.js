@@ -85,7 +85,10 @@ function resizeVideoMedia() {
 
     max = best - Margin * 2;
     setWidth(Cameras, max, bigWidth, Margin, Height, isOneVideoElement);
-    document.documentElement.style.setProperty('--vmi-wh', max / 3 + 'px');
+
+    // When alone, use fixed avatar size; otherwise proportional to tile
+    const avatarSize = isOneVideoElement ? Math.min(200, Math.max(120, Height * 0.25)) : max / 3;
+    document.documentElement.style.setProperty('--vmi-wh', avatarSize + 'px');
 }
 
 function resetZoom() {
