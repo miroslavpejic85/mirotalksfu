@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.68
+ * @version 2.0.69
  *
  */
 
@@ -792,6 +792,9 @@ function setupInitButtons() {
     initUsernameEmojiButton.onclick = () => {
         getId('usernameInput').value = '';
         toggleUsernameEmoji();
+    };
+    initExitButton.onclick = () => {
+        initLeaveRoom();
     };
 }
 
@@ -2470,6 +2473,7 @@ function setButtonsInit() {
         setTippy('initVideoMirrorButton', 'Toggle video mirror', 'top');
         setTippy('initVirtualBackgroundButton', 'Set Virtual Background or Blur', 'top');
         setTippy('initUsernameEmojiButton', 'Toggle username emoji', 'top');
+        setTippy('initExitButton', 'Leave room', 'top');
     }
     if (!isAudioAllowed) hide(initAudioButton);
     if (!isVideoAllowed) hide(initVideoButton);
@@ -3878,6 +3882,10 @@ function handleRoomClientEvents() {
 // ####################################################
 // UTILITY
 // ####################################################
+
+function initLeaveRoom() {
+    openURL('/');
+}
 
 async function leaveRoom(allowCancel = true) {
     if (rc.isRecording() || recordingStatus.innerText != '0s') {
@@ -6488,7 +6496,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.68',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.69',
         html: `
             <br />
             <div id="about">
