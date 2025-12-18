@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.67
+ * @version 2.0.68
  *
  */
 
@@ -1692,8 +1692,6 @@ function roomIsReady() {
     }
     if (isMobileDevice) {
         hide(initVideoAudioRefreshButton);
-        hide(refreshVideoDevices);
-        hide(refreshAudioDevices);
         BUTTONS.main.swapCameraButton && show(swapCameraButton);
         rc.chatMaximize();
         hide(chatTogglePin);
@@ -2045,14 +2043,6 @@ function handleButtons() {
     avatarQuality.selectedIndex = 1;
     avatarQuality.onchange = (e) => {
         VideoAI.quality = e.target.value;
-    };
-    refreshVideoDevices.onclick = async () => {
-        await refreshMyVideoDevices();
-        userLog('info', 'Refreshed video devices', 'top-end');
-    };
-    refreshAudioDevices.onclick = async () => {
-        await refreshMyAudioDevices();
-        userLog('info', 'Refreshed audio devices', 'top-end');
     };
     speakerTestBtn.onclick = () => {
         sound('ring', true);
@@ -6498,7 +6488,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.67',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.68',
         html: `
             <br />
             <div id="about">
