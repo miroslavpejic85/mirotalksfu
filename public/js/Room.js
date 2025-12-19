@@ -4762,6 +4762,17 @@ function whiteboardAddObj(type) {
     }
 }
 
+function whiteboardDeleteObject() {
+    const obj = wbCanvas?.getActiveObject?.();
+    if (!obj) return;
+    const tag = document.activeElement?.tagName;
+    if ((tag === 'INPUT' || tag === 'TEXTAREA') && !obj.isEditing) return;
+    event.preventDefault();
+    if (obj.isEditing && obj.exitEditing) obj.exitEditing();
+    whiteboardEraseObject();
+    return;
+}
+
 function whiteboardEraseObject() {
     if (wbCanvas && typeof wbCanvas.getActiveObjects === 'function') {
         const activeObjects = wbCanvas.getActiveObjects();
@@ -5459,15 +5470,9 @@ function setupWhiteboardShortcuts() {
             return;
         }
         // Whiteboard delete shortcut: Delete / Backspace
-        if (event.key === 'Delete') {
-            const obj = wbCanvas?.getActiveObject?.();
-            if (!obj) return;
-            // Ignore if typing in input (unless editing Fabric text)
-            const tag = document.activeElement?.tagName;
-            if ((tag === 'INPUT' || tag === 'TEXTAREA') && !obj.isEditing) return;
+        if (event.key === 'Delete' || event.key === 'Backspace') {
+            whiteboardDeleteObject();
             event.preventDefault();
-            if (obj.isEditing && obj.exitEditing) obj.exitEditing();
-            whiteboardEraseObject();
             return;
         }
 
