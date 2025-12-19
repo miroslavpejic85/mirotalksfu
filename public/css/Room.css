@@ -521,8 +521,9 @@ body {
     border: var(--border) !important;
 }
 
-/* Audio device dropdown: section headers + divider (Microphones / Speakers) */
-#bottomButtons #startAudioDeviceMenu .device-menu-header {
+/* Audio device dropdown: section headers + divider (Microphones / Speakers / Camera) */
+#bottomButtons #startAudioDeviceMenu .device-menu-header,
+#bottomButtons #startVideoDeviceMenu .device-menu-header {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -533,12 +534,14 @@ body {
     user-select: none;
 }
 
-#bottomButtons #startAudioDeviceMenu .device-menu-header i {
+#bottomButtons #startAudioDeviceMenu .device-menu-header i,
+#bottomButtons #startVideoDeviceMenu .device-menu-header i {
     width: 18px;
     text-align: center;
 }
 
-#bottomButtons #startAudioDeviceMenu .device-menu-divider {
+#bottomButtons #startAudioDeviceMenu .device-menu-divider,
+#bottomButtons #startVideoDeviceMenu .device-menu-divider {
     height: 1px;
     background: var(--border-color);
     opacity: 0.6;
@@ -557,6 +560,30 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     transform: none !important;
+}
+
+/* Action buttons in device menu */
+#bottomButtons #startAudioDeviceMenu .device-menu-action-btn,
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn {
+    background: var(--body-bg);
+    border: 1px solid var(--border-color);
+    color: #fff;
+    font-weight: 500;
+    gap: 8px;
+    transition: all 0.2s ease;
+}
+
+#bottomButtons #startAudioDeviceMenu .device-menu-action-btn:hover,
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn:hover {
+    background: var(--btns-bg-color) !important;
+    border-color: var(--btns-color);
+    transform: translateY(-1px) !important;
+}
+
+#bottomButtons #startAudioDeviceMenu .device-menu-action-btn i,
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn i {
+    width: 18px;
+    text-align: center;
 }
 
 #bottomButtons button:hover {

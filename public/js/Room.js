@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.69
+ * @version 2.0.70
  *
  */
 
@@ -2048,7 +2048,7 @@ function handleButtons() {
         VideoAI.quality = e.target.value;
     };
     speakerTestBtn.onclick = () => {
-        sound('ring', true);
+        playSpeaker(speakerSelect?.value, 'ring');
     };
     roomId.onclick = () => {
         isMobileDevice ? shareRoom(true) : copyRoomURL();
@@ -4141,6 +4141,25 @@ function setVideoButtonsDisabled(disabled) {
     stopVideoButton.disabled = disabled;
 }
 
+async function playSpeaker(deviceId = null, name, path = '../sounds/') {
+    const selectedDeviceId = deviceId || audioOutputSelect?.value;
+    if (selectedDeviceId) {
+        const sound = path + name + '.wav';
+        const audioToPlay = new Audio(sound);
+        try {
+            if (typeof audioToPlay.setSinkId === 'function') {
+                await audioToPlay.setSinkId(selectedDeviceId);
+            }
+            audioToPlay.volume = 0.5;
+            await audioToPlay.play();
+        } catch (err) {
+            console.error('Cannot play test sound:', err);
+        }
+    } else {
+        sound(name, true);
+    }
+}
+
 async function sound(name, force = false) {
     if (!isSoundEnabled && !force) return;
     let sound = '../sounds/' + name + '.wav';
@@ -4352,7 +4371,27 @@ function setupQuickDeviceSwitchDropdowns() {
     function buildVideoMenu() {
         if (!videoMenu || !videoSelect) return;
         videoMenu.innerHTML = '';
+
+        appendMenuHeader(videoMenu, 'fas fa-video', 'Cameras');
         appendSelectOptions(videoMenu, videoSelect, 'No cameras found', buildVideoMenu);
+
+        // Add settings button
+        appendMenuDivider(videoMenu);
+        const settingsBtn = document.createElement('button');
+        settingsBtn.type = 'button';
+        settingsBtn.className = 'device-menu-action-btn';
+        const settingsIcon = document.createElement('i');
+        settingsIcon.className = 'fas fa-cog';
+        settingsBtn.appendChild(settingsIcon);
+        settingsBtn.appendChild(document.createTextNode(' Open Video Settings'));
+        settingsBtn.addEventListener('click', () => {
+            rc.toggleMySettings();
+            // Simulate tab click to open video devices tab
+            setTimeout(() => {
+                tabVideoDevicesBtn.click();
+            }, 100);
+        });
+        videoMenu.appendChild(settingsBtn);
     }
 
     function buildAudioMenu() {
@@ -4375,6 +4414,39 @@ function setupQuickDeviceSwitchDropdowns() {
             return;
         }
         appendSelectOptions(audioMenu, speakerSelect, 'No speakers found', buildAudioMenu);
+
+        // Add action buttons
+        appendMenuDivider(audioMenu);
+
+        // Test speaker button
+        const testBtn = document.createElement('button');
+        testBtn.type = 'button';
+        testBtn.className = 'device-menu-action-btn';
+        const testIcon = document.createElement('i');
+        testIcon.className = 'fa-solid fa-circle-play';
+        testBtn.appendChild(testIcon);
+        testBtn.appendChild(document.createTextNode(' Test Speaker'));
+        testBtn.addEventListener('click', () => {
+            playSpeaker(speakerSelect?.value, 'ring');
+        });
+        audioMenu.appendChild(testBtn);
+
+        // Settings button
+        const settingsBtn = document.createElement('button');
+        settingsBtn.type = 'button';
+        settingsBtn.className = 'device-menu-action-btn';
+        const settingsIcon = document.createElement('i');
+        settingsIcon.className = 'fas fa-cog';
+        settingsBtn.appendChild(settingsIcon);
+        settingsBtn.appendChild(document.createTextNode(' Open Audio Settings'));
+        settingsBtn.addEventListener('click', () => {
+            rc.toggleMySettings();
+            // Simulate tab click to open audio devices tab
+            setTimeout(() => {
+                tabAudioDevicesBtn.click();
+            }, 100);
+        });
+        audioMenu.appendChild(settingsBtn);
     }
 
     function rebuildVideoMenu() {
@@ -6496,7 +6568,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.69',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.70',
         html: `
             <br />
             <div id="about">
