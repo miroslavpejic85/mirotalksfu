@@ -4361,7 +4361,6 @@ function setupQuickDeviceSwitchDropdowns() {
                 if (selectEl.value === opt.value) return;
                 selectEl.value = opt.value;
                 selectEl.dispatchEvent(new Event('change'));
-                if (typeof rebuildFn === 'function') rebuildFn();
             });
 
             menuEl.appendChild(btn);
@@ -4450,11 +4449,19 @@ function setupQuickDeviceSwitchDropdowns() {
     }
 
     function rebuildVideoMenu() {
-        buildVideoMenu();
+        // Debounce rebuilds to prevent interference with selection
+        clearTimeout(rebuildVideoMenu.timeoutId);
+        rebuildVideoMenu.timeoutId = setTimeout(() => {
+            buildVideoMenu();
+        }, 10);
     }
 
     function rebuildAudioMenu() {
-        buildAudioMenu();
+        // Debounce rebuilds to prevent interference with selection
+        clearTimeout(rebuildAudioMenu.timeoutId);
+        rebuildAudioMenu.timeoutId = setTimeout(() => {
+            buildAudioMenu();
+        }, 10);
     }
 
     // Build menus when opening (click or hover)
@@ -4487,8 +4494,11 @@ function setupQuickDeviceSwitchDropdowns() {
                 } catch (err) {
                     // ignore
                 }
-                rebuildVideoMenu();
-                rebuildAudioMenu();
+                // Use timeout to prevent interference with ongoing selections
+                setTimeout(() => {
+                    rebuildVideoMenu();
+                    rebuildAudioMenu();
+                }, 50);
             });
         });
     }
