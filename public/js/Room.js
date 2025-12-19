@@ -4767,7 +4767,6 @@ function whiteboardDeleteObject() {
     if (!obj) return;
     const tag = document.activeElement?.tagName;
     if ((tag === 'INPUT' || tag === 'TEXTAREA') && !obj.isEditing) return;
-    event.preventDefault();
     if (obj.isEditing && obj.exitEditing) obj.exitEditing();
     whiteboardEraseObject();
     return;
