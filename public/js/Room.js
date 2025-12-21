@@ -437,7 +437,7 @@ function initClient() {
         setTippy('whiteboardRedoBtn', 'Redo', 'bottom');
         setTippy('whiteboardLockBtn', 'Toggle Lock whiteboard', 'right');
         setTippy('whiteboardUnlockBtn', 'Toggle Lock whiteboard', 'right');
-        setTippy('whiteboardCloseBtn', 'Close', 'right');
+        setTippy('whiteboardCloseBtn', 'Close', 'bottom');
         setTippy('chatCleanTextButton', 'Clean', 'top');
         setTippy('chatPasteButton', 'Paste', 'top');
         setTippy('chatSendButton', 'Send', 'top');

@@ -1954,9 +1954,13 @@ progress {
     font-size: 1.2rem;
 }
 
+/* Use flexbox for correct button order */
 .whiteboard-header-options {
     position: absolute;
     right: 10px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .whiteboard-header-options button {
@@ -1964,8 +1968,8 @@ progress {
 }
 
 .whiteboard-header-options .dropdown {
-    margin-left: 10px;
-    float: right;
+    margin-left: 0;
+    float: none;
 }
 
 .whiteboard-header-options .dropdown-menu {
