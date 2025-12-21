@@ -351,59 +351,6 @@ body {
 }
 
 /*--------------------------------------------------------------
-# Buttons bar
---------------------------------------------------------------*/
-
-#control {
-    z-index: 3;
-    position: absolute;
-    display: none;
-    padding: 5px;
-
-    top: var(--btns-top);
-    right: var(--btns-right);
-    left: var(--btns-left);
-    margin-left: var(--btns-margin-left);
-    width: var(--btns-width);
-    flex-direction: var(--btns-flex-direction);
-
-    justify-content: center;
-    grid-gap: 0.5rem;
-
-    -webkit-transform: translate(0%, -50%);
-    -ms-transform: translate(0%, -50%);
-    transform: translate(0%, -50%);
-
-    /* border: var(--border); */
-    /* box-shadow: var(--box-shadow); */
-    border-radius: 10px;
-}
-
-#control button {
-    font-size: 1rem;
-    padding: 10px;
-    background: var(--btns-bg-color);
-    border-radius: 10px;
-    border: none !important;
-    /* border: var(--border); */
-    /* box-shadow: var(--box-shadow); */
-    transition: all 0.3s ease-in-out;
-}
-
-#control button:hover {
-    transform: translateY(-3px);
-    background: var(--body-bg) !important;
-}
-
-#control button i {
-    font-size: 1.2rem;
-}
-
-#toggleExtraButton {
-    color: #66beff;
-}
-
-/*--------------------------------------------------------------
 # Bottom buttons
 --------------------------------------------------------------*/
 
@@ -437,7 +384,8 @@ body {
 
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
 #bottomButtons #startAudioDeviceDropdown,
-#bottomButtons #startVideoDeviceDropdown {
+#bottomButtons #startVideoDeviceDropdown,
+#bottomButtons #settingsExtraDropdown {
     position: static;
 }
 
@@ -521,6 +469,32 @@ body {
     border: var(--border) !important;
 }
 
+#bottomButtons #settingsExtraMenu {
+    min-width: 200px !important;
+    max-width: calc(100vw - 24px) !important;
+    text-align: left;
+    border: var(--border) !important;
+}
+
+/* Mobile: keep settingsExtraMenu inside viewport and scrollable */
+@media (max-width: 600px) {
+    #bottomButtons #startAudioDeviceMenu,
+    #bottomButtons #startVideoDeviceMenu,
+    #bottomButtons #settingsExtraMenu {
+        min-width: unset;
+        max-width: 90vw;
+        left: 5vw !important;
+        right: 5vw !important;
+        position: fixed !important;
+        bottom: 70px !important;
+        z-index: 9999;
+        overflow-y: auto;
+        max-height: 60vh;
+        border-radius: var(--border-radius);
+        box-shadow: var(--box-shadow);
+    }
+}
+
 /* Audio device dropdown: section headers + divider (Microphones / Speakers / Camera) */
 #bottomButtons #startAudioDeviceMenu .device-menu-header,
 #bottomButtons #startVideoDeviceMenu .device-menu-header {
@@ -549,7 +523,8 @@ body {
 }
 
 #bottomButtons #startAudioDeviceMenu button,
-#bottomButtons #startVideoDeviceMenu button {
+#bottomButtons #startVideoDeviceMenu button,
+#bottomButtons #settingsExtraMenu button {
     display: flex;
     width: 100%;
     height: 35px;
@@ -562,9 +537,19 @@ body {
     transform: none !important;
 }
 
+#bottomButtons #settingsExtraMenu button i {
+    width: 20px;
+    min-width: 20px;
+    text-align: center;
+    margin-right: 10px;
+    font-size: 1.1em;
+    display: inline-block;
+}
+
 /* Action buttons in device menu */
 #bottomButtons #startAudioDeviceMenu .device-menu-action-btn,
-#bottomButtons #startVideoDeviceMenu .device-menu-action-btn {
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn,
+#bottomButtons #settingsExtraMenu .device-menu-action-btn {
     background: var(--body-bg);
     border: 1px solid var(--border-color);
     color: #fff;
@@ -574,14 +559,16 @@ body {
 }
 
 #bottomButtons #startAudioDeviceMenu .device-menu-action-btn:hover,
-#bottomButtons #startVideoDeviceMenu .device-menu-action-btn:hover {
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn:hover,
+#bottomButtons #settingsExtraMenu .device-menu-action-btn:hover {
     background: var(--btns-bg-color) !important;
     border-color: var(--btns-color);
     transform: translateY(-1px) !important;
 }
 
 #bottomButtons #startAudioDeviceMenu .device-menu-action-btn i,
-#bottomButtons #startVideoDeviceMenu .device-menu-action-btn i {
+#bottomButtons #startVideoDeviceMenu .device-menu-action-btn i,
+#bottomButtons #settingsExtraMenu .device-menu-action-btn i {
     width: 18px;
     text-align: center;
 }

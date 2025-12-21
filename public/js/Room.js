@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.73
+ * @version 2.0.75
  *
  */
 
@@ -65,7 +65,6 @@ let redirect = {
 };
 
 let recCodecs = null;
-let isToggleExtraBtnClicked = false;
 
 const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
@@ -218,6 +217,12 @@ const videoToggle = getId('startVideoDeviceMenuButton');
 const audioToggle = getId('startAudioDeviceMenuButton');
 const videoMenu = getId('startVideoDeviceMenu');
 const audioMenu = getId('startAudioDeviceMenu');
+
+const settingsSplit = getId('settingsSplit');
+const settingsExtraDropdown = getId('settingsExtraDropdown');
+const settingsExtraToggle = getId('settingsExtraToggle');
+const settingsExtraMenu = getId('settingsExtraMenu');
+const noExtraButtons = getId('noExtraButtons');
 
 // ####################################################
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
@@ -489,27 +494,9 @@ function refreshMainButtonsToolTipPlacement() {
     if (!isMobileDevice) {
         //
         const position = BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value;
-        const placement = position == 'vertical' ? 'right' : 'top';
         const bPlacement = position == 'vertical' ? 'top' : 'right';
 
-        // Control buttons
-        setTippy('shareButton', 'Share room', placement);
-        setTippy('hideMeButton', 'Toggle hide self view', placement);
-        setTippy('startRecButton', 'Start recording', placement);
-        setTippy('stopRecButton', 'Stop recording', placement);
-        setTippy('fullScreenButton', 'Toggle full screen', placement);
-        setTippy('emojiRoomButton', 'Toggle emoji reaction', placement);
-        setTippy('pollButton', 'Toggle the poll', placement);
-        setTippy('editorButton', 'Toggle the editor', placement);
-        setTippy('transcriptionButton', 'Toggle transcription', placement);
-        setTippy('whiteboardButton', 'Toggle the whiteboard', placement);
-        setTippy('documentPiPButton', 'Toggle Document picture in picture', placement);
-        setTippy('snapshotRoomButton', 'Snapshot screen, window, or tab', placement);
-        setTippy('restartICEButton', 'Restart ICE', placement);
-        setTippy('aboutButton', 'About this project', placement);
-
         // Bottom buttons
-        setTippy('toggleExtraButton', 'Toggle extra buttons', bPlacement);
         setTippy('startAudioButton', 'Start the audio', bPlacement);
         setTippy('stopAudioButton', 'Stop the audio', bPlacement);
         setTippy('startVideoButton', 'Start the video', bPlacement);
@@ -1648,16 +1635,6 @@ function roomIsReady() {
         myProfileAvatar.setAttribute('src', rc.genAvatarSvg(peer_name, 64));
     }
 
-    const controlDiv = getId('control');
-    if (controlDiv) {
-        const visibleButtons = Array.from(controlDiv.children).filter(
-            (el) => el.offsetParent !== null && !el.classList.contains('hidden')
-        );
-        BUTTONS.main.extraButton || visibleButtons.length > 0 ? show(toggleExtraButton) : hide(toggleExtraButton);
-    } else {
-        show(toggleExtraButton);
-    }
-
     BUTTONS.main.exitButton && show(exitButton);
     BUTTONS.main.shareButton && show(shareButton);
     BUTTONS.main.hideMeButton && show(hideMeButton);
@@ -1781,6 +1758,7 @@ function roomIsReady() {
     startSessionTimer();
     handleButtonsBar();
     handleDropdownHover();
+    setupSettingsExtraDropdown();
     setupQuickDeviceSwitchDropdowns();
     checkButtonsBar();
     if (room_password) {
@@ -1807,7 +1785,7 @@ function updateChatEmptyNotice() {
 }
 
 function elemDisplay(elem, display, mode = 'block') {
-    elem = getId(elem);
+    elem = typeof elem === 'string' ? getId(elem) : elem;
     if (!elem) {
         elementNotFound(elem);
         return;
@@ -1938,12 +1916,6 @@ function handleButtons() {
                 break;
         }
     });
-    control.onmouseover = () => {
-        isButtonsBarOver = true;
-    };
-    control.onmouseout = () => {
-        isButtonsBarOver = false;
-    };
     bottomButtons.onmouseover = () => {
         isButtonsBarOver = true;
     };
@@ -2239,21 +2211,6 @@ function handleButtons() {
     };
     lowerHandButton.onclick = () => {
         rc.updatePeerInfo(peer_name, socket.id, 'hand', false);
-    };
-    toggleExtraButton.onclick = () => {
-        toggleExtraButtons();
-        if (!isMobileDevice) {
-            isToggleExtraBtnClicked = true;
-            setTimeout(() => {
-                isToggleExtraBtnClicked = false;
-            }, 2000);
-        }
-    };
-    toggleExtraButton.onmouseover = () => {
-        if (isToggleExtraBtnClicked || isMobileDevice) return;
-        if (control.style.display === 'none') {
-            toggleExtraButtons();
-        }
     };
     startAudioButton.onclick = async () => {
         const moderator = rc.getModerator();
@@ -2959,7 +2916,6 @@ function handleSelects() {
         localStorageSettings.buttons_bar = BtnsBarPosition.selectedIndex;
         lS.setSettings(localStorageSettings);
         refreshMainButtonsToolTipPlacement();
-        resizeMainButtons();
     };
     pinVideoPosition.onchange = () => {
         rc.toggleVideoPin(pinVideoPosition.value);
@@ -3000,9 +2956,6 @@ function handleSelects() {
     whiteboardGhostButton.onclick = (e) => {
         wbIsBgTransparent = !wbIsBgTransparent;
         wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
-        if (BUTTONS.main.extraButton) {
-            wbIsBgTransparent ? hide(toggleExtraButton) : show(toggleExtraButton);
-        }
     };
     whiteboardGridBtn.onclick = (e) => {
         toggleCanvasGrid();
@@ -3623,7 +3576,6 @@ function loadSettingsFromLocalStorage() {
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
     rc.toggleVideoPin(pinVideoPosition.value);
     refreshMainButtonsToolTipPlacement();
-    resizeMainButtons();
 }
 
 // ####################################################
@@ -4057,21 +4009,16 @@ function showButtons() {
         (isMobileDevice && rc.isMySettingsOpen)
     )
         return;
-    toggleExtraButton.innerHTML = icons.down;
     bottomButtons.style.display = 'flex';
     isButtonsVisible = true;
 }
 
 function checkButtonsBar() {
     if (localStorageSettings.keep_buttons_visible) {
-        control.style.display = 'flex';
-        toggleExtraButton.innerHTML = icons.up;
         bottomButtons.style.display = 'flex';
         isButtonsVisible = true;
     } else {
         if (!isButtonsBarOver) {
-            control.style.display = 'none';
-            toggleExtraButton.innerHTML = icons.up;
             bottomButtons.style.display = 'none';
             isButtonsVisible = false;
         }
@@ -4079,16 +4026,6 @@ function checkButtonsBar() {
     setTimeout(() => {
         checkButtonsBar();
     }, 10000);
-}
-
-function toggleExtraButtons() {
-    const isControlHidden = control.style.display === 'none' || control.style.display === '';
-    const displayValue = isControlHidden ? 'flex' : 'none';
-    const iconHtml = isControlHidden ? icons.up : icons.down;
-
-    elemDisplay('control', isControlHidden, displayValue);
-    toggleExtraButton.innerHTML = iconHtml;
-    hideClassElements('videoMenuBar');
 }
 
 function hideClassElements(className) {
@@ -4265,19 +4202,88 @@ function getId(id) {
 }
 
 // ####################################################
+// SETTINGS EXTRA (buttons dropdown)
+// ####################################################
+
+function setupSettingsExtraDropdown() {
+    if (!settingsSplit || !settingsExtraDropdown || !settingsExtraToggle || !settingsExtraMenu) return;
+
+    // TODO imporve me.....
+    if (BUTTONS.main.extraButton) {
+        show(settingsExtraDropdown);
+        show(settingsExtraMenu);
+    } else {
+        hide(settingsExtraDropdown);
+        hide(settingsExtraMenu);
+        elemDisplay(noExtraButtons, true);
+        settingsButton.style.borderRadius = '10px';
+    }
+
+    let showTimeout;
+    let hideTimeout;
+
+    function showMenu() {
+        clearTimeout(hideTimeout);
+        show(settingsExtraMenu);
+    }
+    function hideMenu() {
+        clearTimeout(showTimeout);
+        hide(settingsExtraMenu);
+    }
+
+    settingsExtraToggle.addEventListener('click', function (e) {
+        e.stopPropagation();
+        !settingsExtraMenu.classList.contains('hidden') ? hideMenu() : showMenu();
+    });
+
+    const supportsHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    if (supportsHover) {
+        let closeTimeout;
+        const cancelClose = () => {
+            if (!closeTimeout) return;
+            clearTimeout(closeTimeout);
+            closeTimeout = null;
+        };
+        const scheduleClose = () => {
+            cancelClose();
+            closeTimeout = setTimeout(() => hideMenu(), 180);
+        };
+        settingsExtraToggle.addEventListener('mouseenter', () => {
+            cancelClose();
+            showMenu();
+        });
+        settingsExtraToggle.addEventListener('mouseleave', scheduleClose);
+        settingsExtraMenu.addEventListener('mouseenter', cancelClose);
+        settingsExtraMenu.addEventListener('mouseleave', scheduleClose);
+    }
+
+    document.addEventListener('click', function (e) {
+        if (!settingsExtraToggle.contains(e.target) && !settingsExtraMenu.contains(e.target)) {
+            hideMenu();
+        }
+    });
+}
+
+// ####################################################
 // QUICK DEVICE SWITCH (Start Audio/Video dropdowns)
 // ####################################################
+
+function restoreSplitButtonsBorderRadius() {
+    document.querySelectorAll('#bottomButtons .split-btn').forEach((group) => {
+        group.querySelectorAll('button').forEach((button) => {
+            if (button.id != 'settingsExtraToggle' && button.id != 'settingsButton') {
+                button.style.setProperty('border-radius', '10px', 'important');
+            }
+        });
+        const toggle = group.querySelector('.device-dropdown-toggle');
+        if (toggle) toggle.style.setProperty('border-left', 'none', 'important');
+    });
+}
 
 function setupQuickDeviceSwitchDropdowns() {
     // For now keep this feature only for desktop devices
     if (!isDesktopDevice) {
-        document.querySelectorAll('#bottomButtons .split-btn').forEach((group) => {
-            group.querySelectorAll('button').forEach((button) => {
-                button.style.setProperty('border-radius', '10px', 'important');
-            });
-            const toggle = group.querySelector('.device-dropdown-toggle');
-            if (toggle) toggle.style.setProperty('border-left', 'none', 'important');
-        });
+        restoreSplitButtonsBorderRadius();
         return;
     }
 
@@ -5359,9 +5365,6 @@ function whiteboardAction(data, emit = true) {
         case 'close':
             if (wbIsOpen) {
                 toggleWhiteboard();
-                if (BUTTONS.main.extraButton) {
-                    show(toggleExtraButton);
-                }
             }
             break;
         default:
@@ -6594,7 +6597,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.73',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.75',
         html: `
             <br />
             <div id="about">

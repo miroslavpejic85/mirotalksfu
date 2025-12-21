@@ -205,25 +205,7 @@ access to use this app.
             <div id="qrText">Scan to join the room</div>
         </div>
 
-        <div id="control" class="fadein">
-            <button id="shareButton" class="hidden"><i class="fas fa-share-alt"></i></button>
-            <button id="hideMeButton" class="hidden"><i id="hideMeIcon" class="fas fa-user"></i></button>
-            <button id="startRecButton" class="hidden"><i class="fas fa-record-vinyl"></i></button>
-            <button id="stopRecButton" class="hidden"><i class="fas fa-record-vinyl cr"></i></button>
-            <button id="fullScreenButton" class="hidden"><i id="fullScreenIcon" class="fas fa-expand-alt"></i></button>
-            <button id="emojiRoomButton" class="hidden"><i class="fas fa-face-smile"></i></button>
-            <button id="transcriptionButton" class="hidden"><i class="fas fa-closed-captioning"></i></button>
-            <button id="pollButton" class="hidden"><i class="fas fa-square-poll-horizontal"></i></button>
-            <button id="editorButton" class="hidden"><i class="fas fa-pen-to-square"></i></button>
-            <button id="whiteboardButton" class="hidden"><i class="fas fa-chalkboard-teacher"></i></button>
-            <button id="documentPiPButton" class="hidden"><i class="fas fa-images"></i></button>
-            <button id="snapshotRoomButton" class="hidden"><i class="fas fas fa-camera-retro"></i></button>
-            <button id="restartICEButton" class="hidden"><i class="fas fa-satellite-dish"></i></button>
-            <button id="aboutButton" class="hidden"><i class="fas fa-question"></i></button>
-        </div>
-
         <div id="bottomButtons" class="fadein">
-            <button id="toggleExtraButton" class="hidden"><i class="fas fa-chevron-down"></i></button>
             <div id="startAudioSplit" class="split-btn">
                 <button id="startAudioButton" class="hidden"><i class="fas fa-microphone-slash"></i></button>
                 <button id="stopAudioButton" class="hidden"><i class="fas fa-microphone"></i></button>
@@ -266,7 +248,6 @@ access to use this app.
                     ></div>
                 </div>
             </div>
-
             <button id="swapCameraButton" class="hidden"><i class="fas fa-camera-rotate"></i></button>
             <button id="startScreenButton" class="hidden"><i class="fas fa-desktop"></i></button>
             <button id="stopScreenButton" class="hidden"><i class="fas fa-stop-circle"></i></button>
@@ -277,7 +258,66 @@ access to use this app.
                 <i class="fas fa-users"></i>
                 <span id="participantsCountBadge"></span>
             </button>
-            <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
+            <div id="settingsSplit" class="split-btn">
+                <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
+                <div id="settingsExtraDropdown" class="dropdown dropup hidden">
+                    <button
+                        id="settingsExtraToggle"
+                        class="dropdown-toggle device-dropdown-toggle"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false"
+                        aria-label="Settings menu"
+                    >
+                        <i class="fas fa-chevron-up"></i>
+                    </button>
+                    <div
+                        id="settingsExtraMenu"
+                        class="dropdown-menu text-start hidden"
+                        aria-labelledby="settingsExtraToggle"
+                    >
+                        <button id="noExtraButtons" class="hidden">
+                            <i class="fas fa-ban red"></i> No extra buttons
+                        </button>
+                        <button id="shareButton" class="hidden"><i class="fas fa-share-alt"></i> Share Room</button>
+                        <button id="hideMeButton" class="hidden">
+                            <i id="hideMeIcon" class="fas fa-user"></i> Hide Me
+                        </button>
+                        <button id="startRecButton" class="hidden">
+                            <i class="fas fa-record-vinyl"></i> Start Recording
+                        </button>
+                        <button id="stopRecButton" class="hidden">
+                            <i class="fas fa-record-vinyl cr"></i> Stop Recording
+                        </button>
+                        <button id="fullScreenButton" class="hidden">
+                            <i id="fullScreenIcon" class="fas fa-expand-alt"></i> Full Screen
+                        </button>
+                        <button id="emojiRoomButton" class="hidden">
+                            <i class="fas fa-face-smile"></i> Room Emoji
+                        </button>
+                        <button id="transcriptionButton" class="hidden">
+                            <i class="fas fa-closed-captioning"></i> Transcription
+                        </button>
+                        <button id="pollButton" class="hidden">
+                            <i class="fas fa-square-poll-horizontal"></i> Poll
+                        </button>
+                        <button id="editorButton" class="hidden"><i class="fas fa-pen-to-square"></i> Editor</button>
+                        <button id="whiteboardButton" class="hidden">
+                            <i class="fas fa-chalkboard-teacher"></i> Whiteboard
+                        </button>
+                        <button id="documentPiPButton" class="hidden">
+                            <i class="fas fa-images"></i> Document PiP
+                        </button>
+                        <button id="snapshotRoomButton" class="hidden">
+                            <i class="fas fas fa-camera-retro"></i> Snapshot
+                        </button>
+                        <button id="restartICEButton" class="hidden">
+                            <i class="fas fa-satellite-dish"></i> Restart ICE
+                        </button>
+                        <button id="aboutButton" class="hidden"><i class="fas fa-question"></i> About</button>
+                    </div>
+                </div>
+            </div>
             <button id="exitButton" class="hidden"><i class="fa-solid fa-phone-slash red"></i></button>
         </div>
 

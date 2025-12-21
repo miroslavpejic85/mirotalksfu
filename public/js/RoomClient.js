@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.73
+ * @version 2.0.75
  *
  */
 
@@ -4215,12 +4215,6 @@ class RoomClient {
     changeBtnsBarPosition(position) {
         switch (position) {
             case 'vertical':
-                document.documentElement.style.setProperty('--btns-top', '50%');
-                document.documentElement.style.setProperty('--btns-right', '0%');
-                document.documentElement.style.setProperty('--btns-left', '10px');
-                document.documentElement.style.setProperty('--btns-margin-left', '0px');
-                document.documentElement.style.setProperty('--btns-width', '60px');
-                document.documentElement.style.setProperty('--btns-flex-direction', 'column');
                 // bottomButtons horizontally
                 document.documentElement.style.setProperty('--bottom-btns-top', 'auto');
                 document.documentElement.style.setProperty('--bottom-btns-left', '50%');
@@ -4231,12 +4225,6 @@ class RoomClient {
                 document.documentElement.style.setProperty('--bottom-btns-flex-direction', 'row');
                 break;
             case 'horizontal':
-                document.documentElement.style.setProperty('--btns-top', '95%');
-                document.documentElement.style.setProperty('--btns-right', '25%');
-                document.documentElement.style.setProperty('--btns-left', '50%');
-                document.documentElement.style.setProperty('--btns-margin-left', '-240px');
-                document.documentElement.style.setProperty('--btns-width', '480px');
-                document.documentElement.style.setProperty('--btns-flex-direction', 'row');
                 // bottomButtons vertically
                 document.documentElement.style.setProperty('--bottom-btns-top', '50%');
                 document.documentElement.style.setProperty('--bottom-btns-left', '15px');
@@ -8107,7 +8095,6 @@ class RoomClient {
                 }
                 this.RoomLobbyAccepted = true;
                 await this.joinAllowed(data.room);
-                control.style.display = 'flex';
                 bottomButtons.style.display = 'flex';
                 this.msgPopup('info', 'Your join meeting request was accepted by the moderator', 3000, 'top');
                 break;
@@ -8432,12 +8419,7 @@ class RoomClient {
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
-            if (result.isConfirmed) {
-                control.style.display = 'none';
-                bottomButtons.style.display = 'none';
-            } else {
-                this.exit();
-            }
+            result.isConfirmed ? (bottomButtons.style.display = 'none') : this.exit();
         });
     }
 

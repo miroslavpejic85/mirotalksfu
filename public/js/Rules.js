@@ -303,5 +303,8 @@ function handleRulesBroadcasting() {
     elemDisplay('settingsButton', false);
     elemDisplay('tabRTMPStreamingBtn', false);
     elemDisplay('tabNotificationsBtn', false);
-    //...
+
+    elemDisplay('startVideoDeviceDropdown', false);
+    elemDisplay('startAudioDeviceDropdown', false);
+    elemDisplay('settingsExtraDropdown', false);
 }
