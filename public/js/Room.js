@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.75
+ * @version 2.0.76
  *
  */
 
@@ -1850,9 +1850,13 @@ function elementNotFound(element) {
 function startSessionTimer() {
     sessionTime.style.display = 'inline';
     let callStartTime = Date.now();
+    let callElapsedSecondsTime = 0;
     setInterval(function printTime() {
+        callElapsedSecondsTime++;
         let callElapsedTime = Date.now() - callStartTime;
         sessionTime.innerText = getTimeToString(callElapsedTime);
+        const myCurrentSessionTime = document.querySelector('.current-session-time.notranslate');
+        if (myCurrentSessionTime) myCurrentSessionTime.innerText = secondsToHms(callElapsedSecondsTime);
     }, 1000);
 }
 
@@ -1867,6 +1871,17 @@ function getTimeToString(time) {
     let formattedMM = mm.toString().padStart(2, '0');
     let formattedSS = ss.toString().padStart(2, '0');
     return `${formattedHH}:${formattedMM}:${formattedSS}`;
+}
+
+function secondsToHms(d) {
+    d = Number(d);
+    const h = Math.floor(d / 3600);
+    const m = Math.floor((d % 3600) / 60);
+    const s = Math.floor((d % 3600) % 60);
+    const hDisplay = h > 0 ? h + 'h' : '';
+    const mDisplay = m > 0 ? m + 'm' : '';
+    const sDisplay = s > 0 ? s + 's' : '';
+    return hDisplay + ' ' + mDisplay + ' ' + sDisplay;
 }
 
 // ####################################################
@@ -6597,7 +6612,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.75',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.76',
         html: `
             <br />
             <div id="about">

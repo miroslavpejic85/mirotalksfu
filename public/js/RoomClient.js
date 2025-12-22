@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.75
+ * @version 2.0.76
  *
  */
 
@@ -2552,6 +2552,13 @@ class RoomClient {
         return button;
     }
 
+    createElement(id, type, className) {
+        const element = document.createElement(type);
+        element.id = id;
+        element.className = className;
+        return element;
+    }
+
     getConsumerIdByProducerId(producerId) {
         for (let [consumerId, consumer] of this.consumers.entries()) {
             if (consumer._producerId === producerId) {
@@ -2610,7 +2617,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -2643,6 +2650,7 @@ class RoomClient {
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
                 pn = this.createButton(id + '__pin', html.pin);
+                st = this.createElement(id + '__sessionTime', 'span', 'current-session-time notranslate');
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
                 au = this.createButton(
                     this.peer_id + '__audio',
@@ -2688,7 +2696,9 @@ class RoomClient {
 
                 if (!this.isMobileDevice) vb.appendChild(pn);
 
+                vb.appendChild(st);
                 vb.appendChild(p);
+
                 d.appendChild(elem);
                 d.appendChild(pm);
                 d.appendChild(i);
@@ -3402,7 +3412,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv, st;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -3432,6 +3442,8 @@ class RoomClient {
             gl = this.createButton('remotePeer___' + peer_id + '___geoLocation', html.geolocation);
             ban = this.createButton('remotePeer___' + peer_id + '___ban', html.ban);
             ko = this.createButton('remotePeer___' + peer_id + '___kickOut', html.kickOut);
+        } else {
+            st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
         }
 
         i = document.createElement('img');
@@ -3467,6 +3479,8 @@ class RoomClient {
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
 
         vb.appendChild(au);
+        if (!remotePeer) vb.appendChild(st);
+
         d.appendChild(i);
         d.appendChild(p);
         d.appendChild(h);
