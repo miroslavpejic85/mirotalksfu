@@ -4032,6 +4032,7 @@ function handleDropdownHover(dropdownElement = null) {
 
 function showButtons() {
     if (
+        wbIsBgTransparent ||
         isButtonsBarOver ||
         isButtonsVisible ||
         rc.isVideoBarDropDownOpen ||
