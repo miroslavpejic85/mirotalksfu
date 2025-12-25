@@ -5394,9 +5394,8 @@ function whiteboardAction(data, emit = true) {
             }
             break;
         case 'close':
-            if (wbIsOpen) {
-                toggleWhiteboard();
-            }
+            if (wbIsOpen) toggleWhiteboard();
+            if (wbIsBgTransparent) setTheme();
             break;
         default:
             break;
