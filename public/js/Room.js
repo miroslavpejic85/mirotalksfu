@@ -553,7 +553,7 @@ function getQueryParam(param) {
 function getRoomId() {
     let queryRoomId = getQueryParam('room');
     let roomId = queryRoomId ? queryRoomId : location.pathname.substring(6);
-    if (roomId == '') {
+    if (roomId == '' || roomId === 'random') {
         roomId = makeId(12);
     }
     console.log('Direct join', { room: roomId });
