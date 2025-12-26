@@ -492,7 +492,7 @@ body {
     #bottomButtons #startVideoDeviceMenu,
     #bottomButtons #settingsExtraMenu {
         min-width: unset;
-        max-width: 90vw;
+        max-width: 90vw !important;
         left: 5vw !important;
         right: 5vw !important;
         position: fixed !important;

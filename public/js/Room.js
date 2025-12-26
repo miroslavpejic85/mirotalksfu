@@ -3508,12 +3508,13 @@ function handleRoomEmojiPicker() {
     }
 
     function toggleEmojiPicker() {
+        const emojiRoomIcon = emojiRoomButton.querySelector('i');
         if (emojiPickerContainer.style.display === 'block') {
             emojiPickerContainer.style.display = 'none';
-            setColor(emojiRoomButton, 'white');
+            setColor(emojiRoomIcon, 'white');
         } else {
             emojiPickerContainer.style.display = 'block';
-            setColor(emojiRoomButton, 'yellow');
+            setColor(emojiRoomIcon, '#FFD600');
         }
     }
 }
