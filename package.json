@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.0.80",
+    "version": "2.0.81",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -80,7 +80,7 @@
         "helmet": "^8.1.0",
         "httpolyglot": "0.1.2",
         "js-yaml": "^4.1.1",
-        "jsdom": "^27.3.0",
+        "jsdom": "^27.4.0",
         "jsonwebtoken": "^9.0.3",
         "mediasoup": "3.19.14",
         "mediasoup-client": "3.18.3",
