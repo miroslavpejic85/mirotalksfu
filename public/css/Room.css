@@ -1955,22 +1955,20 @@ progress {
 }
 
 .whiteboard-header-title {
-    display: inline;
+    display: flex;
     align-items: center;
-    float: left;
 }
 
 .whiteboard-header-title button {
     font-size: 1.2rem;
+    height: 36px;
 }
 
-/* Use flexbox for correct button order */
 .whiteboard-header-options {
-    position: absolute;
-    right: 10px;
     display: flex;
     align-items: center;
     gap: 4px;
+    margin-left: auto;
 }
 
 .whiteboard-header-options button {

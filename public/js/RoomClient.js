@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.79
+ * @version 2.0.80
  *
  */
 
@@ -3006,10 +3006,6 @@ class RoomClient {
 
     async consume(producer_id, peer_name, peer_info, type) {
         try {
-            wbUpdate();
-
-            this.editorUpdate();
-
             const { consumer, stream, kind } = await this.getConsumeStream(producer_id, peer_info.peer_id, type);
 
             console.log('CONSUMER MEDIA TYPE ----> ' + type);
@@ -3027,6 +3023,14 @@ class RoomClient {
                 console.error('Error resuming consumer', error);
             }
 
+            if (kind === 'video' && isParticipantsListOpen) {
+                await getRoomParticipants();
+            }
+
+            wbUpdate();
+
+            this.editorUpdate();
+
             consumer.on('trackended', () => {
                 console.log('Consumer track end', { id: consumer.id, type });
                 this.removeConsumer(consumer.id, consumer.kind);
@@ -3036,10 +3040,6 @@ class RoomClient {
                 console.log('Consumer transport close', { id: consumer.id, type });
                 this.removeConsumer(consumer.id, consumer.kind);
             });
-
-            if (kind === 'video' && isParticipantsListOpen) {
-                await getRoomParticipants();
-            }
         } catch (error) {
             console.error('Error in consume', error);
 
