@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.83
+ * @version 2.0.84
  *
  */
 
@@ -4992,6 +4992,14 @@ class RoomClient {
         resizeChatRoom();
     }
 
+    updateChatFooterVisibility() {
+        const chatFooter = document.querySelector('.chat-message');
+        const peopleList = document.querySelector('#plist') || document.querySelector('.people-list');
+        if (!chatFooter || !peopleList) return;
+        const isFullWidth = window.innerWidth <= 600 && peopleList.offsetWidth >= window.innerWidth * 0.98;
+        elemDisplay(chatFooter, !isFullWidth);
+    }
+
     toggleShowParticipants() {
         const plist = this.getId('plist');
         const chat = this.getId('chat');
@@ -5004,6 +5012,7 @@ class RoomClient {
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
         plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
         plist.style.position = this.isMobileDevice ? 'fixed' : 'absolute';
+        this.updateChatFooterVisibility();
     }
 
     async toggleParticipants() {
@@ -5124,7 +5133,7 @@ class RoomClient {
 
     toggleChatEmoji() {
         this.getId('chatEmoji').classList.toggle('show');
-        this.isChatEmojiOpen = this.isChatEmojiOpen ? false : true;
+        this.isChatEmojiOpen = !this.isChatEmojiOpen;
         this.getId('chatEmojiButton').style.color = this.isChatEmojiOpen ? '#FFFF00' : '#FFFFFF';
     }
 

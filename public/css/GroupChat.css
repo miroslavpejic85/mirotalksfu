@@ -116,6 +116,8 @@
 /* Chat app container */
 .chat-app .chat {
     position: relative;
+    display: flex;
+    flex-direction: column;
     margin-left: 300px;
     /* border-left: var(--border); */
     border-radius: 10px;
@@ -125,6 +127,7 @@
 /* Chat header */
 .chat .chat-header {
     padding: 15px 20px; /* top, right, bottom, left */
+    flex: 0 0 auto;
     border-bottom: var(--border);
     height: 70px;
     max-height: 70px;
@@ -172,10 +175,11 @@
 /* Chat history */
 .chat .chat-history {
     padding: 20px;
-    height: calc(100vh - 210px);
-    min-height: 490px;
-    max-height: 490px;
-    border-bottom: var(--border);
+    flex: 1 1 auto;
+    height: auto;
+    min-height: 0;
+    max-height: none;
+    /* border-bottom: var(--border); */
     overflow-y: auto;
     overflow-x: hidden;
     /* border: 1px solid lime; */
@@ -267,8 +271,13 @@
 
 /* Chat message */
 .chat .chat-message {
+    z-index: 4;
     padding: 20px;
-    max-height: 140px;
+    flex: 0 0 auto;
+    max-height: none;
+    position: sticky;
+    bottom: 0;
+    background: transparent !important;
     overflow-y: auto;
     overflow-x: hidden;
     /* border: 1px solid lime; */
@@ -381,5 +390,6 @@ input[type='text'] {
 @media screen and (max-width: 600px) {
     .people-list {
         width: 100% !important;
+        height: 100% !important;
     }
 }

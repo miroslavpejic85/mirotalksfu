@@ -2049,15 +2049,18 @@ progress {
     margin: 2px;
     border-radius: 50%;
     border: 2px solid #afadad38;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.10);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     background: transparent;
     cursor: pointer;
-    transition: box-shadow 0.2s, border 0.2s, transform 0.2s;
+    transition:
+        box-shadow 0.2s,
+        border 0.2s,
+        transform 0.2s;
     display: inline-block;
     vertical-align: middle;
 }
 .whiteboardColorPicker:hover {
-    box-shadow: 0 0 0 2px rgba(102,190,255,0.18);
+    box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.18);
     border: 2px solid #66beff;
     transform: scale(1.12);
 }
