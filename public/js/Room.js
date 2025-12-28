@@ -446,11 +446,11 @@ function initClient() {
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
+        setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'top');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
         setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('chatTogglePin', 'Toggle pin', 'bottom');
         setTippy('chatHideParticipantsList', 'Hide', 'bottom');
-        setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
