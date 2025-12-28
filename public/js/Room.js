@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.84
+ * @version 2.0.85
  *
  */
 
@@ -450,7 +450,7 @@ function initClient() {
         setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('chatTogglePin', 'Toggle pin', 'bottom');
         setTippy('chatHideParticipantsList', 'Hide', 'bottom');
-        setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
+        setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
@@ -1667,6 +1667,7 @@ function roomIsReady() {
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
+    show(chatShowParticipantsListBtn);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
 
     !BUTTONS.poll.pollSaveButton && hide(pollSaveButton);
@@ -2158,7 +2159,7 @@ function handleButtons() {
     chatHideParticipantsList.onclick = (e) => {
         rc.toggleShowParticipants();
     };
-    chatShowParticipantsList.onclick = (e) => {
+    chatShowParticipantsListBtn.onclick = (e) => {
         rc.toggleShowParticipants();
     };
     chatShareRoomBtn.onclick = (e) => {
@@ -6633,7 +6634,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.84',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.85',
         html: `
             <br />
             <div id="about">

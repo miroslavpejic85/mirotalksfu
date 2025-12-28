@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.84
+ * @version 2.0.85
  *
  */
 
@@ -9540,13 +9540,6 @@ class RoomClient {
             const isSensitiveChat = !['all', 'ChatGPT', 'DeepSeek'].includes(peer_id) && title.length > 15;
             const truncatedTitle = isSensitiveChat ? `${title.substring(0, 10)}*****` : title;
             return `
-                <img class="all-participants-img" 
-                    style="border: var(--border); width: 43px; margin-right: 5px; cursor: pointer;"
-                    id="chatShowParticipantsList" 
-                    src="${image.users}"
-                    alt="participants"
-                    onclick="rc.toggleShowParticipants()" 
-                />
                 <a data-toggle="modal" data-target="#view_info">
                     <img src="${imgSrc}" alt="avatar" />
                 </a>
@@ -9616,8 +9609,6 @@ class RoomClient {
                 }
                 break;
         }
-
-        if (!this.isMobileDevice) setTippy('chatShowParticipantsList', 'Toggle participants list', 'bottom');
 
         const clickedElement = event ? event.target : null;
         if (!event || (clickedElement.tagName != 'BUTTON' && clickedElement.tagName != 'I')) {
