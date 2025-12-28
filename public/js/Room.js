@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.85
+ * @version 2.0.86
  *
  */
 
@@ -448,6 +448,7 @@ function initClient() {
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'top');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
+        setTippy('fileShareChatButton', 'Share the file', 'top');
         setTippy('chatCloseButton', 'Close', 'bottom');
         setTippy('chatTogglePin', 'Toggle pin', 'bottom');
         setTippy('chatHideParticipantsList', 'Hide', 'bottom');
@@ -1665,10 +1666,12 @@ function roomIsReady() {
     BUTTONS.main.editorButton && show(editorButton);
     BUTTONS.main.raiseHandButton && show(raiseHandButton);
     BUTTONS.main.emojiRoomButton && show(emojiRoomButton);
+    show(fileShareExtraButton);
     !BUTTONS.chat.chatSaveButton && hide(chatSaveButton);
     BUTTONS.chat.chatEmojiButton && show(chatEmojiButton);
     show(chatShowParticipantsListBtn);
     BUTTONS.chat.chatMarkdownButton && show(chatMarkdownButton);
+    show(fileShareChatButton);
 
     !BUTTONS.poll.pollSaveButton && hide(pollSaveButton);
 
@@ -2326,6 +2329,12 @@ function handleButtons() {
     };
     fileShareButton.onclick = () => {
         rc.selectFileToShare(socket.id, true);
+    };
+    fileShareExtraButton.onclick = () => {
+        fileShareButton.click();
+    };
+    fileShareChatButton.onclick = () => {
+        rc.chatPeerId === 'all' ? fileShareButton.click() : rc.selectFileToShare(rc.chatPeerId, false);
     };
     videoShareButton.onclick = () => {
         rc.shareVideo('all');
@@ -6634,7 +6643,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.85',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.0.86',
         html: `
             <br />
             <div id="about">
