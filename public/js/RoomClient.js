@@ -3615,9 +3615,46 @@ class RoomClient {
             this._isConnected = false;
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
-            this.socket.off('disconnect');
-            this.socket.off('newProducers');
-            this.socket.off('consumerClosed');
+            if (this.socket) {
+                this.socket.off('disconnect');
+                this.socket.off('newProducers');
+                this.socket.off('consumerClosed');
+                this.socket.off('connect');
+                this.socket.off('connect_error');
+                this.socket.off('setVideoOff');
+                this.socket.off('removeMe');
+                this.socket.off('refreshParticipantsCount');
+                this.socket.off('message');
+                this.socket.off('roomAction');
+                this.socket.off('roomPassword');
+                this.socket.off('roomLobby');
+                this.socket.off('cmd');
+                this.socket.off('peerAction');
+                this.socket.off('updatePeerInfo');
+                this.socket.off('fileInfo');
+                this.socket.off('file');
+                this.socket.off('shareVideoAction');
+                this.socket.off('fileAbort');
+                this.socket.off('receiveFileAbort');
+                this.socket.off('wbCanvasToJson');
+                this.socket.off('whiteboardAction');
+                this.socket.off('audioVolume');
+                this.socket.off('dominantSpeaker');
+                this.socket.off('updateRoomModerator');
+                this.socket.off('updateRoomModeratorALL');
+                this.socket.off('recordingAction');
+                this.socket.off('endRTMP');
+                this.socket.off('errorRTMP');
+                this.socket.off('endRTMPfromURL');
+                this.socket.off('errorRTMPfromURL');
+                this.socket.off('updatePolls');
+                this.socket.off('editorChange');
+                this.socket.off('editorActions');
+                this.socket.off('editorUpdate');
+                this.socket.io.off('reconnect_attempt');
+                this.socket.io.off('reconnect');
+                this.socket.io.off('reconnect_failed');
+            }
         };
 
         if (!offline) {
