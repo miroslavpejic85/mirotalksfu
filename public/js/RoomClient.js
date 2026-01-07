@@ -561,8 +561,12 @@ class RoomClient {
         if (!peer_info.peer_token) {
             // hack...
             for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-                let peer_info = peers.get(peer).peer_info;
-                if (peer_info.peer_name == this.peer_name) {
+                const _peer_info = peers.get(peer).peer_info;
+                if (_peer_info.peer_name == this.peer_name) {
+                    if (_peer_info.peer_uuid === this.peer_uuid) {
+                        console.log('Same user reconnecting', this.peer_name);
+                        continue;
+                    }
                     console.log('07.0-WARNING ----> Username already in use');
                     return true;
                 }
