@@ -153,7 +153,7 @@ class LocalStorage {
     }
 
     getItemLocalStorage(key) {
-        localStorage.getItem(key);
+        return localStorage.getItem(key);
     }
 
     getObjectLocalStorage(name) {
