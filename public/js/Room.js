@@ -347,7 +347,9 @@ let quill = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     initCursorLightEffect();
-    initClient();
+    socket.once('connect', () => {
+        initClient();
+    });
 });
 
 // ####################################################
