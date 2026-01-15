@@ -6678,7 +6678,7 @@ function showAbout() {
                             </a>
                             <br /><br />
                             <hr />
-                            <span>&copy; 2025 MiroTalk SFU, all rights reserved</span>
+                            <span>&copy; 2026 MiroTalk SFU, all rights reserved</span>
                             <hr />
                         `
                 }
