@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.89
+ * @version 2.0.90
  *
  */
 
@@ -2541,6 +2541,15 @@ class RoomClient {
                     });
                 }
             }
+        } else {
+			// No simulcast or SVC enabled.
+            encodings = [
+                {
+                    scaleResolutionDownBy: 1,
+                    maxBitrate: 5000000,
+                    dtx: true,
+                },
+            ];
         }
         return { encodings, codec };
     }
