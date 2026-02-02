@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.0.98
+ * @version 2.0.99
  *
  */
 
@@ -329,6 +329,7 @@ const views = {
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
     login: path.join(__dirname, '../../', 'public/views/login.html'),
     activeRooms: path.join(__dirname, '../../', 'public/views/activeRooms.html'),
+    customRoom: path.join(__dirname, '../../', 'public/views/customRoom.html'),
     newRoom: path.join(__dirname, '../../', 'public/views/newroom.html'),
     notFound: path.join(__dirname, '../../', 'public/views/404.html'),
     permission: path.join(__dirname, '../../', 'public/views/permission.html'),
@@ -338,7 +339,15 @@ const views = {
     whoAreYou: path.join(__dirname, '../../', 'public/views/whoAreYou.html'),
 };
 
-const filesPath = [views.landing, views.newRoom, views.room, views.login, views.whoAreYou, views.activeRooms];
+const filesPath = [
+    views.landing,
+    views.newRoom,
+    views.room,
+    views.login,
+    views.whoAreYou,
+    views.activeRooms,
+    views.customRoom,
+];
 
 const htmlInjector = new HtmlInjector(filesPath, config.ui.brand);
 
@@ -649,6 +658,11 @@ function startServer() {
     // Get Active rooms
     app.get('/activeRooms', OIDCAuth, (req, res) => {
         htmlInjector.injectHtml(views.activeRooms, res);
+    });
+
+    // Get Custom room
+    app.get('/customRoom', OIDCAuth, (req, res) => {
+        htmlInjector.injectHtml(views.customRoom, res);
     });
 
     // Check if room active (exists)

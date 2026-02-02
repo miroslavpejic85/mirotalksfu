@@ -1,0 +1,176 @@
+'use strict';
+
+/**
+ * Custom Room page: build /join URL from form settings.
+ *
+ * Query params used by client.js:
+ * - room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration
+ */
+
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('customRoomForm');
+    const errorEl = document.getElementById('crError');
+    const statusEl = document.getElementById('crStatus');
+    const previewEl = document.getElementById('crPreviewUrl');
+    const copyBtn = document.getElementById('crCopy');
+
+    const roomEl = document.getElementById('room');
+    const roomPasswordEl = document.getElementById('roomPassword');
+    const nameEl = document.getElementById('name');
+    const avatarEl = document.getElementById('avatar');
+    const tokenEl = document.getElementById('token');
+
+    const durationEl = document.getElementById('duration');
+
+    const audioEl = document.getElementById('audio');
+    const videoEl = document.getElementById('video');
+    const screenEl = document.getElementById('screen');
+    const chatEl = document.getElementById('chat');
+    const hideEl = document.getElementById('hide');
+    const notifyEl = document.getElementById('notify');
+
+    // Reasonable defaults (matches the screenshot: audio/video on, others off)
+    if (audioEl) audioEl.checked = true;
+    if (videoEl) videoEl.checked = true;
+
+    const setError = (msg) => {
+        if (!errorEl) return;
+        if (!msg) {
+            errorEl.hidden = true;
+            errorEl.textContent = '';
+            return;
+        }
+        errorEl.hidden = false;
+        errorEl.textContent = msg;
+    };
+
+    const setStatus = (msg) => {
+        if (!statusEl) return;
+        statusEl.textContent = msg || '';
+    };
+
+    const safe = (value) => {
+        const v = (value ?? '').toString().trim();
+        return typeof window.filterXSS === 'function' ? window.filterXSS(v) : v;
+    };
+
+    const boolToFlag = (checked) => (checked ? '1' : '0');
+
+    const normalizeDuration = (raw) => {
+        const value = safe(raw);
+        if (!value) return 'unlimited';
+        if (value.toLowerCase() === 'unlimited') return 'unlimited';
+        // Accept HH:MM:SS where MM/SS are 00-59
+        const re = /^\d{2}:[0-5]\d:[0-5]\d$/;
+        if (!re.test(value)) {
+            throw new Error('Duration must be HH:MM:SS (e.g. 12:30:00) or left empty for unlimited');
+        }
+        return value;
+    };
+
+    const buildJoinUrl = () => {
+        const room = safe(roomEl?.value) || 'random';
+        const roomPasswordRaw = safe(roomPasswordEl?.value);
+        const roomPassword = roomPasswordRaw ? roomPasswordRaw : '0';
+        const name = safe(nameEl?.value) || 'random';
+        const avatarRaw = safe(avatarEl?.value);
+        const avatar = avatarRaw ? avatarRaw : '0';
+        const token = safe(tokenEl?.value);
+        const duration = normalizeDuration(durationEl?.value);
+
+        const url = new URL('/join', window.location.origin);
+        url.searchParams.set('room', room);
+        url.searchParams.set('roomPassword', roomPassword);
+        url.searchParams.set('name', name);
+        url.searchParams.set('avatar', avatar);
+
+        url.searchParams.set('audio', boolToFlag(!!audioEl?.checked));
+        url.searchParams.set('video', boolToFlag(!!videoEl?.checked));
+        url.searchParams.set('screen', boolToFlag(!!screenEl?.checked));
+        url.searchParams.set('chat', boolToFlag(!!chatEl?.checked));
+        url.searchParams.set('hide', boolToFlag(!!hideEl?.checked));
+        url.searchParams.set('notify', boolToFlag(!!notifyEl?.checked));
+
+        url.searchParams.set('duration', duration);
+
+        if (token) url.searchParams.set('token', token);
+
+        return url;
+    };
+
+    const buildJoinUrlForPreview = () => {
+        // For preview we do not hard-fail on empty room.
+        const room = safe(roomEl?.value) || 'random';
+        const url = new URL('/join', window.location.origin);
+        if (!room) return url;
+        try {
+            return buildJoinUrl();
+        } catch {
+            return url;
+        }
+    };
+
+    const updatePreview = () => {
+        if (!previewEl) return;
+        const url = buildJoinUrlForPreview();
+        const room = safe(roomEl?.value);
+        previewEl.value = room ? url.toString() : `${window.location.origin}/join?room=...`;
+        if (copyBtn) copyBtn.disabled = !room;
+    };
+
+    const copyToClipboard = async (text) => {
+        if (navigator.clipboard?.writeText && window.isSecureContext) {
+            await navigator.clipboard.writeText(text);
+            return;
+        }
+        // Fallback
+        const tmp = document.createElement('textarea');
+        tmp.value = text;
+        tmp.setAttribute('readonly', '');
+        tmp.style.position = 'fixed';
+        tmp.style.left = '-9999px';
+        document.body.appendChild(tmp);
+        tmp.select();
+        document.execCommand('copy');
+        document.body.removeChild(tmp);
+    };
+
+    if (!form) return;
+
+    // Live preview
+    updatePreview();
+
+    const inputs = [roomEl, nameEl, avatarEl, tokenEl, audioEl, videoEl, screenEl, chatEl, hideEl, notifyEl];
+    inputs.push(roomPasswordEl, durationEl);
+    inputs.forEach((el) => {
+        if (!el) return;
+        el.addEventListener('input', updatePreview);
+        el.addEventListener('change', updatePreview);
+    });
+
+    if (copyBtn) {
+        copyBtn.addEventListener('click', async () => {
+            setError('');
+            setStatus('');
+            try {
+                const joinUrl = buildJoinUrl();
+                await copyToClipboard(joinUrl.toString());
+                setStatus('Link copied to clipboard.');
+            } catch (err) {
+                setError(err?.message || 'Unable to copy join URL');
+            }
+        });
+    }
+
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        setError('');
+        setStatus('');
+        try {
+            const joinUrl = buildJoinUrl();
+            window.location.href = joinUrl.toString();
+        } catch (err) {
+            setError(err?.message || 'Unable to build join URL');
+        }
+    });
+});
