@@ -192,6 +192,7 @@ if (lastRoomContainer && lastRoom && lastRoomName) {
 
 const genRoomButton = document.getElementById('genRoomButton');
 const joinRoomButton = document.getElementById('joinRoomButton');
+const customizeRoomButton = document.getElementById('customizeRoomButton');
 const adultCnt = document.getElementById('adultCnt');
 
 if (genRoomButton) {
@@ -203,6 +204,12 @@ if (genRoomButton) {
 if (joinRoomButton) {
     joinRoomButton.onclick = () => {
         joinRoom();
+    };
+}
+
+if (customizeRoomButton) {
+    customizeRoomButton.onclick = () => {
+        window.location.href = '/customizeRoom';
     };
 }
 

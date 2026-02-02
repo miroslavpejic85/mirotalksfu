@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.0.99 - Configuration File
+ * MiroTalk SFU v2.1.00 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1018,6 +1018,7 @@ module.exports = {
                     'Start your next video call with a single click. No download, plug-in, or login is required.',
                 joinDescription: process.env.JOIN_DESCRIPTION || 'Pick a room name.<br />How about this one?',
                 joinButtonLabel: process.env.JOIN_BUTTON_LABEL || 'JOIN ROOM',
+                customizeButtonLabel: process.env.CUSTOMIZE_BUTTON_LABEL || 'CUSTOMIZE ROOM',
                 joinLastLabel: process.env.JOIN_LAST_LABEL || 'Your recent room:',
             },
 

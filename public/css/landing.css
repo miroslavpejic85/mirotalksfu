@@ -1088,6 +1088,36 @@ label {
         box-shadow 0.2s ease,
         transform 0.12s ease;
 }
+
+.button-secondary {
+    background: linear-gradient(65deg, rgba(255, 255, 255, 0.06) 0, rgba(255, 255, 255, 0.02) 100%);
+    border: none;
+    color: rgba(255, 255, 255, 0.88) !important;
+    border-radius: 6px;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.12s ease,
+        filter 0.2s ease;
+}
+
+.button-secondary:hover {
+    background: linear-gradient(65deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.04) 100%);
+    border-color: rgba(255, 255, 255, 0.3);
+    filter: brightness(1.03) saturate(1.05);
+    transform: translateY(-2px);
+}
+
+.button-secondary:active {
+    transform: translateY(0);
+    filter: none;
+}
+
+.button-secondary:focus-visible {
+    outline: 0;
+}
+
 .button-block {
     display: flex;
 }

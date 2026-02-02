@@ -16,6 +16,7 @@ const appTitle = document.getElementById('appTitle');
 const appDescription = document.getElementById('appDescription');
 const joinDescription = document.getElementById('joinDescription');
 const joinRoomBtn = document.getElementById('joinRoomButton');
+const customizeRoomBtn = document.getElementById('customizeRoomButton');
 const joinLastLabel = document.getElementById('joinLastLabel');
 
 const topSponsors = document.getElementById('topSponsors');
@@ -44,6 +45,7 @@ let BRAND = {
             'Start your next video call with a single click. No download, plug-in, or login is required. Just get straight to talking, messaging, and sharing your screen.',
         joinDescription: 'Pick a room name.<br />How about this one?',
         joinButtonLabel: 'JOIN ROOM',
+        customizeButtonLabel: 'CUSTOMIZE ROOM',
         joinLastLabel: 'Your recent room:',
     },
     site: {
@@ -80,7 +82,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.0.99</strong>',
+        title: '<strong>WebRTC SFU v2.1.00</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -240,6 +242,9 @@ function customizeApp() {
     }
     if (joinRoomBtn && BRAND.app?.joinButtonLabel) {
         joinRoomBtn.innerText = BRAND.app.joinButtonLabel;
+    }
+    if (customizeRoomBtn && BRAND.app?.customizeButtonLabel) {
+        customizeRoomBtn.innerText = BRAND.app.customizeButtonLabel;
     }
     if (joinLastLabel && BRAND.app?.joinLastLabel) {
         joinLastLabel.innerText = BRAND.app.joinLastLabel;
