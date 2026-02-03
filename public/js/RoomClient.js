@@ -3686,18 +3686,11 @@ class RoomClient {
     }
 
     exitRoom(disconnectAll = false) {
-        if (isExiting) return;
-        isExiting = true;
-
         const switchDisconnectAllOnLeave = getId('switchDisconnectAllOnLeave');
         if (isPresenter && (disconnectAll || (switchDisconnectAllOnLeave && switchDisconnectAllOnLeave.checked))) {
             this.ejectAllOnLeave();
         }
         this.exit();
-
-        setTimeout(() => {
-            isExiting = false;
-        }, 2000);
     }
 
     // ####################################################
