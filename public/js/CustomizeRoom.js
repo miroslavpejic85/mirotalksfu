@@ -4,7 +4,7 @@
  * Custom Room page: build /join URL from form settings.
  *
  * Query params used by client.js:
- * - room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration
+ * - room, roomPassword, name, avatar, audio, video, screen, chat, hide, notify, duration, token
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -60,8 +60,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const value = safe(raw);
         if (!value) return 'unlimited';
         if (value.toLowerCase() === 'unlimited') return 'unlimited';
-        // Accept HH:MM:SS where MM/SS are 00-59
-        const re = /^\d{2}:[0-5]\d:[0-5]\d$/;
+        // Validate HH:MM:SS format only
+        const re = /^(\d{2}):(\d{2}):(\d{2})$/;
         if (!re.test(value)) {
             throw new Error('Duration must be HH:MM:SS (e.g. 12:30:00) or left empty for unlimited');
         }
