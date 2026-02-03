@@ -117,7 +117,7 @@ This project is proudly sponsored by
 <br/>
 
 - You can `directly join a room` by using link like:
-- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=mirotalksfu&avatar=0&audio=0&video=0&screen=0&chat=0&notify=0&duration=unlimited
+- https://sfu.mirotalk.com/join?room=test&roomPassword=0&name=random&avatar=0&audio=0&video=0&screen=0&chat=0&notify=0&duration=unlimited
 
     | Params       | Type           | Description               |
     | ------------ | -------------- | ------------------------- |
@@ -402,12 +402,12 @@ curl -X POST "https://sfu.mirotalk.com/api/v1/meeting" \
 curl -X POST "http://localhost:3010/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"avatar":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
+     --data '{"room":"test","roomPassword":false,"avatar":false,"name":"random","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
 
 curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","avatar":false,"audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
+     --data '{"room":"test","roomPassword":false,"name":"random","avatar":false,"audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited"}'
 ```
 
 ### 5. Join Meeting with Token
@@ -416,12 +416,12 @@ curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
 curl -X POST "http://localhost:3010/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+     --data '{"room":"test","roomPassword":false,"name":"random","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
 
 curl -X POST "https://sfu.mirotalk.com/api/v1/join" \
      -H "authorization: mirotalksfu_default_secret" \
      -H "Content-Type: application/json" \
-     --data '{"room":"test","roomPassword":false,"name":"mirotalksfu","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
+     --data '{"room":"test","roomPassword":false,"name":"random","audio":false,"video":false,"screen":false,"chat":false,"notify":false,"duration":"unlimited","token":{"username":"username","password":"password","presenter":true,"expire":"1h"}}'
 ```
 
 ### 6. Generate Token
