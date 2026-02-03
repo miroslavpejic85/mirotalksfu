@@ -1090,7 +1090,12 @@ label {
 }
 
 .button-secondary {
-    background: linear-gradient(65deg, rgba(255, 255, 255, 0.06) 0, rgba(255, 255, 255, 0.02) 100%);
+    background: linear-gradient(65deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+    box-shadow:
+        0 10px 24px rgba(0, 0, 0, 0.35),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
     border: none;
     color: rgba(255, 255, 255, 0.88) !important;
     border-radius: 6px;
@@ -1107,15 +1112,6 @@ label {
     border-color: rgba(255, 255, 255, 0.3);
     filter: brightness(1.03) saturate(1.05);
     transform: translateY(-2px);
-}
-
-.button-secondary:active {
-    transform: translateY(0);
-    filter: none;
-}
-
-.button-secondary:focus-visible {
-    outline: 0;
 }
 
 .button-block {
