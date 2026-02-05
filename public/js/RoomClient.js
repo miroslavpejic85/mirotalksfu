@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.05
+ * @version 2.1.06
  *
  */
 
@@ -4515,7 +4515,7 @@ class RoomClient {
         const element = elem ? elem : document.documentElement;
         const fullScreen = this.isFullScreen();
         fullScreen ? this.goOutFullscreen(element) : this.goInFullscreen(element);
-        if (elem === null) this.isVideoOnFullScreen = fullScreen;
+        if (elem) this.isVideoOnFullScreen = !fullScreen;
     }
 
     isFullScreen() {
@@ -4545,30 +4545,50 @@ class RoomClient {
     }
 
     handleFS(elemId, fsId) {
-        let videoPlayer = this.getId(elemId);
-        let btnFs = this.getId(fsId);
-        if (videoPlayer && btnFs) {
-            this.setTippy(fsId, 'Full screen', 'bottom');
-            btnFs.addEventListener('click', () => {
-                if (videoPlayer.classList.contains('videoCircle')) {
-                    return this.userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
-                }
-                videoPlayer.style.pointerEvents = this.isVideoOnFullScreen ? 'auto' : 'none';
-                this.toggleFullScreen(videoPlayer);
-            });
-            videoPlayer.addEventListener('fullscreenchange', (e) => {
-                if (!document.fullscreenElement) {
-                    videoPlayer.style.pointerEvents = 'auto';
-                    this.isVideoOnFullScreen = false;
-                }
-            });
-            videoPlayer.addEventListener('webkitfullscreenchange', (e) => {
-                if (!document.webkitIsFullScreen) {
-                    videoPlayer.style.pointerEvents = 'auto';
-                    this.isVideoOnFullScreen = false;
-                }
-            });
+        const videoPlayer = this.getId(elemId);
+        const btnFs = this.getId(fsId);
+        if (!videoPlayer || !btnFs) return;
+
+        this.setTippy(fsId, 'Full screen', 'bottom');
+
+        const videoWrap = this.getId(elemId + '__video');
+        const fsTarget = videoWrap || videoPlayer;
+
+        const getFsElement = () =>
+            document.fullscreenElement ||
+            document.webkitFullscreenElement ||
+            document.mozFullScreenElement ||
+            document.msFullscreenElement ||
+            null;
+
+        const sync = () => {
+            const fsEl = getFsElement();
+            const isThisVideoFullscreen = fsEl === fsTarget;
+            if (isThisVideoFullscreen) {
+                this.isVideoOnFullScreen = true;
+                videoPlayer.style.pointerEvents = 'none';
+                return;
+            }
+
+            if (!fsEl) {
+                videoPlayer.style.pointerEvents = 'auto';
+                this.isVideoOnFullScreen = false;
+            }
+        };
+
+        if (!videoPlayer.dataset.fsSyncAttached) {
+            videoPlayer.dataset.fsSyncAttached = '1';
+            document.addEventListener('fullscreenchange', sync);
+            document.addEventListener('webkitfullscreenchange', sync);
         }
+
+        btnFs.addEventListener('click', () => {
+            if (videoPlayer.classList.contains('videoCircle')) {
+                return this.userLog('info', 'Full Screen not allowed if video on privacy mode', 'top-end');
+            }
+            this.toggleFullScreen(fsTarget);
+            setTimeout(sync, 0);
+        });
     }
 
     // ####################################################
@@ -4895,6 +4915,18 @@ class RoomClient {
         if (btnMv && videoPlayer) {
             btnMv.addEventListener('click', () => {
                 videoPlayer.classList.toggle('mirror');
+
+                // Persist user preference only for *local webcam* video.
+                // Local webcam video elements have `name=this.peer_id` (see handleProducer()).
+                const isLocalWebcam = videoPlayer.getAttribute('name') === this.peer_id;
+                if (isLocalWebcam && typeof localStorageSettings === 'object') {
+                    localStorageSettings.video_mirror = videoPlayer.classList.contains('mirror');
+                    try {
+                        lS.setSettings(localStorageSettings);
+                    } catch (e) {
+                        console.warn('Unable to persist video_mirror preference:', e);
+                    }
+                }
             });
         }
     }

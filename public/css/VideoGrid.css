@@ -438,6 +438,12 @@ video:fullscreen {
     transform: rotateY(180deg);
 }
 
+.videoCircle.mirror {
+    -webkit-transform: translate(-50%, -50%) rotateY(180deg) !important;
+    -moz-transform: translate(-50%, -50%) rotateY(180deg) !important;
+    transform: translate(-50%, -50%) rotateY(180deg) !important;
+}
+
 .blur {
     -webkit-filter: blur(5px);
     -moz-filter: blur(5px);
