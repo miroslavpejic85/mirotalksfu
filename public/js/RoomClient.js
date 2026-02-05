@@ -4915,18 +4915,6 @@ class RoomClient {
         if (btnMv && videoPlayer) {
             btnMv.addEventListener('click', () => {
                 videoPlayer.classList.toggle('mirror');
-
-                // Persist user preference only for *local webcam* video.
-                // Local webcam video elements have `name=this.peer_id` (see handleProducer()).
-                const isLocalWebcam = videoPlayer.getAttribute('name') === this.peer_id;
-                if (isLocalWebcam && typeof localStorageSettings === 'object') {
-                    localStorageSettings.video_mirror = videoPlayer.classList.contains('mirror');
-                    try {
-                        lS.setSettings(localStorageSettings);
-                    } catch (e) {
-                        console.warn('Unable to persist video_mirror preference:', e);
-                    }
-                }
             });
         }
     }
