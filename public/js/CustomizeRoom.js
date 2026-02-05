@@ -69,7 +69,11 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const buildJoinUrl = () => {
-        const room = safe(roomEl?.value) || 'random';
+        const room = safe(roomEl?.value);
+        if (!room) {
+            throw new Error('Room name is required');
+        }
+
         const roomPasswordRaw = safe(roomPasswordEl?.value);
         const roomPassword = roomPasswordRaw ? roomPasswordRaw : '0';
         const name = safe(nameEl?.value) || 'random';
