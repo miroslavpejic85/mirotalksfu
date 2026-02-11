@@ -25,7 +25,7 @@ const html = {
     audioOff: 'fas fa-microphone-slash',
     videoOn: 'fas fa-video',
     videoOff: 'fas fa-video-slash',
-    userName: 'username',
+    userName: 'username notranslate fadein',
     userHand: 'fas fa-hand-paper user-hand pulsate',
     pip: 'fas fa-images',
     fullScreen: 'fas fa-expand',
