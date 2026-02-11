@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.07
+ * @version 2.1.08
  *
  */
 
@@ -2254,11 +2254,22 @@ class RoomClient {
             echoCancellation: true,
             autoGainControl: true,
             noiseSuppression: !BUTTONS.settings.customNoiseSuppression, // if disable using the built-in RNNoise suppression
-            sampleRate: 48000,
-            channelCount: 2, // Stereo for better audio quality
         };
-
-        if (deviceId) audioConstraints.deviceId = { exact: deviceId };
+        /* 
+        deviceId handling is platform-dependent:
+            - iOS Safari: routing is OS-controlled; ignore deviceId.
+            - Mobile (Android): best-effort with `ideal`.
+            - Desktop: `exact` is reliable.
+        */
+        if (deviceId) {
+            if (this.isMobileSafari) {
+                // ignore
+            } else if (this.isMobileDevice) {
+                audioConstraints.deviceId = { ideal: deviceId };
+            } else {
+                audioConstraints.deviceId = { exact: deviceId };
+            }
+        }
 
         return {
             audio: audioConstraints,

@@ -2542,6 +2542,49 @@ hr {
     font-size: 1rem;
 }
 
+/* Mic Guidance */
+
+.mic-guidance {
+    padding: 10px;
+    border-radius: 6px;
+    margin: 10px 0;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+.mic-guidance p {
+    margin: 5px 0;
+}
+
+.mic-guidance .title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 600;
+}
+
+.mic-guidance.ios {
+    background: var(--body-bg);
+    border-left: 3px solid #ffc107;
+}
+
+.mic-guidance.ios .title {
+    color: #ffc107;
+}
+
+.mic-guidance.mobile {
+    background: var(--body-bg);
+    border-left: 3px solid #2196f3;
+}
+
+.mic-guidance.mobile .title {
+    color: #2196f3;
+}
+
+.mic-guidance .text {
+    color: #ddd;
+}
+
 /*
 z-index:
     - 1 videoMediaContainer

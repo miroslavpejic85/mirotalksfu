@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.07
+ * @version 2.1.08
  *
  */
 
@@ -26,6 +26,7 @@ const parser = new UAParser(userAgent);
 const parserResult = parser.getResult();
 const deviceType = parserResult.device.type || 'desktop';
 const isMobileDevice = deviceType === 'mobile';
+const isMobileSafari = isMobileDevice && parserResult.browser.name?.toLowerCase().includes('safari');
 const isTabletDevice = deviceType === 'tablet';
 const isIPadDevice = parserResult.device.model?.toLowerCase() === 'ipad';
 const isDesktopDevice = deviceType === 'desktop';
@@ -1291,6 +1292,7 @@ async function whoAreYou() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         willOpen: () => {
             hide(loadingDiv);
+            showMobileAudioGuidance();
         },
         inputValidator: (name) => {
             if (isVideoAllowed && !isInitVideoLoaded) {
@@ -1354,6 +1356,46 @@ function mergeConfig(current, updated) {
         }
     }
     return current;
+}
+
+function showMobileAudioGuidance() {
+    if (!isMobileDevice) return;
+
+    const guidance = isMobileSafari
+        ? `
+            <div class="mic-guidance ios">
+                <p class="title">
+                    <i class="fas fa-info-circle"></i>
+                    iOS Audio Routing
+                </p>
+                <p class="text">
+                    iOS automatically routes audio to connected Bluetooth or external devices.
+                    Connect your preferred microphone <strong>before</strong> joining.
+                </p>
+            </div>
+        `
+        : `
+            <div class="mic-guidance mobile">
+                <p class="title">
+                    <i class="fas fa-mobile-alt"></i>
+                    External Microphones
+                </p>
+                <p class="text">
+                    External microphones may require device reconnection to activate.
+                </p>
+            </div>
+        `;
+
+    // Inject into the initUser modal
+    const audioGuidanceDiv = document.createElement('div');
+    audioGuidanceDiv.id = 'mobileAudioGuidance';
+    audioGuidanceDiv.innerHTML = guidance;
+
+    // Insert before the audio/video controls
+    const initUserContainer = document.getElementById('initUser');
+    if (initUserContainer && initMicrophoneSelect) {
+        initMicrophoneSelect.parentElement.insertBefore(audioGuidanceDiv, initMicrophoneSelect);
+    }
 }
 
 function handleAudio() {
@@ -4541,15 +4583,26 @@ function setupQuickDeviceSwitchDropdowns() {
     // Re-enumerate & refresh lists on hardware changes
     if (navigator.mediaDevices) {
         let deviceChangeFrame;
-        navigator.mediaDevices.addEventListener('devicechange', () => {
+        let lastChangeTime = 0;
+
+        navigator.mediaDevices.addEventListener('devicechange', async () => {
+            const now = Date.now();
+
+            // Debounce: ignore rapid-fire changes
+            if (now - lastChangeTime < 1000) return;
+            lastChangeTime = now;
+
             if (deviceChangeFrame) cancelAnimationFrame(deviceChangeFrame);
+
             deviceChangeFrame = requestAnimationFrame(async () => {
+                console.log('🔄 Audio devices changed - refreshing...');
+                // Give OS time to finish routing (especially important on mobile)
+                await new Promise((resolve) => setTimeout(resolve, isMobileDevice ? 1500 : 500));
                 try {
                     await refreshMyAudioVideoDevices();
                 } catch (err) {
-                    // ignore
+                    console.warn('Device refresh failed:', err);
                 }
-                // Use timeout to prevent interference with ongoing selections
                 setTimeout(() => {
                     rebuildVideoMenu();
                     rebuildAudioMenu();
@@ -6645,7 +6698,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.07',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.08',
         html: `
             <br />
             <div id="about">
