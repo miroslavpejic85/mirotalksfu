@@ -2305,6 +2305,7 @@ class RoomClient {
 
         const resolutionMap = this.getResolutionMap();
 
+        // Default to HD
         const [width, height] = resolutionMap[videoQuality.value] || [1280, 720];
 
         const constraints = {

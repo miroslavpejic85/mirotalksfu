@@ -200,6 +200,7 @@ const participantsCountBadge = getId('participantsCountBadge');
 const videoSelect = getId('videoSelect');
 const videoQuality = getId('videoQuality');
 const videoFps = getId('videoFps');
+const screenQuality = getId('screenQuality');
 const screenFps = getId('screenFps');
 const screenOptimization = getId('screenOptimization');
 const initVideoSelect = getId('initVideoSelect');
