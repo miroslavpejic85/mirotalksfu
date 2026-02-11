@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.08
+ * @version 2.1.09
  *
  */
 
@@ -2286,69 +2286,37 @@ class RoomClient {
         };
     }
 
+    getResolutionMap() {
+        return {
+            qvga: [320, 240],
+            vga: [640, 480],
+            hd: [1280, 720],
+            fhd: [1920, 1080],
+            '2k': [2560, 1440],
+            '4k': [3840, 2160],
+            '6k': [6144, 3456],
+            '8k': [7680, 4320],
+        };
+    }
+
     getVideoConstraints(deviceId) {
-        const defaultFrameRate = { ideal: 30 };
         const selectedValue = this.getSelectedIndexValue(videoFps);
         const customFrameRate = parseInt(selectedValue, 10);
-        const frameRate = selectedValue === 'max' ? defaultFrameRate : customFrameRate;
 
-        // Helper to create constraints
-        function createConstraints(width, height, frameRate, isIdeal = false) {
-            const constraints = {
-                width: isIdeal ? { ideal: width } : { exact: width },
-                height: isIdeal ? { ideal: height } : { exact: height },
-            };
-            // Only add frameRate for non-Firefox browsers
-            if (!isFirefox) {
-                constraints.frameRate = isIdeal ? { ideal: frameRate } : frameRate;
-            }
-            return constraints;
-        }
+        const resolutionMap = this.getResolutionMap();
 
-        let constraints = {};
+        const [width, height] = resolutionMap[videoQuality.value] || [1280, 720];
 
-        switch (videoQuality.value) {
-            case 'default':
-                constraints = createConstraints(1280, 720, 30, true);
-                videoFps.selectedIndex = 0;
-                videoFps.disabled = true;
-                break;
-            case 'qvga':
-                constraints = createConstraints(320, 240, frameRate, isFirefox);
-                break;
-            case 'vga':
-                constraints = createConstraints(640, 480, frameRate, isFirefox);
-                break;
-            case 'hd':
-                constraints = createConstraints(1280, 720, frameRate, isFirefox);
-                break;
-            case 'fhd':
-                constraints = createConstraints(1920, 1080, frameRate, isFirefox);
-                break;
-            case '2k':
-                constraints = createConstraints(2560, 1440, frameRate, isFirefox);
-                break;
-            case '4k':
-                constraints = createConstraints(3840, 2160, frameRate, isFirefox);
-                break;
-            case '6k':
-                constraints = createConstraints(6144, 3456, frameRate, isFirefox);
-                break;
-            case '8k':
-                constraints = createConstraints(7680, 4320, frameRate, isFirefox);
-                break;
-            default:
-                // fallback to HD
-                constraints = createConstraints(1280, 720, frameRate, isFirefox);
-                break;
-        }
+        const constraints = {
+            width: { ideal: width },
+            height: { ideal: height },
+            frameRate: { ideal: customFrameRate || 30 },
+        };
 
-        // Add deviceId if provided
         if (deviceId) {
             constraints.deviceId = { exact: deviceId };
         }
 
-        // Compose final constraints object
         return {
             audio: false,
             video: constraints,
@@ -2356,40 +2324,24 @@ class RoomClient {
     }
 
     getScreenConstraints() {
-        const defaultFrameRate = { ideal: 30 };
         const selectedValue = this.getSelectedIndexValue(screenFps);
         const customFrameRate = parseInt(selectedValue, 10);
-        const frameRate = selectedValue === 'max' ? defaultFrameRate : { ideal: customFrameRate };
 
-        // Base constraints structure with dynamic values for resolution and frame rate
-        const screenBaseConstraints = (width, height) => {
-            const videoConstraints = {
-                width: { ideal: width },
-                height: { ideal: height },
-                aspectRatio: 1.777, // 16:9 aspect ratio
-            };
-            if (!isFirefox) {
-                videoConstraints.frameRate = frameRate;
-            }
-            return {
-                audio: true,
-                video: videoConstraints,
-            };
+        const screenResolutionMap = this.getResolutionMap();
+
+        // Default to Full HD
+        const [width, height] = screenResolutionMap[screenQuality.value] || [1920, 1080];
+
+        const videoConstraints = {
+            width: { ideal: width },
+            height: { ideal: height },
+            frameRate: { ideal: customFrameRate || 30 },
         };
 
-        const screenResolutionMap = {
-            hd: { width: 1280, height: 720 },
-            fhd: { width: 1920, height: 1080 },
-            '2k': { width: 2560, height: 1440 },
-            '4k': { width: 3840, height: 2160 },
-            '6k': { width: 6144, height: 3456 },
-            '8k': { width: 7680, height: 4320 },
+        return {
+            audio: false,
+            video: videoConstraints,
         };
-
-        // Default to Full HD if no match found in the screen resolution map
-        const { width, height } = screenResolutionMap[screenQuality.value] || { width: 1920, height: 1080 };
-
-        return screenBaseConstraints(width, height);
     }
 
     // ####################################################
