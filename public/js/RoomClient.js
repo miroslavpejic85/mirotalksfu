@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.12
+ * @version 2.1.13
  *
  */
 
@@ -46,6 +46,7 @@ const html = {
     expand: 'fas fa-bars dropdown-button',
     hideALL: 'fas fa-eye',
     mirror: 'fas fa-arrow-right-arrow-left',
+    draw: 'fas fa-pencil-alt',
     close: 'fas fa-times',
     stop: 'fas fa-circle-stop',
 };
@@ -1150,6 +1151,7 @@ class RoomClient {
         this.socket.on('receiveFileAbort', this.handleReceiveFileAbortData);
         this.socket.on('wbCanvasToJson', this.handleWbCanvasToJson);
         this.socket.on('whiteboardAction', this.handleWhiteboardAction);
+        this.socket.on('videoDrawing', this.handleVideoDrawingData);
         this.socket.on('audioVolume', this.handleAudioVolumeData);
         this.socket.on('dominantSpeaker', this.handleDominantSpeakerData);
         this.socket.on('updateRoomModerator', this.handleUpdateRoomModeratorData);
@@ -1330,6 +1332,10 @@ class RoomClient {
     handleWhiteboardAction = (data) => {
         console.log('Whiteboard action', data);
         whiteboardAction(data, false);
+    };
+
+    handleVideoDrawingData = (data) => {
+        this.handleVideoDrawing(data);
     };
 
     handleAudioVolumeData = (data) => {
@@ -2594,7 +2600,7 @@ class RoomClient {
     }
 
     async handleProducer(id, type, stream) {
-        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st;
+        let elem, vb, vp, ts, d, p, i, au, pip, ha, fs, pm, pb, pn, pv, mv, st, dw;
         switch (type) {
             case mediaType.video:
             case mediaType.screen:
@@ -2626,6 +2632,7 @@ class RoomClient {
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
                 mv = this.createButton(id + '__mirror', html.mirror);
+                dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
                 st = this.createElement(id + '__sessionTime', 'span', 'current-session-time notranslate');
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
@@ -2668,6 +2675,7 @@ class RoomClient {
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
                 BUTTONS.producerVideo.videoMirrorButton && vb.appendChild(mv);
+                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
 
@@ -2710,6 +2718,7 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 this.handleHA(ha.id, d.id);
+                BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, d.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.handleZV(elem.id, d.id, this.peer_id);
                 this.handlePV(id + '___' + pv.id);
@@ -2733,6 +2742,7 @@ class RoomClient {
                     this.setTippy(mv.id, 'Toggle mirror', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    this.setTippy(dw.id, 'Toggle draw', 'bottom');
                     this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
@@ -2955,6 +2965,11 @@ class RoomClient {
         const d = this.getId(video.id + '__video');
         const vb = this.getId(video.id + '__vb');
 
+        // Destroy drawing overlay if present
+        if (d && typeof VideoDrawingOverlay !== 'undefined') {
+            VideoDrawingOverlay.destroyById(d.id);
+        }
+
         video.srcObject.getTracks().forEach(function (track) {
             track.stop();
         });
@@ -3066,7 +3081,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3119,6 +3134,7 @@ class RoomClient {
                 mv = this.createButton(id + '__videoMirror', html.mirror);
                 fs = this.createButton(id + '__fullScreen', html.fullScreen);
                 ts = this.createButton(id + '__snapshot', html.snapshot);
+                dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
                 sf = this.createButton(id + '___' + remotePeerId + '___sendFile', html.sendFile);
@@ -3192,6 +3208,7 @@ class RoomClient {
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
                 BUTTONS.consumerVideo.videoMirrorButton && vb.appendChild(mv);
+                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.fullScreenButton && this.isVideoFullScreenSupported && vb.appendChild(fs);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
@@ -3223,6 +3240,7 @@ class RoomClient {
                 this.handleDD(elem.id, remotePeerId);
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
+                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
                 this.handleSF(sf.id);
                 this.handleHA(ha.id, d.id);
                 this.handleSM(sm.id, peer_name);
@@ -3260,6 +3278,7 @@ class RoomClient {
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(mv.id, 'Toggle mirror', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    this.setTippy(dw.id, 'Toggle draw', 'bottom');
                     this.setTippy(sf.id, 'Send file', 'bottom');
                     this.setTippy(sm.id, 'Send message', 'bottom');
                     this.setTippy(sv.id, 'Send video', 'bottom');
@@ -3342,6 +3361,11 @@ class RoomClient {
             const vb = this.getId(consumer_id + '__vb');
 
             if (d) {
+                // Destroy drawing overlay if present
+                if (typeof VideoDrawingOverlay !== 'undefined') {
+                    VideoDrawingOverlay.destroyById(d.id);
+                }
+
                 // Check if video is in focus-mode...
                 if (d.hasAttribute('focus-mode')) {
                     const dhaBtn = this.getId(consumer_id + '__hideALL');
@@ -3616,6 +3640,7 @@ class RoomClient {
                 this.socket.off('receiveFileAbort');
                 this.socket.off('wbCanvasToJson');
                 this.socket.off('whiteboardAction');
+                this.socket.off('videoDrawing');
                 this.socket.off('audioVolume');
                 this.socket.off('dominantSpeaker');
                 this.socket.off('updateRoomModerator');
@@ -4867,6 +4892,76 @@ class RoomClient {
                 saveDataToFile(dataURL, getDataTimeString() + '-SNAPSHOT.png');
             });
         }
+    }
+
+    // ####################################################
+    // HANDLE VIDEO DRAWING OVERLAY
+    // ####################################################
+
+    handleVideoDrawing(data) {
+        if (typeof VideoDrawingOverlay === 'undefined') return;
+        if (!data || !data.producerId || !data.paths) return;
+        // Translate the canonical producerId to our local camera div ID.
+        // If we are the producer, the div is {producerId}__video.
+        // If we are a consumer of that producer, the div is {consumerId}__video.
+        let cameraId = data.producerId + '__video';
+        if (!document.getElementById(cameraId)) {
+            const consumerId = this.getConsumerIdByProducerId(data.producerId);
+            if (consumerId) {
+                cameraId = consumerId + '__video';
+            }
+        }
+        VideoDrawingOverlay.receiveRemoteDrawing({ cameraId, paths: data.paths, peerName: data.peer_name });
+    }
+
+    handleDW(dwBtnId, camDivId) {
+        const btnDw = this.getId(dwBtnId);
+        const camDiv = this.getId(camDivId);
+        if (!btnDw || !camDiv) return;
+        // Wire up the global emit callback (once) so VideoDrawingOverlay
+        // can send batched strokes through the signaling server.
+        // Translates the local cameraId to a canonical producerId so remote
+        // peers can resolve it to their own consumer div.
+        if (typeof VideoDrawingOverlay !== 'undefined' && !VideoDrawingOverlay.onEmitDrawing) {
+            VideoDrawingOverlay.onEmitDrawing = (data) => {
+                // if not peers, don't send
+                if (!this.thereAreParticipants()) return;
+
+                // cameraId format: "{id}__video" — extract the base ID
+                const baseId = data.cameraId.replace('__video', '');
+
+                // Determine the canonical producer ID:
+                // - If baseId is a producer we own, it's already the producer ID.
+                // - If baseId is a consumer ID, look up the producer ID.
+                let producerId = baseId;
+                const mappedProducerId = this.getProducerIdByConsumerId(baseId);
+                if (mappedProducerId) {
+                    producerId = mappedProducerId;
+                }
+
+                this.socket.emit('videoDrawing', {
+                    peer_name: this.peer_name,
+                    producerId: producerId,
+                    paths: data.paths,
+                });
+            };
+        }
+
+        btnDw.addEventListener('click', () => {
+            if (typeof VideoDrawingOverlay === 'undefined') {
+                return console.warn('[handleDW] VideoDrawingOverlay not loaded');
+            }
+            // Privacy mode check
+            const video = camDiv.querySelector('video');
+            if (video && video.classList.contains('videoCircle')) {
+                return this.userLog('info', 'Drawing not allowed in privacy mode', 'top-end');
+            }
+            const overlay = VideoDrawingOverlay.getOrCreate(camDiv);
+            const isActive = overlay.toggle();
+
+            // Visual feedback on the button
+            btnDw.style.color = isActive ? 'lime' : '#fff';
+        });
     }
 
     // ####################################################

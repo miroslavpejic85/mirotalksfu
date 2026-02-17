@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.12 - Configuration File
+ * MiroTalk SFU v2.1.13 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1246,6 +1246,7 @@ module.exports = {
                 muteAudioButton: process.env.SHOW_MUTE_AUDIO !== 'false',
                 videoPrivacyButton: process.env.SHOW_PRIVACY_TOGGLE !== 'false',
                 audioVolumeInput: process.env.SHOW_VOLUME_CONTROL !== 'false',
+                drawingButton: process.env.SHOW_DRAWING_BUTTON !== 'false',
             },
 
             // Video controls for consumer (remote users)
@@ -1264,6 +1265,7 @@ module.exports = {
                 geolocationButton: process.env.SHOW_GEO_LOCATION !== 'false',
                 banButton: process.env.SHOW_BAN_BUTTON !== 'false',
                 ejectButton: process.env.SHOW_EJECT_BUTTON !== 'false',
+                drawingButton: process.env.SHOW_DRAWING_BUTTON !== 'false',
             },
 
             // Controls when video is off

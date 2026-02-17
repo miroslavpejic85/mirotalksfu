@@ -69,6 +69,7 @@ let BUTTONS = {
         muteAudioButton: true,
         videoPrivacyButton: true,
         audioVolumeInput: true,
+        drawingButton: true,
     },
     consumerVideo: {
         videoPictureInPicture: true,
@@ -85,6 +86,7 @@ let BUTTONS = {
         geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
+        drawingButton: true, // presenter
     },
     videoOff: {
         sendMessageButton: true,
@@ -149,6 +151,8 @@ function handleRules(isPresenter) {
         BUTTONS.consumerVideo.geolocationButton = false;
         BUTTONS.consumerVideo.banButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
+        // BUTTONS.consumerVideo.drawingButton = false;
+        // BUTTONS.producerVideo.drawingButton = false;
         BUTTONS.whiteboard.whiteboardLockButton = false;
 
         //...

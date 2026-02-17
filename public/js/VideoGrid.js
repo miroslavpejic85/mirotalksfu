@@ -89,6 +89,11 @@ function resizeVideoMedia() {
     // When alone, use fixed avatar size; otherwise proportional to tile
     const avatarSize = isOneVideoElement ? Math.min(200, Math.max(120, Height * 0.25)) : max / 3;
     document.documentElement.style.setProperty('--vmi-wh', avatarSize + 'px');
+
+    // Resize any active drawing overlays to match new tile dimensions
+    if (typeof VideoDrawingOverlay !== 'undefined') {
+        VideoDrawingOverlay.resizeAll();
+    }
 }
 
 function resetZoom() {

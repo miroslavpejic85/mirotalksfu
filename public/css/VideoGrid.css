@@ -564,3 +564,78 @@ input[type='range'] {
         gap: 6px;
     }
 }
+
+/*--------------------------------------------------------------
+# Video Drawing Overlay (Fabric.js)
+--------------------------------------------------------------*/
+
+/* Fabric.js wraps the canvas in a .canvas-container div.
+   Use a dedicated class so it works when .Camera is removed (pinned state). */
+.video-drawing-wrap {
+    position: absolute !important;
+    top: 0;
+    left: 0;
+    z-index: 1; /* Above video (0), below videoMenuBar (2) */
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+/* The raw canvas element before Fabric wraps it */
+.video-drawing-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+/* When drawing is inactive, let all events pass through to the video */
+.video-drawing-inactive {
+    pointer-events: none !important;
+}
+
+/* When drawing is active, capture pointer events and show crosshair */
+.video-drawing-active {
+    pointer-events: auto !important;
+    cursor: crosshair;
+}
+
+/* Ensure the upper-canvas (Fabric.js event layer) inherits pointer-events */
+.video-drawing-active .upper-canvas {
+    pointer-events: auto !important;
+    cursor: crosshair !important;
+}
+
+.video-drawing-inactive .upper-canvas {
+    pointer-events: none !important;
+}
+
+/* Floating label showing who is drawing on the video */
+.video-drawing-label {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 10;
+    padding: 3px 8px;
+    max-width: calc(100% - 16px);
+    background: rgba(0, 0, 0, 0.65);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 500;
+    border-radius: 6px;
+    pointer-events: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    opacity: 0;
+    transition: opacity 0.35s ease;
+}
+
+/* Smaller label on narrow video tiles (mobile) */
+@container camera (max-width: 250px) {
+    .video-drawing-label {
+        top: 4px;
+        left: 4px;
+        max-width: calc(100% - 8px);
+        padding: 2px 5px;
+        font-size: 10px;
+    }
+}

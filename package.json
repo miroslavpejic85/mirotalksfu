@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.1.12",
+    "version": "2.1.13",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -8,7 +8,7 @@
         "start": "node app/src/Server.js",
         "start-dev": "nodemon app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
-        "compile": "npx webpack",
+        "client-compile": "npx webpack",
         "lint": "npx prettier --write .",
         "docker-build": "docker build --tag mirotalk/sfu:latest .",
         "docker-rmi": "docker image prune -f",
@@ -83,7 +83,7 @@
         "jsdom": "^28.1.0",
         "jsonwebtoken": "^9.0.3",
         "mediasoup": "3.19.17",
-        "mediasoup-client": "3.18.6",
+        "mediasoup-client": "3.18.7",
         "mime-types": "^3.0.2",
         "nodemailer": "^8.0.1",
         "openai": "^6.22.0",
