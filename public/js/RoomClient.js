@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.15
+ * @version 2.1.16
  *
  */
 
@@ -4013,6 +4013,10 @@ class RoomClient {
         return this._isRecording;
     }
 
+    hasActiveRecorder() {
+        return this.mediaRecorder !== null;
+    }
+
     static get mediaType() {
         return mediaType;
     }
@@ -7225,7 +7229,7 @@ class RoomClient {
     }
 
     saveRecording(reason) {
-        if (this._isRecording || recordingStatus.innerText != '0s') {
+        if (this._isRecording || this.hasActiveRecorder()) {
             console.log(`Save recording: ${reason}`);
             this.stopRecording();
         }

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.15
+ * @version 2.1.16
  *
  */
 
@@ -3855,7 +3855,7 @@ function handleRoomClientEvents() {
         if (isRulesActive && !isPresenter) {
             console.log('Room event: host only recording enabled');
             // Stop recording ...
-            if (rc.isRecording() || recordingStatus.innerText != '0s') {
+            if (rc.isRecording() || rc.hasActiveRecorder()) {
                 rc.saveRecording('Room event: host only recording enabled, going to stop recording');
             }
             hide(startRecButton);
@@ -3915,7 +3915,7 @@ function handleRoomClientEvents() {
 
         endRoomSession();
 
-        if (rc.isRecording() || recordingStatus.innerText != '0s') {
+        if (rc.isRecording() || rc.hasActiveRecorder()) {
             rc.saveRecording('Room event: Client save recording before to exit');
         }
 
@@ -3932,7 +3932,7 @@ function initLeaveMeeting() {
 }
 
 async function leaveRoom(allowCancel = true) {
-    if (rc.isRecording() || recordingStatus.innerText != '0s') {
+    if (rc.isRecording() || rc.hasActiveRecorder()) {
         recShowInfo = false;
         rc.saveRecording('User is leaving the room, saving recording before exit');
         rc.popupRecordingOnLeaveRoom();
@@ -6675,7 +6675,7 @@ window.addEventListener('popstate', (event) => {
     }).then((result) => {
         if (result.isConfirmed) {
             // Save recording if in progress
-            if (rc.isRecording() || recordingStatus.innerText != '0s') {
+            if (rc.isRecording() || rc.hasActiveRecorder()) {
                 recShowInfo = false;
                 rc.saveRecording('User popstate changes');
             }
@@ -6692,7 +6692,7 @@ window.addEventListener('popstate', (event) => {
 // Intercept tab close, refresh, or direct URL navigation
 window.addEventListener('beforeunload', (e) => {
     // Save recording if in progress
-    if (rc.isRecording() || recordingStatus.innerText != '0s') {
+    if (rc.isRecording() || rc.hasActiveRecorder()) {
         recShowInfo = false;
         rc.saveRecording('User is closing the tab, refreshing, or navigating away');
     }
@@ -6715,7 +6715,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.15',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.16',
         html: `
             <br />
             <div id="about">
