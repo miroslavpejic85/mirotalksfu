@@ -59,7 +59,7 @@ class RNNoiseContextManager {
         });
     }
 
-    processFrame(frameBuffer, processedBuffer, messagePort) {
+    processFrame(frameBuffer, processedBuffer, messagePort, throttledVadSend) {
         if (!this.rnnoiseContext || !this.module || !this.module.HEAPF32) return;
 
         try {
@@ -77,11 +77,14 @@ class RNNoiseContextManager {
                 processedBuffer[i] = this.module.HEAPF32[this.wasmPcmInputF32Index + i] / SHIFT_16_BIT_NR;
             }
 
-            messagePort.postMessage({
-                type: 'vad',
-                probability: vadScore,
-                isSpeech: vadScore > 0.5,
-            });
+            // Throttle VAD messages to reduce postMessage overhead (mobile perf)
+            if (throttledVadSend) {
+                messagePort.postMessage({
+                    type: 'vad',
+                    probability: vadScore,
+                    isSpeech: vadScore > 0.5,
+                });
+            }
         } catch (error) {
             console.error('Frame processing failed:', error);
             for (let i = 0; i < RNNOISE_FRAME_SIZE; i++) {
@@ -140,9 +143,18 @@ class AudioFrameBuffer {
     }
 }
 
-// Handle volume analysis
+// Handle volume analysis (throttled to reduce postMessage overhead on mobile)
 class VolumeAnalyzer {
+    constructor() {
+        this.lastSendTime = 0;
+        this.throttleMs = 100; // Send at most every 100ms
+    }
+
     calculateVolume(input, output, messagePort) {
+        const now = currentTime * 1000; // AudioWorklet currentTime is in seconds
+        if (now - this.lastSendTime < this.throttleMs) return;
+        this.lastSendTime = now;
+
         const originalVolume = Math.sqrt(input.reduce((sum, v) => sum + v * v, 0) / input.length);
         const processedVolume = Math.sqrt(output.reduce((sum, v) => sum + v * v, 0) / output.length);
 
@@ -169,6 +181,8 @@ class RNNoiseProcessor extends AudioWorkletProcessor {
         this.contextManager = null;
         this.frameBuffer = new AudioFrameBuffer();
         this.volumeAnalyzer = new VolumeAnalyzer();
+        this.lastVadSendTime = 0;
+        this.vadThrottleMs = 100; // Send VAD at most every 100ms
 
         this.setupMessageHandler();
         this.port.postMessage({ type: 'request-wasm' });
@@ -189,6 +203,9 @@ class RNNoiseProcessor extends AudioWorkletProcessor {
                     break;
                 case 'enable':
                     this.enabled = enabled;
+                    break;
+                case 'destroy':
+                    this.destroy();
                     break;
                 default:
                     console.warn('Unknown message type:', type);
@@ -220,11 +237,15 @@ class RNNoiseProcessor extends AudioWorkletProcessor {
             const isFrameReady = this.frameBuffer.addSample(input[i]);
 
             if (isFrameReady) {
+                const now = currentTime * 1000;
+                const shouldSendVad = now - this.lastVadSendTime >= this.vadThrottleMs;
                 this.contextManager.processFrame(
                     this.frameBuffer.getFrameBuffer(),
                     this.frameBuffer.getProcessedBuffer(),
-                    this.port
+                    this.port,
+                    shouldSendVad
                 );
+                if (shouldSendVad) this.lastVadSendTime = now;
                 this.frameBuffer.resetBuffer();
             }
 

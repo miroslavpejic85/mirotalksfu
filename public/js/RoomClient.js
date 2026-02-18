@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.13
+ * @version 2.1.14
  *
  */
 
@@ -411,6 +411,7 @@ class RoomClient {
 
         // Noise Suppression
         this.RNNoiseProcessor = null;
+        this.isRNNoiseSupported = true; // Will be set to false if AudioWorklet/WASM not available
 
         this.videoProducerId = null;
         this.screenProducerId = null;
@@ -2206,6 +2207,13 @@ class RoomClient {
     initRNNoiseSuppression() {
         if (typeof RNNoiseProcessor === 'undefined') {
             console.warn('RNNoiseProcessor is not available.');
+            this.handleRNNoiseNotSupported();
+            return;
+        }
+
+        if (!RNNoiseProcessor.isSupported()) {
+            console.warn('RNNoise: AudioWorklet or WebAssembly not supported on this device, skipping.');
+            this.handleRNNoiseNotSupported();
             return;
         }
 
@@ -2214,9 +2222,22 @@ class RoomClient {
         this.RNNoiseProcessor = new RNNoiseProcessor();
     }
 
+    handleRNNoiseNotSupported() {
+        this.isRNNoiseSupported = false;
+
+        // Uncheck the toggle so localStorage stays consistent
+        if (switchNoiseSuppression) switchNoiseSuppression.checked = false;
+        localStorageSettings.mic_noise_suppression = false;
+        lS.setSettings(localStorageSettings);
+
+        // Hide the custom noise suppression toggle in audio settings
+        elemDisplay('noiseSuppressionButton', false);
+    }
+
     async getRNNoiseSuppressionStream(stream) {
         if (!this.RNNoiseProcessor) {
             console.warn('RNNoiseProcessor not initialized.');
+            //
             return stream;
         }
 
@@ -2256,10 +2277,13 @@ class RoomClient {
     // ####################################################
 
     getAudioConstraints(deviceId) {
+        // If custom RNNoise is enabled but not supported, fall back to built-in WebRTC noise suppression
+        const useBuiltInNoiseSuppression = !BUTTONS.settings.customNoiseSuppression || !this.isRNNoiseSupported;
+
         const audioConstraints = {
             echoCancellation: true,
             autoGainControl: true,
-            noiseSuppression: !BUTTONS.settings.customNoiseSuppression, // if disable using the built-in RNNoise suppression
+            noiseSuppression: useBuiltInNoiseSuppression,
         };
         /* 
         deviceId handling is platform-dependent:
