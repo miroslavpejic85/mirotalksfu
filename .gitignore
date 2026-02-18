@@ -19,6 +19,7 @@ docker-push.sh
 data
 rec
 rtmp
+rnnoiseBuild
 
 # virtual background
 custom
