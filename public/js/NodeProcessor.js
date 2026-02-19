@@ -131,15 +131,16 @@ class RNNoiseProcessor {
         };
 
         this.elements.switchNoiseSuppression.onchange = (e) => {
-            localStorageSettings.mic_noise_suppression = e.currentTarget.checked;
+            const enabled = e.currentTarget.checked;
+            localStorageSettings.mic_noise_suppression = enabled;
             lS.setSettings(localStorageSettings);
             userLog(
-                localStorageSettings.mic_noise_suppression ? 'success' : 'info',
-                `Noise suppression ${localStorageSettings.mic_noise_suppression ? 'enabled' : 'disabled'}`,
+                enabled ? 'success' : 'info',
+                `Noise suppression ${enabled ? 'enabled' : 'disabled'}`,
                 'top-end',
                 3000
             );
-            this.toggleNoiseSuppression();
+            this.setNoiseSuppression(enabled);
         };
     }
 
@@ -168,16 +169,9 @@ class RNNoiseProcessor {
                 return null;
             }
 
-            this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            this.audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
             const sampleRate = this.audioContext.sampleRate;
             this.uiManager.updateStatus(`🎵 Audio context created with sample rate: ${sampleRate}Hz`, 'info');
-
-            if (sampleRate !== 48000) {
-                this.uiManager.updateStatus(
-                    `⚠️ Sample rate ${sampleRate}Hz differs from RNNoise expected 48000Hz, quality may be affected`,
-                    'warning'
-                );
-            }
 
             if (this.audioContext.state === 'suspended') {
                 try {
@@ -256,8 +250,8 @@ class RNNoiseProcessor {
         this.uiManager.updateStatus('🛑 Audio processing stopped', 'info');
     }
 
-    toggleNoiseSuppression() {
-        this.noiseSuppressionEnabled = !this.noiseSuppressionEnabled;
+    setNoiseSuppression(enabled) {
+        this.noiseSuppressionEnabled = enabled;
 
         if (this.workletNode) {
             this.workletNode.port.postMessage({
@@ -271,5 +265,9 @@ class RNNoiseProcessor {
             : this.uiManager.updateStatus('🔇 RNNoise disabled - audio passes through unchanged', 'info');
 
         this.uiManager.updateUI(this.isProcessing, this.noiseSuppressionEnabled);
+    }
+
+    toggleNoiseSuppression() {
+        this.setNoiseSuppression(!this.noiseSuppressionEnabled);
     }
 }
