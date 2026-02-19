@@ -70,6 +70,33 @@ module.exports = class ServerApi {
         return meetings;
     }
 
+    endMeeting(roomList, room, redirect = '') {
+        if (!roomList.has(room)) {
+            return { success: false, error: 'Room not found' };
+        }
+
+        const roomObj = roomList.get(room);
+
+        // Notify all peers to exit (clients handle 'ejectAll' by redirecting)
+        roomObj.sendToAll('cmd', {
+            type: 'ejectAll',
+            peer_name: 'API',
+            broadcast: true,
+            redirect: redirect || '',
+        });
+
+        // Remove all peers and close transports
+        const peers = roomObj.getPeers();
+        for (const [peerId] of peers) {
+            roomObj.removePeer(peerId);
+        }
+
+        // Delete room from the active list
+        roomList.delete(room);
+
+        return { success: true, message: 'Meeting ended', room: room };
+    }
+
     getMeetingURL() {
         return 'https://' + this._host + '/join/' + uuidV4();
     }

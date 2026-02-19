@@ -66,6 +66,39 @@ paths:
                         $ref: '#/definitions/MeetingResponse'
                 '403':
                     description: 'Unauthorized!'
+    /meeting/{room}:
+        delete:
+            tags:
+                - 'meeting'
+            summary: 'End meeting'
+            description: 'End an active meeting by room name. All connected peers will be disconnected and redirected to the specified URL or home page.'
+            parameters:
+                - in: path
+                  name: room
+                  required: true
+                  type: string
+                  description: 'The room name/ID of the meeting to end'
+                - in: body
+                  name: body
+                  required: false
+                  description: 'Optional body with redirect URL'
+                  schema:
+                      $ref: '#/definitions/EndMeetingRequest'
+            consumes:
+                - 'application/json'
+            produces:
+                - 'application/json'
+            security:
+                - secretApiKey: []
+            responses:
+                '200':
+                    description: 'Meeting ended successfully'
+                    schema:
+                        $ref: '#/definitions/EndMeetingResponse'
+                '403':
+                    description: 'Unauthorized!'
+                '404':
+                    description: 'Room not found'
     /join:
         post:
             tags:
@@ -203,6 +236,22 @@ definitions:
             expire:
                 type: string
                 default: '1h'
+    EndMeetingRequest:
+        type: object
+        properties:
+            redirect:
+                type: string
+                description: 'URL to redirect peers to after the meeting ends. If empty, peers are redirected to the home page.'
+                default: ''
+    EndMeetingResponse:
+        type: 'object'
+        properties:
+            success:
+                type: boolean
+            message:
+                type: string
+            room:
+                type: string
     JoinResponse:
         type: 'object'
         properties:

@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.19
+ * @version 2.1.20
  *
  */
 
@@ -1468,6 +1468,44 @@ function startServer() {
             body: req.body,
             token: token,
         });
+    });
+
+    // request end meeting room endpoint
+    app.delete(restApi.basePath + '/meeting/:room', (req, res) => {
+        try {
+            // Check if endpoint allowed
+            if (restApi.allowed && !restApi.allowed.meetingEnd) {
+                return res.status(403).json({
+                    success: false,
+                    error: 'This endpoint has been disabled. Please contact the administrator for further information.',
+                });
+            }
+            // check if user was authorized for the api call
+            const { host, authorization } = req.headers;
+            const api = new ServerApi(host, authorization);
+            if (!api.isAuthorized()) {
+                log.debug('MiroTalk end meeting - Unauthorized', {
+                    header: req.headers,
+                    body: req.body,
+                });
+                return res.status(403).json({ error: 'Unauthorized!' });
+            }
+            // End the meeting
+            const { room } = req.params;
+            const { redirect } = req.body || {};
+            const result = api.endMeeting(roomList, room, redirect);
+            const status = result.success ? 200 : 404;
+            res.status(status).json(result);
+            // log.debug the output if all done
+            log.debug('MiroTalk end meeting - Authorized', {
+                header: req.headers,
+                room: room,
+                result: result,
+            });
+        } catch (error) {
+            console.error('Error ending meeting', error);
+            res.status(500).json({ success: false, error: 'Failed to end meeting.' });
+        }
     });
 
     // ####################################################

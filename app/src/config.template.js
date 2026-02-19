@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.19 - Configuration File
+ * MiroTalk SFU v2.1.20 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -512,6 +512,7 @@ module.exports = {
             stats: process.env.API_ALLOW_STATS !== 'false',
             meetings: process.env.API_ALLOW_MEETINGS === 'true',
             meeting: process.env.API_ALLOW_MEETING !== 'false',
+            meetingEnd: process.env.API_ALLOW_MEETING_END === 'true',
             join: process.env.API_ALLOW_JOIN !== 'false',
             token: process.env.API_ALLOW_TOKEN === 'true',
             slack: process.env.API_ALLOW_SLACK !== 'false',

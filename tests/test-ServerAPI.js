@@ -239,6 +239,113 @@ describe('test-ServerAPI', () => {
         });
     });
 
+    describe('endMeeting', () => {
+        it('should end an existing meeting and return success', () => {
+            const removePeerStub = sinon.stub();
+            const sendToAllStub = sinon.stub();
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        getPeers: () =>
+                            new Map([
+                                ['peer1', {}],
+                                ['peer2', {}],
+                            ]),
+                        removePeer: removePeerStub,
+                        sendToAll: sendToAllStub,
+                    },
+                ],
+            ]);
+
+            const result = serverApi.endMeeting(roomList, 'room1');
+
+            result.should.deepEqual({ success: true, message: 'Meeting ended', room: 'room1' });
+            sendToAllStub.calledOnce.should.be.true();
+            sendToAllStub
+                .calledWith('cmd', { type: 'ejectAll', peer_name: 'API', broadcast: true, redirect: '' })
+                .should.be.true();
+            removePeerStub.calledTwice.should.be.true();
+            roomList.has('room1').should.be.false();
+        });
+
+        it('should pass redirect URL to peers when provided', () => {
+            const removePeerStub = sinon.stub();
+            const sendToAllStub = sinon.stub();
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        getPeers: () => new Map([['peer1', {}]]),
+                        removePeer: removePeerStub,
+                        sendToAll: sendToAllStub,
+                    },
+                ],
+            ]);
+
+            const result = serverApi.endMeeting(roomList, 'room1', 'https://example.com/goodbye');
+
+            result.should.deepEqual({ success: true, message: 'Meeting ended', room: 'room1' });
+            sendToAllStub
+                .calledWith('cmd', {
+                    type: 'ejectAll',
+                    peer_name: 'API',
+                    broadcast: true,
+                    redirect: 'https://example.com/goodbye',
+                })
+                .should.be.true();
+            removePeerStub.calledOnce.should.be.true();
+            roomList.has('room1').should.be.false();
+        });
+
+        it('should use empty redirect when redirect is not provided', () => {
+            const sendToAllStub = sinon.stub();
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        getPeers: () => new Map([['peer1', {}]]),
+                        removePeer: sinon.stub(),
+                        sendToAll: sendToAllStub,
+                    },
+                ],
+            ]);
+
+            serverApi.endMeeting(roomList, 'room1');
+
+            sendToAllStub
+                .calledWith('cmd', { type: 'ejectAll', peer_name: 'API', broadcast: true, redirect: '' })
+                .should.be.true();
+        });
+
+        it('should return error when room does not exist', () => {
+            const roomList = new Map();
+
+            const result = serverApi.endMeeting(roomList, 'nonexistent');
+
+            result.should.deepEqual({ success: false, error: 'Room not found' });
+        });
+
+        it('should handle room with no peers', () => {
+            const sendToAllStub = sinon.stub();
+            const roomList = new Map([
+                [
+                    'room1',
+                    {
+                        getPeers: () => new Map(),
+                        removePeer: sinon.stub(),
+                        sendToAll: sendToAllStub,
+                    },
+                ],
+            ]);
+
+            const result = serverApi.endMeeting(roomList, 'room1');
+
+            result.should.deepEqual({ success: true, message: 'Meeting ended', room: 'room1' });
+            roomList.has('room1').should.be.false();
+        });
+    });
+
     describe('getRandomNumber', () => {
         it('should return a random number between 0 and 999999', () => {
             const result = serverApi.getRandomNumber();
