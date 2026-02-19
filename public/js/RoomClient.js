@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.18
+ * @version 2.1.19
  *
  */
 
@@ -1264,6 +1264,11 @@ class RoomClient {
             }
 
             for (let { producer_id, peer_name, peer_info, type } of data) {
+                // Skip own producers to prevent echo from self-consumption
+                if (peer_info.peer_id === this.peer_id) {
+                    console.warn('Skipping own producer to prevent echo', { producer_id, type });
+                    continue;
+                }
                 await this.consume(producer_id, peer_name, peer_info, type);
             }
         }
@@ -6835,9 +6840,9 @@ class RoomClient {
         const audioElements = document.querySelectorAll('audio');
         const audioTracks = [];
         audioElements.forEach((audio) => {
-            // Exclude avatar Preview Audio
-            if (audio.id !== 'avatarPreviewAudio') {
-                const audioTrack = audio.srcObject.getAudioTracks()[0];
+            // Exclude avatar Preview Audio and local producer audio (already captured via mic)
+            if (audio.id !== 'avatarPreviewAudio' && audio.getAttribute('name') !== 'LOCAL-AUDIO') {
+                const audioTrack = audio.srcObject?.getAudioTracks()[0];
                 if (audioTrack) {
                     audioTracks.push(audioTrack);
                 }
@@ -6850,9 +6855,9 @@ class RoomClient {
         const audioElements = document.querySelectorAll('audio');
         const audioStream = new MediaStream();
         audioElements.forEach((audio) => {
-            // Exclude avatar Preview Audio
-            if (audio.id !== 'avatarPreviewAudio') {
-                const audioTrack = audio.srcObject.getAudioTracks()[0];
+            // Exclude avatar Preview Audio and local producer audio (already captured via mic)
+            if (audio.id !== 'avatarPreviewAudio' && audio.getAttribute('name') !== 'LOCAL-AUDIO') {
+                const audioTrack = audio.srcObject?.getAudioTracks()[0];
                 if (audioTrack) {
                     audioStream.addTrack(audioTrack);
                 }
@@ -8766,6 +8771,13 @@ class RoomClient {
 
     setAudioVolume(audioPlayer, volume) {
         if (audioPlayer) {
+            // Never unmute local producer audio elements (prevents echo/feedback)
+            const isLocalProducer = audioPlayer.getAttribute('name') === 'LOCAL-AUDIO';
+            if (isLocalProducer) {
+                audioPlayer.muted = true;
+                audioPlayer.volume = 0;
+                return;
+            }
             if (this.isMobileDevice) {
                 audioPlayer.muted = volume === 0;
                 if (!audioPlayer.muted) {

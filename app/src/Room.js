@@ -586,13 +586,16 @@ module.exports = class Room {
         return this.peers.size;
     }
 
-    getProducerListForPeer() {
+    getProducerListForPeer(socket_id) {
         const producerList = [];
-        this.peers.forEach((peer) => {
+        this.peers.forEach((peer, peerId) => {
+            // Skip the requesting peer's own producers to prevent self-consumption (echo)
+            if (peerId === socket_id) return;
             const { peer_name, peer_info } = peer;
             peer.producers.forEach((producer) => {
                 producerList.push({
                     producer_id: producer.id,
+                    producer_socket_id: peerId,
                     peer_name: peer_name,
                     peer_info: peer_info,
                     type: producer.appData.mediaType,

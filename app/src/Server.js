@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.18
+ * @version 2.1.19
  *
  */
 
@@ -2377,8 +2377,8 @@ function startServer() {
 
             log.debug('Get producers', peer_name);
 
-            // send all the current producer to newly joined member
-            const producerList = room.getProducerListForPeer();
+            // send all the current producer to newly joined member (excluding own producers)
+            const producerList = room.getProducerListForPeer(socket.id);
 
             socket.emit('newProducers', producerList);
         });
