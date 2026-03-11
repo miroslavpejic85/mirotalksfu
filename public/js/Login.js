@@ -124,13 +124,9 @@ function login() {
                         const roomName = filterXSS(document.getElementById('customRoomInput').value);
                         const displayname = response.data.displayname;
                         if (roomName) {
+                            window.localStorage.peer_name = displayname;
                             window.location.href =
-                                '/join/?room=' +
-                                roomName +
-                                '&name=' +
-                                displayname +
-                                '&token=' +
-                                window.sessionStorage.peer_token;
+                                '/join/?room=' + roomName + '&token=' + window.sessionStorage.peer_token;
                         } else {
                             popup('warning', 'Room name required');
                         }
@@ -164,7 +160,8 @@ function login() {
 function join() {
     const username = filterXSS(document.getElementById('username').value);
     const roomId = filterXSS(document.getElementById('selectRoom').value);
-    window.location.href = '/join/?room=' + roomId + '&name=' + username + '&token=' + window.sessionStorage.peer_token;
+    window.localStorage.peer_name = username;
+    window.location.href = '/join/?room=' + roomId + '&token=' + window.sessionStorage.peer_token;
 }
 
 function getUUID4() {
