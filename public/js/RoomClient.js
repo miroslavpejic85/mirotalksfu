@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.30
+ * @version 2.1.31
  *
  */
 
@@ -10381,11 +10381,11 @@ class RoomClient {
 
                 // Populate the select element with options
                 sortedList.forEach((voice) => {
-                    const { is_paid, voice_id, language, display_name, gender } = voice;
+                    const { is_paid, voice_id, language, name, gender } = voice;
                     if (showFreeAvatars ? !is_paid : true) {
                         const option = document.createElement('option');
                         option.value = voice_id;
-                        option.textContent = `${language ?? 'Unknown'}, ${display_name ?? 'Unnamed'} (${gender ?? 'N/A'})`;
+                        option.textContent = `${language ? language + ', ' : ''}${name || 'Unnamed'} (${gender || 'N/A'})`;
                         selectElement.appendChild(option);
                     }
                 });
