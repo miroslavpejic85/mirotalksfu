@@ -221,7 +221,7 @@ module.exports = class Peer {
             log.debug('Producer created ----->', { type, kind });
         }
 
-        producer.on('transportclose', () => {
+        producer.once('transportclose', () => {
             log.debug('Producer "transportclose" event', { producerId: id });
             this.closeProducer(id);
         });
@@ -348,7 +348,7 @@ module.exports = class Peer {
             log.debug('Consumer created ----->', { type, kind });
         }
 
-        consumer.on('transportclose', () => {
+        consumer.once('transportclose', () => {
             log.debug('Consumer "transportclose" event', { consumerId: id });
             this.removeConsumer(id);
         });

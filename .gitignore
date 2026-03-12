@@ -20,6 +20,7 @@ data
 rec
 rtmp
 rnnoiseBuild
+security
 
 # virtual background
 custom

@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.28
+ * @version 2.1.29
  *
  */
 
@@ -538,29 +538,36 @@ function startServer() {
 
     // OpenID Connect - Dynamically set baseURL based on incoming host and protocol
     if (OIDC.enabled) {
-        const getDynamicConfig = (host, protocol) => {
-            const baseURL = `${protocol}://${host}`;
-            const config = OIDC.baseUrlDynamic
-                ? {
-                      ...OIDC.config,
-                      baseURL,
-                  }
-                : OIDC.config;
-            return config;
-        };
+        if (OIDC.baseUrlDynamic) {
+            // Cache auth middleware instances per origin to avoid re-running OIDC discovery on every request
+            const authMiddlewareCache = new Map();
 
-        // Apply the authentication middleware using dynamic baseURL configuration
-        app.use((req, res, next) => {
-            const host = req.headers.host;
-            const protocol = req.protocol === 'https' ? 'https' : 'http';
-            const dynamicOIDCConfig = getDynamicConfig(host, protocol);
+            app.use((req, res, next) => {
+                const host = req.headers.host;
+                const protocol = req.protocol === 'https' ? 'https' : 'http';
+                const origin = `${protocol}://${host}`;
+
+                let cachedAuth = authMiddlewareCache.get(origin);
+                if (!cachedAuth) {
+                    try {
+                        cachedAuth = auth({ ...OIDC.config, baseURL: origin });
+                        authMiddlewareCache.set(origin, cachedAuth);
+                    } catch (err) {
+                        log.error('OIDC Auth Middleware Error', err);
+                        return next(err);
+                    }
+                }
+                cachedAuth(req, res, next);
+            });
+        } else {
+            // Static baseURL: create auth middleware once at startup
             try {
-                auth(dynamicOIDCConfig)(req, res, next);
+                app.use(auth(OIDC.config));
             } catch (err) {
                 log.error('OIDC Auth Middleware Error', err);
                 process.exit(1);
             }
-        });
+        }
     }
 
     // Route to display user information
@@ -3610,6 +3617,11 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
+            // Clean up this peer's presenter entry immediately
+            if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
+                delete presenters[socket.room_id][socket.id];
+            }
+
             if (room.getPeersCount() === 0) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
@@ -3668,6 +3680,11 @@ function startServer() {
             room.removePeer(socket.id);
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
+
+            // Clean up this peer's presenter entry immediately
+            if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
+                delete presenters[socket.room_id][socket.id];
+            }
 
             if (room.getPeersCount() === 0) {
                 //

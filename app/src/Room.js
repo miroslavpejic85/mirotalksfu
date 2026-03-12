@@ -65,7 +65,7 @@ module.exports = class Room {
         this.redirect = config?.features?.redirect;
         this.videoAIEnabled = config?.integrations?.videoAI?.enabled || false;
         this.peers = new Map();
-        this.bannedPeers = [];
+        this.bannedPeers = new Map(); // uuid -> timestamp, with TTL-based expiration
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
         this.routerSettings = config.mediasoup.router;
@@ -713,6 +713,9 @@ module.exports = class Room {
             log.debug('---> transport close [id:%s]', transport.id);
         });
 
+        // Track ICE disconnect timeout so it can be cancelled on transport close
+        let iceDisconnectTimeout = null;
+
         transport.on('icestatechange', (iceState) => {
             const iceLog = {
                 peer_name: peer_name,
@@ -723,7 +726,8 @@ module.exports = class Room {
 
             if (iceState === 'disconnected') {
                 log.debug('ICE state disconnected for transport waiting before closing', iceLog);
-                setTimeout(() => {
+                iceDisconnectTimeout = setTimeout(() => {
+                    iceDisconnectTimeout = null;
                     if (transport.iceState === 'disconnected') {
                         log.warn('Closing transport due to prolonged ICE disconnection', iceLog);
                         if (!transport.closed) {
@@ -731,10 +735,17 @@ module.exports = class Room {
                         }
                     }
                 }, iceConsentTimeout * 1000); // Wait iceConsentTimeout seconds before closing
-            } else if (iceState === 'closed') {
-                log.warn('ICE state closed, closing transport', iceLog);
-                if (!transport.closed) {
-                    transport.close();
+            } else {
+                // Clear pending timeout when ICE state recovers or moves to another state
+                if (iceDisconnectTimeout) {
+                    clearTimeout(iceDisconnectTimeout);
+                    iceDisconnectTimeout = null;
+                }
+                if (iceState === 'closed') {
+                    log.warn('ICE state closed, closing transport', iceLog);
+                    if (!transport.closed) {
+                        transport.close();
+                    }
                 }
             }
         });
@@ -761,6 +772,14 @@ module.exports = class Room {
         });
 
         transport.on('close', () => {
+            // Clear any pending ICE disconnect timeout
+            if (iceDisconnectTimeout) {
+                clearTimeout(iceDisconnectTimeout);
+                iceDisconnectTimeout = null;
+            }
+            // Remove all listeners from this transport to prevent memory leaks
+            transport.removeAllListeners();
+            transport.observer.removeAllListeners();
             log.debug('Transport closed', {
                 peer_name: peer_name,
                 transport_id: transport.id,
@@ -945,7 +964,7 @@ module.exports = class Room {
         const { consumer, params } = peerConsumer;
         const { id, kind } = consumer;
 
-        consumer.on('producerclose', () => {
+        consumer.once('producerclose', () => {
             log.debug('Consumer closed due to "producerclose" event', {
                 consumer_id: id,
                 producer_id: producerId,
@@ -981,17 +1000,24 @@ module.exports = class Room {
     // ####################################################
 
     addBannedPeer(uuid) {
-        if (!this.bannedPeers.includes(uuid)) {
-            this.bannedPeers.push(uuid);
+        if (!this.bannedPeers.has(uuid)) {
+            this.bannedPeers.set(uuid, Date.now());
             log.debug('Added to the banned list', {
                 uuid: uuid,
-                banned: this.bannedPeers,
+                banned: [...this.bannedPeers.keys()],
             });
         }
     }
 
     isBanned(uuid) {
-        return this.bannedPeers.includes(uuid);
+        if (!this.bannedPeers.has(uuid)) return false;
+        const bannedAt = this.bannedPeers.get(uuid);
+        const BAN_TTL_MS = 24 * 60 * 60 * 1000; // 24 hours
+        if (Date.now() - bannedAt > BAN_TTL_MS) {
+            this.bannedPeers.delete(uuid);
+            return false;
+        }
+        return true;
     }
 
     // ####################################################
