@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.31
+ * @version 2.1.32
  *
  */
 
@@ -221,18 +221,27 @@ if (sentryEnabled && typeof sentryDSN === 'string' && sentryDSN.trim()) {
     // Accept logLevels as an array, e.g., ['warn', 'error']
     const logLevels = config.integrations?.sentry?.logLevels || ['error'];
 
+    const stripAnsi = (str) => (typeof str === 'string' ? str.replace(/\u001b\[[\d;]*m/g, '') : str);
+
+    const sanitizeArgs = (args) =>
+        args
+            .map((arg) =>
+                typeof arg === 'string' ? stripAnsi(arg) : typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+            )
+            .join(' ');
+
     const originalConsole = {};
     logLevels.forEach((level) => {
         originalConsole[level] = console[level];
         console[level] = function (...args) {
             switch (level) {
                 case 'warn':
-                    Sentry.captureMessage(args.join(' '), 'warning');
+                    Sentry.captureMessage(sanitizeArgs(args), 'warning');
                     break;
                 case 'error':
                     args[0] instanceof Error
                         ? Sentry.captureException(args[0])
-                        : Sentry.captureException(new Error(args.join(' ')));
+                        : Sentry.captureException(new Error(sanitizeArgs(args)));
                     break;
             }
             originalConsole[level].apply(console, args);
