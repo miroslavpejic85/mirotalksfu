@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.29
+ * @version 2.1.30
  *
  */
 
@@ -582,7 +582,31 @@ function startServer() {
             log.debug('OIDC get Profile', user);
             return res.json(user);
         }
-        // OIDC disabled
+
+        // Host protected: return displayname from JWT token
+        if (hostCfg.protected) {
+            const authHeader = req.headers.authorization;
+            const token = authHeader && authHeader.startsWith('Bearer ') ? authHeader.split(' ')[1] : null;
+            if (token) {
+                try {
+                    const { username } = decodeToken(token);
+                    const user = hostCfg.users.find((u) => u.username === username || u.displayname === username);
+                    const displayname = user?.displayname || username;
+                    log.debug('Host protected get Profile', { username, displayname });
+                    return res.json({
+                        name: displayname,
+                        peer_name: {
+                            force: true,
+                            name: true,
+                        },
+                    });
+                } catch (err) {
+                    log.warn('Profile token decode error', err.message);
+                }
+            }
+        }
+
+        // OIDC disabled, no host protection
         res.status(201).json({
             email: false,
             name: false,
