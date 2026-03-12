@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.32
+ * @version 2.1.33
  *
  */
 
@@ -848,7 +848,7 @@ function startServer() {
             if (!OIDC.enabled && hostCfg.protected && hostCfg.users_from_db) {
                 const roomExists = await roomExistsForUser(roomId);
                 log.debug('/join/:roomId exists from API endpoint', roomExists);
-                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/login');
+                return roomExists ? htmlInjector.injectHtml(views.room, res) : res.redirect('/login?room=' + roomId);
             }
             // 2. Protect room access with configuration check
             if (!OIDC.enabled && hostCfg.protected && !hostCfg.users_from_db) {
@@ -907,14 +907,15 @@ function startServer() {
 
     // handle logged on host protected
     app.get('/logged', (req, res) => {
+        const { room } = checkXSS(req.query);
         if (!OIDC.enabled && hostCfg.protected) {
             const ip = getIP(req);
             if (allowedIP(ip)) {
                 hostCfg.authenticated = true;
-                res.redirect('/');
+                res.redirect(room ? '/join/' + room : '/');
             } else {
                 hostCfg.authenticated = false;
-                res.redirect('/login');
+                res.redirect(room ? '/login?room=' + room : '/login');
             }
         } else {
             res.redirect('/');

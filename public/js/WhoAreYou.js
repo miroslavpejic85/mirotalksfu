@@ -28,7 +28,7 @@ let roomActive = false;
 
 // Button event handlers
 presenterLoginBtn.addEventListener('click', () => {
-    window.location.href = '/login';
+    window.location.href = '/login?room=' + roomId;
 });
 
 guestJoinRoomBtn.addEventListener('click', () => {
