@@ -135,7 +135,11 @@ function login() {
                 }
 
                 const sessionRoom = window.sessionStorage.roomID;
-                window.location.href = room ? '/logged?room=' + room : sessionRoom ? '/logged?room=' + sessionRoom : '/logged';
+                window.location.href = room
+                    ? '/logged?room=' + room
+                    : sessionRoom
+                      ? '/logged?room=' + sessionRoom
+                      : '/logged';
                 return;
             })
             .catch(function (error) {
