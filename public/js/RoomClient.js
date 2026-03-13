@@ -4193,7 +4193,7 @@ class RoomClient {
                     icon: type,
                     title: type,
                     text: message,
-                    showClass: { popup: 'animate__animated animate__rubberBand' },
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
                     hideClass: { popup: 'animate__animated animate__fadeOutUp' },
                 });
                 this.sound('alert');
@@ -10525,11 +10525,11 @@ class RoomClient {
 
             await this.startSession();
         } catch (error) {
-            switch (error.code) {
-                case 'quota_not_enough':
+            switch (error.message) {
+                case 'quota not enough':
                     this.msgPopup(
                         'warning',
-                        'You’ve reached your quota limit for this demo account. Please consider upgrading for more features.',
+                        'All available AI Avatar credits for this month have been used. Please consider self-hosting it for more features.',
                         6000,
                         'top'
                     );
