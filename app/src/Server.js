@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.37
+ * @version 2.1.38
  *
  */
 
@@ -3116,91 +3116,135 @@ function startServer() {
             }
         });
 
-        // https://docs.heygen.com/reference/list-avatars-v2
+        // https://docs.liveavatar.com/reference/list_public_avatars_v1_avatars_public_get
+        // https://docs.liveavatar.com/reference/list_user_avatars_v1_avatars_get
         socket.on('getAvatarList', async ({}, cb) => {
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
-                const response = await axios.get(`${config?.integrations?.videoAI?.basePath}/v2/avatars`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Api-Key': config?.integrations?.videoAI?.apiKey,
-                    },
-                });
+                const headers = {
+                    'Content-Type': 'application/json',
+                    'X-API-KEY': config?.integrations?.videoAI?.apiKey,
+                };
 
-                const data = { response: response.data.data };
+                const [publicRes, privateRes] = await Promise.allSettled([
+                    axios.get(`${config?.integrations?.videoAI?.basePath}/v1/avatars/public?page_size=100`, {
+                        headers,
+                    }),
+                    axios.get(`${config?.integrations?.videoAI?.basePath}/v1/avatars?page_size=100`, { headers }),
+                ]);
+
+                const publicAvatars =
+                    publicRes.status === 'fulfilled' ? publicRes.value.data?.data?.results || [] : [];
+                const privateAvatars =
+                    privateRes.status === 'fulfilled' ? privateRes.value.data?.data?.results || [] : [];
+
+                // Normalize LiveAvatar fields to match client expectations
+                const avatars = [...publicAvatars, ...privateAvatars].map((a) => ({
+                    avatar_id: a.id,
+                    avatar_name: a.name,
+                    preview_image_url: a.preview_url,
+                    preview_video_url: null,
+                    is_paid: false,
+                }));
+
+                const data = { response: { avatars } };
 
                 //log.debug('getAvatarList', data);
 
                 cb(data);
             } catch (error) {
-                log.error('getAvatarList', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                log.error('getAvatarList', error.response?.data || error.message);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
             }
         });
 
-        // https://docs.heygen.com/reference/list-voices-v2
+        // https://docs.liveavatar.com/reference/list_voices_v1_voices_get
         socket.on('getVoiceList', async ({}, cb) => {
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
-                const response = await axios.get(`${config?.integrations?.videoAI?.basePath}/v2/voices`, {
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Api-Key': config?.integrations?.videoAI?.apiKey,
+                const response = await axios.get(
+                    `${config?.integrations?.videoAI?.basePath}/v1/voices?page_size=100`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
+                        },
                     },
-                });
+                );
 
-                const data = { response: response.data.data };
+                // Normalize LiveAvatar fields to match client expectations
+                const voices = (response.data?.data?.results || []).map((v) => ({
+                    voice_id: v.id,
+                    name: v.name,
+                    language: v.language,
+                    gender: v.gender,
+                    is_paid: false,
+                }));
+
+                const data = { response: { voices } };
 
                 //log.debug('getVoiceList', data);
 
                 cb(data);
             } catch (error) {
-                log.error('getVoiceList', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                log.error('getVoiceList', error.response?.data || error.message);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
             }
         });
 
-        // https://docs.heygen.com/reference/new-session
-        socket.on('streamingNew', async ({ quality, avatar_id, voice_id }, cb) => {
+        // https://docs.liveavatar.com/reference/create_session_token_v1_sessions_token_post
+        socket.on('createSessionToken', async ({ quality, avatar_id, voice_id }, cb) => {
             if (!roomExists(socket)) return;
 
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
                 return cb({ error: 'Video AI seems disabled, try later!' });
             try {
-                const voice = voice_id ? { voice_id: voice_id } : {};
+                const mode = config?.integrations?.videoAI?.mode || 'FULL';
+                const contextId = config?.integrations?.videoAI?.contextId;
+
+                const avatarPersona = {};
+                if (voice_id) avatarPersona.voice_id = voice_id;
+                if (contextId) avatarPersona.context_id = contextId;
+
+                const body = {
+                    mode,
+                    avatar_id,
+                    video_settings: { quality: quality || 'high' },
+                };
+
+                if (mode === 'FULL') {
+                    body.avatar_persona = avatarPersona;
+                }
+
                 const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.new`,
-                    {
-                        quality,
-                        avatar_id,
-                        voice: voice,
-                    },
+                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/token`,
+                    body,
                     {
                         headers: {
                             accept: 'application/json',
                             'content-type': 'application/json',
-                            'x-api-key': config?.integrations?.videoAI?.apiKey,
+                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
                         },
                     }
                 );
 
                 const data = { response: response.data };
 
-                log.debug('streamingNew', data);
+                log.debug('createSessionToken', data);
 
                 cb(data);
             } catch (error) {
-                log.error('streamingNew', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data });
+                log.error('createSessionToken', error.response?.data || error.message);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response?.data || error.message });
             }
         });
 
-        // https://docs.heygen.com/reference/start-session
-        socket.on('streamingStart', async ({ session_id, sdp }, cb) => {
+        // https://docs.liveavatar.com/reference/start_session_v1_sessions_start_post
+        socket.on('startSession', async ({ session_token }, cb) => {
             if (!roomExists(socket)) return;
 
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
@@ -3208,119 +3252,28 @@ function startServer() {
 
             try {
                 const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.start`,
-                    { session_id, sdp },
+                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/start`,
+                    {},
                     {
                         headers: {
-                            'Content-Type': 'application/json',
-                            'X-Api-Key': config?.integrations?.videoAI?.apiKey,
+                            accept: 'application/json',
+                            Authorization: `Bearer ${session_token}`,
                         },
                     }
                 );
 
                 const data = { response: response.data.data };
 
-                log.debug('startSessionAi', data);
+                log.debug('startSession', data);
 
                 cb(data);
             } catch (error) {
-                log.error('streamingStart', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
-            }
-        });
-
-        // https://docs.heygen.com/reference/submit-ice-information
-        socket.on('streamingICE', async ({ session_id, candidate }, cb) => {
-            if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
-            try {
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.ice`,
-                    { session_id, candidate },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Api-Key': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const data = { response: response.data };
-
-                log.debug('streamingICE', data);
-
-                cb(data);
-            } catch (error) {
-                log.error('streamingICE', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
-            }
-        });
-
-        // https://docs.heygen.com/reference/send-task
-        socket.on('streamingTask', async ({ session_id, text }, cb) => {
-            if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
-            try {
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.task`,
-                    {
-                        session_id,
-                        text,
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Api-Key': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const data = { response: response.data };
-
-                log.debug('streamingTask', data);
-
-                cb(data);
-            } catch (error) {
-                log.error('streamingTask', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
-            }
-        });
-
-        // https://docs.heygen.com/reference/interrupt-task
-        socket.on('streamingInterrupt', async ({ session_id, text }, cb) => {
-            if (!roomExists(socket)) return;
-
-            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
-                return cb({ error: 'Video AI seems disabled, try later!' });
-
-            try {
-                const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.interrupt`,
-                    {
-                        session_id,
-                    },
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-Api-Key': config?.integrations?.videoAI?.apiKey,
-                        },
-                    }
-                );
-
-                const data = { response: response.data };
-
-                log.debug('streamingInterrupt', data);
-
-                cb(data);
-            } catch (error) {
-                log.error('streamingInterrupt', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                log.error('startSession', error.response?.data || error.message);
+                cb({
+                    error:
+                        error.response?.data?.message ||
+                        (error.response?.status === 500 ? 'Internal server error' : error.message),
+                });
             }
         });
 
@@ -3352,8 +3305,8 @@ function startServer() {
             }
         });
 
-        // https://docs.heygen.com/reference/close-session
-        socket.on('streamingStop', async ({ session_id }, cb) => {
+        // https://docs.liveavatar.com/reference/stop_session_v1_sessions_stop_post
+        socket.on('stopSession', async ({ session_id }, cb) => {
             if (!roomExists(socket)) return;
 
             if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
@@ -3361,26 +3314,26 @@ function startServer() {
 
             try {
                 const response = await axios.post(
-                    `${config?.integrations?.videoAI?.basePath}/v1/streaming.stop`,
+                    `${config?.integrations?.videoAI?.basePath}/v1/sessions/stop`,
                     {
                         session_id,
                     },
                     {
                         headers: {
                             'Content-Type': 'application/json',
-                            'X-Api-Key': config?.integrations?.videoAI?.apiKey,
+                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
                         },
                     }
                 );
 
                 const data = { response: response.data };
 
-                log.debug('streamingStop', data);
+                log.debug('stopSession', data);
 
                 cb(data);
             } catch (error) {
-                log.error('streamingStop', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                log.error('stopSession', error.response?.data || error.message);
+                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
             }
         });
 

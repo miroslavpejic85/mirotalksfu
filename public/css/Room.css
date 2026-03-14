@@ -2467,59 +2467,59 @@ hr {
     overflow: auto;
 }
 
-.container-flex {
-    display: flex;
-    flex-direction: column;
+#avatarVideoAIPreview {
+    width: 100%;
+    max-width: 200px;
+    border-radius: 10px;
+    display: block;
+    margin: 0 auto;
 }
 
-/* Custom avatar audio UI */
-
-#audio-container {
-    margin-top: 20px;
-    color: #fff;
-    border-radius: 5px;
-}
-
-#audio-container audio {
-    width: 320px;
-    outline: none;
-}
-
-#audio-container audio::-webkit-media-controls-panel {
-    background: var(--body-bg);
+#avatarVideoAIcontainer {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    gap: 10px;
+    max-height: 400px;
+    overflow-y: auto;
     padding: 5px;
 }
 
-#audio-container audio::-webkit-media-controls-timeline {
-    background: var(--body-bg);
-    border-radius: 5px;
-    margin: 5px;
+.avatarCard {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 8px;
+    padding: 6px;
+    transition: background 0.2s;
 }
 
-/* Styling for the audio volume controls */
-#audio-container audio::-webkit-media-controls-volume-slider-container {
-    color: #fff;
+.avatarCard:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-#audio-container audio::-webkit-media-controls-volume-slider {
-    background: var(--body-bg);
-    border-radius: 5px;
+.avatarImg {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+    cursor: pointer;
 }
 
-/* Styling for the play/pause button */
-#audio-container audio::-webkit-media-controls-play-button,
-#audio-container audio::-webkit-media-controls-pause-button {
-    background-color: #fff;
-    border-radius: 50%;
-    width: 30px;
-    height: 30px;
-    margin: 0 10px;
+.avatarLabel {
+    font-size: 0.75rem;
+    text-align: center;
+    margin-top: 4px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    width: 100%;
+    display: block;
 }
 
-/* Styling for the time display */
-#audio-container audio::-webkit-media-controls-current-time-display,
-#audio-container audio::-webkit-media-controls-time-remaining-display {
-    color: #fff;
+.container-flex {
+    display: flex;
+    flex-direction: column;
 }
 
 #avatarVideoAIStart {

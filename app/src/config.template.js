@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.37 - Configuration File
+ * MiroTalk SFU v2.1.38 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -618,21 +618,23 @@ module.exports = {
         },
 
         /**
-         * HeyGen Video AI Configuration
-         * ============================
-         * AI-powered avatar streaming integration
+         * LiveAvatar Video AI Configuration
+         * =================================
+         * AI-powered avatar streaming integration (migrated from HeyGen)
          *
          * Setup Instructions:
          * ------------------
-         * 1. Go to https://app.heygen.com
-         * 2. Create your HeyGen account
-         * 3. Generate your API key at https://app.heygen.com/settings?nav=API
+         * 1. Go to https://app.liveavatar.com
+         * 2. Create your LiveAvatar account
+         * 3. Generate your API key from settings
          *
          * Core Settings:
          * -------------
          * - enabled    : Enable/disable Video AI [true/false] (default: false)
-         * - basePath   : HeyGen API endpoint (default: 'https://api.heygen.com')
-         * - apiKey     : From HeyGen account (ALWAYS store in .env)
+         * - basePath   : LiveAvatar API endpoint (default: 'https://api.liveavatar.com')
+         * - apiKey     : From LiveAvatar account (ALWAYS store in .env)
+         * - mode       : Session mode - FULL (managed LLM) or LITE (custom pipeline)
+         * - contextId  : Optional context ID for avatar personality/knowledge
          *
          * AI Behavior:
          * -----------
@@ -641,8 +643,10 @@ module.exports = {
          */
         videoAI: {
             enabled: process.env.VIDEOAI_ENABLED === 'true',
-            basePath: 'https://api.heygen.com',
+            basePath: process.env.VIDEOAI_BASE_PATH || 'https://api.liveavatar.com',
             apiKey: process.env.VIDEOAI_API_KEY || '',
+            mode: process.env.VIDEOAI_MODE || 'FULL',
+            contextId: process.env.VIDEOAI_CONTEXT_ID || '',
             systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from MiroTalk SFU...',
         },
 

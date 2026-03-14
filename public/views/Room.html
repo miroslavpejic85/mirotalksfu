@@ -124,6 +124,9 @@
         <script defer src="../js/WakeLock.js"></script>
         <script defer src="../js/RoomClient.js"></script>
         <script defer src="../js/Room.js"></script>
+
+        <!-- LiveKit client for LiveAvatar Video AI -->
+        <script defer src="https://cdn.jsdelivr.net/npm/livekit-client/dist/livekit-client.umd.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/qrious@4.0.2/dist/qrious.min.js"></script>
         <script defer src="https://cdn.jsdelivr.net/npm/fabric@5.3.0-browser/dist/fabric.min.js"></script>
@@ -1020,38 +1023,16 @@ access to use this app.
 
                     <div id="tabVideoAI" class="tabcontent">
                         <div class="avatarsVideoAI">
-                            <video id="avatarVideoAIPreview" poster="../images/loader.gif"></video>
-                            <hr />
-                            <table class="settingsTable">
-                                <tr id="avatars">
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-users-line"></i>
-                                            <p>Show free avatars</p>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <div class="form-check form-switch form-switch-md">
-                                            <input
-                                                id="switchAvatars"
-                                                class="form-check-input"
-                                                type="checkbox"
-                                                checked
-                                            />
-                                        </div>
-                                    </td>
-                                </tr>
-                            </table>
+                            <img id="avatarVideoAIPreview" src="../images/loader.gif" alt="Avatar Preview" />
                             <hr />
                             <div class="container-flex">
                                 <div id="avatarVideoAIcontainer"></div>
                                 <hr />
                                 <select id="avatarQuality" class="form-select text-light bg-dark">
-                                    <option value="low">Avatar Quality - Low</option>
-                                    <option value="medium" selected>Avatar Quality - Medium</option>
-                                    <option value="legacy_medium">Avatar Quality - Legacy medium</option>
-                                    <option value="high">Avatar Quality - High</option>
-                                    <option value="very_high" selected>Avatar Quality - Very high</option>
+                                    <option value="low">Avatar Quality - Low (360p)</option>
+                                    <option value="medium">Avatar Quality - Medium (480p)</option>
+                                    <option value="high" selected>Avatar Quality - High (720p)</option>
+                                    <option value="very_high">Avatar Quality - Very High (1080p)</option>
                                 </select>
                                 <select
                                     id="avatarVoiceIDs"
@@ -1060,9 +1041,6 @@ access to use this app.
                                 >
                                     <option value="">Select Avatar Voice</option>
                                 </select>
-                                <div id="audio-container">
-                                    <audio id="avatarPreviewAudio" controls></audio>
-                                </div>
                                 <button id="avatarVideoAIStart" class="btn-custom">
                                     <i class="fas fa-play"></i> Start Avatar Session
                                 </button>

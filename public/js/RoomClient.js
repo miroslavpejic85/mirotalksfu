@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.37
+ * @version 2.1.38
  *
  */
 
@@ -190,17 +190,17 @@ const enums = {
     //...
 };
 
-// HeyGen config
+// LiveAvatar config
 const VideoAI = {
     enabled: true,
     active: false,
     info: {},
     avatarId: null,
-    avatarName: 'Monica',
+    avatarName: '',
     avatarVoice: null,
     quality: 'medium',
-    virtualBackground: true,
-    background: image.virtualBackground.one,
+    sessionToken: null,
+    livekitRoom: null,
 };
 
 // Recording
@@ -290,12 +290,9 @@ class RoomClient {
         this.chatPeerAvatar = '';
         this.unreadMessageCounts = {};
 
-        // HeyGen Video AI
+        // LiveAvatar Video AI
         this.videoAIContainer = null;
         this.videoAIElement = null;
-        this.canvasAIElement = null;
-        this.renderAIToken = null;
-        this.peerConnection = null;
 
         this.dominantSpeaker = false;
         this.isAudioAllowed = isAudioAllowed;
@@ -10248,11 +10245,10 @@ class RoomClient {
     }
 
     // ##############################################
-    // HeyGen Video AI
+    // LiveAvatar Video AI
     // ##############################################
 
     getAvatarList() {
-        this.msgPopup('toast', 'Please hold on, we are processing the avatar lists...', 10000);
         this.socket
             .request('getAvatarList')
             .then(function (completion) {
@@ -10260,94 +10256,44 @@ class RoomClient {
                 const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
                 avatarVideoAIcontainer.innerHTML = ''; // cleanup the avatar container
 
-                const excludedIds = [
-                    'josh_lite3_20230714',
-                    'josh_lite_20230714',
-                    'Lily_public_lite1_20230601',
-                    'Brian_public_lite1_20230601',
-                    'Brian_public_lite2_20230601',
-                    'Eric_public_lite1_20230601',
-                    'Mido-lite-20221128',
-                ];
+                const avatars = completion?.response?.avatars || [];
+                let firstPreviewSet = false;
 
-                const freeAvatars = [
-                    'Kristin in Black Suit',
-                    'Angela in Black Dress',
-                    'Kayla in Casual Suit',
-                    'Anna in Brown T-shirt',
-                    'Anna in White T-shirt',
-                    'Briana in Brown suit',
-                    'Justin in White Shirt',
-                    'Leah in Black Suit',
-                    'Wade in Black Jacket',
-                    'Tyler in Casual Suit',
-                    'Tyler in Shirt',
-                    'Tyler in Suit',
-                    'Edward in Blue Shirt',
-                    'Susan in Black Shirt',
-                    'Monica in Sleeveless',
-                ];
+                avatars.forEach((avatar) => {
+                    const div = document.createElement('div');
+                    div.className = 'avatarCard';
+                    const img = document.createElement('img');
+                    const label = document.createElement('label');
+                    label.className = 'avatarLabel';
+                    label.textContent = avatar.avatar_name;
+                    img.setAttribute('id', avatar.avatar_id);
+                    img.setAttribute('class', 'avatarImg');
+                    img.setAttribute('src', avatar.preview_image_url);
+                    img.setAttribute('alt', avatar.avatar_name);
+                    img.onclick = () => {
+                        const avatarImages = document.querySelectorAll('.avatarImg');
+                        avatarImages.forEach((image) => {
+                            image.style.border = 'none';
+                        });
+                        img.style.border = 'var(--border)';
+                        VideoAI.avatarId = avatar.avatar_id;
+                        VideoAI.avatarName = avatar.avatar_name;
+                        avatarVideoAIPreview.src = avatar.preview_image_url;
+                        avatarVideoAIPreview.alt = avatar.avatar_name;
+                        console.log('Avatar image click event', { avatar });
+                    };
+                    div.append(img);
+                    div.append(label);
+                    avatarVideoAIcontainer.append(div);
 
-                //console.log('AVATARS LISTS', completion.response.avatars);
-                completion.response.avatars.forEach((avatar) => {
-                    if (
-                        !excludedIds.includes(avatar.avatar_id) &&
-                        (showFreeAvatars ? freeAvatars.includes(avatar.avatar_name) : true)
-                    ) {
-                        const div = document.createElement('div');
-                        div.style.float = 'left';
-                        div.style.padding = '5px';
-                        div.style.width = '100px';
-                        div.style.height = '200px';
-                        const img = document.createElement('img');
-                        const hr = document.createElement('hr');
-                        const label = document.createElement('label');
-                        const textContent = document.createTextNode(avatar.avatar_name);
-                        label.appendChild(textContent);
-                        //label.style.fontSize = '12px';
-                        img.setAttribute('id', avatar.avatar_id);
-                        img.setAttribute('class', 'avatarImg');
-                        img.setAttribute('src', avatar.preview_image_url);
-                        img.setAttribute('width', '100%');
-                        img.setAttribute('height', 'auto');
-                        img.setAttribute('alt', avatar.avatar_name);
-                        img.setAttribute('style', 'cursor:pointer; padding: 2px; border-radius: 5px;');
-                        img.setAttribute(
-                            'avatarData',
-                            avatar.avatar_id + '|' + avatar.avatar_name + '|' + avatar.preview_video_url
-                        );
-                        img.onclick = () => {
-                            const avatarImages = document.querySelectorAll('.avatarImg');
-                            avatarImages.forEach((image) => {
-                                image.style.border = 'none';
-                            });
-                            img.style.border = 'var(--border)';
-                            const avatarData = img.getAttribute('avatarData');
-                            const avatarDataArr = avatarData.split('|');
-                            VideoAI.avatarId = avatarDataArr[0];
-                            VideoAI.avatarName = avatarDataArr[1];
-
-                            avatarVideoAIPreview.setAttribute('src', avatarDataArr[2]);
-                            avatarVideoAIPreview.play();
-
-                            console.log('Avatar image click event', {
-                                avatar,
-                                avatarDataArr,
-                            });
-                        };
-                        div.append(img);
-                        div.append(hr);
-                        div.append(label);
-                        avatarVideoAIcontainer.append(div);
-
-                        // Show the first available free avatar
-                        if (showFreeAvatars && avatar.avatar_name === 'Kristin in Black Suit') {
-                            avatarVideoAIPreview.setAttribute('src', avatar.preview_video_url);
-                            avatarVideoAIPreview.playsInline = true;
-                            avatarVideoAIPreview.autoplay = true;
-                            avatarVideoAIPreview.controls = true;
-                            avatarVideoAIPreview.volume = 0.5;
-                        }
+                    // Auto-select the first available avatar
+                    if (!firstPreviewSet && avatar.preview_image_url) {
+                        avatarVideoAIPreview.src = avatar.preview_image_url;
+                        avatarVideoAIPreview.alt = avatar.avatar_name;
+                        img.style.border = 'var(--border)';
+                        VideoAI.avatarId = avatar.avatar_id;
+                        VideoAI.avatarName = avatar.avatar_name;
+                        firstPreviewSet = true;
                     }
                 });
             })
@@ -10364,9 +10310,6 @@ class RoomClient {
         this.socket
             .request('getVoiceList')
             .then((completion) => {
-                //console.log('VOICES LISTS', completion.response.voices);
-
-                // Ensure the response has the list of voices
                 const voiceList = completion?.response?.voices || [];
                 if (!voiceList.length) {
                     console.warn('No voices available in the response');
@@ -10381,29 +10324,20 @@ class RoomClient {
 
                 // Populate the select element with options
                 sortedList.forEach((voice) => {
-                    const { is_paid, voice_id, language, name, gender } = voice;
-                    if (showFreeAvatars ? !is_paid : true) {
-                        const option = document.createElement('option');
-                        option.value = voice_id;
-                        option.textContent = `${language ? language + ', ' : ''}${name || 'Unnamed'} (${gender || 'N/A'})`;
-                        selectElement.appendChild(option);
-                    }
+                    const { voice_id, language, name, gender } = voice;
+                    const option = document.createElement('option');
+                    option.value = voice_id;
+                    option.textContent = `${language ? language + ', ' : ''}${name || 'Unnamed'} (${gender || 'N/A'})`;
+                    selectElement.appendChild(option);
                 });
 
                 // Event listener for changes on the select element
-                selectElement.addEventListener('change', (event) => {
-                    const selectedVoiceID = event.target.value;
-                    const selectedVoice = voiceList.find((voice) => voice.voice_id === selectedVoiceID);
-
-                    VideoAI.avatarVoice = selectedVoiceID || null;
-
-                    const previewAudioURL = selectedVoice?.preview_audio;
-                    if (previewAudioURL) {
-                        const avatarPreviewAudio = document.getElementById('avatarPreviewAudio');
-                        avatarPreviewAudio.src = previewAudioURL;
-                        avatarPreviewAudio.play().catch((err) => {
-                            console.error('Error playing preview audio:', err);
-                        });
+                selectElement.addEventListener('change', async (event) => {
+                    VideoAI.avatarVoice = event.target.value || null;
+                    if (VideoAI.active && VideoAI.avatarVoice) {
+                        console.log('Video AI voice changed during active session, restarting...');
+                        this.streamingStop();
+                        await this.createLiveAvatarSession();
                     }
                 });
             })
@@ -10413,6 +10347,10 @@ class RoomClient {
     }
 
     async handleVideoAI() {
+        if (!VideoAI.avatarId) {
+            return this.userLog('warning', 'Please select an avatar before starting', 'top-end', 6000);
+        }
+
         const vb = document.createElement('div');
         vb.setAttribute('id', 'avatar__vb');
         vb.className = 'videoAvatarMenuBar fadein';
@@ -10433,12 +10371,6 @@ class RoomClient {
         this.videoAIContainer.className = 'Camera';
         this.videoAIContainer.id = 'videoAIContainer';
 
-        // Create canvas element for video rendering
-        this.canvasAIElement = document.createElement('canvas');
-        this.canvasAIElement.className = '';
-        this.canvasAIElement.id = 'canvasAIElement';
-        this.canvasAIElement.style.objectFit = this.isMobileDevice ? 'cover' : 'contain';
-
         // Create video element for avatar
         this.videoAIElement = document.createElement('video');
         this.videoAIElement.id = 'videoAIElement';
@@ -10446,7 +10378,7 @@ class RoomClient {
         this.videoAIElement.autoplay = true;
         this.videoAIElement.className = '';
         this.videoAIElement.poster = image.poster;
-        this.videoAIElement.style.objectFit = this.isMobileDevice ? 'cover' : 'contain';
+        this.videoAIElement.style.objectFit = 'cover';
 
         // Append elements to video container
         vb.appendChild(ss);
@@ -10456,22 +10388,12 @@ class RoomClient {
         avatarName.appendChild(an);
 
         this.videoAIContainer.appendChild(this.videoAIElement);
-        VideoAI.virtualBackground && this.videoAIContainer.appendChild(this.canvasAIElement);
         this.videoAIContainer.appendChild(vb);
         this.videoAIContainer.appendChild(avatarName);
         this.videoMediaContainer.appendChild(this.videoAIContainer);
 
-        // Hide canvas initially
-        this.canvasAIElement.hidden = true;
-
-        // Use video avatar virtual background
-        if (VideoAI.virtualBackground) {
-            this.isVideoFullScreenSupported && this.handleFS(this.canvasAIElement.id, fs.id);
-            this.handlePN(this.canvasAIElement.id, pin.id, this.videoAIContainer.id, true, true);
-        } else {
-            this.isVideoFullScreenSupported && this.handleFS(this.videoAIElement.id, fs.id);
-            this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true, true);
-        }
+        this.isVideoFullScreenSupported && this.handleFS(this.videoAIElement.id, fs.id);
+        this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true, true);
 
         interrupt.onclick = () => {
             this.streamingInterrupt();
@@ -10490,137 +10412,157 @@ class RoomClient {
 
         handleAspectRatio();
 
-        await this.streamingNew();
+        await this.createLiveAvatarSession();
     }
 
-    async streamingNew() {
+    async createLiveAvatarSession() {
         try {
             const { quality, avatarId, avatarVoice } = VideoAI;
 
-            const response = await this.socket.request('streamingNew', {
+            // Step 1: Create session token
+            const tokenResponse = await this.socket.request('createSessionToken', {
                 quality: quality,
                 avatar_id: avatarId,
                 voice_id: avatarVoice,
             });
 
-            if (!response || Object.keys(response).length === 0 || response.error) {
-                this.userLog('error', 'Error to creating the avatar', 'top-end');
+            if (!tokenResponse || Object.keys(tokenResponse).length === 0 || tokenResponse.error) {
+                const errMsg =
+                    tokenResponse?.error?.message || tokenResponse?.error || 'Error creating the avatar session';
+                this.userLog('warning', errMsg, 'top-end');
                 this.stopSession();
                 return;
             }
 
-            if (response.response.code !== 100) {
-                this.userLog('warning', response.response.message, 'top-end');
+            if (tokenResponse.response.code !== 1000) {
+                this.userLog('warning', tokenResponse.response.message, 'top-end');
                 this.stopSession();
                 return;
             }
 
-            VideoAI.info = response.response.data;
+            const { session_id, session_token } = tokenResponse.response.data;
+            VideoAI.info = { session_id };
+            VideoAI.sessionToken = session_token;
 
-            console.log('Video AI streamingNew', VideoAI);
+            console.log('Video AI createSessionToken', VideoAI);
 
-            const { sdp, ice_servers2 } = VideoAI.info;
+            // Step 2: Start session to get LiveKit credentials
+            const startResponse = await this.socket.request('startSession', {
+                session_token: session_token,
+            });
 
-            await this.setupPeerConnection(sdp, ice_servers2);
+            if (!startResponse || startResponse.error) {
+                const errMsg =
+                    startResponse?.error?.message || startResponse?.error || 'Error starting the avatar session';
+                this.userLog('warning', errMsg, 'top-end');
+                this.stopSession();
+                return;
+            }
 
-            await this.startSession();
+            const { livekit_url, livekit_client_token } = startResponse.response;
+
+            console.log('Video AI startSession', { livekit_url, session_id });
+
+            // Step 3: Connect to LiveKit room
+            await this.connectToLiveKit(livekit_url, livekit_client_token);
         } catch (error) {
-            switch (error.message) {
-                case 'quota not enough':
-                    this.msgPopup(
-                        'warning',
-                        'All available AI Avatar credits for this month have been used. Please consider self-hosting it for more features.',
-                        6000,
-                        'top'
-                    );
-                    break;
-                // ...
-                default:
-                    this.userLog('error', error.message, 'top-end');
+            const errMsg =
+                typeof error === 'string' ? error : error?.response?.data?.message || error?.message || 'Unknown error';
+            if (errMsg.toLowerCase().includes('insufficient credits') || errMsg === 'quota not enough') {
+                this.msgPopup(
+                    'warning',
+                    'Insufficient AI Avatar credits. Please check your LiveAvatar subscription.',
+                    6000,
+                    'top'
+                );
+            } else {
+                this.userLog('error', errMsg, 'top-end');
             }
-            console.error('Video AI streamingNew error:', error);
+            console.error('Video AI createLiveAvatarSession error:', errMsg);
             this.stopSession();
         }
     }
 
-    async setupPeerConnection(sdp, iceServers) {
-        this.peerConnection = new RTCPeerConnection({ iceServers: iceServers });
+    async connectToLiveKit(livekitUrl, livekitToken) {
+        const { Room, RoomEvent } = LivekitClient;
 
-        this.peerConnection.ontrack = (event) => {
-            if (event.track.kind === 'audio' || event.track.kind === 'video') {
-                this.videoAIElement.srcObject = event.streams[0];
+        const room = new Room();
+
+        // Collect tracks into a single MediaStream for the video element
+        const mediaStream = new MediaStream();
+
+        // Handle incoming tracks (avatar video/audio)
+        room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+            console.log('Video AI LiveKit track subscribed:', track.kind, participant.identity);
+            if (track.kind === 'video' || track.kind === 'audio') {
+                const element = track.attach();
+                const tracks =
+                    track.kind === 'video'
+                        ? element.srcObject.getVideoTracks()
+                        : element.srcObject.getAudioTracks();
+
+                tracks.forEach((t) => mediaStream.addTrack(t));
+
+                this.videoAIElement.srcObject = mediaStream;
+                this.videoAIElement.play().catch(() => {});
             }
-        };
+        });
 
-        this.peerConnection.ondatachannel = (event) => {
-            event.channel.onmessage = this.handleVideoAIMessage;
-        };
+        // Handle track unsubscribed
+        room.on(RoomEvent.TrackUnsubscribed, (track) => {
+            console.log('Video AI LiveKit track unsubscribed:', track.kind);
+            track.detach();
+        });
 
-        const remoteDescription = new RTCSessionDescription(sdp);
-        this.peerConnection.setRemoteDescription(remoteDescription);
-    }
-
-    handleVideoAIMessage(event) {
-        console.log('handleVideoAIMessage', event.data);
-    }
-
-    async startSession() {
-        if (!VideoAI.info) {
-            this.userLog('warning', 'Please create a connection first', 'top-end');
-            return;
-        }
-        this.userLog('info', 'Starting session... please wait', 'top-end');
-        try {
-            const answer = await this.peerConnection.createAnswer();
-
-            await this.peerConnection.setLocalDescription(answer);
-
-            await this.streamingStart(VideoAI.info.session_id, answer);
-
-            this.peerConnection.onicecandidate = async ({ candidate }) => {
-                if (candidate) {
-                    await this.streamingICE(candidate);
+        // Handle server events from agent-response topic
+        room.on(RoomEvent.DataReceived, (payload, participant, kind, topic) => {
+            if (topic === 'agent-response') {
+                try {
+                    const event = JSON.parse(new TextDecoder().decode(payload));
+                    this.handleLiveAvatarEvent(event);
+                } catch (e) {
+                    console.warn('Video AI: failed to parse agent-response event', e);
                 }
-            };
-        } catch (error) {
-            this.userLog('error', error, 'top-end');
-            console.error('Video AI startSession error:', error);
-        }
-    }
-
-    async streamingICE(candidate) {
-        try {
-            const response = await this.socket.request('streamingICE', {
-                session_id: VideoAI.info.session_id,
-                candidate: candidate.toJSON(),
-            });
-
-            if (response && !response.error) {
-                return response.response;
             }
-        } catch (error) {
-            console.error('Video AI streamingICE error:', error);
-        }
+        });
+
+        room.on(RoomEvent.Disconnected, () => {
+            console.log('Video AI LiveKit room disconnected');
+        });
+
+        await room.connect(livekitUrl, livekitToken);
+
+        VideoAI.livekitRoom = room;
+        VideoAI.active = true;
+
+        this.startRendering();
+
+        this.isMobileDevice ? this.handleMobileVideoAiChat() : this.handleDesktopVideoAiChat();
+
+        this.userLog('info', 'Video AI streaming started', 'top-end');
     }
 
-    async streamingStart(sessionId, sdp) {
-        try {
-            const response = await this.socket.request('streamingStart', {
-                session_id: sessionId,
-                sdp: sdp,
-            });
-
-            if (!response || response.error) return;
-
-            this.startRendering();
-
-            this.isMobileDevice ? this.handleMobileVideoAiChat() : this.handleDesktopVideoAiChat();
-
-            VideoAI.active = true;
-
-            this.userLog('info', 'Video AI streaming started', 'top-end');
-        } catch (error) {
-            console.error('Video AI streamingStart error:', error);
+    handleLiveAvatarEvent(event) {
+        console.log('Video AI LiveAvatar event:', event);
+        switch (event.event_type) {
+            case 'avatar.speak_started':
+                console.log('Video AI: Avatar started speaking');
+                break;
+            case 'avatar.speak_ended':
+                console.log('Video AI: Avatar finished speaking');
+                break;
+            case 'user.transcription':
+                console.log('Video AI: User said:', event.text);
+                break;
+            case 'avatar.transcription':
+                console.log('Video AI: Avatar said:', event.text);
+                break;
+            case 'session.stopped':
+                console.log('Video AI: Session stopped:', event.end_reason);
+                this.stopSession();
+                break;
+            default:
+                break;
         }
     }
 
@@ -10675,86 +10617,54 @@ class RoomClient {
     }
 
     streamingTask(message) {
-        if (VideoAI.enabled && VideoAI.active && message) {
-            const response = this.socket.request('streamingTask', {
+        if (VideoAI.enabled && VideoAI.active && message && VideoAI.livekitRoom) {
+            const event = {
+                event_type: 'avatar.speak_text',
                 session_id: VideoAI.info.session_id,
                 text: message,
-            });
-            console.log('Video AI streamingTask', response);
+            };
+            const data = new TextEncoder().encode(JSON.stringify(event));
+            VideoAI.livekitRoom.localParticipant
+                .publishData(data, { topic: 'agent-control' })
+                .then(() => {
+                    console.log('Video AI streamingTask sent:', message);
+                })
+                .catch((err) => {
+                    console.error('Video AI streamingTask error:', err);
+                });
         }
     }
 
     streamingInterrupt() {
-        if (VideoAI.enabled && VideoAI.active && VideoAI.info.session_id) {
-            const response = this.socket.request('streamingInterrupt', { session_id: VideoAI.info.session_id });
-            console.log('Video AI streamingInterrupt', response);
+        if (VideoAI.enabled && VideoAI.active && VideoAI.info.session_id && VideoAI.livekitRoom) {
+            const event = {
+                event_type: 'avatar.interrupt',
+                session_id: VideoAI.info.session_id,
+            };
+            const data = new TextEncoder().encode(JSON.stringify(event));
+            VideoAI.livekitRoom.localParticipant
+                .publishData(data, { topic: 'agent-control' })
+                .then(() => {
+                    console.log('Video AI streamingInterrupt sent');
+                })
+                .catch((err) => {
+                    console.error('Video AI streamingInterrupt error:', err);
+                });
         }
     }
 
     startRendering() {
-        if (!VideoAI.virtualBackground) return;
-
-        let frameCounter = 0;
-
-        this.renderAIToken = Math.trunc(1e9 * Math.random());
-        frameCounter = this.renderAIToken;
-
-        this.videoAIElement.hidden = true;
-        this.canvasAIElement.hidden = false;
-
-        const context = this.canvasAIElement.getContext('2d', { willReadFrequently: true });
-
-        const renderFrame = () => {
-            if (this.renderAIToken !== frameCounter) return;
-
-            if (this.videoAIElement.videoWidth === 0 || this.videoAIElement.videoHeight === 0) {
-                requestAnimationFrame(renderFrame);
-                return;
-            }
-
-            this.canvasAIElement.width = this.videoAIElement.videoWidth;
-            this.canvasAIElement.height = this.videoAIElement.videoHeight;
-
-            context.drawImage(this.videoAIElement, 0, 0, this.canvasAIElement.width, this.canvasAIElement.height);
-
-            const imageData = context.getImageData(0, 0, this.canvasAIElement.width, this.canvasAIElement.height);
-            const pixels = imageData.data;
-
-            for (let i = 0; i < pixels.length; i += 4) {
-                if (shouldHidePixel([pixels[i], pixels[i + 1], pixels[i + 2]])) {
-                    pixels[i + 3] = 0; // Make pixel transparent
-                }
-            }
-
-            function shouldHidePixel([r, g, b]) {
-                const greenThreshold = 90;
-                const redThreshold = 90;
-                const blueThreshold = 90;
-                return g > greenThreshold && r < redThreshold && b < blueThreshold;
-            }
-
-            context.putImageData(imageData, 0, 0);
-            requestAnimationFrame(renderFrame);
-        };
-
-        // Ensure the video element is ready before starting rendering
-        const startRenderingWhenReady = () => {
-            if (this.videoAIElement.readyState >= 2) {
-                // HAVE_CURRENT_DATA
-                renderFrame();
-            } else {
-                this.videoAIElement.addEventListener('loadeddata', renderFrame, { once: true });
+        // Ensure video playback starts reliably (autoplay can fail on subsequent sessions)
+        const ensurePlayback = () => {
+            if (this.videoAIElement && this.videoAIElement.paused && this.videoAIElement.srcObject) {
+                this.videoAIElement.play().catch(() => {});
             }
         };
-
-        // Set the background of the canvas' parent element to an image or color of your choice
-        this.canvasAIElement.parentElement.style.background = `url("${VideoAI.background}") center / cover no-repeat`;
-
-        setTimeout(startRenderingWhenReady, 1000);
+        setTimeout(ensurePlayback, 500);
+        setTimeout(ensurePlayback, 1500);
     }
 
     stopRendering() {
-        this.renderAIToken = null;
         if (isHideMeActive) {
             isHideMeActive = !isHideMeActive;
             this.handleHideMe();
@@ -10764,13 +10674,17 @@ class RoomClient {
     stopSession() {
         const videoAIElement = this.getId('videoAIElement');
         if (videoAIElement) {
+            // Stop old MediaStream tracks to release resources
+            if (videoAIElement.srcObject) {
+                videoAIElement.srcObject.getTracks().forEach((t) => t.stop());
+                videoAIElement.srcObject = null;
+            }
             videoAIElement.parentNode.removeChild(videoAIElement);
         }
         const videoAIContainer = this.getId('videoAIContainer');
         if (videoAIContainer) {
             videoAIContainer.parentNode.removeChild(videoAIContainer);
-            const removeVideoAI = ['videoAIElement', 'canvasAIElement'];
-            if (this.isVideoPinned && removeVideoAI.includes(this.pinnedVideoPlayerId)) {
+            if (this.isVideoPinned && this.pinnedVideoPlayerId === 'videoAIElement') {
                 this.removeVideoPinMediaContainer();
             }
         }
@@ -10781,26 +10695,28 @@ class RoomClient {
     }
 
     streamingStop() {
-        if (this.peerConnection) {
-            console.info('Video AI streamingStop peerConnection close done!');
-            this.peerConnection.close();
-            this.peerConnection = null;
+        // Disconnect LiveKit room
+        if (VideoAI.livekitRoom) {
+            console.info('Video AI LiveKit room disconnect');
+            VideoAI.livekitRoom.disconnect();
+            VideoAI.livekitRoom = null;
         }
-        if (VideoAI.info && VideoAI.info.session_id) {
+        if (VideoAI.active && VideoAI.info && VideoAI.info.session_id) {
             const sessionId = VideoAI.info.session_id;
             this.socket
-                .request('streamingStop', { session_id: sessionId })
+                .request('stopSession', { session_id: sessionId })
                 .then(() => {
-                    console.info('Video AI streamingStop done!');
+                    console.info('Video AI stopSession done!');
                 })
                 .catch((error) => {
-                    console.error('Video AI streamingStop error:', error);
+                    console.warn('Video AI stopSession:', error?.message || error);
                 });
         }
 
         this.stopRendering();
 
         VideoAI.active = false;
+        VideoAI.sessionToken = null;
     }
 
     // ##############################################
