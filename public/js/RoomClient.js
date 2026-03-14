@@ -10497,9 +10497,7 @@ class RoomClient {
             if (track.kind === 'video' || track.kind === 'audio') {
                 const element = track.attach();
                 const tracks =
-                    track.kind === 'video'
-                        ? element.srcObject.getVideoTracks()
-                        : element.srcObject.getAudioTracks();
+                    track.kind === 'video' ? element.srcObject.getVideoTracks() : element.srcObject.getAudioTracks();
 
                 tracks.forEach((t) => mediaStream.addTrack(t));
 

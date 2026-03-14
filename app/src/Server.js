@@ -3135,8 +3135,7 @@ function startServer() {
                     axios.get(`${config?.integrations?.videoAI?.basePath}/v1/avatars?page_size=100`, { headers }),
                 ]);
 
-                const publicAvatars =
-                    publicRes.status === 'fulfilled' ? publicRes.value.data?.data?.results || [] : [];
+                const publicAvatars = publicRes.status === 'fulfilled' ? publicRes.value.data?.data?.results || [] : [];
                 const privateAvatars =
                     privateRes.status === 'fulfilled' ? privateRes.value.data?.data?.results || [] : [];
 
@@ -3166,15 +3165,12 @@ function startServer() {
                 return cb({ error: 'Video AI seems disabled, try later!' });
 
             try {
-                const response = await axios.get(
-                    `${config?.integrations?.videoAI?.basePath}/v1/voices?page_size=100`,
-                    {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
-                        },
+                const response = await axios.get(`${config?.integrations?.videoAI?.basePath}/v1/voices?page_size=100`, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-API-KEY': config?.integrations?.videoAI?.apiKey,
                     },
-                );
+                });
 
                 // Normalize LiveAvatar fields to match client expectations
                 const voices = (response.data?.data?.results || []).map((v) => ({
@@ -3239,7 +3235,12 @@ function startServer() {
                 cb(data);
             } catch (error) {
                 log.error('createSessionToken', error.response?.data || error.message);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response?.data || error.message });
+                cb({
+                    error:
+                        error.response?.status === 500
+                            ? 'Internal server error'
+                            : error.response?.data || error.message,
+                });
             }
         });
 
