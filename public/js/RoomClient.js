@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.40
+ * @version 2.1.41
  *
  */
 
@@ -10254,10 +10254,13 @@ class RoomClient {
             .then(function (completion) {
                 const avatarVideoAIPreview = document.getElementById('avatarVideoAIPreview');
                 const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
+                const avatarVideoAICount = document.getElementById('avatarVideoAICount');
                 avatarVideoAIcontainer.innerHTML = ''; // cleanup the avatar container
 
                 const avatars = completion?.response?.avatars || [];
                 let firstPreviewSet = false;
+
+                avatarVideoAICount.innerText = `Avatars: ${avatars.length}`;
 
                 avatars.forEach((avatar) => {
                     const div = document.createElement('div');

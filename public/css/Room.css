@@ -2484,6 +2484,12 @@ hr {
     padding: 5px;
 }
 
+.avatarCount {
+    font-size: 0.85rem;
+    color: var(--body-color);
+    padding: 4px 0;
+}
+
 .avatarCard {
     display: flex;
     flex-direction: column;
