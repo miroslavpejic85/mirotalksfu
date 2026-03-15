@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.41
+ * @version 2.1.42
  *
  */
 
@@ -10255,16 +10255,31 @@ class RoomClient {
                 const avatarVideoAIPreview = document.getElementById('avatarVideoAIPreview');
                 const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
                 const avatarVideoAICount = document.getElementById('avatarVideoAICount');
-                avatarVideoAIcontainer.innerHTML = ''; // cleanup the avatar container
+                const avatarVideoAISelectedName = document.getElementById('avatarVideoAISelectedName');
+                const avatarSearchInput = document.getElementById('avatarSearchInput');
+                avatarVideoAIcontainer.innerHTML = '';
 
                 const avatars = completion?.response?.avatars || [];
                 let firstPreviewSet = false;
 
                 avatarVideoAICount.innerText = `Avatars: ${avatars.length}`;
 
+                function selectAvatar(avatar, card) {
+                    document.querySelectorAll('.avatarCard').forEach((c) => c.classList.remove('selected'));
+                    card.classList.add('selected');
+                    VideoAI.avatarId = avatar.avatar_id;
+                    VideoAI.avatarName = avatar.avatar_name;
+                    avatarVideoAIPreview.src = avatar.preview_image_url;
+                    avatarVideoAIPreview.alt = avatar.avatar_name;
+                    avatarVideoAISelectedName.textContent = avatar.avatar_name;
+                    console.log('Avatar image click event', { avatar });
+                }
+
                 avatars.forEach((avatar) => {
                     const div = document.createElement('div');
                     div.className = 'avatarCard';
+                    div.dataset.name = avatar.avatar_name.toLowerCase();
+                    div.title = avatar.avatar_name;
                     const img = document.createElement('img');
                     const label = document.createElement('label');
                     label.className = 'avatarLabel';
@@ -10273,32 +10288,33 @@ class RoomClient {
                     img.setAttribute('class', 'avatarImg');
                     img.setAttribute('src', avatar.preview_image_url);
                     img.setAttribute('alt', avatar.avatar_name);
-                    img.onclick = () => {
-                        const avatarImages = document.querySelectorAll('.avatarImg');
-                        avatarImages.forEach((image) => {
-                            image.style.border = 'none';
-                        });
-                        img.style.border = 'var(--border)';
-                        VideoAI.avatarId = avatar.avatar_id;
-                        VideoAI.avatarName = avatar.avatar_name;
-                        avatarVideoAIPreview.src = avatar.preview_image_url;
-                        avatarVideoAIPreview.alt = avatar.avatar_name;
-                        console.log('Avatar image click event', { avatar });
-                    };
+                    img.setAttribute('loading', 'lazy');
+                    div.onclick = () => selectAvatar(avatar, div);
                     div.append(img);
                     div.append(label);
                     avatarVideoAIcontainer.append(div);
 
-                    // Auto-select the first available avatar
                     if (!firstPreviewSet && avatar.preview_image_url) {
-                        avatarVideoAIPreview.src = avatar.preview_image_url;
-                        avatarVideoAIPreview.alt = avatar.avatar_name;
-                        img.style.border = 'var(--border)';
-                        VideoAI.avatarId = avatar.avatar_id;
-                        VideoAI.avatarName = avatar.avatar_name;
+                        selectAvatar(avatar, div);
                         firstPreviewSet = true;
                     }
                 });
+
+                // Search/filter avatars by name
+                avatarSearchInput.value = '';
+                avatarSearchInput.oninput = () => {
+                    const query = avatarSearchInput.value.toLowerCase().trim();
+                    const cards = avatarVideoAIcontainer.querySelectorAll('.avatarCard');
+                    let visible = 0;
+                    cards.forEach((card) => {
+                        const match = card.dataset.name.includes(query);
+                        card.style.display = match ? '' : 'none';
+                        if (match) visible++;
+                    });
+                    avatarVideoAICount.innerText = query
+                        ? `Avatars: ${visible}/${avatars.length}`
+                        : `Avatars: ${avatars.length}`;
+                };
             })
             .catch((err) => {
                 console.error('Video AI getAvatarList error:', err);

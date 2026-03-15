@@ -2475,6 +2475,31 @@ hr {
     margin: 0 auto;
 }
 
+.avatarSelectedName {
+    font-size: 0.9rem;
+    text-align: center;
+    margin-top: 6px;
+    color: var(--body-color);
+    font-weight: 500;
+    min-height: 1.3em;
+}
+
+.avatarSearchRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.avatarSearch {
+    flex: 1;
+    max-width: 200px;
+    padding: 4px 8px !important;
+    font-size: 0.8rem !important;
+    border-radius: 6px !important;
+}
+
 #avatarVideoAIcontainer {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -2488,6 +2513,7 @@ hr {
     font-size: 0.85rem;
     color: var(--body-color);
     padding: 4px 0;
+    white-space: nowrap;
 }
 
 .avatarCard {
@@ -2497,11 +2523,20 @@ hr {
     cursor: pointer;
     border-radius: 8px;
     padding: 6px;
-    transition: background 0.2s;
+    transition:
+        background 0.2s,
+        transform 0.15s;
 }
 
 .avatarCard:hover {
     background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.avatarCard.selected {
+    background: rgba(255, 255, 255, 0.15);
+    outline: 2px solid var(--body-color);
+    outline-offset: -2px;
 }
 
 .avatarImg {

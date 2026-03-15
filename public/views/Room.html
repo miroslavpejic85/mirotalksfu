@@ -1024,9 +1024,18 @@ access to use this app.
                     <div id="tabVideoAI" class="tabcontent">
                         <div class="avatarsVideoAI">
                             <img id="avatarVideoAIPreview" src="../images/loader.gif" alt="Avatar Preview" />
+                            <div id="avatarVideoAISelectedName" class="avatarSelectedName"></div>
                             <hr />
                             <div class="container-flex">
-                                <div id="avatarVideoAICount" class="avatarCount"></div>
+                                <div class="avatarSearchRow">
+                                    <div id="avatarVideoAICount" class="avatarCount"></div>
+                                    <input
+                                        id="avatarSearchInput"
+                                        type="text"
+                                        class="form-control avatarSearch"
+                                        placeholder="Search avatars..."
+                                    />
+                                </div>
                                 <div id="avatarVideoAIcontainer"></div>
                                 <hr />
                                 <select id="avatarQuality" class="form-select text-light bg-dark">
