@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.42 - Configuration File
+ * MiroTalk SFU v2.1.43 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -648,6 +648,9 @@ module.exports = {
             mode: process.env.VIDEOAI_MODE || 'FULL',
             contextId: process.env.VIDEOAI_CONTEXT_ID || '',
             systemLimit: process.env.VIDEOAI_SYSTEM_LIMIT || 'You are a streaming avatar from MiroTalk SFU...',
+            sessionTimeLimit: process.env.VIDEOAI_SESSION_TIME_LIMIT
+                ? parseInt(process.env.VIDEOAI_SESSION_TIME_LIMIT, 10)
+                : 0, // Session time limit in seconds (0 = unlimited)
         },
 
         /**

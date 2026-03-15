@@ -230,6 +230,14 @@
     overflow: hidden;
 }
 
+.avatar-session-timer {
+    font-size: 14px;
+    color: white;
+    margin-right: auto;
+    padding: 4px 8px;
+    white-space: nowrap;
+}
+
 .videoMenuBar input,
 .videoMenuBar button,
 .videoAvatarMenuBar button,

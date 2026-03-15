@@ -64,6 +64,7 @@ module.exports = class Room {
         this.survey = config?.features?.survey;
         this.redirect = config?.features?.redirect;
         this.videoAIEnabled = config?.integrations?.videoAI?.enabled || false;
+        this.videoAISessionTimeLimit = config?.integrations?.videoAI?.sessionTimeLimit || 0;
         this.peers = new Map();
         this.bannedPeers = new Map(); // uuid -> timestamp, with TTL-based expiration
         this.webRtcTransport = config.mediasoup.webRtcTransport;
@@ -113,6 +114,7 @@ module.exports = class Room {
             survey: this.survey,
             redirect: this.redirect,
             videoAIEnabled: this.videoAIEnabled,
+            videoAISessionTimeLimit: this.videoAISessionTimeLimit,
             thereIsPolls: this.thereIsPolls(),
             shareMediaData: this.shareMediaData,
             dominantSpeaker: this.activeSpeakerObserverEnabled,

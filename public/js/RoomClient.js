@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.42
+ * @version 2.1.43
  *
  */
 
@@ -201,6 +201,8 @@ const VideoAI = {
     quality: 'medium',
     sessionToken: null,
     livekitRoom: null,
+    sessionTimeLimit: 0,
+    sessionCountdown: null,
 };
 
 // Recording
@@ -703,6 +705,9 @@ class RoomClient {
             if (!room.videoAIEnabled) {
                 VideoAI.enabled = false;
                 elemDisplay('tabVideoAIBtn', false);
+            }
+            if (room.videoAISessionTimeLimit > 0) {
+                VideoAI.sessionTimeLimit = room.videoAISessionTimeLimit;
             }
             // Check che RTMP config
             if (room.rtmp) {
@@ -10400,12 +10405,19 @@ class RoomClient {
         this.videoAIElement.poster = image.poster;
         this.videoAIElement.style.objectFit = 'cover';
 
+        // Session time limit countdown
+        const sessionTimerSpan = document.createElement('span');
+        sessionTimerSpan.id = 'avatar__sessionTimer';
+        sessionTimerSpan.className = 'avatar-session-timer notranslate';
+        sessionTimerSpan.style.display = 'none';
+
         // Append elements to video container
         vb.appendChild(ss);
         this.isVideoFullScreenSupported && vb.appendChild(fs);
         vb.appendChild(interrupt);
         speechRecognition && vb.appendChild(mic);
         !this.isMobileDevice && vb.appendChild(pin);
+        vb.appendChild(sessionTimerSpan);
         avatarName.appendChild(an);
 
         this.videoAIContainer.appendChild(this.videoAIElement);
@@ -10569,6 +10581,8 @@ class RoomClient {
         this.startRendering();
 
         this.isMobileDevice ? this.handleMobileVideoAiChat() : this.handleDesktopVideoAiChat();
+
+        this.startVideoAISessionTimer();
 
         this.userLog('info', 'Video AI streaming started', 'top-end');
     }
@@ -10751,7 +10765,51 @@ class RoomClient {
         }
     }
 
+    startVideoAISessionTimer() {
+        if (VideoAI.sessionTimeLimit > 0) {
+            console.log(`Video AI session time limit: ${VideoAI.sessionTimeLimit}s`);
+
+            let remaining = VideoAI.sessionTimeLimit;
+            const timerEl = this.getId('avatar__sessionTimer');
+
+            if (timerEl) {
+                timerEl.style.display = 'inline';
+                timerEl.innerText = this.formatSessionTime(remaining);
+            }
+
+            VideoAI.sessionCountdown = setInterval(() => {
+                remaining--;
+                if (timerEl) {
+                    timerEl.innerText = this.formatSessionTime(remaining);
+                    timerEl.style.color = remaining <= 10 ? '#ff4040' : 'white';
+                }
+                if (remaining <= 0) {
+                    console.log('Video AI session time limit reached, stopping session');
+                    this.userLog('warning', 'Video AI session time limit reached', 'top-end', 6000);
+                    this.stopSession();
+                }
+            }, 1000);
+        }
+    }
+
+    stopVideoAISessionTimer() {
+        if (VideoAI.sessionCountdown) {
+            clearInterval(VideoAI.sessionCountdown);
+            VideoAI.sessionCountdown = null;
+        }
+    }
+
+    formatSessionTime(seconds) {
+        const m = Math.floor(seconds / 60)
+            .toString()
+            .padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `⏱️ ${m}:${s}`;
+    }
+
     stopSession() {
+        this.stopVideoAISessionTimer();
+
         if (this.videoAISpeechRecognition) {
             this.videoAISpeechRecognition.stop();
             this.videoAISpeechRecognition = null;
