@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.38
+ * @version 2.1.39
  *
  */
 
@@ -10358,6 +10358,7 @@ class RoomClient {
         const interrupt = this.createButton('avatar__interrupt', html.stop);
         const fs = this.createButton('avatar__fs', html.fullScreen);
         const pin = this.createButton('avatar__pin', html.pin);
+        const mic = this.createButton('avatar__mic', html.audioOn);
         const ss = this.createButton('avatar__stopSession', html.kickOut);
 
         const avatarName = document.createElement('div');
@@ -10384,6 +10385,7 @@ class RoomClient {
         vb.appendChild(ss);
         this.isVideoFullScreenSupported && vb.appendChild(fs);
         vb.appendChild(interrupt);
+        speechRecognition && vb.appendChild(mic);
         !this.isMobileDevice && vb.appendChild(pin);
         avatarName.appendChild(an);
 
@@ -10399,6 +10401,17 @@ class RoomClient {
             this.streamingInterrupt();
         };
 
+        mic.onclick = () => {
+            if (!speechRecognition) {
+                return this.userLog('warning', 'Speech recognition is not supported in this browser', 'top-end', 6000);
+            }
+            if (this.videoAIRecording) {
+                this.videoAISpeechRecognition.stop();
+            } else {
+                this.startVideoAISpeechRecognition(mic);
+            }
+        };
+
         ss.onclick = () => {
             this.stopSession();
         };
@@ -10406,6 +10419,7 @@ class RoomClient {
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
             this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
+            this.setTippy(mic.id, 'Speech to text', 'bottom');
             this.setTippy(fs.id, 'Toggle full screen', 'bottom');
             this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
         }
@@ -10614,6 +10628,60 @@ class RoomClient {
         }, Promise.resolve());
     }
 
+    startVideoAISpeechRecognition(micBtn) {
+        const SpeechAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
+        if (!SpeechAPI) {
+            return this.userLog('warning', 'Speech recognition is not supported in this browser', 'top-end', 6000);
+        }
+
+        this.videoAISpeechRecognition = new SpeechAPI();
+        this.videoAISpeechRecognition.lang = typeof currentLangCode !== 'undefined' ? currentLangCode : 'en-US';
+        this.videoAISpeechRecognition.continuous = false;
+        this.videoAISpeechRecognition.interimResults = false;
+        this.videoAISpeechRecognition.maxAlternatives = 1;
+
+        this.videoAISpeechRecognition.onstart = () => {
+            this.videoAIRecording = true;
+            micBtn.className = html.audioOff;
+            setColor(micBtn, 'red');
+            console.log('Video AI speech recognition started');
+        };
+
+        this.videoAISpeechRecognition.onresult = (e) => {
+            const transcript = e.results[0][0].transcript;
+            if (transcript) {
+                console.log('Video AI speech recognized:', transcript);
+                if (isChatGPTOn) {
+                    chatMessage.value = transcript;
+                    this.sendMessage();
+                } else {
+                    this.streamingTask(transcript);
+                }
+            }
+        };
+
+        this.videoAISpeechRecognition.onerror = (event) => {
+            console.error('Video AI speech recognition error:', event.error);
+            if (event.error !== 'no-speech') {
+                this.userLog('warning', `Speech recognition error: ${event.error}`, 'top-end', 6000);
+            }
+        };
+
+        this.videoAISpeechRecognition.onend = () => {
+            this.videoAIRecording = false;
+            micBtn.className = html.audioOn;
+            setColor(micBtn, 'white');
+            console.log('Video AI speech recognition stopped');
+        };
+
+        try {
+            this.videoAISpeechRecognition.start();
+        } catch (error) {
+            console.error('Video AI speech recognition start error:', error);
+            this.userLog('warning', 'Failed to start speech recognition', 'top-end', 6000);
+        }
+    }
+
     streamingTask(message) {
         if (VideoAI.enabled && VideoAI.active && message && VideoAI.livekitRoom) {
             const event = {
@@ -10670,6 +10738,12 @@ class RoomClient {
     }
 
     stopSession() {
+        if (this.videoAISpeechRecognition) {
+            this.videoAISpeechRecognition.stop();
+            this.videoAISpeechRecognition = null;
+        }
+        this.videoAIRecording = false;
+
         const videoAIElement = this.getId('videoAIElement');
         if (videoAIElement) {
             // Stop old MediaStream tracks to release resources
