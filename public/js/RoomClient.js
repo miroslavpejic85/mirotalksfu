@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.39
+ * @version 2.1.40
  *
  */
 
@@ -10590,11 +10590,6 @@ class RoomClient {
             isHideMeActive = !isHideMeActive;
             this.handleHideMe();
         }
-        setTimeout(() => {
-            this.streamingTask(
-                `Welcome to ${BRAND.app.name}! Please Open the Chat and navigate to the ChatGPT section. Feel free to ask me any questions you have.`
-            );
-        }, 2000);
     }
 
     sendMessageToVideoAi() {
@@ -10651,12 +10646,12 @@ class RoomClient {
             const transcript = e.results[0][0].transcript;
             if (transcript) {
                 console.log('Video AI speech recognized:', transcript);
-                if (isChatGPTOn) {
-                    chatMessage.value = transcript;
-                    this.sendMessage();
-                } else {
-                    this.streamingTask(transcript);
+                if (!isChatGPTOn) {
+                    if (!this.isChatOpen) this.toggleChat();
+                    this.showPeerAboutAndMessages('ChatGPT', 'ChatGPT');
                 }
+                chatMessage.value = transcript;
+                this.sendMessage();
             }
         };
 
