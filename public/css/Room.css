@@ -2489,7 +2489,7 @@ hr {
     align-items: center;
     justify-content: space-between;
     gap: 8px;
-    padding: 4px 0;
+    padding: 10px 0;
 }
 
 .avatarSearch {
@@ -2529,12 +2529,12 @@ hr {
 }
 
 .avatarCard:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: var(--body-bg);
     transform: translateY(-2px);
 }
 
 .avatarCard.selected {
-    background: rgba(255, 255, 255, 0.15);
+    background: var(--body-bg);
     outline: 2px solid var(--body-color);
     outline-offset: -2px;
 }
