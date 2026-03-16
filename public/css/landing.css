@@ -2067,6 +2067,16 @@ main {
     transform: scale(1.01);
 }
 
+#topSponsors .sponsor-link {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+
 /*--------------------------------------------------------------
 # Sponsors & Powered By Sections (Grid)
 --------------------------------------------------------------*/

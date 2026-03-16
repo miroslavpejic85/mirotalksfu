@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.1.44",
+    "version": "2.1.45",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -97,7 +97,7 @@
         "@babel/core": "^7.29.0",
         "@babel/preset-env": "^7.29.0",
         "babel-loader": "^10.1.1",
-        "mocha": "^11.3.0",
+        "mocha": "^11.7.5",
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.14",
         "prettier": "3.8.1",
