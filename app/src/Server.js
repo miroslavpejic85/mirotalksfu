@@ -122,7 +122,9 @@ const ipKeyGenerator = (req) =>
 const loginLimiter = rateLimit({
     windowMs: minBlockTime * 60 * 1000,
     max: maxAttempts,
-    message: 'Too many login attempts, please try again later.',
+    message: {
+        message: `Too many login attempts. Please try again after ${minBlockTime} minute${minBlockTime == 1 ? '' : 's'}.`,
+    },
     keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
 });
 

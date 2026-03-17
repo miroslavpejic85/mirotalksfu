@@ -144,7 +144,12 @@ function login() {
             })
             .catch(function (error) {
                 console.error(error);
-                popup('warning', 'Invalid credentials. Please try again.');
+                if (error.response && error.response.status === 429) {
+                    const msg = error.response.data?.message || 'Too many login attempts. Please try again later.';
+                    popup('warning', msg);
+                } else {
+                    popup('warning', 'Invalid credentials. Please try again.');
+                }
             });
         return;
     }
