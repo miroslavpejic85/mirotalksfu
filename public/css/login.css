@@ -12,7 +12,7 @@
 .center-card-section .hero-figure {
     display: none;
 }
-@media (min-width: 641px) {
+@media (min-width: 1025px) {
     .center-card-section .hero-figure {
         display: block;
     }
@@ -249,6 +249,11 @@
 
 /* Responsive */
 @media (min-width: 641px) {
+    .login-card {
+        min-width: 420px;
+    }
+}
+@media (min-width: 1025px) {
     .login-card {
         margin: 0;
     }

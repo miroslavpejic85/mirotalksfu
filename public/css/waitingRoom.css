@@ -12,7 +12,7 @@
 .center-card-section .hero-figure {
     display: none;
 }
-@media (min-width: 641px) {
+@media (min-width: 1025px) {
     .center-card-section .hero-figure {
         display: block;
     }
@@ -155,6 +155,11 @@
 
 /* Responsive */
 @media (min-width: 641px) {
+    .waiting-card {
+        min-width: 420px;
+    }
+}
+@media (min-width: 1025px) {
     .waiting-card {
         margin: 0;
     }
