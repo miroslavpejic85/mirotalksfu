@@ -107,79 +107,103 @@
             <main class="site-content">
                 <section class="hero section center-card-section">
                     <div class="container">
-                        <div class="login-card reveal-from-bottom" data-reveal-delay="150">
-                            <div id="loginForm" class="login-form-section">
-                                <div class="login-icon">
-                                    <i id="loginIconEl" class="fa-solid fa-lock"></i>
-                                </div>
-                                <h2 id="loginHeading" class="login-title">Welcome back</h2>
-                                <p id="loginDescription" class="login-description">
-                                    Enter your credentials to continue.
-                                </p>
-                                <div class="login-input-group">
-                                    <i class="fa-solid fa-user"></i>
-                                    <input
-                                        id="username"
-                                        class="form-input"
-                                        type="text"
-                                        placeholder="Username"
-                                        maxlength="254"
-                                        autocomplete="username"
-                                        required
-                                    />
-                                </div>
-                                <div class="login-input-group">
-                                    <i class="fa-solid fa-key"></i>
-                                    <input
-                                        id="password"
-                                        class="form-input"
-                                        type="password"
-                                        placeholder="Password"
-                                        maxlength="36"
-                                        autocomplete="current-password"
-                                        required
-                                    />
-                                    <button type="button" id="togglePassword" class="password-toggle" title="Show password">
-                                        <i class="fa-solid fa-eye"></i>
-                                    </button>
-                                </div>
-                                <button id="loginButton" class="login-btn pulse" type="button">
-                                    <span id="loginBtnText"><i class="fa-solid fa-right-to-bracket"></i>&nbsp; Login</span>
-                                    <span id="loginBtnLoader" class="login-btn-loader" style="display: none">
-                                        <i class="fa-solid fa-circle-notch fa-spin"></i>&nbsp; Signing in...
-                                    </span>
-                                </button>
-                            </div>
-                            <!-- Join Room Section hidden -->
-                            <div id="joinRoomForm" class="login-form-section" style="display: none">
-                                <div class="login-icon login-icon-success">
-                                    <i class="fa-solid fa-video"></i>
-                                </div>
-                                <h2 class="join-room-title">
-                                    Pick name.<br />
-                                    Share URL.<br />
-                                    Start conference.
-                                </h2>
-                                <div class="room-input-row">
-                                    <div class="login-input-group">
-                                        <i class="fa-solid fa-door-open"></i>
-                                        <select
-                                            id="selectRoom"
-                                            class="form-input"
-                                            style="background: transparent; border: none"
-                                        ></select>
+                        <div class="hero-inner">
+                            <div class="login-card reveal-from-bottom" data-reveal-delay="150">
+                                <div id="loginForm" class="login-form-section">
+                                    <div class="login-icon">
+                                        <i id="loginIconEl" class="fa-solid fa-lock"></i>
                                     </div>
-                                    <button
-                                        id="generateRoomButton"
-                                        class="random-room-btn"
-                                        title="Generate random room name"
-                                    >
-                                        <i class="fa-solid fa-arrows-rotate"></i>
+                                    <h2 id="loginHeading" class="login-title">Welcome back</h2>
+                                    <p id="loginDescription" class="login-description">
+                                        Enter your credentials to continue.
+                                    </p>
+                                    <div class="login-input-group">
+                                        <i class="fa-solid fa-user"></i>
+                                        <input
+                                            id="username"
+                                            class="form-input"
+                                            type="text"
+                                            placeholder="Username"
+                                            maxlength="254"
+                                            autocomplete="username"
+                                            required
+                                        />
+                                    </div>
+                                    <div class="login-input-group">
+                                        <i class="fa-solid fa-key"></i>
+                                        <input
+                                            id="password"
+                                            class="form-input"
+                                            type="password"
+                                            placeholder="Password"
+                                            maxlength="36"
+                                            autocomplete="current-password"
+                                            required
+                                        />
+                                        <button
+                                            type="button"
+                                            id="togglePassword"
+                                            class="password-toggle"
+                                            title="Show password"
+                                        >
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    <button id="loginButton" class="login-btn pulse" type="button">
+                                        <span id="loginBtnText"
+                                            ><i class="fa-solid fa-right-to-bracket"></i>&nbsp; Login</span
+                                        >
+                                        <span id="loginBtnLoader" class="login-btn-loader" style="display: none">
+                                            <i class="fa-solid fa-circle-notch fa-spin"></i>&nbsp; Signing in...
+                                        </span>
                                     </button>
                                 </div>
-                                <button id="joinSelectRoomButton" class="join-room-btn">
-                                    <i class="fa-solid fa-right-to-bracket"></i>&nbsp; JOIN ROOM
-                                </button>
+                                <!-- Join Room Section hidden -->
+                                <div id="joinRoomForm" class="login-form-section" style="display: none">
+                                    <div class="login-icon login-icon-success">
+                                        <i class="fa-solid fa-video"></i>
+                                    </div>
+                                    <h2 class="join-room-title">
+                                        Pick name.<br />
+                                        Share URL.<br />
+                                        Start conference.
+                                    </h2>
+                                    <div class="room-input-row">
+                                        <div class="login-input-group">
+                                            <i class="fa-solid fa-door-open"></i>
+                                            <select
+                                                id="selectRoom"
+                                                class="form-input"
+                                                style="background: transparent; border: none"
+                                            ></select>
+                                        </div>
+                                        <button
+                                            id="generateRoomButton"
+                                            class="random-room-btn"
+                                            title="Generate random room name"
+                                        >
+                                            <i class="fa-solid fa-arrows-rotate"></i>
+                                        </button>
+                                    </div>
+                                    <button id="joinSelectRoomButton" class="join-room-btn">
+                                        <i class="fa-solid fa-right-to-bracket"></i>&nbsp; JOIN ROOM
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="hero-figure anime-element">
+                                <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
+                                    <rect width="528" height="396" style="fill: transparent" />
+                                </svg>
+                                <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
+                                <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
+                                <div class="hero-figure-box hero-figure-box-05"></div>
+                                <div class="hero-figure-box hero-figure-box-06"></div>
+                                <div class="hero-figure-box hero-figure-box-07"></div>
+                                <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
+                                <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
+                                <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
                             </div>
                         </div>
                     </div>

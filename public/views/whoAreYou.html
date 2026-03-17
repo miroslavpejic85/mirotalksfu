@@ -86,31 +86,45 @@
             <main class="site-content">
                 <section class="hero section center-card-section">
                     <div class="container">
-                        <div class="waiting-card reveal-from-bottom" data-reveal-delay="150">
-                            <div class="waiting-icon">
-                                <i class="fa-solid fa-users"></i>
+                        <div class="hero-inner">
+                            <div class="waiting-card reveal-from-bottom" data-reveal-delay="150">
+                                <div class="waiting-icon">
+                                    <i class="fa-solid fa-users"></i>
+                                </div>
+                                <h2 id="waitingRoomHeading" class="waiting-title">Waiting for host...</h2>
+                                <p id="waitingRoomDescription" class="waiting-description">
+                                    The meeting hasn't started yet.<br />
+                                    You'll join automatically when the host opens the room.
+                                </p>
+                                <div class="waiting-spinner">
+                                    <div class="waiting-spinner-dot"></div>
+                                    <div class="waiting-spinner-dot"></div>
+                                    <div class="waiting-spinner-dot"></div>
+                                </div>
+                                <p class="waiting-status" id="waitingStatus">Checking room status...</p>
+                                <hr class="waiting-divider" />
+                                <p class="host-login-link" id="hostLoginLink">
+                                    <span id="waitingRoomHostLink">Are you the host?</span>
+                                    <a id="loginLink" href="/login"
+                                        ><span id="waitingRoomLoginLink">Login here</span></a
+                                    >
+                                </p>
                             </div>
-                            <h2
-                                id="waitingRoomHeading"
-                                class="waiting-title"
-                            >Waiting for host...</h2>
-                            <p id="waitingRoomDescription" class="waiting-description">
-                                The meeting hasn't started yet.<br />
-                                You'll join automatically when the host opens the room.
-                            </p>
-                            <div class="waiting-spinner">
-                                <div class="waiting-spinner-dot"></div>
-                                <div class="waiting-spinner-dot"></div>
-                                <div class="waiting-spinner-dot"></div>
+                            <div class="hero-figure anime-element">
+                                <svg class="placeholder" width="528" height="396" viewBox="0 0 528 396">
+                                    <rect width="528" height="396" style="fill: transparent" />
+                                </svg>
+                                <div class="hero-figure-box hero-figure-box-01" data-rotation="45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-02" data-rotation="-45deg"></div>
+                                <div class="hero-figure-box hero-figure-box-03" data-rotation="0deg"></div>
+                                <div class="hero-figure-box hero-figure-box-04" data-rotation="-135deg"></div>
+                                <div class="hero-figure-box hero-figure-box-05"></div>
+                                <div class="hero-figure-box hero-figure-box-06"></div>
+                                <div class="hero-figure-box hero-figure-box-07"></div>
+                                <div class="hero-figure-box hero-figure-box-08" data-rotation="-22deg"></div>
+                                <div class="hero-figure-box hero-figure-box-09" data-rotation="-52deg"></div>
+                                <div class="hero-figure-box hero-figure-box-10" data-rotation="-50deg"></div>
                             </div>
-                            <p class="waiting-status" id="waitingStatus">Checking room status...</p>
-                            <hr class="waiting-divider" />
-                            <p class="host-login-link" id="hostLoginLink">
-                                <span id="waitingRoomHostLink">Are you the host?</span>
-                                <a id="loginLink" href="/login"
-                                    ><span id="waitingRoomLoginLink">Login here</span></a
-                                >
-                            </p>
                         </div>
                     </div>
                 </section>

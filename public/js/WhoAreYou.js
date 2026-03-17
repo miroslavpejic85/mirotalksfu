@@ -65,7 +65,7 @@ function checkRoom() {
             } else if (!isActive) {
                 statusEl.textContent = getWaitingRoomBrand(
                     'waitingRoomWaiting',
-                    'Waiting for host to start the meeting...',
+                    'Waiting for host to start the meeting...'
                 );
                 scheduleNextCheck();
             }
@@ -73,7 +73,7 @@ function checkRoom() {
         .catch(function () {
             statusEl.textContent = getWaitingRoomBrand(
                 'waitingRoomWaiting',
-                'Waiting for host to start the meeting...',
+                'Waiting for host to start the meeting...'
             );
             scheduleNextCheck();
         });

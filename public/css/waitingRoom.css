@@ -2,22 +2,28 @@
 .center-card-section {
     display: flex;
     align-items: center;
-    justify-content: center;
     min-height: calc(100vh - 200px);
     padding-top: 0 !important;
     padding-bottom: 0 !important;
 }
 .center-card-section .container {
-    display: flex;
-    justify-content: center;
+    width: 100%;
+}
+.center-card-section .hero-figure {
+    display: none;
+}
+@media (min-width: 641px) {
+    .center-card-section .hero-figure {
+        display: block;
+    }
 }
 
 /* Waiting Room Card */
 .waiting-card {
-    max-width: 560px;
+    max-width: 480px;
     width: 100%;
     margin: 0 auto;
-    padding: 56px 48px 48px;
+    padding: 48px 40px 40px;
     background:
         radial-gradient(900px circle at 20% 15%, rgba(70, 120, 249, 0.14) 0%, rgba(70, 120, 249, 0) 55%),
         radial-gradient(700px circle at 80% 85%, rgba(70, 120, 249, 0.1) 0%, rgba(70, 120, 249, 0) 52%),
@@ -156,6 +162,11 @@
 }
 
 /* Responsive */
+@media (min-width: 641px) {
+    .waiting-card {
+        margin: 0;
+    }
+}
 @media (max-width: 640px) {
     .waiting-card {
         margin: 0 16px;

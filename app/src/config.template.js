@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.47 - Configuration File
+ * MiroTalk SFU v2.1.48 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1104,8 +1104,7 @@ module.exports = {
                 waitingRoomStatus: process.env.WHO_ARE_YOU_WAITING_ROOM_STATUS || 'Checking room status...',
                 waitingRoomReady: process.env.WHO_ARE_YOU_WAITING_ROOM_READY || 'Room is ready! Joining...',
                 waitingRoomWaiting:
-                    process.env.WHO_ARE_YOU_WAITING_ROOM_WAITING ||
-                    'Waiting for host to start the meeting...',
+                    process.env.WHO_ARE_YOU_WAITING_ROOM_WAITING || 'Waiting for host to start the meeting...',
                 waitingRoomHostLink: process.env.WHO_ARE_YOU_WAITING_ROOM_HOST_LINK || 'Are you the host?',
                 waitingRoomLoginLink: process.env.WHO_ARE_YOU_WAITING_ROOM_LOGIN_LINK || 'Login here',
             },
