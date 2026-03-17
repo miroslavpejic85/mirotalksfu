@@ -20,30 +20,20 @@
 
 /* Login Card */
 .login-card {
-    max-width: 480px;
+    max-width: 552px;
     width: 100%;
     margin: 0 auto;
-    padding: 48px 40px 40px;
-    background:
-        radial-gradient(900px circle at 20% 15%, rgba(70, 120, 249, 0.14) 0%, rgba(70, 120, 249, 0) 55%),
-        radial-gradient(700px circle at 80% 85%, rgba(70, 120, 249, 0.1) 0%, rgba(70, 120, 249, 0) 52%),
-        linear-gradient(160deg, rgba(15, 15, 25, 0.97) 40%, rgba(70, 120, 249, 0.18) 100%);
+    padding: 56px 48px 48px;
+    background: linear-gradient(160deg, rgba(15, 15, 25, 0.95) 40%, rgba(70, 120, 249, 0.12) 100%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 20px;
-    box-shadow:
-        0 16px 48px rgba(0, 0, 0, 0.55),
-        0 4px 16px rgba(70, 120, 249, 0.08),
-        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
     text-align: center;
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
 }
 
 /* Form section transition */
 .login-form-section {
-    transition:
-        opacity 0.25s ease,
-        transform 0.25s ease;
+    transition: opacity 0.3s ease;
 }
 
 /* Icon */
@@ -52,8 +42,8 @@
     height: 72px;
     margin: 0 auto 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, rgba(70, 120, 249, 0.2), rgba(70, 120, 249, 0.06));
-    border: 1px solid rgba(70, 120, 249, 0.3);
+    background: rgba(70, 120, 249, 0.1);
+    border: 1px solid rgba(70, 120, 249, 0.2);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -107,9 +97,8 @@
         box-shadow 0.25s ease;
 }
 .login-input-group:focus-within {
-    border-color: rgba(70, 120, 249, 0.5);
-    background: rgba(70, 120, 249, 0.06);
-    box-shadow: 0 0 0 3px rgba(70, 120, 249, 0.1);
+    border-color: rgba(70, 120, 249, 0.4);
+    background: rgba(70, 120, 249, 0.04);
 }
 .login-input-group:focus-within > i:first-child {
     color: #4678f9;
@@ -171,12 +160,10 @@
         opacity 0.15s ease;
 }
 .login-btn:hover:not(:disabled) {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(70, 120, 249, 0.35);
+    box-shadow: 0 4px 16px rgba(70, 120, 249, 0.3);
 }
 .login-btn:active:not(:disabled) {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(70, 120, 249, 0.2);
+    box-shadow: 0 2px 8px rgba(70, 120, 249, 0.15);
 }
 .login-btn:disabled {
     opacity: 0.7;
@@ -254,12 +241,10 @@
         box-shadow 0.15s ease;
 }
 .join-room-btn:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(46, 206, 137, 0.35);
+    box-shadow: 0 4px 16px rgba(46, 206, 137, 0.3);
 }
 .join-room-btn:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 8px rgba(46, 206, 137, 0.2);
+    box-shadow: 0 2px 8px rgba(46, 206, 137, 0.15);
 }
 
 /* Responsive */
@@ -271,7 +256,7 @@
 @media (max-width: 640px) {
     .login-card {
         margin: 0 16px;
-        padding: 40px 24px 32px;
+        padding: 44px 28px 36px;
     }
     .login-title,
     .join-room-title {
