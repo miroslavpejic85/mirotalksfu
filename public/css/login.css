@@ -1,0 +1,276 @@
+/* Center card section (shared with waitingRoom.css) */
+.center-card-section {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: calc(100vh - 200px);
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+.center-card-section .container {
+    display: flex;
+    justify-content: center;
+}
+
+/* Login Card */
+.login-card {
+    max-width: 560px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 56px 48px 48px;
+    background:
+        radial-gradient(900px circle at 20% 15%, rgba(70, 120, 249, 0.14) 0%, rgba(70, 120, 249, 0) 55%),
+        radial-gradient(700px circle at 80% 85%, rgba(70, 120, 249, 0.1) 0%, rgba(70, 120, 249, 0) 52%),
+        linear-gradient(160deg, rgba(15, 15, 25, 0.97) 40%, rgba(70, 120, 249, 0.18) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px;
+    box-shadow:
+        0 16px 48px rgba(0, 0, 0, 0.55),
+        0 4px 16px rgba(70, 120, 249, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    text-align: center;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+}
+
+/* Form section transition */
+.login-form-section {
+    transition:
+        opacity 0.25s ease,
+        transform 0.25s ease;
+}
+
+/* Icon */
+.login-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 24px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, rgba(70, 120, 249, 0.2), rgba(70, 120, 249, 0.06));
+    border: 1px solid rgba(70, 120, 249, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.login-icon i {
+    font-size: 30px;
+    color: #4678f9;
+}
+
+/* Success variant */
+.login-icon-success {
+    background: linear-gradient(135deg, rgba(46, 206, 137, 0.2), rgba(46, 206, 137, 0.06)) !important;
+    border-color: rgba(46, 206, 137, 0.3) !important;
+}
+.login-icon-success i {
+    color: #2ece89 !important;
+}
+
+/* Title */
+.login-title {
+    font-size: 26px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 10px;
+    letter-spacing: -0.4px;
+}
+
+/* Description */
+.login-description {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.55);
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Input group with icon */
+.login-input-group {
+    display: flex;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    padding: 0 16px;
+    margin-bottom: 16px;
+    transition:
+        border-color 0.25s ease,
+        background 0.25s ease,
+        box-shadow 0.25s ease;
+}
+.login-input-group:focus-within {
+    border-color: rgba(70, 120, 249, 0.5);
+    background: rgba(70, 120, 249, 0.06);
+    box-shadow: 0 0 0 3px rgba(70, 120, 249, 0.1);
+}
+.login-input-group:focus-within > i:first-child {
+    color: #4678f9;
+}
+.login-input-group > i:first-child {
+    color: rgba(255, 255, 255, 0.35);
+    font-size: 15px;
+    margin-right: 12px;
+    flex-shrink: 0;
+    transition: color 0.25s ease;
+}
+.login-input-group .form-input {
+    flex: 1;
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #fff;
+    padding: 14px 0;
+    font-size: 15px;
+    outline: none;
+    text-align: left;
+}
+.login-input-group .form-input::placeholder {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+/* Password toggle button */
+.password-toggle {
+    background: none;
+    border: none;
+    color: rgba(255, 255, 255, 0.3);
+    cursor: pointer;
+    padding: 4px 0 4px 8px;
+    font-size: 14px;
+    line-height: 1;
+    transition: color 0.2s ease;
+    flex-shrink: 0;
+}
+.password-toggle:hover {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Login button */
+.login-btn {
+    width: 100%;
+    padding: 15px;
+    margin-top: 10px;
+    margin-bottom: 0;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #4678f9, #3b5de7);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease,
+        opacity 0.15s ease;
+}
+.login-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(70, 120, 249, 0.35);
+}
+.login-btn:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(70, 120, 249, 0.2);
+}
+.login-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
+}
+
+/* Login button loader */
+.login-btn-loader {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Join Room title */
+.join-room-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 24px;
+    line-height: 1.5;
+}
+
+/* Room input row: input + random button side by side */
+.room-input-row {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+    margin-bottom: 16px;
+}
+.room-input-row .login-input-group {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+/* Random room button */
+.random-room-btn {
+    width: 52px;
+    min-width: 52px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 17px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        border-color 0.2s ease,
+        color 0.2s ease,
+        background 0.2s ease;
+}
+.random-room-btn:hover {
+    border-color: rgba(70, 120, 249, 0.35);
+    color: #4678f9;
+    background: rgba(70, 120, 249, 0.06);
+}
+.random-room-btn:active {
+    transform: scale(0.95);
+}
+
+/* Join room button */
+.join-room-btn {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(135deg, #2ece89, #27b578);
+    color: #fff;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        box-shadow 0.15s ease;
+}
+.join-room-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 24px rgba(46, 206, 137, 0.35);
+}
+.join-room-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 8px rgba(46, 206, 137, 0.2);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .login-card {
+        margin: 0 16px;
+        padding: 40px 24px 32px;
+    }
+    .login-title,
+    .join-room-title {
+        font-size: 22px;
+    }
+    .login-icon {
+        width: 60px;
+        height: 60px;
+    }
+    .login-icon i {
+        font-size: 26px;
+    }
+}

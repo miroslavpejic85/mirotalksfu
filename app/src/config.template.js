@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.46 - Configuration File
+ * MiroTalk SFU v2.1.47 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1096,12 +1096,29 @@ module.exports = {
              * Customizable text and button labels.
              */
             whoAreYou: {
-                title: process.env.WHO_ARE_YOU_TITLE || 'Who are you?',
-                description:
-                    process.env.WHO_ARE_YOU_DESCRIPTION ||
-                    "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
-                buttonLoginLabel: process.env.WHO_ARE_YOU_BUTTON_LOGIN_LABEL || 'LOGIN',
-                buttonJoinLabel: process.env.WHO_ARE_YOU_JOIN_LABEL || 'JOIN ROOM',
+                title: process.env.WHO_ARE_YOU_TITLE || 'MiroTalk SFU - Waiting for host to start the meeting',
+                waitingRoomHeading: process.env.WHO_ARE_YOU_WAITING_ROOM_HEADING || 'Waiting for host...',
+                waitingRoomDescription:
+                    process.env.WHO_ARE_YOU_WAITING_ROOM_DESCRIPTION ||
+                    "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
+                waitingRoomStatus: process.env.WHO_ARE_YOU_WAITING_ROOM_STATUS || 'Checking room status...',
+                waitingRoomReady: process.env.WHO_ARE_YOU_WAITING_ROOM_READY || 'Room is ready! Joining...',
+                waitingRoomWaiting:
+                    process.env.WHO_ARE_YOU_WAITING_ROOM_WAITING ||
+                    'Waiting for host to start the meeting...',
+                waitingRoomHostLink: process.env.WHO_ARE_YOU_WAITING_ROOM_HOST_LINK || 'Are you the host?',
+                waitingRoomLoginLink: process.env.WHO_ARE_YOU_WAITING_ROOM_LOGIN_LINK || 'Login here',
+            },
+
+            /**
+             * Login Page Section
+             * ---------------------
+             * Customizable heading, description, and button label for the login page.
+             */
+            login: {
+                heading: process.env.LOGIN_HEADING || 'Welcome back',
+                description: process.env.LOGIN_DESCRIPTION || 'Enter your credentials to continue.',
+                buttonLabel: process.env.LOGIN_BUTTON_LABEL || 'Login',
             },
 
             /**

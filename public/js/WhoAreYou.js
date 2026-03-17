@@ -2,23 +2,16 @@
 
 console.log(window.location);
 
-const mediaQuery = window.matchMedia('(max-width: 640px)');
-
 const settings = JSON.parse(localStorage.getItem('SFU_SETTINGS')) || {};
 console.log('Settings:', settings);
 
-const autoJoinRoom = false; // Automatically join the guest to the meeting
-const intervalTime = 5000; // Interval to check room status
+const pollInterval = 5000;
 
-const presenterLoginBtn = document.getElementById('presenterLoginButton');
-const guestJoinRoomBtn = document.getElementById('guestJoinRoomButton');
-
-// Disable the guest join button initially
-guestJoinRoomBtn.classList.add('disabled');
-
-// Extract room ID from URL path using XSS filtering
 const pathParts = window.location.pathname.split('/');
 const roomId = filterXSS(pathParts[pathParts.length - 1]);
+
+const statusEl = document.getElementById('waitingStatus');
+const loginLink = document.getElementById('loginLink');
 
 // Store the room in the session for auto-join from the landing page after successful login
 window.sessionStorage.roomID = roomId;
@@ -26,14 +19,19 @@ window.sessionStorage.roomID = roomId;
 let intervalId = null;
 let roomActive = false;
 
-// Button event handlers
-presenterLoginBtn.addEventListener('click', () => {
-    window.location.href = '/login?room=' + roomId;
-});
+// Brand text helper (overridden by Brand.js if configured)
+function getWaitingRoomBrand(key, fallback) {
+    try {
+        return (typeof BRAND !== 'undefined' && BRAND?.whoAreYou?.[key]) || fallback;
+    } catch (e) {
+        return fallback;
+    }
+}
 
-guestJoinRoomBtn.addEventListener('click', () => {
-    window.location.href = `/join/${roomId}`;
-});
+// Set login link with room param so host returns to the room after login
+if (roomId && roomId !== 'whoAreYou') {
+    loginLink.href = '/login?room=' + encodeURIComponent(roomId);
+}
 
 // Function to play sound
 function playSound(name) {
@@ -48,78 +46,58 @@ function playSound(name) {
     });
 }
 
-// Handle screen resize to adjust presenter login button visibility
-function handleScreenResize(e) {
-    if (!roomActive) {
-        presenterLoginBtn.style.display = e.matches ? 'flex' : 'inline-flex';
-    }
-}
-
 // Function to check room status from the server
-async function checkRoomStatus(roomId) {
-    if (!roomId) {
-        console.warn('Room ID is empty!');
-        return;
-    }
+function checkRoom() {
+    axios
+        .post('/isRoomActive', { roomId: roomId })
+        .then(function (response) {
+            const isActive = response.data.message;
+            console.log('Room active status:', isActive);
 
-    try {
-        const response = await axios.post('/isRoomActive', { roomId });
-        const isActive = response.data.message;
-        console.log('Room active status:', isActive);
-
-        roomActive = isActive;
-        if (roomActive) {
-            playSound('roomActive');
-            guestJoinRoomBtn.classList.remove('disabled');
-            presenterLoginBtn.style.display = 'none';
-
-            if (autoJoinRoom) {
-                guestJoinRoomBtn.click();
+            if (isActive && !roomActive) {
+                roomActive = true;
+                playSound('roomActive');
+                statusEl.textContent = getWaitingRoomBrand('waitingRoomReady', 'Room is ready! Joining...');
+                statusEl.classList.add('ready');
+                setTimeout(function () {
+                    window.location.href = '/join/' + encodeURIComponent(roomId);
+                }, 800);
+            } else if (!isActive) {
+                statusEl.textContent = getWaitingRoomBrand(
+                    'waitingRoomWaiting',
+                    'Waiting for host to start the meeting...',
+                );
+                scheduleNextCheck();
             }
-        } else {
-            guestJoinRoomBtn.classList.add('disabled');
-            handleScreenResize(mediaQuery);
-        }
-    } catch (error) {
-        console.error('Error checking room status:', error);
-    }
+        })
+        .catch(function () {
+            statusEl.textContent = getWaitingRoomBrand(
+                'waitingRoomWaiting',
+                'Waiting for host to start the meeting...',
+            );
+            scheduleNextCheck();
+        });
 }
 
-// Start interval to check room status every 5 seconds
-function startRoomStatusCheck() {
-    intervalId = setInterval(() => {
-        if (document.visibilityState === 'visible') {
-            checkRoomStatus(roomId);
-        }
-    }, intervalTime);
-}
-
-// Fallback to setTimeout for room status checks
-function fallbackRoomStatusCheck() {
-    if (document.visibilityState === 'visible') {
-        checkRoomStatus(roomId);
-    }
-    setTimeout(fallbackRoomStatusCheck, intervalTime);
-}
-
-// Page visibility change handler to pause or resume status checks
-function handleVisibilityChange() {
-    if (document.visibilityState === 'visible') {
-        console.log('Page is visible. Resuming room status checks.');
-        checkRoomStatus(roomId);
-        if (!intervalId) startRoomStatusCheck();
-    } else {
-        console.log('Page is hidden. Pausing room status checks.');
-        clearInterval(intervalId);
+// Schedule next check, pausing when page is hidden
+function scheduleNextCheck() {
+    if (intervalId) return;
+    intervalId = setTimeout(function () {
         intervalId = null;
-    }
+        if (document.visibilityState === 'visible') {
+            checkRoom();
+        } else {
+            scheduleNextCheck();
+        }
+    }, pollInterval);
 }
 
-// Initialize event listeners
-mediaQuery.addEventListener('change', handleScreenResize);
-document.addEventListener('visibilitychange', handleVisibilityChange);
+// Page visibility change handler
+document.addEventListener('visibilitychange', function () {
+    if (document.visibilityState === 'visible' && !roomActive) {
+        checkRoom();
+    }
+});
 
-// Start checking room status on page load
-handleScreenResize(mediaQuery);
-checkRoomStatus(roomId);
-startRoomStatusCheck();
+// Start checking
+checkRoom();

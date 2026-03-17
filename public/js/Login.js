@@ -6,11 +6,53 @@ const usernameInput = document.getElementById('username');
 const passwordInput = document.getElementById('password');
 const loginForm = document.getElementById('loginForm');
 const loginBtn = document.getElementById('loginButton');
+const loginBtnText = document.getElementById('loginBtnText');
+const loginBtnLoader = document.getElementById('loginBtnLoader');
+const loginIconEl = document.getElementById('loginIconEl');
 
 const joinRoomForm = document.getElementById('joinRoomForm');
 const selectRoom = document.getElementById('selectRoom');
 const joinSelectRoomBtn = document.getElementById('joinSelectRoomButton');
 const generateRoomBtn = document.getElementById('generateRoomButton');
+
+// Password toggle
+const togglePasswordBtn = document.getElementById('togglePassword');
+if (togglePasswordBtn) {
+    togglePasswordBtn.onclick = () => {
+        const isPassword = passwordInput.type === 'password';
+        passwordInput.type = isPassword ? 'text' : 'password';
+        togglePasswordBtn.querySelector('i').className = isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
+        togglePasswordBtn.title = isPassword ? 'Hide password' : 'Show password';
+    };
+}
+
+// Loading state helpers
+function setLoginLoading(loading) {
+    loginBtn.disabled = loading;
+    loginBtnText.style.display = loading ? 'none' : 'inline';
+    loginBtnLoader.style.display = loading ? 'inline' : 'none';
+    if (loading) {
+        loginBtn.classList.remove('pulse');
+    } else {
+        loginBtn.classList.add('pulse');
+    }
+}
+
+// Smooth transition from login form to join room form
+function showJoinRoomForm() {
+    loginForm.style.opacity = '0';
+    loginForm.style.transform = 'translateY(-10px)';
+    setTimeout(() => {
+        loginForm.style.display = 'none';
+        joinRoomForm.style.display = 'block';
+        joinRoomForm.style.opacity = '0';
+        joinRoomForm.style.transform = 'translateY(10px)';
+        requestAnimationFrame(() => {
+            joinRoomForm.style.opacity = '1';
+            joinRoomForm.style.transform = 'translateY(0)';
+        });
+    }, 250);
+}
 
 // Default handler (will be overridden for admin below)
 joinSelectRoomBtn.onclick = (e) => {
@@ -63,6 +105,8 @@ function login() {
     const roomPath = filterXSS(pathParts[pathParts.length - 1]);
 
     if (username && password) {
+        setLoginLoading(true);
+
         axios
             .post('/login', {
                 username: username,
@@ -90,30 +134,27 @@ function login() {
                 const allowedRooms = response.data.allowedRooms;
                 if (allowedRooms && !allowedRooms.includes('*')) {
                     console.log('User detected with limited join room access!', allowedRooms);
-                    loginForm.style.display = 'none';
-                    joinRoomForm.style.display = 'block';
-                    // Hide random button for limited users
-                    if (generateRoomBtn) generateRoomBtn.style.display = 'none';
                     allowedRooms.forEach((room) => {
                         const option = document.createElement('option');
                         option.value = room;
                         option.text = room;
                         selectRoom.appendChild(option);
                     });
+                    // Hide random button for limited users
+                    if (generateRoomBtn) generateRoomBtn.style.display = 'none';
+                    showJoinRoomForm();
                     return;
                 }
 
                 // Admin (all rooms)
                 if (allowedRooms && allowedRooms.includes('*')) {
                     console.log('User detected with admin access!', allowedRooms);
-                    loginForm.style.display = 'none';
-                    joinRoomForm.style.display = 'block';
                     selectRoom.innerHTML = '';
                     const input = document.createElement('input');
                     input.type = 'text';
                     input.id = 'customRoomInput';
                     input.placeholder = 'Enter room name';
-                    input.className = 'form-control mb-2';
+                    input.className = 'form-input';
                     input.maxLength = 32;
                     selectRoom.parentNode.insertBefore(input, selectRoom);
                     selectRoom.style.display = 'none';
@@ -131,6 +172,7 @@ function login() {
                             popup('warning', 'Room name required');
                         }
                     };
+                    showJoinRoomForm();
                     return;
                 }
 
@@ -144,6 +186,7 @@ function login() {
             })
             .catch(function (error) {
                 console.error(error);
+                setLoginLoading(false);
                 if (error.response && error.response.status === 429) {
                     const msg = error.response.data?.message || 'Too many login attempts. Please try again later.';
                     popup('warning', msg);

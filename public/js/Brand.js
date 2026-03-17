@@ -29,10 +29,15 @@ const advertisers = document.getElementById('advertisers');
 const supportUs = document.getElementById('supportUs');
 const footer = document.getElementById('footer');
 
-const whoAreYouTitle = document.getElementById('whoAreYouTitle');
-const whoAreYouDescription = document.getElementById('whoAreYouDescription');
-const presenterLoginButton = document.getElementById('presenterLoginButton');
-const guestJoinRoomButton = document.getElementById('guestJoinRoomButton');
+const waitingRoomHeading = document.getElementById('waitingRoomHeading');
+const waitingRoomDescription = document.getElementById('waitingRoomDescription');
+const waitingRoomStatus = document.getElementById('waitingStatus');
+const waitingRoomHostLink = document.getElementById('waitingRoomHostLink');
+const waitingRoomLoginLink = document.getElementById('waitingRoomLoginLink');
+
+const loginHeading = document.getElementById('loginHeading');
+const loginDescription = document.getElementById('loginDescription');
+const loginButton = document.getElementById('loginButton');
 //...
 
 // app/src/config.js - ui.brand
@@ -74,15 +79,24 @@ let BRAND = {
         footer: true,
     },
     whoAreYou: {
-        title: 'Who are you?',
-        description:
-            "If you\'re the presenter, please log in now.<br />Otherwise, kindly wait for the presenter to join.",
-        buttonLoginLabel: 'LOGIN',
-        buttonJoinLabel: 'JOIN ROOM',
+        title: 'MiroTalk SFU - Waiting for host to start the meeting',
+        waitingRoomHeading: 'Waiting for host...',
+        waitingRoomDescription:
+            "The meeting hasn't started yet.<br />You'll join automatically when the host opens the room.",
+        waitingRoomStatus: 'Checking room status...',
+        waitingRoomReady: 'Room is ready! Joining...',
+        waitingRoomWaiting: 'Waiting for host to start the meeting...',
+        waitingRoomHostLink: 'Are you the host?',
+        waitingRoomLoginLink: 'Login here',
+    },
+    login: {
+        heading: 'Welcome back',
+        description: 'Enter your credentials to continue.',
+        buttonLabel: 'Login',
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.1.46</strong>',
+        title: '<strong>WebRTC SFU v2.1.47</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -162,6 +176,8 @@ async function initialize() {
     customizeWidget();
 
     customizeWhoAreYou();
+
+    customizeLogin();
 
     checkBrand();
 }
@@ -300,17 +316,29 @@ function customizeMetaTags() {
 }
 
 function customizeWhoAreYou() {
-    if (whoAreYouTitle && BRAND.whoAreYou?.title) {
-        whoAreYouTitle.textContent = BRAND.whoAreYou.title;
-    }
-    if (whoAreYouDescription && BRAND.whoAreYou?.description) {
-        whoAreYouDescription.innerHTML = BRAND.whoAreYou.description;
-    }
-    if (presenterLoginButton && BRAND.whoAreYou?.buttonLoginLabel) {
-        presenterLoginButton.textContent = BRAND.whoAreYou.buttonLoginLabel;
-    }
-    if (guestJoinRoomButton && BRAND.whoAreYou?.buttonJoinLabel) {
-        guestJoinRoomButton.textContent = BRAND.whoAreYou.buttonJoinLabel;
+    if (title && BRAND.whoAreYou?.title) title.textContent = BRAND.whoAreYou.title;
+    if (waitingRoomHeading && BRAND.whoAreYou?.waitingRoomHeading)
+        waitingRoomHeading.textContent = BRAND.whoAreYou.waitingRoomHeading;
+    if (waitingRoomDescription && BRAND.whoAreYou?.waitingRoomDescription)
+        waitingRoomDescription.innerHTML = BRAND.whoAreYou.waitingRoomDescription;
+    if (waitingRoomStatus && BRAND.whoAreYou?.waitingRoomStatus)
+        waitingRoomStatus.textContent = BRAND.whoAreYou.waitingRoomStatus;
+    if (waitingRoomHostLink && BRAND.whoAreYou?.waitingRoomHostLink)
+        waitingRoomHostLink.textContent = BRAND.whoAreYou.waitingRoomHostLink;
+    if (waitingRoomLoginLink && BRAND.whoAreYou?.waitingRoomLoginLink)
+        waitingRoomLoginLink.textContent = BRAND.whoAreYou.waitingRoomLoginLink;
+}
+
+function customizeLogin() {
+    if (loginHeading && BRAND.login?.heading) loginHeading.textContent = BRAND.login.heading;
+    if (loginDescription && BRAND.login?.description) loginDescription.textContent = BRAND.login.description;
+    if (BRAND.login?.buttonLabel) {
+        const loginBtnText = document.getElementById('loginBtnText');
+        if (loginBtnText) {
+            loginBtnText.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i>&nbsp; ' + BRAND.login.buttonLabel;
+        } else if (loginButton) {
+            loginButton.textContent = BRAND.login.buttonLabel;
+        }
     }
 }
 
