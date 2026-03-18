@@ -2563,6 +2563,10 @@ hr {
     flex-direction: column;
 }
 
+#avatarVoicePreview {
+    display: none;
+}
+
 #avatarVideoAIStart {
     margin-bottom: 5px;
 }

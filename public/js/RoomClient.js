@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.53
+ * @version 2.1.54
  *
  */
 
@@ -10356,9 +10356,32 @@ class RoomClient {
                     selectElement.appendChild(option);
                 });
 
+                const voicePreviewPlayer = document.getElementById('avatarVoicePreview');
+
                 // Event listener for changes on the select element
                 selectElement.addEventListener('change', async (event) => {
                     VideoAI.avatarVoice = event.target.value || null;
+
+                    // Fetch and play real voice preview from LiveAvatar API
+                    if (voicePreviewPlayer && event.target.value) {
+                        try {
+                            voicePreviewPlayer.pause();
+                            voicePreviewPlayer.src = '';
+                            const result = await this.socket.request('previewVoice', {
+                                voice_id: event.target.value,
+                            });
+                            if (result?.audio) {
+                                voicePreviewPlayer.src = result.audio;
+                                voicePreviewPlayer.play().catch(() => {});
+                            }
+                        } catch (err) {
+                            console.warn('Voice preview failed', err);
+                        }
+                    } else if (voicePreviewPlayer) {
+                        voicePreviewPlayer.pause();
+                        voicePreviewPlayer.src = '';
+                    }
+
                     if (VideoAI.active && VideoAI.avatarVoice) {
                         console.log('Video AI voice changed during active session, restarting...');
                         this.streamingStop();
@@ -10451,12 +10474,14 @@ class RoomClient {
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
             this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
-            this.setTippy(mic.id, 'Speech to text', 'bottom');
+            this.setTippy(mic.id, 'Speech to avatar', 'bottom');
             this.setTippy(fs.id, 'Toggle full screen', 'bottom');
             this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
         }
 
         handleAspectRatio();
+
+        this.setVideoAIControlsDisabled(true);
 
         await this.createLiveAvatarSession();
     }
@@ -10836,7 +10861,17 @@ class RoomClient {
 
         handleAspectRatio();
 
+        this.setVideoAIControlsDisabled(false);
+
         this.streamingStop();
+    }
+
+    setVideoAIControlsDisabled(disabled) {
+        const ids = ['avatarQuality', 'avatarVoiceIDs', 'avatarVideoAIStart'];
+        ids.forEach((id) => {
+            const el = this.getId(id);
+            if (el) el.disabled = disabled;
+        });
     }
 
     streamingStop() {

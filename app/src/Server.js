@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.53
+ * @version 2.1.54
  *
  */
 
@@ -3191,6 +3191,34 @@ function startServer() {
             } catch (error) {
                 log.error('getVoiceList', error.response?.data || error.message);
                 cb({ error: error.response?.status === 500 ? 'Internal server error' : error.message });
+            }
+        });
+
+        // https://docs.liveavatar.com/reference/get_voice_preview_by_id_v1_voices__voice_id__preview_get
+        socket.on('previewVoice', async ({ voice_id }, cb) => {
+            if (!config?.integrations?.videoAI?.enabled || !config?.integrations?.videoAI?.apiKey)
+                return cb({ error: 'Video AI seems disabled, try later!' });
+
+            try {
+                const response = await axios.get(
+                    `${config?.integrations?.videoAI?.basePath}/v1/voices/${encodeURIComponent(voice_id)}/preview`,
+                    {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-API-KEY': config?.integrations?.videoAI?.apiKey,
+                        },
+                    }
+                );
+
+                const audioBase64 = response.data?.data?.audio_base64;
+                if (audioBase64) {
+                    cb({ audio: `data:audio/mpeg;base64,${audioBase64}` });
+                } else {
+                    cb({ error: 'No audio preview available for this voice' });
+                }
+            } catch (error) {
+                log.error('previewVoice', error.response?.data || error.message);
+                cb({ error: 'Voice preview not available' });
             }
         });
 
