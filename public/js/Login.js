@@ -28,7 +28,7 @@ if (togglePasswordBtn) {
 function setLoginLoading(loading) {
     loginBtn.disabled = loading;
     loginBtnText.style.display = loading ? 'none' : 'inline';
-    loginBtnLoader.style.display = loading ? 'inline' : 'none';
+    loginBtnLoader.classList.toggle('show', loading);
     if (loading) {
         loginBtn.classList.remove('pulse');
     } else {
@@ -41,7 +41,7 @@ function showJoinRoomForm() {
     loginForm.style.transform = 'translateY(-10px)';
     setTimeout(() => {
         loginForm.style.display = 'none';
-        joinRoomForm.style.display = 'block';
+        joinRoomForm.classList.add('show');
         joinRoomForm.style.opacity = '0';
         joinRoomForm.style.transform = 'translateY(10px)';
         requestAnimationFrame(() => {
@@ -129,6 +129,7 @@ function login() {
 
     if (username && password) {
         setLoginLoading(true);
+        hideLoginError();
 
         axios
             .post('/login', {
@@ -212,9 +213,9 @@ function login() {
                 setLoginLoading(false);
                 if (error.response && error.response.status === 429) {
                     const msg = error.response.data?.message || 'Too many login attempts. Please try again later.';
-                    popup('warning', msg);
+                    showLoginError(msg);
                 } else {
-                    popup('warning', 'Invalid credentials. Please try again.');
+                    showLoginError('Invalid credentials. Please try again.');
                 }
             });
         return;
@@ -250,6 +251,19 @@ function highlightEmpty(input) {
     input.addEventListener('input', clearError);
     input.addEventListener('change', clearError);
     input.addEventListener('blur', clearError);
+}
+
+function showLoginError(msg) {
+    const el = document.getElementById('loginError');
+    const text = document.getElementById('loginErrorText');
+    if (!el || !text) return;
+    text.textContent = msg;
+    el.classList.add('show');
+}
+
+function hideLoginError() {
+    const el = document.getElementById('loginError');
+    if (el) el.classList.remove('show');
 }
 
 function join() {

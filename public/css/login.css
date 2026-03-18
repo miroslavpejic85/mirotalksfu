@@ -82,6 +82,39 @@
     margin-right: auto;
 }
 
+/* Inline error message */
+.login-error {
+    display: none;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    border-radius: 10px;
+    background: rgba(255, 75, 75, 0.1);
+    border: 1px solid rgba(255, 75, 75, 0.25);
+    color: #ff6b6b;
+    font-size: 13px;
+    text-align: left;
+    animation: fadeIn 0.3s ease;
+}
+.login-error.show {
+    display: flex;
+}
+.login-error i {
+    flex-shrink: 0;
+    font-size: 14px;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-4px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
 /* Input group with icon */
 .login-input-group {
     display: flex;
@@ -229,9 +262,29 @@
 
 /* Login button loader */
 .login-btn-loader {
-    display: inline-flex;
+    display: none;
     align-items: center;
     gap: 6px;
+}
+.login-btn-loader.show {
+    display: inline-flex;
+}
+
+/* Join Room form background */
+#joinRoomForm {
+    display: none;
+    background: linear-gradient(160deg, rgba(15, 15, 25, 0.95) 40%, rgba(70, 120, 249, 0.12) 100%);
+    border-radius: 20px;
+    padding: 48px;
+    margin: -48px;
+}
+#joinRoomForm.show {
+    display: block;
+}
+
+#selectRoom {
+    background: transparent;
+    border: none;
 }
 
 /* Join Room title */
