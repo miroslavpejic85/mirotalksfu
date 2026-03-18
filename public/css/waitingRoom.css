@@ -71,12 +71,43 @@
 /* Description */
 .waiting-description {
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.65);
     line-height: 1.7;
     margin-bottom: 32px;
     max-width: 400px;
     margin-left: auto;
     margin-right: auto;
+}
+
+/* Room name badge */
+.waiting-room-name {
+    display: inline-block;
+    background: rgba(70, 120, 249, 0.12);
+    border: 1px solid rgba(70, 120, 249, 0.2);
+    border-radius: 8px;
+    padding: 6px 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #7ba4fc;
+    letter-spacing: 0.3px;
+    margin-bottom: 24px;
+    word-break: break-all;
+    max-width: 100%;
+}
+.waiting-room-name i {
+    margin-right: 6px;
+    font-size: 12px;
+}
+
+/* Elapsed time */
+.waiting-elapsed {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+    margin-bottom: 20px;
+}
+.waiting-elapsed i {
+    margin-right: 5px;
+    font-size: 12px;
 }
 
 /* Spinner */
@@ -116,7 +147,7 @@
 /* Status */
 .waiting-status {
     font-size: 14px;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.55);
     margin-bottom: 24px;
     transition:
         color 0.3s ease,
@@ -126,6 +157,11 @@
     color: #2ece89;
     font-weight: 600;
     font-size: 15px;
+}
+
+/* Pulse on check */
+.waiting-spinner-dot.checking {
+    background: #6d9bff;
 }
 
 /* Divider */

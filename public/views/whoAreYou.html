@@ -87,7 +87,12 @@
                 <section class="hero section center-card-section">
                     <div class="container">
                         <div class="hero-inner">
-                            <div class="waiting-card reveal-from-bottom" data-reveal-delay="150">
+                            <div
+                                class="waiting-card reveal-from-bottom"
+                                data-reveal-delay="150"
+                                role="status"
+                                aria-live="polite"
+                            >
                                 <div class="waiting-icon">
                                     <i class="fa-solid fa-users"></i>
                                 </div>
@@ -96,12 +101,22 @@
                                     The meeting hasn't started yet.<br />
                                     You'll join automatically when the host opens the room.
                                 </p>
+                                <div id="waitingRoomName" class="waiting-room-name" style="display: none">
+                                    <i class="fa-solid fa-door-open"></i>
+                                    <span id="waitingRoomNameText"></span>
+                                </div>
                                 <div class="waiting-spinner">
                                     <div class="waiting-spinner-dot"></div>
                                     <div class="waiting-spinner-dot"></div>
                                     <div class="waiting-spinner-dot"></div>
                                 </div>
-                                <p class="waiting-status" id="waitingStatus">Checking room status...</p>
+                                <p class="waiting-status" id="waitingStatus" aria-live="assertive">
+                                    Checking room status...
+                                </p>
+                                <p class="waiting-elapsed" id="waitingElapsed">
+                                    <i class="fa-regular fa-clock"></i>
+                                    <span id="waitingElapsedText">Just started waiting</span>
+                                </p>
                                 <hr class="waiting-divider" />
                                 <p class="host-login-link" id="hostLoginLink">
                                     <span id="waitingRoomHostLink">Are you the host?</span>

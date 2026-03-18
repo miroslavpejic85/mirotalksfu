@@ -88,6 +88,8 @@ let BRAND = {
         waitingRoomWaiting: 'Waiting for host to start the meeting...',
         waitingRoomHostLink: 'Are you the host?',
         waitingRoomLoginLink: 'Login here',
+        waitingRoomElapsedJust: 'Just started waiting',
+        waitingRoomElapsedMinutes: 'Waiting for {minutes}',
     },
     login: {
         heading: 'Welcome back',

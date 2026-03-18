@@ -12,14 +12,38 @@ const roomId = filterXSS(pathParts[pathParts.length - 1]);
 
 const statusEl = document.getElementById('waitingStatus');
 const loginLink = document.getElementById('loginLink');
+const waitingRoomNameEl = document.getElementById('waitingRoomName');
+const waitingRoomNameText = document.getElementById('waitingRoomNameText');
+const waitingElapsedText = document.getElementById('waitingElapsedText');
+const spinnerDots = document.querySelectorAll('.waiting-spinner-dot');
 
-// Store the room in the session for auto-join from the landing page after successful login
 window.sessionStorage.roomID = roomId;
 
 let intervalId = null;
 let roomActive = false;
+const waitStartTime = Date.now();
+let elapsedTimerId = null;
 
-// Brand text helper (overridden by Brand.js if configured)
+if (roomId && roomId !== 'whoAreYou') {
+    waitingRoomNameText.textContent = roomId;
+    waitingRoomNameEl.style.display = 'inline-block';
+}
+
+function updateElapsedTime() {
+    const seconds = Math.floor((Date.now() - waitStartTime) / 1000);
+    if (seconds < 60) {
+        waitingElapsedText.textContent = getWaitingRoomBrand('waitingRoomElapsedJust', 'Just started waiting');
+    } else {
+        const minutes = Math.floor(seconds / 60);
+        const template = getWaitingRoomBrand('waitingRoomElapsedMinutes', 'Waiting for {minutes}');
+        waitingElapsedText.textContent = template.replace(
+            '{minutes}',
+            minutes + (minutes === 1 ? ' minute' : ' minutes')
+        );
+    }
+}
+elapsedTimerId = setInterval(updateElapsedTime, 10000);
+
 function getWaitingRoomBrand(key, fallback) {
     try {
         return (typeof BRAND !== 'undefined' && BRAND?.whoAreYou?.[key]) || fallback;
@@ -28,12 +52,10 @@ function getWaitingRoomBrand(key, fallback) {
     }
 }
 
-// Set login link with room param so host returns to the room after login
 if (roomId && roomId !== 'whoAreYou') {
     loginLink.href = '/login?room=' + encodeURIComponent(roomId);
 }
 
-// Function to play sound
 function playSound(name) {
     if (!settings.sounds) return;
 
@@ -46,8 +68,13 @@ function playSound(name) {
     });
 }
 
-// Function to check room status from the server
+function flashCheckingState() {
+    spinnerDots.forEach((dot) => dot.classList.add('checking'));
+    setTimeout(() => spinnerDots.forEach((dot) => dot.classList.remove('checking')), 600);
+}
+
 function checkRoom() {
+    flashCheckingState();
     axios
         .post('/isRoomActive', { roomId: roomId })
         .then(function (response) {
@@ -79,7 +106,6 @@ function checkRoom() {
         });
 }
 
-// Schedule next check, pausing when page is hidden
 function scheduleNextCheck() {
     if (intervalId) return;
     intervalId = setTimeout(function () {
@@ -92,12 +118,10 @@ function scheduleNextCheck() {
     }, pollInterval);
 }
 
-// Page visibility change handler
 document.addEventListener('visibilitychange', function () {
     if (document.visibilityState === 'visible' && !roomActive) {
         checkRoom();
     }
 });
 
-// Start checking
 checkRoom();

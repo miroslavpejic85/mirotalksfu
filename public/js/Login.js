@@ -15,7 +15,6 @@ const selectRoom = document.getElementById('selectRoom');
 const joinSelectRoomBtn = document.getElementById('joinSelectRoomButton');
 const generateRoomBtn = document.getElementById('generateRoomButton');
 
-// Password toggle
 const togglePasswordBtn = document.getElementById('togglePassword');
 if (togglePasswordBtn) {
     togglePasswordBtn.onclick = () => {
@@ -26,7 +25,6 @@ if (togglePasswordBtn) {
     };
 }
 
-// Loading state helpers
 function setLoginLoading(loading) {
     loginBtn.disabled = loading;
     loginBtnText.style.display = loading ? 'none' : 'inline';
@@ -38,7 +36,6 @@ function setLoginLoading(loading) {
     }
 }
 
-// Smooth transition from login form to join room form
 function showJoinRoomForm() {
     loginForm.style.opacity = '0';
     loginForm.style.transform = 'translateY(-10px)';
@@ -54,12 +51,10 @@ function showJoinRoomForm() {
     }, 250);
 }
 
-// Default handler (will be overridden for admin below)
 joinSelectRoomBtn.onclick = (e) => {
     join();
 };
 
-// Generate random room -> fills the custom input (admin mode). Hidden for limited users.
 if (generateRoomBtn) {
     generateRoomBtn.onclick = (e) => {
         e.preventDefault();
@@ -197,17 +192,31 @@ function login() {
         return;
     }
     if (!username && !password) {
-        popup('warning', 'Username and Password required');
+        highlightEmpty(usernameInput);
+        highlightEmpty(passwordInput);
         return;
     }
     if (!username) {
-        popup('warning', 'Username required');
+        highlightEmpty(usernameInput);
         return;
     }
     if (!password) {
-        popup('warning', 'Password required');
+        highlightEmpty(passwordInput);
         return;
     }
+}
+
+function highlightEmpty(input) {
+    const group = input.closest('.login-input-group');
+    if (!group) return;
+    group.classList.remove('input-error');
+    void group.offsetWidth; // force reflow to restart animation
+    group.classList.add('input-error');
+    input.focus();
+    input.addEventListener('input', function onInput() {
+        group.classList.remove('input-error');
+        input.removeEventListener('input', onInput);
+    });
 }
 
 function join() {

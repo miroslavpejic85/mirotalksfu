@@ -74,7 +74,7 @@
 /* Description */
 .login-description {
     font-size: 15px;
-    color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.65);
     line-height: 1.7;
     margin-bottom: 32px;
     max-width: 400px;
@@ -123,6 +123,63 @@
 }
 .login-input-group .form-input::placeholder {
     color: rgba(255, 255, 255, 0.3);
+}
+
+/* Validation error state */
+.login-input-group.input-error {
+    border-color: rgba(255, 75, 75, 0.5);
+    background: rgba(255, 75, 75, 0.06);
+    animation: inputShake 0.4s ease;
+}
+.login-input-group.input-error > i:first-child {
+    color: #ff4b4b;
+}
+
+@keyframes inputShake {
+    0%,
+    100% {
+        transform: translateX(0);
+    }
+    20% {
+        transform: translateX(-6px);
+    }
+    40% {
+        transform: translateX(6px);
+    }
+    60% {
+        transform: translateX(-4px);
+    }
+    80% {
+        transform: translateX(4px);
+    }
+}
+
+/* Custom select styling */
+.login-input-group select.form-input {
+    appearance: none;
+    -webkit-appearance: none;
+    background: transparent
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23ffffff50' d='M6 8L1 3h10z'/%3E%3C/svg%3E")
+        no-repeat right 4px center;
+    padding-right: 24px;
+    cursor: pointer;
+    color: #fff;
+}
+.login-input-group select.form-input option {
+    background: #1a1a2e;
+    color: #fff;
+}
+
+/* Focus indicators for accessibility */
+.login-btn:focus-visible,
+.join-room-btn:focus-visible,
+.random-room-btn:focus-visible,
+.password-toggle:focus-visible {
+    outline: 2px solid #4678f9;
+    outline-offset: 2px;
+}
+.login-input-group:focus-within {
+    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
 }
 
 /* Password toggle button */
