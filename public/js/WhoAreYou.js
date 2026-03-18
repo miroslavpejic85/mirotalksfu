@@ -154,9 +154,13 @@ function initWaitingAudio() {
         waitingAudio = null;
     });
 
-    waitingAudio.addEventListener('canplaythrough', function () {
-        audioPlayerEl.style.display = 'flex';
-    }, { once: true });
+    waitingAudio.addEventListener(
+        'canplaythrough',
+        function () {
+            audioPlayerEl.style.display = 'flex';
+        },
+        { once: true }
+    );
 
     waitingAudio.addEventListener('timeupdate', function () {
         if (waitingAudio.duration) {
@@ -182,9 +186,7 @@ function initWaitingAudio() {
 
     audioMuteBtn.onclick = function () {
         waitingAudio.muted = !waitingAudio.muted;
-        audioMuteIcon.className = waitingAudio.muted
-            ? 'fa-solid fa-volume-xmark'
-            : 'fa-solid fa-volume-high';
+        audioMuteIcon.className = waitingAudio.muted ? 'fa-solid fa-volume-xmark' : 'fa-solid fa-volume-high';
         audioMuteBtn.title = waitingAudio.muted ? 'Unmute' : 'Mute';
     };
 }

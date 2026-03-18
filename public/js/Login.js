@@ -68,6 +68,34 @@ if (generateRoomBtn) {
     };
 }
 
+const shareRoomBtn = document.getElementById('shareRoomButton');
+if (shareRoomBtn) {
+    shareRoomBtn.onclick = (e) => {
+        e.preventDefault();
+        const custom = document.getElementById('customRoomInput');
+        const roomName =
+            custom && custom.offsetParent !== null
+                ? filterXSS(custom.value.trim())
+                : selectRoom
+                  ? filterXSS(selectRoom.value.trim())
+                  : '';
+        if (!roomName) {
+            const inputEl = custom && custom.offsetParent !== null ? custom : selectRoom;
+            if (inputEl) highlightEmpty(inputEl);
+            return;
+        }
+        const roomUrl = window.location.origin + '/join/?room=' + roomName;
+        if (navigator.share) {
+            navigator.share({ title: 'Join my room', url: roomUrl }).catch(() => {});
+        } else {
+            navigator.clipboard
+                .writeText(roomUrl)
+                .then(() => popup('success', 'Room link copied to clipboard!'))
+                .catch(() => popup('warning', 'Failed to copy link'));
+        }
+    };
+}
+
 usernameInput.onkeyup = (e) => {
     if (e.keyCode === 13) {
         e.preventDefault();
@@ -164,7 +192,7 @@ function login() {
                             window.location.href =
                                 '/join/?room=' + roomName + '&token=' + window.sessionStorage.peer_token;
                         } else {
-                            popup('warning', 'Room name required');
+                            highlightEmpty(document.getElementById('customRoomInput'));
                         }
                     };
                     showJoinRoomForm();
@@ -213,10 +241,15 @@ function highlightEmpty(input) {
     void group.offsetWidth; // force reflow to restart animation
     group.classList.add('input-error');
     input.focus();
-    input.addEventListener('input', function onInput() {
+    function clearError() {
         group.classList.remove('input-error');
-        input.removeEventListener('input', onInput);
-    });
+        input.removeEventListener('input', clearError);
+        input.removeEventListener('change', clearError);
+        input.removeEventListener('blur', clearError);
+    }
+    input.addEventListener('input', clearError);
+    input.addEventListener('change', clearError);
+    input.addEventListener('blur', clearError);
 }
 
 function join() {
