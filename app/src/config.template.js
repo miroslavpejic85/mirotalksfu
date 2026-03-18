@@ -1110,7 +1110,7 @@ module.exports = {
                 waitingRoomElapsedJust: process.env.WHO_ARE_YOU_WAITING_ROOM_ELAPSED_JUST || 'Just started waiting',
                 waitingRoomElapsedMinutes:
                     process.env.WHO_ARE_YOU_WAITING_ROOM_ELAPSED_MINUTES || 'Waiting for {minutes}',
-                waitingRoomSongUrl: process.env.WHO_ARE_YOU_WAITING_ROOM_SONG_URL || '',
+                waitingRoomSongUrl: process.env.WHO_ARE_YOU_WAITING_ROOM_SONG_URL || '../sounds/waiting-music.mp3',
             },
 
             /**
