@@ -90,6 +90,7 @@ let BRAND = {
         waitingRoomLoginLink: 'Login here',
         waitingRoomElapsedJust: 'Just started waiting',
         waitingRoomElapsedMinutes: 'Waiting for {minutes}',
+        waitingRoomSongUrl: '',
     },
     login: {
         heading: 'Welcome back',
@@ -98,7 +99,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.1.51</strong>',
+        title: '<strong>WebRTC SFU v2.1.52</strong>',
         html: `
             <button 
                 id="support-button" 

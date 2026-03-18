@@ -83,6 +83,10 @@ function checkRoom() {
 
             if (isActive && !roomActive) {
                 roomActive = true;
+                if (waitingAudio) {
+                    waitingAudio.pause();
+                    waitingAudio = null;
+                }
                 playSound('roomActive');
                 statusEl.textContent = getWaitingRoomBrand('waitingRoomReady', 'Room is ready! Joining...');
                 statusEl.classList.add('ready');
@@ -123,5 +127,69 @@ document.addEventListener('visibilitychange', function () {
         checkRoom();
     }
 });
+
+// Waiting room audio player
+const audioPlayerEl = document.getElementById('waitingAudioPlayer');
+const audioBtn = document.getElementById('waitingAudioBtn');
+const audioIcon = document.getElementById('waitingAudioIcon');
+const audioMuteBtn = document.getElementById('waitingAudioMute');
+const audioMuteIcon = document.getElementById('waitingAudioMuteIcon');
+const audioProgress = document.getElementById('waitingAudioProgress');
+
+let waitingAudio = null;
+let audioPlaying = false;
+
+function initWaitingAudio() {
+    const songUrl = getWaitingRoomBrand('waitingRoomSongUrl', '');
+    if (!songUrl || !audioPlayerEl) return;
+
+    waitingAudio = new Audio(songUrl);
+    waitingAudio.loop = true;
+    waitingAudio.volume = 0.3;
+    waitingAudio.preload = 'auto';
+
+    waitingAudio.addEventListener('error', function () {
+        console.warn('Waiting room audio failed to load:', songUrl);
+        audioPlayerEl.style.display = 'none';
+        waitingAudio = null;
+    });
+
+    waitingAudio.addEventListener('canplaythrough', function () {
+        audioPlayerEl.style.display = 'flex';
+    }, { once: true });
+
+    waitingAudio.addEventListener('timeupdate', function () {
+        if (waitingAudio.duration) {
+            const pct = (waitingAudio.currentTime / waitingAudio.duration) * 100;
+            audioProgress.style.width = pct + '%';
+        }
+    });
+
+    audioBtn.onclick = function () {
+        if (audioPlaying) {
+            waitingAudio.pause();
+            audioIcon.className = 'fa-solid fa-play';
+            audioBtn.title = 'Play music';
+        } else {
+            waitingAudio.play().catch(function (err) {
+                console.warn('Audio play blocked:', err.message);
+            });
+            audioIcon.className = 'fa-solid fa-pause';
+            audioBtn.title = 'Pause music';
+        }
+        audioPlaying = !audioPlaying;
+    };
+
+    audioMuteBtn.onclick = function () {
+        waitingAudio.muted = !waitingAudio.muted;
+        audioMuteIcon.className = waitingAudio.muted
+            ? 'fa-solid fa-volume-xmark'
+            : 'fa-solid fa-volume-high';
+        audioMuteBtn.title = waitingAudio.muted ? 'Unmute' : 'Mute';
+    };
+}
+
+// Wait for Brand.js to load before initializing audio
+setTimeout(initWaitingAudio, 1000);
 
 checkRoom();

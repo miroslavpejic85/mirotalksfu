@@ -118,6 +118,17 @@
                                     <span id="waitingElapsedText">Just started waiting</span>
                                 </p>
                                 <hr class="waiting-divider" />
+                                <div id="waitingAudioPlayer" class="waiting-audio-player" style="display: none">
+                                    <button id="waitingAudioBtn" class="waiting-audio-btn" title="Play music">
+                                        <i id="waitingAudioIcon" class="fa-solid fa-play"></i>
+                                    </button>
+                                    <div class="waiting-audio-bar">
+                                        <div id="waitingAudioProgress" class="waiting-audio-progress"></div>
+                                    </div>
+                                    <button id="waitingAudioMute" class="waiting-audio-btn" title="Mute">
+                                        <i id="waitingAudioMuteIcon" class="fa-solid fa-volume-high"></i>
+                                    </button>
+                                </div>
                                 <p class="host-login-link" id="hostLoginLink">
                                     <span id="waitingRoomHostLink">Are you the host?</span>
                                     <a id="loginLink" href="/login"
