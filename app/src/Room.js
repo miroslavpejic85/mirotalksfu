@@ -1,12 +1,7 @@
 'use strict';
 
 const config = require('./config');
-const crypto = require('crypto-js');
-const RtmpFile = require('./RtmpFile');
-const RtmpUrl = require('./RtmpUrl');
-const fs = require('fs');
-const path = require('path');
-const { v4: uuidv4 } = require('uuid');
+const RtmpStreaming = require('./RtmpStreaming');
 const Logger = require('./Logger');
 const log = new Logger('Room');
 
@@ -73,9 +68,7 @@ module.exports = class Room {
         this.createTheRouter();
 
         // RTMP configuration
-        this.rtmpFileStreamer = null;
-        this.rtmpUrlStreamer = null;
-        this.rtmp = config?.media?.rtmp || false;
+        this.rtmpStreaming = new RtmpStreaming(this);
 
         // Polls
         this.polls = [];
@@ -104,10 +97,10 @@ module.exports = class Room {
                 hostOnlyRecording: this._hostOnlyRecording,
             },
             rtmp: {
-                enabled: this.rtmp && this.rtmp.enabled,
-                fromFile: this.rtmp && this.rtmp.fromFile,
-                fromUrl: this.rtmp && this.rtmp.fromUrl,
-                fromStream: this.rtmp && this.rtmp.fromStream,
+                enabled: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.enabled,
+                fromFile: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromFile,
+                fromUrl: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromUrl,
+                fromStream: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromStream,
             },
             hostProtected: this.isHostProtected,
             moderator: this._moderator,
@@ -154,168 +147,43 @@ module.exports = class Room {
     }
 
     // ##############################################
-    // RTMP from FILE
+    // RTMP (delegated to RtmpStreaming)
     // ##############################################
 
     isRtmpFileStreamerActive() {
-        return this.rtmpFileStreamer;
+        return this.rtmpStreaming.isRtmpFileStreamerActive();
     }
 
-    async getRTMP(dir = '../rtmp') {
-        //
-        const folderPath = path.join(__dirname, dir);
-        log.debug('[getRTMP] Files from dir', folderPath);
-
-        try {
-            // Create dir if not exists
-            if (!fs.existsSync(folderPath)) {
-                log.debug('[getRTMP] Dir not exists going to create', folderPath);
-                fs.mkdirSync(folderPath, { recursive: true });
-            }
-            const files = fs.readdirSync(folderPath);
-            log.debug('[getRTMP] Files', files);
-            return files;
-        } catch (error) {
-            log.error(`[getRTMP] Error reading directory: ${error.message}`);
-            return [];
-        }
+    async getRTMP(dir) {
+        return this.rtmpStreaming.getRTMP(dir);
     }
 
-    async startRTMP(socket_id, room, host = 'localhost', port = 1935, file = '../rtmp/BigBuckBunny.mp4') {
-        if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('[startRTMP] Server is not enabled or missing the config');
-            return false;
-        }
-
-        if (this.rtmpFileStreamer) {
-            log.debug('[startRTMP] Already in progress');
-            return false;
-        }
-
-        const inputFilePath = path.join(__dirname, file);
-
-        if (!fs.existsSync(inputFilePath)) {
-            log.error(`[startRTMP] File not found: ${inputFilePath}`);
-            return false;
-        }
-
-        log.debug('[startRTMP] Read all stream from file', inputFilePath);
-
-        this.rtmpFileStreamer = new RtmpFile(socket_id, room);
-
-        const inputStream = fs.createReadStream(inputFilePath);
-
-        const rtmpUrl = this.getRTMPUrl(host, port);
-
-        const rtmpRun = await this.rtmpFileStreamer.start(inputStream, rtmpUrl);
-
-        if (!rtmpRun) {
-            this.rtmpFileStreamer = false;
-            return this.rtmpFileStreamer;
-        }
-        return rtmpUrl;
+    async startRTMP(socket_id, room, host, port, file) {
+        return this.rtmpStreaming.startRTMP(socket_id, room, host, port, file);
     }
 
     stopRTMP() {
-        if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('[stopRTMP] Server is not enabled or missing the config');
-            return false;
-        }
-        if (this.rtmpFileStreamer) {
-            this.rtmpFileStreamer.stop();
-            this.rtmpFileStreamer = null;
-            log.debug('[stopRTMP] Streamer Stopped successfully!');
-            return true;
-        } else {
-            log.debug('[stopRTMP] No process to stop');
-            return false;
-        }
+        return this.rtmpStreaming.stopRTMP();
     }
-
-    // ####################################################
-    // RTMP from URL
-    // ####################################################
 
     isRtmpUrlStreamerActive() {
-        return this.rtmpUrlStreamer;
+        return this.rtmpStreaming.isRtmpUrlStreamerActive();
     }
 
-    async startRTMPfromURL(
-        socket_id,
-        room,
-        host = 'localhost',
-        port = 1935,
-        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
-    ) {
-        if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('[startRTMPfromURL] Server is not enabled or missing the config');
-            return false;
-        }
-
-        if (this.rtmpUrlStreamer) {
-            log.debug('[startRTMPfromURL] Already in progress');
-            return false;
-        }
-
-        log.debug('[startRTMPfromURL] Input video URL', inputVideoURL);
-
-        this.rtmpUrlStreamer = new RtmpUrl(socket_id, room);
-
-        const rtmpUrl = this.getRTMPUrl(host, port);
-
-        const rtmpRun = await this.rtmpUrlStreamer.start(inputVideoURL, rtmpUrl);
-
-        if (!rtmpRun) {
-            this.rtmpUrlStreamer = false;
-            return this.rtmpUrlStreamer;
-        }
-        return rtmpUrl;
+    async startRTMPfromURL(socket_id, room, host, port, inputVideoURL) {
+        return this.rtmpStreaming.startRTMPfromURL(socket_id, room, host, port, inputVideoURL);
     }
 
     stopRTMPfromURL() {
-        if (!this.rtmp || !this.rtmp.enabled) {
-            log.debug('[stopRTMPfromURL] Server is not enabled or missing the config');
-            return false;
-        }
-        if (this.rtmpUrlStreamer) {
-            this.rtmpUrlStreamer.stop();
-            this.rtmpUrlStreamer = null;
-            log.debug('[stopRTMPfromURL] Streamer Stopped successfully!');
-            return true;
-        } else {
-            log.debug('[stopRTMPfromURL] No process to stop');
-            return false;
-        }
+        return this.rtmpStreaming.stopRTMPfromURL();
     }
-
-    // ####################################################
-    // RTMP COMMON
-    // ####################################################
 
     getRTMPUrl(host, port) {
-        const rtmpUseNodeMediaServer = this.rtmp.useNodeMediaServer ?? true;
-        const rtmpServer = this.rtmp.server != '' ? this.rtmp.server : false;
-        const rtmpAppName = this.rtmp.appName != '' ? this.rtmp.appName : 'live';
-        const rtmpStreamKey = this.rtmp.streamKey != '' ? this.rtmp.streamKey : uuidv4();
-        const rtmpServerSecret = this.rtmp.secret != '' ? this.rtmp.secret : false;
-        const expirationHours = this.rtmp.expirationHours || 4;
-        const rtmpServerURL = rtmpServer ? rtmpServer : `rtmp://${host}:${port}`;
-        const rtmpServerPath = '/' + rtmpAppName + '/' + rtmpStreamKey;
-
-        const rtmpUrl = rtmpUseNodeMediaServer
-            ? this.generateRTMPUrl(rtmpServerURL, rtmpServerPath, rtmpServerSecret, expirationHours)
-            : rtmpServerURL + rtmpServerPath;
-
-        log.info('RTMP Url generated', rtmpUrl);
-        return rtmpUrl;
+        return this.rtmpStreaming.getRTMPUrl(host, port);
     }
 
-    generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours = 8) {
-        const currentTime = Math.floor(Date.now() / 1000);
-        const expirationTime = currentTime + expirationHours * 3600;
-        const hashValue = crypto.MD5(`${streamPath}-${expirationTime}-${secretKey}`).toString();
-        const rtmpUrl = `${baseURL}${streamPath}?sign=${expirationTime}-${hashValue}`;
-        return rtmpUrl;
+    generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours) {
+        return this.rtmpStreaming.generateRTMPUrl(baseURL, streamPath, secretKey, expirationHours);
     }
 
     // ####################################################
@@ -364,8 +232,7 @@ module.exports = class Room {
     async close() {
         this.closeAudioLevelObserver();
         this.closeActiveSpeakerObserver();
-        if (this.isRtmpFileStreamerActive()) this.stopRTMP();
-        if (this.isRtmpUrlStreamerActive()) this.stopRTMPfromURL();
+        this.rtmpStreaming.closeAll();
         this.closeRouter();
         log.debug('Room closed', { room_id: this.id });
     }
