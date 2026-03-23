@@ -471,6 +471,11 @@ class MiroTalkWidget {
     // ============================================================================
 
     async checkOnlineStatus() {
+        // Random rooms are created on-demand, always show as online
+        if (this.isRandomRoom()) {
+            this.updateOnlineStatus(true);
+            return;
+        }
         try {
             const response = await fetch(`${this.protocol}://${this.domain}/isWidgetRoomActive`, {
                 method: 'POST',
@@ -565,7 +570,8 @@ class MiroTalkWidget {
     joinRoom() {
         if (this.isOnline) {
             console.log('Joining room...');
-            window.open(`${this.protocol}://${this.domain}/join?room=${this.roomId}`, '_blank');
+            const room = this.isRandomRoom() ? this.generateRandomRoomId() : this.roomId;
+            window.open(`${this.protocol}://${this.domain}/join?room=${room}`, '_blank');
         } else {
             this.supportOffline();
         }
@@ -576,8 +582,9 @@ class MiroTalkWidget {
     }
 
     openMeetingWindow(params) {
+        const room = this.isRandomRoom() ? this.generateRandomRoomId() : this.roomId;
         const queryParams = new URLSearchParams({
-            room: this.roomId,
+            room: room,
             name: this.userName,
             ...params,
         });
@@ -586,6 +593,19 @@ class MiroTalkWidget {
 
     supportOffline() {
         alert('Sorry, support is currently offline.');
+    }
+
+    isRandomRoom() {
+        return this.roomId === 'random';
+    }
+
+    generateRandomRoomId() {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+        let result = '';
+        for (let i = 0; i < 12; i++) {
+            result += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        return result;
     }
 
     // ============================================================================
