@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.55
+ * @version 2.1.56
  *
  */
 
@@ -3331,8 +3331,12 @@ function startServer() {
 
                 cb(data);
             } catch (error) {
-                log.error('talkToOpenAI', error.response.data);
-                cb({ error: error.response?.status === 500 ? 'Internal server error' : error.response.data.message });
+                log.error('talkToOpenAI', error.response?.data || error.message);
+                cb({
+                    error:
+                        error.response?.data?.message ||
+                        (error.response?.status === 500 ? 'Internal server error' : error.message),
+                });
             }
         });
 
