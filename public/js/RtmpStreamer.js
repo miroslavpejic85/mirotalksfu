@@ -20,6 +20,7 @@ const screenFrameRate = filterXSS(qs.get('sf'));
 const theme = filterXSS(qs.get('ts'));
 const color = filterXSS(qs.get('tc'));
 const customRtmpUrl = qs.get('customRtmpUrl') || null;
+const streamType = filterXSS(qs.get('st'));
 
 console.log('RTMP settings', {
     videoId: videoId,
@@ -296,7 +297,6 @@ function getRTMPScreenConstraints(screenFrameRate) {
 }
 
 function copyRTMP() {
-    const rtmpInput = document.getElementById('rtmp');
     if (!rtmpInput.value) {
         return showPopup('No RTMP URL detected', 'info');
     }
@@ -384,7 +384,14 @@ function setTheme() {
 startCameraButton.addEventListener('click', startCameraStreaming);
 startScreenButton.addEventListener('click', startScreenStreaming);
 stopButton.addEventListener('click', stopRTMP);
-copyButton.addEventListener('click', copyRTMP);
+
+if (!customRtmpUrl && !streamType) {
+    copyButton.addEventListener('click', copyRTMP);
+} else {
+    copyButton.style.display = 'none';
+    rtmpInput.style.display = 'none';
+}
+
 closePopup.addEventListener('click', hidePopup);
 
 window.addEventListener('load', color ? setCustomTheme : setTheme);

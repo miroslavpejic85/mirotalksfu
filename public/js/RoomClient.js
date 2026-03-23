@@ -10926,13 +10926,6 @@ class RoomClient {
             activeBtn.classList.add('active');
         };
 
-        document.addEventListener('click', (e) => {
-            const rtmpDestination = this.getId('rtmpCustomDestination');
-            if (rtmpDestination && !rtmpDestination.contains(e.target)) {
-                document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
-            }
-        });
-
         rtmpCustomUrl.addEventListener('input', showClearButton);
         rtmpCustomStreamKey.addEventListener('input', showClearButton);
 
@@ -11153,13 +11146,17 @@ class RoomClient {
 
         const customRtmpUrl = this.getCustomRtmpUrl();
 
+        const activePreset = document.querySelector('.btn-rtmp-preset.active');
+        const streamType = activePreset ? activePreset.textContent.trim() : customRtmpUrl ? 'Custom' : '';
+
         const options =
             `&vr=${videoQuality.value}` +
             `&vf=${videoFps.value}` +
             `&sf=${screenFps.value}` +
             `&ts=${selectTheme.value}` +
             (themeCustom.keep ? `&tc=${themeColor}` : '') +
-            (customRtmpUrl ? `&customRtmpUrl=${encodeURIComponent(customRtmpUrl)}` : '');
+            (customRtmpUrl ? `&customRtmpUrl=${encodeURIComponent(customRtmpUrl)}` : '') +
+            (streamType ? `&st=${encodeURIComponent(streamType)}` : '');
 
         const url = `/rtmp?v=${videoSelect.value}&a=${microphoneSelect.value}${options}`;
 
