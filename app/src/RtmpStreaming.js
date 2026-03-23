@@ -49,7 +49,14 @@ class RtmpStreaming {
         }
     }
 
-    async startRTMP(socket_id, room, host = 'localhost', port = 1935, file = '../rtmp/BigBuckBunny.mp4') {
+    async startRTMP(
+        socket_id,
+        room,
+        host = 'localhost',
+        port = 1935,
+        file = '../rtmp/BigBuckBunny.mp4',
+        customRtmpUrl = null
+    ) {
         if (!this.rtmp || !this.rtmp.enabled) {
             log.debug('[startRTMP] Server is not enabled or missing the config');
             return false;
@@ -79,7 +86,8 @@ class RtmpStreaming {
 
         const inputStream = fs.createReadStream(inputFilePath);
 
-        const rtmpUrl = this.getRTMPUrl(host, port);
+        const rtmpUrl = this.resolveRTMPUrl(host, port, customRtmpUrl);
+        if (!rtmpUrl) return false;
 
         const rtmpRun = await this.rtmpFileStreamer.start(inputStream, rtmpUrl);
 
@@ -119,7 +127,8 @@ class RtmpStreaming {
         room,
         host = 'localhost',
         port = 1935,
-        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4'
+        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        customRtmpUrl = null
     ) {
         if (!this.rtmp || !this.rtmp.enabled) {
             log.debug('[startRTMPfromURL] Server is not enabled or missing the config');
@@ -146,7 +155,8 @@ class RtmpStreaming {
 
         this.rtmpUrlStreamer = new RtmpUrl(socket_id, this);
 
-        const rtmpUrl = this.getRTMPUrl(host, port);
+        const rtmpUrl = this.resolveRTMPUrl(host, port, customRtmpUrl);
+        if (!rtmpUrl) return false;
 
         const rtmpRun = await this.rtmpUrlStreamer.start(inputVideoURL, rtmpUrl);
 
@@ -176,6 +186,31 @@ class RtmpStreaming {
     // ####################################################
     // RTMP COMMON
     // ####################################################
+
+    isValidRtmpUrl(url) {
+        try {
+            const parsed = new URL(url);
+            return ['rtmp:', 'rtmps:'].includes(parsed.protocol);
+        } catch (err) {
+            return false;
+        }
+    }
+
+    resolveRTMPUrl(host, port, customRtmpUrl = null) {
+        if (customRtmpUrl) {
+            if (!this.rtmp.allowCustomUrl) {
+                log.warn('[resolveRTMPUrl] Custom RTMP URLs are disabled by server config');
+                return false;
+            }
+            if (!this.isValidRtmpUrl(customRtmpUrl)) {
+                log.error('[resolveRTMPUrl] Invalid custom RTMP URL scheme, only rtmp:// and rtmps:// are allowed');
+                return false;
+            }
+            log.info('[resolveRTMPUrl] Using custom RTMP URL', customRtmpUrl);
+            return customRtmpUrl;
+        }
+        return this.getRTMPUrl(host, port);
+    }
 
     getRTMPUrl(host, port) {
         const rtmpUseNodeMediaServer = this.rtmp.useNodeMediaServer ?? true;

@@ -1055,6 +1055,47 @@ body {
     border: var(--border);
 }
 
+.rtmp-preset-buttons {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+
+.btn-rtmp-preset {
+    flex: 1;
+    min-width: 80px;
+    padding: 6px 10px;
+    font-size: 12px;
+    background: var(--select-bg);
+    color: #fff;
+    border: var(--border);
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.btn-rtmp-preset:hover {
+    background: var(--btns-bg-color);
+}
+.btn-rtmp-preset.active {
+    background: var(--body-bg) !important;
+    border-color: rgb(8, 189, 89);
+    color: rgb(8, 189, 89);
+}
+.btn-rtmp-preset i {
+    margin-right: 4px;
+}
+
+#rtmpCustomUrl,
+#rtmpCustomStreamKey {
+    margin-top: 5px;
+    padding: 10px;
+    width: 100%;
+    color: #fff;
+    border: none;
+    background: var(--select-bg) !important;
+}
+
 /*--------------------------------------------------------------
 # Dropdown menu
 --------------------------------------------------------------*/

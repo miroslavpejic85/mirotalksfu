@@ -1074,7 +1074,7 @@ access to use this app.
 
                     <div id="tabRTMPStreaming" class="tabcontent">
                         <div id="rtmpUrlLive">
-                            <div class="input-container">
+                            <div id="rtmpUrlLiveContainer" class="input-container">
                                 <input
                                     id="rtmpLiveUrl"
                                     type="text"
@@ -1083,6 +1083,34 @@ access to use this app.
                                     readonly
                                 />
                                 <button id="copyRtmpUrlButton" class="fas fa-paste"></button>
+                            </div>
+                            <div id="rtmpCustomDestination" style="display: none">
+                                <p>Custom RTMP destination:</p>
+                                <div class="rtmp-preset-buttons">
+                                    <button id="rtmpPresetYouTube" class="btn-rtmp-preset" title="YouTube Live">
+                                        <i class="fa-brands fa-youtube"></i> YouTube
+                                    </button>
+                                    <button id="rtmpPresetFacebook" class="btn-rtmp-preset" title="Facebook Live">
+                                        <i class="fa-brands fa-facebook"></i> Facebook
+                                    </button>
+                                    <button id="rtmpPresetTwitch" class="btn-rtmp-preset" title="Twitch">
+                                        <i class="fa-brands fa-twitch"></i> Twitch
+                                    </button>
+                                    <button id="rtmpPresetCustom" class="btn-rtmp-preset" title="Custom RTMP URL">
+                                        <i class="fa-solid fa-globe"></i> Custom
+                                    </button>
+                                </div>
+                                <input
+                                    id="rtmpCustomUrl"
+                                    type="text"
+                                    value=""
+                                    placeholder="rtmp://a.rtmp.youtube.com/live2"
+                                />
+                                <input id="rtmpCustomStreamKey" type="password" value="" placeholder="Stream key" />
+                                <button id="rtmpCustomClear" class="btn-custom" style="display: none">
+                                    <i class="fa-solid fa-eraser"></i>&nbsp;Clear custom destination
+                                </button>
+                                <hr />
                             </div>
                             <div id="rtmpFromFile">
                                 <table class="file-table">

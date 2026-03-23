@@ -101,6 +101,7 @@ module.exports = class Room {
                 fromFile: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromFile,
                 fromUrl: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromUrl,
                 fromStream: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.fromStream,
+                allowCustomUrl: this.rtmpStreaming.rtmp && this.rtmpStreaming.rtmp.allowCustomUrl,
             },
             hostProtected: this.isHostProtected,
             moderator: this._moderator,
@@ -158,8 +159,8 @@ module.exports = class Room {
         return this.rtmpStreaming.getRTMP(dir);
     }
 
-    async startRTMP(socket_id, room, host, port, file) {
-        return this.rtmpStreaming.startRTMP(socket_id, room, host, port, file);
+    async startRTMP(socket_id, room, host, port, file, customRtmpUrl) {
+        return this.rtmpStreaming.startRTMP(socket_id, room, host, port, file, customRtmpUrl);
     }
 
     stopRTMP() {
@@ -170,8 +171,8 @@ module.exports = class Room {
         return this.rtmpStreaming.isRtmpUrlStreamerActive();
     }
 
-    async startRTMPfromURL(socket_id, room, host, port, inputVideoURL) {
-        return this.rtmpStreaming.startRTMPfromURL(socket_id, room, host, port, inputVideoURL);
+    async startRTMPfromURL(socket_id, room, host, port, inputVideoURL, customRtmpUrl) {
+        return this.rtmpStreaming.startRTMPfromURL(socket_id, room, host, port, inputVideoURL, customRtmpUrl);
     }
 
     stopRTMPfromURL() {

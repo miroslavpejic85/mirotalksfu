@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.59
+ * @version 2.1.60
  *
  */
 
@@ -712,11 +712,13 @@ class RoomClient {
             // Check che RTMP config
             if (room.rtmp) {
                 console.log('RTMP config', room.rtmp);
-                const { enabled, fromFile, fromUrl, fromStream } = room.rtmp;
+                const { enabled, fromFile, fromUrl, fromStream, allowCustomUrl } = room.rtmp;
                 elemDisplay('tabRTMPStreamingBtn', enabled);
                 elemDisplay('rtmpFromFile', fromFile);
                 elemDisplay('rtmpFromUrl', fromUrl);
                 elemDisplay('rtmpFromStream', fromStream);
+                elemDisplay('rtmpCustomDestination', allowCustomUrl);
+                if (allowCustomUrl) this.initRtmpCustomDestination();
                 if (!fromFile && !fromUrl && !fromStream) {
                     elemDisplay('tabRTMPStreamingBtn', false);
                 }
@@ -10900,6 +10902,95 @@ class RoomClient {
     }
 
     // ##############################################
+    // RTMP Custom Destination
+    // ##############################################
+
+    initRtmpCustomDestination() {
+        const rtmpPresets = {
+            YouTube: { url: 'rtmp://a.rtmp.youtube.com/live2', placeholder: 'YouTube stream key' },
+            Facebook: { url: 'rtmps://live-api-s.facebook.com:443/rtmp', placeholder: 'Facebook stream key' },
+            Twitch: { url: 'rtmp://live.twitch.tv/app', placeholder: 'Twitch stream key' },
+            Custom: { url: '', placeholder: 'Stream key' },
+        };
+
+        const rtmpCustomUrl = this.getId('rtmpCustomUrl');
+        const rtmpCustomStreamKey = this.getId('rtmpCustomStreamKey');
+        const rtmpCustomClear = this.getId('rtmpCustomClear');
+
+        const showClearButton = () => {
+            elemDisplay('rtmpCustomClear', rtmpCustomUrl.value || rtmpCustomStreamKey.value ? true : false);
+        };
+
+        const setActivePreset = (activeBtn) => {
+            document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
+            activeBtn.classList.add('active');
+        };
+
+        document.addEventListener('click', (e) => {
+            const rtmpDestination = this.getId('rtmpCustomDestination');
+            if (rtmpDestination && !rtmpDestination.contains(e.target)) {
+                document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
+            }
+        });
+
+        rtmpCustomUrl.addEventListener('input', showClearButton);
+        rtmpCustomStreamKey.addEventListener('input', showClearButton);
+
+        this.getId('rtmpPresetYouTube').addEventListener('click', (e) => {
+            rtmpCustomUrl.value = rtmpPresets.YouTube.url;
+            rtmpCustomStreamKey.placeholder = rtmpPresets.YouTube.placeholder;
+            rtmpCustomStreamKey.value = '';
+            rtmpCustomStreamKey.focus();
+            setActivePreset(e.currentTarget);
+            showClearButton();
+        });
+        this.getId('rtmpPresetFacebook').addEventListener('click', (e) => {
+            rtmpCustomUrl.value = rtmpPresets.Facebook.url;
+            rtmpCustomStreamKey.placeholder = rtmpPresets.Facebook.placeholder;
+            rtmpCustomStreamKey.value = '';
+            rtmpCustomStreamKey.focus();
+            setActivePreset(e.currentTarget);
+            showClearButton();
+        });
+        this.getId('rtmpPresetTwitch').addEventListener('click', (e) => {
+            rtmpCustomUrl.value = rtmpPresets.Twitch.url;
+            rtmpCustomStreamKey.placeholder = rtmpPresets.Twitch.placeholder;
+            rtmpCustomStreamKey.value = '';
+            rtmpCustomStreamKey.focus();
+            setActivePreset(e.currentTarget);
+            showClearButton();
+        });
+        this.getId('rtmpPresetCustom').addEventListener('click', (e) => {
+            rtmpCustomUrl.value = rtmpPresets.Custom.url;
+            rtmpCustomStreamKey.placeholder = rtmpPresets.Custom.placeholder;
+            rtmpCustomUrl.placeholder = 'rtmp://your-server/app';
+            rtmpCustomStreamKey.value = '';
+            rtmpCustomUrl.focus();
+            setActivePreset(e.currentTarget);
+            showClearButton();
+        });
+
+        rtmpCustomClear.addEventListener('click', () => {
+            rtmpCustomUrl.value = '';
+            rtmpCustomStreamKey.value = '';
+            rtmpCustomUrl.placeholder = 'rtmp://a.rtmp.youtube.com/live2';
+            rtmpCustomStreamKey.placeholder = 'Stream key';
+            document.querySelectorAll('.btn-rtmp-preset').forEach((btn) => btn.classList.remove('active'));
+            showClearButton();
+        });
+    }
+
+    getCustomRtmpUrl() {
+        const rtmpCustomUrl = this.getId('rtmpCustomUrl')?.value?.trim();
+        const rtmpCustomStreamKey = this.getId('rtmpCustomStreamKey')?.value?.trim();
+        if (rtmpCustomUrl && rtmpCustomStreamKey) {
+            const separator = rtmpCustomUrl.endsWith('/') ? '' : '/';
+            return rtmpCustomUrl + separator + rtmpCustomStreamKey;
+        }
+        return null;
+    }
+
+    // ##############################################
     // RTMP from FILE
     // ##############################################
 
@@ -10956,6 +11047,7 @@ class RoomClient {
                 file: filterXSS(this.selectedRtmpFilename),
                 peer_name: filterXSS(this.peer_name),
                 peer_uuid: filterXSS(this.peer_uuid),
+                customRtmpUrl: this.getCustomRtmpUrl(),
             })
             .then(function (rtmp) {
                 rc.event(_EVENTS.startRTMP);
@@ -11013,6 +11105,7 @@ class RoomClient {
                 inputVideoURL: filterXSS(inputVideoURL),
                 peer_name: filterXSS(this.peer_name),
                 peer_uuid: filterXSS(this.peer_uuid),
+                customRtmpUrl: this.getCustomRtmpUrl(),
             })
             .then(function (rtmp) {
                 rc.event(_EVENTS.startRTMPfromURL);
@@ -11058,12 +11151,15 @@ class RoomClient {
     openRTMPStreamer() {
         const themeColor = encodeURIComponent(themeCustom.color);
 
+        const customRtmpUrl = this.getCustomRtmpUrl();
+
         const options =
             `&vr=${videoQuality.value}` +
             `&vf=${videoFps.value}` +
             `&sf=${screenFps.value}` +
             `&ts=${selectTheme.value}` +
-            (themeCustom.keep ? `&tc=${themeColor}` : '');
+            (themeCustom.keep ? `&tc=${themeColor}` : '') +
+            (customRtmpUrl ? `&customRtmpUrl=${encodeURIComponent(customRtmpUrl)}` : '');
 
         const url = `/rtmp?v=${videoSelect.value}&a=${microphoneSelect.value}${options}`;
 
@@ -11083,6 +11179,7 @@ class RoomClient {
     cleanRTMPUrl() {
         const rtmpUrl = rc.getId('rtmpLiveUrl');
         rtmpUrl.value = '';
+        elemDisplay('rtmpUrlLiveContainer', true);
     }
 
     showRTMP(rtmp, type = 'file') {
@@ -11107,24 +11204,31 @@ class RoomClient {
             );
         }
 
-        const rtmpUrl = rc.getId('rtmpLiveUrl');
-        rtmpUrl.value = filterXSS(rtmp);
+        const isCustomDestination = this.getCustomRtmpUrl() !== null;
+
+        if (isCustomDestination) {
+            elemDisplay('rtmpUrlLiveContainer', false);
+        } else {
+            elemDisplay('rtmpUrlLiveContainer', true);
+            const rtmpUrl = rc.getId('rtmpLiveUrl');
+            rtmpUrl.value = filterXSS(rtmp);
+        }
 
         Swal.fire({
             background: swalBackground,
             imageUrl: image.rtmp,
             position: 'center',
             title: 'LIVE',
-            html: `
-                <p style="background:transparent; color:rgb(8, 189, 89);">${rtmp}</p>
-                `,
+            html: isCustomDestination
+                ? `<p style="background:transparent; color:rgb(8, 189, 89);">Streaming to external platform</p>`
+                : `<p style="background:transparent; color:rgb(8, 189, 89);">${rtmp}</p>`,
             showDenyButton: false,
             showCancelButton: false,
-            confirmButtonText: `Copy URL`,
+            confirmButtonText: isCustomDestination ? 'OK' : 'Copy URL',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
-            if (result.isConfirmed) {
+            if (result.isConfirmed && !isCustomDestination) {
                 copyToClipboard(rtmp);
             }
         });

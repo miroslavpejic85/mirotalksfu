@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.59 - Configuration File
+ * MiroTalk SFU v2.1.60 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -197,6 +197,7 @@ module.exports = {
          * - fromUrl            : Enable URL streaming (default: true)
          * - fromStream         : Enable live stream input (default: true)
          * - maxStreams         : Maximum simultaneous streams (default: 1)
+         * - allowCustomUrl     : Allow presenters to set a custom RTMP destination (default: false)
          * - useNodeMediaServer : Use NodeMediaServer instead of nginx-rtmp (default: true)
          * - server             : RTMP server URL (default: 'rtmp://localhost:1935')
          * - appName            : Application name (default: 'live')
@@ -231,10 +232,67 @@ module.exports = {
          *    - If no streamKey provided, generates UUIDv4
          *    - When useNodeMediaServer=true, generates signed URLs with expiration
          *
+         * Custom RTMP Destinations (YouTube, Facebook, Twitch)
+         * ---------------------------------------------------
+         * When allowCustomUrl=true, presenters can stream directly to external platforms
+         * from the meeting room UI. They select a preset or enter a custom RTMP URL,
+         * paste their stream key, and start streaming. Only rtmp:// and rtmps:// schemes
+         * are accepted by the server for security.
+         *
+         * YouTube Live:
+         *   - Go to https://studio.youtube.com → Go Live → Stream
+         *   - Copy your "Stream key" from the stream settings
+         *   - RTMP URL: rtmp://a.rtmp.youtube.com/live2
+         *   - Full URL: rtmp://a.rtmp.youtube.com/live2/YOUR_STREAM_KEY
+         *   - Env setup (server-wide default):
+         *       RTMP_SERVER=rtmp://a.rtmp.youtube.com
+         *       RTMP_APP_NAME=live2
+         *       RTMP_STREAM_KEY=xxxx-xxxx-xxxx-xxxx
+         *       RTMP_USE_NODE_MEDIA_SERVER=false
+         *
+         * Facebook Live:
+         *   - Go to https://www.facebook.com/live/producer → Use Stream Key
+         *   - Copy the "Stream key" shown
+         *   - RTMP URL: rtmps://live-api-s.facebook.com:443/rtmp
+         *   - Full URL: rtmps://live-api-s.facebook.com:443/rtmp/YOUR_STREAM_KEY
+         *   - Note: Facebook requires rtmps:// (TLS encrypted)
+         *   - Env setup (server-wide default):
+         *       RTMP_SERVER=rtmps://live-api-s.facebook.com:443
+         *       RTMP_APP_NAME=rtmp
+         *       RTMP_STREAM_KEY=your-facebook-stream-key
+         *       RTMP_USE_NODE_MEDIA_SERVER=false
+         *
+         * Twitch:
+         *   - Go to https://dashboard.twitch.tv/settings/stream
+         *   - Copy your "Primary Stream key"
+         *   - RTMP URL: rtmp://live.twitch.tv/app
+         *   - Full URL: rtmp://live.twitch.tv/app/YOUR_STREAM_KEY
+         *   - Env setup (server-wide default):
+         *       RTMP_SERVER=rtmp://live.twitch.tv
+         *       RTMP_APP_NAME=app
+         *       RTMP_STREAM_KEY=live_xxxxxxxxxxxx
+         *       RTMP_USE_NODE_MEDIA_SERVER=false
+         *
+         * Custom RTMP Server:
+         *   - Use any RTMP/RTMPS ingest endpoint
+         *   - Full URL: rtmp://your-server:1935/app/stream-key
+         *   - Env setup (server-wide default):
+         *       RTMP_SERVER=rtmp://your-server:1935
+         *       RTMP_APP_NAME=app
+         *       RTMP_STREAM_KEY=your-stream-key
+         *       RTMP_USE_NODE_MEDIA_SERVER=false
+         *
+         * Per-room custom destination (no env changes needed):
+         *   - Set RTMP_ALLOW_CUSTOM_URL=true in .env
+         *   - Presenters will see preset buttons (YouTube/Facebook/Twitch/Custom)
+         *     in the RTMP tab of the meeting room
+         *   - They select a platform, paste their stream key, and start streaming
+         *   - The custom URL overrides the server default for that specific stream only
+         *
          * Requirements:
          * -------------
-         * - RTMP server must be running
-         * - Port 1935 must be accessible
+         * - RTMP server must be running (or streaming to external platform)
+         * - Port 1935 must be accessible (or 443 for rtmps)
          * - FFmpeg must be installed
          *
          * Documentation:
@@ -247,6 +305,7 @@ module.exports = {
             fromUrl: process.env.RTMP_FROM_URL !== 'false',
             fromStream: process.env.RTMP_FROM_STREAM !== 'false',
             maxStreams: parseInt(process.env.RTMP_MAX_STREAMS) || 1,
+            allowCustomUrl: process.env.RTMP_ALLOW_CUSTOM_URL === 'true',
             useNodeMediaServer: process.env.RTMP_USE_NODE_MEDIA_SERVER !== 'false',
             server: process.env.RTMP_SERVER || 'rtmp://localhost:1935',
             appName: process.env.RTMP_APP_NAME || 'live',

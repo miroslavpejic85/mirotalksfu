@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.59
+ * @version 2.1.60
  *
  */
 
@@ -1256,34 +1256,53 @@ function startServer() {
             return res.status(400).send('RTMP server is not enabled or missing the config');
         }
 
-        const domainName = config?.integrations?.ngrok?.enabled
-            ? 'localhost'
-            : req.headers.host?.split(':')[0] || 'localhost';
+        const customRtmpUrl = req.body?.customRtmpUrl || null;
 
-        const rtmpUseNodeMediaServer = rtmpCfg.useNodeMediaServer ?? true;
-        const rtmpServer = rtmpCfg.server != '' ? rtmpCfg.server : false;
-        const rtmpServerAppName = rtmpCfg.appName != '' ? rtmpCfg.appName : 'live';
-        const rtmpStreamKey = rtmpCfg.streamKey != '' ? rtmpCfg.streamKey : uuidv4();
-        const rtmpServerSecret = rtmpCfg.secret != '' ? rtmpCfg.secret : false;
-        const expirationHours = rtmpCfg.expirationHours || 4;
-        const rtmpServerURL = rtmpServer ? rtmpServer : `rtmp://${domainName}:1935`;
-        const rtmpServerPath = '/' + rtmpServerAppName + '/' + rtmpStreamKey;
+        let rtmp;
+        let rtmpStreamKey;
 
-        const rtmp = rtmpUseNodeMediaServer
-            ? generateRTMPUrl(rtmpServerURL, rtmpServerPath, rtmpServerSecret, expirationHours)
-            : rtmpServerURL + rtmpServerPath;
+        if (customRtmpUrl && rtmpCfg.allowCustomUrl) {
+            try {
+                const parsed = new URL(customRtmpUrl);
+                if (!['rtmp:', 'rtmps:'].includes(parsed.protocol)) {
+                    return res.status(400).send('Invalid RTMP URL scheme. Only rtmp:// and rtmps:// are allowed');
+                }
+            } catch (err) {
+                return res.status(400).send('Invalid custom RTMP URL');
+            }
+            rtmp = customRtmpUrl;
+            rtmpStreamKey = uuidv4();
+            log.info('initRTMP using custom RTMP URL', { rtmp });
+        } else {
+            const domainName = config?.integrations?.ngrok?.enabled
+                ? 'localhost'
+                : req.headers.host?.split(':')[0] || 'localhost';
 
-        log.info('initRTMP', {
-            headers: req.headers,
-            rtmpUseNodeMediaServer: rtmpUseNodeMediaServer,
-            rtmpServer,
-            rtmpServerSecret,
-            rtmpServerURL,
-            rtmpServerPath,
-            expirationHours,
-            rtmpStreamKey,
-            rtmp,
-        });
+            const rtmpUseNodeMediaServer = rtmpCfg.useNodeMediaServer ?? true;
+            const rtmpServer = rtmpCfg.server != '' ? rtmpCfg.server : false;
+            const rtmpServerAppName = rtmpCfg.appName != '' ? rtmpCfg.appName : 'live';
+            rtmpStreamKey = rtmpCfg.streamKey != '' ? rtmpCfg.streamKey : uuidv4();
+            const rtmpServerSecret = rtmpCfg.secret != '' ? rtmpCfg.secret : false;
+            const expirationHours = rtmpCfg.expirationHours || 4;
+            const rtmpServerURL = rtmpServer ? rtmpServer : `rtmp://${domainName}:1935`;
+            const rtmpServerPath = '/' + rtmpServerAppName + '/' + rtmpStreamKey;
+
+            rtmp = rtmpUseNodeMediaServer
+                ? generateRTMPUrl(rtmpServerURL, rtmpServerPath, rtmpServerSecret, expirationHours)
+                : rtmpServerURL + rtmpServerPath;
+
+            log.info('initRTMP', {
+                headers: req.headers,
+                rtmpUseNodeMediaServer: rtmpUseNodeMediaServer,
+                rtmpServer,
+                rtmpServerSecret,
+                rtmpServerURL,
+                rtmpServerPath,
+                expirationHours,
+                rtmpStreamKey,
+                rtmp,
+            });
+        }
 
         const stream = new RtmpStreamer(rtmp, rtmpStreamKey);
         stream.lastActivity = Date.now();
@@ -1291,7 +1310,7 @@ function startServer() {
 
         log.info('Active RTMP Streams', Object.keys(streams).length);
 
-        return res.json({ rtmp });
+        return res.json({ rtmp, rtmpStreamKey });
     });
 
     app.post('/streamRTMP', checkRTMPApiSecret, (req, res) => {
@@ -3420,7 +3439,9 @@ function startServer() {
                 ? DEFAULT_HOST
                 : socket?.handshake?.headers?.host?.split(':')[0] || DEFAULT_HOST;
 
-            const rtmp = await room.startRTMP(socket.id, room, host, 1935, `${rtmpDir}/${file}`);
+            const customRtmpUrl = data.customRtmpUrl || null;
+
+            const rtmp = await room.startRTMP(socket.id, room, host, 1935, `${rtmpDir}/${file}`, customRtmpUrl);
 
             if (rtmp !== false) rtmpFileStreamsCount++;
 
@@ -3472,7 +3493,9 @@ function startServer() {
                 ? DEFAULT_HOST
                 : socket?.handshake?.headers?.host?.split(':')[0] || DEFAULT_HOST;
 
-            const rtmp = await room.startRTMPfromURL(socket.id, room, host, 1935, inputVideoURL);
+            const customRtmpUrl = data.customRtmpUrl || null;
+
+            const rtmp = await room.startRTMPfromURL(socket.id, room, host, 1935, inputVideoURL, customRtmpUrl);
 
             if (rtmp !== false) rtmpUrlStreamsCount++;
 

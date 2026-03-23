@@ -19,6 +19,7 @@ const audioId = filterXSS(qs.get('a'));
 const screenFrameRate = filterXSS(qs.get('sf'));
 const theme = filterXSS(qs.get('ts'));
 const color = filterXSS(qs.get('tc'));
+const customRtmpUrl = qs.get('customRtmpUrl') || null;
 
 console.log('RTMP settings', {
     videoId: videoId,
@@ -114,15 +115,16 @@ function attachMediaStream(stream) {
 async function initRTMP(stream) {
     const apiSecret = apiSecretInput.value;
     try {
-        const response = await axios.post(`/initRTMP`, null, {
+        const response = await axios.post(`/initRTMP`, customRtmpUrl ? { customRtmpUrl } : null, {
             headers: {
                 authorization: apiSecret,
+                ...(customRtmpUrl ? { 'Content-Type': 'application/json' } : {}),
             },
         });
-        const { rtmp } = response.data;
+        const { rtmp, rtmpStreamKey } = response.data;
         console.log('initRTMP response:', { res: response, rtmp: rtmp });
         rtmpInput.value = rtmp;
-        rtmpKey = new URL(rtmp).pathname.split('/').pop(); // Extract the RTMP key from the URL
+        rtmpKey = rtmpStreamKey || new URL(rtmp).pathname.split('/').pop();
         toggleButtons(true);
         stopButton.disabled = false; // Enable stopButton on successful initialization
         return true;
