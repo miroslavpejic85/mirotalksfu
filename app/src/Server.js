@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.60
+ * @version 2.1.61
  *
  */
 
@@ -138,8 +138,15 @@ const RtmpStreamer = require('./RtmpStreamer.js'); // Import the RtmpStreamer cl
 const rtmpCfg = config?.media?.rtmp;
 const rtmpDir = rtmpCfg?.dir || 'rtmp';
 
-// Unified RTMP streams count (file + URL + live streams share one limit)
-let rtmpTotalStreamsCount = 0;
+// Compute total active RTMP streams from actual sources (live + file + URL)
+function getRtmpTotalActiveStreamsCount() {
+    let count = Object.keys(streams).length;
+    for (const [, room] of roomList) {
+        if (room.isRtmpFileStreamerActive()) count++;
+        if (room.isRtmpUrlStreamerActive()) count++;
+    }
+    return count;
+}
 
 // Email alerts and notifications
 const nodemailer = require('./lib/nodemailer');
@@ -1231,16 +1238,18 @@ function startServer() {
 
     function checkMaxStreams(req, res, next) {
         const maxStreams = (rtmpCfg && rtmpCfg.maxStreams) || 1;
-        if (rtmpTotalStreamsCount >= maxStreams) {
-            log.warn('Maximum number of RTMP streams reached', { rtmpTotalStreamsCount, maxStreams });
+        const activeStreams = getRtmpTotalActiveStreamsCount();
+        if (activeStreams >= maxStreams) {
+            log.warn('Maximum number of RTMP streams reached', { activeStreams, maxStreams });
             return res.status(429).send('Maximum number of streams reached, please try later!');
         }
         next();
     }
 
     app.get('/activeStreams', checkRTMPApiSecret, (req, res) => {
-        log.info('Active Streams', { live: Object.keys(streams).length, total: rtmpTotalStreamsCount });
-        res.json({ live: Object.keys(streams).length, total: rtmpTotalStreamsCount });
+        const total = getRtmpTotalActiveStreamsCount();
+        log.info('Active Streams', { total });
+        res.json({ total });
     });
 
     app.get('/rtmpEnabled', (req, res) => {
@@ -1304,9 +1313,8 @@ function startServer() {
         const stream = new RtmpStreamer(rtmp, rtmpStreamKey);
         stream.lastActivity = Date.now();
         streams[rtmpStreamKey] = stream;
-        rtmpTotalStreamsCount++;
 
-        log.info('Active RTMP Streams', { live: Object.keys(streams).length, total: rtmpTotalStreamsCount });
+        log.info('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
 
         return res.json({ rtmp, rtmpStreamKey });
     });
@@ -1350,8 +1358,7 @@ function startServer() {
         if (stream) {
             stream.end();
             delete streams[rtmpStreamKey];
-            if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-            log.debug('Active RTMP Streams', { live: Object.keys(streams).length, total: rtmpTotalStreamsCount });
+            log.debug('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
         }
 
         res.sendStatus(200);
@@ -1365,7 +1372,7 @@ function startServer() {
                 log.debug('Cleaning up orphaned RTMP stream', key);
                 stream.end();
                 delete streams[key];
-                if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
+                log.debug('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
             }
         }
     }, STREAM_TIMEOUT_MS);
@@ -3419,8 +3426,9 @@ function startServer() {
         socket.on('startRTMP', async (dataObject, cb) => {
             if (!roomExists(socket)) return;
 
-            if (rtmpCfg && rtmpTotalStreamsCount >= rtmpCfg.maxStreams) {
-                log.warn('RTMP max streams reached', { total: rtmpTotalStreamsCount, maxStreams: rtmpCfg.maxStreams });
+            const totalActive = getRtmpTotalActiveStreamsCount();
+            if (rtmpCfg && totalActive >= rtmpCfg.maxStreams) {
+                log.warn('RTMP max streams reached', { total: totalActive, maxStreams: rtmpCfg.maxStreams });
                 return cb(false);
             }
 
@@ -3443,9 +3451,7 @@ function startServer() {
 
             const rtmp = await room.startRTMP(socket.id, room, host, 1935, `${rtmpDir}/${file}`, customRtmpUrl);
 
-            if (rtmp !== false) rtmpTotalStreamsCount++;
-
-            log.debug('startRTMP - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
+            log.debug('startRTMP - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
 
             cb(rtmp);
         });
@@ -3455,26 +3461,23 @@ function startServer() {
 
             const room = getRoom(socket);
 
-            if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-
-            log.debug('stopRTMP - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
-
             await room.stopRTMP();
+
+            log.debug('stopRTMP - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
         });
 
         socket.on('endOrErrorRTMP', async () => {
             if (!roomExists(socket)) return;
 
-            if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-
-            log.debug('endRTMP - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
+            log.debug('endRTMP - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
         });
 
         socket.on('startRTMPfromURL', async (dataObject, cb) => {
             if (!roomExists(socket)) return;
 
-            if (rtmpCfg && rtmpTotalStreamsCount >= rtmpCfg.maxStreams) {
-                log.warn('RTMP max streams reached', { total: rtmpTotalStreamsCount, maxStreams: rtmpCfg.maxStreams });
+            const totalActive = getRtmpTotalActiveStreamsCount();
+            if (rtmpCfg && totalActive >= rtmpCfg.maxStreams) {
+                log.warn('RTMP max streams reached', { total: totalActive, maxStreams: rtmpCfg.maxStreams });
                 return cb(false);
             }
 
@@ -3497,9 +3500,7 @@ function startServer() {
 
             const rtmp = await room.startRTMPfromURL(socket.id, room, host, 1935, inputVideoURL, customRtmpUrl);
 
-            if (rtmp !== false) rtmpTotalStreamsCount++;
-
-            log.debug('startRTMPfromURL - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
+            log.debug('startRTMPfromURL - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
 
             cb(rtmp);
         });
@@ -3509,19 +3510,15 @@ function startServer() {
 
             const room = getRoom(socket);
 
-            if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-
-            log.debug('stopRTMPfromURL - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
-
             await room.stopRTMPfromURL();
+
+            log.debug('stopRTMPfromURL - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
         });
 
         socket.on('endOrErrorRTMPfromURL', async () => {
             if (!roomExists(socket)) return;
 
-            if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-
-            log.debug('endRTMPfromURL - rtmpTotalStreamsCount ---->', rtmpTotalStreamsCount);
+            log.debug('endRTMPfromURL - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
         });
 
         socket.on('createPoll', (dataObject) => {
@@ -3897,22 +3894,28 @@ function startServer() {
 
     function getRTMPActiveStreams() {
         return {
-            rtmpLiveStreams: Object.keys(streams).length,
-            rtmpTotalStreamsCount,
+            rtmpTotalActiveStreamsCount: getRtmpTotalActiveStreamsCount(),
         };
     }
 
     function stopRTMPActiveStreams(isPresenter, room) {
-        if (isPresenter) {
+        // When the room is closing (last peer), clean up regardless of presenter status
+        const forceCleanup = room.getPeersCount() === 0;
+
+        if (isPresenter || forceCleanup) {
             if (room.isRtmpFileStreamerActive()) {
                 room.stopRTMP();
-                if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-                log.debug('stopRTMPActiveStreams - file stream stopped, rtmpTotalStreamsCount', rtmpTotalStreamsCount);
+                log.debug(
+                    'stopRTMPActiveStreams - file stream stopped, rtmpTotalActiveStreamsCount',
+                    getRtmpTotalActiveStreamsCount()
+                );
             }
             if (room.isRtmpUrlStreamerActive()) {
                 room.stopRTMPfromURL();
-                if (rtmpTotalStreamsCount > 0) rtmpTotalStreamsCount--;
-                log.debug('stopRTMPActiveStreams - URL stream stopped, rtmpTotalStreamsCount', rtmpTotalStreamsCount);
+                log.debug(
+                    'stopRTMPActiveStreams - URL stream stopped, rtmpTotalActiveStreamsCount',
+                    getRtmpTotalActiveStreamsCount()
+                );
             }
         }
     }
