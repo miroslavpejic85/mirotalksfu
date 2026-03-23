@@ -16,6 +16,7 @@ class RtmpStreamer {
         this.log = log;
         this.stream = new PassThrough();
         this.ffmpegStream = null;
+        this.ending = false;
         this.initFFmpeg();
         this.run = true;
     }
@@ -23,6 +24,7 @@ class RtmpStreamer {
     initFFmpeg() {
         this.ffmpegStream = ffmpeg()
             .input(this.stream)
+            .inputFormat('webm')
             .inputOptions('-re')
             .videoCodec('libx264')
             .videoBitrate('3000k')
@@ -57,12 +59,15 @@ class RtmpStreamer {
     }
 
     end() {
+        if (this.ending) return;
+        this.ending = true;
+
         if (this.stream) {
             this.stream.end();
             this.stream = null;
             this.log.debug('RTMP streaming stopped', this.rtmpKey);
         }
-        if (this.ffmpegStream && !this.ffmpegStream.killed) {
+        if (this.ffmpegStream) {
             this.ffmpegStream.kill('SIGTERM');
             this.ffmpegStream = null;
             this.log.debug('FFMPEG closed successfully', this.rtmpKey);

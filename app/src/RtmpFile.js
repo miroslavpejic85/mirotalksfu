@@ -14,6 +14,7 @@ class RtmpFile {
         this.room = room;
         this.rtmpUrl = '';
         this.ffmpegProcess = null;
+        this.stopping = false;
     }
 
     async start(inputStream, rtmpUrl) {
@@ -64,7 +65,10 @@ class RtmpFile {
     }
 
     async stop() {
-        if (this.ffmpegProcess && !this.ffmpegProcess.killed) {
+        if (this.stopping) return true;
+        this.stopping = true;
+
+        if (this.ffmpegProcess) {
             try {
                 this.ffmpegProcess.kill('SIGTERM');
                 this.ffmpegProcess = null;
@@ -83,13 +87,13 @@ class RtmpFile {
     handleEnd() {
         if (!this.room) return;
         this.room.send(this.socketId, 'endRTMP', { rtmpUrl: this.rtmpUrl });
-        this.room.rtmpFileStreamer = false;
+        this.room.rtmpFileStreamer = null;
     }
 
     handleError(message, stdout, stderr) {
         if (!this.room) return;
         this.room.send(this.socketId, 'errorRTMP', { message });
-        this.room.rtmpFileStreamer = false;
+        this.room.rtmpFileStreamer = null;
         log.error('Error: ' + message, { stdout, stderr });
     }
 }

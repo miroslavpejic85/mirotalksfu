@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.58
+ * @version 2.1.59
  *
  */
 
@@ -369,6 +369,7 @@ const roomList = new Map(); // All Rooms
 const presenters = {}; // Collect presenters grp by roomId
 
 const streams = {}; // Collect all rtmp streams
+const STREAM_TIMEOUT_MS = 60 * 1000; // Cleanup orphaned streams after 60s of inactivity
 
 const webRtcServerActive = config.mediasoup.webRtcServerActive;
 
@@ -1285,6 +1286,7 @@ function startServer() {
         });
 
         const stream = new RtmpStreamer(rtmp, rtmpStreamKey);
+        stream.lastActivity = Date.now();
         streams[rtmpStreamKey] = stream;
 
         log.info('Active RTMP Streams', Object.keys(streams).length);
@@ -1315,6 +1317,7 @@ function startServer() {
             size: bytesToSize(req.headers['content-length']),
         });
 
+        stream.lastActivity = Date.now();
         stream.write(Buffer.from(req.body));
         res.sendStatus(200);
     });
@@ -1335,6 +1338,18 @@ function startServer() {
 
         res.sendStatus(200);
     });
+
+    // Cleanup orphaned RTMP streams that haven't received data
+    setInterval(() => {
+        const now = Date.now();
+        for (const [key, stream] of Object.entries(streams)) {
+            if (!stream.isRunning() || (stream.lastActivity && now - stream.lastActivity > STREAM_TIMEOUT_MS)) {
+                log.debug('Cleaning up orphaned RTMP stream', key);
+                stream.end();
+                delete streams[key];
+            }
+        }
+    }, STREAM_TIMEOUT_MS);
 
     // Join roomId redirect to /join?room=roomId
     app.get('/:roomId', (req, res) => {

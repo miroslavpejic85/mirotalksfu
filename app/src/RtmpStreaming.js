@@ -60,7 +60,13 @@ class RtmpStreaming {
             return false;
         }
 
-        const inputFilePath = path.join(__dirname, file);
+        const rtmpDir = path.resolve(__dirname, this.rtmp.dir || '../rtmp');
+        const inputFilePath = path.resolve(__dirname, file);
+
+        if (!inputFilePath.startsWith(rtmpDir)) {
+            log.error(`[startRTMP] Path traversal blocked: ${inputFilePath}`);
+            return false;
+        }
 
         if (!fs.existsSync(inputFilePath)) {
             log.error(`[startRTMP] File not found: ${inputFilePath}`);
@@ -78,8 +84,8 @@ class RtmpStreaming {
         const rtmpRun = await this.rtmpFileStreamer.start(inputStream, rtmpUrl);
 
         if (!rtmpRun) {
-            this.rtmpFileStreamer = false;
-            return this.rtmpFileStreamer;
+            this.rtmpFileStreamer = null;
+            return false;
         }
         return rtmpUrl;
     }
@@ -125,6 +131,17 @@ class RtmpStreaming {
             return false;
         }
 
+        try {
+            const parsedUrl = new URL(inputVideoURL);
+            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+                log.error(`[startRTMPfromURL] Invalid URL scheme: ${parsedUrl.protocol}`);
+                return false;
+            }
+        } catch (err) {
+            log.error(`[startRTMPfromURL] Invalid URL: ${inputVideoURL}`);
+            return false;
+        }
+
         log.debug('[startRTMPfromURL] Input video URL', inputVideoURL);
 
         this.rtmpUrlStreamer = new RtmpUrl(socket_id, this);
@@ -134,8 +151,8 @@ class RtmpStreaming {
         const rtmpRun = await this.rtmpUrlStreamer.start(inputVideoURL, rtmpUrl);
 
         if (!rtmpRun) {
-            this.rtmpUrlStreamer = false;
-            return this.rtmpUrlStreamer;
+            this.rtmpUrlStreamer = null;
+            return false;
         }
         return rtmpUrl;
     }

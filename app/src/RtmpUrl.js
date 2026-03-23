@@ -14,6 +14,7 @@ class RtmpUrl {
         this.socketId = socket_id;
         this.rtmpUrl = '';
         this.ffmpegProcess = null;
+        this.stopping = false;
     }
 
     async start(inputVideoURL, rtmpUrl) {
@@ -60,7 +61,10 @@ class RtmpUrl {
     }
 
     async stop() {
-        if (this.ffmpegProcess && !this.ffmpegProcess.killed) {
+        if (this.stopping) return true;
+        this.stopping = true;
+
+        if (this.ffmpegProcess) {
             try {
                 this.ffmpegProcess.kill('SIGTERM');
                 this.ffmpegProcess = null;
@@ -79,13 +83,13 @@ class RtmpUrl {
     handleEnd() {
         if (!this.room) return;
         this.room.send(this.socketId, 'endRTMPfromURL', { rtmpUrl: this.rtmpUrl });
-        this.room.rtmpUrlStreamer = false;
+        this.room.rtmpUrlStreamer = null;
     }
 
     handleError(message, stdout, stderr) {
         if (!this.room) return;
         this.room.send(this.socketId, 'errorRTMPfromURL', { message });
-        this.room.rtmpUrlStreamer = false;
+        this.room.rtmpUrlStreamer = null;
         log.error('Error: ' + message, { stdout, stderr });
     }
 }
