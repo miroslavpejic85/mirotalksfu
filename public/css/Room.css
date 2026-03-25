@@ -1716,6 +1716,14 @@ body {
     border: var(--border) !important;
     box-shadow: none !important;
 }
+.swal2-input:-webkit-autofill,
+.swal2-input:-webkit-autofill:hover,
+.swal2-input:-webkit-autofill:focus,
+.swal2-input:-webkit-autofill:active {
+    -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+    -webkit-text-fill-color: #fff !important;
+    transition: background-color 5000s ease-in-out 0s;
+}
 
 .swal2-timer-progress-bar-container {
     background: var(--body-bg);
