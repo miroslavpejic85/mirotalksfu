@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.63 - Configuration File
+ * MiroTalk SFU v2.1.64 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -721,12 +721,12 @@ module.exports = {
          * -------------
          * - alert      : Enable/disable email alerts [true/false] (default: false)
          * - notify     : Enable/disable room email notifications [true/false] (default: false)
-         * - host       : SMTP server address (default: 'smtp.gmail.com')
-         * - port       : SMTP port (default: 587 for TLS)
+         * - host       : SMTP server address (default: 'localhost')
+         * - port       : SMTP port (default: 1025 for Mailpit, 587 for most providers)
          * - username   : SMTP auth username
          * - password   : SMTP auth password (store ONLY in .env)
          * - from       : Sender email address (default: same as username)
-         * - sendTo     : Recipient email for alerts
+         * - sendTo     : Recipient email for alerts and notifications
          *
          * Common Providers:
          * ----------------
@@ -741,16 +741,21 @@ module.exports = {
          * SendGrid:
          * - host: smtp.sendgrid.net
          * - port: 587
+         *
+         * Mailpit (local testing):
+         * - host: localhost
+         * - port: 1025
+         * - docker-compose-mailpit.yml
          */
         email: {
             alert: process.env.EMAIL_ALERTS_ENABLED === 'true',
             notify: process.env.EMAIL_NOTIFICATIONS === 'true',
-            host: process.env.EMAIL_HOST || 'smtp.gmail.com',
-            port: parseInt(process.env.EMAIL_PORT) || 587,
-            username: process.env.EMAIL_USERNAME || 'your_username',
-            password: process.env.EMAIL_PASSWORD || 'your_password',
+            host: process.env.EMAIL_HOST || 'localhost',
+            port: parseInt(process.env.EMAIL_PORT) || 1025,
+            username: process.env.EMAIL_USERNAME || 'test',
+            password: process.env.EMAIL_PASSWORD || 'test',
             from: process.env.EMAIL_FROM || process.env.EMAIL_USERNAME,
-            sendTo: process.env.EMAIL_SEND_TO || 'sfu.mirotalk@gmail.com',
+            sendTo: process.env.EMAIL_SEND_TO || 'test@mirotalk.com',
         },
 
         /**
