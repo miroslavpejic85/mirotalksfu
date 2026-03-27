@@ -1,4 +1,4 @@
-name: CI
+name: CI/CD
 
 on:
   push:
@@ -7,49 +7,61 @@ on:
 
 jobs:
   test:
-    runs-on: ubuntu-22.04 # LTS
+    runs-on: ubuntu-22.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: '22.x'  # Latest minor version in 22.x LTS series
+          node-version: '22'
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Copy config file
         run: cp app/src/config.template.js app/src/config.js
 
-      - name: Run unit tests
+      - name: Run tests
         run: npm test
 
   build:
-    runs-on: ubuntu-22.04 # LTS
-    needs: test  # This ensures the build job only runs if the test job succeeds
+    runs-on: ubuntu-22.04
+    needs: test
+
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set up QEMU
-        uses: docker/setup-qemu-action@v2
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
-
-      - name: Login Docker Hub
-        uses: docker/login-action@v2
+      # Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_ACCESS_TOKEN }}
 
-      - name: Build and publish
-        uses: docker/build-push-action@v3
+      # QEMU (multi-arch support)
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v4
         with:
-          context: ./
+          platforms: all
+
+      # Buildx builder
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # Build & push image
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
           file: ./Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: mirotalk/sfu:latest
+          tags: |
+            mirotalk/sfu:latest
+            mirotalk/sfu:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
