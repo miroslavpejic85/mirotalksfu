@@ -1,39 +1,34 @@
+# syntax=docker/dockerfile:1.6
+
 # Use Node.js 22 LTS slim image as base
 FROM node:22-slim
 
 # Set working directory
 WORKDIR /src
 
-# Set environment variable to skip downloading prebuilt workers
-ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD="true"
-ENV NODE_ENV="production"
+# Environment
+ENV NODE_ENV=production
+ENV MEDIASOUP_SKIP_WORKER_PREBUILT_DOWNLOAD=true
 
-# Install necessary system packages and dependencies
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        python3 \
-        python3-pip \
-        ffmpeg \
-    && rm -rf /var/lib/apt/lists/*
-
-# Rename config.template.js to config.js
-COPY ./app/src/config.template.js ./app/src/config.js
-
-# Copy package*.json and install npm dependencies
-COPY package*.json ./
-RUN npm ci --only=production --silent
-
-# Cleanup unnecessary packages and files
-RUN apt-get purge -y --auto-remove \
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
     python3-pip \
     build-essential \
-    && npm cache clean --force \
-    && rm -rf /tmp/* /var/tmp/* /usr/share/doc/*
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy the application code
-COPY app app
-COPY public public
+# Install dependencies (cache npm)
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit=dev
 
-# Set default command to start the application
+# Copy application code
+COPY app ./app
+COPY public ./public
+
+# Copy config template → config
+COPY app/src/config.template.js app/src/config.js
+
+# Default command
 CMD ["npm", "start"]
