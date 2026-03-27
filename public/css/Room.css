@@ -480,10 +480,27 @@ body {
 }
 
 #bottomButtons #settingsExtraMenu {
-    min-width: 180px !important;
+    min-width: 220px !important;
     max-width: calc(100vw - 24px) !important;
     text-align: left;
     border: var(--border) !important;
+    padding: 8px 0;
+}
+
+#bottomButtons #settingsExtraMenu .extra-menu-group {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(255, 255, 255, 0.4);
+    padding: 10px 16px 4px;
+    pointer-events: none;
+    user-select: none;
+}
+
+#bottomButtons #settingsExtraMenu .extra-menu-divider {
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 6px 12px;
 }
 
 /* Mobile: keep settingsExtraMenu inside viewport and scrollable */
@@ -545,6 +562,11 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     transform: none !important;
+    transition: padding-left 0.2s ease;
+}
+
+#bottomButtons #settingsExtraMenu button:hover {
+    padding-left: 22px;
 }
 
 #bottomButtons #settingsExtraMenu button i {

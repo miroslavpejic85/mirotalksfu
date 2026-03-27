@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.64
+ * @version 2.1.65
  *
  */
 
@@ -4371,6 +4371,37 @@ function setupSettingsExtraDropdown() {
             hideMenu();
         }
     });
+
+    // Auto-hide group headers/dividers when all their buttons are hidden
+    updateSettingsExtraGroups();
+    const observer = new MutationObserver(updateSettingsExtraGroups);
+    settingsExtraMenu.querySelectorAll('button').forEach((btn) => {
+        observer.observe(btn, { attributes: true, attributeFilter: ['class', 'style'] });
+    });
+}
+
+function updateSettingsExtraGroups() {
+    settingsExtraMenu.querySelectorAll('.extra-menu-group').forEach((header) => {
+        const ids = (header.dataset.buttons || '').split(',');
+        const anyVisible = ids.some((id) => {
+            const btn = document.getElementById(id.trim());
+            return btn && !btn.classList.contains('hidden') && btn.style.display !== 'none';
+        });
+        header.style.display = anyVisible ? '' : 'none';
+    });
+    settingsExtraMenu.querySelectorAll('.extra-menu-divider').forEach((div) => {
+        let prev = div.previousElementSibling;
+        while (prev && !prev.classList.contains('extra-menu-group')) {
+            prev = prev.previousElementSibling;
+        }
+        let next = div.nextElementSibling;
+        while (next && !next.classList.contains('extra-menu-group')) {
+            next = next.nextElementSibling;
+        }
+        const prevVisible = prev && prev.style.display !== 'none';
+        const nextVisible = next && next.style.display !== 'none';
+        div.style.display = prevVisible && nextVisible ? '' : 'none';
+    });
 }
 
 // ####################################################
@@ -6716,7 +6747,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.64',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.65',
         html: `
             <br />
             <div id="about">

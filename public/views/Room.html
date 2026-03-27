@@ -283,25 +283,47 @@ access to use this app.
                         <button id="noExtraButtons" class="hidden">
                             <i class="fas fa-ban red"></i> No extra buttons
                         </button>
+
+                        <!-- SHARING -->
+                        <div
+                            class="device-menu-header extra-menu-group"
+                            data-buttons="shareButton,fileShareExtraButton"
+                        >
+                            SHARING
+                        </div>
                         <button id="shareButton" class="hidden"><i class="fas fa-share-alt"></i> Share Room</button>
-                        <button id="hideMeButton" class="hidden">
-                            <i id="hideMeIcon" class="fas fa-user"></i> Hide Me
+                        <button id="fileShareExtraButton" class="hidden">
+                            <i class="fas fa-folder-open"></i> File sharing
                         </button>
+
+                        <div class="device-menu-divider extra-menu-divider" data-group="sharing"></div>
+
+                        <!-- RECORDING & CAPTURE -->
+                        <div
+                            class="device-menu-header extra-menu-group"
+                            data-buttons="startRecButton,stopRecButton,snapshotRoomButton"
+                        >
+                            RECORDING & CAPTURE
+                        </div>
                         <button id="startRecButton" class="hidden">
                             <i class="fas fa-record-vinyl"></i> Start Recording
                         </button>
                         <button id="stopRecButton" class="hidden">
                             <i class="fas fa-record-vinyl cr"></i> Stop Recording
                         </button>
-                        <button id="fullScreenButton" class="hidden">
-                            <i id="fullScreenIcon" class="fas fa-expand-alt"></i> Full Screen
+                        <button id="snapshotRoomButton" class="hidden">
+                            <i class="fas fas fa-camera-retro"></i> Snapshot
                         </button>
-                        <button id="emojiRoomButton" class="hidden">
-                            <i class="fas fa-face-smile"></i> Room Emoji
-                        </button>
-                        <button id="fileShareExtraButton" class="hidden">
-                            <i class="fas fa-folder-open"></i> File sharing
-                        </button>
+
+                        <div class="device-menu-divider extra-menu-divider" data-group="recording"></div>
+
+                        <!-- TOOLS -->
+                        <div
+                            class="device-menu-header extra-menu-group"
+                            data-buttons="transcriptionButton,pollButton,editorButton,whiteboardButton,documentPiPButton,emojiRoomButton"
+                        >
+                            TOOLS
+                        </div>
                         <button id="transcriptionButton" class="hidden">
                             <i class="fas fa-closed-captioning"></i> Transcription
                         </button>
@@ -315,8 +337,24 @@ access to use this app.
                         <button id="documentPiPButton" class="hidden">
                             <i class="fas fa-images"></i> Document PiP
                         </button>
-                        <button id="snapshotRoomButton" class="hidden">
-                            <i class="fas fas fa-camera-retro"></i> Snapshot
+                        <button id="emojiRoomButton" class="hidden">
+                            <i class="fas fa-face-smile"></i> Room Emoji
+                        </button>
+
+                        <div class="device-menu-divider extra-menu-divider" data-group="tools"></div>
+
+                        <!-- VIEW & SETTINGS -->
+                        <div
+                            class="device-menu-header extra-menu-group"
+                            data-buttons="hideMeButton,fullScreenButton,restartICEButton,aboutButton"
+                        >
+                            VIEW & SETTINGS
+                        </div>
+                        <button id="hideMeButton" class="hidden">
+                            <i id="hideMeIcon" class="fas fa-user"></i> Hide Me
+                        </button>
+                        <button id="fullScreenButton" class="hidden">
+                            <i id="fullScreenIcon" class="fas fa-expand-alt"></i> Full Screen
                         </button>
                         <button id="restartICEButton" class="hidden">
                             <i class="fas fa-satellite-dish"></i> Restart ICE
