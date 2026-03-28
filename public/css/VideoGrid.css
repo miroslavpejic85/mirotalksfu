@@ -318,10 +318,8 @@
     width: 100%;
     padding: 10px;
     height: 100px;
-    background: var(--btns-bg-color);
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
+    box-shadow: var(--box-shadow);
+    background: var(--body-bg);
     border-radius: 10px;
     margin-bottom: 10px;
     display: flex;
