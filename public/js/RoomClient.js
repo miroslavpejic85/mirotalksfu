@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.68
+ * @version 2.1.69
  *
  */
 
@@ -9761,7 +9761,7 @@ class RoomClient {
             li.style.display = shouldDisplay ? '' : 'none';
         }
         this.isToggleRaiseHand = !this.isToggleRaiseHand;
-        setColor(participantsRaiseHandBtn, this.isToggleRaiseHand ? 'lime' : 'white');
+        setColor(participantsRaiseHandBtn, this.isToggleRaiseHand ? '#FFD700' : 'white');
     }
 
     // ####################################################

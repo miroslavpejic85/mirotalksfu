@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.68
+ * @version 2.1.69
  *
  */
 
@@ -76,7 +76,7 @@ const _PEER = {
     videoOff: '<i class="fas fa-video-slash red"></i>',
     screenOn: '<i class="fas fa-desktop"></i>',
     screenOff: '<i class="fas fa-desktop red"></i>',
-    raiseHand: '<i style="color: rgb(0, 255, 71);" class="fas fa-hand-paper pulsate"></i>',
+    raiseHand: '<i style="color: #FFD700;" class="fas fa-hand-paper pulsate"></i>',
     lowerHand: '',
     acceptPeer: '<i class="fas fa-check"></i>',
     banPeer: '<i class="fas fa-ban red"></i>',
@@ -3711,7 +3711,7 @@ function handleRoomClientEvents() {
         console.log('Room event: Client raise hand');
         hide(raiseHandButton);
         show(lowerHandButton);
-        setColor(lowerHandIcon, 'lime');
+        setColor(lowerHandIcon, '#FFD700');
         hand = true;
     });
     rc.on(RoomClient.EVENTS.lowerHand, () => {
@@ -6747,7 +6747,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.68',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.69',
         html: `
             <br />
             <div id="about">
