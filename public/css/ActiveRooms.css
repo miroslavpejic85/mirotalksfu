@@ -21,7 +21,7 @@ body {
     max-width: 1200px;
     margin: 40px auto;
     background: var(--card-bg);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: var(--card-shadow);
     padding: 32px;
 }
@@ -75,7 +75,7 @@ h1 {
 
 .room-card {
     background: var(--accent);
-    border-radius: 12px;
+    border-radius: 16px;
     box-shadow: 0 1px 6px #15181d;
     padding: 32px 24px;
     min-height: 220px;
@@ -160,7 +160,7 @@ h1 {
     padding: 10px 24px;
     background: var(--accent2);
     color: #fff;
-    border-radius: 6px;
+    border-radius: 10px;
     font-size: 1em;
     font-weight: bold;
     text-decoration: none;

@@ -6,7 +6,7 @@
     height: 100%;
     max-width: 600px;
     max-height: 700px;
-    border-radius: 10px;
+    border-radius: 14px;
     background: var(--body-bg);
     /* border: var(--border); */
     box-shadow: var(--box-shadow);
@@ -70,7 +70,7 @@
 .form input {
     padding: 10px;
     border: var(--border);
-    border-radius: 4px;
+    border-radius: 8px;
     width: 100%;
     box-sizing: border-box;
 }
@@ -85,7 +85,7 @@
     background: var(--body-bg);
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s;
 }
@@ -100,7 +100,7 @@
     background: #dc3545;
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s;
 }
@@ -118,7 +118,7 @@
     background: var(--body-bg);
     padding: 15px;
     margin-bottom: 20px;
-    border-radius: 8px;
+    border-radius: 12px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
 }
 
@@ -140,7 +140,7 @@
     background: var(--body-bg);
     padding: 8px;
     border: var(--border);
-    border-radius: 4px;
+    border-radius: 8px;
     margin-bottom: 5px;
     color: #fff;
 }
@@ -163,7 +163,7 @@
     background: var(--body-bg);
     color: #fff;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     cursor: pointer;
     transition: background 0.3s;
 }

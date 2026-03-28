@@ -1,27 +1,27 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
 :root {
-    --body-bg: radial-gradient(#393939, #000000);
-    --border: 0.1px solid rgb(255 255 255 / 32%);
-    --border-radius: 1rem;
+    --body-bg: linear-gradient(135deg, #0e0e14, #1e1e28);
+    --border: 0.5px solid rgb(255 255 255 / 18%);
+    --border-radius: 1.125rem;
     --msger-width: 800px;
     --msger-height: 700px;
     --msger-bubble-width: 85%;
-    --msger-bg: radial-gradient(#393939, #000000);
+    --msger-bg: linear-gradient(135deg, #0e0e14, #1e1e28);
     --wb-width: 1920px;
     --wb-height: 1080px;
-    --wb-bg: radial-gradient(#393939, #000000);
-    --select-bg: #2c2c2c;
-    --select-border-radius: 8px;
+    --wb-bg: linear-gradient(135deg, #0e0e14, #1e1e28);
+    --select-bg: #161622;
+    --select-border-radius: 12px;
     --select-focus-color: rgba(102, 190, 255, 0.5);
-    --left-msg-bg: #252d31;
-    --right-msg-bg: #056162;
+    --left-msg-bg: #141420;
+    --right-msg-bg: #1a1a26;
     --private-msg-bg: #6b1226;
     --box-shadow: 0px 8px 16px 0px rgb(0 0 0);
     --btns-hover-scale: scale(1.1);
-    --settings-bg: radial-gradient(#393939, #000000);
-    --tab-btn-active: rgb(42 42 42 / 70%);
-    --btns-bg-color: rgba(0, 0, 0, 0.7);
+    --settings-bg: linear-gradient(135deg, #0e0e14, #1e1e28);
+    --tab-btn-active: #1e1e28;
+    --btns-bg-color: rgba(10, 10, 16, 0.8);
 
     /* bottom buttons bar horizontal default */
     --bottom-btns-top: auto;
@@ -34,7 +34,7 @@
 
     --transcription-height: 680px;
     --transcription-width: 420px;
-    --trx-bg: radial-gradient(#393939, #000000);
+    --trx-bg: linear-gradient(135deg, #0e0e14, #1e1e28);
 
     --editor-container-width: 100%;
     --editor-container-height: 100%;
@@ -44,7 +44,7 @@
     /* https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit */
     --videoObjFit: cover;
 
-    --dd-color: #ffffff;
+    --dd-color: #e8e8ec;
 
     --videoBar-active: 1px solid rgba(102, 190, 255, 0.32);
 }

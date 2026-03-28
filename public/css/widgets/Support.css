@@ -156,7 +156,7 @@
     color: #aaa;
     cursor: pointer;
     padding: 4px 6px;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -184,7 +184,7 @@
     font-size: 18px;
     line-height: 1;
     padding: 4px;
-    border-radius: 4px;
+    border-radius: 8px;
     transition: all 0.2s ease;
     color: #aaa;
 }
@@ -277,7 +277,7 @@
     background: linear-gradient(135deg, #333 0%, #444 100%);
     color: white;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 14px 16px;
     margin-bottom: 12px;
     cursor: pointer;
@@ -566,7 +566,7 @@
         padding: 11px 12px;
         font-size: 14px;
         margin-bottom: 8px;
-        border-radius: 10px;
+        border-radius: 14px;
     }
 
     .mirotalk-support-widget .btn-icon {
@@ -667,7 +667,7 @@
         padding: 10px;
         font-size: 13px;
         margin-bottom: 6px;
-        border-radius: 8px;
+        border-radius: 12px;
     }
 
     .mirotalk-support-widget .btn-icon {

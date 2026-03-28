@@ -18,7 +18,7 @@
     padding: 3px;
     background: var(--msger-bg);
     /* border: var(--border); */
-    border-radius: 10px;
+    border-radius: 14px;
     box-shadow: var(--box-shadow);
     transition:
         background 1s,
@@ -31,7 +31,7 @@
     position: absolute;
     width: 100%;
     height: 100%;
-    border-radius: 10px;
+    border-radius: 14px;
     overflow-y: auto;
     overflow-x: hidden;
     /* border: 1px solid lime; */
@@ -120,7 +120,7 @@
     flex-direction: column;
     margin-left: 300px;
     /* border-left: var(--border); */
-    border-radius: 10px;
+    border-radius: 14px;
     /* border: 1px solid lime; */
 }
 
@@ -291,7 +291,7 @@
     bottom: 135px;
     background: var(--body-bg);
     border: var(--border);
-    border-radius: 5px;
+    border-radius: 10px;
     --rgb-background: var(--body-bg);
     --color-border-over: var(--body-bg);
     --font-family: 'Montserrat';
@@ -376,7 +376,7 @@ input[type='text'] {
 #chatShareRoomBtn {
     padding: 8px 16px;
     background: var(--body-bg);
-    border-radius: 5px;
+    border-radius: 10px;
     /* border: var(--border); */
     transition: all 0.3s ease-in-out;
 }

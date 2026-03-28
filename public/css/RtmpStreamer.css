@@ -19,7 +19,7 @@ body {
     padding: 20px;
     background: var(--body-bg);
     color: #fff;
-    border-radius: 10px;
+    border-radius: 14px;
     border: var(--border);
     box-shadow: var(--box-shadow);
 }
@@ -30,7 +30,7 @@ h1 {
 }
 
 video {
-    border-radius: 10px;
+    border-radius: 14px;
     border: var(--border);
     box-shadow: var(--box-shadow);
 }
@@ -64,7 +64,7 @@ button {
     padding: 15px;
     font-size: 16px;
     border: none;
-    border-radius: 4px;
+    border-radius: 8px;
     outline: none;
     box-sizing: border-box;
 }

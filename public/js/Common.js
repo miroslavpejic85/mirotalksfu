@@ -1,5 +1,18 @@
 'use strict';
 
+// Fallback if xss library failed to load (CDN blocked/unreachable)
+if (typeof filterXSS === 'undefined') {
+    var filterXSS = function (str) {
+        if (!str) return '';
+        return String(str)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#x27;');
+    };
+}
+
 // ####################################################################
 // NEW ROOM
 // ####################################################################

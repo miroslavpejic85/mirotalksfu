@@ -89,7 +89,7 @@
     gap: 8px;
     padding: 10px 14px;
     margin-bottom: 16px;
-    border-radius: 10px;
+    border-radius: 14px;
     background: rgba(255, 75, 75, 0.1);
     border: 1px solid rgba(255, 75, 75, 0.25);
     color: #ff6b6b;
@@ -121,7 +121,7 @@
     align-items: center;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 16px;
     padding: 0 16px;
     margin-bottom: 16px;
     transition:
@@ -247,7 +247,7 @@
     margin-top: 10px;
     margin-bottom: 0;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     background: linear-gradient(135deg, #4678f9, #3b5de7);
     color: #fff;
     font-size: 16px;
@@ -322,7 +322,7 @@
     width: 52px;
     min-width: 52px;
     border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 12px;
+    border-radius: 16px;
     background: rgba(255, 255, 255, 0.05);
     color: rgba(255, 255, 255, 0.6);
     font-size: 17px;
@@ -349,7 +349,7 @@
     width: 100%;
     padding: 15px;
     border: none;
-    border-radius: 12px;
+    border-radius: 16px;
     background: linear-gradient(135deg, #2ece89, #27b578);
     color: #fff;
     font-size: 16px;

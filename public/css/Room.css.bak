@@ -71,24 +71,24 @@ body {
     color: #fff;
     padding: 30px;
     text-align: center;
-    border-radius: 14px;
+    border-radius: 10px;
     background: var(--btns-bg-color);
 }
 #loadingDiv h1 {
     padding: 10px;
     font-size: 60px;
     font-family: 'Montserrat';
-    border-radius: 14px;
+    border-radius: 10px;
 }
 #loadingDiv img {
     margin-top: 5px;
     margin-bottom: 10px;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 #loadingDiv pre {
     padding: 10px;
     font-family: 'Montserrat';
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -163,7 +163,7 @@ body {
     background-color: var(--select-bg) !important;
     color: white;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: none;
     cursor: pointer;
 }
@@ -176,7 +176,7 @@ body {
     margin-bottom: 10px;
     font-size: 1.2rem;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     background-color: transparent;
 }
 
@@ -195,7 +195,7 @@ body {
     width: 100%;
     padding: 10px;
     max-height: 120px;
-    border-radius: 12px;
+    border-radius: 8px;
     background: transparent;
     overflow-y: auto;
     scrollbar-width: thin;
@@ -209,7 +209,7 @@ body {
 
 .image-grid::-webkit-scrollbar-thumb {
     background-color: rgba(255, 255, 255, 0.5);
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 /* Image Thumbnails */
@@ -218,7 +218,7 @@ body {
     max-width: 50px;
     height: 45px;
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .image-grid img:hover {
@@ -268,7 +268,7 @@ body {
     font-size: 12px;
     cursor: pointer;
     color: #f5f5f5b0;
-    border-radius: 10px;
+    border-radius: 5px;
     padding: 5px;
     display: flex;
     align-items: center;
@@ -295,14 +295,14 @@ body {
     width: 80%;
     max-width: 400px;
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 8px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 
 .imageUrlModal-content {
     background: var(--body-bg);
     padding: 20px;
-    border-radius: 12px;
+    border-radius: 8px;
     text-align: center;
 }
 
@@ -311,15 +311,15 @@ body {
     padding: 10px;
     margin: 10px 0;
     border: var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 .imageUrlModal button {
     padding: 10px 20px;
     border: none;
     background: var(--btns-bg-color);
-    border-radius: 14px;
-    border-radius: 8px;
+    border-radius: 10px;
+    border-radius: 4px;
     cursor: pointer;
     margin: 5px;
 }
@@ -378,7 +378,7 @@ body {
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-    border-radius: 14px;
+    border-radius: 10px;
     border: none !important;
     /* box-shadow: var(--box-shadow); */
 }
@@ -389,7 +389,7 @@ body {
     display: inline-flex;
     align-items: stretch;
     overflow: visible;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
@@ -427,7 +427,7 @@ body {
     height: 50px;
     font-size: 1.6rem;
     padding: 10px;
-    border-radius: 14px;
+    border-radius: 10px;
     background: var(--btns-bg-color);
     border: none !important;
     transition: all 0.3s ease-in-out;
@@ -665,7 +665,7 @@ body {
     height: 16px;
     background: #e74c3c;
     color: #fff;
-    border-radius: 12px;
+    border-radius: 8px;
     font-size: 11px;
     display: flex;
     align-items: center;
@@ -753,7 +753,7 @@ body {
     background: var(--settings-bg);
     box-shadow: var(--box-shadow);
     border: var(--border);
-    border-radius: 14px;
+    border-radius: 10px;
     overflow-y: auto; /* Single overflow handling */
     overflow-x: hidden;
     display: flex;
@@ -817,7 +817,7 @@ body {
     color: #fff;
     background-color: var(--select-bg) !important;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     box-shadow: none;
     cursor: pointer;
 }
@@ -830,7 +830,7 @@ body {
 }
 
 #mySettings button {
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 #myProfileAvatar {
@@ -911,7 +911,7 @@ body {
     color: #fff;
     table-layout: auto;
     border-collapse: collapse;
-    border-radius: 14px;
+    border-radius: 10px;
     background: var(--body-bg);
 }
 
@@ -938,7 +938,7 @@ body {
 
 .settingsTable i {
     border: none;
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .settingsTable select {
@@ -956,7 +956,7 @@ body {
     font-size: 16px;
     text-align: left;
     color: #fff;
-    border-radius: 14px;
+    border-radius: 10px;
     background: var(--body-bg);
 }
 #shortcutsTable th,
@@ -1009,7 +1009,7 @@ body {
 }
 .file-table tbody::-webkit-scrollbar-thumb {
     background: #888;
-    border-radius: 8px;
+    border-radius: 4px;
 }
 .file-item {
     cursor: pointer;
@@ -1054,7 +1054,7 @@ body {
 
 #refreshVideoFiles {
     cursor: pointer;
-    border-radius: 10px;
+    border-radius: 5px;
     border: var(--border);
     background: var(--btns-bg-color) !important;
 }
@@ -1092,7 +1092,7 @@ body {
     background: var(--select-bg);
     color: #fff;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
     transition: background 0.2s;
 }
@@ -1126,7 +1126,7 @@ body {
     position: fixed;
     /* max-height: 300px; */
     border: none !important;
-    border-radius: 14px !important;
+    border-radius: 10px !important;
     background: var(--body-bg) !important;
     box-shadow: var(--box-shadow);
     overflow-y: auto;
@@ -1183,7 +1183,7 @@ body {
 .tab {
     padding: 10px;
     overflow: hidden;
-    border-radius: 10px;
+    border-radius: 5px;
     width: 35%;
     background-color: var(--body-bg);
     min-height: 480px;
@@ -1224,7 +1224,7 @@ body {
         justify-content: center;
         font-size: 1.5rem;
         padding: 0;
-        border-radius: 14px;
+        border-radius: 10px;
         box-sizing: border-box;
         transition:
             background 0.2s,
@@ -1240,7 +1240,7 @@ body {
     }
     .tabActions {
         width: 100%;
-        border-radius: 14px;
+        border-radius: 10px;
         overflow: visible;
     }
 }
@@ -1251,14 +1251,14 @@ body {
         min-width: 48px;
         max-width: 48px;
         padding: 6px 0;
-        border-radius: 12px;
+        border-radius: 8px;
     }
     .tab button {
         width: 38px;
         height: 38px;
         margin: 8px auto;
         font-size: 1.2rem;
-        border-radius: 12px;
+        border-radius: 8px;
     }
     .tabActions {
         padding: 6px;
@@ -1274,7 +1274,7 @@ body {
     color: #fff;
     font-size: 1rem;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     background-color: rgba(0, 0, 0, 0.2);
     outline: none;
     cursor: pointer;
@@ -1337,7 +1337,7 @@ body {
     color: white;
     background: var(--body-bg);
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 /*--------------------------------------------------------------
@@ -1348,7 +1348,7 @@ body {
     padding: 10px;
     width: 120px;
     border: var(--border);
-    border-radius: 10px;
+    border-radius: 5px;
     margin-top: 10px;
     margin-bottom: 20px;
 }
@@ -1362,7 +1362,7 @@ body {
     align-items: center;
     width: 100%;
     background-color: var(--body-bg);
-    border-radius: 12px;
+    border-radius: 8px;
 }
 
 .volume-bar {
@@ -1370,7 +1370,7 @@ body {
     height: 5px;
     margin: 0 2px;
     background-color: #ddd;
-    border-radius: 10px;
+    border-radius: 5px;
     transition: all 0.3s ease;
 }
 
@@ -1400,7 +1400,7 @@ body {
     padding: 10px;
     margin: 10px 0;
     border: var(--border);
-    border-radius: 8px;
+    border-radius: 4px;
 }
 
 #notifyEmailCleanBtn {
@@ -1421,7 +1421,7 @@ body {
     min-width: var(--transcription-width);
     background: var(--trx-bg);
     /* border: var(--border); */
-    border-radius: 14px;
+    border-radius: 10px;
     box-shadow: var(--box-shadow);
     resize: both;
     overflow: hidden;
@@ -1456,7 +1456,7 @@ body {
     transition: all 0.3s ease-in-out;
     background: transparent;
     color: #fff;
-    border-radius: 10px;
+    border-radius: 5px;
     transition: background 0.23s;
 }
 
@@ -1512,7 +1512,7 @@ body {
 
 .msg-transcription-bubble {
     padding: 15px;
-    border-radius: 18px;
+    border-radius: 15px;
 }
 
 .msg-transcription-info {
@@ -1565,7 +1565,7 @@ body {
     width: 100%;
     bottom: 0px;
     text-align: center;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -1575,7 +1575,7 @@ body {
 #usernameEmoji {
     position: absolute;
     z-index: 9999;
-    border-radius: 14px;
+    border-radius: 10px;
     border: var(--border);
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
@@ -1591,7 +1591,7 @@ body {
     display: none;
     background: var(--body-bg);
     border: var(--border);
-    border-radius: 14px;
+    border-radius: 10px;
     box-shadow: var(--box-shadow);
     top: 50%;
     left: 50%;
@@ -1646,7 +1646,7 @@ body {
     background: none;
     color: #fff;
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 3px 14px;
     font-size: 0.95rem;
     cursor: pointer;
@@ -1703,7 +1703,7 @@ body {
     position: absolute;
     left: 15px;
     bottom: 60px;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 /*--------------------------------------------------------------
@@ -1713,7 +1713,6 @@ body {
 .swal2-popup {
     /* border: var(--border) !important; */
     /* border: 0.5px solid rgb(255 255 255 / 32%) !important; */
-    border-radius: 16px !important;
     box-shadow: var(--box-shadow) !important;
 }
 
@@ -1737,7 +1736,6 @@ body {
 
 .swal2-input {
     border: var(--border) !important;
-    border-radius: 12px !important;
     box-shadow: none !important;
 }
 .swal2-input:-webkit-autofill,
@@ -1776,7 +1774,7 @@ body {
 
 #about img {
     cursor: pointer;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 #about a {
@@ -1795,7 +1793,7 @@ body {
     height: 40px;
     color: #ffffff;
     font-size: 1.2rem;
-    border-radius: 10px;
+    border-radius: 6px;
     background: linear-gradient(65deg, #0270d7 0, #0f8afd 100%);
     transition: background 0.23s;
     cursor: pointer;
@@ -1906,7 +1904,7 @@ button {
 
 button:hover {
     background: var(--body-bg);
-    border-radius: 10px;
+    border-radius: 5px;
 }
 
 .red {
@@ -1934,7 +1932,7 @@ button:hover {
     background: var(--body-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
-    border-radius: 14px;
+    border-radius: 10px;
     overflow: hidden;
 }
 
@@ -1942,7 +1940,7 @@ button:hover {
     display: flex;
     justify-content: space-between;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 10px;
     color: #fff;
     cursor: move;
@@ -2003,7 +2001,7 @@ button:hover {
 #receiveAbortBtn,
 #receiveHideBtn {
     padding: 5px;
-    border-radius: 10px;
+    border-radius: 5px;
     color: #fff;
     background: transparent;
 }
@@ -2056,7 +2054,7 @@ progress {
     background: var(--wb-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
-    border-radius: 14px;
+    border-radius: 10px;
     box-sizing: border-box;
     /* overflow: hidden; */
 }
@@ -2065,7 +2063,7 @@ progress {
 @media (max-width: 768px) {
     #whiteboard {
         padding: 5px;
-        border-radius: 10px;
+        border-radius: 5px;
     }
 
     .whiteboard-header {
@@ -2094,7 +2092,7 @@ progress {
 .whiteboard-header {
     display: flex;
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 14px;
+    border-radius: 10px;
     padding: 5px;
     color: #fff;
     cursor: move;
@@ -2102,7 +2100,7 @@ progress {
 
 .whiteboard-header button {
     padding: 8px;
-    border-radius: 10px;
+    border-radius: 5px;
     border: none !important;
 }
 
@@ -2210,7 +2208,7 @@ progress {
     font-family: 'Segoe UI', Arial, sans-serif;
     background: var(--body-bg);
     padding: 0.5rem 0.7rem;
-    border-radius: 14px;
+    border-radius: 10px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
     max-width: 340px;
     margin: 0 auto;
@@ -2243,7 +2241,7 @@ progress {
 .wb-shortcuts-code {
     background: var(--body-bg);
     padding: 0.5rem 0.5rem;
-    border-radius: 10px;
+    border-radius: 6px;
     white-space: pre;
     overflow-x: auto;
     font-family: 'Courier New', monospace;
@@ -2261,7 +2259,7 @@ progress {
     letter-spacing: 0.02em;
     background: linear-gradient(135deg, rgba(102, 190, 255, 0.11), rgba(102, 190, 255, 0.06));
     padding: 4px 10px;
-    border-radius: 10px;
+    border-radius: 6px;
     display: inline-block;
     box-shadow: 0 1px 4px rgba(102, 190, 255, 0.07);
 }
@@ -2270,7 +2268,7 @@ progress {
     list-style: none;
     padding-left: 0;
     background: var(--body-bg);
-    border-radius: 10px;
+    border-radius: 6px;
     padding: 0.3rem 0.2rem;
     filter: brightness(0.97);
 }
@@ -2279,7 +2277,7 @@ progress {
     margin: 0.3rem 0;
     padding: 0.3rem 0.5rem;
     background: rgba(255, 255, 255, 0.03);
-    border-radius: 8px;
+    border-radius: 4px;
     color: var(--text-color);
     font-weight: 500;
     font-size: 0.85rem;
@@ -2298,7 +2296,7 @@ progress {
     flex-direction: column;
     gap: 1.2rem;
     padding: 1.2rem;
-    border-radius: 16px;
+    border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
     border: 1px solid rgba(255, 215, 0, 0.18);
     max-width: 100%;
@@ -2316,7 +2314,7 @@ progress {
     width: 100%;
     padding: 12px;
     border: 2px solid rgba(255, 215, 0, 0.3);
-    border-radius: 14px;
+    border-radius: 10px;
     background: rgba(255, 235, 59, 0.07);
     color: var(--text-color, #ffffff);
     font-size: 1rem;
@@ -2348,7 +2346,7 @@ progress {
     width: 100%;
     height: 50px;
     border: none !important;
-    border-radius: 14px;
+    border-radius: 10px;
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 1px 4px rgba(255, 215, 0, 0.07);
@@ -2360,24 +2358,24 @@ progress {
 
 .sticky-note-color-input::-webkit-color-swatch-wrapper {
     padding: 4px;
-    border-radius: 14px;
+    border-radius: 10px;
 }
 
 .sticky-note-color-input::-webkit-color-swatch {
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
 }
 
 .sticky-note-color-input::-moz-color-swatch {
     border: none;
-    border-radius: 12px;
+    border-radius: 8px;
 }
 
 /* Responsive styles for small screens */
 @media (max-width: 600px) {
     .sticky-note-form {
         padding: 0.7rem;
-        border-radius: 12px;
+        border-radius: 8px;
         gap: 0.7rem;
     }
     .sticky-note-colors-row {
@@ -2393,7 +2391,7 @@ progress {
     }
     .sticky-note-color-input {
         height: 38px;
-        border-radius: 12px;
+        border-radius: 8px;
     }
 }
 
@@ -2425,7 +2423,7 @@ progress {
 
 .bar {
     width: 6px;
-    border-radius: 10px;
+    border-radius: 6px;
     background: rgba(#19bb5c, 0.65);
     transition-property: height background-color;
     transition-duration: 1s;
@@ -2441,7 +2439,7 @@ progress {
 
 ::-webkit-scrollbar-thumb {
     background: var(--body-bg);
-    border-radius: 10px;
+    border-radius: 5px;
     cursor: pointer;
 }
 
@@ -2549,7 +2547,7 @@ hr {
     height: 18px;
     line-height: 18px;
     padding: 0 5px;
-    border-radius: 12px;
+    border-radius: 9px;
     text-align: center;
     margin-left: 4px;
     vertical-align: middle;
@@ -2575,7 +2573,7 @@ hr {
 #avatarVideoAIPreview {
     width: 100%;
     max-width: 200px;
-    border-radius: 14px;
+    border-radius: 10px;
     display: block;
     margin: 0 auto;
 }
@@ -2602,7 +2600,7 @@ hr {
     max-width: 200px;
     padding: 4px 8px !important;
     font-size: 0.8rem !important;
-    border-radius: 10px !important;
+    border-radius: 6px !important;
 }
 
 #avatarVideoAIcontainer {
@@ -2626,7 +2624,7 @@ hr {
     flex-direction: column;
     align-items: center;
     cursor: pointer;
-    border-radius: 12px;
+    border-radius: 8px;
     padding: 6px;
     transition:
         background 0.2s,
@@ -2648,7 +2646,7 @@ hr {
     width: 100%;
     height: 120px;
     object-fit: cover;
-    border-radius: 10px;
+    border-radius: 6px;
     cursor: pointer;
 }
 
@@ -2716,7 +2714,7 @@ hr {
 
 .mic-guidance {
     padding: 10px;
-    border-radius: 10px;
+    border-radius: 6px;
     margin: 10px 0;
     font-size: 13px;
     line-height: 1.4;

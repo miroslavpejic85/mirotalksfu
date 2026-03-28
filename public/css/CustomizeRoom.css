@@ -156,7 +156,7 @@ body::before {
 .cr-input {
     height: 48px;
     padding: 0 14px;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid var(--cr-input-border);
     background: var(--cr-input-bg);
     color: var(--cr-text);
@@ -193,7 +193,7 @@ body::before {
     right: 6px;
     height: 36px;
     padding: 0 12px;
-    border-radius: 10px;
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.16);
     background: rgba(255, 255, 255, 0.06);
     color: var(--cr-text);
@@ -380,7 +380,7 @@ body::before {
 .cr-copy {
     height: 48px;
     padding: 0 14px;
-    border-radius: 12px;
+    border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.16);
     background: rgba(255, 255, 255, 0.06);
     color: var(--cr-text);
@@ -436,7 +436,7 @@ body::before {
     display: block;
     max-width: 100%;
     max-height: 100%;
-    border-radius: 10px;
+    border-radius: 14px;
 }
 
 .cr-qr-hint {

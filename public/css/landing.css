@@ -926,10 +926,10 @@ label {
     padding-left: 64px;
 }
 .br-6 {
-    border-radius: 6px;
+    border-radius: 10px;
 }
 .br-12 {
-    border-radius: 12px;
+    border-radius: 16px;
 }
 .br-18 {
     border-radius: 18px;
@@ -1075,11 +1075,11 @@ label {
 }
 .button-primary {
     background: linear-gradient(65deg, #0270d7 0, #0f8afd 100%);
-    border-radius: 6px;
+    border-radius: 10px;
 }
 .button-primary:hover {
     background: linear-gradient(65deg, #0275e1 0%, #198ffd 100%);
-    border-radius: 6px;
+    border-radius: 10px;
     filter: brightness(1.1) saturate(1.2);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
     transform: translateY(-2px);
@@ -1098,7 +1098,7 @@ label {
     -webkit-backdrop-filter: blur(6px);
     border: none;
     color: rgba(255, 255, 255, 0.88) !important;
-    border-radius: 6px;
+    border-radius: 10px;
     transition:
         background 0.2s ease,
         border-color 0.2s ease,
@@ -1927,7 +1927,7 @@ main {
     padding: 11px 15px;
     height: 48px;
     border: none;
-    border-radius: 6px;
+    border-radius: 10px;
     justify-content: center;
     text-align: center;
     white-space: nowrap;
@@ -1945,7 +1945,7 @@ main {
 #loginForm {
     padding: 40px;
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
+    border-radius: 14px;
 }
 
 /*--------------------------------------------------------------
@@ -1990,7 +1990,7 @@ main {
     justify-content: center;
     align-items: center;
     padding: 0.625rem 1.125rem;
-    border-radius: 10px;
+    border-radius: 14px;
     border: 1px solid rgba(255, 255, 255, 0.04) !important;
     background-color: #1a1d23 !important;
     background-image: linear-gradient(
@@ -2224,7 +2224,7 @@ main {
     #topSponsors .clients-logo {
         padding: 0.75rem 1rem;
         max-width: 100%;
-        border-radius: 10px;
+        border-radius: 14px;
     }
 
     #topSponsors .clients-size-logo {
@@ -2332,7 +2332,7 @@ main {
 
 ::-webkit-scrollbar-thumb {
     background: radial-gradient(#393939, #000000);
-    border-radius: 5px;
+    border-radius: 10px;
     cursor: pointer;
 }
 
@@ -2358,7 +2358,7 @@ main {
     margin-top: 1.6em;
     margin-bottom: 0.9em;
     overflow: hidden;
-    border-radius: 8px;
+    border-radius: 12px;
     will-change: transform;
 }
 
@@ -2400,7 +2400,7 @@ main {
 }
 
 .c-pointer {
-    border-radius: 10px;
+    border-radius: 14px;
     cursor: pointer;
 }
 
@@ -2420,7 +2420,7 @@ main {
     display: none;
     margin-top: 0;
     background: rgba(70, 120, 249, 0.08);
-    border-radius: 10px;
+    border-radius: 14px;
     padding: 32px 24px;
     transition:
         box-shadow 0.3s,

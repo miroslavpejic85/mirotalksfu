@@ -5,7 +5,7 @@
     width: var(--editor-container-width);
     height: var(--editor-container-height);
     /* border: var(--border); */
-    border-radius: 10px;
+    border-radius: 14px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
     overflow-x: hidden;
@@ -66,7 +66,7 @@
 .ql-picker-options {
     color: white;
     border: none !important;
-    border-radius: 10px;
+    border-radius: 14px;
     background: var(--body-bg);
     box-shadow: var(--box-shadow) !important;
 }
