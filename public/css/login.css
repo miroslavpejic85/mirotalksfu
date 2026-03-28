@@ -197,6 +197,15 @@
     padding-right: 24px;
     cursor: pointer;
     color: #fff;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+.login-input-group select.form-input:focus,
+.login-input-group select.form-input:focus-visible {
+    outline: none;
+    border-color: rgba(70, 120, 249, 0.5);
+    box-shadow: 0 0 0 2px rgba(70, 120, 249, 0.15);
 }
 .login-input-group select.form-input option {
     background: #1a1a2e;

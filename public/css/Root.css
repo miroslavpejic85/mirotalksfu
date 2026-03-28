@@ -12,6 +12,8 @@
     --wb-height: 1080px;
     --wb-bg: radial-gradient(#393939, #000000);
     --select-bg: #2c2c2c;
+    --select-border-radius: 8px;
+    --select-focus-color: rgba(102, 190, 255, 0.5);
     --left-msg-bg: #252d31;
     --right-msg-bg: #056162;
     --private-msg-bg: #6b1226;
@@ -50,4 +52,9 @@
 * {
     outline: none;
     font-family: 'Montserrat';
+}
+
+*:focus-visible {
+    outline: 2px solid var(--select-focus-color);
+    outline-offset: 2px;
 }

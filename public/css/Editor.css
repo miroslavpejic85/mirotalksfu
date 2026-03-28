@@ -76,7 +76,16 @@ select.ql-ui {
     color: #fff !important;
     height: 30px;
     border: var(--border);
-    border-radius: 4px;
-    background: var(--body-bg);
+    border-radius: var(--select-border-radius);
     background-color: var(--select-bg) !important;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+select.ql-ui:focus,
+select.ql-ui:focus-visible {
+    outline: none;
+    border-color: var(--select-focus-color);
+    box-shadow: 0 0 0 2px var(--select-focus-color);
 }

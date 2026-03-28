@@ -1821,6 +1821,37 @@ select {
     height: 40px;
     line-height: 40px;
     box-shadow: none;
+    cursor: pointer;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background-color 0.2s ease;
+}
+
+/* Override Bootstrap .form-select dark arrow with white arrow for dark theme */
+select.form-select {
+    background-color: var(--select-bg);
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23ffffff' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    border: var(--border);
+    border-radius: var(--select-border-radius);
+    transition: background-color 0.2s ease;
+}
+
+select:hover,
+select.form-select:hover {
+    background-color: color-mix(in srgb, var(--select-bg) 80%, #ffffff);
+}
+
+select:focus,
+select:focus-visible {
+    outline: none;
+    border-color: var(--select-focus-color);
+    box-shadow: 0 0 0 2px var(--select-focus-color);
+}
+
+select option {
+    background-color: var(--select-bg);
+    color: #fff;
 }
 
 .hidden {
