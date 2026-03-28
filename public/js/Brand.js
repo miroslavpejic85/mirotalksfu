@@ -319,7 +319,7 @@ function customizeMetaTags() {
 }
 
 function customizeWhoAreYou() {
-    if (title && BRAND.whoAreYou?.title) title.textContent = BRAND.whoAreYou.title;
+    if (waitingRoomHeading && title && BRAND.whoAreYou?.title) title.textContent = BRAND.whoAreYou.title;
     if (waitingRoomHeading && BRAND.whoAreYou?.waitingRoomHeading)
         waitingRoomHeading.textContent = BRAND.whoAreYou.waitingRoomHeading;
     if (waitingRoomDescription && BRAND.whoAreYou?.waitingRoomDescription)
