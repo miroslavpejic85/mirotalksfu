@@ -2652,6 +2652,7 @@ async function changeCamera(deviceId) {
             console.error('[Error] changeCamera', error);
             handleMediaError('video/audio', error, '/');
             isInitVideoLoaded = false;
+            elemDisplay('initVideoLoader', false);
         });
 
     if (isVideoAllowed) {

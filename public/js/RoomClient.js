@@ -2654,9 +2654,22 @@ class RoomClient {
     }
 
     closeThenProduce(type, deviceId = null, swapCamera = false) {
+        const previousCamera = camera;
         this.closeProducer(type, 'closeThenProduce');
         setTimeout(async function () {
-            await rc.produce(type, deviceId, swapCamera);
+            try {
+                await rc.produce(type, deviceId, swapCamera);
+            } catch (err) {
+                console.error('closeThenProduce error, restoring previous camera', err);
+                if (swapCamera) {
+                    camera = previousCamera;
+                    try {
+                        await rc.produce(type, deviceId, false);
+                    } catch (restoreErr) {
+                        console.error('Failed to restore previous camera', restoreErr);
+                    }
+                }
+            }
         }, 1000);
     }
 
