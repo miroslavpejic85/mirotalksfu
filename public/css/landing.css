@@ -1896,7 +1896,7 @@ main {
         margin-bottom: 12px;
     }
 
-    .form-group-desktop .button {
+    .form-group-desktop .button:not(.gen-room-btn) {
         width: 100%;
     }
 }
@@ -1909,6 +1909,9 @@ main {
     .form-group-desktop .form-input {
         flex-grow: 1;
         flex-shrink: 1;
+    }
+
+    .form-group-desktop .room-input-wrapper {
         margin-right: 12px;
     }
 
@@ -1917,6 +1920,35 @@ main {
         padding-right: 24px;
         flex-shrink: 0;
     }
+}
+
+.room-input-wrapper {
+    position: relative;
+    flex-grow: 1;
+    flex-shrink: 1;
+}
+
+.room-input-wrapper .form-input {
+    padding-right: 48px;
+}
+
+.gen-room-btn {
+    position: absolute;
+    right: 4px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+}
+
+.gen-room-btn:hover {
+    transform: translateY(calc(-50% - 2px)) !important;
 }
 
 .form-input {
