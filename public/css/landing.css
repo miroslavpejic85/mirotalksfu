@@ -1937,18 +1937,39 @@ main {
     right: 4px;
     top: 50%;
     transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    min-width: 40px;
+    width: 36px;
+    height: 36px;
+    min-width: 36px;
     padding: 0 !important;
     display: flex;
     align-items: center;
     justify-content: center;
     margin: 0 !important;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    color: rgba(255, 255, 255, 0.5);
+    transition:
+        color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        background 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        filter 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
 }
 
 .gen-room-btn:hover {
-    transform: translateY(calc(-50% - 2px)) !important;
+    color: rgba(255, 255, 255, 0.95);
+    background: linear-gradient(65deg, rgba(2, 112, 215, 0.15) 0%, rgba(15, 138, 253, 0.1) 100%);
+    filter: brightness(1.1) saturate(1.2);
+    box-shadow: 0 4px 12px rgba(2, 112, 215, 0.25);
+    transform: translateY(calc(-50% - 2px));
+}
+
+.gen-room-btn:active {
+    transform: translateY(-50%);
+    filter: brightness(0.95);
+    box-shadow: none;
 }
 
 .form-input {
