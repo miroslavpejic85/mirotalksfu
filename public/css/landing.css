@@ -2395,10 +2395,6 @@ main {
     color: grey;
 }
 
-.loading-img {
-    width: 400px;
-}
-
 .c-pointer {
     border-radius: 14px;
     cursor: pointer;

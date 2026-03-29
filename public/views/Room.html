@@ -146,9 +146,12 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
 
-        <div id="loadingDiv" class="center pulsate">
+        <div id="loadingDiv" class="center">
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+            </div>
             <h1>Loading</h1>
-            <img class="loading-img" src="../images/loading.gif" />
             <pre>
 Please allow the camera or microphone
 access to use this app.
@@ -158,13 +161,13 @@ access to use this app.
         <section>
             <div id="initUser" class="init-user hidden">
                 <div id="initVideoContainer" class="init-video-container">
-                    <video
-                        id="initVideo"
-                        playsinline="true"
-                        autoplay=""
-                        class="mirror"
-                        poster="../images/loader.gif"
-                    ></video>
+                    <video id="initVideo" playsinline="true" autoplay="" class="mirror"></video>
+                    <div id="initVideoLoader" class="init-video-loader">
+                        <div class="loading-spinner">
+                            <div class="spinner-ring"></div>
+                            <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                        </div>
+                    </div>
                     <div id="imageGrid" class="image-grid fadein"></div>
                     <span id="initErrorMessage" class="show-error"></span>
                 </div>
@@ -1061,7 +1064,18 @@ access to use this app.
 
                     <div id="tabVideoAI" class="tabcontent">
                         <div class="avatarsVideoAI">
-                            <img id="avatarVideoAIPreview" src="../images/loader.gif" alt="Avatar Preview" />
+                            <div id="avatarVideoAIPreviewContainer" class="avatar-preview-container">
+                                <div id="avatarVideoAISpinner" class="loading-spinner">
+                                    <div class="spinner-ring"></div>
+                                    <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                                </div>
+                                <img
+                                    id="avatarVideoAIPreview"
+                                    src=""
+                                    alt="Avatar Preview"
+                                    class="hidden"
+                                />
+                            </div>
                             <div id="avatarVideoAISelectedName" class="avatarSelectedName"></div>
                             <hr />
                             <div class="container-flex">

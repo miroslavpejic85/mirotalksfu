@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.69
+ * @version 2.1.70
  *
  */
 
@@ -1474,6 +1474,7 @@ async function checkInitVideo(isVideoAllowed) {
         if (initStream) {
             stopTracks(initStream);
             elemDisplay('initVideo', false);
+            elemDisplay('initVideoLoader', false);
             initVideoContainerShow(false);
             sound('left');
         }
@@ -2620,6 +2621,7 @@ async function changeCamera(deviceId) {
     if (initStream) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
+        elemDisplay('initVideoLoader', true);
         initVideoContainerShow();
     }
     const videoConstraints = {
@@ -2643,6 +2645,7 @@ async function changeCamera(deviceId) {
             checkInitConfig();
             camera = detectCameraFacingMode(camStream);
             handleCameraMirror(initVideo);
+            elemDisplay('initVideoLoader', false);
             isInitVideoLoaded = true;
         })
         .catch((error) => {
@@ -2765,6 +2768,7 @@ async function toggleScreenSharing() {
     if (initStream) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
+        elemDisplay('initVideoLoader', true);
         initVideoContainerShow();
     }
     joinRoomWithScreen = !joinRoomWithScreen;
@@ -2782,6 +2786,7 @@ async function toggleScreenSharing() {
                 initVideo.srcObject = screenStream;
                 initStream = screenStream;
                 console.log('04.6 ----> Success attached init screen video stream', initStream);
+                elemDisplay('initVideoLoader', false);
                 show(initStopScreenButton);
                 hide(initStartScreenButton);
                 disable(initVideoSelect, true);
@@ -6747,7 +6752,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.69',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.70',
         html: `
             <br />
             <div id="about">

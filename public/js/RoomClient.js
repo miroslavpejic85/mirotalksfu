@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.69
+ * @version 2.1.70
  *
  */
 
@@ -2569,6 +2569,33 @@ class RoomClient {
         return button;
     }
 
+    createVideoLoader(id) {
+        const loader = document.createElement('div');
+        loader.id = id;
+        loader.className = 'video-loader';
+        loader.innerHTML = `
+            <div class="loading-spinner">
+                <div class="spinner-ring"></div>
+                <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+            </div>`;
+        return loader;
+    }
+
+    hideVideoLoader(container) {
+        const loader = container.querySelector('.video-loader');
+        if (loader) loader.style.display = 'none';
+    }
+
+    hideVideoLoaderOnPlay(videoElem) {
+        const container = videoElem.parentElement;
+        if (!container) return;
+        const hide = () => {
+            this.hideVideoLoader(container);
+            videoElem.removeEventListener('playing', hide);
+        };
+        videoElem.addEventListener('playing', hide);
+    }
+
     createElement(id, type, className) {
         const element = document.createElement(type);
         element.id = id;
@@ -2654,8 +2681,9 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.muted = true;
                 elem.volume = 0;
-                elem.poster = image.poster;
                 elem.style.objectFit = isScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
+
+                const localVideoLoader = this.createVideoLoader(id + '__loader');
 
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
@@ -2724,6 +2752,7 @@ class RoomClient {
                 vb.appendChild(p);
 
                 d.appendChild(elem);
+                d.appendChild(localVideoLoader);
                 d.appendChild(pm);
                 d.appendChild(i);
                 d.appendChild(p);
@@ -3154,8 +3183,9 @@ class RoomClient {
                 elem.autoplay = true;
                 elem.muted = true;
                 elem.className = '';
-                elem.poster = image.poster;
                 elem.style.objectFit = remoteIsScreen || isBroadcastingEnabled ? 'contain' : 'var(--videoObjFit)';
+
+                const remoteVideoLoader = this.createVideoLoader(id + '__loader');
 
                 vb = document.createElement('div');
                 vb.id = id + '__vb';
@@ -3258,6 +3288,7 @@ class RoomClient {
                 if (!this.isMobileDevice) vb.appendChild(pn);
 
                 d.appendChild(elem);
+                d.appendChild(remoteVideoLoader);
                 d.appendChild(i);
                 d.appendChild(p);
                 d.appendChild(pm);
@@ -3766,6 +3797,9 @@ class RoomClient {
         const consumerStream = new MediaStream();
         consumerStream.addTrack(track);
         elem.srcObject = consumerStream;
+        if (type !== mediaType.audio) {
+            this.hideVideoLoaderOnPlay(elem);
+        }
         console.log(who + ' Success attached media ' + type);
     }
 
@@ -10261,6 +10295,7 @@ class RoomClient {
             .request('getAvatarList')
             .then(function (completion) {
                 const avatarVideoAIPreview = document.getElementById('avatarVideoAIPreview');
+                const avatarVideoAISpinner = document.getElementById('avatarVideoAISpinner');
                 const avatarVideoAIcontainer = document.getElementById('avatarVideoAIcontainer');
                 const avatarVideoAICount = document.getElementById('avatarVideoAICount');
                 const avatarVideoAISelectedName = document.getElementById('avatarVideoAISelectedName');
@@ -10279,6 +10314,10 @@ class RoomClient {
                     VideoAI.avatarName = avatar.avatar_name;
                     avatarVideoAIPreview.src = avatar.preview_image_url;
                     avatarVideoAIPreview.alt = avatar.avatar_name;
+                    avatarVideoAIPreview.onload = () => {
+                        if (avatarVideoAISpinner) avatarVideoAISpinner.style.display = 'none';
+                        avatarVideoAIPreview.classList.remove('hidden');
+                    };
                     avatarVideoAISelectedName.textContent = avatar.avatar_name;
                     console.log('Avatar image click event', { avatar });
                 }
@@ -10428,8 +10467,9 @@ class RoomClient {
         this.videoAIElement.setAttribute('playsinline', true);
         this.videoAIElement.autoplay = true;
         this.videoAIElement.className = '';
-        this.videoAIElement.poster = image.poster;
         this.videoAIElement.style.objectFit = 'cover';
+
+        const videoAILoader = this.createVideoLoader('videoAILoader');
 
         // Session time limit countdown
         const sessionTimerSpan = document.createElement('span');
@@ -10447,6 +10487,7 @@ class RoomClient {
         avatarName.appendChild(an);
 
         this.videoAIContainer.appendChild(this.videoAIElement);
+        this.videoAIContainer.appendChild(videoAILoader);
         this.videoAIContainer.appendChild(vb);
         this.videoAIContainer.appendChild(avatarName);
         this.videoMediaContainer.appendChild(this.videoAIContainer);
@@ -10576,6 +10617,9 @@ class RoomClient {
 
                 this.videoAIElement.srcObject = mediaStream;
                 this.videoAIElement.play().catch(() => {});
+                if (track.kind === 'video') {
+                    this.hideVideoLoaderOnPlay(this.videoAIElement);
+                }
             }
         });
 
