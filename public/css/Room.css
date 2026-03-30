@@ -89,9 +89,17 @@ body {
 /* Custom CSS spinner */
 .loading-spinner {
     position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
     width: 120px;
     height: 120px;
-    margin: 0 auto 15px;
+    margin: 0 auto;
+}
+
+#loadingDiv .loading-spinner {
+    margin-bottom: 15px;
 }
 
 .spinner-ring {
