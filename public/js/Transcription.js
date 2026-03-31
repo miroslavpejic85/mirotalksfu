@@ -273,9 +273,20 @@ class Transcription {
 
     toggleBg() {
         this.isBgTransparent = !this.isBgTransparent;
-        this.isBgTransparent
-            ? document.documentElement.style.setProperty('--trx-bg', 'rgba(0, 0, 0, 0.100)')
-            : setTheme();
+        const transcriptionContainer = document.querySelector('.transcription-room');
+        if (this.isBgTransparent) {
+            document.documentElement.style.setProperty('--trx-bg', 'rgba(0, 0, 0, 0.200)');
+            if (transcriptionContainer) {
+                transcriptionContainer.style.backdropFilter = 'blur(12px)';
+                transcriptionContainer.style.webkitBackdropFilter = 'blur(12px)';
+            }
+        } else {
+            setTheme();
+            if (transcriptionContainer) {
+                transcriptionContainer.style.backdropFilter = 'none';
+                transcriptionContainer.style.webkitBackdropFilter = 'none';
+            }
+        }
     }
 
     maximize() {

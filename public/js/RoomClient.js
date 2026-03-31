@@ -6088,9 +6088,20 @@ class RoomClient {
 
     chatToggleBg() {
         this.isChatBgTransparent = !this.isChatBgTransparent;
-        this.isChatBgTransparent
-            ? document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.100)')
-            : setTheme();
+        const chatContainer = document.querySelector('.chat-container');
+        if (this.isChatBgTransparent) {
+            document.documentElement.style.setProperty('--msger-bg', 'rgba(0, 0, 0, 0.200)');
+            if (chatContainer) {
+                chatContainer.style.backdropFilter = 'blur(12px)';
+                chatContainer.style.webkitBackdropFilter = 'blur(12px)';
+            }
+        } else {
+            setTheme();
+            if (chatContainer) {
+                chatContainer.style.backdropFilter = 'none';
+                chatContainer.style.webkitBackdropFilter = 'none';
+            }
+        }
     }
 
     chatClean() {
