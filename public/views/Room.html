@@ -1757,53 +1757,58 @@ access to use this app.
                     <!-- CHAT MESSAGE -->
                     <div class="chat-message clearfix">
                         <!-- CHAT MESSAGE INPUT -->
-                        <div class="input-group mb-0 w-100">
-                            <div class="input-group mb-3">
-                                <span class="input-group-text"><i class="fas fa-message"></i></span>
+                        <div class="chat-input-wrapper">
+                            <div class="chat-input-container">
                                 <textarea
                                     id="chatMessage"
-                                    class="form-control"
-                                    placeholder="Enter text here..."
+                                    class="chat-input-textarea"
+                                    placeholder="Type a message..."
                                     rows="1"
                                 ></textarea>
-                                <!-- <input 
-                                    id="chatMessage" 
-                                    type="text" 
-                                    class="form-control" 
-                                    placeholder="Enter text here..."
-                                > -->
+                                <button id="chatSendButton" class="chat-send-btn hidden">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
                             </div>
-                        </div>
-
-                        <!-- CHAT MESSAGE OPTIONS  -->
-                        <div class="mt10">
-                            <button id="chatEmojiButton" class="float-left mr5 hidden">
-                                <i class="fas fa-smile"></i>
-                            </button>
-                            <button id="chatShowParticipantsListBtn" class="float-left mr5 hidden">
-                                <i class="fas fa-users"></i>
-                            </button>
-                            <button id="chatMarkdownButton" class="float-left mr5 hidden">
-                                <i class="fab fa-markdown"></i>
-                            </button>
-                            <button id="fileShareChatButton" class="float-left mr5 hidden">
-                                <i class="fas fa-paperclip"></i>
-                            </button>
-                            <button id="chatSpeechStartButton" class="float-left mr5 hidden">
-                                <i class="fas fa-microphone-slash"></i>
-                            </button>
-                            <button id="chatSpeechStopButton" class="float-left mr5 hidden">
-                                <i class="fas fa-microphone"></i>
-                            </button>
-                            <button id="chatPasteButton" class="float-left mr5 hidden">
-                                <i class="fas fa-paste"></i>
-                            </button>
-                            <button id="chatCleanTextButton" class="float-left mr5 hidden">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                            <button id="chatSendButton" class="float-right hidden">
-                                <i class="fas fa-paper-plane"></i>
-                            </button>
+                            <div class="chat-toolbar">
+                                <div class="chat-toolbar-left">
+                                    <button id="chatEmojiButton" class="chat-toolbar-btn hidden" title="Emoji">
+                                        <i class="fas fa-smile"></i>
+                                    </button>
+                                    <button
+                                        id="chatShowParticipantsListBtn"
+                                        class="chat-toolbar-btn hidden"
+                                        title="Participants"
+                                    >
+                                        <i class="fas fa-users"></i>
+                                    </button>
+                                    <button id="chatMarkdownButton" class="chat-toolbar-btn hidden" title="Markdown">
+                                        <i class="fab fa-markdown"></i>
+                                    </button>
+                                    <button
+                                        id="fileShareChatButton"
+                                        class="chat-toolbar-btn hidden"
+                                        title="Attach file"
+                                    >
+                                        <i class="fas fa-paperclip"></i>
+                                    </button>
+                                    <button id="chatSpeechStartButton" class="chat-toolbar-btn hidden" title="Speech">
+                                        <i class="fas fa-microphone-slash"></i>
+                                    </button>
+                                    <button
+                                        id="chatSpeechStopButton"
+                                        class="chat-toolbar-btn hidden"
+                                        title="Stop speech"
+                                    >
+                                        <i class="fas fa-microphone"></i>
+                                    </button>
+                                    <button id="chatPasteButton" class="chat-toolbar-btn hidden" title="Paste">
+                                        <i class="fas fa-paste"></i>
+                                    </button>
+                                    <button id="chatCleanTextButton" class="chat-toolbar-btn hidden" title="Clear text">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
