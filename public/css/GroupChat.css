@@ -151,19 +151,8 @@
 }
 
 .people-list .about-buttons {
-    clear: both;
-    width: 100%;
-    margin-top: 0;
-    max-height: 0;
-    overflow: hidden;
-    opacity: 0;
-    visibility: hidden;
-    pointer-events: none;
-    transition:
-        max-height 0.2s ease,
-        margin-top 0.2s ease,
-        opacity 0.2s ease,
-        visibility 0.2s ease;
+    margin-top: 35px;
+    max-height: 64px;
 }
 
 .people-list .dropdown {
@@ -173,16 +162,6 @@
 
 .people-list .dropdown-menu {
     z-index: 1085 !important;
-}
-
-.people-list .chat-list > li:hover .about-buttons,
-.people-list .chat-list > li.active .about-buttons,
-.people-list .chat-list > li:focus-within .about-buttons {
-    margin-top: 35px;
-    max-height: 64px;
-    opacity: 1;
-    visibility: visible;
-    pointer-events: auto;
 }
 
 .people-list .status {
