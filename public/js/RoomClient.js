@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.71
+ * @version 2.1.72
  *
  */
 
@@ -9781,13 +9781,18 @@ class RoomClient {
 
     searchPeer() {
         const searchParticipantsFromList = this.getId('searchParticipantsFromList');
-        const searchFilter = searchParticipantsFromList.value.toUpperCase();
+        const searchFilter = (searchParticipantsFromList?.value || '').toUpperCase();
         const participantsList = this.getId('participantsList');
-        const participantsListItems = participantsList.getElementsByTagName('li');
+        const participantsListItems = Array.from(participantsList?.children || []).filter(
+            (item) => item.tagName === 'LI'
+        );
 
-        for (let i = 0; i < participantsListItems.length; i++) {
-            const li = participantsListItems[i];
-            const participantName = li.getAttribute('data-to-name').toUpperCase();
+        for (const li of participantsListItems) {
+            const participantName = (
+                li.getAttribute('data-to-name') ||
+                li.querySelector('.name')?.textContent ||
+                ''
+            ).toUpperCase();
             const shouldDisplay = participantName.includes(searchFilter);
             li.style.display = shouldDisplay ? '' : 'none';
         }

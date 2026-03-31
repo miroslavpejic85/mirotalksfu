@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.71
+ * @version 2.1.72
  *
  */
 
@@ -1218,6 +1218,7 @@ async function whoAreYou() {
         isVideoAllowed = false;
         isInitVideoLoaded = true;
         elemDisplay('initVideo', false);
+        elemDisplay('initVideoLoader', false);
         elemDisplay('initVideoButton', false);
         elemDisplay('initAudioVideoButton', false);
         elemDisplay('initVideoAudioRefreshButton', false);
@@ -2621,7 +2622,7 @@ async function changeCamera(deviceId) {
     if (initStream) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
-        elemDisplay('initVideoLoader', true);
+        elemDisplay('initVideoLoader', true, 'flex');
         initVideoContainerShow();
     }
     const videoConstraints = {
@@ -2769,7 +2770,7 @@ async function toggleScreenSharing() {
     if (initStream) {
         await stopTracks(initStream);
         elemDisplay('initVideo', true);
-        elemDisplay('initVideoLoader', true);
+        elemDisplay('initVideoLoader', true, 'flex');
         initVideoContainerShow();
     }
     joinRoomWithScreen = !joinRoomWithScreen;
@@ -6074,6 +6075,7 @@ function setCustomTheme() {
     document.documentElement.style.setProperty('--left-msg-bg', `${color}`);
     document.documentElement.style.setProperty('--right-msg-bg', `${color}`);
     document.documentElement.style.setProperty('--select-bg', `${color}`);
+    document.documentElement.style.setProperty('--select-focus-color', `color-mix(in srgb, ${color} 58%, white)`);
     document.documentElement.style.setProperty('--tab-btn-active', `${color}`);
     document.documentElement.style.setProperty('--settings-bg', `radial-gradient(${color}, ${color})`);
     document.documentElement.style.setProperty('--wb-bg', `radial-gradient(${color}, ${color})`);
@@ -6097,6 +6099,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#141420');
             document.documentElement.style.setProperty('--right-msg-bg', '#1a1a26');
             document.documentElement.style.setProperty('--select-bg', '#161622');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(102, 190, 255, 0.5)');
             document.documentElement.style.setProperty('--tab-btn-active', '#1e1e28');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #0e0e14, #1e1e28)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #0e0e14, #1e1e28)');
@@ -6113,6 +6116,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#111118');
             document.documentElement.style.setProperty('--right-msg-bg', '#1a1a22');
             document.documentElement.style.setProperty('--select-bg', '#14141c');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(154, 186, 255, 0.42)');
             document.documentElement.style.setProperty('--tab-btn-active', '#181820');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #0d0d12, #181820)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #0d0d12, #181820)');
@@ -6129,6 +6133,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#24242e');
             document.documentElement.style.setProperty('--right-msg-bg', '#32323e');
             document.documentElement.style.setProperty('--select-bg', '#222230');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(196, 204, 224, 0.38)');
             document.documentElement.style.setProperty('--tab-btn-active', '#3a3a46');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1c1c24, #3a3a46)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1c1c24, #3a3a46)');
@@ -6145,6 +6150,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#0d1816');
             document.documentElement.style.setProperty('--right-msg-bg', '#1e2e2a');
             document.documentElement.style.setProperty('--select-bg', '#122420');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(111, 207, 151, 0.42)');
             document.documentElement.style.setProperty('--tab-btn-active', '#1a3830');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #0f1d1a, #1a3830)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #0f1d1a, #1a3830)');
@@ -6161,6 +6167,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#0e1420');
             document.documentElement.style.setProperty('--right-msg-bg', '#1a2840');
             document.documentElement.style.setProperty('--select-bg', '#131c30');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(107, 163, 214, 0.45)');
             document.documentElement.style.setProperty('--tab-btn-active', '#1e3050');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #111827, #1e3050)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #111827, #1e3050)');
@@ -6177,6 +6184,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#180e12');
             document.documentElement.style.setProperty('--right-msg-bg', '#2a1c22');
             document.documentElement.style.setProperty('--select-bg', '#20141a');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(224, 112, 112, 0.42)');
             document.documentElement.style.setProperty('--tab-btn-active', '#332028');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1c1015, #332028)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1c1015, #332028)');
@@ -6193,6 +6201,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#140e22');
             document.documentElement.style.setProperty('--right-msg-bg', '#261c3a');
             document.documentElement.style.setProperty('--select-bg', '#1c1430');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(176, 124, 200, 0.42)');
             document.documentElement.style.setProperty('--tab-btn-active', '#2e2045');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #18102a, #2e2045)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #18102a, #2e2045)');
@@ -6209,6 +6218,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#18120e');
             document.documentElement.style.setProperty('--right-msg-bg', '#302218');
             document.documentElement.style.setProperty('--select-bg', '#221a12');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(232, 165, 96, 0.45)');
             document.documentElement.style.setProperty('--tab-btn-active', '#3a2a1a');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1c1510, #3a2a1a)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1c1510, #3a2a1a)');
@@ -6225,6 +6235,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#180e14');
             document.documentElement.style.setProperty('--right-msg-bg', '#2e1c28');
             document.documentElement.style.setProperty('--select-bg', '#201420');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(216, 139, 160, 0.42)');
             document.documentElement.style.setProperty('--tab-btn-active', '#382030');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1c1018, #382030)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1c1018, #382030)');
@@ -6241,6 +6252,7 @@ function setTheme() {
             document.documentElement.style.setProperty('--left-msg-bg', '#16140e');
             document.documentElement.style.setProperty('--right-msg-bg', '#2c2a18');
             document.documentElement.style.setProperty('--select-bg', '#201e12');
+            document.documentElement.style.setProperty('--select-focus-color', 'rgba(212, 184, 92, 0.44)');
             document.documentElement.style.setProperty('--tab-btn-active', '#36321a');
             document.documentElement.style.setProperty('--settings-bg', 'linear-gradient(135deg, #1a1810, #36321a)');
             document.documentElement.style.setProperty('--wb-bg', 'linear-gradient(135deg, #1a1810, #36321a)');
@@ -6753,7 +6765,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.71',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.72',
         html: `
             <br />
             <div id="about">

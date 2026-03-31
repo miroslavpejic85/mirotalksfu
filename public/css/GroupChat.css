@@ -61,22 +61,76 @@
     /* border: 1px solid lime; */
 }
 
-.people-list .chat-list li {
-    padding: 10px 15px;
-    list-style: none;
-    border-radius: 3px;
+.people-list > div:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: nowrap;
 }
 
-.people-list .chat-list li:hover {
-    background: rgba(0, 0, 0, 0.2);
+.people-list > div:first-child button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 38px;
+    line-height: 1;
+}
+
+.people-list > div:first-child button i {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1;
+}
+
+.people-list > div:first-child #chatShareRoomBtn {
+    margin-right: auto;
+}
+
+.people-list > div:first-child button:not(#chatShareRoomBtn) {
+    flex: 0 0 38px;
+    width: 38px;
+    padding: 0;
+}
+
+.people-list .chat-list > li {
+    padding: 12px 15px;
+    list-style: none;
+    margin-bottom: 10px;
+    position: relative;
+    overflow: visible;
+    z-index: 0;
+    border-radius: 12px;
+    background: transparent;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+.people-list .chat-list > li:hover {
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
+    transform: translateY(-1px);
+    z-index: 20;
     cursor: pointer;
 }
 
-.people-list .chat-list li.active {
-    background: rgba(0, 0, 0, 0.2);
+.people-list .chat-list > li.active {
+    background: var(--body-bg);
+    box-shadow: var(--box-shadow);
+    z-index: 25;
 }
 
-.people-list .chat-list li .name {
+.people-list .chat-list > li:focus-within,
+.people-list .chat-list > li .dropdown.show,
+.people-list .chat-list > li:has(.dropdown-menu.show) {
+    z-index: 30;
+}
+
+.people-list .chat-list > li .name {
     color: #fff;
     font-size: 15px;
 }
@@ -97,9 +151,38 @@
 }
 
 .people-list .about-buttons {
+    clear: both;
+    width: 100%;
+    margin-top: 0;
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition:
+        max-height 0.2s ease,
+        margin-top 0.2s ease,
+        opacity 0.2s ease,
+        visibility 0.2s ease;
+}
+
+.people-list .dropdown {
+    position: relative;
+    z-index: 31;
+}
+
+.people-list .dropdown-menu {
+    z-index: 1085 !important;
+}
+
+.people-list .chat-list > li:hover .about-buttons,
+.people-list .chat-list > li.active .about-buttons,
+.people-list .chat-list > li:focus-within .about-buttons {
     margin-top: 35px;
-    width: auto;
-    /* display: inline-flex; */
+    max-height: 64px;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .people-list .status {
@@ -386,10 +469,83 @@ input[type='text'] {
     transform: translateY(-3px);
 }
 
+.people-list .input-group {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    margin-top: 16px;
+    padding: 4px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--body-bg) 82%, transparent);
+    border: var(--border);
+    box-shadow: 0 8px 18px rgba(0, 0, 0, 0.12);
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease,
+        background 0.2s ease;
+}
+
+.people-list .input-group:hover {
+    box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+}
+
+.people-list .input-group-text {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    height: 44px;
+    margin-right: 2px;
+    border: 0;
+    border-right: 1px solid color-mix(in srgb, #ffffff 8%, transparent);
+    border-radius: 16px 0 0 16px;
+    background: color-mix(in srgb, #ffffff 6%, var(--body-bg) 94%);
+    color: #ffffff;
+    font-size: 20px;
+}
+
+.people-list #searchParticipantsFromList {
+    border: 0;
+    border-radius: 0 16px 16px 0;
+    background: transparent !important;
+    box-shadow: none !important;
+    color: #ffffff;
+    padding: 12px 16px;
+    font-size: 14px;
+    line-height: 1.2;
+    font-weight: 500;
+}
+
+.people-list #searchParticipantsFromList:focus {
+    outline: none;
+    box-shadow: none !important;
+}
+
+.people-list #searchParticipantsFromList::placeholder {
+    color: color-mix(in srgb, #ffffff 60%, transparent);
+}
+
 /* handle screen sizes */
 @media screen and (max-width: 600px) {
     .people-list {
         width: 100% !important;
         height: 100% !important;
+    }
+
+    .people-list .input-group {
+        margin-top: 10px;
+        padding: 3px;
+    }
+
+    .people-list .input-group-text {
+        min-width: 40px;
+        height: 40px;
+        font-size: 18px;
+    }
+
+    .people-list #searchParticipantsFromList {
+        padding: 10px 12px;
+        font-size: 13px;
     }
 }
