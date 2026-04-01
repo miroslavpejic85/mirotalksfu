@@ -5223,8 +5223,8 @@ class RoomClient {
         return !plist.classList.contains('hidden');
     }
 
-    async toggleChat() {
-        if (!BUTTONS.main.chatButton) return;
+    async toggleChat(fromParticipants = false) {
+        if (!fromParticipants && !BUTTONS.main.chatButton) return;
         const chatRoom = this.getId('chatRoom');
         chatRoom.classList.toggle('show');
         if (!this.isChatOpen) {
@@ -5258,11 +5258,26 @@ class RoomClient {
         elemDisplay(chatFooter, !isFullWidth);
     }
 
-    toggleShowParticipants() {
+    toggleShowParticipants(fromUser = false) {
         const plist = this.getId('plist');
         const chat = this.getId('chat');
         plist.classList.toggle('hidden');
         const isParticipantsListHidden = !this.isPlistOpen();
+
+        if (!BUTTONS.main.chatButton) {
+            elemDisplay(chat.id, false);
+            if (isParticipantsListHidden && fromUser) {
+                // User clicked X button: close the entire chat panel
+                if (this.isChatOpen) this.toggleChat(true);
+            } else if (!isParticipantsListHidden) {
+                // Opening participants: show plist full-width
+                plist.style.width = '100%';
+                plist.style.position = this.isMobileDevice ? 'fixed' : 'absolute';
+            }
+            this.updateChatFooterVisibility();
+            return;
+        }
+
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
         chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
         if (this.isChatPinned) elemDisplay(chat.id, isParticipantsListHidden);
@@ -5276,11 +5291,14 @@ class RoomClient {
     async toggleParticipants() {
         this.isParticipantsOpen = !this.isParticipantsOpen;
         if (!this.isParticipantsOpen && this.isChatOpen) {
-            this.toggleChat();
+            this.toggleChat(true);
             return;
         }
         if (!this.isChatOpen) {
-            this.toggleChat();
+            this.toggleChat(true);
+            if (!BUTTONS.main.chatButton) {
+                elemDisplay('chat', false);
+            }
             await this.sleep(500);
         }
         if ((isDesktopDevice && this.isChatPinned) || !isDesktopDevice) {

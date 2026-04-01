@@ -2223,10 +2223,10 @@ function handleButtons() {
         transcription.delete();
     };
     chatHideParticipantsList.onclick = (e) => {
-        rc.toggleShowParticipants();
+        rc.toggleShowParticipants(true);
     };
     chatShowParticipantsListBtn.onclick = (e) => {
-        rc.toggleShowParticipants();
+        rc.toggleShowParticipants(true);
     };
     chatShareRoomBtn.onclick = (e) => {
         shareRoom(true);
