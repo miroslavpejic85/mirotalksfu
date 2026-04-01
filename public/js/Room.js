@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.73
+ * @version 2.1.74
  *
  */
 
@@ -3335,8 +3335,8 @@ function setKeyboardShortcuts(enabled) {
 // ####################################################
 
 function handleInputs() {
-    chatMessage.onkeyup = (e) => {
-        if (e.keyCode === 13 && (isMobileDevice || !e.shiftKey)) {
+    chatMessage.onkeydown = (e) => {
+        if (e.key === 'Enter' && (isMobileDevice || !e.shiftKey)) {
             e.preventDefault();
             chatSendButton.click();
         }
@@ -6778,7 +6778,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.73',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.74',
         html: `
             <br />
             <div id="about">

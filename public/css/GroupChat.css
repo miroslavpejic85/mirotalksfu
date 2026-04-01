@@ -418,6 +418,13 @@
     filter: brightness(0.92);
 }
 
+.chat-send-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.5);
+    pointer-events: none;
+}
+
 /* Toolbar */
 .chat-toolbar {
     display: flex;

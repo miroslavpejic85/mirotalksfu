@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.1.73",
+    "version": "2.1.74",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -8,7 +8,8 @@
         "start": "node app/src/Server.js",
         "start-dev": "nodemon app/src/Server.js",
         "debug": "DEBUG='mediasoup*' node app/src/Server.js",
-        "client-compile": "npx webpack",
+        "build:mediasoup-client": "npx esbuild node_modules/mediasoup-client/lib/index.js --bundle --minify --format=iife --global-name=mediasoupClient --outfile=public/sfu/MediasoupClient.js --platform=browser",
+        "postinstall": "npm run build:mediasoup-client",
         "lint": "npx prettier --write .",
         "mailpit:up": "docker-compose -f docker-compose-mailpit.yml up -d",
         "mailpit:down": "docker-compose -f docker-compose-mailpit.yml down",
@@ -96,17 +97,13 @@
         "uuid": "13.0.0"
     },
     "devDependencies": {
-        "@babel/core": "^7.29.0",
-        "@babel/preset-env": "^7.29.2",
-        "babel-loader": "^10.1.1",
+        "esbuild": "^0.27.4",
         "mocha": "^11.7.5",
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.14",
         "prettier": "3.8.1",
         "proxyquire": "^2.1.3",
         "should": "^13.2.3",
-        "sinon": "^21.0.3",
-        "webpack": "^5.105.4",
-        "webpack-cli": "^7.0.2"
+        "sinon": "^21.0.3"
     }
 }
