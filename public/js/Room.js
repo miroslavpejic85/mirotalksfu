@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.74
+ * @version 2.1.75
  *
  */
 
@@ -347,6 +347,7 @@ let quill = null;
 
 document.addEventListener('DOMContentLoaded', function () {
     initCursorLightEffect();
+    initDocumentListener();
     socket.once('connect', () => {
         initClient();
     });
@@ -365,6 +366,15 @@ function initCursorLightEffect() {
         const y = ((e.clientY - rect.top) / rect.height) * 100;
         videoMediaContainer.style.setProperty('--mouse-x', x + '%');
         videoMediaContainer.style.setProperty('--mouse-y', y + '%');
+    });
+}
+
+function initDocumentListener() {
+    // Close navbar dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.navbar-dropdown')) {
+            document.querySelectorAll('.navbar-dropdown-content.show').forEach((el) => el.classList.remove('show'));
+        }
     });
 }
 
@@ -2397,7 +2407,7 @@ function handleButtons() {
         fileShareButton.click();
     };
     fileShareChatButton.onclick = () => {
-        rc.chatPeerId === 'all' ? fileShareButton.click() : rc.selectFileToShare(rc.chatPeerId, false);
+        rc.chatPeerId === 'all' ? fileShareButton.click() : rc.selectFileToShare(rc.chatPeerId, false, rc.chatPeerName);
     };
     videoShareButton.onclick = () => {
         rc.shareVideo('all');
@@ -5928,10 +5938,10 @@ function getParticipantsList(peers) {
                 li += `<li><button class="ml5" id='${peer_id}___pScreenStop' onclick="rc.peerAction('me',this.id,'stop')">${_PEER.screenOn} Toggle screen</button></li>`;
 
                 if (BUTTONS.participantsList.sendFileButton) {
-                    li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>`;
+                    li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false, '${peer_name}')">${peer_sendFile} Share file</button></li>`;
                 }
 
-                li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share audio/video</button></li>`;
+                li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}', '${peer_name}');">${_PEER.sendVideo} Share audio/video</button></li>`;
 
                 if (BUTTONS.participantsList.geoLocationButton) {
                     li += `<li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>`;
@@ -6003,10 +6013,10 @@ function getParticipantsList(peers) {
                         <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
 
                     if (BUTTONS.participantsList.sendFileButton) {
-                        li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false)">${peer_sendFile} Share file</button></li>`;
+                        li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false, '${peer_name}')">${peer_sendFile} Share file</button></li>`;
                     }
 
-                    li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}');">${_PEER.sendVideo} Share Audio/Video</button></li>
+                    li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}', '${peer_name}');">${_PEER.sendVideo} Share Audio/Video</button></li>
                         </ul>
                     </div>
                     `;
@@ -6778,7 +6788,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.74',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.75',
         html: `
             <br />
             <div id="about">
