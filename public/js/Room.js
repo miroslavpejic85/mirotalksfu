@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.72
+ * @version 2.1.73
  *
  */
 
@@ -1204,6 +1204,7 @@ async function whoAreYou() {
     if (peer_name) {
         hide(loadingDiv);
         checkMedia();
+        if (!BUTTONS.main.startScreenButton) isScreenAllowed = false;
         getPeerInfo();
         joinRoom(peer_name, room_id);
         return;
@@ -1511,6 +1512,10 @@ function checkMedia() {
     // elemDisplay('tabVideoDevicesBtn', isVideoAllowed);
     // elemDisplay('tabAudioDevicesBtn', isAudioAllowed);
 
+    // Enforce BUTTONS config: URL params cannot override disabled buttons
+    if (!BUTTONS.main.startAudioButton) isAudioAllowed = false;
+    if (!BUTTONS.main.startVideoButton) isVideoAllowed = false;
+
     console.log('Direct join', {
         audio: isAudioAllowed,
         video: isVideoAllowed,
@@ -1800,6 +1805,14 @@ function roomIsReady() {
     BUTTONS.main.settingsButton && show(settingsButton);
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
+    if (!BUTTONS.main.startAudioButton) {
+        elemDisplay('tabAudioDevicesBtn', false);
+        elemDisplay('tabAudioDevices', false);
+    }
+    if (!BUTTONS.main.startVideoButton) {
+        elemDisplay('tabVideoDevicesBtn', false);
+        elemDisplay('tabVideoDevices', false);
+    }
     BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
@@ -6765,7 +6778,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.72',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.73',
         html: `
             <br />
             <div id="about">

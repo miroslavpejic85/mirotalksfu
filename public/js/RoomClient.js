@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.72
+ * @version 2.1.73
  *
  */
 
@@ -1757,18 +1757,21 @@ class RoomClient {
 
         switch (type) {
             case mediaType.audio:
+                if (!BUTTONS.main.startAudioButton) return;
                 this.isAudioAllowed = true;
                 mediaConstraints = this.getAudioConstraints(deviceId);
                 this.peer_info.peer_audio = true;
                 audio = true;
                 break;
             case mediaType.video:
+                if (!BUTTONS.main.startVideoButton) return;
                 this.isVideoAllowed = true;
                 mediaConstraints = swapCamera ? this.getCameraConstraints() : this.getVideoConstraints(deviceId);
                 this.peer_info.peer_video = true;
                 video = true;
                 break;
             case mediaType.screen:
+                if (!BUTTONS.main.startScreenButton) return;
                 mediaConstraints = this.getScreenConstraints();
                 this.peer_info.peer_screen = true;
                 screen = true;
@@ -5221,6 +5224,7 @@ class RoomClient {
     }
 
     async toggleChat() {
+        if (!BUTTONS.main.chatButton) return;
         const chatRoom = this.getId('chatRoom');
         chatRoom.classList.toggle('show');
         if (!this.isChatOpen) {
