@@ -289,13 +289,6 @@
     align-items: center;
 }
 
-.navbar-dropdown > button {
-    background: none !important;
-    border-radius: 0 !important;
-    min-width: 24px !important;
-    min-height: 24px !important;
-}
-
 .navbar-dropdown-content {
     display: none !important;
     position: fixed;
