@@ -181,8 +181,7 @@
     display: flex;
     flex-direction: column;
     margin-left: 300px;
-    /* border-left: var(--border); */
-    border-radius: 14px;
+    border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
     /* border: 1px solid lime; */
 }
 
