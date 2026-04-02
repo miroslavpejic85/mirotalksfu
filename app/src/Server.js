@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.76
+ * @version 2.1.77
  *
  */
 
@@ -2090,7 +2090,8 @@ function startServer() {
             // first we check if the username match the presenters username else if join_first enabled
             if (
                 hostCfg?.presenters?.list?.includes(peer_name) ||
-                (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0)
+                (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0) ||
+                (peer_token && is_presenter)
             ) {
                 presenter.is_presenter = true;
                 presenters[socket.room_id][socket.id] = presenter;
@@ -3936,46 +3937,48 @@ function startServer() {
 
     function isPeerPresenter(room_id, peer_id, peer_name, peer_uuid) {
         try {
-            if (hostCfg?.presenters?.join_first && (!presenters[room_id] || !presenters[room_id][peer_id])) {
-                // Presenter not in the presenters config list, disconnected, or peer_id changed...
-                for (const [existingPeerID, presenter] of Object.entries(presenters[room_id] || {})) {
-                    if (presenter.peer_name === peer_name) {
-                        log.debug('Presenter found', {
-                            room: room_id,
-                            peer_id: existingPeerID,
-                            peer_name: peer_name,
-                        });
-                        return true;
-                    }
-                }
-                return false;
+            // 1. Direct lookup by peer_id (server-assigned socket.id — not user-controlled)
+            const storedPresenter = presenters[room_id]?.[peer_id];
+            if (storedPresenter) {
+                const isPresenter =
+                    storedPresenter.peer_name === peer_name &&
+                    storedPresenter.peer_uuid === peer_uuid &&
+                    storedPresenter.is_presenter === true;
+
+                log.debug('isPeerPresenter Check (stored)', {
+                    room_id: room_id,
+                    peer_id: peer_id,
+                    peer_name: peer_name,
+                    peer_uuid: peer_uuid,
+                    isPresenter: isPresenter,
+                });
+
+                return isPresenter;
             }
 
-            const isPresenter =
-                // 1. Check if join_first mode is enabled and peer matches presenter criteria:
-                //    - Presenters list contains the peer's room_id and peer_id
-                //    - Peer's name and UUID match the stored values
-                //    - Presenter object has additional properties (length > 1)
-                (hostCfg?.presenters?.join_first &&
-                    presenters[room_id]?.[peer_id]?.peer_name === peer_name &&
-                    presenters[room_id]?.[peer_id]?.peer_uuid === peer_uuid &&
-                    Object.keys(presenters[room_id]?.[peer_id] || {}).length > 1) ||
-                // 2. Check if peer_name exists in the static presenters list configuration
-                hostCfg?.presenters?.list?.includes(peer_name) ||
-                // 3. Check if peer is explicitly marked as presenter (e.g., from token)
-                presenters[room_id]?.[peer_id]?.is_presenter ||
-                // 4. Default case (not a presenter)
-                false;
+            // 2. Static presenter list — verify against server-side registered name, not user input
+            const room = roomList.get(room_id);
+            const peer = room?.getPeer(peer_id);
+            if (peer && hostCfg?.presenters?.list?.includes(peer.peer_info.peer_name)) {
+                log.debug('isPeerPresenter Check (static list)', {
+                    room_id: room_id,
+                    peer_id: peer_id,
+                    peer_name: peer.peer_info.peer_name,
+                    isPresenter: true,
+                });
+                return true;
+            }
 
-            log.debug('isPeerPresenter Check', {
+            // 3. Not a presenter
+            log.debug('isPeerPresenter Check (denied)', {
                 room_id: room_id,
                 peer_id: peer_id,
                 peer_name: peer_name,
                 peer_uuid: peer_uuid,
-                isPresenter: isPresenter,
+                isPresenter: false,
             });
 
-            return isPresenter;
+            return false;
         } catch (err) {
             log.error('isPeerPresenter Check error', err);
             return false;
