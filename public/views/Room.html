@@ -1686,9 +1686,12 @@ access to use this app.
                                     <ul class="dropdown-menu text-start" aria-labelledby="chatDropDownMenu">
                                         <li>
                                             <hr />
-                                            <div class="title ml10">
+                                            <div class="transcription-switch-row">
                                                 <i class="fa-solid fa-eye"></i>
-                                                <div class="form-check form-switch form-switch-md ml10">
+                                                <label class="transcription-switch-label" for="showChatOnMsg"
+                                                    >Show on msg</label
+                                                >
+                                                <div class="form-check form-switch form-switch-md">
                                                     <input
                                                         class="form-check-input"
                                                         type="checkbox"
@@ -1696,15 +1699,20 @@ access to use this app.
                                                         checked
                                                     />
                                                 </div>
-                                                <div id="speechMsgDiv" class="title ml10">
-                                                    <i class="fas fa-volume-high"></i>
-                                                    <div class="form-check form-switch form-switch-md ml10">
-                                                        <input
-                                                            class="form-check-input"
-                                                            type="checkbox"
-                                                            id="speechIncomingMsg"
-                                                        />
-                                                    </div>
+                                            </div>
+                                        </li>
+                                        <li id="speechMsgDiv">
+                                            <div class="transcription-switch-row">
+                                                <i class="fas fa-volume-high"></i>
+                                                <label class="transcription-switch-label" for="speechIncomingMsg"
+                                                    >Speech msg</label
+                                                >
+                                                <div class="form-check form-switch form-switch-md">
+                                                    <input
+                                                        class="form-check-input"
+                                                        type="checkbox"
+                                                        id="speechIncomingMsg"
+                                                    />
                                                 </div>
                                             </div>
                                             <hr />
@@ -1907,13 +1915,32 @@ access to use this app.
                             <ul class="dropdown-menu text-start" aria-labelledby="transcriptionDropDownMenu">
                                 <li>
                                     <hr />
-                                    <div class="title ml5">
+                                    <div class="transcription-switch-row">
                                         <i class="fa-solid fa-eye"></i>
-                                        <div class="form-check form-switch form-switch-md ml-5">
+                                        <label class="transcription-switch-label" for="transcriptShowOnMsg"
+                                            >Show on msg</label
+                                        >
+                                        <div class="form-check form-switch form-switch-md">
                                             <input
                                                 class="form-check-input"
                                                 type="checkbox"
                                                 id="transcriptShowOnMsg"
+                                                checked
+                                            />
+                                        </div>
+                                    </div>
+                                </li>
+                                <li>
+                                    <div class="transcription-switch-row">
+                                        <i class="fa-solid fa-share-nodes"></i>
+                                        <label class="transcription-switch-label" for="transcriptSendToAll"
+                                            >Send to all</label
+                                        >
+                                        <div class="form-check form-switch form-switch-md">
+                                            <input
+                                                class="form-check-input"
+                                                type="checkbox"
+                                                id="transcriptSendToAll"
                                                 checked
                                             />
                                         </div>

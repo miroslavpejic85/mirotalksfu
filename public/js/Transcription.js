@@ -88,6 +88,7 @@ class Transcription {
         this.isPersistentMode = true; // Prevent stopping due to extended periods of silence
         this.isPersistent = false;
         this.showOnMessage = true;
+        this.sendToAll = true;
     }
 
     isSupported() {
@@ -175,6 +176,7 @@ class Transcription {
     }
 
     sendTranscript(transcriptionData) {
+        if (!this.sendToAll) return;
         if (rc.thereAreParticipants()) {
             //console.log('TRANSCRIPTION SEND', transcriptionData);
             rc.emitCmd(transcriptionData);

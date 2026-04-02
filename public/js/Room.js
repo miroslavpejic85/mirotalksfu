@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.75
+ * @version 2.1.76
  *
  */
 
@@ -491,6 +491,7 @@ function initClient() {
         setTippy('transcriptionMinBtn', 'Minimize', 'bottom');
         setTippy('transcriptionSpeechStatus', 'Status', 'bottom');
         setTippy('transcriptShowOnMsg', 'Show transcript on new message comes', 'bottom');
+        setTippy('transcriptSendToAll', 'When enabled, your transcription will be sent to all participants', 'bottom');
         setTippy('transcriptionSpeechStart', 'Start transcription', 'top');
         setTippy('transcriptionSpeechStop', 'Stop transcription', 'top');
     }
@@ -3062,6 +3063,13 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+    transcriptSendToAll.onchange = (e) => {
+        transcription.sendToAll = e.currentTarget.checked;
+        rc.roomMessage('transcriptSendToAll', transcription.sendToAll);
+        localStorageSettings.transcript_send_to_all = transcription.sendToAll;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
     // whiteboard options
     wbDrawingColorEl.onchange = () => {
         wbCanvas.freeDrawingBrush.color = wbDrawingColorEl.value;
@@ -3659,6 +3667,8 @@ function applySyntaxHighlighting() {
 function loadSettingsFromLocalStorage() {
     rc.showChatOnMessage = localStorageSettings.show_chat_on_msg;
     transcription.showOnMessage = localStorageSettings.transcript_show_on_msg;
+    transcription.sendToAll =
+        localStorageSettings.transcript_send_to_all !== undefined ? localStorageSettings.transcript_send_to_all : true;
     rc.speechInMessages = localStorageSettings.speech_in_msg;
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
@@ -3666,6 +3676,7 @@ function loadSettingsFromLocalStorage() {
     isShortcutsEnabled = localStorageSettings.keyboard_shortcuts;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
+    transcriptSendToAll.checked = transcription.sendToAll;
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
@@ -6788,7 +6799,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.75',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.76',
         html: `
             <br />
             <div id="about">

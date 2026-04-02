@@ -1636,6 +1636,39 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Transcription switch rows (dropdown menu)
+--------------------------------------------------------------*/
+
+.transcription-switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 5px 15px;
+    gap: 10px;
+    color: #fff;
+    white-space: nowrap;
+}
+
+.transcription-switch-row i {
+    font-size: 1rem;
+    width: 20px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.transcription-switch-label {
+    flex: 1;
+    font-size: 0.85rem;
+    cursor: default;
+}
+
+.transcription-switch-row .form-check {
+    margin: 0;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+/*--------------------------------------------------------------
 # Transcription room popup
 --------------------------------------------------------------*/
 
