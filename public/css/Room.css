@@ -1434,6 +1434,148 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Settings - theme cards
+--------------------------------------------------------------*/
+
+.theme-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.theme-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 10px 4px;
+    border: 2px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+}
+
+.theme-card i {
+    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.25s ease;
+}
+
+.theme-card span {
+    font-size: 0.7rem;
+    color: rgba(255, 255, 255, 0.6);
+    text-transform: capitalize;
+}
+
+.theme-card:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.theme-card.active {
+    border-color: var(--dd-color, #66beff);
+    background: rgba(255, 255, 255, 0.1);
+    box-shadow: 0 0 12px rgba(102, 190, 255, 0.2);
+}
+
+.theme-card.active i {
+    color: var(--dd-color, #66beff);
+}
+
+.theme-card.active span {
+    color: #ffffff;
+}
+
+.theme-card.disabled {
+    opacity: 0.4;
+    pointer-events: none;
+}
+
+/* Theme card specific icon colors */
+.theme-card[data-theme='default'] i {
+    color: #e8e8ec;
+}
+.theme-card[data-theme='dark'] i {
+    color: #9a9abb;
+}
+.theme-card[data-theme='grey'] i {
+    color: #b0b0c0;
+}
+.theme-card[data-theme='green'] i {
+    color: #6fcf97;
+}
+.theme-card[data-theme='blue'] i {
+    color: #6ba3d6;
+}
+.theme-card[data-theme='red'] i {
+    color: #e07070;
+}
+.theme-card[data-theme='purple'] i {
+    color: #b07cc8;
+}
+.theme-card[data-theme='orange'] i {
+    color: #e8a560;
+}
+.theme-card[data-theme='pink'] i {
+    color: #d88ba0;
+}
+.theme-card[data-theme='yellow'] i {
+    color: #d4b85c;
+}
+
+.theme-card.active[data-theme='default'] {
+    border-color: #e8e8ec;
+    box-shadow: 0 0 12px rgba(232, 232, 236, 0.15);
+}
+.theme-card.active[data-theme='dark'] {
+    border-color: #9a9abb;
+    box-shadow: 0 0 12px rgba(154, 154, 187, 0.15);
+}
+.theme-card.active[data-theme='grey'] {
+    border-color: #b0b0c0;
+    box-shadow: 0 0 12px rgba(176, 176, 192, 0.15);
+}
+.theme-card.active[data-theme='green'] {
+    border-color: #6fcf97;
+    box-shadow: 0 0 12px rgba(111, 207, 151, 0.2);
+}
+.theme-card.active[data-theme='blue'] {
+    border-color: #6ba3d6;
+    box-shadow: 0 0 12px rgba(107, 163, 214, 0.2);
+}
+.theme-card.active[data-theme='red'] {
+    border-color: #e07070;
+    box-shadow: 0 0 12px rgba(224, 112, 112, 0.2);
+}
+.theme-card.active[data-theme='purple'] {
+    border-color: #b07cc8;
+    box-shadow: 0 0 12px rgba(176, 124, 200, 0.2);
+}
+.theme-card.active[data-theme='orange'] {
+    border-color: #e8a560;
+    box-shadow: 0 0 12px rgba(232, 165, 96, 0.2);
+}
+.theme-card.active[data-theme='pink'] {
+    border-color: #d88ba0;
+    box-shadow: 0 0 12px rgba(216, 139, 160, 0.2);
+}
+.theme-card.active[data-theme='yellow'] {
+    border-color: #d4b85c;
+    box-shadow: 0 0 12px rgba(212, 184, 92, 0.2);
+}
+
+@media screen and (max-width: 500px) {
+    .theme-cards-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/*--------------------------------------------------------------
 # Settings - microphone volume indicator
 --------------------------------------------------------------*/
 

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.78
+ * @version 2.1.79
  *
  */
 
@@ -3003,6 +3003,7 @@ function handleSelects() {
     keepCustomTheme.onchange = (e) => {
         themeCustom.keep = e.currentTarget.checked;
         selectTheme.disabled = themeCustom.keep;
+        updateThemeCardsDisabled();
         rc.roomMessage('customThemeKeep', themeCustom.keep);
         localStorageSettings.theme_custom = themeCustom.keep;
         localStorageSettings.theme_color = themeCustom.color;
@@ -3030,6 +3031,14 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         setTheme();
     };
+    document.querySelectorAll('.theme-card').forEach((card) => {
+        card.onclick = () => {
+            if (card.classList.contains('disabled')) return;
+            const index = parseInt(card.dataset.index);
+            selectTheme.selectedIndex = index;
+            selectTheme.onchange();
+        };
+    });
     BtnsBarPosition.onchange = () => {
         rc.changeBtnsBarPosition(BtnsBarPosition.value);
         localStorageSettings.buttons_bar = BtnsBarPosition.selectedIndex;
@@ -3688,6 +3697,7 @@ function loadSettingsFromLocalStorage() {
 
     keepCustomTheme.checked = themeCustom.keep;
     selectTheme.disabled = themeCustom.keep;
+    updateThemeCardsDisabled();
     themeCustom.input.value = themeCustom.color;
 
     switchDominantSpeakerFocus.checked = localStorageSettings.dominant_speaker_focus;
@@ -6300,6 +6310,21 @@ function setTheme() {
     }
     wbIsBgTransparent = false;
     if (rc) rc.isChatBgTransparent = false;
+    updateThemeCardsActive();
+}
+
+function updateThemeCardsActive() {
+    const cards = document.querySelectorAll('.theme-card');
+    cards.forEach((card) => {
+        card.classList.toggle('active', parseInt(card.dataset.index) === selectTheme.selectedIndex);
+    });
+}
+
+function updateThemeCardsDisabled() {
+    const cards = document.querySelectorAll('.theme-card');
+    cards.forEach((card) => {
+        card.classList.toggle('disabled', selectTheme.disabled);
+    });
 }
 
 // ####################################################
@@ -6799,7 +6824,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.78',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.79',
         html: `
             <br />
             <div id="about">

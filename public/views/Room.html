@@ -1405,18 +1405,60 @@ access to use this app.
                             <p>Theme:</p>
                         </div>
                         <br />
-                        <select id="selectTheme" class="form-select text-light bg-dark">
-                            <option value="default">🔘 &nbsp;Default</option>
-                            <option value="dark">⚫ &nbsp;Dark</option>
-                            <option value="grey">⚪ &nbsp;Grey</option>
-                            <option value="green">🟢 &nbsp;Green</option>
-                            <option value="blue">🔵 &nbsp;Blue</option>
-                            <option value="red">🔴 &nbsp;Red</option>
-                            <option value="purple">🟣 &nbsp;Purple</option>
-                            <option value="orange">🟠 &nbsp;Orange</option>
-                            <option value="pink">🎀 &nbsp;Pink</option>
-                            <option value="yellow">🌕 &nbsp;Yellow</option>
+                        <select id="selectTheme" class="form-select text-light bg-dark" style="display: none">
+                            <option value="default">Default</option>
+                            <option value="dark">Dark</option>
+                            <option value="grey">Grey</option>
+                            <option value="green">Green</option>
+                            <option value="blue">Blue</option>
+                            <option value="red">Red</option>
+                            <option value="purple">Purple</option>
+                            <option value="orange">Orange</option>
+                            <option value="pink">Pink</option>
+                            <option value="yellow">Yellow</option>
                         </select>
+                        <div id="themeCardsGrid" class="theme-cards-grid">
+                            <div class="theme-card" data-theme="default" data-index="0">
+                                <i class="fa-solid fa-circle-dot"></i>
+                                <span>Default</span>
+                            </div>
+                            <div class="theme-card" data-theme="dark" data-index="1">
+                                <i class="fa-solid fa-moon"></i>
+                                <span>Dark</span>
+                            </div>
+                            <div class="theme-card" data-theme="grey" data-index="2">
+                                <i class="fa-solid fa-cloud"></i>
+                                <span>Grey</span>
+                            </div>
+                            <div class="theme-card" data-theme="green" data-index="3">
+                                <i class="fa-solid fa-leaf"></i>
+                                <span>Green</span>
+                            </div>
+                            <div class="theme-card" data-theme="blue" data-index="4">
+                                <i class="fa-solid fa-droplet"></i>
+                                <span>Blue</span>
+                            </div>
+                            <div class="theme-card" data-theme="red" data-index="5">
+                                <i class="fa-solid fa-fire"></i>
+                                <span>Red</span>
+                            </div>
+                            <div class="theme-card" data-theme="purple" data-index="6">
+                                <i class="fa-solid fa-gem"></i>
+                                <span>Purple</span>
+                            </div>
+                            <div class="theme-card" data-theme="orange" data-index="7">
+                                <i class="fa-solid fa-sun"></i>
+                                <span>Orange</span>
+                            </div>
+                            <div class="theme-card" data-theme="pink" data-index="8">
+                                <i class="fa-solid fa-heart"></i>
+                                <span>Pink</span>
+                            </div>
+                            <div class="theme-card" data-theme="yellow" data-index="9">
+                                <i class="fa-solid fa-star"></i>
+                                <span>Yellow</span>
+                            </div>
+                        </div>
                         <br />
                         <div class="title">
                             <i class="fas fa-fill-drip"></i>
