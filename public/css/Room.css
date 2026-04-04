@@ -1216,6 +1216,7 @@ body {
     box-shadow: var(--box-shadow);
     overflow-y: auto;
     overflow-x: hidden;
+    padding: 6px 0;
 }
 
 .dropdown-menu button {
@@ -1228,11 +1229,16 @@ body {
     border: none;
     background: none;
     cursor: pointer;
+    border-radius: 8px;
+    transition:
+        background 0.2s ease,
+        padding-left 0.2s ease;
 }
 
 .dropdown-menu button:hover {
-    background: var(--body-bg);
+    background: rgba(255, 255, 255, 0.08);
     color: #ffffff;
+    padding-left: 20px;
 }
 
 .dropdown-menu button i,
@@ -1241,15 +1247,22 @@ body {
 }
 
 .dropdown-menu li {
-    padding: 8px 16px;
+    padding: 2px 8px;
 }
 
 .dropdown-menu li:hover {
-    background: var(--body-bg);
+    background: transparent;
 }
 
 .dropdown-menu li button {
     background: transparent;
+}
+
+.dropdown-menu hr {
+    border: none;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.08);
+    margin: 6px 12px;
 }
 
 .dropdown-toggle {
@@ -1804,6 +1817,12 @@ body {
     gap: 10px;
     color: #fff;
     white-space: nowrap;
+    border-radius: 8px;
+    transition: background 0.2s ease;
+}
+
+.transcription-switch-row:hover {
+    background: rgba(255, 255, 255, 0.06);
 }
 
 .transcription-switch-row i {
@@ -2831,8 +2850,13 @@ hr {
 }
 
 @keyframes unreadPulse {
-    0%, 100% { transform: scale(1); }
-    50% { transform: scale(1.1); }
+    0%,
+    100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.1);
+    }
 }
 
 /*--------------------------------------------------------------
