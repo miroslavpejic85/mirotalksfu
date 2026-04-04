@@ -5527,7 +5527,7 @@ class RoomClient {
         }
 
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
-        chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgb(255 255 255 / 32%)';
+        chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgba(255, 255, 255, 0.08)';
         if (this.isChatPinned) elemDisplay(chat.id, isParticipantsListHidden);
         if (!this.isChatPinned) elemDisplay(chat.id, true);
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));

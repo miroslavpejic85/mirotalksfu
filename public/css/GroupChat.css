@@ -17,7 +17,7 @@
     min-height: var(--msger-height);
     padding: 3px;
     background: var(--msger-bg);
-    /* border: var(--border); */
+    border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 14px;
     box-shadow: var(--box-shadow);
     transition:
@@ -244,7 +244,7 @@
     margin-left: 300px;
     height: 100%;
     overflow: hidden;
-    border-left: 1px solid rgba(255, 255, 255, 0.06) !important;
+    border-left: 1px solid rgba(255, 255, 255, 0.06);
     /* border: 1px solid lime; */
 }
 
