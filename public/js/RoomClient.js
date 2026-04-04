@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.81
+ * @version 2.1.82
  *
  */
 
@@ -305,6 +305,11 @@ class RoomClient {
         this.consumerTransport = null;
         this.device = null;
 
+        // DataChannel chat
+        this.chatDataProducer = null;
+        this.chatDataConsumers = new Map();
+        this.useDataChannel = true; // prefer DataChannel for chat
+
         this.isScreenShareSupported =
             navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia ? true : false;
 
@@ -587,6 +592,12 @@ class RoomClient {
         // ###############################################
         this.socket.emit('getProducers'); // newProducers
         // ###############################################
+
+        // Initialize chat DataChannel
+        await this.initChatDataProducer();
+
+        // Request existing data producers from other peers
+        this.socket.emit('getDataProducers');
 
         if (isBroadcastingEnabled) {
             isPresenter ? await this.startLocalMedia() : this.handleRoomBroadcasting();
@@ -898,6 +909,24 @@ class RoomClient {
             }
         });
 
+        this.producerTransport.on(
+            'producedata',
+            async ({ sctpStreamParameters, label, protocol, appData }, callback, errback) => {
+                try {
+                    const { id } = await this.socket.request('produceData', {
+                        transportId: this.producerTransport.id,
+                        sctpStreamParameters,
+                        label,
+                        protocol,
+                        appData,
+                    });
+                    callback({ id });
+                } catch (err) {
+                    errback(err);
+                }
+            }
+        );
+
         this.producerTransport.on('connectionstatechange', async (state) => {
             console.log(`Producer Transport state changed to: ${state}`, { id: this.producerTransport.id });
 
@@ -1143,6 +1172,8 @@ class RoomClient {
         this.socket.on('removeMe', this.handleRemoveMe);
         this.socket.on('refreshParticipantsCount', this.handleRefreshParticipantsCount);
         this.socket.on('newProducers', this.handleNewProducers);
+        this.socket.on('newDataProducer', this.handleNewDataProducer);
+        this.socket.on('dataConsumerClosed', this.handleDataConsumerClosed);
         this.socket.on('message', this.handleMessage);
         this.socket.on('roomAction', this.handleRoomAction);
         this.socket.on('roomPassword', this.handleRoomPassword);
@@ -1276,6 +1307,21 @@ class RoomClient {
                 }
                 await this.consume(producer_id, peer_name, peer_info, type);
             }
+        }
+    };
+
+    handleNewDataProducer = async (data) => {
+        console.log('SocketOn New data producer:', data);
+        if (data.peer_id === this.peer_id) return;
+        await this.consumeData(data.dataProducerId);
+    };
+
+    handleDataConsumerClosed = (data) => {
+        console.log('SocketOn Data consumer closed:', data);
+        const { dataConsumer_id } = data;
+        if (this.chatDataConsumers.has(dataConsumer_id)) {
+            this.chatDataConsumers.delete(dataConsumer_id);
+            console.log('DataConsumer removed', { dataConsumer_id });
         }
     };
 
@@ -3155,6 +3201,130 @@ class RoomClient {
             console.error('Error in consume', error);
 
             popupHtmlMessage(null, image.network, 'Consume', error, 'center', false, false);
+        }
+    }
+
+    // ####################################################
+    // DATA CHANNEL (Chat via mediasoup DataChannel)
+    // ####################################################
+
+    async initChatDataProducer() {
+        if (!this.producerTransport) {
+            console.warn('Producer transport not available, skipping chat DataProducer creation');
+            return;
+        }
+
+        try {
+            this.chatDataProducer = await this.producerTransport.produceData({
+                ordered: true,
+                maxRetransmits: 3,
+                label: 'chat',
+                appData: { type: 'chat' },
+            });
+
+            this.chatDataProducer.on('open', () => {
+                console.log('✅ Chat DataProducer open');
+            });
+
+            this.chatDataProducer.on('close', () => {
+                console.log('Chat DataProducer closed');
+                this.chatDataProducer = null;
+            });
+
+            this.chatDataProducer.on('error', (error) => {
+                console.error('Chat DataProducer error', error);
+            });
+
+            this.chatDataProducer.on('transportclose', () => {
+                console.log('Chat DataProducer transport closed');
+                this.chatDataProducer = null;
+            });
+
+            console.log('Chat DataProducer created', { id: this.chatDataProducer.id });
+        } catch (error) {
+            console.error('Failed to create chat DataProducer', error);
+            this.chatDataProducer = null;
+        }
+    }
+
+    async consumeData(dataProducerId) {
+        if (!this.consumerTransport) {
+            console.warn('Consumer transport not available, skipping DataConsumer creation');
+            return;
+        }
+
+        try {
+            const params = await this.socket.request('consumeData', {
+                consumerTransportId: this.consumerTransport.id,
+                dataProducerId,
+            });
+
+            if (!params || params.error) {
+                console.error('ConsumeData error', params?.error);
+                return;
+            }
+
+            const dataConsumer = await this.consumerTransport.consumeData({
+                id: params.id,
+                dataProducerId: params.dataProducerId,
+                sctpStreamParameters: params.sctpStreamParameters,
+                label: params.label,
+                protocol: params.protocol,
+                appData: params.appData,
+            });
+
+            dataConsumer.on('message', (data) => {
+                try {
+                    const msg = JSON.parse(data);
+                    if (msg.type === 'chat') {
+                        console.log('DataChannel chat message received', msg);
+                        this.showMessage(msg);
+                    }
+                } catch (error) {
+                    console.error('Failed to parse DataChannel message', error);
+                }
+            });
+
+            dataConsumer.on('close', () => {
+                console.log('DataConsumer closed', { id: dataConsumer.id });
+                this.chatDataConsumers.delete(dataConsumer.id);
+            });
+
+            dataConsumer.on('error', (error) => {
+                console.error('DataConsumer error', { id: dataConsumer.id, error });
+            });
+
+            dataConsumer.on('transportclose', () => {
+                console.log('DataConsumer transport closed', { id: dataConsumer.id });
+                this.chatDataConsumers.delete(dataConsumer.id);
+            });
+
+            this.chatDataConsumers.set(dataConsumer.id, dataConsumer);
+
+            console.log('DataConsumer created', {
+                id: dataConsumer.id,
+                dataProducerId: params.dataProducerId,
+                label: params.label,
+            });
+        } catch (error) {
+            console.error('Failed to consume data', error);
+        }
+    }
+
+    isChatDataChannelOpen() {
+        return this.chatDataProducer && !this.chatDataProducer.closed && this.chatDataProducer.readyState === 'open';
+    }
+
+    sendChatDataChannelMessage(data) {
+        if (!this.isChatDataChannelOpen()) return false;
+
+        try {
+            const message = JSON.stringify(data);
+            this.chatDataProducer.send(message);
+            return true;
+        } catch (error) {
+            console.error('Failed to send DataChannel message', error);
+            return false;
         }
     }
 
@@ -5675,7 +5845,34 @@ class RoomClient {
                     data.to_peer_id = li.getAttribute('data-to-id');
                     data.to_peer_name = li.getAttribute('data-to-name');
                     console.log('Send message:', data);
-                    this.socket.emit('message', data);
+
+                    const isPublicMessage = data.to_peer_id === 'all';
+
+                    // Try DataChannel for public messages, fallback to signaling
+                    if (isPublicMessage && this.useDataChannel && this.isChatDataChannelOpen()) {
+                        const dcMsg = {
+                            type: 'chat',
+                            room_id: data.room_id,
+                            peer_name: data.peer_name,
+                            peer_avatar: data.peer_avatar,
+                            peer_id: data.peer_id,
+                            to_peer_id: data.to_peer_id,
+                            to_peer_name: data.to_peer_name,
+                            peer_msg: data.peer_msg,
+                            timestamp: Date.now(),
+                        };
+                        const sent = this.sendChatDataChannelMessage(dcMsg);
+                        if (!sent) {
+                            console.warn('DataChannel send failed, falling back to signaling');
+                            this.socket.emit('message', data);
+                        } else {
+                            console.log('Message sent via DataChannel');
+                        }
+                    } else {
+                        // Private messages or DataChannel unavailable: use signaling
+                        this.socket.emit('message', data);
+                    }
+
                     this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
                     this.appendMessage(
                         'left',

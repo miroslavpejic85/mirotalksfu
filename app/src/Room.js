@@ -510,6 +510,8 @@ module.exports = class Room {
             preferUdp: true,
             iceConsentTimeout,
             initialAvailableOutgoingBitrate,
+            enableSctp: true,
+            numSctpStreams: { OS: 1024, MIS: 1024 },
         };
     }
 
@@ -541,7 +543,7 @@ module.exports = class Room {
             throw new Error('Transport is already closed');
         }
 
-        const { id, type, iceParameters, iceCandidates, dtlsParameters } = transport;
+        const { id, type, iceParameters, iceCandidates, dtlsParameters, sctpParameters } = transport;
         const { maxIncomingBitrate } = this.webRtcTransport;
 
         if (maxIncomingBitrate) {
@@ -662,6 +664,7 @@ module.exports = class Room {
             iceParameters: iceParameters,
             iceCandidates: iceCandidates,
             dtlsParameters: dtlsParameters,
+            sctpParameters: sctpParameters,
         };
     }
 
@@ -863,6 +866,148 @@ module.exports = class Room {
         });
 
         return params;
+    }
+
+    // ####################################################
+    // PRODUCE DATA (DataChannel)
+    // ####################################################
+
+    async produceData(socket_id, transportId, sctpStreamParameters, label, protocol, appData) {
+        if (!socket_id || !transportId || !sctpStreamParameters) {
+            throw new Error('Missing required parameters for producing data');
+        }
+
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
+
+        const peer = this.getPeer(socket_id);
+        const { peer_name, peer_info } = peer;
+
+        if (!peer.hasTransport(transportId)) {
+            throw new Error(`Transport with ID ${transportId} not found for peer ${socket_id}`);
+        }
+
+        let dataProducer;
+        try {
+            dataProducer = await peer.createDataProducer(transportId, sctpStreamParameters, label, protocol, appData);
+        } catch (error) {
+            log.error(`Error creating data producer for peer ${peer_name} with socket ID ${socket_id}`, {
+                transportId,
+                label,
+                error: error.message,
+            });
+            throw new Error(`Failed to create data producer for peer ${peer_name} with transport ID ${transportId}`);
+        }
+
+        if (!dataProducer) {
+            throw new Error(`Failed to create data producer for peer ${peer_name} with transport ID ${transportId}`);
+        }
+
+        // Notify other peers about the new data producer
+        this.broadCast(socket_id, 'newDataProducer', {
+            dataProducerId: dataProducer.id,
+            peer_id: socket_id,
+            peer_name: peer_name,
+            peer_info: peer_info,
+            label: dataProducer.label,
+        });
+
+        log.debug('DataProducer created successfully', {
+            transportId,
+            dataProducer_id: dataProducer.id,
+            peer_name,
+            label: dataProducer.label,
+        });
+
+        return dataProducer.id;
+    }
+
+    // ####################################################
+    // CONSUME DATA (DataChannel)
+    // ####################################################
+
+    async consumeData(socket_id, consumerTransportId, dataProducerId) {
+        if (!socket_id || !consumerTransportId || !dataProducerId) {
+            throw new Error('Missing required parameters for consuming data');
+        }
+
+        if (!this.peers.has(socket_id)) {
+            throw new Error(`Peer with socket ID ${socket_id} not found in the room`);
+        }
+
+        const peer = this.getPeer(socket_id);
+        const { peer_name } = peer;
+
+        let result;
+        try {
+            result = await peer.createDataConsumer(consumerTransportId, dataProducerId);
+        } catch (error) {
+            log.error(`Error creating data consumer for peer ${peer_name} with socket ID ${socket_id}`, {
+                consumerTransportId,
+                dataProducerId,
+                error: error.message,
+            });
+            throw new Error(
+                `Failed to create data consumer for peer ${peer_name} with transport ID ${consumerTransportId}`
+            );
+        }
+
+        if (!result) {
+            throw new Error(
+                `Data consumer creation failed for peer ${peer_name} with transport ID ${consumerTransportId}`
+            );
+        }
+
+        const { dataConsumer, params } = result;
+
+        dataConsumer.once('producerclose', () => {
+            log.debug('DataConsumer closed due to "producerclose" event', {
+                dataConsumer_id: dataConsumer.id,
+                dataProducer_id: dataProducerId,
+                peer_name,
+            });
+
+            peer.removeDataConsumer(dataConsumer.id);
+
+            this.send(socket_id, 'dataConsumerClosed', {
+                dataConsumer_id: dataConsumer.id,
+            });
+        });
+
+        const consumerTransport = peer.getTransport(consumerTransportId);
+
+        log.debug('DataConsumer created successfully', {
+            consumerTransportId,
+            dataConsumer_id: dataConsumer.id,
+            dataProducer_id: dataProducerId,
+            peer_name,
+            label: dataConsumer.label,
+            transport_state: consumerTransport
+                ? `ICE:${consumerTransport.iceState}, DTLS:${consumerTransport.dtlsState}`
+                : 'unknown',
+        });
+
+        return params;
+    }
+
+    // Get list of data producers for a peer (excluding their own)
+    getDataProducerListForPeer(socket_id) {
+        const dataProducerList = [];
+        this.peers.forEach((peer, peerId) => {
+            if (peerId === socket_id) return;
+            const { peer_name, peer_info } = peer;
+            peer.dataProducers.forEach((dataProducer) => {
+                dataProducerList.push({
+                    dataProducerId: dataProducer.id,
+                    peer_id: peerId,
+                    peer_name: peer_name,
+                    peer_info: peer_info,
+                    label: dataProducer.label,
+                });
+            });
+        });
+        return dataProducerList;
     }
 
     // ####################################################

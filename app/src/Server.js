@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.81
+ * @version 2.1.82
  *
  */
 
@@ -2386,6 +2386,100 @@ function startServer() {
                     peerInfo,
                 });
                 callback({ error: err.message });
+            }
+        });
+
+        // ####################################################
+        // DATA CHANNEL (DataProducer / DataConsumer)
+        // ####################################################
+
+        socket.on('produceData', async ({ transportId, sctpStreamParameters, label, protocol, appData }, callback) => {
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const { room, peer } = getRoomAndPeer(socket);
+
+            if (!peer) {
+                return callback({ error: 'Peer not found' });
+            }
+
+            const peerInfo = getPeerInfo(peer);
+
+            try {
+                const dataProducerId = await room.produceData(
+                    socket.id,
+                    transportId,
+                    sctpStreamParameters,
+                    label,
+                    protocol,
+                    appData
+                );
+
+                log.debug('ProduceData', {
+                    dataProducer_id: dataProducerId,
+                    peer_id: socket.id,
+                    label: label,
+                    peerInfo: peerInfo,
+                });
+
+                callback({ id: dataProducerId });
+            } catch (err) {
+                log.warn('ProduceData error', {
+                    error: err.message,
+                    peerInfo,
+                });
+                callback({ error: err.message });
+            }
+        });
+
+        socket.on('consumeData', async ({ consumerTransportId, dataProducerId }, callback) => {
+            if (!roomExists(socket)) {
+                return callback({ error: 'Room not found' });
+            }
+
+            const { room, peer } = getRoomAndPeer(socket);
+
+            if (!peer) {
+                return callback({ error: 'Peer not found' });
+            }
+
+            const peerInfo = getPeerInfo(peer);
+
+            try {
+                const params = await room.consumeData(socket.id, consumerTransportId, dataProducerId);
+
+                log.debug('ConsumeData', {
+                    dataProducer_id: dataProducerId,
+                    dataConsumer_id: params ? params.id : undefined,
+                    peerInfo: peerInfo,
+                });
+
+                callback(params);
+            } catch (err) {
+                log.warn('ConsumeData error', {
+                    error: err.message,
+                    consumerTransportId,
+                    dataProducerId,
+                    peerInfo,
+                });
+                callback({ error: err.message });
+            }
+        });
+
+        socket.on('getDataProducers', () => {
+            if (!roomExists(socket)) return;
+
+            const { room, peer } = getRoomAndPeer(socket);
+            const peerInfo = getPeerInfo(peer);
+
+            log.debug('Get Data Producers', peerInfo);
+
+            const dataProducerList = room.getDataProducerListForPeer(socket.id);
+
+            // Notify the requesting peer about existing data producers
+            for (const dataProducerInfo of dataProducerList) {
+                socket.emit('newDataProducer', dataProducerInfo);
             }
         });
 

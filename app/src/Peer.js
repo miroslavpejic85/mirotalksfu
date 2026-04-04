@@ -38,6 +38,8 @@ module.exports = class Peer {
         this.transports = new Map();
         this.consumers = new Map();
         this.producers = new Map();
+        this.dataProducers = new Map();
+        this.dataConsumers = new Map();
     }
 
     // ####################################################
@@ -399,6 +401,186 @@ module.exports = class Peer {
     }
 
     // ####################################################
+    // DATA PRODUCER
+    // ####################################################
+
+    getDataProducers() {
+        return this.dataProducers;
+    }
+
+    getDataProducer(dataProducer_id) {
+        return this.dataProducers.get(dataProducer_id);
+    }
+
+    addDataProducer(dataProducer_id, dataProducer) {
+        this.dataProducers.set(dataProducer_id, dataProducer);
+    }
+
+    delDataProducer(dataProducer_id) {
+        this.dataProducers.delete(dataProducer_id);
+    }
+
+    async createDataProducer(transportId, sctpStreamParameters, label, protocol, appData) {
+        if (!transportId || !sctpStreamParameters) {
+            throw new Error('Missing required parameters for creating a data producer');
+        }
+
+        if (!this.transports.has(transportId)) {
+            throw new Error(`Transport with ID ${transportId} not found`);
+        }
+
+        const transport = this.getTransport(transportId);
+
+        if (!transport) {
+            throw new Error(`Transport with ID ${transportId} not found for peer ${this.peer_name}`);
+        }
+
+        let dataProducer;
+        try {
+            dataProducer = await transport.produceData({
+                sctpStreamParameters,
+                label: label || 'chat',
+                protocol: protocol || '',
+                appData: appData || {},
+            });
+
+            this.addDataProducer(dataProducer.id, dataProducer);
+        } catch (error) {
+            log.error(`Error creating data producer for transport ID ${transportId}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
+            throw new Error(`Failed to create data producer for transport ID ${transportId}`);
+        }
+
+        dataProducer.once('transportclose', () => {
+            log.debug('DataProducer "transportclose" event', { dataProducerId: dataProducer.id });
+            this.closeDataProducer(dataProducer.id);
+        });
+
+        return dataProducer;
+    }
+
+    closeDataProducer(dataProducer_id) {
+        if (!this.dataProducers.has(dataProducer_id)) return;
+
+        const dataProducer = this.getDataProducer(dataProducer_id);
+
+        try {
+            if (!dataProducer.closed) {
+                dataProducer.close();
+            }
+
+            log.debug('DataProducer closed successfully', {
+                dataProducer_id: dataProducer.id,
+                peer_name: this.peer_name,
+                label: dataProducer.label,
+            });
+        } catch (error) {
+            log.error(`Error closing data producer with ID ${dataProducer_id}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
+        }
+
+        this.delDataProducer(dataProducer_id);
+    }
+
+    // ####################################################
+    // DATA CONSUMER
+    // ####################################################
+
+    getDataConsumers() {
+        return this.dataConsumers;
+    }
+
+    getDataConsumer(dataConsumer_id) {
+        return this.dataConsumers.get(dataConsumer_id);
+    }
+
+    addDataConsumer(dataConsumer_id, dataConsumer) {
+        this.dataConsumers.set(dataConsumer_id, dataConsumer);
+    }
+
+    delDataConsumer(dataConsumer_id) {
+        this.dataConsumers.delete(dataConsumer_id);
+    }
+
+    async createDataConsumer(consumerTransportId, dataProducerId) {
+        if (!consumerTransportId || !dataProducerId) {
+            throw new Error('Missing required parameters for creating a data consumer');
+        }
+
+        if (!this.transports.has(consumerTransportId)) {
+            throw new Error(`Consumer transport with ID ${consumerTransportId} not found`);
+        }
+
+        const consumerTransport = this.getTransport(consumerTransportId);
+
+        if (!consumerTransport) {
+            throw new Error(`Consumer transport with ID ${consumerTransportId} not found for peer ${this.peer_name}`);
+        }
+
+        let dataConsumer;
+        try {
+            dataConsumer = await consumerTransport.consumeData({
+                dataProducerId,
+            });
+
+            this.addDataConsumer(dataConsumer.id, dataConsumer);
+        } catch (error) {
+            log.error(`Error creating data consumer for transport ID ${consumerTransportId}`, {
+                error: error.message,
+                dataProducerId,
+                peer_name: this.peer_name,
+            });
+            throw new Error(`Failed to create data consumer for transport ID ${consumerTransportId}`);
+        }
+
+        dataConsumer.once('transportclose', () => {
+            log.debug('DataConsumer "transportclose" event', { dataConsumerId: dataConsumer.id });
+            this.removeDataConsumer(dataConsumer.id);
+        });
+
+        return {
+            dataConsumer,
+            params: {
+                id: dataConsumer.id,
+                dataProducerId,
+                sctpStreamParameters: dataConsumer.sctpStreamParameters,
+                label: dataConsumer.label,
+                protocol: dataConsumer.protocol,
+                appData: dataConsumer.appData,
+            },
+        };
+    }
+
+    removeDataConsumer(dataConsumer_id) {
+        if (!this.dataConsumers.has(dataConsumer_id)) return;
+
+        const dataConsumer = this.getDataConsumer(dataConsumer_id);
+
+        try {
+            if (!dataConsumer.closed) {
+                dataConsumer.close();
+            }
+
+            log.debug('DataConsumer closed successfully', {
+                dataConsumer_id: dataConsumer.id,
+                peer_name: this.peer_name,
+                label: dataConsumer.label,
+            });
+        } catch (error) {
+            log.error(`Error closing data consumer with ID ${dataConsumer_id}`, {
+                error: error.message,
+                peer_name: this.peer_name,
+            });
+        }
+
+        this.delDataConsumer(dataConsumer_id);
+    }
+
+    // ####################################################
     // CLOSE PEER
     // ####################################################
 
@@ -409,6 +591,8 @@ module.exports = class Peer {
             transports: this.transports.size,
             producers: this.producers.size,
             consumers: this.consumers.size,
+            dataProducers: this.dataProducers.size,
+            dataConsumers: this.dataConsumers.size,
         });
 
         // Close all consumers first
@@ -426,6 +610,21 @@ module.exports = class Peer {
         }
         this.consumers.clear();
 
+        // Close all data consumers
+        for (const [dataConsumer_id, dataConsumer] of this.dataConsumers.entries()) {
+            try {
+                if (!dataConsumer.closed) {
+                    dataConsumer.close();
+                }
+            } catch (error) {
+                log.warn('Error closing data consumer during peer cleanup', {
+                    dataConsumer_id,
+                    error: error.message,
+                });
+            }
+        }
+        this.dataConsumers.clear();
+
         // Close all producers
         for (const [producer_id, producer] of this.producers.entries()) {
             try {
@@ -440,6 +639,21 @@ module.exports = class Peer {
             }
         }
         this.producers.clear();
+
+        // Close all data producers
+        for (const [dataProducer_id, dataProducer] of this.dataProducers.entries()) {
+            try {
+                if (!dataProducer.closed) {
+                    dataProducer.close();
+                }
+            } catch (error) {
+                log.warn('Error closing data producer during peer cleanup', {
+                    dataProducer_id,
+                    error: error.message,
+                });
+            }
+        }
+        this.dataProducers.clear();
 
         // Close all transports
         for (const [transport_id, transport] of this.transports.entries()) {
@@ -462,6 +676,8 @@ module.exports = class Peer {
             transports: this.transports.size,
             producers: this.producers.size,
             consumers: this.consumers.size,
+            dataProducers: this.dataProducers.size,
+            dataConsumers: this.dataConsumers.size,
         });
     }
 };
