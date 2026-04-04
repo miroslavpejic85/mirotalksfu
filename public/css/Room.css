@@ -1188,6 +1188,11 @@ body {
     margin-right: 4px;
 }
 
+#rtmpCustomDestination,
+#rtmpCustomClear {
+    display: none;
+}
+
 #rtmpCustomUrl,
 #rtmpCustomStreamKey {
     margin-top: 5px;
@@ -1437,10 +1442,15 @@ body {
 # Settings - theme cards
 --------------------------------------------------------------*/
 
+#selectTheme {
+    display: none;
+}
+
 .theme-cards-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 8px;
+    margin-top: 10px;
     margin-bottom: 10px;
 }
 
