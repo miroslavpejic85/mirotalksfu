@@ -2811,19 +2811,28 @@ hr {
 --------------------------------------------------------------*/
 
 .unread-count {
-    display: inline-block;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
     background-color: #ff3b30;
     color: #fff;
     font-size: 11px;
     font-weight: 700;
-    min-width: 18px;
-    height: 18px;
-    line-height: 18px;
-    padding: 0 5px;
-    border-radius: 12px;
+    min-width: 20px;
+    height: 20px;
+    line-height: 1;
+    padding: 0 6px;
+    border-radius: 10px;
     text-align: center;
-    margin-left: 4px;
+    margin-left: 6px;
     vertical-align: middle;
+    box-shadow: 0 2px 6px rgba(255, 59, 48, 0.4);
+    animation: unreadPulse 2s ease-in-out infinite;
+}
+
+@keyframes unreadPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
 }
 
 /*--------------------------------------------------------------

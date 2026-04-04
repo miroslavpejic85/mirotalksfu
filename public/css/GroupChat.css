@@ -160,6 +160,7 @@
     overflow: visible;
     z-index: 0;
     border-radius: 12px;
+    border-left: 1px solid transparent;
     background: transparent;
     transition:
         background 0.2s ease,
@@ -179,6 +180,7 @@
 .people-list .chat-list > li.active {
     background: var(--body-bg);
     box-shadow: var(--box-shadow);
+    border-left-color: var(--dd-color);
     z-index: 25;
 }
 
