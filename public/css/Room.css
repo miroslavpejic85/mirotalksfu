@@ -1569,6 +1569,11 @@ body {
     box-shadow: 0 0 12px rgba(212, 184, 92, 0.2);
 }
 
+/* Dynamic server-added theme cards: active state handled via inline styles */
+.theme-card.active i {
+    filter: brightness(1.2);
+}
+
 @media screen and (max-width: 500px) {
     .theme-cards-grid {
         grid-template-columns: repeat(3, 1fr);

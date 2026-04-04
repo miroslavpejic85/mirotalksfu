@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.80 - Configuration File
+ * MiroTalk SFU v2.1.81 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1270,6 +1270,38 @@ module.exports = {
                 },
             },
             //...
+        },
+
+        /**
+         * Theme definitions — CSS custom properties for each theme.
+         * Admins can override individual themes or add new ones.
+         * The client merges these with built-in defaults, so you
+         * only need to specify the properties you want to change.
+         */
+        themes: {
+            /* Example: override default theme background
+            default: {
+                '--body-bg': 'linear-gradient(135deg, #1a1a2e, #0a0a14)',
+                '--msger-bg': 'linear-gradient(135deg, #1a1a2e, #0a0a14)',
+            },
+            */
+            /* Example: add a custom theme
+            ocean: {
+                '--body-bg': 'linear-gradient(135deg, #0d2137, #061220)',
+                '--trx-bg': 'linear-gradient(135deg, #0d2137, #061220)',
+                '--msger-bg': 'linear-gradient(135deg, #0d2137, #061220)',
+                '--left-msg-bg': '#112d4a',
+                '--right-msg-bg': '#0a1f35',
+                '--private-msg-bg': '#0e2540',
+                '--select-bg': '#0f2a45',
+                '--select-focus-color': 'rgba(56, 189, 248, 0.5)',
+                '--tab-btn-active': '#163d5e',
+                '--settings-bg': 'linear-gradient(135deg, #0d2137, #061220)',
+                '--wb-bg': 'linear-gradient(135deg, #0d2137, #061220)',
+                '--btns-bg-color': 'rgba(6, 18, 32, 0.75)',
+                '--dd-color': '#38BDF8',
+            },
+            */
         },
 
         /**
