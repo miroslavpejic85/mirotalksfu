@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.82
+ * @version 2.1.83
  *
  */
 
@@ -5556,8 +5556,8 @@ class RoomClient {
 
     toggleChatHistorySize(max = true) {
         const chatHistory = this.getId('chatHistory');
-        chatHistory.style.minHeight = max ? 'calc(100vh - 210px)' : '490px';
-        chatHistory.style.maxHeight = max ? 'calc(100vh - 210px)' : '490px';
+        chatHistory.style.minHeight = max ? 'calc(100vh - 270px)' : '430px';
+        chatHistory.style.maxHeight = max ? 'calc(100vh - 270px)' : '430px';
     }
 
     toggleChatPin() {
@@ -5669,6 +5669,8 @@ class RoomClient {
     cleanMessage() {
         chatMessage.value = '';
         chatMessage.setAttribute('rows', '1');
+        const charCount = this.getId('chatCharCount');
+        if (charCount) charCount.textContent = '0 / 4000';
     }
 
     pasteMessage() {
@@ -10174,17 +10176,25 @@ class RoomClient {
         const participantsListItems = participantsList.getElementsByTagName('li');
         const avatarImg = getParticipantAvatar(peer_name, peer_avatar);
 
-        const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '') => {
+        const generateChatAboutHTML = (imgSrc, title, status = 'online', participants = '', category = '') => {
             const isSensitiveChat = !['all', 'ChatGPT', 'DeepSeek'].includes(peer_id) && title.length > 15;
             const truncatedTitle = isSensitiveChat ? `${title.substring(0, 10)}*****` : title;
+            const categoryHTML = category ? `<span class="chat-header-category">${category}</span>` : '';
+            const statusText =
+                category === 'AI ASSISTANT'
+                    ? 'Assistant replies are visible only to you'
+                    : peer_id === 'all'
+                      ? `Everyone in room ${participants}`
+                      : `${status}`;
             return `
                 <a data-toggle="modal" data-target="#view_info">
                     <img src="${imgSrc}" alt="avatar" />
                 </a>
                 <div class="chat-about">
+                    ${categoryHTML}
                     <h6 class="mb-0">${truncatedTitle}</h6>
                     <span class="status">
-                        <i class="fa fa-circle ${status}"></i> ${status} ${participants}
+                        <i class="fa fa-circle ${status}"></i> ${statusText}
                     </span>
                 </div>
             `;
@@ -10221,7 +10231,7 @@ class RoomClient {
                     return userLog('warning', 'The moderator does not allow you to chat with ChatGPT', 'top-end', 6000);
                 }
                 isChatGPTOn = true;
-                chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT');
+                chatAbout.innerHTML = generateChatAboutHTML(image.chatgpt, 'ChatGPT', 'online', '', 'AI ASSISTANT');
                 this.getId('chatGPTMessages').style.display = 'block';
                 break;
             case 'DeepSeek':
@@ -10234,7 +10244,7 @@ class RoomClient {
                     );
                 }
                 isDeepSeekOn = true;
-                chatAbout.innerHTML = generateChatAboutHTML(image.deepSeek, 'DeepSeek');
+                chatAbout.innerHTML = generateChatAboutHTML(image.deepSeek, 'DeepSeek', 'online', '', 'AI ASSISTANT');
                 this.getId('deepSeekMessages').style.display = 'block';
                 break;
             case 'all':
@@ -10257,6 +10267,20 @@ class RoomClient {
                 }
                 break;
         }
+
+        // Update replying-in indicator, placeholder, and empty notice
+        const displayName = peer_id === 'all' ? 'Public chat' : peer_name;
+        const replyingName = this.getId('chatReplyingName');
+        if (replyingName) replyingName.textContent = displayName;
+
+        const chatMsg = this.getId('chatMessage');
+        if (chatMsg) {
+            const isAI = ['ChatGPT', 'DeepSeek'].includes(peer_id);
+            chatMsg.placeholder = isAI ? `Ask ${peer_name} anything...` : `Type a message...`;
+        }
+
+        const emptyTitle = document.querySelector('.empty-chat-title');
+        if (emptyTitle) emptyTitle.textContent = `Start with ${displayName}`;
 
         const clickedElement = event ? event.target : null;
         if (!event || (clickedElement.tagName != 'BUTTON' && clickedElement.tagName != 'I')) {

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.82
+ * @version 2.1.83
  *
  */
 
@@ -1866,6 +1866,21 @@ function roomIsReady() {
 // UTILS
 // ####################################################
 
+function updateChatConversationsCount() {
+    const el = getId('chatConversationsCount');
+    if (!el) return;
+    const list = getId('participantsList');
+    const count = list ? list.querySelectorAll(':scope > li').length : 0;
+    el.textContent = count > 0 ? `${count} conversation${count !== 1 ? 's' : ''}` : '';
+}
+
+function updateChatCharCount() {
+    const el = getId('chatCharCount');
+    if (!el) return;
+    const len = chatMessage ? chatMessage.value.length : 0;
+    el.textContent = `${len} / 4000`;
+}
+
 function updateChatEmptyNotice() {
     const chatLists = [
         getId('chatGPTMessages'),
@@ -3429,6 +3444,7 @@ function handleInputs() {
         // Replace matching patterns with corresponding emojis
         this.value = this.value.replace(regexPattern, (match) => chatInputEmoji[match]);
         rc.checkLineBreaks();
+        updateChatCharCount();
     };
 
     chatMessage.onpaste = () => {
@@ -5779,6 +5795,7 @@ async function getRoomParticipants() {
     handleDropdownHover(participantsList.querySelectorAll('.dropdown'));
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
+    updateChatConversationsCount();
     console.log('*** Refresh Chat participant lists ***');
 }
 
@@ -5804,8 +5821,8 @@ function getParticipantsList(peers) {
                 alt="avatar"
             />
             <div class="about">
-                <div class="name">ChatGPT</div>
-                <div class="status"><i class="fa fa-circle online"></i> online</div>
+                <div class="name">ChatGPT <span class="chat-peer-badge assistant-green">Assistant</span></div>
+                <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private assistant replies</span>
             </div>
         </li>`;
     }
@@ -5829,8 +5846,8 @@ function getParticipantsList(peers) {
                 alt="avatar"
             />
             <div class="about">
-                <div class="name">DeepSeek</div>
-                <div class="status"><i class="fa fa-circle online"></i> online</div>
+                <div class="name">DeepSeek <span class="chat-peer-badge assistant">Assistant</span></div>
+                <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private assistant replies</span>
             </div>
         </li>`;
     }
@@ -5850,8 +5867,8 @@ function getParticipantsList(peers) {
             alt="avatar"
         />
         <div class="about">
-            <div class="name">Public chat</div>
-            <div class="status"> <i class="fa fa-circle online"></i> online ${participantsCount} <span id="all-unread-count" class="unread-count hidden"></span></div>
+            <div class="name">Public chat <span id="all-unread-count" class="unread-count hidden"></span></div>
+            <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Everyone in room ${participantsCount}</span>
         </div>`;
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
@@ -5938,8 +5955,8 @@ function getParticipantsList(peers) {
                         alt="avatar" 
                     />
                     <div class="about">
-                        <div class="name">${peer_name_limited}</div>
-                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span> </div>
+                        <div class="name">${peer_name_limited} <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
+                        <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
                     </div>
 
                     <div class="dropdown">
@@ -6013,8 +6030,8 @@ function getParticipantsList(peers) {
                     alt="avatar" 
                 />
                     <div class="about">
-                        <div class="name">${peer_name_limited}</div>
-                        <div class="status"> <i class="fa fa-circle online"></i> online <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span> </div>
+                        <div class="name">${peer_name_limited} <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
+                        <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
                     </div>
                 `;
 
@@ -6906,7 +6923,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.82',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.83',
         html: `
             <br />
             <div id="about">

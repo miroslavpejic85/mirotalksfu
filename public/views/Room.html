@@ -1655,20 +1655,25 @@ access to use this app.
             <div id="chatApp" class="chat-app">
                 <!-- CHAT PEOPLE LIST -->
                 <div id="plist" class="people-list">
+                    <!-- CHAT HEADER -->
+                    <div class="chat-conversations-header">
+                        <span class="chat-conversations-label">CHAT</span>
+                        <h5 class="chat-conversations-title">Conversations</h5>
+                    </div>
                     <!-- CHAT LIST OPTIONS -->
                     <div>
                         <button id="chatShareRoomBtn"><i class="fas fa-user-plus"></i> Invite</button>
+                        <button id="chatHideParticipantsList" class="float-right">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button id="participantsRaiseHandBtn" class="float-right">
+                            <i class="fas fa-hand-paper"></i>
+                        </button>
                         <button id="participantsSaveBtn" class="float-right hidden">
                             <i class="fas fa-save"></i>
                         </button>
                         <button id="participantsUnreadMessagesBtn" class="float-right">
                             <i class="fas fa-comments"></i>
-                        </button>
-                        <button id="participantsRaiseHandBtn" class="float-right">
-                            <i class="fas fa-hand-paper"></i>
-                        </button>
-                        <button id="chatHideParticipantsList" class="float-right">
-                            <i class="fas fa-times"></i>
                         </button>
                     </div>
 
@@ -1684,6 +1689,8 @@ access to use this app.
                         />
                     </div>
 
+                    <!-- CHAT CONVERSATIONS COUNT -->
+                    <div id="chatConversationsCount" class="chat-conversations-count"></div>
                     <!-- CHAT LIST -->
                     <ul id="participantsList" class="list-unstyled chat-list mt-2 mb-0"></ul>
                 </div>
@@ -1806,6 +1813,12 @@ access to use this app.
 
                     <!-- CHAT MESSAGE -->
                     <div class="chat-message clearfix">
+                        <!-- REPLYING IN INDICATOR -->
+                        <div id="chatReplyingIn" class="chat-replying-in">
+                            <span class="chat-replying-label">REPLYING IN</span>
+                            <span id="chatReplyingName" class="chat-replying-badge">Public chat</span>
+                            <span id="chatCharCount" class="chat-char-count">0 / 4000</span>
+                        </div>
                         <!-- CHAT MESSAGE INPUT -->
                         <div class="chat-input-wrapper">
                             <div class="chat-input-container">
@@ -1818,6 +1831,9 @@ access to use this app.
                                 <button id="chatSendButton" class="chat-send-btn hidden">
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
+                            </div>
+                            <div class="chat-toolbar-hint">
+                                <span class="chat-input-hint">Enter sends. Shift+Enter adds a line break.</span>
                             </div>
                             <div class="chat-toolbar">
                                 <div class="chat-toolbar-left">
