@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.79
+ * @version 2.1.80
  *
  */
 
@@ -4417,29 +4417,32 @@ class RoomClient {
     }
 
     changeBtnsBarPosition(position) {
-        switch (position) {
-            case 'vertical':
+        const positions = {
+            vertical: {
                 // bottomButtons horizontally
-                document.documentElement.style.setProperty('--bottom-btns-top', 'auto');
-                document.documentElement.style.setProperty('--bottom-btns-left', '50%');
-                document.documentElement.style.setProperty('--bottom-btns-bottom', '0');
-                document.documentElement.style.setProperty('--bottom-btns-translate-X', '-50%');
-                document.documentElement.style.setProperty('--bottom-btns-translate-Y', '0%');
-                document.documentElement.style.setProperty('--bottom-btns-margin-bottom', '16px');
-                document.documentElement.style.setProperty('--bottom-btns-flex-direction', 'row');
-                break;
-            case 'horizontal':
+                '--bottom-btns-top': 'auto',
+                '--bottom-btns-left': '50%',
+                '--bottom-btns-bottom': '0',
+                '--bottom-btns-translate-X': '-50%',
+                '--bottom-btns-translate-Y': '0%',
+                '--bottom-btns-margin-bottom': '16px',
+                '--bottom-btns-flex-direction': 'row',
+            },
+            horizontal: {
                 // bottomButtons vertically
-                document.documentElement.style.setProperty('--bottom-btns-top', '50%');
-                document.documentElement.style.setProperty('--bottom-btns-left', '15px');
-                document.documentElement.style.setProperty('--bottom-btns-bottom', 'auto');
-                document.documentElement.style.setProperty('--bottom-btns-translate-X', '0%');
-                document.documentElement.style.setProperty('--bottom-btns-translate-Y', '-50%');
-                document.documentElement.style.setProperty('--bottom-btns-margin-bottom', '0');
-                document.documentElement.style.setProperty('--bottom-btns-flex-direction', 'column');
-                break;
-            default:
-                break;
+                '--bottom-btns-top': '50%',
+                '--bottom-btns-left': '15px',
+                '--bottom-btns-bottom': 'auto',
+                '--bottom-btns-translate-X': '0%',
+                '--bottom-btns-translate-Y': '-50%',
+                '--bottom-btns-margin-bottom': '0',
+                '--bottom-btns-flex-direction': 'column',
+            },
+        };
+        const props = positions[position];
+        if (props) {
+            const root = document.documentElement.style;
+            Object.entries(props).forEach(([key, value]) => root.setProperty(key, value));
         }
     }
 
