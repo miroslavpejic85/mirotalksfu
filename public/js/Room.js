@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.84
+ * @version 2.1.85
  *
  */
 
@@ -274,6 +274,7 @@ let isSpaceDown = false;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isKeepButtonsVisible = false;
+let isChatPinEnabled = true;
 let isShortcutsEnabled = false;
 let isBroadcastingEnabled = false;
 let isLobbyEnabled = false;
@@ -428,6 +429,7 @@ async function initClient() {
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
         setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
+        setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy('recordingImage', 'Toggle recording', 'right');
@@ -3000,6 +3002,15 @@ function handleSelects() {
         hide(keepAwakeButton);
     }
 
+    switchChatPin.onchange = (e) => {
+        isChatPinEnabled = e.currentTarget.checked;
+        localStorageSettings.chat_pin = isChatPinEnabled;
+        lS.setSettings(localStorageSettings);
+        const status = isChatPinEnabled ? 'enabled' : 'disabled';
+        userLog('info', `Chat auto pin ${status}`, 'top-end');
+        e.target.blur();
+    };
+
     // recording
     switchHostOnlyRecording.onchange = (e) => {
         hostOnlyRecording = e.currentTarget.checked;
@@ -3699,6 +3710,7 @@ function loadSettingsFromLocalStorage() {
     isPitchBarEnabled = localStorageSettings.pitch_bar;
     isSoundEnabled = localStorageSettings.sounds;
     isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
+    isChatPinEnabled = localStorageSettings.chat_pin !== undefined ? localStorageSettings.chat_pin : true;
     isShortcutsEnabled = localStorageSettings.keyboard_shortcuts;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
@@ -3708,6 +3720,7 @@ function loadSettingsFromLocalStorage() {
     switchSounds.checked = isSoundEnabled;
     switchShare.checked = notify;
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
+    switchChatPin.checked = isChatPinEnabled;
     switchShortcuts.checked = isShortcutsEnabled;
 
     switchServerRecording.checked = localStorageSettings.rec_server;
@@ -6923,7 +6936,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.84',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.85',
         html: `
             <br />
             <div id="about">
