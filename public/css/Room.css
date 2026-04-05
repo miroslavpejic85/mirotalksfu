@@ -1266,7 +1266,7 @@ body {
 }
 
 .dropdown-toggle {
-    color: #66beff;
+    color: #66beff !important;
 }
 
 /* Hide the default Bootstrap dropdown icon */
@@ -1701,8 +1701,7 @@ body {
 }
 
 .transcription-header-title button,
-.transcription-header-options button,
-.transcription-header-options .dropdown-toggle {
+.transcription-header-options button {
     border: none;
     transition: all 0.3s ease-in-out;
     background: transparent;
