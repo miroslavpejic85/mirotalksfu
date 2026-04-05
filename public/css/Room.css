@@ -1701,7 +1701,8 @@ body {
 }
 
 .transcription-header-title button,
-.transcription-header-options button {
+.transcription-header-options button,
+.transcription-header-options .dropdown-toggle {
     border: none;
     transition: all 0.3s ease-in-out;
     background: transparent;

@@ -511,7 +511,7 @@
     border-radius: 50%;
     background: var(--dd-color);
     color: #111;
-    border: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -521,18 +521,33 @@
         transform 0.2s ease,
         background 0.2s ease,
         box-shadow 0.2s ease,
-        filter 0.2s ease;
+        filter 0.2s ease,
+        opacity 0.2s ease;
     box-shadow: 0 2px 8px color-mix(in srgb, var(--dd-color) 35%, transparent);
+    animation: sendBtnIn 0.2s ease-out;
+}
+
+@keyframes sendBtnIn {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .chat-send-btn:hover {
     color: #fff;
     filter: brightness(1.12);
+    transform: scale(1.08);
     box-shadow: 0 3px 10px color-mix(in srgb, var(--dd-color) 40%, transparent);
 }
 
 .chat-send-btn:active {
     filter: brightness(0.92);
+    transform: scale(0.95);
 }
 
 .chat-send-btn:disabled {
