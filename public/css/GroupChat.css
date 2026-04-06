@@ -47,9 +47,23 @@
     width: 300px;
     height: 99%;
     background: var(--msger-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    /* border: 1px solid lime; */
+}
+
+/* Keep header elements pinned at top */
+.chat-app .people-list > *:not(.chat-list) {
+    flex-shrink: 0;
+}
+
+/* Scrollable participant list */
+.chat-app .people-list .chat-list {
     overflow-y: auto;
     overflow-x: hidden;
-    /* border: 1px solid lime; */
+    flex: 1;
+    min-height: 0;
 }
 
 /* Conversations header */
