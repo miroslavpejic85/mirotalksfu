@@ -1,6 +1,7 @@
 'use strict';
 
 const nodemailer = require('nodemailer');
+const icalGenerator = require('ical-generator').default;
 const { isValidEmail } = require('../Validator');
 const config = require('../config');
 const Logger = require('../Logger');
@@ -258,7 +259,106 @@ function getCurrentDataTime() {
     return `${currentTime}:${milliseconds}`;
 }
 
+// ####################################################
+// SCHEDULE MEETING
+// ####################################################
+
+async function sendScheduleMeeting(data) {
+    if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USERNAME || !EMAIL_PASSWORD) {
+        throw new Error('Email is not configured');
+    }
+
+    const { title, description, dateTime, duration, recipients, roomName, hostUrl } = data;
+
+    const start = new Date(dateTime);
+    const end = new Date(start.getTime() + duration * 60 * 1000);
+    const roomUrl = `${hostUrl}/join/?room=${encodeURIComponent(roomName)}`;
+
+    // Generate .ics content using ical-generator
+    const calendar = icalGenerator({ name: APP_NAME, method: 'REQUEST' });
+    const event = calendar.createEvent({
+        start: start,
+        end: end,
+        summary: title,
+        description: `${description ? description + '\n\n' : ''}Join the meeting: ${roomUrl}`,
+        url: roomUrl,
+        status: 'CONFIRMED',
+        organizer: { name: APP_NAME, email: EMAIL_FROM },
+    });
+    recipients.forEach((email) => event.createAttendee({ email, rsvp: true, role: 'REQ-PARTICIPANT' }));
+    const icsContent = calendar.toString();
+
+    const subject = `${APP_NAME} - Meeting Invitation: ${title}`;
+    const body = getScheduleMeetingBody({ title, description, roomUrl, start, end, duration });
+
+    const promises = recipients.map((recipient) => {
+        return transport.sendMail({
+            from: EMAIL_FROM,
+            to: recipient,
+            subject: subject,
+            html: body,
+            icalEvent: {
+                filename: 'meeting.ics',
+                method: 'REQUEST',
+                content: icsContent,
+            },
+        });
+    });
+
+    await Promise.all(promises);
+
+    log.debug('Schedule meeting emails sent', { title, roomName, recipients });
+}
+
+function getScheduleMeetingBody(data) {
+    const { title, description, roomUrl, start, end, duration } = data;
+
+    const formatDate = (d) =>
+        d.toLocaleString('en-US', {
+            weekday: 'long',
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+        });
+
+    return `
+        <div style="font-family: arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h1 style="color: #333;">📅 Meeting Invitation</h1>
+            <h2 style="color: #555;">${title}</h2>
+            ${description ? `<p style="color: #666;">${description}</p>` : ''}
+            <table style="font-family: arial, sans-serif; border-collapse: collapse; width: 100%; margin: 20px 0;">
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">📅 Date & Time</td>
+                    <td style="border: 1px solid #ddd; padding: 10px;">${formatDate(start)}</td>
+                </tr>
+                <tr style="background-color: #f9f9f9;">
+                    <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">⏱️ Duration</td>
+                    <td style="border: 1px solid #ddd; padding: 10px;">${duration} minutes</td>
+                </tr>
+                <tr>
+                    <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">🔗 Join Link</td>
+                    <td style="border: 1px solid #ddd; padding: 10px;">
+                        <a href="${roomUrl}" style="color: #0270D7;">${roomUrl}</a>
+                    </td>
+                </tr>
+            </table>
+            <p style="margin-top: 20px;">
+                <a href="${roomUrl}" 
+                   style="display: inline-block; padding: 12px 24px; background-color: #0270D7; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+                    Join Meeting
+                </a>
+            </p>
+            <p style="color: #999; font-size: 12px; margin-top: 20px;">
+                This invitation was sent via ${APP_NAME}. A calendar event (.ics) is attached.
+            </p>
+        </div>
+    `;
+}
+
 module.exports = {
     sendEmailAlert,
     sendEmailNotifications,
+    sendScheduleMeeting,
 };

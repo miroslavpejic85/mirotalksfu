@@ -1,0 +1,44 @@
+<div class="sch-form">
+    <div class="sch-field">
+        <label class="sch-label" for="schTitle">
+            <i class="fas fa-heading sch-icon"></i> Meeting Title
+            <span class="sch-required">*</span>
+        </label>
+        <input type="text" id="schTitle" class="sch-input" placeholder="e.g. Team standup" maxlength="100" />
+    </div>
+    <div class="sch-field">
+        <label class="sch-label" for="schDescription"> <i class="fas fa-align-left sch-icon"></i> Description </label>
+        <input type="text" id="schDescription" class="sch-input" placeholder="Optional description" maxlength="255" />
+    </div>
+    <div class="sch-field">
+        <label class="sch-label" for="schRoomName">
+            <i class="fas fa-door-open sch-icon"></i> Room Name
+            <span class="sch-required">*</span>
+        </label>
+        <input type="text" id="schRoomName" class="sch-input" placeholder="e.g. my-meeting" maxlength="64" />
+    </div>
+    <div class="sch-row">
+        <div class="sch-field">
+            <label class="sch-label" for="schDateTime">
+                <i class="fas fa-calendar-alt sch-icon"></i> Date & Time
+                <span class="sch-required">*</span>
+            </label>
+            <input type="text" id="schDateTime" class="sch-input" placeholder="Select date and time" />
+        </div>
+        <div class="sch-field">
+            <label class="sch-label" for="schDuration">
+                <i class="fas fa-clock sch-icon"></i> Duration (min)
+                <span class="sch-required">*</span>
+            </label>
+            <input type="number" id="schDuration" class="sch-input" value="60" min="5" max="480" />
+        </div>
+    </div>
+    <div class="sch-field">
+        <label class="sch-label" for="schRecipients">
+            <i class="fas fa-envelope sch-icon"></i> Recipients
+            <span class="sch-required">*</span>
+        </label>
+        <input type="text" id="schRecipients" class="sch-input" placeholder="user@example.com, user2@example.com" />
+        <p class="sch-hint">Separate multiple emails with commas</p>
+    </div>
+</div>

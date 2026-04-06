@@ -366,6 +366,34 @@
     box-shadow: 0 2px 8px rgba(46, 206, 137, 0.15);
 }
 
+/* Schedule meeting button (login page) */
+.schedule-meeting-login-btn {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+}
+.schedule-meeting-login-btn:hover {
+    box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+}
+.schedule-meeting-login-btn:active {
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.15);
+}
+
+/* Divider */
+.login-divider {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 4px 0;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+}
+.login-divider::before,
+.login-divider::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
 /* Responsive */
 @media (min-width: 641px) {
     .login-card {

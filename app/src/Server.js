@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.86
+ * @version 2.1.87
  *
  */
 
@@ -738,6 +738,50 @@ function startServer() {
         const roomWidgetActive = roomId && roomId === widget.roomId && roomList.has(roomId);
         log.debug('isWidgetRoomActive', { roomId, roomWidgetActive });
         res.status(200).json({ message: roomWidgetActive });
+    });
+
+    // Schedule Meeting feature flag
+    app.get('/isScheduleMeetingEnabled', (req, res) => {
+        res.status(200).json({ enabled: config.features?.scheduleMeeting?.enabled || false });
+    });
+
+    // Schedule Meeting - send email with .ics calendar attachment
+    app.post('/scheduleMeeting', async (req, res) => {
+        if (!config.features?.scheduleMeeting?.enabled) {
+            return res.status(403).json({ message: 'Schedule meeting is disabled' });
+        }
+
+        const safeBody = checkXSS(req.body) || {};
+        const { title, description, dateTime, duration, recipients, roomName } = safeBody;
+
+        if (!title || !dateTime || !duration || !recipients || !roomName) {
+            return res.status(400).json({ message: 'Missing required fields' });
+        }
+
+        const recipientList = recipients
+            .split(',')
+            .map((e) => e.trim())
+            .filter((e) => Validator.isValidEmail(e));
+
+        if (recipientList.length === 0) {
+            return res.status(400).json({ message: 'No valid email recipients' });
+        }
+
+        try {
+            await nodemailer.sendScheduleMeeting({
+                title,
+                description: description || '',
+                dateTime,
+                duration: parseInt(duration) || 60,
+                recipients: recipientList,
+                roomName,
+                hostUrl: config.server.hostUrl,
+            });
+            res.status(200).json({ message: 'Meeting scheduled and invitations sent' });
+        } catch (err) {
+            log.error('scheduleMeeting', err);
+            res.status(500).json({ message: 'Failed to send meeting invitations' });
+        }
     });
 
     // Handle Direct join room with params

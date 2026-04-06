@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.86 - Configuration File
+ * MiroTalk SFU v2.1.87 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1475,6 +1475,17 @@ module.exports = {
         redirect: {
             enabled: process.env.REDIRECT_ENABLED === 'true',
             url: process.env.REDIRECT_URL || '',
+        },
+
+        /**
+         * Meeting Scheduler
+         * ---------------------
+         * - enabled: Show "Schedule Meeting" button on landing/newroom pages
+         * - Requires email configuration (integrations.email) to send invitations
+         * - Sends .ics calendar attachments with meeting details
+         */
+        scheduleMeeting: {
+            enabled: process.env.SCHEDULE_MEETING_ENABLED === 'true',
         },
 
         /**

@@ -1,0 +1,113 @@
+/* Schedule Meeting Modal */
+.sch-form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    text-align: left;
+    font-size: 14px;
+}
+
+.sch-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.sch-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.sch-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+.sch-icon {
+    font-size: 12px;
+    color: rgba(59, 130, 246, 0.9);
+}
+
+.sch-required {
+    color: rgba(239, 68, 68, 0.85);
+    font-size: 12px;
+}
+
+.sch-input {
+    width: 100%;
+    height: 42px;
+    padding: 0 12px;
+    margin: 0;
+    box-sizing: border-box;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    background: rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.92);
+    font-size: 14px;
+    font-family: inherit;
+    outline: none;
+    transition:
+        border-color 160ms ease,
+        box-shadow 160ms ease;
+}
+
+.sch-input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.sch-input:focus {
+    border-color: rgba(59, 130, 246, 0.6);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.sch-hint {
+    margin: 0;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+}
+
+/* Rounded Swal popup & buttons */
+.sch-popup {
+    border-radius: 14px !important;
+}
+
+.sch-btn {
+    border-radius: 8px !important;
+}
+
+/* Schedule Meeting Button (landing / newroom) */
+.schedule-meeting-btn {
+    margin-top: 8px;
+    width: 100%;
+    max-width: 420px;
+    height: 44px;
+    border-radius: 10px;
+    border: 1px solid rgba(59, 130, 246, 0.5);
+    background: rgba(59, 130, 246, 0.15);
+    color: #fff;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition:
+        background 160ms ease,
+        border-color 160ms ease,
+        transform 120ms ease;
+}
+
+.schedule-meeting-btn:hover {
+    background: rgba(59, 130, 246, 0.3);
+    border-color: rgba(59, 130, 246, 0.7);
+}
+
+.schedule-meeting-btn:active {
+    transform: translateY(1px);
+}
+
+.schedule-meeting-btn i {
+    margin-right: 6px;
+}
