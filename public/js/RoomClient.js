@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.88
+ * @version 2.1.89
  *
  */
 
@@ -1876,7 +1876,7 @@ class RoomClient {
                  * This will only apply to audio tracks
                  * and will not affect video tracks.
                  */
-                this.initRNNoiseSuppression();
+                await this.initRNNoiseSuppression();
                 stream = await this.getRNNoiseSuppressionStream(stream);
             }
 
@@ -2263,7 +2263,7 @@ class RoomClient {
     // NOISE SUPPRESSION
     // ####################################################
 
-    initRNNoiseSuppression() {
+    async initRNNoiseSuppression() {
         if (typeof RNNoiseProcessor === 'undefined') {
             console.warn('RNNoiseProcessor is not available.');
             this.handleRNNoiseNotSupported();
@@ -2272,6 +2272,13 @@ class RoomClient {
 
         if (!RNNoiseProcessor.isSupported()) {
             console.warn('RNNoise: AudioWorklet or WebAssembly not supported on this device, skipping.');
+            this.handleRNNoiseNotSupported();
+            return;
+        }
+
+        const supports48k = await RNNoiseProcessor.isSampleRateSupported();
+        if (!supports48k) {
+            console.warn('RNNoise: device does not support 48 kHz sample rate, skipping.');
             this.handleRNNoiseNotSupported();
             return;
         }

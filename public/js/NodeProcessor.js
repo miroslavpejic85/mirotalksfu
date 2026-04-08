@@ -66,6 +66,12 @@ class WasmLoader {
 
     async loadWasmBuffer() {
         try {
+            const workletNode = this.getWorkletNode();
+            if (!workletNode) {
+                this.uiManager.updateStatus('⚠️ Worklet node not available, skipping WASM load', 'warning');
+                return;
+            }
+
             this.uiManager.updateStatus('📦 Loading RNNoise sync module...', 'info');
 
             const jsResponse = await fetch('../js/RnnoiseSync.js');
@@ -77,7 +83,13 @@ class WasmLoader {
             const jsContent = await jsResponse.text();
             this.uiManager.updateStatus('📦 Sending sync module to worklet...', 'info');
 
-            this.getWorkletNode().port.postMessage({
+            const node = this.getWorkletNode();
+            if (!node) {
+                this.uiManager.updateStatus('⚠️ Worklet node disconnected before WASM could be sent', 'warning');
+                return;
+            }
+
+            node.port.postMessage({
                 type: 'sync-module',
                 jsContent: jsContent,
             });
@@ -119,6 +131,23 @@ class RNNoiseProcessor {
                 typeof WebAssembly.Module === 'function' &&
                 typeof WebAssembly.Instance === 'function';
             return !!(hasAudioWorklet && hasWebAssembly);
+        } catch (e) {
+            return false;
+        }
+    }
+
+    /**
+     * Probe whether the device actually supports a 48 kHz sample rate.
+     * Creates a temporary AudioContext, checks the real rate, then closes it.
+     * @returns {Promise<boolean>}
+     */
+    static async isSampleRateSupported() {
+        try {
+            const AudioCtx = window.AudioContext || window.webkitAudioContext;
+            const ctx = new AudioCtx({ sampleRate: 48000 });
+            const actual = ctx.sampleRate;
+            await ctx.close();
+            return actual === 48000;
         } catch (e) {
             return false;
         }
@@ -169,9 +198,12 @@ class RNNoiseProcessor {
                 return null;
             }
 
+            // 48 kHz support is verified by isSampleRateSupported() at init.
             this.audioContext = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 48000 });
-            const sampleRate = this.audioContext.sampleRate;
-            this.uiManager.updateStatus(`🎵 Audio context created with sample rate: ${sampleRate}Hz`, 'info');
+            this.uiManager.updateStatus(
+                `🎵 Audio context created with sample rate: ${this.audioContext.sampleRate}Hz`,
+                'info'
+            );
 
             if (this.audioContext.state === 'suspended') {
                 try {
