@@ -1307,6 +1307,8 @@ async function whoAreYou() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         willOpen: () => {
             hide(loadingDiv);
+        },
+        didOpen: () => {
             showMobileAudioGuidance();
         },
         inputValidator: (name) => {
@@ -1416,7 +1418,7 @@ function showMobileAudioGuidance() {
         setTimeout(() => {
             audioGuidanceDiv.remove();
         }, 500);
-    }, 10000);
+    }, 6000);
 }
 
 function handleAudio() {
