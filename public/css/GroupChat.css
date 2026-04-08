@@ -320,8 +320,8 @@
     height: 32px;
     border-radius: 8px;
     border: none;
-    background: color-mix(in srgb, var(--dd-color) 15%, transparent);
-    color: var(--dd-color);
+    background: rgba(0, 168, 255, 0.15);
+    color: #00a8ff;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
@@ -335,7 +335,7 @@
 
 .chat-header-participants-btn:hover {
     color: #fff;
-    background: color-mix(in srgb, var(--dd-color) 35%, transparent);
+    background: rgba(0, 168, 255, 0.35);
     transform: translateY(-1px);
 }
 
