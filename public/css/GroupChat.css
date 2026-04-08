@@ -307,9 +307,40 @@
 .chat .chat-header .chat-option-buttons {
     position: absolute;
     display: inline-flex;
+    align-items: center;
+    gap: 4px;
     top: 20px;
     right: 20px;
     z-index: 5;
+}
+
+/* Participants toggle button in header */
+.chat-header-participants-btn {
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    border: none;
+    background: rgba(0, 168, 255, 0.15);
+    color: #00a8ff;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    transition:
+        color 0.2s ease,
+        background 0.2s ease,
+        transform 0.15s ease;
+}
+
+.chat-header-participants-btn:hover {
+    color: #fff;
+    background: rgba(0, 168, 255, 0.35);
+    transform: translateY(-1px);
+}
+
+.chat-header-participants-btn:active {
+    transform: scale(0.92);
 }
 
 /* Chat history */
