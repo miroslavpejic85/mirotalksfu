@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.1.90 - Configuration File
+ * MiroTalk SFU v2.1.91 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1148,6 +1148,7 @@ module.exports = {
                 tryEasier: process.env.SHOW_TRY_EASIER !== 'false',
                 poweredBy: process.env.SHOW_POWERED_BY !== 'false',
                 sponsors: process.env.SHOW_SPONSORS !== 'false',
+                pastSponsors: process.env.SHOW_PAST_SPONSORS !== 'false',
                 advertisers: process.env.SHOW_ADVERTISERS !== 'false',
                 supportUs: process.env.SHOW_SUPPORT_US !== 'false',
                 footer: process.env.SHOW_FOOTER !== 'false',

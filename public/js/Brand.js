@@ -25,6 +25,7 @@ const teams = document.getElementById('teams');
 const tryEasier = document.getElementById('tryEasier');
 const poweredBy = document.getElementById('poweredBy');
 const sponsors = document.getElementById('sponsors');
+const pastSponsors = document.getElementById('pastSponsors');
 const advertisers = document.getElementById('advertisers');
 const supportUs = document.getElementById('supportUs');
 const footer = document.getElementById('footer');
@@ -74,6 +75,7 @@ let BRAND = {
         tryEasier: true,
         poweredBy: true,
         sponsors: true,
+        pastSponsors: true,
         advertisers: true,
         supportUs: true,
         footer: true,
@@ -99,7 +101,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.1.90</strong>',
+        title: '<strong>WebRTC SFU v2.1.91</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -237,6 +239,7 @@ function checkBrand() {
     !BRAND.html.tryEasier && elementDisplay(tryEasier, false);
     !BRAND.html.poweredBy && elementDisplay(poweredBy, false);
     !BRAND.html.sponsors && elementDisplay(sponsors, false);
+    !BRAND.html.pastSponsors && elementDisplay(pastSponsors, false);
     !BRAND.html.advertisers && elementDisplay(advertisers, false);
     !BRAND.html.supportUs && elementDisplay(supportUs, false);
     !BRAND.html.footer && elementDisplay(footer, false);
