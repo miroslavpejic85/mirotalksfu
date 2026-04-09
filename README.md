@@ -41,9 +41,7 @@
     </a>
 </p>
 
-<p align="center"><strong>Proudly sponsored by</strong></p>
-
-<hr />
+<p align="center">Proudly sponsored by</p>
 
 <h1 align=center>Recall.ai - API for meeting recording</h1>
 <p align="center">
@@ -82,10 +80,10 @@
 <br/>
 
 - 🎥 Video up to **8K @ 60fps** · Screen sharing · Recording · Picture-in-Picture
-- 💬 Chat with Markdown & emoji · Collaborative whiteboard · Rich text editor · File sharing
+- 💬 Chat with Markdown & emoji · Collaborative whiteboard and Rich text editor · File sharing
 - 🤖 ChatGPT (OpenAI) & DeepSeek integration · VideoAI avatars · Speech recognition
-- 🔒 OIDC auth · Host protection · JWT credentials · Room passwords · Lobby & spam mitigation
-- 🔌 REST API · Slack, Discord & Mattermost · Embeddable **[iframe](https://docs.mirotalk.com/mirotalk-sfu/integration/#iframe)** & **[widget](https://docs.mirotalk.com/mirotalk-sfu/integration/#widgets-integration)** · 133 languages
+- 🔒 OIDC auth · [Host protection](https://docs.mirotalk.com/mirotalk-sfu/host-protection/) · JWT credentials · Room passwords · Lobby & spam mitigation
+- 🔌 REST API · Slack, Discord & Mattermost · Embeddable [iframe](https://docs.mirotalk.com/mirotalk-sfu/integration/#iframe) & [widget](https://docs.mirotalk.com/mirotalk-sfu/integration/#widgets-integration) · 133 languages
 
 **[See all features →](https://docs.mirotalk.com/mirotalk-sfu/)**
 
@@ -308,7 +306,7 @@ We are grateful to our past sponsors for their support!
 
 </details>
 
-## EffectsSDK ✨
+## ✨ EffectsSDK
 
 [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)
 
@@ -316,13 +314,15 @@ We are grateful to our past sponsors for their support!
 
 **Explore:**
 
-- 🎥 **[AI Video Effects Extension](https://chromewebstore.google.com/detail/effetti-webcam-ai-+-regis/iedbphhbpflhgpihkcceocomcdnemcbj)** - Add virtual backgrounds and effects to your webcam.
-- 🔊 **[Noise Cancelling Extension](https://chromewebstore.google.com/detail/noise-cancelling-app/njmhcidcdbaannpafjdljminaigdgolj)** - Reduce background noise for clearer audio.
-- 🛠️ **[Integrate EffectsSDK](https://github.com/EffectsSDK)** - Access SDKs and plugins for custom solutions.
+- 🎥 **[AI Video Effects Extension](https://chromewebstore.google.com/detail/effetti-webcam-ai-+-regis/iedbphhbpflhgpihkcceocomcdnemcbj)**: Add virtual backgrounds and effects to your webcam.
+- 🔊 **[Noise Cancelling Extension](https://chromewebstore.google.com/detail/noise-cancelling-app/njmhcidcdbaannpafjdljminaigdgolj)**: Reduce background noise for clearer audio.
+- 🛠️ **[Integrate EffectsSDK](https://github.com/EffectsSDK)**: Access SDKs and plugins for custom solutions.
 
 ---
 
 🌐 **Explore all MiroTalk projects:** [MiroTalk Overview →](https://docs.mirotalk.com/overview/)
+
+---
 
 This project is tested with [BrowserStack](https://www.browserstack.com).
 
