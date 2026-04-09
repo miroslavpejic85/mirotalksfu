@@ -337,7 +337,7 @@ This project is tested with [BrowserStack](https://www.browserstack.com).
 
 If you like this project, please star it - every star helps more people discover this free Zoom alternative!
 
-[![Star History Chart](https://api.star-history.com/svg?repos=miroslavpejic85/mirotalksfu&type=Date)](https://star-history.com/#miroslavpejic85/mirotalksfu&Date)
+![Star History Chart](https://app.repohistory.com/api/svg?repo=miroslavpejic85/mirotalksfu&type=Date&background=0D1117&color=62C3F8)
 
 ---
 
