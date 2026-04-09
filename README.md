@@ -634,7 +634,3 @@ If you like this project, please star it - every star helps more people discover
 <p align="center">
   Built with ❤️ by <a href="https://www.linkedin.com/in/miroslav-pejic-976a07101/">Miroslav</a> and the open-source community
 </p>
-
-<p align="center">
-  <a href="https://github.com/miroslavpejic85/mirotalksfu/stargazers"><strong>⭐ Star MiroTalk SFU on GitHub</strong></a>
-</p>
