@@ -52,7 +52,7 @@
 
 <br/>
 
-<details open>
+<details>
 <summary>✨ Why MiroTalk SFU?</summary>
 
 <br/>
@@ -74,7 +74,7 @@
 
 </details>
 
-<details open>
+<details>
 <summary>🚀 Features</summary>
 
 <br/>
@@ -158,7 +158,7 @@ Open [https://localhost:3010](https://localhost:3010) - done!
 
 </details>
 
-<details open>
+<details>
 <summary>🐳 Docker</summary>
 
 <br/>
@@ -306,7 +306,8 @@ We are grateful to our past sponsors for their support!
 
 </details>
 
-## ✨ EffectsSDK
+<details open>
+<summary>✨ EffectsSDK</summary>
 
 [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)
 
@@ -317,6 +318,10 @@ We are grateful to our past sponsors for their support!
 - 🎥 **[AI Video Effects Extension](https://chromewebstore.google.com/detail/effetti-webcam-ai-+-regis/iedbphhbpflhgpihkcceocomcdnemcbj)**: Add virtual backgrounds and effects to your webcam.
 - 🔊 **[Noise Cancelling Extension](https://chromewebstore.google.com/detail/noise-cancelling-app/njmhcidcdbaannpafjdljminaigdgolj)**: Reduce background noise for clearer audio.
 - 🛠️ **[Integrate EffectsSDK](https://github.com/EffectsSDK)**: Access SDKs and plugins for custom solutions.
+
+</details>
+
+<br />
 
 ---
 
