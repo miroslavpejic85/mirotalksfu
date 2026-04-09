@@ -41,10 +41,6 @@
     </a>
 </p>
 
-<br />
-
-<p align="center"><strong>If you find MiroTalk SFU useful, please ⭐ Star it on GitHub - it helps others discover this project!</strong></p>
-
 <p align="center"><strong>Proudly sponsored by</strong></p>
 
 <hr />
@@ -55,6 +51,8 @@
 </p>
 
 <hr />
+
+<br/>
 
 <details open>
 <summary>✨ Why MiroTalk SFU?</summary>
@@ -72,7 +70,7 @@
 | 🌍 **Languages**     | 133 languages                                                                                                                                       | ~30-80                      |
 | 🔌 **API**           | Full REST API included                                                                                                                              | Paid add-on                 |
 | 📡 **RTMP/OBS**      | Built-in RTMP streaming                                                                                                                             | Third-party needed          |
-| 🤖 **AI Features**   | ChatGPT, DeepSeek + VideoAI integration                                                                                                                       | Paid AI add-ons             |
+| 🤖 **AI Features**   | ChatGPT, DeepSeek + VideoAI integration                                                                                                             | Paid AI add-ons             |
 | 🧩 **Customization** | Full source code, white-label ready                                                                                                                 | Limited branding options    |
 | 📦 **Deployment**    | Docker, Node.js, one-click install                                                                                                                  | N/A (SaaS only)             |
 
