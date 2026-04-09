@@ -2017,7 +2017,7 @@ main {
 #topSponsors .clients-inner {
     max-width: 100%;
     margin: 0 auto;
-    padding: 0 24px;
+    padding: 24px 24px 0 24px;
 }
 
 #topSponsors .clients-inner ul {
@@ -2267,7 +2267,7 @@ main {
 
     #topSponsors .clients-inner {
         max-width: 100%;
-        padding: 0 16px;
+        padding: 24px 16px 0 16px;
     }
 
     #topSponsors .clients-inner li {
@@ -2294,7 +2294,7 @@ main {
 
     #topSponsors .clients-inner {
         max-width: 100%;
-        padding: 0 20px;
+        padding: 24px 20px 0 20px;
     }
 
     #topSponsors .clients-inner li {
