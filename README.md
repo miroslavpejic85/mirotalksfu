@@ -37,7 +37,7 @@
 
 <p align="center">
     <a href="https://sfu.mirotalk.com/">
-        <img src="public/images/mirotalksfu-header.gif" alt="MiroTalk SFU - Open Source Video Conferencing">
+        <img src="public/images/mirotalksfu-github.gif" alt="MiroTalk SFU - Open Source Video Conferencing">
     </a>
 </p>
 
