@@ -190,6 +190,7 @@ Open [https://localhost:3010](https://localhost:3010) - done!
 
 For detailed guides and references, visit the **[official documentation](https://docs.mirotalk.com)**:
 
+- [Our Story](https://docs.mirotalk.com/story/)
 - [About](https://docs.mirotalk.com/mirotalk-sfu/)
 - [Self-Hosting Guide](https://docs.mirotalk.com/mirotalk-sfu/self-hosting/)
 - [Automation-scripts](https://docs.mirotalk.com/scripts/about/)
