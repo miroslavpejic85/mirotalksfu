@@ -21,16 +21,10 @@
 
 <br />
 
-<p align="center"><strong>MiroTalk SFU</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform built on <a href="https://mediasoup.org" target="_blank">Mediasoup</a> (Selective Forwarding Unit). It's a powerful <strong>Zoom, Google Meet, and Microsoft Teams alternative</strong> you can deploy on your own server in minutes. Enjoy unlimited rooms, no time limits, end-to-end privacy, and a rich feature set - all under your control.</p>
+<p align="center"><strong>MiroTalk SFU</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform built on <a href="https://mediasoup.org" target="_blank">mediasoup</a> (Selective Forwarding Unit). It's a powerful <strong>Zoom, Google Meet, and Microsoft Teams alternative</strong> you can deploy on your own server in minutes. Enjoy unlimited rooms, no time limits, end-to-end privacy, and a rich feature set - all under your control.</p>
 
 <p align="center">
-    <a href="https://sfu.mirotalk.com"><img src="https://img.shields.io/badge/Try_Live_Demo-blue?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Try Live Demo"></a>
-    &nbsp;
-    <a href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/"><img src="https://img.shields.io/badge/Documentation-green?style=for-the-badge&logo=readthedocs&logoColor=white" alt="Documentation"></a>
-    &nbsp;
-    <a href="https://discord.gg/rgGYfeYW3N"><img src="https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white" alt="Discord"></a>
-    &nbsp;
-    <a href="https://github.com/sponsors/miroslavpejic85"><img src="https://img.shields.io/badge/Sponsor-ea4aaa?style=for-the-badge&logo=githubsponsors&logoColor=white" alt="Sponsor"></a>
+    <a href="https://sfu.mirotalk.com">Try Live Demo</a> · <a href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> · <a href="https://discord.gg/rgGYfeYW3N">Discord</a> · <a href="https://github.com/sponsors/miroslavpejic85">Sponsor</a>
 </p>
 
 <br />
