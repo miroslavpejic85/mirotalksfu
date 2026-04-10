@@ -7392,8 +7392,9 @@ async function presenterJoinBreakoutRoom(breakoutRoom) {
 
     const room = breakoutRooms.find((r) => r.id === breakoutRoom);
     const duration = room ? room.duration : getBreakoutDuration();
+    const breakoutName = room ? room.name || breakoutRoom : breakoutRoom;
 
-    navigateToRoom(breakoutRoom, { breakoutMain: room_id, duration: duration });
+    navigateToRoom(breakoutRoom, { breakoutMain: room_id, duration: duration, breakoutName: breakoutName });
 }
 
 function broadcastToBreakoutRooms(targetRoom = null) {
