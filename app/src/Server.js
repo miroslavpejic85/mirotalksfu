@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.91
+ * @version 2.2.00
  *
  */
 
@@ -2071,10 +2071,18 @@ function startServer() {
                             return cb('unauthorized');
                         }
 
-                        is_presenter =
-                            presenter === '1' ||
-                            presenter === 'true' ||
-                            (hostCfg?.presenters?.join_first && room?.getPeersCount() === 0);
+                        const tokenPresenter = presenter === '1' || presenter === 'true';
+
+                        /*
+                            In breakout rooms: only presenters.list members get presenter role
+                            join_first and token-based presenter flags are ignored
+                        */
+                        if (socket.room_id.includes('_breakout_')) {
+                            is_presenter = hostCfg?.presenters?.list?.includes(peer_name) || false;
+                        } else {
+                            is_presenter =
+                                tokenPresenter || (hostCfg?.presenters?.join_first && room?.getPeersCount() === 0);
+                        }
 
                         log.debug('[Join] - HOST PROTECTED - USER AUTH check peer', {
                             ip: peer_ip,
@@ -2144,10 +2152,17 @@ function startServer() {
                 peer_uuid: peer_uuid,
                 is_presenter: is_presenter,
             };
-            // first we check if the username match the presenters username else if join_first enabled
+
+            /**
+             * first we check if the username match the presenters username else if join_first enabled
+             * For breakout rooms, skip join_first rule - only presenters.list or token-based presenters are valid
+             */
+            const isBreakoutRoom = socket.room_id.includes('_breakout_');
             if (
                 hostCfg?.presenters?.list?.includes(peer_name) ||
-                (hostCfg?.presenters?.join_first && Object.keys(presenters[socket.room_id]).length === 0) ||
+                (!isBreakoutRoom &&
+                    hostCfg?.presenters?.join_first &&
+                    Object.keys(presenters[socket.room_id]).length === 0) ||
                 (peer_token && is_presenter)
             ) {
                 presenter.is_presenter = true;
@@ -2241,6 +2256,11 @@ function startServer() {
             }
 
             handleJoinWebHook(room.id, data.peer_info);
+
+            // Notify main room when a peer joins a breakout room
+            if (socket.room_id.includes('_breakout_')) {
+                notifyMainRoomBreakoutCountChanged(socket.room_id);
+            }
 
             cb(room.toJson());
         });
@@ -2842,6 +2862,139 @@ function startServer() {
                 }
             }
         });
+
+        // ####################################################
+        // BREAKOUT ROOMS
+        // ####################################################
+
+        socket.on('getBreakoutRoomsInfo', async ({ mainRoom }, callback) => {
+            if (!roomExists(socket)) return callback([]);
+
+            const breakoutRooms = [];
+            for (const [roomId, room] of roomList) {
+                if (roomId.startsWith(mainRoom + '_breakout_')) {
+                    const peerNames = [];
+                    room.getPeers().forEach((peer) => {
+                        if (peer.peer_name) peerNames.push(peer.peer_name);
+                    });
+                    breakoutRooms.push({
+                        room: roomId,
+                        peers: room.getPeersCount(),
+                        peerNames: peerNames,
+                    });
+                }
+            }
+            callback(breakoutRooms);
+        });
+
+        socket.on('breakoutRoomBroadcast', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Breakout room broadcast', data);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            const { mainRoom, targetRoom, message } = data;
+            if (!message || !mainRoom) return;
+
+            const msgData = {
+                peer_name: data.peer_name,
+                message: message,
+            };
+
+            if (targetRoom) {
+                // Send to a specific breakout room
+                const room = roomList.get(targetRoom);
+                if (room) room.sendToAll('breakoutRoomMessage', msgData);
+            } else {
+                // Send to all breakout rooms
+                for (const [roomId, room] of roomList) {
+                    if (roomId.startsWith(mainRoom + '_breakout_')) {
+                        room.sendToAll('breakoutRoomMessage', msgData);
+                    }
+                }
+            }
+        });
+
+        socket.on('breakoutRoomEnd', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Breakout room end all', data);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            const { mainRoom } = data;
+            if (!mainRoom) return;
+
+            // Force all peers in breakout rooms to return to main room
+            for (const [roomId, room] of roomList) {
+                if (roomId.startsWith(mainRoom + '_breakout_')) {
+                    room.sendToAll('breakoutRoomEnd', { mainRoom });
+                }
+            }
+        });
+
+        socket.on('breakoutRoomHelp', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Breakout room help request', data);
+
+            const { mainRoom, peer_name, breakoutRoom } = data;
+            if (!mainRoom || !peer_name || !breakoutRoom) return;
+
+            // Send help request to all peers in the main room (presenter will handle it)
+            const room = roomList.get(mainRoom);
+            if (room) {
+                room.sendToAll('breakoutRoomHelp', {
+                    peer_name: peer_name,
+                    breakoutRoom: breakoutRoom,
+                });
+            }
+        });
+
+        socket.on('breakoutRoom', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Breakout room', data);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            const room = getRoom(socket);
+            if (!room) return;
+
+            // Send breakout room assignment to each assigned peer
+            const { assignments, mainRoom } = data;
+            if (assignments && Array.isArray(assignments)) {
+                for (const assignment of assignments) {
+                    const { peerId, breakoutRoom, duration, roomName } = assignment;
+                    room.sendTo(peerId, 'breakoutRoom', {
+                        action: 'assign',
+                        breakoutRoom: breakoutRoom,
+                        mainRoom: mainRoom,
+                        duration: duration || 'unlimited',
+                        roomName: roomName || breakoutRoom,
+                    });
+                }
+            }
+        });
+
+        // ####################################################
+        // BREAKOUT ROOMS END
+        // ####################################################
 
         socket.on('peerAction', async (dataObject) => {
             if (!roomExists(socket)) return;
@@ -3841,6 +3994,11 @@ function startServer() {
 
             room.broadCast(socket.id, 'removeMe', removeMeData(room, peer_name, isPresenter));
 
+            // Notify main room when a peer leaves a breakout room
+            if (socket.room_id.includes('_breakout_')) {
+                notifyMainRoomBreakoutCountChanged(socket.room_id);
+            }
+
             // Clean up this peer's presenter entry immediately
             if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
                 delete presenters[socket.room_id][socket.id];
@@ -4025,6 +4183,14 @@ function startServer() {
             };
             log.debug('Peer removed from the room', data);
             return data;
+        }
+
+        function notifyMainRoomBreakoutCountChanged(breakoutRoomId) {
+            const mainRoomId = breakoutRoomId.split('_breakout_')[0];
+            const mainRoom = roomList.get(mainRoomId);
+            if (mainRoom) {
+                mainRoom.sendToAll('breakoutRoomCountsChanged', { breakoutRoom: breakoutRoomId });
+            }
         }
     });
 

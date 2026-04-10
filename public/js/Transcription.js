@@ -325,6 +325,9 @@ class Transcription {
         if (rc.isEditorPinned) {
             return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
         }
+        if (rc.isBreakoutPinned) {
+            return userLog('info', 'Please unpin the breakout rooms that appears to be currently pinned', 'top-end');
+        }
         this.isPinned ? this.unpinned() : this.pinned();
         rc.sound('click');
     }

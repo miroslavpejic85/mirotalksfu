@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.91
+ * @version 2.2.00
  *
  */
 
@@ -287,6 +287,8 @@ let isVideoPrivacyActive = false;
 let isRecording = false;
 let isAudioVideoAllowed = false;
 let isParticipantsListOpen = false;
+let isBreakoutPanelOpen = false;
+let breakoutRooms = [];
 let isVideoControlsOn = false;
 let isChatPasteTxt = false;
 let isChatMarkdownOn = false;
@@ -470,6 +472,7 @@ async function initClient() {
         setTippy('chatMaxButton', 'Maximize', 'bottom');
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
+        setTippy('breakoutTogglePin', 'Toggle pin', 'bottom');
         setTippy('pollMaxButton', 'Maximize', 'bottom');
         setTippy('pollMinButton', 'Minimize', 'bottom');
         setTippy('pollSaveButton', 'Save results', 'bottom');
@@ -1771,6 +1774,7 @@ function roomIsReady() {
         rc.pollMaximize();
         hide(pollTogglePin);
         hide(editorTogglePin);
+        hide(breakoutTogglePin);
         hide(pollMaxButton);
         hide(pollMinButton);
         transcription.maximize();
@@ -1788,6 +1792,9 @@ function roomIsReady() {
         rc.makeDraggable(receiveFileDiv, imgShareReceive);
         rc.makeDraggable(lobby, lobbyHeader);
         rc.makeDraggable(transcriptionRoom, transcriptionHeader);
+        rc.makeDraggable(breakoutToolbar, breakoutToolbarHandle);
+        rc.makeDraggable(breakoutPanel, breakoutPanelHeader);
+        initBreakoutDurationPicker();
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             if (BUTTONS.main.startScreenButton) {
                 show(startScreenButton);
@@ -1800,6 +1807,7 @@ function roomIsReady() {
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         BUTTONS.poll.pollPinButton && show(pollTogglePin);
         show(editorTogglePin);
+        show(breakoutTogglePin);
         BUTTONS.poll.pollMaxButton && show(pollMaxButton);
         BUTTONS.settings.pushToTalk && show(pushToTalkDiv);
         BUTTONS.settings.tabRTMPStreamingBtn &&
@@ -1860,6 +1868,7 @@ function roomIsReady() {
     setupSettingsExtraDropdown();
     setupQuickDeviceSwitchDropdowns();
     checkButtonsBar();
+    checkBreakoutRoom();
     if (room_password) {
         lockRoomButton.click();
     }
@@ -2190,6 +2199,46 @@ function handleButtons() {
     pollCreateForm.onsubmit = (e) => {
         rc.pollCreateNewForm(e);
     };
+    // Breakout Rooms
+    breakoutRoomButton.onclick = () => {
+        toggleBreakoutPanel();
+    };
+    breakoutReturnBtn.onclick = () => {
+        returnToMainRoom();
+    };
+    breakoutHelpBtn.onclick = () => {
+        askBreakoutHelp();
+    };
+    breakoutPanelCloseBtn.onclick = () => {
+        toggleBreakoutPanel();
+    };
+    breakoutAddRoomBtn.onclick = () => {
+        addBreakoutRoom();
+    };
+    breakoutRefreshBtn.onclick = () => {
+        refreshBreakoutPanel();
+    };
+    breakoutTogglePin.onclick = () => {
+        rc.toggleBreakoutPin();
+    };
+    breakoutLaunchBtn.onclick = () => {
+        launchBreakoutRooms();
+    };
+    breakoutBroadcastAllBtn.onclick = () => {
+        broadcastToBreakoutRooms();
+    };
+    breakoutBroadcastInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') broadcastToBreakoutRooms();
+    });
+    breakoutEndAllBtn.onclick = () => {
+        endAllBreakoutSessions();
+    };
+    breakoutAutoAssignBtn.onclick = () => {
+        autoAssignBreakoutRooms();
+    };
+    breakoutParticipantSearch.addEventListener('input', () => {
+        filterBreakoutParticipants();
+    });
     editorButton.onclick = () => {
         rc.toggleEditor();
         if (isPresenter && !rc.editorIsLocked()) {
@@ -5811,6 +5860,7 @@ async function getRoomParticipants() {
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
     updateChatConversationsCount();
+    if (isBreakoutPanelOpen) refreshBreakoutPanel();
     console.log('*** Refresh Chat participant lists ***');
 }
 
@@ -6938,7 +6988,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.1.91',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.00',
         html: `
             <br />
             <div id="about">
@@ -6980,4 +7030,622 @@ function showAbout() {
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
+}
+
+// ####################################################
+// BREAKOUT ROOMS
+// ####################################################
+
+async function getBreakoutRoomsInfo() {
+    try {
+        return await rc.socket.request('getBreakoutRoomsInfo', { mainRoom: room_id });
+    } catch (e) {
+        console.warn('Failed to get breakout rooms info', e);
+        return [];
+    }
+}
+
+function parseDurationToSeconds(duration) {
+    if (!duration || duration === 'unlimited') return 0;
+    const match = duration.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+    if (!match) return 0;
+    return parseInt(match[1], 10) * 3600 + parseInt(match[2], 10) * 60 + parseInt(match[3], 10);
+}
+
+function navigateToRoom(room, extraParams = {}) {
+    const baseUrl = `${window.location.origin}/join`;
+    const queryParams = new URLSearchParams({
+        room: room,
+        name: peer_name,
+        audio: rc.peer_info.peer_audio ? '1' : '0',
+        video: rc.peer_info.peer_video ? '1' : '0',
+        notify: '0',
+        ...extraParams,
+    });
+    if (peer_token) queryParams.set('token', peer_token);
+
+    if (typeof preventExit !== 'undefined') preventExit = false;
+    rc.exit(true);
+    openURL(`${baseUrl}?${queryParams.toString()}`);
+}
+
+function checkBreakoutRoom() {
+    const breakoutMain = getQueryParam('breakoutMain');
+    if (breakoutMain) {
+        const toolbar = getId('breakoutToolbar');
+        const roomLabel = getId('breakoutToolbarRoomName');
+        if (toolbar && roomLabel) {
+            roomLabel.textContent = getQueryParam('breakoutName') || room_id;
+            toolbar.classList.remove('hidden');
+            toolbar.dataset.mainRoom = breakoutMain;
+        }
+        checkBreakoutTimer();
+    }
+}
+
+function returnToMainRoom() {
+    const toolbar = getId('breakoutToolbar');
+    const mainRoom = toolbar ? toolbar.dataset.mainRoom : null;
+    if (!mainRoom || !rc) return;
+    navigateToRoom(mainRoom);
+}
+
+function askBreakoutHelp() {
+    const toolbar = getId('breakoutToolbar');
+    const mainRoom = toolbar ? toolbar.dataset.mainRoom : null;
+    if (!mainRoom || !rc) return;
+
+    rc.socket.emit('breakoutRoomHelp', {
+        peer_name: peer_name,
+        mainRoom: mainRoom,
+        breakoutRoom: room_id,
+    });
+
+    rc.userLog('info', 'Help request sent to presenter', 'top-end', 3000);
+    sound('notification');
+}
+
+function toggleBreakoutPanel() {
+    if (!rc || !isPresenter) return;
+    const panel = getId('breakoutPanel');
+    if (!panel) return;
+
+    isBreakoutPanelOpen = !isBreakoutPanelOpen;
+
+    if (isBreakoutPanelOpen) {
+        show(panel);
+        refreshBreakoutPanel();
+        sound('open');
+
+        if (rc.isBreakoutPinned) rc.breakoutUnpin();
+
+        if (!rc.isMobileDevice && rc.canBePinned()) {
+            rc.toggleBreakoutPin();
+        }
+    } else {
+        if (rc.isBreakoutPinned) rc.breakoutUnpin();
+        hide(panel);
+    }
+}
+
+function addBreakoutRoom() {
+    const duration = getBreakoutDuration();
+    if (validateBreakoutDuration(duration) === null) return;
+
+    const index = breakoutRooms.length + 1;
+    breakoutRooms.push({ id: `${room_id}_breakout_${index}`, duration: duration, name: `Room ${index}` });
+    refreshBreakoutPanel();
+}
+
+async function removeBreakoutRoom(index) {
+    const room = breakoutRooms[index];
+    if (!room) return;
+
+    const breakoutInfo = await getBreakoutRoomsInfo();
+    const info = breakoutInfo.find((r) => r.room === room.id);
+    if (info && info.peers > 0) {
+        return rc.userLog(
+            'warning',
+            `Cannot remove room with ${info.peers} active peer(s). Wait for them to return or broadcast a message first.`,
+            'top-end',
+            5000
+        );
+    }
+
+    breakoutRooms.splice(index, 1);
+    refreshBreakoutPanel();
+}
+
+async function refreshBreakoutPanel() {
+    if (!isBreakoutPanelOpen || !rc) return;
+
+    // Get current room peers
+    const peers = await getRoomPeers();
+    const peerList = [];
+    for (const [id, data] of peers) {
+        if (id === rc.peer_id) continue;
+        peerList.push({ id, name: data.peer_info.peer_name });
+    }
+
+    // Save current select values before re-render
+    const savedAssignments = {};
+    document.querySelectorAll('.breakout-room-select').forEach((sel) => {
+        if (sel.value) savedAssignments[sel.dataset.peerId] = sel.value;
+    });
+
+    // Get breakout room info from server (which rooms actually exist and peer counts)
+    const breakoutInfo = await getBreakoutRoomsInfo();
+
+    // Ensure rooms discovered on server are in our local list
+    for (const info of breakoutInfo) {
+        if (!breakoutRooms.some((r) => r.id === info.room)) {
+            breakoutRooms.push({
+                id: info.room,
+                duration: 'unlimited',
+                name: info.room.split('_breakout_').pop() || 'Room',
+            });
+        }
+    }
+
+    // Update rooms section label
+    const roomsLabel = getId('breakoutRoomsLabel');
+    roomsLabel.textContent = breakoutRooms.length > 0 ? `Rooms (${breakoutRooms.length})` : 'Rooms';
+
+    // Build rooms list
+    const roomsList = getId('breakoutRoomsList');
+    const emptyState = getId('breakoutEmptyState');
+    let roomsHtml = '';
+    const roomTooltips = [];
+    breakoutRooms.forEach((room, idx) => {
+        const displayName = room.name || `Room ${idx + 1}`;
+        const info = breakoutInfo.find((r) => r.room === room.id);
+        const peerCount = info ? info.peers : 0;
+        const peerNames = info && info.peerNames ? info.peerNames : [];
+        const durationDisplay =
+            room.duration === 'unlimited'
+                ? '<i class="fas fa-infinity"></i>'
+                : `<i class="fas fa-clock"></i> ${room.duration}`;
+        const activeClass = peerCount > 0 ? ' breakout-room-active' : '';
+        const countId = `breakoutRoomCount-${idx}`;
+        const nameId = `breakoutRoomName-${idx}`;
+        roomsHtml += `
+            <div class="breakout-room-card${activeClass}">
+                <div class="breakout-room-info">
+                    <i class="fas fa-door-open breakout-accent"></i>
+                    <span class="breakout-room-name" id="${nameId}" onclick="renameBreakoutRoom(${idx})" title="Click to rename">${displayName}</span>
+                    <span class="breakout-room-count" id="${countId}">${peerCount} peer${peerCount !== 1 ? 's' : ''}</span>
+                    <span class="breakout-room-duration">${durationDisplay}</span>
+                </div>
+                <div class="breakout-room-actions">
+                    <button class="breakout-room-join-btn" onclick="presenterJoinBreakoutRoom('${room.id}')">
+                        <i class="fas fa-sign-in-alt"></i> Join
+                    </button>
+                    <button class="breakout-room-msg-btn" onclick="broadcastToBreakoutRooms('${room.id}')" title="Send message to this room">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                    <button class="breakout-room-remove-btn" onclick="removeBreakoutRoom(${idx})">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </div>`;
+        if (peerNames.length > 0) {
+            const namesHtml = peerNames
+                .map((n) => `<i class="fas fa-user breakout-room-peer-icon"></i>${n}`)
+                .join('<br>');
+            roomTooltips.push({ id: countId, content: namesHtml });
+        }
+    });
+    roomsList.innerHTML = roomsHtml;
+
+    // Apply tooltips to peer count spans (appendTo body to avoid overflow clipping)
+    roomTooltips.forEach((t) => {
+        const el = getId(t.id);
+        if (!el) return;
+        if (el._tippy) el._tippy.destroy();
+        tippy(el, {
+            content: t.content,
+            placement: 'top',
+            allowHTML: true,
+            appendTo: document.body,
+        });
+    });
+
+    // Toggle empty state vs rooms list
+    const hasRooms = breakoutRooms.length > 0;
+    hasRooms ? hide(emptyState) : show(emptyState);
+    hasRooms ? show(roomsList) : hide(roomsList);
+
+    // Show/hide actions bar when rooms exist
+    const actionsBar = getId('breakoutActionsBar');
+    const endAllBtn = getId('breakoutEndAllBtn');
+    const broadcastAllBtn = getId('breakoutBroadcastAllBtn');
+    const hasActivePeers = breakoutInfo.some((r) => r.peers > 0);
+
+    hasRooms ? show(actionsBar) : hide(actionsBar);
+    hasActivePeers ? show(endAllBtn) : hide(endAllBtn);
+
+    broadcastAllBtn.disabled = !hasRooms;
+
+    // Show/hide auto-assign button when rooms and participants exist
+    const autoAssignBtn = getId('breakoutAutoAssignBtn');
+    hasRooms && peerList.length > 0 ? show(autoAssignBtn) : hide(autoAssignBtn);
+
+    // Update participants section label
+    const participantsLabel = getId('breakoutParticipantsLabel');
+    participantsLabel.textContent = peerList.length > 0 ? `Participants (${peerList.length})` : 'Participants';
+
+    // Build participants list with room assignment dropdowns
+    const bpList = getId('breakoutParticipantsList');
+    const roomOptions = breakoutRooms
+        .map((room, idx) => `<option value="${room.id}">${room.name || `Room ${idx + 1}`}</option>`)
+        .join('');
+
+    let participantsHtml = '';
+    for (const p of peerList) {
+        participantsHtml += `
+            <div class="breakout-participant-row">
+                <div class="breakout-participant-info">
+                    <i class="fas fa-user breakout-peer-icon"></i>
+                    <span class="breakout-peer-name">${p.name}</span>
+                </div>
+                <select class="breakout-room-select" data-peer-id="${p.id}" data-peer-name="${p.name}">
+                    <option value="">Not assigned</option>
+                    ${roomOptions}
+                </select>
+            </div>`;
+    }
+
+    if (peerList.length === 0) {
+        participantsHtml = '<div class="breakout-no-participants">No other participants in the room</div>';
+    }
+    bpList.innerHTML = participantsHtml;
+
+    // Restore saved select values
+    document.querySelectorAll('.breakout-room-select').forEach((sel) => {
+        const saved = savedAssignments[sel.dataset.peerId];
+        if (saved && Array.from(sel.options).some((o) => o.value === saved)) {
+            sel.value = saved;
+        }
+    });
+}
+
+async function launchBreakoutRooms() {
+    const selects = document.querySelectorAll('.breakout-room-select');
+    const assignments = [];
+
+    selects.forEach((select) => {
+        if (select.value) {
+            assignments.push({
+                peerId: select.dataset.peerId,
+                peerName: select.dataset.peerName,
+                breakoutRoom: select.value,
+            });
+        }
+    });
+
+    if (assignments.length === 0) {
+        return rc.userLog('warning', 'Please assign at least one participant to a room', 'top-end', 4000);
+    }
+
+    // Group assignments by room for summary
+    const roomCounts = {};
+    assignments.forEach((a) => {
+        const idx = breakoutRooms.findIndex((r) => r.id === a.breakoutRoom);
+        const room = breakoutRooms[idx];
+        const name = room ? room.name || `Room ${idx + 1}` : `Room ${idx + 1}`;
+        roomCounts[name] = (roomCounts[name] || 0) + 1;
+    });
+    const summary = Object.entries(roomCounts)
+        .map(([name, count]) => `${name}: ${count}`)
+        .join(', ');
+
+    const confirmed = await Swal.fire({
+        background: swalBackground,
+        position: 'top',
+        title: 'Launch Breakout Rooms?',
+        html: `<p style="color:#fff">Move <b>${assignments.length}</b> participant(s) to breakout rooms?</p><p style="color:#b0b0b0;font-size:13px">${summary}</p>`,
+        showDenyButton: true,
+        confirmButtonText: 'Launch',
+        denyButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+
+    if (!confirmed.isConfirmed) return;
+
+    // Use per-room durations and names from assignments
+    const assignmentsWithDuration = assignments.map((a) => {
+        const idx = breakoutRooms.findIndex((r) => r.id === a.breakoutRoom);
+        const room = idx !== -1 ? breakoutRooms[idx] : null;
+        return {
+            ...a,
+            duration: room ? room.duration : 'unlimited',
+            roomName: room ? room.name || `Room ${idx + 1}` : a.breakoutRoom,
+        };
+    });
+
+    rc.socket.emit('breakoutRoom', {
+        peer_name: peer_name,
+        peer_uuid: peer_uuid,
+        mainRoom: room_id,
+        assignments: assignmentsWithDuration,
+        duration: 'per-room',
+    });
+
+    rc.userLog('info', `Breakout rooms launched! ${assignments.length} participant(s) assigned`, 'top-end', 4000);
+
+    // Staggered refresh to show updated counts as participants join their rooms
+    setTimeout(() => refreshBreakoutPanel(), 2000);
+    setTimeout(() => refreshBreakoutPanel(), 5000);
+    setTimeout(() => refreshBreakoutPanel(), 10000);
+}
+
+async function presenterJoinBreakoutRoom(breakoutRoom) {
+    if (!rc) return;
+
+    const breakoutInfo = await getBreakoutRoomsInfo();
+    const info = breakoutInfo.find((r) => r.room === breakoutRoom);
+    if (!info || info.peers === 0) {
+        return rc.userLog('warning', 'No peers in this room yet', 'top-end', 3000);
+    }
+
+    const room = breakoutRooms.find((r) => r.id === breakoutRoom);
+    const duration = room ? room.duration : getBreakoutDuration();
+
+    navigateToRoom(breakoutRoom, { breakoutMain: room_id, duration: duration });
+}
+
+function broadcastToBreakoutRooms(targetRoom = null) {
+    if (!rc || !isPresenter) return;
+
+    const input = getId('breakoutBroadcastInput');
+    const message = input.value.trim();
+    if (!message) {
+        return rc.userLog('warning', 'Please type a message to broadcast', 'top-end', 3000);
+    }
+
+    rc.socket.emit('breakoutRoomBroadcast', {
+        peer_name: peer_name,
+        peer_uuid: peer_uuid,
+        mainRoom: room_id,
+        targetRoom: targetRoom,
+        message: message,
+    });
+
+    const logMsg = targetRoom ? 'Message sent to room' : 'Message broadcast to all breakout rooms';
+    rc.userLog('info', logMsg, 'top-end', 3000);
+    input.value = '';
+}
+
+function filterBreakoutParticipants() {
+    const query = getId('breakoutParticipantSearch').value.toLowerCase().trim();
+    const rows = document.querySelectorAll('.breakout-participant-row');
+    rows.forEach((row) => {
+        const name = row.querySelector('.breakout-peer-name');
+        if (!name) return;
+        row.style.display = name.textContent.toLowerCase().includes(query) ? '' : 'none';
+    });
+}
+
+function renameBreakoutRoom(index) {
+    const room = breakoutRooms[index];
+    if (!room) return;
+
+    const nameEl = getId(`breakoutRoomName-${index}`);
+    if (!nameEl) return;
+
+    const currentName = room.name || `Room ${index + 1}`;
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'breakout-room-name-input';
+    input.value = currentName;
+    input.maxLength = 30;
+
+    nameEl.replaceWith(input);
+    input.focus();
+    input.select();
+
+    function saveName() {
+        const newName = input.value.trim() || `Room ${index + 1}`;
+        room.name = newName;
+        refreshBreakoutPanel();
+    }
+
+    input.addEventListener('blur', saveName);
+    input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') input.blur();
+        if (e.key === 'Escape') {
+            input.value = currentName;
+            input.blur();
+        }
+    });
+}
+
+function autoAssignBreakoutRooms() {
+    if (breakoutRooms.length === 0) {
+        return rc.userLog('warning', 'Add at least one room first', 'top-end', 3000);
+    }
+
+    const selects = Array.from(document.querySelectorAll('.breakout-room-select'));
+    if (selects.length === 0) {
+        return rc.userLog('warning', 'No participants to assign', 'top-end', 3000);
+    }
+
+    // Only assign unassigned participants
+    const unassigned = selects.filter((sel) => !sel.value);
+    if (unassigned.length === 0) {
+        return rc.userLog('info', 'All participants are already assigned', 'top-end', 3000);
+    }
+
+    // Shuffle unassigned participants randomly
+    for (let i = unassigned.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [unassigned[i], unassigned[j]] = [unassigned[j], unassigned[i]];
+    }
+
+    // Round-robin assignment across rooms
+    unassigned.forEach((sel, i) => {
+        const roomIndex = i % breakoutRooms.length;
+        sel.value = breakoutRooms[roomIndex].id;
+    });
+
+    rc.userLog(
+        'info',
+        `${unassigned.length} participant(s) auto-assigned to ${breakoutRooms.length} room(s)`,
+        'top-end',
+        3000
+    );
+}
+
+async function endAllBreakoutSessions() {
+    if (!rc || !isPresenter) return;
+
+    const breakoutInfo = await getBreakoutRoomsInfo();
+    const totalPeers = breakoutInfo.reduce((sum, r) => sum + r.peers, 0);
+
+    if (totalPeers === 0) {
+        breakoutRooms = [];
+        refreshBreakoutPanel();
+        return rc.userLog('info', 'All breakout rooms cleared', 'top-end', 3000);
+    }
+
+    const confirmed = await Swal.fire({
+        background: swalBackground,
+        position: 'top',
+        title: 'End All Breakout Sessions?',
+        html: `<p style="color:#fff">This will notify <b>${totalPeers}</b> participant(s) to return to the main room and remove all rooms.</p>`,
+        showDenyButton: true,
+        confirmButtonText: 'End All',
+        denyButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+
+    if (!confirmed.isConfirmed) return;
+
+    rc.socket.emit('breakoutRoomEnd', {
+        peer_name: peer_name,
+        peer_uuid: peer_uuid,
+        mainRoom: room_id,
+    });
+
+    setTimeout(() => {
+        breakoutRooms = [];
+        refreshBreakoutPanel();
+    }, 3000);
+
+    rc.userLog('info', 'Ending all breakout sessions...', 'top-end', 3000);
+}
+
+function validateBreakoutDuration(input) {
+    if (!input || input.toLowerCase() === 'unlimited') return 'unlimited';
+    const total = parseDurationToSeconds(input);
+    if (total === 0) {
+        const match = input.match(/^(\d{1,2}):(\d{2}):(\d{2})$/);
+        if (!match) {
+            rc.userLog('warning', 'Invalid duration format. Use the time picker or set unlimited', 'top-end', 4000);
+            return null;
+        }
+        const minutes = parseInt(match[2], 10);
+        const seconds = parseInt(match[3], 10);
+        if (minutes > 59 || seconds > 59) {
+            rc.userLog('warning', 'Invalid duration. Minutes and seconds must be 0-59', 'top-end', 4000);
+            return null;
+        }
+        rc.userLog('warning', 'Duration must be greater than 0', 'top-end', 4000);
+        return null;
+    }
+    return input;
+}
+
+let breakoutDurationUnlimited = true;
+let breakoutDurationPicker = null;
+
+function initBreakoutDurationPicker() {
+    const input = getId('breakoutDurationInput');
+    const unlimitedBtn = getId('breakoutDurationUnlimitedBtn');
+
+    breakoutDurationPicker = flatpickr(input, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i:S',
+        enableSeconds: true,
+        time_24hr: true,
+        defaultHour: 0,
+        defaultMinute: 30,
+        defaultSeconds: 0,
+        onChange: function () {
+            breakoutDurationUnlimited = false;
+            unlimitedBtn.classList.remove('active');
+        },
+    });
+
+    input.value = 'unlimited';
+
+    unlimitedBtn.onclick = () => {
+        breakoutDurationUnlimited = !breakoutDurationUnlimited;
+        if (breakoutDurationUnlimited) {
+            unlimitedBtn.classList.add('active');
+            input.value = 'unlimited';
+        } else {
+            unlimitedBtn.classList.remove('active');
+            breakoutDurationPicker.open();
+        }
+    };
+}
+
+function getBreakoutDuration() {
+    if (breakoutDurationUnlimited) return 'unlimited';
+    const input = getId('breakoutDurationInput');
+    const val = input.value.trim();
+    if (!val || val === 'unlimited') return 'unlimited';
+    // flatpickr outputs H:i:S, pad to HH:MM:SS
+    const parts = val.split(':');
+    if (parts.length === 3) {
+        return parts.map((p) => p.padStart(2, '0')).join(':');
+    }
+    return val;
+}
+
+let breakoutTimerInterval = null;
+
+function checkBreakoutTimer() {
+    const duration = getQueryParam('duration');
+    if (!duration || duration === 'unlimited') return;
+
+    let remaining = parseDurationToSeconds(duration);
+    if (remaining <= 0) return;
+
+    const timerEl = getId('breakoutTimer');
+    const displayEl = getId('breakoutTimerDisplay');
+    if (!timerEl || !displayEl) return;
+
+    timerEl.classList.remove('hidden');
+    updateTimerDisplay(displayEl, remaining);
+
+    breakoutTimerInterval = setInterval(() => {
+        remaining--;
+        updateTimerDisplay(displayEl, remaining);
+
+        if (remaining <= 30 && remaining > 0 && remaining % 10 === 0) {
+            if (rc) rc.userLog('warning', `Breakout session ends in ${remaining} seconds`, 'top-end', 3000);
+        }
+
+        if (remaining <= 0) {
+            clearInterval(breakoutTimerInterval);
+            breakoutTimerInterval = null;
+            if (rc) rc.userLog('info', 'Breakout session ended. Returning to main room...', 'top-end', 4000);
+            setTimeout(() => returnToMainRoom(), 2000);
+        }
+    }, 1000);
+}
+
+function updateTimerDisplay(el, seconds) {
+    const h = String(Math.floor(seconds / 3600)).padStart(2, '0');
+    const m = String(Math.floor((seconds % 3600) / 60)).padStart(2, '0');
+    const s = String(seconds % 60).padStart(2, '0');
+    el.textContent = `${h}:${m}:${s}`;
+    if (seconds <= 30) {
+        el.parentElement.classList.add('breakout-timer-warning');
+    }
 }

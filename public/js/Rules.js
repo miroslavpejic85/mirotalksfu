@@ -29,6 +29,7 @@ let BUTTONS = {
         chatButton: true,
         participantsButton: true,
         pollButton: true,
+        breakoutRoomButton: true, // if presenter and if true
         editorButton: true,
         raiseHandButton: true,
         transcriptionButton: true,
@@ -135,6 +136,7 @@ function handleRules(isPresenter) {
         // ##################################
         // GUEST
         // ##################################
+        BUTTONS.main.breakoutRoomButton = false;
         BUTTONS.participantsList.saveInfoButton = false;
         BUTTONS.settings.lockRoomButton = false;
         BUTTONS.settings.unlockRoomButton = false;
@@ -168,6 +170,8 @@ function handleRules(isPresenter) {
 
         show(editorUnlockBtn);
         show(transcriptionAllLi);
+
+        BUTTONS.main.breakoutRoomButton && show(breakoutRoomButton);
         //...
 
         // ##################################
@@ -262,6 +266,7 @@ function handleRulesBroadcasting() {
     //BUTTONS.main.snapshotRoomButton = false;
     //BUTTONS.main.emojiRoomButton = false,
     //BUTTONS.main.pollButton = false;
+    BUTTONS.main.breakoutRoomButton = false;
     BUTTONS.main.transcriptionButton = false;
     BUTTONS.main.settingsButton = false;
     BUTTONS.participantsList.saveInfoButton = false;
@@ -299,6 +304,7 @@ function handleRulesBroadcasting() {
     //elemDisplay('snapshotRoomButton', false);
     //elemDisplay('emojiRoomButton', false);
     //elemDisplay('pollButton', false);
+    //elemDisplay('breakoutRoomButton', false);
     //elemDisplay('editorButton', false);
     elemDisplay('transcriptionButton', false);
     elemDisplay('lockRoomButton', false);

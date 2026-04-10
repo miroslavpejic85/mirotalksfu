@@ -58,7 +58,7 @@
         <!-- flatpickr  https://flatpickr.js.org/themes/ -->
 
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css" />
-        <link rel="stylesheet" href="https://npmcdn.com/flatpickr/dist/themes/airbnb.css" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/dark.css" />
 
         <!--  pickr  https://github.com/simonwep/pickr -->
 
@@ -212,6 +212,24 @@ access to use this app.
             <div id="qrText">Scan to join the room</div>
         </div>
 
+        <!-- Breakout Room: Return to Main Toolbar -->
+        <div id="breakoutToolbar" class="breakout-toolbar hidden">
+            <div id="breakoutToolbarHandle" class="breakout-toolbar-handle">
+                <i class="fas fa-object-ungroup breakout-accent"></i>
+                <span class="breakout-toolbar-label">Breakout:</span>
+                <span id="breakoutToolbarRoomName" class="breakout-toolbar-room"></span>
+            </div>
+            <span id="breakoutTimer" class="breakout-toolbar-timer hidden">
+                <i class="fas fa-clock"></i> <span id="breakoutTimerDisplay">00:00:00</span>
+            </span>
+            <button id="breakoutHelpBtn" class="breakout-toolbar-help-btn">
+                <i class="fas fa-hand-paper"></i> Ask for Help
+            </button>
+            <button id="breakoutReturnBtn" class="breakout-toolbar-btn">
+                <i class="fas fa-arrow-rotate-left"></i> Return to Main
+            </button>
+        </div>
+
         <div id="bottomButtons" class="fadein">
             <div id="startAudioSplit" class="split-btn">
                 <button id="startAudioButton" class="hidden"><i class="fas fa-microphone-slash"></i></button>
@@ -323,7 +341,7 @@ access to use this app.
                         <!-- TOOLS -->
                         <div
                             class="device-menu-header extra-menu-group"
-                            data-buttons="transcriptionButton,pollButton,editorButton,whiteboardButton,documentPiPButton,emojiRoomButton"
+                            data-buttons="transcriptionButton,pollButton,editorButton,whiteboardButton,documentPiPButton,emojiRoomButton,breakoutRoomButton"
                         >
                             TOOLS
                         </div>
@@ -332,6 +350,9 @@ access to use this app.
                         </button>
                         <button id="pollButton" class="hidden">
                             <i class="fas fa-square-poll-horizontal"></i> Poll
+                        </button>
+                        <button id="breakoutRoomButton" class="hidden">
+                            <i class="fas fa-object-ungroup"></i> Breakout Rooms
                         </button>
                         <button id="editorButton" class="hidden"><i class="fas fa-pen-to-square"></i> Editor</button>
                         <button id="whiteboardButton" class="hidden">
@@ -2060,6 +2081,108 @@ access to use this app.
         </section>
 
         <div id="transcriptionPopup" class="transcriptio-popup"></div>
+
+        <!-- Breakout Rooms Panel -->
+        <section id="breakoutPanel" class="breakout-panel fadein center hidden">
+            <header id="breakoutPanelHeader" class="breakout-panel-header">
+                <div class="breakout-panel-title">
+                    <i class="fas fa-object-ungroup breakout-accent"></i>
+                    <span>Breakout Rooms</span>
+                </div>
+                <div class="breakout-panel-header-actions">
+                    <button id="breakoutTogglePin" class="fas fa-map-pin hidden"></button>
+                    <button id="breakoutRefreshBtn" class="fas fa-sync-alt"></button>
+                    <button id="breakoutPanelCloseBtn" class="fas fa-times"></button>
+                </div>
+            </header>
+            <main class="breakout-panel-body">
+                <!-- Create Room -->
+                <div class="breakout-create-section">
+                    <div class="breakout-create-row">
+                        <div class="breakout-timer-input-group">
+                            <i class="fas fa-clock breakout-accent"></i>
+                            <input
+                                id="breakoutDurationInput"
+                                class="breakout-duration-input"
+                                type="text"
+                                placeholder="HH:MM:SS"
+                                title="Duration: HH:MM:SS or unlimited"
+                                readonly
+                            />
+                            <button
+                                id="breakoutDurationUnlimitedBtn"
+                                class="breakout-duration-unlimited-btn active"
+                                title="Toggle unlimited duration"
+                            >
+                                <i class="fas fa-infinity"></i>
+                            </button>
+                        </div>
+                        <button id="breakoutAddRoomBtn" class="breakout-action-btn">
+                            <i class="fas fa-plus"></i> Add Room
+                        </button>
+                    </div>
+                </div>
+                <!-- Rooms -->
+                <div class="breakout-section">
+                    <div class="breakout-section-label">
+                        <span id="breakoutRoomsLabel">Rooms</span>
+                    </div>
+                    <div id="breakoutRoomsList" class="breakout-rooms-list"></div>
+                    <div id="breakoutEmptyState" class="breakout-empty-state">
+                        <i class="fas fa-door-open"></i>
+                        <span>No rooms yet, set a duration and add one above</span>
+                    </div>
+                </div>
+                <!-- Actions -->
+                <div id="breakoutActionsBar" class="breakout-actions-bar hidden">
+                    <div class="breakout-actions-row">
+                        <button id="breakoutLaunchBtn" class="breakout-action-btn breakout-launch-btn">
+                            <i class="fas fa-rocket"></i> Launch
+                        </button>
+                        <button id="breakoutEndAllBtn" class="breakout-end-all-btn hidden">
+                            <i class="fas fa-stop-circle"></i> End All
+                        </button>
+                    </div>
+                    <div id="breakoutBroadcastInline" class="breakout-broadcast-inline">
+                        <input
+                            id="breakoutBroadcastInput"
+                            class="breakout-broadcast-input"
+                            type="text"
+                            placeholder="Broadcast message..."
+                            maxlength="500"
+                        />
+                        <button
+                            id="breakoutBroadcastAllBtn"
+                            class="breakout-broadcast-all-btn"
+                            title="Send to all rooms"
+                        >
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+                <!-- Participants -->
+                <div class="breakout-section">
+                    <div class="breakout-section-label">
+                        <span id="breakoutParticipantsLabel">Participants</span>
+                        <button
+                            id="breakoutAutoAssignBtn"
+                            class="breakout-auto-assign-btn hidden"
+                            title="Auto-assign participants randomly"
+                        >
+                            <i class="fas fa-random"></i> Auto-assign
+                        </button>
+                    </div>
+                    <input
+                        id="breakoutParticipantSearch"
+                        class="breakout-participant-search"
+                        type="text"
+                        placeholder="Search participants..."
+                        maxlength="100"
+                    />
+                    <div id="breakoutParticipantsList" class="breakout-participants-list"></div>
+                </div>
+            </main>
+        </section>
 
         <section id="lobby" class="fadein center">
             <header id="lobbyHeader" class="lobby-header">

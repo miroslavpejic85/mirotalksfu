@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.1.91
+ * @version 2.2.00
  *
  */
 
@@ -329,6 +329,7 @@ class RoomClient {
         this.isEditorOpen = false;
         this.isEditorLocked = false;
         this.isEditorPinned = false;
+        this.isBreakoutPinned = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.isParticipantsOpen = false;
         this.speechInMessages = false;
@@ -1202,6 +1203,11 @@ class RoomClient {
         this.socket.on('editorChange', this.handleEditorChange);
         this.socket.on('editorActions', this.handleEditorActions);
         this.socket.on('editorUpdate', this.handleEditorUpdate);
+        this.socket.on('breakoutRoom', this.handleBreakoutRoom);
+        this.socket.on('breakoutRoomCountsChanged', this.handleBreakoutRoomCountsChanged);
+        this.socket.on('breakoutRoomMessage', this.handleBreakoutRoomMessage);
+        this.socket.on('breakoutRoomEnd', this.handleBreakoutRoomEnd);
+        this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
     }
 
     // ####################################################
@@ -1258,6 +1264,7 @@ class RoomClient {
         participantsCount = data.peer_counts;
         if (!isBroadcastingEnabled) adaptAspectRatio(participantsCount);
         if (isParticipantsListOpen) getRoomParticipants();
+        if (isBreakoutPanelOpen) refreshBreakoutPanel();
         if (isBroadcastingEnabled && data.isPresenter) {
             this.userLog('info', `${icons.broadcaster} ${data.peer_name} disconnected`, 'top-end', 6000);
         }
@@ -1273,6 +1280,7 @@ class RoomClient {
         } else {
             adaptAspectRatio(participantsCount);
         }
+        if (isBreakoutPanelOpen) refreshBreakoutPanel();
     };
 
     handleNewProducers = async (data) => {
@@ -1449,6 +1457,94 @@ class RoomClient {
     handleEditorUpdate = (data) => {
         this.handleEditorUpdateData(data);
     };
+
+    handleBreakoutRoom = (data) => {
+        if (data.action === 'assign') {
+            this.joinBreakoutRoom(data.breakoutRoom, data.mainRoom, data.duration, data.roomName);
+        }
+    };
+
+    handleBreakoutRoomCountsChanged = () => {
+        if (isBreakoutPanelOpen) refreshBreakoutPanel();
+    };
+
+    handleBreakoutRoomMessage = (data) => {
+        console.log('SocketOn breakoutRoomMessage', data);
+        this.userLog('info', `<b>${data.peer_name}</b>: ${data.message}`, 'top-end', 8000);
+        sound('notification');
+    };
+
+    handleBreakoutRoomEnd = (data) => {
+        console.log('SocketOn breakoutRoomEnd', data);
+        this.userLog('info', 'Breakout session ended by presenter. Returning to main room...', 'top-end', 4000);
+        sound('notification');
+        setTimeout(() => returnToMainRoom(), 2000);
+    };
+
+    handleBreakoutRoomHelp = (data) => {
+        console.log('SocketOn breakoutRoomHelp', data);
+        if (!isPresenter) return;
+        sound('notification');
+        const roomIdx = breakoutRooms.findIndex((r) => r.id === data.breakoutRoom);
+        const room = roomIdx !== -1 ? breakoutRooms[roomIdx] : null;
+        const roomLabel = room ? room.name || `Room ${roomIdx + 1}` : data.breakoutRoom;
+        Swal.fire({
+            background: swalBackground,
+            position: 'top',
+            title: '<i class="fas fa-hand-paper" style="color:#ff9800"></i> Help Requested',
+            html: `<p style="color:#fff"><b>${data.peer_name}</b> in <b>${roomLabel}</b> is asking for help.</p>`,
+            showDenyButton: true,
+            confirmButtonText: '<i class="fas fa-sign-in-alt"></i> Join Room',
+            denyButtonText: 'Dismiss',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                presenterJoinBreakoutRoom(data.breakoutRoom);
+            }
+        });
+    };
+
+    async joinBreakoutRoom(breakoutRoom, mainRoom, duration = 'unlimited', roomName = '') {
+        const displayName = roomName || breakoutRoom;
+        const durationText =
+            duration && duration !== 'unlimited'
+                ? `<br/><br/><i class="fas fa-clock"></i> Duration: <strong>${duration}</strong>`
+                : '';
+        const confirmResult = await Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            position: 'center',
+            title: '<i class="fas fa-object-ungroup breakout-accent"></i> Breakout Room',
+            html: `<div class="breakout-assign-spinner"><div class="breakout-spinner"></div></div>
+                   You have been assigned to a breakout room.<br/><br/><strong class="breakout-accent">${displayName}</strong>${durationText}`,
+            showDenyButton: true,
+            confirmButtonText: '<i class="fas fa-arrow-right"></i> Join',
+            denyButtonText: 'Stay',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+
+        if (!confirmResult.isConfirmed) return;
+
+        const baseUrl = `${window.location.origin}/join`;
+        const queryParams = new URLSearchParams({
+            room: breakoutRoom,
+            name: this.peer_name,
+            audio: this.peer_info.peer_audio ? '1' : '0',
+            video: this.peer_info.peer_video ? '1' : '0',
+            notify: '0',
+            breakoutMain: mainRoom,
+            breakoutName: displayName,
+            duration: duration || 'unlimited',
+        });
+        if (this.peer_info.peer_token) queryParams.set('token', this.peer_info.peer_token);
+
+        if (typeof preventExit !== 'undefined') preventExit = false;
+        this.exit(true);
+        openURL(`${baseUrl}?${queryParams.toString()}`);
+    }
 
     // ####################################################
     // SOCKET RECONNECT/DISCONNECT
@@ -3951,6 +4047,7 @@ class RoomClient {
                 this.socket.off('editorChange');
                 this.socket.off('editorActions');
                 this.socket.off('editorUpdate');
+                this.socket.off('breakoutRoom');
                 this.socket.io.off('reconnect_attempt');
                 this.socket.io.off('reconnect');
                 this.socket.io.off('reconnect_failed');
@@ -5197,9 +5294,16 @@ class RoomClient {
             this.isChatPinned ||
             this.isEditorPinned ||
             this.isPollPinned ||
+            this.isBreakoutPinned ||
             transcription.isPin();
         const menuBarWidth =
-            this.isVideoPinned || this.isChatPinned || this.isPollPinned || transcription.isPin() ? '75%' : '70%';
+            this.isVideoPinned ||
+            this.isChatPinned ||
+            this.isPollPinned ||
+            this.isBreakoutPinned ||
+            transcription.isPin()
+                ? '75%'
+                : '70%';
         const videoMenuBar = rc.getEcN('videoMenuBar');
         for (let i = 0; i < videoMenuBar.length; i++) {
             const menuBar = videoMenuBar[i];
@@ -5224,6 +5328,9 @@ class RoomClient {
         }
         if (this.isEditorPinned) {
             this.editorPin();
+        }
+        if (this.isBreakoutPinned) {
+            this.breakoutPin();
         }
         if (this.transcription.isPin()) {
             this.transcription.pinned();
@@ -5576,6 +5683,9 @@ class RoomClient {
         }
         if (this.isEditorPinned) {
             return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
+        }
+        if (this.isBreakoutPinned) {
+            return userLog('info', 'Please unpin the breakout rooms that appears to be currently pinned', 'top-end');
         }
         this.isChatPinned ? this.chatUnpin() : this.chatPin();
         this.sound('click');
@@ -6481,6 +6591,9 @@ class RoomClient {
         if (this.isEditorPinned) {
             return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
         }
+        if (this.isBreakoutPinned) {
+            return userLog('info', 'Please unpin the breakout rooms that appears to be currently pinned', 'top-end');
+        }
         this.isPollPinned ? this.pollUnpin() : this.pollPin();
         this.sound('click');
     }
@@ -6547,6 +6660,83 @@ class RoomClient {
             pollRoom.style.maxWidth = '600px';
             pollRoom.style.maxHeight = '700px';
         }
+    }
+
+    // ####################################################
+    // BREAKOUT ROOMS PIN
+    // ####################################################
+
+    toggleBreakoutPin() {
+        if (transcription.isPin()) {
+            return userLog('info', 'Please unpin the transcription that appears to be currently pinned', 'top-end');
+        }
+        if (this.isChatPinned) {
+            return userLog('info', 'Please unpin the chat that appears to be currently pinned', 'top-end');
+        }
+        if (this.isPollPinned) {
+            return userLog('info', 'Please unpin the poll that appears to be currently pinned', 'top-end');
+        }
+        if (this.isEditorPinned) {
+            return userLog('info', 'Please unpin the editor that appears to be currently pinned', 'top-end');
+        }
+        this.isBreakoutPinned ? this.breakoutUnpin() : this.breakoutPin();
+        this.sound('click');
+    }
+
+    breakoutPin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainer.style.top = 0;
+            this.videoMediaContainer.style.width = '70%';
+            this.videoMediaContainer.style.height = '100%';
+        }
+        if (!this.isMobileDevice) this.makeUnDraggable(breakoutPanel, breakoutPanelHeader);
+        this.breakoutPinned();
+        this.isBreakoutPinned = true;
+        setColor(breakoutTogglePin, 'lime');
+        this.resizeVideoMenuBar();
+        resizeVideoMedia();
+    }
+
+    breakoutUnpin() {
+        if (!this.isVideoPinned) {
+            this.videoMediaContainerUnpin();
+        }
+        this.breakoutCenter();
+        this.isBreakoutPinned = false;
+        setColor(breakoutTogglePin, 'white');
+        this.resizeVideoMenuBar();
+        resizeVideoMedia();
+        if (!this.isMobileDevice) this.makeDraggable(breakoutPanel, breakoutPanelHeader);
+    }
+
+    breakoutPinned() {
+        breakoutPanel.style.position = 'absolute';
+        breakoutPanel.style.top = '0';
+        breakoutPanel.style.right = '0';
+        breakoutPanel.style.left = 'auto';
+        breakoutPanel.style.transform = 'none';
+        breakoutPanel.style.width = '30%';
+        breakoutPanel.style.height = '100%';
+        breakoutPanel.style.maxWidth = '30%';
+        breakoutPanel.style.maxHeight = '100%';
+        breakoutPanel.style.borderRadius = '14px 0 0 14px';
+        const body = breakoutPanel.querySelector('.breakout-panel-body');
+        if (body) body.style.maxHeight = 'calc(100vh - 55px)';
+    }
+
+    breakoutCenter() {
+        breakoutPanel.style.position = 'fixed';
+        breakoutPanel.style.transform = 'translate(-50%, -50%)';
+        breakoutPanel.style.top = '50%';
+        breakoutPanel.style.left = '50%';
+        breakoutPanel.style.right = '';
+        breakoutPanel.style.width = '420px';
+        breakoutPanel.style.height = '';
+        breakoutPanel.style.maxWidth = '95vw';
+        breakoutPanel.style.maxHeight = '85vh';
+        breakoutPanel.style.borderRadius = '16px';
+        const body = breakoutPanel.querySelector('.breakout-panel-body');
+        if (body) body.style.maxHeight = 'calc(85vh - 55px)';
     }
 
     pollsUpdate(polls) {
@@ -6845,6 +7035,9 @@ class RoomClient {
         }
         if (this.isChatPinned) {
             return userLog('info', 'Please unpin the chat that appears to be currently pinned', 'top-end');
+        }
+        if (this.isBreakoutPinned) {
+            return userLog('info', 'Please unpin the breakout rooms that appears to be currently pinned', 'top-end');
         }
         this.isEditorPinned ? this.editorUnpin() : this.editorPin();
         this.sound('click');
