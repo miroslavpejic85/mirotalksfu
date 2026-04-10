@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.01
+ * @version 2.2.02
  *
  */
 
@@ -2938,6 +2938,29 @@ function startServer() {
             for (const [roomId, room] of roomList) {
                 if (roomId.startsWith(mainRoom + '_breakout_')) {
                     room.sendToAll('breakoutRoomEnd', { mainRoom });
+                }
+            }
+        });
+
+        socket.on('breakoutRoomCountdown', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            log.debug('Breakout room countdown', data);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            const { mainRoom, countdown } = data;
+            if (!mainRoom || !countdown) return;
+
+            const seconds = Math.min(Math.max(parseInt(countdown) || 0, 0), 300);
+
+            for (const [roomId, room] of roomList) {
+                if (roomId.startsWith(mainRoom + '_breakout_')) {
+                    room.sendToAll('breakoutRoomCountdown', { mainRoom, countdown: seconds });
                 }
             }
         });

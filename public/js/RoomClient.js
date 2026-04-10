@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.01
+ * @version 2.2.02
  *
  */
 
@@ -1207,6 +1207,7 @@ class RoomClient {
         this.socket.on('breakoutRoomCountsChanged', this.handleBreakoutRoomCountsChanged);
         this.socket.on('breakoutRoomMessage', this.handleBreakoutRoomMessage);
         this.socket.on('breakoutRoomEnd', this.handleBreakoutRoomEnd);
+        this.socket.on('breakoutRoomCountdown', this.handleBreakoutRoomCountdown);
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
     }
 
@@ -1479,6 +1480,12 @@ class RoomClient {
         this.userLog('info', 'Breakout session ended by presenter. Returning to main room...', 'top-end', 4000);
         sound('notification');
         setTimeout(() => returnToMainRoom(), 2000);
+    };
+
+    handleBreakoutRoomCountdown = (data) => {
+        console.log('SocketOn breakoutRoomCountdown', data);
+        sound('notification');
+        startBreakoutEndCountdown(data.countdown);
     };
 
     handleBreakoutRoomHelp = (data) => {

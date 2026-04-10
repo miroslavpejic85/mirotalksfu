@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.01
+ * @version 2.2.02
  *
  */
 
@@ -6990,7 +6990,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.01',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.02',
         html: `
             <br />
             <div id="about">
@@ -7274,11 +7274,15 @@ async function refreshBreakoutPanel() {
     hasRooms ? hide(emptyState) : show(emptyState);
     hasRooms ? show(roomsList) : hide(roomsList);
 
-    // Show/hide launch and delete all buttons next to add room
+    // Show/hide launch button and header menu
     const launchBtn = getId('breakoutLaunchBtn');
-    const deleteAllBtn = getId('breakoutDeleteAllBtn');
+    const menuDropdown = getId('breakoutMenuDropdown');
     hasRooms ? show(launchBtn) : hide(launchBtn);
-    hasRooms ? show(deleteAllBtn) : hide(deleteAllBtn);
+    hasRooms ? show(menuDropdown) : hide(menuDropdown);
+
+    // Enable desktop hover for header dropdown
+    const headerDropdown = menuDropdown;
+    if (headerDropdown) handleDropdownHover([headerDropdown]);
 
     // Show/hide actions bar when rooms exist
     const actionsBar = getId('breakoutActionsBar');
@@ -7580,7 +7584,18 @@ async function endAllBreakoutSessions() {
         background: swalBackground,
         position: 'top',
         title: 'End All Breakout Sessions?',
-        html: `<p style="color:#fff">This will notify <b>${totalPeers}</b> participant(s) to return to the main room and remove all rooms.</p>`,
+        html: `
+            <p style="color:#fff">This will notify <b>${totalPeers}</b> participant(s) to return to the main room and remove all rooms.</p>
+            <div class="breakout-countdown-section">
+                <label class="breakout-countdown-label">Countdown before closing:</label>
+                <select id="breakoutEndCountdown" class="form-select text-light bg-dark breakout-countdown-select">
+                    <option value="0">Immediately</option>
+                    <option value="10">10 seconds</option>
+                    <option value="30" selected>30 seconds</option>
+                    <option value="60">60 seconds</option>
+                    <option value="120">2 minutes</option>
+                </select>
+            </div>`,
         showDenyButton: true,
         confirmButtonText: 'End All',
         denyButtonText: 'Cancel',
@@ -7590,18 +7605,33 @@ async function endAllBreakoutSessions() {
 
     if (!confirmed.isConfirmed) return;
 
-    rc.socket.emit('breakoutRoomEnd', {
-        peer_name: peer_name,
-        peer_uuid: peer_uuid,
-        mainRoom: room_id,
-    });
+    const countdownEl = document.getElementById('breakoutEndCountdown');
+    const countdown = countdownEl ? parseInt(countdownEl.value) : 0;
 
-    setTimeout(() => {
-        breakoutRooms = [];
-        refreshBreakoutPanel();
-    }, 3000);
+    if (countdown > 0) {
+        rc.socket.emit('breakoutRoomCountdown', {
+            peer_name: peer_name,
+            peer_uuid: peer_uuid,
+            mainRoom: room_id,
+            countdown: countdown,
+        });
+        rc.userLog('info', `Breakout sessions ending in ${countdown} seconds...`, 'top-end', 3000);
+    } else {
+        rc.socket.emit('breakoutRoomEnd', {
+            peer_name: peer_name,
+            peer_uuid: peer_uuid,
+            mainRoom: room_id,
+        });
+        rc.userLog('info', 'Ending all breakout sessions...', 'top-end', 3000);
+    }
 
-    rc.userLog('info', 'Ending all breakout sessions...', 'top-end', 3000);
+    setTimeout(
+        () => {
+            breakoutRooms = [];
+            refreshBreakoutPanel();
+        },
+        (countdown + 3) * 1000
+    );
 }
 
 function validateBreakoutDuration(input) {
@@ -7631,22 +7661,50 @@ function checkBreakoutTimer() {
     const duration = getQueryParam('duration');
     if (!duration || duration === 'unlimited') return;
 
-    let remaining = parseDurationToSeconds(duration);
-    if (remaining <= 0) return;
+    const seconds = parseDurationToSeconds(duration);
+    if (seconds <= 0) return;
+
+    startBreakoutCountdown(seconds, { warn: false });
+}
+
+function startBreakoutEndCountdown(seconds) {
+    if (!rc || seconds <= 0) return;
+    startBreakoutCountdown(seconds, { warn: true });
+}
+
+function startBreakoutCountdown(seconds, { warn = false } = {}) {
+    if (breakoutTimerInterval) {
+        clearInterval(breakoutTimerInterval);
+        breakoutTimerInterval = null;
+    }
+
+    let remaining = seconds;
 
     const timerEl = getId('breakoutTimer');
     const displayEl = getId('breakoutTimerDisplay');
     if (!timerEl || !displayEl) return;
 
     timerEl.classList.remove('hidden');
+    if (warn) timerEl.parentElement.classList.add('breakout-timer-warning');
     updateTimerDisplay(displayEl, remaining);
+
+    if (warn && rc) {
+        rc.userLog('warning', `Breakout session closing in ${remaining} seconds`, 'top-end', 5000);
+    }
 
     breakoutTimerInterval = setInterval(() => {
         remaining--;
         updateTimerDisplay(displayEl, remaining);
 
-        if (remaining <= 30 && remaining > 0 && remaining % 10 === 0) {
-            if (rc) rc.userLog('warning', `Breakout session ends in ${remaining} seconds`, 'top-end', 3000);
+        if (warn) {
+            if ((remaining === 30 || remaining === 10 || remaining === 5) && rc) {
+                rc.userLog('warning', `Returning to main room in ${remaining} seconds`, 'top-end', 3000);
+                sound('notification');
+            }
+        } else {
+            if (remaining <= 30 && remaining > 0 && remaining % 10 === 0 && rc) {
+                rc.userLog('warning', `Breakout session ends in ${remaining} seconds`, 'top-end', 3000);
+            }
         }
 
         if (remaining <= 0) {

@@ -3278,6 +3278,55 @@ hr {
     gap: 4px;
 }
 
+.breakout-header-menu-btn {
+    background: none;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: background 0.2s;
+}
+
+.breakout-header-menu-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.breakout-header-dropdown {
+    background: var(--settings-bg);
+    border: var(--border);
+    border-radius: 10px;
+    padding: 4px 0;
+    min-width: 180px;
+    box-shadow: var(--box-shadow);
+}
+
+.breakout-header-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 14px;
+    color: #fff !important;
+    font-size: 12px;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+    cursor: pointer;
+    transition: background 0.2s;
+    border: none;
+    width: 100%;
+}
+
+.breakout-header-dropdown-item:hover,
+.breakout-header-dropdown-item:focus {
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff !important;
+}
+
+.breakout-header-dropdown-item .fa-trash {
+    color: #e53935;
+}
+
 .breakout-panel-header-actions .fa-sync-alt {
     background: none;
     border: none;
@@ -3534,19 +3583,6 @@ hr {
     background: linear-gradient(135deg, #56c95a, #388e3c);
     border: none;
     box-shadow: 0 2px 10px rgba(76, 175, 80, 0.4);
-}
-
-.breakout-delete-all-btn {
-    background: linear-gradient(135deg, #e53935, #b71c1c);
-    border: none;
-    color: #fff;
-    margin-left: auto;
-}
-
-.breakout-delete-all-btn:hover {
-    background: linear-gradient(135deg, #ef5350, #c62828);
-    border: none;
-    box-shadow: 0 2px 10px rgba(229, 57, 53, 0.4);
 }
 
 .breakout-auto-assign-btn {
@@ -3826,6 +3862,23 @@ hr {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+
+.breakout-countdown-section {
+    margin-top: 10px;
+}
+
+.breakout-countdown-label {
+    color: #fff;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.breakout-countdown-select {
+    margin-top: 6px;
+    max-width: 200px;
+    margin-left: auto;
+    margin-right: auto;
 }
 
 /* Breakout Timer (toolbar) */
