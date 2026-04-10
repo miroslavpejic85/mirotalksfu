@@ -326,7 +326,9 @@ We are grateful to our past sponsors for their support!
 
 ---
 
-🌐 **Explore all MiroTalk projects:** [MiroTalk Overview →](https://docs.mirotalk.com/overview/)
+🌐 **Explore all MiroTalk projects:** 
+
+**[ → MiroTalk Overview](https://docs.mirotalk.com/overview/)**
 
 ---
 
