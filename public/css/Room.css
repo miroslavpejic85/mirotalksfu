@@ -3638,8 +3638,10 @@ hr {
 .breakout-room-join-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 3px;
     padding: 4px 8px;
+    min-height: 26px;
     border: none;
     border-radius: 6px;
     background: linear-gradient(135deg, #4caf50, #2e7d32);
@@ -3659,12 +3661,18 @@ hr {
 .breakout-room-remove-btn {
     display: flex;
     align-items: center;
-    padding: 4px 6px;
+    justify-content: center;
+    gap: 3px;
+    padding: 4px 8px;
+    min-height: 26px;
+    min-width: 26px;
     border: none;
     border-radius: 6px;
     background: rgba(255, 82, 82, 0.12);
     color: #ff5252;
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -3676,12 +3684,18 @@ hr {
 .breakout-room-msg-btn {
     display: flex;
     align-items: center;
-    padding: 4px 6px;
+    justify-content: center;
+    gap: 3px;
+    padding: 4px 8px;
+    min-height: 26px;
+    min-width: 26px;
     border: none;
     border-radius: 6px;
     background: rgba(102, 190, 255, 0.12);
     color: #66beff;
-    font-size: 11px;
+    font-size: 10px;
+    font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
     cursor: pointer;
     transition: all 0.2s ease;
 }
