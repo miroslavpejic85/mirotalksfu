@@ -37,10 +37,8 @@
 
 <p align="center">Proudly sponsored by</p>
 
-<h1 align=center>Recall.ai - API for meeting recording</h1>
-<p align="center">
-    <a href="https://www.recall.ai/?utm_source=github&utm_medium=sponsorship&utm_campaign=miroslavpejic85-mirotalksfu"><strong>Recall.ai</strong></a> – an API for recording Zoom, Google Meet, Microsoft Teams, and in-person meetings.
-</p>
+<h1 align=center><a href="https://www.recall.ai/?utm_source=github&utm_medium=sponsorship&utm_campaign=miroslavpejic85-mirotalksfu">Recall.ai</a> - API for meeting recording</h1>
+<p align="center">An API for recording Zoom, Google Meet, Microsoft Teams, and in-person meetings.</p>
 
 <hr />
 
