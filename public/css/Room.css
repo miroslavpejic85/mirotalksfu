@@ -3117,7 +3117,7 @@ hr {
 }
 
 .breakout-toolbar-label {
-    color: var(--dd-color);
+    color: #fff;
     font-size: 13px;
     font-weight: 500;
     white-space: nowrap;
@@ -3252,7 +3252,7 @@ hr {
     display: flex;
     align-items: center;
     gap: 8px;
-    color: var(--dd-color);
+    color: #fff;
     font-size: 15px;
     font-weight: 600;
 }
@@ -3260,7 +3260,7 @@ hr {
 .breakout-panel-header .fa-times {
     background: none;
     border: none;
-    color: var(--dd-color);
+    color: #fff;
     font-size: 16px;
     cursor: pointer;
     padding: 4px 8px;
@@ -3281,7 +3281,7 @@ hr {
 .breakout-panel-header-actions .fa-sync-alt {
     background: none;
     border: none;
-    color: var(--dd-color);
+    color: #fff;
     font-size: 14px;
     cursor: pointer;
     padding: 4px 8px;
@@ -3327,7 +3327,7 @@ hr {
     border: var(--border);
     border-radius: 8px;
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-family: 'Montserrat', sans-serif;
     text-align: center;
@@ -3348,7 +3348,7 @@ hr {
     border: var(--border);
     border-radius: 8px;
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 13px;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -3373,7 +3373,7 @@ hr {
     border: var(--border);
     border-radius: 10px;
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-weight: 600;
     font-family: 'Montserrat', sans-serif;
@@ -3451,7 +3451,7 @@ hr {
 }
 
 .breakout-room-name {
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-weight: 600;
     white-space: nowrap;
@@ -3468,7 +3468,7 @@ hr {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
     border-radius: 4px;
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-weight: 600;
     font-family: 'Montserrat', sans-serif;
@@ -3586,7 +3586,7 @@ hr {
     border: var(--border);
     border-radius: 8px;
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-family: 'Montserrat', sans-serif;
     outline: none;
@@ -3723,7 +3723,7 @@ hr {
     border: var(--border);
     border-radius: 8px;
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     font-family: 'Montserrat', sans-serif;
     outline: none;
@@ -3774,7 +3774,7 @@ hr {
     border-radius: 6px;
     border: var(--border);
     background: var(--select-bg);
-    color: var(--dd-color);
+    color: #fff;
     font-size: 11px;
     font-family: 'Montserrat', sans-serif;
     cursor: pointer;
@@ -3789,7 +3789,7 @@ hr {
 }
 
 .breakout-no-participants {
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     text-align: center;
     padding: 14px 0;
@@ -3807,7 +3807,7 @@ hr {
 }
 
 .breakout-peer-name {
-    color: var(--dd-color);
+    color: #fff;
     font-size: 12px;
     overflow: hidden;
     text-overflow: ellipsis;
