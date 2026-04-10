@@ -6721,7 +6721,14 @@ class RoomClient {
         breakoutPanel.style.maxHeight = '100%';
         breakoutPanel.style.borderRadius = '14px 0 0 14px';
         const body = breakoutPanel.querySelector('.breakout-panel-body');
-        if (body) body.style.maxHeight = 'calc(100vh - 55px)';
+        if (body) {
+            body.style.maxHeight = 'calc(100vh - 55px)';
+            body.style.height = 'calc(100vh - 55px)';
+            body.style.display = 'flex';
+            body.style.flexDirection = 'column';
+        }
+        const participantsList = breakoutPanel.querySelector('.breakout-participants-list');
+        if (participantsList) participantsList.style.maxHeight = 'none';
     }
 
     breakoutCenter() {
@@ -6736,7 +6743,14 @@ class RoomClient {
         breakoutPanel.style.maxHeight = '85vh';
         breakoutPanel.style.borderRadius = '16px';
         const body = breakoutPanel.querySelector('.breakout-panel-body');
-        if (body) body.style.maxHeight = 'calc(85vh - 55px)';
+        if (body) {
+            body.style.maxHeight = 'calc(85vh - 55px)';
+            body.style.height = '';
+            body.style.display = '';
+            body.style.flexDirection = '';
+        }
+        const participantsList = breakoutPanel.querySelector('.breakout-participants-list');
+        if (participantsList) participantsList.style.maxHeight = '';
     }
 
     pollsUpdate(polls) {

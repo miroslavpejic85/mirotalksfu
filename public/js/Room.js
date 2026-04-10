@@ -2223,6 +2223,9 @@ function handleButtons() {
     breakoutLaunchBtn.onclick = () => {
         launchBreakoutRooms();
     };
+    breakoutDeleteAllBtn.onclick = () => {
+        deleteAllBreakoutRooms();
+    };
     breakoutBroadcastAllBtn.onclick = () => {
         broadcastToBreakoutRooms();
     };
@@ -7133,6 +7136,24 @@ function addBreakoutRoom() {
     refreshBreakoutPanel();
 }
 
+async function deleteAllBreakoutRooms() {
+    if (breakoutRooms.length === 0) return;
+
+    const breakoutInfo = await getBreakoutRoomsInfo();
+    const hasActivePeers = breakoutInfo.some((r) => r.peers > 0);
+    if (hasActivePeers) {
+        return rc.userLog(
+            'warning',
+            'Cannot delete all rooms while participants are still in breakout rooms. Wait for them to return or broadcast a message first.',
+            'top-end',
+            5000
+        );
+    }
+
+    breakoutRooms = [];
+    refreshBreakoutPanel();
+}
+
 async function removeBreakoutRoom(index) {
     const room = breakoutRooms[index];
     if (!room) return;
@@ -7252,9 +7273,11 @@ async function refreshBreakoutPanel() {
     hasRooms ? hide(emptyState) : show(emptyState);
     hasRooms ? show(roomsList) : hide(roomsList);
 
-    // Show/hide launch button next to add room
+    // Show/hide launch and delete all buttons next to add room
     const launchBtn = getId('breakoutLaunchBtn');
+    const deleteAllBtn = getId('breakoutDeleteAllBtn');
     hasRooms ? show(launchBtn) : hide(launchBtn);
+    hasRooms ? show(deleteAllBtn) : hide(deleteAllBtn);
 
     // Show/hide actions bar when rooms exist
     const actionsBar = getId('breakoutActionsBar');
