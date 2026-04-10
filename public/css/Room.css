@@ -3540,6 +3540,7 @@ hr {
     background: linear-gradient(135deg, #e53935, #b71c1c);
     border: none;
     color: #fff;
+    margin-left: auto;
 }
 
 .breakout-delete-all-btn:hover {
