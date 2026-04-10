@@ -3811,9 +3811,12 @@ hr {
     font-size: 14px;
 }
 
-.breakout-peer-icon {
-    color: #66beff;
-    font-size: 12px;
+.breakout-peer-avatar {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
 }
 
 .breakout-peer-name {

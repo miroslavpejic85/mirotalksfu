@@ -7181,7 +7181,8 @@ async function refreshBreakoutPanel() {
     const peerList = [];
     for (const [id, data] of peers) {
         if (id === rc.peer_id) continue;
-        peerList.push({ id, name: data.peer_info.peer_name });
+        const avatar = getParticipantAvatar(data.peer_info.peer_name, data.peer_info.peer_avatar);
+        peerList.push({ id, name: data.peer_info.peer_name, avatar });
     }
 
     // Save current select values before re-render
@@ -7309,7 +7310,7 @@ async function refreshBreakoutPanel() {
         participantsHtml += `
             <div class="breakout-participant-row">
                 <div class="breakout-participant-info">
-                    <i class="fas fa-user breakout-peer-icon"></i>
+                    <img src="${p.avatar}" alt="avatar" class="breakout-peer-avatar" />
                     <span class="breakout-peer-name">${p.name}</span>
                 </div>
                 <select class="breakout-room-select" data-peer-id="${p.id}" data-peer-name="${p.name}">
