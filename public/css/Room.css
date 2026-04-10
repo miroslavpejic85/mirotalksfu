@@ -3311,58 +3311,7 @@ hr {
     display: flex;
     align-items: center;
     gap: 8px;
-}
-
-.breakout-timer-input-group {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex: 1;
-    min-width: 0;
-}
-
-.breakout-duration-input {
-    width: 90px;
-    padding: 6px 10px;
-    border: var(--border);
-    border-radius: 8px;
-    background: var(--select-bg);
-    color: #fff;
-    font-size: 12px;
-    font-family: 'Montserrat', sans-serif;
-    text-align: center;
-    outline: none;
-    transition: border-color 0.2s;
-}
-
-.breakout-duration-input:focus {
-    border-color: #66beff;
-}
-
-.breakout-duration-unlimited-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px;
-    height: 30px;
-    border: var(--border);
-    border-radius: 8px;
-    background: var(--select-bg);
-    color: #fff;
-    font-size: 13px;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    flex-shrink: 0;
-}
-
-.breakout-duration-unlimited-btn.active {
-    background: linear-gradient(135deg, #66beff, #1e88e5);
-    color: #fff;
-    border-color: transparent;
-}
-
-.breakout-duration-unlimited-btn:hover {
-    transform: scale(1.08);
+    flex-wrap: wrap;
 }
 
 .breakout-action-btn {
@@ -3504,6 +3453,31 @@ hr {
     align-items: center;
     gap: 3px;
     white-space: nowrap;
+    cursor: pointer;
+    border-bottom: 1px dashed transparent;
+    transition: border-color 0.2s;
+}
+
+.breakout-room-duration:hover {
+    border-bottom-color: rgba(255, 255, 255, 0.3);
+}
+
+.breakout-room-duration-input {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 4px;
+    color: #fff;
+    font-size: 10px;
+    font-weight: 500;
+    font-family: 'Montserrat', sans-serif;
+    padding: 2px 6px;
+    width: 70px;
+    outline: none;
+    text-align: center;
+}
+
+.breakout-room-duration-input:focus {
+    border-color: rgba(102, 190, 255, 0.5);
 }
 
 /* Empty State */
@@ -3633,6 +3607,7 @@ hr {
 .breakout-end-all-btn {
     display: flex;
     align-items: center;
+    justify-content: center;
     gap: 4px;
     padding: 7px 12px;
     border: none;
@@ -3645,7 +3620,7 @@ hr {
     cursor: pointer;
     transition: all 0.2s ease;
     white-space: nowrap;
-    flex-shrink: 0;
+    width: 100%;
 }
 
 .breakout-end-all-btn:hover {

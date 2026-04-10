@@ -2099,26 +2099,11 @@ access to use this app.
                 <!-- Create Room -->
                 <div class="breakout-create-section">
                     <div class="breakout-create-row">
-                        <div class="breakout-timer-input-group">
-                            <i class="fas fa-clock breakout-accent"></i>
-                            <input
-                                id="breakoutDurationInput"
-                                class="breakout-duration-input"
-                                type="text"
-                                placeholder="HH:MM:SS"
-                                title="Duration: HH:MM:SS or unlimited"
-                                readonly
-                            />
-                            <button
-                                id="breakoutDurationUnlimitedBtn"
-                                class="breakout-duration-unlimited-btn active"
-                                title="Toggle unlimited duration"
-                            >
-                                <i class="fas fa-infinity"></i>
-                            </button>
-                        </div>
                         <button id="breakoutAddRoomBtn" class="breakout-action-btn">
                             <i class="fas fa-plus"></i> Add Room
+                        </button>
+                        <button id="breakoutLaunchBtn" class="breakout-action-btn breakout-launch-btn hidden">
+                            <i class="fas fa-rocket"></i> Launch
                         </button>
                     </div>
                 </div>
@@ -2136,9 +2121,6 @@ access to use this app.
                 <!-- Actions -->
                 <div id="breakoutActionsBar" class="breakout-actions-bar hidden">
                     <div class="breakout-actions-row">
-                        <button id="breakoutLaunchBtn" class="breakout-action-btn breakout-launch-btn">
-                            <i class="fas fa-rocket"></i> Launch
-                        </button>
                         <button id="breakoutEndAllBtn" class="breakout-end-all-btn hidden">
                             <i class="fas fa-stop-circle"></i> End All
                         </button>

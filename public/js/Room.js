@@ -1794,7 +1794,6 @@ function roomIsReady() {
         rc.makeDraggable(transcriptionRoom, transcriptionHeader);
         rc.makeDraggable(breakoutToolbar, breakoutToolbarHandle);
         rc.makeDraggable(breakoutPanel, breakoutPanelHeader);
-        initBreakoutDurationPicker();
         if (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia) {
             if (BUTTONS.main.startScreenButton) {
                 show(startScreenButton);
@@ -7129,11 +7128,8 @@ function toggleBreakoutPanel() {
 }
 
 function addBreakoutRoom() {
-    const duration = getBreakoutDuration();
-    if (validateBreakoutDuration(duration) === null) return;
-
     const index = breakoutRooms.length + 1;
-    breakoutRooms.push({ id: `${room_id}_breakout_${index}`, duration: duration, name: `Room ${index}` });
+    breakoutRooms.push({ id: `${room_id}_breakout_${index}`, duration: 'unlimited', name: `Room ${index}` });
     refreshBreakoutPanel();
 }
 
@@ -7208,13 +7204,14 @@ async function refreshBreakoutPanel() {
         const activeClass = peerCount > 0 ? ' breakout-room-active' : '';
         const countId = `breakoutRoomCount-${idx}`;
         const nameId = `breakoutRoomName-${idx}`;
+        const durationId = `breakoutRoomDuration-${idx}`;
         roomsHtml += `
             <div class="breakout-room-card${activeClass}">
                 <div class="breakout-room-info">
                     <i class="fas fa-door-open breakout-accent"></i>
                     <span class="breakout-room-name" id="${nameId}" onclick="renameBreakoutRoom(${idx})" title="Click to rename">${displayName}</span>
                     <span class="breakout-room-count" id="${countId}">${peerCount} peer${peerCount !== 1 ? 's' : ''}</span>
-                    <span class="breakout-room-duration">${durationDisplay}</span>
+                    <span class="breakout-room-duration" id="${durationId}" onclick="editBreakoutDuration(${idx})" title="Click to change duration">${durationDisplay}</span>
                 </div>
                 <div class="breakout-room-actions">
                     <button class="breakout-room-join-btn" onclick="presenterJoinBreakoutRoom('${room.id}')">
@@ -7254,6 +7251,10 @@ async function refreshBreakoutPanel() {
     const hasRooms = breakoutRooms.length > 0;
     hasRooms ? hide(emptyState) : show(emptyState);
     hasRooms ? show(roomsList) : hide(roomsList);
+
+    // Show/hide launch button next to add room
+    const launchBtn = getId('breakoutLaunchBtn');
+    hasRooms ? show(launchBtn) : hide(launchBtn);
 
     // Show/hide actions bar when rooms exist
     const actionsBar = getId('breakoutActionsBar');
@@ -7461,6 +7462,47 @@ function renameBreakoutRoom(index) {
     });
 }
 
+function editBreakoutDuration(index) {
+    const room = breakoutRooms[index];
+    if (!room) return;
+
+    const durationEl = getId(`breakoutRoomDuration-${index}`);
+    if (!durationEl) return;
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'breakout-room-duration-input';
+    input.value = room.duration === 'unlimited' ? '' : room.duration;
+    input.placeholder = 'HH:MM:SS';
+    input.readOnly = true;
+
+    durationEl.replaceWith(input);
+
+    const picker = flatpickr(input, {
+        enableTime: true,
+        noCalendar: true,
+        dateFormat: 'H:i:S',
+        enableSeconds: true,
+        time_24hr: true,
+        defaultHour: 0,
+        defaultMinute: 30,
+        defaultSeconds: 0,
+        onClose: function () {
+            const val = input.value.trim();
+            if (!val) {
+                room.duration = 'unlimited';
+            } else {
+                const validated = validateBreakoutDuration(val);
+                room.duration = validated === null ? 'unlimited' : validated;
+            }
+            picker.destroy();
+            refreshBreakoutPanel();
+        },
+    });
+
+    picker.open();
+}
+
 function autoAssignBreakoutRooms() {
     if (breakoutRooms.length === 0) {
         return rc.userLog('warning', 'Add at least one room first', 'top-end', 3000);
@@ -7556,55 +7598,6 @@ function validateBreakoutDuration(input) {
         return null;
     }
     return input;
-}
-
-let breakoutDurationUnlimited = true;
-let breakoutDurationPicker = null;
-
-function initBreakoutDurationPicker() {
-    const input = getId('breakoutDurationInput');
-    const unlimitedBtn = getId('breakoutDurationUnlimitedBtn');
-
-    breakoutDurationPicker = flatpickr(input, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: 'H:i:S',
-        enableSeconds: true,
-        time_24hr: true,
-        defaultHour: 0,
-        defaultMinute: 30,
-        defaultSeconds: 0,
-        onChange: function () {
-            breakoutDurationUnlimited = false;
-            unlimitedBtn.classList.remove('active');
-        },
-    });
-
-    input.value = 'unlimited';
-
-    unlimitedBtn.onclick = () => {
-        breakoutDurationUnlimited = !breakoutDurationUnlimited;
-        if (breakoutDurationUnlimited) {
-            unlimitedBtn.classList.add('active');
-            input.value = 'unlimited';
-        } else {
-            unlimitedBtn.classList.remove('active');
-            breakoutDurationPicker.open();
-        }
-    };
-}
-
-function getBreakoutDuration() {
-    if (breakoutDurationUnlimited) return 'unlimited';
-    const input = getId('breakoutDurationInput');
-    const val = input.value.trim();
-    if (!val || val === 'unlimited') return 'unlimited';
-    // flatpickr outputs H:i:S, pad to HH:MM:SS
-    const parts = val.split(':');
-    if (parts.length === 3) {
-        return parts.map((p) => p.padStart(2, '0')).join(':');
-    }
-    return val;
 }
 
 let breakoutTimerInterval = null;
