@@ -7365,8 +7365,11 @@ async function launchBreakoutRooms() {
         roomCounts[name] = (roomCounts[name] || 0) + 1;
     });
     const summary = Object.entries(roomCounts)
-        .map(([name, count]) => `${name}: ${count}`)
-        .join(', ');
+        .map(
+            ([name, count]) =>
+                `<i class="fas fa-door-open"></i> ${name}: <i class="fas fa-user${count > 1 ? 's' : ''}"></i> ${count}`
+        )
+        .join('<br>');
 
     const confirmed = await Swal.fire({
         background: swalBackground,
