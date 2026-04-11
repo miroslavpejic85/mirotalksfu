@@ -189,6 +189,7 @@ body {
 .init-video-container {
     position: relative;
     width: 100%;
+    margin-right: 10px;
 }
 
 .init-video-container video {
