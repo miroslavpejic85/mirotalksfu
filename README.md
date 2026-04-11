@@ -1,8 +1,12 @@
 <h1 align="center">MiroTalk SFU</h1>
 
-<h3 align="center">Open Source Zoom Alternative You Can Self-Host in Minutes</h3>
+<h3 align="center">
+Self-hosted open-source WebRTC video conferencing platform for real-time communication and collaboration.
+</h3>
 
-<h4 align="center">Free, Secure, Scalable Video Conferences powered by WebRTC & Mediasoup SFU - up to 8K, 60fps.</h4>
+<h4 align="center">
+A modern self-hosted alternative to Zoom, Jitsi Meet, Google Meet, and Microsoft Teams built on SFU architecture (Mediasoup).
+</h4>
 
 <br />
 
@@ -21,7 +25,7 @@
 
 <br />
 
-<p align="center"><strong>MiroTalk SFU</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform built on <a href="https://mediasoup.org" target="_blank">mediasoup</a> (Selective Forwarding Unit). It's a powerful <strong>Zoom, Google Meet, and Microsoft Teams alternative</strong> you can deploy on your own server in minutes. Enjoy unlimited rooms, no time limits, end-to-end privacy, and a rich feature set - all under your control.</p>
+<p align="center"><strong>MiroTalk SFU</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform built on <a href="https://mediasoup.org" target="_blank">mediasoup</a> SFU architecture for scalable real-time communication. A powerful alternative to <strong>Zoom, Google Meet, and Microsoft Teams</strong> for video conferencing, collaboration, and streaming. Deploy it on your own server and keep full control over your data, privacy, and infrastructure — with no vendor lock-in and no limits.</p>
 
 <p align="center">
     <a href="https://sfu.mirotalk.com">Try Live Demo</a> · <a href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> · <a href="https://discord.gg/rgGYfeYW3N">Discord</a> · <a href="https://github.com/sponsors/miroslavpejic85">Sponsor</a>
