@@ -3537,6 +3537,24 @@ hr {
     border-color: rgba(102, 190, 255, 0.5);
 }
 
+.breakout-duration-picker-wrapper {
+    display: flex;
+    justify-content: center;
+    overflow: visible;
+}
+
+.breakout-duration-picker-wrapper .flatpickr-calendar {
+    overflow: visible;
+}
+
+.swal2-html-container:has(.breakout-duration-picker-wrapper) {
+    overflow: visible !important;
+}
+
+.breakout-duration-picker-input {
+    display: none;
+}
+
 /* Empty State */
 .breakout-empty-state {
     display: flex;

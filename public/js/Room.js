@@ -7495,41 +7495,55 @@ function editBreakoutDuration(index) {
     const room = breakoutRooms[index];
     if (!room) return;
 
-    const durationEl = getId(`breakoutRoomDuration-${index}`);
-    if (!durationEl) return;
+    const currentValue = room.duration === 'unlimited' ? '' : room.duration;
 
-    const input = document.createElement('input');
-    input.type = 'text';
-    input.className = 'breakout-room-duration-input';
-    input.value = room.duration === 'unlimited' ? '' : room.duration;
-    input.placeholder = 'HH:MM:SS';
-    input.readOnly = true;
-
-    durationEl.replaceWith(input);
-
-    const picker = flatpickr(input, {
-        enableTime: true,
-        noCalendar: true,
-        dateFormat: 'H:i:S',
-        enableSeconds: true,
-        time_24hr: true,
-        defaultHour: 0,
-        defaultMinute: 30,
-        defaultSeconds: 0,
-        onClose: function () {
-            const val = input.value.trim();
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        title: 'Set Room Duration',
+        html: '<div class="breakout-duration-picker-wrapper"><input type="text" id="breakoutDurationPicker" class="breakout-duration-picker-input" /></div>',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Set',
+        denyButtonText: 'Unlimited',
+        cancelButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        didOpen: () => {
+            flatpickr('#breakoutDurationPicker', {
+                enableTime: true,
+                noCalendar: true,
+                dateFormat: 'H:i:S',
+                enableSeconds: true,
+                time_24hr: true,
+                defaultHour: 0,
+                defaultMinute: 30,
+                defaultSeconds: 0,
+                defaultDate: currentValue || '0:30:00',
+                inline: true,
+                disableMobile: true,
+            });
+        },
+        preConfirm: () => {
+            const val = document.getElementById('breakoutDurationPicker').value.trim();
+            if (!val) return null;
+            return val;
+        },
+    }).then((result) => {
+        if (result.isDenied) {
+            room.duration = 'unlimited';
+            refreshBreakoutPanel();
+        } else if (result.isConfirmed) {
+            const val = result.value;
             if (!val) {
                 room.duration = 'unlimited';
             } else {
                 const validated = validateBreakoutDuration(val);
                 room.duration = validated === null ? 'unlimited' : validated;
             }
-            picker.destroy();
             refreshBreakoutPanel();
-        },
+        }
     });
-
-    picker.open();
 }
 
 function autoAssignBreakoutRooms() {
