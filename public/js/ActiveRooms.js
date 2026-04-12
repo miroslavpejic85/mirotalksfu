@@ -6,13 +6,20 @@ const isTest = false; // Set to true for testing with mock data
 
 const roomsDiv = document.getElementById('rooms');
 const searchInput = document.getElementById('searchInput');
-const searchBtn = document.getElementById('search-btn');
 const refreshBtn = document.getElementById('refresh-btn');
+const roomCountBadge = document.getElementById('roomCountBadge');
+const statRooms = document.getElementById('statRooms');
+const statPeers = document.getElementById('statPeers');
 
 let allRooms = [];
 
-searchBtn.addEventListener('click', handleSearch);
-refreshBtn.addEventListener('click', fetchRooms);
+searchInput.addEventListener('input', handleSearch);
+refreshBtn.addEventListener('click', () => {
+    refreshBtn.classList.add('spinning');
+    fetchRooms().finally(() => {
+        setTimeout(() => refreshBtn.classList.remove('spinning'), 600);
+    });
+});
 
 function setRoomsContent(html) {
     roomsDiv.innerHTML = html;
@@ -39,22 +46,31 @@ function getUUID() {
     );
 }
 
+function updateStats(rooms) {
+    const totalPeers = rooms.reduce((sum, r) => sum + r.peers, 0);
+    statRooms.textContent = rooms.length;
+    statPeers.textContent = totalPeers;
+    roomCountBadge.textContent = rooms.length === 1 ? '1 room' : `${rooms.length} rooms`;
+}
+
 async function fetchRooms() {
-    setRoomsContent('<div class="empty">Loading...</div>');
+    setRoomsContent('<div class="empty"><i class="fa-solid fa-spinner fa-spin"></i>Loading rooms...</div>');
     try {
         const res = await axios.get('/api/v1/activeRooms');
         if (res.status !== 200) throw new Error('Failed to fetch active rooms');
         allRooms = getRoomsData(res);
+        updateStats(allRooms);
         renderRooms(allRooms);
     } catch (err) {
         const errorMsg = err.response?.data?.error || err.message;
-        setRoomsContent(`<div class="empty">${errorMsg}</div>`);
+        setRoomsContent(`<div class="empty"><i class="fa-solid fa-circle-exclamation"></i>${errorMsg}</div>`);
+        updateStats([]);
     }
 }
 
 function renderRooms(rooms) {
     if (!rooms.length) {
-        setRoomsContent('<div class="empty">No active rooms found.</div>');
+        setRoomsContent('<div class="empty"><i class="fa-solid fa-door-closed"></i>No active rooms found.</div>');
         return;
     }
     setRoomsContent(
@@ -62,18 +78,24 @@ function renderRooms(rooms) {
             .map(
                 (room) => `
             <div class="room-card">
-                <div class="room-title">
-                    <i class="fa-solid fa-door-open"></i>
-                    ${room.id}
+                <div class="room-card-header">
+                    <div class="room-title">
+                        <i class="fa-solid fa-door-open"></i>${room.id}
+                    </div>
+                    <div class="peer-badge">
+                        <i class="fa-solid fa-users"></i>
+                        ${room.peers}
+                    </div>
                 </div>
-                <div class="peer-count">
-                    <i class="fa-solid fa-users"></i>
-                    ${room.peers}
+                <div class="room-card-footer">
+                    <div class="peer-status">
+                        <span class="dot"></span>
+                        ${room.peers} ${room.peers === 1 ? 'peer' : 'peers'} connected
+                    </div>
+                    <a href="${room.join}" class="join-btn" target="_blank">
+                        <i class="fa-solid fa-arrow-right-to-bracket"></i> Join
+                    </a>
                 </div>
-                <div class="peer-label">${room.peers === 1 ? 'peer' : 'peers'}</div>
-                <a href="${room.join}" class="join-btn" target="_blank">
-                    <i class="fa-solid fa-sign-in-alt"></i> Join
-                </a>
             </div>
         `
             )
@@ -83,7 +105,8 @@ function renderRooms(rooms) {
 
 function handleSearch() {
     const value = searchInput.value.trim().toLowerCase();
-    renderRooms(!value ? allRooms : allRooms.filter((room) => room.id.toLowerCase().includes(value)));
+    const filtered = !value ? allRooms : allRooms.filter((room) => room.id.toLowerCase().includes(value));
+    renderRooms(filtered);
 }
 
 fetchRooms();

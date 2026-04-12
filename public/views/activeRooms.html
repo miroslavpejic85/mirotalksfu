@@ -24,12 +24,30 @@
     </head>
     <body>
         <div class="container">
-            <h1>Active Rooms</h1>
-            <div class="search-bar">
-                <input class="search-input" id="searchInput" type="text" placeholder="Search by Room ID..." />
-                <button id="search-btn" class="search-btn">Search</button>
+            <div class="header">
+                <div class="header-left">
+                    <i class="fa-solid fa-tower-broadcast"></i>
+                    <h1>Active Rooms</h1>
+                    <span class="room-count-badge" id="roomCountBadge">0 rooms</span>
+                </div>
+                <button id="refresh-btn" class="refresh-btn" title="Refresh">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
             </div>
-            <button id="refresh-btn" class="refresh-btn">Refresh</button>
+            <div class="search-bar">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input class="search-input" id="searchInput" type="text" placeholder="Search rooms..." />
+            </div>
+            <div class="stats-bar" id="statsBar">
+                <div class="stat-item">
+                    <div class="stat-value accent" id="statRooms">0</div>
+                    <div class="stat-label">Rooms</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value gold" id="statPeers">0</div>
+                    <div class="stat-label">Total Peers</div>
+                </div>
+            </div>
             <div class="rooms" id="rooms"></div>
         </div>
         <script defer src="../js/ActiveRooms.js"></script>
