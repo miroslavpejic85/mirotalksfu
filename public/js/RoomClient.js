@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.03
+ * @version 2.2.04
  *
  */
 
@@ -336,6 +336,7 @@ class RoomClient {
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
+        this.isFollowMeActive = false;
         this.isChatPinned = false;
         this.isChatMaximized = false;
         this.isToggleUnreadMsg = false;
@@ -712,6 +713,10 @@ class RoomClient {
                 //
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
+            }
+            // Handle Follow Me state for late joiners
+            if (room.followMe && room.followMe.enabled && !isPresenter) {
+                this._pendingFollowMe = room.followMe;
             }
             // Check if VideoAI is enabled
             if (!room.videoAIEnabled) {
@@ -1209,6 +1214,7 @@ class RoomClient {
         this.socket.on('breakoutRoomEnd', this.handleBreakoutRoomEnd);
         this.socket.on('breakoutRoomCountdown', this.handleBreakoutRoomCountdown);
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
+        this.socket.on('followMe', this.handleFollowMeData);
     }
 
     // ####################################################
@@ -1316,6 +1322,8 @@ class RoomClient {
                 }
                 await this.consume(producer_id, peer_name, peer_info, type);
             }
+
+            this.applyPendingFollowMe();
         }
     };
 
@@ -5071,6 +5079,14 @@ class RoomClient {
                 }
                 this.resizeVideoMenuBar();
                 handleAspectRatio();
+                if (this.isFollowMeActive && isPresenter) {
+                    if (this.isVideoPinned) {
+                        const peerId = videoPlayer.getAttribute('name');
+                        this.emitFollowMe({ action: 'pin', peerId: peerId });
+                    } else {
+                        this.emitFollowMe({ action: 'unpin' });
+                    }
+                }
             });
 
             if (isAvatar && !this.isMobileDevice && this.videoMediaContainer.childElementCount > 1) btnPn.click();
@@ -8909,6 +8925,9 @@ class RoomClient {
             case 'disconnect_all_on_leave':
                 this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
                 break;
+            case 'everyone_follows_me':
+                this.userLog('info', `${icons.moderator} Moderator: everyone follows me ${status}`, 'top-end');
+                break;
             case 'recSyncServer':
                 active
                     ? this.showRecServerSideAdvice()
@@ -9676,6 +9695,13 @@ class RoomClient {
         for (let child of children) {
             if (child.id != videoContainerId) {
                 child.style.display = isHideALLVideosActive ? 'none' : 'block';
+            }
+        }
+        if (this.isFollowMeActive && isPresenter) {
+            const videoEl = videoContainer ? videoContainer.querySelector('video[name]') : null;
+            const peerId = videoEl ? videoEl.getAttribute('name') : null;
+            if (peerId) {
+                this.emitFollowMe({ action: isHideALLVideosActive ? 'focus' : 'unfocus', peerId: peerId });
             }
         }
     }
@@ -10583,6 +10609,151 @@ class RoomClient {
     getModerator() {
         console.log('Get Moderator', this._moderator);
         return this._moderator;
+    }
+
+    // ####################################################
+    // FOLLOW ME
+    // ####################################################
+
+    applyPendingFollowMe() {
+        if (!this._pendingFollowMe) return;
+        const { peerId, action } = this._pendingFollowMe;
+        this._pendingFollowMe = null;
+
+        this.userLog('info', `${icons.moderator} Moderator has Everyone Follows Me enabled`, 'top-end');
+
+        if (peerId && action) {
+            setTimeout(() => {
+                if (action === 'pin') {
+                    this.followMePin(peerId);
+                } else if (action === 'focus') {
+                    this.followMeFocus(peerId);
+                }
+            }, 1000);
+        }
+    }
+
+    handleFollowMeData = (data) => {
+        console.log('SocketOn Follow me', data);
+        this.handleFollowMe(data);
+    };
+
+    toggleFollowMe(enabled) {
+        this.isFollowMeActive = enabled;
+        this.emitFollowMe({ action: 'toggle', status: enabled });
+        if (enabled) {
+            if (this.isVideoPinned && this.pinnedVideoPlayerId) {
+                const videoEl = this.getId(this.pinnedVideoPlayerId);
+                const peerId = videoEl ? videoEl.getAttribute('name') : null;
+                if (peerId) {
+                    this.emitFollowMe({ action: 'pin', peerId: peerId });
+                }
+            }
+            if (isHideALLVideosActive) {
+                const focused = this.videoMediaContainer.querySelector('[focus-mode]');
+                if (focused) {
+                    const focusedVideo = focused.querySelector('video[name]');
+                    const peerId = focusedVideo ? focusedVideo.getAttribute('name') : null;
+                    if (peerId) {
+                        this.emitFollowMe({ action: 'focus', peerId: peerId });
+                    }
+                }
+            }
+        }
+        if (!enabled) {
+            this.emitFollowMe({ action: 'unpin' });
+            this.emitFollowMe({ action: 'unfocus' });
+        }
+    }
+
+    emitFollowMe(data) {
+        if (!isPresenter) return;
+        this.socket.emit('followMe', {
+            peer_name: this.peer_name,
+            peer_uuid: this.peer_uuid,
+            ...data,
+        });
+    }
+
+    handleFollowMe(data) {
+        if (isPresenter) return;
+
+        switch (data.action) {
+            case 'toggle':
+                data.status
+                    ? this.userLog('info', `${icons.moderator} Moderator enabled: Everyone Follows Me`, 'top-end')
+                    : this.userLog('info', `${icons.moderator} Moderator disabled: Everyone Follows Me`, 'top-end');
+                break;
+            case 'pin':
+                this.followMePin(data.peerId);
+                break;
+            case 'unpin':
+                this.followMeUnpin();
+                break;
+            case 'focus':
+                this.followMeFocus(data.peerId);
+                break;
+            case 'unfocus':
+                this.followMeUnfocus(data.peerId);
+                break;
+            default:
+                break;
+        }
+    }
+
+    followMePin(peerId) {
+        if (this.isVideoPinned) {
+            this.followMeUnpin();
+        }
+        const videoEl = this.getVideoElementByPeerId(peerId);
+        if (videoEl) {
+            const btnPn = this.getId(`${videoEl.id}__pin`);
+            if (btnPn) {
+                btnPn.click();
+                return;
+            }
+        }
+        console.warn('Follow me pin: no video found for peer', peerId);
+    }
+
+    followMeUnpin() {
+        if (!this.isVideoPinned || !this.pinnedVideoPlayerId) return;
+        const btnPn = this.getId(`${this.pinnedVideoPlayerId}__pin`);
+        if (btnPn) {
+            btnPn.click();
+        }
+    }
+
+    followMeFocus(peerId) {
+        if (isHideALLVideosActive) {
+            this.followMeUnfocus();
+        }
+        const videoEl = this.getVideoElementByPeerId(peerId);
+        if (videoEl) {
+            const containerId = videoEl.id + '__video';
+            const container = this.getId(containerId);
+            if (container) {
+                this.toggleFocusMode(containerId);
+                return;
+            }
+        }
+        console.warn('Follow me focus: no video found for peer', peerId);
+    }
+
+    followMeUnfocus(peerId) {
+        if (!isHideALLVideosActive) return;
+        const focused = this.videoMediaContainer.querySelector('[focus-mode]');
+        if (focused) {
+            this.toggleFocusMode(focused.id);
+        }
+    }
+
+    getVideoElementByPeerId(peerId) {
+        const videos = document.querySelectorAll('video[name]');
+        for (const video of videos) {
+            if (video.getAttribute('name') === peerId) return video;
+        }
+        return null;
     }
 
     // ####################################################

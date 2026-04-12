@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.03
+ * @version 2.2.04
  *
  */
 
@@ -3153,6 +3153,40 @@ function startServer() {
             room.updateRoomModeratorALL(moderator);
 
             room.broadCast(socket.id, 'updateRoomModeratorALL', moderator);
+        });
+
+        socket.on('followMe', (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
+
+            const room = getRoom(socket);
+
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+
+            if (!isPresenter) return;
+
+            log.debug('Follow me', data);
+
+            switch (data.action) {
+                case 'toggle':
+                    room.setFollowMe(data.status ? { enabled: true, peerId: null, action: null } : null);
+                    break;
+                case 'pin':
+                case 'focus':
+                    room.setFollowMe({ enabled: true, peerId: data.peerId, action: data.action });
+                    break;
+                case 'unpin':
+                case 'unfocus':
+                    room.setFollowMe({ enabled: true, peerId: null, action: null });
+                    break;
+                default:
+                    break;
+            }
+
+            room.broadCast(socket.id, 'followMe', data);
         });
 
         socket.on('getRoomInfo', async (_, cb) => {

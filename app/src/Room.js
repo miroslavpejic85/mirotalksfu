@@ -56,6 +56,7 @@ module.exports = class Room {
             chat_cant_deep_seek: false,
             media_cant_sharing: false,
         };
+        this._followMe = null;
         this.survey = config?.features?.survey;
         this.redirect = config?.features?.redirect;
         this.videoAIEnabled = config?.integrations?.videoAI?.enabled || false;
@@ -105,6 +106,7 @@ module.exports = class Room {
             },
             hostProtected: this.isHostProtected,
             moderator: this._moderator,
+            followMe: this._followMe,
             survey: this.survey,
             redirect: this.redirect,
             videoAIEnabled: this.videoAIEnabled,
@@ -426,6 +428,15 @@ module.exports = class Room {
             default:
                 break;
         }
+    }
+
+    // ####################################################
+    // FOLLOW ME
+    // ####################################################
+
+    setFollowMe(data) {
+        this._followMe = data;
+        log.debug('Set follow me', this._followMe);
     }
 
     // ####################################################
