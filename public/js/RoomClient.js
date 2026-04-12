@@ -2924,9 +2924,6 @@ class RoomClient {
                 myDropdownContent.className = 'navbar-dropdown-content';
 
                 myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
-                BUTTONS.producerVideo.drawingButton &&
-                    isScreen &&
-                    myDropdownContent.appendChild(this.createDropdownItem(dw, 'Draw', myDropdownContent));
                 BUTTONS.producerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
                     myDropdownContent.appendChild(this.createDropdownItem(fs, 'Full Screen', myDropdownContent));
@@ -2944,6 +2941,7 @@ class RoomClient {
                 BUTTONS.producerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
+                BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
                 if (!this.isMobileDevice) vb.appendChild(pn);
 
@@ -3579,9 +3577,6 @@ class RoomClient {
                 BUTTONS.consumerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
                     eVc.appendChild(this.createDropdownItem(fs, 'Full Screen', eVc));
-                BUTTONS.consumerVideo.drawingButton &&
-                    remoteIsScreen &&
-                    eVc.appendChild(this.createDropdownItem(dw, 'Draw', eVc));
                 BUTTONS.consumerVideo.sendMessageButton &&
                     eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
                 BUTTONS.consumerVideo.geolocationButton &&
@@ -3606,6 +3601,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
                     vb.appendChild(pip);
+                BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
                 if (!this.isMobileDevice) vb.appendChild(pn);
