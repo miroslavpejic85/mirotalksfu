@@ -686,6 +686,22 @@ body {
     text-align: center;
 }
 
+/* Noise cancellation toggle row in audio device menu */
+.device-menu-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 12px;
+    margin: 0;
+    color: #fff;
+    font-size: 0.9rem;
+    user-select: none;
+}
+
+.device-menu-toggle-row p {
+    margin: 0;
+}
+
 #bottomButtons button:hover {
     transform: var(--btns-hover-scale);
     background: var(--body-bg) !important;

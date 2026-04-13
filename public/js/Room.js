@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.07
+ * @version 2.2.08
  *
  */
 
@@ -4696,7 +4696,47 @@ function setupQuickDeviceSwitchDropdowns() {
         appendMenuHeader(audioMenu, 'fas fa-microphone', 'Microphones');
         appendSelectOptions(audioMenu, microphoneSelect, 'No microphones found', buildAudioMenu);
 
-        appendMenuDivider(audioMenu);
+        // Noise cancellation toggle (only when custom noise suppression is enabled & supported)
+        if (BUTTONS.settings.customNoiseSuppression && rc.isRNNoiseSupported) {
+            appendMenuDivider(audioMenu);
+            appendMenuHeader(audioMenu, 'fas fa-ear-listen', 'Microphone Effects');
+
+            const toggleRow = document.createElement('div');
+            toggleRow.className = 'device-menu-toggle-row';
+
+            const labelDiv = document.createElement('div');
+            labelDiv.className = 'title';
+            const label = document.createElement('p');
+            label.textContent = 'Noise cancellation';
+            labelDiv.appendChild(label);
+
+            const switchDiv = document.createElement('div');
+            switchDiv.className = 'form-check form-switch form-switch-md title';
+
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'form-check-input';
+            checkbox.checked = switchNoiseSuppression ? switchNoiseSuppression.checked : false;
+
+            switchDiv.appendChild(checkbox);
+
+            toggleRow.appendChild(labelDiv);
+            toggleRow.appendChild(switchDiv);
+
+            checkbox.addEventListener('change', () => {
+                // Sync with the settings switch
+                if (switchNoiseSuppression) {
+                    switchNoiseSuppression.checked = checkbox.checked;
+                    switchNoiseSuppression.dispatchEvent(new Event('change'));
+                }
+            });
+
+            audioMenu.appendChild(toggleRow);
+
+            appendMenuDivider(audioMenu);
+        } else {
+            appendMenuDivider(audioMenu);
+        }
 
         appendMenuHeader(audioMenu, 'fas fa-volume-high', 'Speakers');
         if (!speakerSelect || speakerSelect.disabled) {
@@ -7005,7 +7045,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.07',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.08',
         html: `
             <br />
             <div id="about">
