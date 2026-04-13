@@ -153,19 +153,44 @@ noun = noun.charAt(0).toUpperCase() + noun.substring(1);
 adjective = adjective.charAt(0).toUpperCase() + adjective.substring(1);
 
 // ####################################################################
-// TYPING EFFECT
+// Shuffle Text Effect
 // ####################################################################
 
-let i = 0;
 let txt = num + adjective + noun;
-let speed = 100;
 
-function typeWriter() {
-    if (i < txt.length) {
-        roomName.value += txt.charAt(i);
-        i++;
-        setTimeout(typeWriter, speed);
-    }
+/**
+ * Shuffle text effect for input fields
+ * @param {HTMLInputElement} input
+ * @param {string} finalValue
+ * @param {number} duration
+ */
+function shuffleText(input, finalValue, duration = 600) {
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    const steps = 10;
+    const interval = duration / steps;
+    let step = 0;
+
+    input.classList.add('shuffle-active');
+
+    const timer = setInterval(() => {
+        step++;
+        const progress = step / steps;
+        let display = '';
+        for (let i = 0; i < finalValue.length; i++) {
+            if (i < finalValue.length * progress) {
+                display += finalValue[i];
+            } else {
+                display += chars[Math.floor(Math.random() * chars.length)];
+            }
+        }
+        input.value = display;
+
+        if (step >= steps) {
+            clearInterval(timer);
+            input.value = finalValue;
+            setTimeout(() => input.classList.remove('shuffle-active'), 300);
+        }
+    }, interval);
 }
 
 const roomName = document.getElementById('roomName');
@@ -178,7 +203,7 @@ if (roomName) {
         window.sessionStorage.roomID = false;
         joinRoom();
     } else {
-        typeWriter();
+        shuffleText(roomName, txt);
     }
 
     roomName.onkeyup = (e) => {
@@ -233,7 +258,8 @@ if (adultCnt) {
 }
 
 function genRoom() {
-    document.getElementById('roomName').value = getUUID4();
+    const input = document.getElementById('roomName');
+    shuffleText(input, getUUID4());
 }
 
 function getUUID4() {
@@ -247,7 +273,7 @@ function joinRoom() {
     const roomValid = isValidRoomName(roomName);
 
     if (!roomValid) {
-        typeWriter();
+        shuffleText(document.getElementById('roomName'), txt);
         return;
     }
 

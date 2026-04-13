@@ -2672,3 +2672,9 @@ main {
         min-height: 140px;
     }
 }
+
+/* Shuffle text effect */
+.shuffle-active {
+    opacity: 0.5;
+    transition: opacity 0.3s ease;
+}
