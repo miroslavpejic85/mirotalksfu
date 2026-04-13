@@ -177,6 +177,7 @@
     position: absolute; /* inside video feed by default */
     top: 0;
     left: 0;
+    right: 0;
     width: 100%;
     display: flex;
     align-items: center;
@@ -187,8 +188,8 @@
     padding: clamp(4px, 1.2vw, 8px);
     backdrop-filter: blur(6px);
     -webkit-backdrop-filter: blur(6px);
-    border-top-left-radius: 10px;
-    border-top-right-radius: 10px;
+    border-top-left-radius: 14px;
+    border-top-right-radius: 14px;
     background: var(--body-bg);
     /* box-shadow: var(--box-shadow); */
     cursor: default;
