@@ -45,6 +45,8 @@ const languageHandlers = {
             chatOff: 'close the chat',
             pollOn: 'open the poll',
             pollOff: 'close the poll',
+            breakoutRoomOn: 'open the breakout room',
+            breakoutRoomOff: 'close the breakout room',
             editorOn: 'open the editor',
             editorOff: 'close the editor',
             toggleTr: 'toggle transcription',
@@ -113,6 +115,8 @@ const languageHandlers = {
             chatOff: 'চ্যাট বন্ধ করো',
             pollOn: 'পোল খুলো',
             pollOff: 'পোল বন্ধ করো',
+            breakoutRoomOn: 'ব্রেকআউট রুম খুলো',
+            breakoutRoomOff: 'ব্রেকআউট রুম বন্ধ করো',
             editorOn: 'এডিটর খুলো',
             editorOff: 'এডিটর বন্ধ করো',
             toggleTr: 'ট্রান্সক্রিপশন চালু/বন্ধ করো',
@@ -181,6 +185,8 @@ const languageHandlers = {
             chatOff: 'cerrar chat',
             pollOn: 'abrir encuesta',
             pollOff: 'cerrar encuesta',
+            breakoutRoomOn: 'abrir sala de grupo',
+            breakoutRoomOff: 'cerrar sala de grupo',
             editorOn: 'abrir editor',
             editorOff: 'cerrar editor',
             toggleTr: 'alternar transcripción',
@@ -250,6 +256,8 @@ const languageHandlers = {
             chatOff: 'fermer le chat',
             pollOn: 'ouvrir le sondage',
             pollOff: 'fermer le sondage',
+            breakoutRoomOn: 'ouvrir la salle de groupe',
+            breakoutRoomOff: 'fermer la salle de groupe',
             editorOn: "ouvrir l'éditeur",
             editorOff: "fermer l'éditeur",
             toggleTr: 'basculer la transcription',
@@ -319,6 +327,8 @@ const languageHandlers = {
             chatOff: 'chiudi chat',
             pollOn: 'apri sondaggio',
             pollOff: 'chiudi sondaggio',
+            breakoutRoomOn: 'apri sala di gruppo',
+            breakoutRoomOff: 'chiudi sala di gruppo',
             editorOn: 'apri editor',
             editorOff: 'chiudi editor',
             toggleTr: 'attiva/disattiva trascrizione',
@@ -388,6 +398,8 @@ const languageHandlers = {
             chatOff: 'Chat schließen',
             pollOn: 'Umfrage öffnen',
             pollOff: 'Umfrage schließen',
+            breakoutRoomOn: 'Gruppenraum öffnen',
+            breakoutRoomOff: 'Gruppenraum schließen',
             editorOn: 'Editor öffnen',
             editorOff: 'Editor schließen',
             toggleTr: 'Transkription umschalten',
@@ -457,6 +469,8 @@ const languageHandlers = {
             chatOff: 'fechar chat',
             pollOn: 'abrir enquete',
             pollOff: 'fechar enquete',
+            breakoutRoomOn: 'abrir sala de grupo',
+            breakoutRoomOff: 'fechar sala de grupo',
             editorOn: 'abrir editor',
             editorOff: 'fechar editor',
             toggleTr: 'alternar transcrição',
@@ -526,6 +540,8 @@ const languageHandlers = {
             chatOff: 'チャットを閉じる',
             pollOn: '投票を開く',
             pollOff: '投票を閉じる',
+            breakoutRoomOn: 'ブレイクアウトルームを開く',
+            breakoutRoomOff: 'ブレイクアウトルームを閉じる',
             editorOn: 'エディターを開く',
             editorOff: 'エディターを閉じる',
             toggleTr: '文字起こしを切り替え',
@@ -595,6 +611,8 @@ const languageHandlers = {
             chatOff: '关闭聊天',
             pollOn: '开启投票',
             pollOff: '关闭投票',
+            breakoutRoomOn: '打开分组讨论室',
+            breakoutRoomOff: '关闭分组讨论室',
             editorOn: '开启编辑器',
             editorOff: '关闭编辑器',
             toggleTr: '切换字幕',
@@ -664,6 +682,8 @@ const languageHandlers = {
             chatOff: 'إغلاق الدردشة',
             pollOn: 'فتح الاستطلاع',
             pollOff: 'إغلاق الاستطلاع',
+            breakoutRoomOn: 'فتح غرفة فرعية',
+            breakoutRoomOff: 'إغلاق غرفة فرعية',
             editorOn: 'فتح المحرر',
             editorOff: 'إغلاق المحرر',
             toggleTr: 'التبديل بين الترجمة',
@@ -875,6 +895,14 @@ function execVoiceCommands(transcript) {
         case languageHandlers[currentLanguage].commands.pollOff:
             printCommand(languageHandlers[currentLanguage].commands.pollOff);
             pollCloseBtn.click();
+            break;
+        case languageHandlers[currentLanguage].commands.breakoutRoomOn:
+            printCommand(languageHandlers[currentLanguage].commands.breakoutRoomOn);
+            breakoutRoomButton.click();
+            break;
+        case languageHandlers[currentLanguage].commands.breakoutRoomOff:
+            printCommand(languageHandlers[currentLanguage].commands.breakoutRoomOff);
+            breakoutPanelCloseBtn.click();
             break;
         case languageHandlers[currentLanguage].commands.editorOn:
             printCommand(languageHandlers[currentLanguage].commands.editorOn);
