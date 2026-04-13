@@ -2,6 +2,7 @@
 
 let recognition;
 let isVoiceCommandsEnabled = true;
+let isSpeechRecRunning = false;
 let currentLanguage = 'en';
 let currentLangCode = 'en-US';
 
@@ -760,9 +761,11 @@ if (speechRecognition) {
 
     recognition.onstart = function () {
         console.log('Speech recognition started');
+        isSpeechRecRunning = true;
         hide(chatSpeechStartButton);
         show(chatSpeechStopButton);
         setColor(chatSpeechStopButton, 'lime');
+        setSpeechRecButtonState(true);
         userLog('info', 'Speech recognition started', 'top-end');
     };
 
@@ -786,9 +789,11 @@ if (speechRecognition) {
 
     recognition.onend = function () {
         console.log('Speech recognition stopped');
+        isSpeechRecRunning = false;
         show(chatSpeechStartButton);
         hide(chatSpeechStopButton);
         setColor(chatSpeechStopButton, 'white');
+        setSpeechRecButtonState(false);
         userLog('info', 'Speech recognition stopped', 'top-end');
     };
 
@@ -822,6 +827,25 @@ function stopSpeech() {
         recognition.stop();
     } catch (error) {
         console.error('Error stopping speech recognition:', error);
+    }
+}
+
+function setSpeechRecButtonState(active) {
+    if (typeof speechRecButton !== 'undefined' && speechRecButton) {
+        const icon = speechRecButton.querySelector('#speechRecIcon');
+        if (active) {
+            setColor(speechRecButton, 'lime');
+            if (icon) {
+                icon.classList.remove('fa-microphone-slash');
+                icon.classList.add('fa-microphone');
+            }
+        } else {
+            setColor(speechRecButton, 'white');
+            if (icon) {
+                icon.classList.remove('fa-microphone');
+                icon.classList.add('fa-microphone-slash');
+            }
+        }
     }
 }
 

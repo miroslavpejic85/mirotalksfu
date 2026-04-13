@@ -29,6 +29,7 @@ let BUTTONS = {
         chatButton: true,
         participantsButton: true,
         pollButton: true,
+        speechRecButton: true,
         breakoutRoomButton: true, // if presenter and if true
         editorButton: true,
         raiseHandButton: true,
