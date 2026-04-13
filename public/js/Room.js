@@ -462,7 +462,6 @@ async function initClient() {
         setTippy('speechIncomingMsg', 'Speech the incoming messages', 'bottom');
         setTippy('chatSpeechStartButton', 'Start speech recognition', 'top');
         setTippy('chatSpeechStopButton', 'Stop speech recognition', 'top');
-        setTippy('speechRecButton', 'Toggle voice commands', 'top');
         setTippy('chatEmojiButton', 'Emoji', 'top');
         setTippy('chatShowParticipantsListBtn', 'Toggle participants list', 'bottom');
         setTippy('chatMarkdownButton', 'Markdown', 'top');
