@@ -1,11 +1,11 @@
 <h1 align="center">MiroTalk SFU</h1>
 
 <h3 align="center">
-Self-hosted open-source WebRTC video conferencing platform for real-time communication and collaboration.
+Self-hosted, open-source WebRTC video conferencing platform for real-time communication and collaboration at scale.
 </h3>
 
 <h4 align="center">
-A modern self-hosted alternative to Zoom, Jitsi Meet, Google Meet, and Microsoft Teams built on SFU architecture (Mediasoup).
+A modern alternative to Zoom, Google Meet, Jitsi Meet, and Microsoft Teams, powered by a scalable SFU architecture (Mediasoup).
 </h4>
 
 <br />
