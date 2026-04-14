@@ -1195,6 +1195,9 @@ label {
     position: relative;
     z-index: 1;
 }
+.hero-copy h3 {
+    color: #fff;
+}
 .hero-cta {
     margin-bottom: 40px;
 }

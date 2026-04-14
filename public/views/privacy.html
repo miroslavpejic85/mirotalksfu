@@ -66,23 +66,102 @@
                             <div class="hero-copy">
                                 <h1 class="hero-title mt-0">Privacy Policy</h1>
                                 <p class="hero-paragraph" id="message"></p>
+                                <p class="hero-paragraph"><em>Last Updated: April 15, 2026</em></p>
+
                                 <p class="hero-paragraph">
-                                    <strong>MiroTalk SFU</strong> has an integrated
-                                    <a href="https://mediasoup.org/" target="_blank">mediasoup server</a>. Routing is a
-                                    multiparty topology, where each participant sends its media to this server and
-                                    receives all other's media from it. Thanks to the SFU architecture, it allows having
-                                    many users connected in the same room. The media streams are encrypted using Secure
-                                    Real-time Transport Protocol (SRTP).<br /><br />
-                                    If you record a meeting, the recording of the meeting is temporarily stored on
-                                    <strong>Your browser</strong>
+                                    Your privacy matters to us. This page explains in plain language what data
+                                    <strong>MiroTalk SFU</strong> ("we", "us", or "our") handles when you use our
+                                    service, and how we keep it safe. If anything is unclear, feel free to reach out —
+                                    our contact info is at the bottom.
+                                </p>
+
+                                <h3>1. How It Works Under the Hood</h3>
+                                <p class="hero-paragraph">
+                                    <strong>MiroTalk SFU</strong> is built on
+                                    <a href="https://mediasoup.org/" target="_blank">mediasoup</a>, a Selective
+                                    Forwarding Unit. In simple terms, the server acts as a smart relay: it receives your
+                                    audio and video and forwards it to the other people in the room. It does
+                                    <strong>not</strong> record, inspect, or process the content of your calls.
+                                    Everything is encrypted end-to-hop with <strong>SRTP</strong> and
+                                    <strong>DTLS</strong>, so your media stays private in transit.
+                                </p>
+
+                                <h3>2. What We Don't Collect</h3>
+                                <p class="hero-paragraph">
+                                    <strong>Everything is ephemeral.</strong> Display names, chat messages, and session
+                                    data only exist while the room is active — once it ends, they're gone. Nothing is
+                                    stored on our servers afterward.<br /><br />
+                                    <strong>Anonymized stats only:</strong> We pick up anonymized usage statistics (page
+                                    views, browser type, OS) through our privacy-friendly analytics. No personally
+                                    identifiable information is collected or stored.<br /><br />
+                                    <strong>Things we never touch:</strong> We don't record your calls, we don't ask for
+                                    payment info or government IDs, and we don't collect sensitive personal data. Your
+                                    conversations are yours.
+                                </p>
+
+                                <h3>3. Recordings Stay on Your Device</h3>
+                                <p class="hero-paragraph">
+                                    When you hit "Record", the file is created right inside
+                                    <strong>your browser</strong> (as a
                                     <a href="https://developer.mozilla.org/en-US/docs/Web/API/Blob" target="_blank"
                                         >Blob</a
-                                    >, then will be downloaded on Your PC/Mobile Device.<br /><br />
-                                    We use Umami to track aggregated usage statistics in order to improve our service.
-                                    The maker of
-                                    <strong>MiroTalk SFU</strong> has no intention of using personally or selling any of
-                                    the above-mentioned data.
+                                    >) and downloaded straight to your device. It is
+                                    <strong>never uploaded to our servers</strong>.<br /><br />
+                                    Server-side recording is <strong>disabled by default</strong>. If the host enables
+                                    it, the recordings are persistently stored on the server or cloud storage (if
+                                    configured). It is the host's responsibility to manage, secure, and delete those
+                                    recordings. Please remember: if you record other people, make sure you have their
+                                    consent — it's the right thing to do (and usually the law).
                                 </p>
+
+                                <h3>4. Cookies &amp; Analytics</h3>
+                                <p class="hero-paragraph">
+                                    We use <strong>Umami</strong>, a privacy-friendly analytics tool that doesn't use
+                                    cookies and doesn't collect personally identifiable information. It's fully
+                                    compliant with GDPR, CCPA, and PECR.<br /><br />
+                                    The app may store small bits of data in your browser (like your display name or room
+                                    preferences) to make things easier for you. This is purely functional — no tracking
+                                    involved.
+                                </p>
+
+                                <h3>5. How Long We Keep Data</h3>
+                                <p class="hero-paragraph">
+                                    Server logs are kept only as long as needed to keep things running and diagnose
+                                    issues, then automatically deleted. Chat messages and session data disappear when
+                                    the room ends — we don't hold onto them unless the host has explicitly set up
+                                    persistence.
+                                </p>
+
+                                <h3>6. How We Protect Your Data</h3>
+                                <p class="hero-paragraph">
+                                    We take security seriously: SRTP/DTLS encryption for all media, TLS/HTTPS for web
+                                    traffic, and hardened server infrastructure. That said, no system is bulletproof —
+                                    if you ever spot a vulnerability, please
+                                    <a href="mailto:miroslav.pejic.85@gmail.com">let us know</a> so we can fix it fast.
+                                </p>
+
+                                <h3>7. Third-Party Services</h3>
+                                <p class="hero-paragraph">
+                                    MiroTalk may connect to external services like RTMP streaming endpoints, CDNs, or
+                                    other APIs. Each of those has its own privacy policy, and we encourage you to check
+                                    them out. We can't take responsibility for how third parties handle data on their
+                                    end.
+                                </p>
+
+                                <h3>8. Self-Hosted Instances</h3>
+                                <p class="hero-paragraph">
+                                    MiroTalk SFU is open-source — anyone can host their own instance. If you're using
+                                    someone else's self-hosted version, <strong>they</strong> are responsible for
+                                    privacy, not us. This policy only covers instances we operate directly.
+                                </p>
+
+                                <h3>9. Policy Updates</h3>
+                                <p class="hero-paragraph">
+                                    We may tweak this policy from time to time. When we do, we'll update the "Last
+                                    Updated" date at the top. If you keep using the service after a change, that counts
+                                    as acceptance. We recommend checking back occasionally.
+                                </p>
+
                                 <div>
                                     <a class="button button-primary button-wide-mobile pulse" href="/newroom">AGREE</a>
                                 </div>
