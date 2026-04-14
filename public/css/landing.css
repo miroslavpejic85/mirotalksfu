@@ -1198,6 +1198,11 @@ label {
 .hero-copy h3 {
     color: #fff;
 }
+.hero-copy ~ .hero-figure {
+    align-self: flex-start;
+    position: sticky;
+    top: 64px;
+}
 .hero-cta {
     margin-bottom: 40px;
 }
