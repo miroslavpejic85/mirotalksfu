@@ -28,7 +28,9 @@ A modern alternative to Zoom, Google Meet, Jitsi Meet, and Microsoft Teams, powe
 <p align="center"><strong>MiroTalk SFU</strong> is a <strong>self-hosted, open-source video conferencing</strong> platform built on <a href="https://mediasoup.org" target="_blank">mediasoup</a> SFU architecture for scalable real-time communication. A powerful alternative to <strong>Zoom, Google Meet, and Microsoft Teams</strong> for video conferencing, collaboration, and streaming. Deploy it on your own server and keep full control over your data, privacy, and infrastructure — with no vendor lock-in and no limits.</p>
 
 <p align="center">
-    <a href="https://sfu.mirotalk.com">Try Live Demo</a> · <a href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> · <a href="https://discord.gg/rgGYfeYW3N">Discord</a> · <a href="https://github.com/sponsors/miroslavpejic85">Sponsor</a>
+    <a href="https://sfu.mirotalk.com">Try Live Demo</a> · <a 
+href="https://sfu.mirotalk.com/privacy">Privacy</a> · <a 
+href="https://docs.mirotalk.com/mirotalk-sfu/self-hosting/">Documentation</a> · <a href="https://discord.gg/rgGYfeYW3N">Discord</a> · <a href="https://github.com/sponsors/miroslavpejic85">Sponsor</a>
 </p>
 
 <br />
