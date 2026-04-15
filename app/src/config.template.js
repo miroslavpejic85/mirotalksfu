@@ -566,7 +566,7 @@ module.exports = {
      * - Webhook setup: See integration guides for Slack/Mattermost
      */
     api: {
-        keySecret: process.env.API_KEY_SECRET || 'mirotalksfu_default_secret',
+        keySecret: process.env.API_KEY_SECRET,
         allowed: {
             stats: process.env.API_ALLOW_STATS !== 'false',
             meetings: process.env.API_ALLOW_MEETINGS === 'true',

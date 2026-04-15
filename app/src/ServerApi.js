@@ -17,7 +17,9 @@ module.exports = class ServerApi {
     }
 
     isAuthorized() {
-        if (this._authorization != this._api_key_secret) return false;
+        if (!this._api_key_secret || typeof this._api_key_secret !== 'string') return false;
+        if (!this._authorization || typeof this._authorization !== 'string') return false;
+        if (this._authorization !== this._api_key_secret) return false;
         return true;
     }
 
