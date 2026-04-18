@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.10
+ * @version 2.2.11
  *
  */
 
@@ -5899,6 +5899,8 @@ class RoomClient {
             );
             this.cleanMessage();
 
+            this.showAITypingIndicator('ChatGPT');
+
             this.socket
                 .request('getChatGPT', {
                     time: getDataTimeString(),
@@ -5908,6 +5910,7 @@ class RoomClient {
                     context: this.chatGPTContext,
                 })
                 .then((completion) => {
+                    this.hideAITypingIndicator('ChatGPT');
                     if (!completion) return;
                     const { message, context } = completion;
                     this.chatGPTContext = context ? context : [];
@@ -5921,6 +5924,7 @@ class RoomClient {
                         : this.sound('message');
                 })
                 .catch((err) => {
+                    this.hideAITypingIndicator('ChatGPT');
                     console.log('ChatGPT error:', err);
                 });
         }
@@ -5942,6 +5946,8 @@ class RoomClient {
             );
             this.cleanMessage();
 
+            this.showAITypingIndicator('DeepSeek');
+
             this.socket
                 .request('getDeepSeek', {
                     time: getDataTimeString(),
@@ -5951,6 +5957,7 @@ class RoomClient {
                     context: this.deepSeekContext,
                 })
                 .then((completion) => {
+                    this.hideAITypingIndicator('DeepSeek');
                     if (!completion) return;
                     const { message, context } = completion;
                     this.deepSeekContext = context ? context : [];
@@ -5972,6 +5979,7 @@ class RoomClient {
                         : this.sound('message');
                 })
                 .catch((err) => {
+                    this.hideAITypingIndicator('DeepSeek');
                     console.log('DeepSeek error:', err);
                 });
         }
@@ -6240,6 +6248,33 @@ class RoomClient {
         chatMessagesId++;
         // Update empty chat notice after adding a message
         updateChatEmptyNotice();
+    }
+
+    showAITypingIndicator(aiName) {
+        const containerId = aiName === 'ChatGPT' ? 'chatGPTMessages' : 'deepSeekMessages';
+        const container = this.getId(containerId);
+        if (!container) return;
+        const existing = this.getId(`ai-typing-${aiName}`);
+        if (existing) return;
+        const typingHTML = `
+            <li id="ai-typing-${aiName}" class="clearfix">
+                <div class="ai-typing-indicator">
+                    <div class="typing-dots">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </div>
+            </li>
+        `;
+        container.insertAdjacentHTML('beforeend', typingHTML);
+        const chatHistory = this.getId('chatHistory');
+        if (chatHistory) chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    hideAITypingIndicator(aiName) {
+        const indicator = this.getId(`ai-typing-${aiName}`);
+        if (indicator) indicator.remove();
     }
 
     streamMessage(element, message, speed = 100) {
