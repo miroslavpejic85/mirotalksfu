@@ -315,29 +315,15 @@
     z-index: 5;
 }
 
-/* Participants toggle button in header */
+/* Participants toggle button */
 .chat-header-participants-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
-    border: none;
-    background: rgba(0, 168, 255, 0.15);
-    color: #00a8ff;
-    cursor: pointer;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    transition:
-        color 0.2s ease,
-        background 0.2s ease,
-        transform 0.15s ease;
+    background: rgba(0, 168, 255, 0.15) !important;
+    color: #00a8ff !important;
 }
 
 .chat-header-participants-btn:hover {
-    color: #fff;
-    background: rgba(0, 168, 255, 0.35);
-    transform: translateY(-1px);
+    color: #fff !important;
+    background: rgba(0, 168, 255, 0.35) !important;
 }
 
 .chat-header-participants-btn:active {
