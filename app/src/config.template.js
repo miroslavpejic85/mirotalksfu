@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.2.14 - Configuration File
+ * MiroTalk SFU v2.2.15 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -599,7 +599,7 @@ module.exports = {
          * -------------
          * - enabled    : Enable/disable ChatGPT integration [true/false] (default: false)
          * - basePath   : OpenAI API endpoint (default: 'https://api.openai.com/v1/')
-         * - apiKey     : OpenAI API secret key (ALWAYS store in .env)
+         * - apiKey     : OpenAI ProjectAPI secret key (ALWAYS store in .env)
          * - model      : GPT model version (default: 'gpt-3.5-turbo')
          *
          * Advanced Settings:

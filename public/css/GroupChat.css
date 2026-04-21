@@ -347,13 +347,29 @@
     padding: 0;
 }
 
-.chat .chat-history ul li {
+.chat .chat-history ul > li {
     list-style: none;
     margin-bottom: 16px;
 }
 
-.chat .chat-history ul li:last-child {
+.chat .chat-history ul > li:last-child {
     margin-bottom: 0px;
+}
+
+.chat .chat-history .message ol,
+.chat .chat-history .message ul {
+    padding-left: 1.5em;
+    margin: 0.5em 0;
+}
+
+.chat .chat-history .message ol li {
+    list-style: decimal;
+    margin-bottom: 4px;
+}
+
+.chat .chat-history .message ul li {
+    list-style: disc;
+    margin-bottom: 4px;
 }
 
 .chat .chat-history .message-data {

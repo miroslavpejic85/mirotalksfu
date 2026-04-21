@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.14
+ * @version 2.2.15
  *
  */
 
@@ -6278,29 +6278,45 @@ class RoomClient {
     }
 
     streamMessage(element, message, speed = 100) {
-        const parts = this.processMessage(message);
-        const words = parts.split(' ');
+        // Cancel any in-progress stream on this element
+        if (element._streamInterval) {
+            clearInterval(element._streamInterval);
+        }
+
+        const safeMessage = this.sanitizeHtml(String(message ?? ''));
+        const words = safeMessage.split(' ').filter((w) => w.length > 0);
 
         let textBuffer = '';
         let wordIndex = 0;
 
-        const interval = setInterval(() => {
+        element._streamInterval = setInterval(() => {
             if (wordIndex < words.length) {
                 textBuffer += words[wordIndex] + ' ';
-                element.innerHTML = textBuffer;
+                // Preserve visual line breaks while streaming plain text.
+                element.innerHTML = textBuffer.replace(/\n/g, '<br/>');
                 wordIndex++;
             } else {
-                clearInterval(interval);
-                highlightCodeBlocks(element);
+                clearInterval(element._streamInterval);
+                element._streamInterval = null;
+                element.innerHTML = this.processAIMessage(message);
+                this.highlightCodeBlocks(element);
             }
         }, speed);
+    }
 
-        function highlightCodeBlocks(element) {
-            const codeBlocks = element.querySelectorAll('pre code');
-            codeBlocks.forEach((block) => {
-                hljs.highlightElement(block);
-            });
+    highlightCodeBlocks(element) {
+        element.querySelectorAll('pre code').forEach((block) => {
+            hljs.highlightElement(block);
+        });
+    }
+
+    processAIMessage(message) {
+        const raw = String(message ?? '');
+        if (typeof marked !== 'undefined') {
+            return filterXSS(marked.parse(raw));
         }
+        // Fallback if markdown parser is unavailable.
+        return filterXSS(raw).replace(/\n/g, '<br/>');
     }
 
     processMessage(message) {
