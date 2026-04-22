@@ -1706,30 +1706,32 @@ access to use this app.
                         <h5 class="chat-conversations-title">Conversations</h5>
                     </div>
                     <!-- CHAT LIST OPTIONS -->
-                    <div>
+                    <div class="chat-list-actions">
                         <button id="chatShareRoomBtn"><i class="fas fa-user-plus"></i> Invite</button>
-                        <button id="chatHideParticipantsList" class="float-right">
-                            <i class="fas fa-times"></i>
-                        </button>
-                        <button id="participantsRaiseHandBtn" class="float-right">
-                            <i class="fas fa-hand-paper"></i>
-                        </button>
-                        <button id="participantsSaveBtn" class="float-right hidden">
-                            <i class="fas fa-save"></i>
-                        </button>
-                        <button id="participantsUnreadMessagesBtn" class="float-right">
-                            <i class="fas fa-comments"></i>
-                        </button>
+                        <div class="chat-action-icon-btns">
+                            <button id="participantsUnreadMessagesBtn">
+                                <i class="fas fa-comments"></i>
+                            </button>
+                            <button id="participantsRaiseHandBtn">
+                                <i class="fas fa-hand-paper"></i>
+                            </button>
+                            <button id="participantsSaveBtn" class="hidden">
+                                <i class="fas fa-save"></i>
+                            </button>
+                            <button id="chatHideParticipantsList">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
                     </div>
 
                     <!-- CHAT SEARCH -->
-                    <div class="input-group mt5">
+                    <div class="input-group">
                         <span class="input-group-text"><i class="fa fa-search"></i></span>
                         <input
                             id="searchParticipantsFromList"
                             type="text"
                             class="form-control"
-                            placeholder="Search..."
+                            placeholder="Search conversations"
                             maxlength="254"
                         />
                     </div>
