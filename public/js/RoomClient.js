@@ -6290,13 +6290,19 @@ class RoomClient {
         const msgEl = document.getElementById(msgListId);
         if (!msgEl) return;
         const msgId = msgEl.getAttribute('data-msg-id') || '';
-        this.applyReactionToElement(msgEl, emoji, this.peer_name);
+        // Determine action: toggle remove if already reacted, otherwise add
+        const reactionsEl = msgEl.querySelector('.message-reactions');
+        const existing = reactionsEl?.querySelector(`[data-emoji="${emoji}"]`);
+        const peers = existing ? JSON.parse(existing.getAttribute('data-peers') || '[]') : [];
+        const action = peers.includes(this.peer_name) ? 'remove' : 'add';
+        this.applyReactionToElement(msgEl, emoji, this.peer_name, action);
         if (msgId) {
             this.socket.emit('chatReaction', {
                 msg_id: msgId,
                 emoji: emoji,
                 peer_name: this.peer_name,
                 peer_id: this.peer_id,
+                action: action,
             });
         }
         const id = msgListId.replace('msg-', '');
@@ -6304,20 +6310,44 @@ class RoomClient {
         if (picker) picker.style.display = 'none';
     }
 
-    applyReactionToElement(msgEl, emoji, peerName) {
+    applyReactionToElement(msgEl, emoji, peerName, action = 'add') {
         const reactionsEl = msgEl.querySelector('.message-reactions');
         if (!reactionsEl) return;
         const existing = reactionsEl.querySelector(`[data-emoji="${emoji}"]`);
-        if (existing) {
-            const countEl = existing.querySelector('.reaction-count');
-            countEl.textContent = (parseInt(countEl.textContent) || 0) + 1;
-        } else {
-            const badge = document.createElement('span');
-            badge.className = 'reaction-badge';
-            badge.setAttribute('data-emoji', emoji);
-            badge.title = peerName;
-            badge.innerHTML = `${emoji} <span class="reaction-count">1</span>`;
-            reactionsEl.appendChild(badge);
+        if (action === 'add') {
+            if (existing) {
+                let peers = JSON.parse(existing.getAttribute('data-peers') || '[]');
+                if (!peers.includes(peerName)) {
+                    peers.push(peerName);
+                    existing.setAttribute('data-peers', JSON.stringify(peers));
+                    existing.querySelector('.reaction-count').textContent = peers.length;
+                    existing.setAttribute('data-tooltip', peers.join(', '));
+                }
+                if (peerName === this.peer_name) existing.classList.add('my-reaction');
+            } else {
+                const badge = document.createElement('span');
+                badge.className = 'reaction-badge';
+                if (peerName === this.peer_name) badge.classList.add('my-reaction');
+                badge.setAttribute('data-emoji', emoji);
+                badge.setAttribute('data-peers', JSON.stringify([peerName]));
+                badge.setAttribute('data-tooltip', peerName);
+                badge.innerHTML = `${emoji} <span class="reaction-count">1</span>`;
+                badge.addEventListener('click', () => this.sendChatReaction(msgEl.id, emoji));
+                reactionsEl.appendChild(badge);
+            }
+        } else if (action === 'remove') {
+            if (existing) {
+                let peers = JSON.parse(existing.getAttribute('data-peers') || '[]');
+                peers = peers.filter((p) => p !== peerName);
+                if (peers.length === 0) {
+                    existing.remove();
+                } else {
+                    existing.setAttribute('data-peers', JSON.stringify(peers));
+                    existing.querySelector('.reaction-count').textContent = peers.length;
+                    existing.setAttribute('data-tooltip', peers.join(', '));
+                    if (peerName === this.peer_name) existing.classList.remove('my-reaction');
+                }
+            }
         }
     }
 
@@ -6325,10 +6355,11 @@ class RoomClient {
         const msg_id = filterXSS(dataObject.msg_id || '');
         const emoji = filterXSS(dataObject.emoji || '');
         const peer_name = filterXSS(dataObject.peer_name || '');
+        const action = dataObject.action === 'remove' ? 'remove' : 'add';
         if (!msg_id || !emoji) return;
         const msgEl = document.querySelector(`li[data-msg-id="${CSS.escape(msg_id)}"]`);
         if (!msgEl) return;
-        this.applyReactionToElement(msgEl, emoji, peer_name);
+        this.applyReactionToElement(msgEl, emoji, peer_name, action);
     };
 
     showAITypingIndicator(aiName) {

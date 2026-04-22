@@ -938,12 +938,47 @@ input[type='text'] {
     border-radius: 12px;
     padding: 2px 8px;
     font-size: 13px;
-    cursor: default;
-    transition: background 0.2s ease;
+    cursor: pointer;
+    position: relative;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease;
 }
 
 .reaction-badge:hover {
     background: rgba(255, 255, 255, 0.18);
+}
+
+.reaction-badge.my-reaction {
+    background: rgba(99, 179, 237, 0.22);
+    border-color: rgba(99, 179, 237, 0.55);
+}
+
+.reaction-badge.my-reaction:hover {
+    background: rgba(99, 179, 237, 0.32);
+}
+
+/* Tooltip showing reacting users on hover */
+.reaction-badge[data-tooltip]::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: calc(100% + 6px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+    font-size: 11px;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease;
+    z-index: 1000;
+}
+
+.reaction-badge[data-tooltip]:hover::after {
+    opacity: 1;
 }
 
 .reaction-count {
