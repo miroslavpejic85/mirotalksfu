@@ -6076,7 +6076,7 @@ function getParticipantsList(peers) {
                         alt="avatar" 
                     />
                     <div class="about">
-                        <div class="name">${peer_name_limited} <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
+                        <div class="name">${peer_name_limited} <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
                         <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
                     </div>
 
@@ -6151,7 +6151,7 @@ function getParticipantsList(peers) {
                     alt="avatar" 
                 />
                     <div class="about">
-                        <div class="name">${peer_name_limited} <i id="${peer_id}-unread-msg" class="fas fa-comments hidden"></i> <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
+                        <div class="name">${peer_name_limited} <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
                         <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
                     </div>
                 `;

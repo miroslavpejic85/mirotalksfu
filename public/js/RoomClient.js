@@ -6110,7 +6110,7 @@ class RoomClient {
             if (li.id === data.peer_id && !isPublicMessage && !isMessageVisible) {
                 li.classList.add('pulsate');
                 if (!['all', 'ChatGPT', 'DeepSeek'].includes(data.to_peer_id)) {
-                    this.getId(`${data.peer_id}-unread-msg`).classList.remove('hidden');
+                    // unread-count badge handled by updateUnreadCountBadge
                 }
             }
         }
@@ -10506,8 +10506,7 @@ class RoomClient {
         if (selectedLi) selectedLi.classList.remove('pulsate');
 
         if (!['all', 'ChatGPT', 'DeepSeek'].includes(peer_id)) {
-            // icon private new message to read
-            this.getId(`${peer_id}-unread-msg`).classList.add('hidden');
+            // unread-count badge cleared by updateUnreadCountBadge below
         }
 
         // Clear unread count badge for selected peer
