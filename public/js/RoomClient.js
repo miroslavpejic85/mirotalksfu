@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.16
+ * @version 2.2.17
  *
  */
 
@@ -1215,6 +1215,7 @@ class RoomClient {
         this.socket.on('breakoutRoomCountdown', this.handleBreakoutRoomCountdown);
         this.socket.on('breakoutRoomHelp', this.handleBreakoutRoomHelp);
         this.socket.on('followMe', this.handleFollowMeData);
+        this.socket.on('chatReaction', this.handleChatReaction);
     }
 
     // ####################################################
@@ -5872,6 +5873,7 @@ class RoomClient {
         }
         this.peer_name = filterXSS(this.peer_name);
 
+        const msg_id = `${this.peer_id}_${Date.now()}`;
         const data = {
             room_id: this.room_id,
             peer_name: this.peer_name,
@@ -5880,6 +5882,7 @@ class RoomClient {
             to_peer_id: '',
             to_peer_name: '',
             peer_msg: peer_msg,
+            msg_id: msg_id,
         };
 
         if (isChatGPTOn) {
@@ -6007,6 +6010,7 @@ class RoomClient {
                             to_peer_id: data.to_peer_id,
                             to_peer_name: data.to_peer_name,
                             peer_msg: data.peer_msg,
+                            msg_id: data.msg_id,
                             timestamp: Date.now(),
                         };
                         const sent = this.sendChatDataChannelMessage(dcMsg);
@@ -6029,7 +6033,8 @@ class RoomClient {
                         this.peer_id,
                         peer_msg,
                         data.to_peer_id,
-                        data.to_peer_name
+                        data.to_peer_name,
+                        data.msg_id
                     );
                     this.cleanMessage();
                 }
@@ -6076,7 +6081,8 @@ class RoomClient {
             data.peer_id,
             data.peer_msg,
             data.to_peer_id,
-            data.to_peer_name
+            data.to_peer_name,
+            data.msg_id
         );
 
         if (!this.showChatOnMessage) {
@@ -6142,7 +6148,7 @@ class RoomClient {
         avatar === 'left' ? (this.leftMsgAvatar = avatarImg) : (this.rightMsgAvatar = avatarImg);
     }
 
-    appendMessage(side, img, fromName, fromId, msg, toId, toName) {
+    appendMessage(side, img, fromName, fromId, msg, toId, toName, msgId = '') {
         const getSide = filterXSS(side);
         const getImg = filterXSS(img);
         const getFromName = filterXSS(fromName);
@@ -6150,6 +6156,7 @@ class RoomClient {
         const getMsg = filterXSS(msg);
         const getToId = filterXSS(toId);
         const getToName = filterXSS(toName);
+        const getMsgId = filterXSS(msgId || '');
         const time = this.getTimeNow();
 
         const myMessage = getSide === 'left';
@@ -6173,12 +6180,21 @@ class RoomClient {
             ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
             : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
 
+        const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
+        const reactionButtons = reactionEmojis
+            .map(
+                (e) =>
+                    `<span class="reaction-emoji-btn" onclick="rc.sendChatReaction('msg-${chatMessagesId}', '${e}')" role="button">${e}</span>`
+            )
+            .join('');
+
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
                 data-from-id="${getFromId}" 
                 data-from-name="${getFromName}"
                 data-to-id="${getToId}" 
                 data-to-name="${getToName}"
+                data-msg-id="${getMsgId}"
                 class="clearfix"
             >
                 <div class="message-data ${messageData}">
@@ -6186,6 +6202,7 @@ class RoomClient {
                 </div>
                 <div class="message ${messageClass}">
                     <span class="text-start" id="message-${chatMessagesId}"></span>
+                    <div class="message-reactions"></div>
                     <hr/>
                     <div class="about-buttons mt5">
                         <button 
@@ -6196,11 +6213,20 @@ class RoomClient {
                         </button>
                         ${speechButton}
                         <button 
+                            id="msg-react-${chatMessagesId}" 
+                            class="mr5" 
+                            onclick="rc.toggleReactionPicker('msg-${chatMessagesId}')">
+                            <i class="fas fa-face-smile"></i>
+                        </button>
+                        <button 
                             id="msg-delete-${chatMessagesId}"   
                             class="mr5" 
                             onclick="rc.deleteMessage('msg-${chatMessagesId}')">
                             <i class="fas fa-trash"></i>
                         </button>
+                    </div>
+                    <div id="reaction-picker-${chatMessagesId}" class="reaction-picker" style="display:none">
+                        ${reactionButtons}
                     </div>
                 </div>
             </li>
@@ -6243,12 +6269,67 @@ class RoomClient {
             this.setTippy('msg-delete-' + chatMessagesId, 'Delete', 'top');
             this.setTippy('msg-copy-' + chatMessagesId, 'Copy', 'top');
             this.setTippy('msg-speech-' + chatMessagesId, 'Speech', 'top');
+            this.setTippy('msg-react-' + chatMessagesId, 'React', 'top');
         }
 
         chatMessagesId++;
         // Update empty chat notice after adding a message
         updateChatEmptyNotice();
     }
+
+    toggleReactionPicker(msgListId) {
+        const id = msgListId.replace('msg-', '');
+        const picker = document.getElementById('reaction-picker-' + id);
+        if (!picker) return;
+        const isVisible = picker.style.display !== 'none';
+        document.querySelectorAll('.reaction-picker').forEach((p) => (p.style.display = 'none'));
+        if (!isVisible) picker.style.display = 'flex';
+    }
+
+    sendChatReaction(msgListId, emoji) {
+        const msgEl = document.getElementById(msgListId);
+        if (!msgEl) return;
+        const msgId = msgEl.getAttribute('data-msg-id') || '';
+        this.applyReactionToElement(msgEl, emoji, this.peer_name);
+        if (msgId) {
+            this.socket.emit('chatReaction', {
+                msg_id: msgId,
+                emoji: emoji,
+                peer_name: this.peer_name,
+                peer_id: this.peer_id,
+            });
+        }
+        const id = msgListId.replace('msg-', '');
+        const picker = document.getElementById('reaction-picker-' + id);
+        if (picker) picker.style.display = 'none';
+    }
+
+    applyReactionToElement(msgEl, emoji, peerName) {
+        const reactionsEl = msgEl.querySelector('.message-reactions');
+        if (!reactionsEl) return;
+        const existing = reactionsEl.querySelector(`[data-emoji="${emoji}"]`);
+        if (existing) {
+            const countEl = existing.querySelector('.reaction-count');
+            countEl.textContent = (parseInt(countEl.textContent) || 0) + 1;
+        } else {
+            const badge = document.createElement('span');
+            badge.className = 'reaction-badge';
+            badge.setAttribute('data-emoji', emoji);
+            badge.title = peerName;
+            badge.innerHTML = `${emoji} <span class="reaction-count">1</span>`;
+            reactionsEl.appendChild(badge);
+        }
+    }
+
+    handleChatReaction = (dataObject) => {
+        const msg_id = filterXSS(dataObject.msg_id || '');
+        const emoji = filterXSS(dataObject.emoji || '');
+        const peer_name = filterXSS(dataObject.peer_name || '');
+        if (!msg_id || !emoji) return;
+        const msgEl = document.querySelector(`li[data-msg-id="${CSS.escape(msg_id)}"]`);
+        if (!msgEl) return;
+        this.applyReactionToElement(msgEl, emoji, peer_name);
+    };
 
     showAITypingIndicator(aiName) {
         const containerId = aiName === 'ChatGPT' ? 'chatGPTMessages' : 'deepSeekMessages';

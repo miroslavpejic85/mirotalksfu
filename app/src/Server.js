@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.16
+ * @version 2.2.17
  *
  */
 
@@ -3384,6 +3384,14 @@ function startServer() {
             data.to_peer_id == 'all'
                 ? room.broadCast(socket.id, 'message', data)
                 : room.sendTo(data.to_peer_id, 'message', data);
+        });
+
+        socket.on('chatReaction', (dataObject) => {
+            if (!roomExists(socket)) return;
+            const data = checkXSS(dataObject);
+            if (!Validator.isValidData(data)) return;
+            const { room } = getRoomAndPeer(socket);
+            room.broadCast(socket.id, 'chatReaction', data);
         });
 
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {

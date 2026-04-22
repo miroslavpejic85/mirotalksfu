@@ -919,3 +919,63 @@ input[type='text'] {
         opacity: 1;
     }
 }
+
+/* Message reaction badges */
+.message-reactions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 4px;
+    min-height: 0;
+}
+
+.reaction-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 13px;
+    cursor: default;
+    transition: background 0.2s ease;
+}
+
+.reaction-badge:hover {
+    background: rgba(255, 255, 255, 0.18);
+}
+
+.reaction-count {
+    font-size: 11px;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 600;
+}
+
+/* Reaction emoji picker */
+.reaction-picker {
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: 6px;
+    padding: 6px 8px;
+    background: rgba(0, 0, 0, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+}
+
+.reaction-emoji-btn {
+    font-size: 18px;
+    cursor: pointer;
+    padding: 2px 4px;
+    border-radius: 6px;
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease;
+    user-select: none;
+}
+
+.reaction-emoji-btn:hover {
+    transform: scale(1.3);
+    background: rgba(255, 255, 255, 0.1);
+}
