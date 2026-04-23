@@ -10675,10 +10675,8 @@ class RoomClient {
                 break;
         }
 
-        // Update replying-in indicator, placeholder, and empty notice
+        // Update placeholder, and empty notice
         const displayName = peer_id === 'all' ? 'Public chat' : peer_name;
-        const replyingName = this.getId('chatReplyingName');
-        if (replyingName) replyingName.textContent = displayName;
 
         const chatMsg = this.getId('chatMessage');
         if (chatMsg) {
