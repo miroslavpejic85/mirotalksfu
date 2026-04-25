@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.19
+ * @version 2.2.20
  *
  */
 
@@ -9493,15 +9493,18 @@ class RoomClient {
     // HANDLE AUDIO VOLUME
     // ####################################################
 
+    getAudioVolumeColor(volume) {
+        if (volume >= 80) return 'red';
+        if (volume >= 50) return 'orange';
+        return 'lime';
+    }
+
     handleAudioVolume(data) {
         //console.log('Active speaker', data);
 
         const { peer_id, peer_name, audioVolume } = data;
         const audioVolumeTmp = audioVolume * 10; //10-100
-
-        let audioColorTmp = 'lime';
-        if ([50, 60, 70].includes(audioVolumeTmp)) audioColorTmp = 'orange';
-        if ([80, 90, 100].includes(audioVolumeTmp)) audioColorTmp = 'red';
+        const audioColorTmp = this.getAudioVolumeColor(audioVolumeTmp);
 
         if (!isPitchBarEnabled) {
             const peerVideo = this.getName(peer_id);
@@ -9524,13 +9527,21 @@ class RoomClient {
         if (pbConsumer) pbConsumer.style.backgroundColor = audioColorTmp;
         if (pbProducer) pbProducer.style.height = audioVolumeTmp + '%';
         if (pbConsumer) pbConsumer.style.height = audioVolumeTmp + '%';
-        setTimeout(function () {
-            audioColorTmp = 'white';
-            if (producerAudioBtn) producerAudioBtn.style.color = audioColorTmp;
-            if (consumerAudioBtn) consumerAudioBtn.style.color = audioColorTmp;
-            if (pbProducer) pbProducer.style.height = '0%';
-            if (pbConsumer) pbConsumer.style.height = '0%';
-        }, 200);
+
+        if (!this._audioVolumeTimers) this._audioVolumeTimers = new Map();
+        if (this._audioVolumeTimers.has(peer_id)) {
+            clearTimeout(this._audioVolumeTimers.get(peer_id));
+        }
+        this._audioVolumeTimers.set(
+            peer_id,
+            setTimeout(() => {
+                if (producerAudioBtn) producerAudioBtn.style.color = 'white';
+                if (consumerAudioBtn) consumerAudioBtn.style.color = 'white';
+                if (pbProducer) pbProducer.style.height = '0%';
+                if (pbConsumer) pbConsumer.style.height = '0%';
+                this._audioVolumeTimers.delete(peer_id);
+            }, 200)
+        );
     }
 
     applyBoxShadowEffect(element, color, delay = 200) {
