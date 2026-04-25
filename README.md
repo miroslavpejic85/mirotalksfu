@@ -1,3 +1,9 @@
+<div align="center">
+    <a href="https://sfu.mirotalk.com" target="_blank">
+        <img src="public/images/mirotalk-icon.png">
+    </a>
+</div>
+
 <h1 align="center">MiroTalk SFU</h1>
 
 <h3 align="center">
