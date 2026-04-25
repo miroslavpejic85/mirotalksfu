@@ -417,3 +417,27 @@
                 });
             }
     })());
+
+(function () {
+    'use strict';
+    const section = document.getElementById('pastSponsors');
+    const toggle = document.getElementById('pastSponsorsToggle');
+
+    if (!section || !toggle) return;
+
+    const setExpanded = (expanded) => {
+        section.classList.toggle('is-open', expanded);
+        toggle.setAttribute('aria-expanded', expanded ? 'true' : 'false');
+    };
+
+    toggle.addEventListener('click', (event) => {
+        event.preventDefault();
+        setExpanded(!section.classList.contains('is-open'));
+    });
+
+    document.addEventListener('click', (event) => {
+        if (!section.contains(event.target)) {
+            setExpanded(false);
+        }
+    });
+})();

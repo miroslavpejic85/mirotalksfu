@@ -614,9 +614,23 @@
 
                 <section id="pastSponsors" class="clients section mt-48 mb-48">
                     <div class="container">
-                        <h3 class="tac">Past sponsors</h3>
-                        <br />
-                        <div class="clients-inner section-inner has-animations has-top-divider has-bottom-divider">
+                        <div class="past-sponsors-header tac mt-24">
+                            <button
+                                id="pastSponsorsToggle"
+                                class="past-sponsors-toggle"
+                                type="button"
+                                aria-controls="pastSponsorsContent"
+                                aria-expanded="false"
+                            >
+                                <span class="past-sponsors-toggle-label">Previous Sponsors</span>
+                                <span class="past-sponsors-toggle-hint">Click or tap to view</span>
+                                <i class="fa-solid fa-chevron-down past-sponsors-toggle-icon" aria-hidden="true"></i>
+                            </button>
+                        </div>
+                        <div
+                            id="pastSponsorsContent"
+                            class="clients-inner section-inner has-animations has-top-divider has-bottom-divider"
+                        >
                             <ul class="list-reset">
                                 <li class="reveal-from-left" data-reveal-delay="150">
                                     <div class="clients-logo">

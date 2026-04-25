@@ -2681,3 +2681,79 @@ main {
     opacity: 0.5;
     transition: opacity 0.3s ease;
 }
+
+/*--------------------------------------------------------------
+# Past Sponsors Toggle
+--------------------------------------------------------------*/
+
+#pastSponsors .past-sponsors-toggle {
+    border: 0;
+    background: transparent;
+    color: #d6ddf5;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 0;
+}
+
+#pastSponsors .past-sponsors-toggle-label {
+    font-size: 2rem;
+    line-height: 1.2;
+    letter-spacing: -0.4px;
+    font-weight: 600;
+}
+
+#pastSponsors .past-sponsors-toggle-hint {
+    font-size: 0.75rem;
+    color: #959cb1;
+    line-height: 1;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+#pastSponsors .past-sponsors-toggle-icon {
+    font-size: 0.85rem;
+    color: #4a74f5;
+    transform: rotate(-90deg);
+    transition: transform 0.25s ease;
+}
+
+#pastSponsors .clients-inner {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    transform: translateY(-8px);
+    transition:
+        max-height 0.35s ease,
+        opacity 0.28s ease,
+        transform 0.35s ease;
+}
+
+#pastSponsors.is-open .clients-inner {
+    max-height: 1200px;
+    opacity: 1;
+    overflow: visible;
+    pointer-events: auto;
+    transform: translateY(0);
+}
+
+#pastSponsors.is-open .past-sponsors-toggle-icon {
+    transform: rotate(0deg);
+}
+
+@media (max-width: 640px) {
+    #pastSponsors .past-sponsors-toggle {
+        flex-wrap: wrap;
+    }
+
+    #pastSponsors .past-sponsors-toggle-label {
+        font-size: 1.5rem;
+    }
+
+    #pastSponsors .past-sponsors-toggle-hint {
+        width: 100%;
+    }
+}
