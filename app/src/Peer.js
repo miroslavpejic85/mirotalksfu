@@ -91,6 +91,10 @@ module.exports = class Peer {
                 this.peer_info.peer_lobby = data.status;
                 this.peer_lobby = data.status;
                 break;
+            case 'avatar':
+                this.peer_info.peer_avatar = data.status;
+                this.peer_avatar = data.status;
+                break;
             default:
                 break;
         }

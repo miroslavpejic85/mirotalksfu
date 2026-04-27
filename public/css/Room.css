@@ -939,6 +939,11 @@ body {
     border-radius: 50px;
 }
 
+#myProfileAvatarUploadBtn,
+#myProfileAvatarResetBtn {
+    margin-top: 6px;
+}
+
 .form-check-input {
     cursor: pointer;
 }
