@@ -1887,6 +1887,8 @@ function roomIsReady() {
 // ####################################################
 
 async function updateMyPeerAvatarByUrl() {
+    let selectedAvatarUrl = null;
+
     const result = await Swal.fire({
         background: swalBackground,
         title: 'Set avatar URL',
@@ -1904,12 +1906,53 @@ async function updateMyPeerAvatarByUrl() {
                 return 'Please provide a valid image URL (.jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff, .svg)';
             return null;
         },
+        didOpen: () => {
+            const input = document.querySelector('.swal2-input');
+            if (!input) return;
+            const label = document.createElement('p');
+            label.textContent = 'Or pick a random avatar:';
+            label.style.cssText = 'color:#aaa;font-size:12px;margin:10px 0 6px;text-align:center;';
+            const grid = document.createElement('div');
+            grid.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:4px;';
+            for (let i = 0; i < 6; i++) {
+                const seed = Math.random().toString(36).substring(2, 10);
+                const url = `https://robohash.org/${seed}.png`;
+                const img = document.createElement('img');
+                img.src = url;
+                img.title = 'Click to use this avatar';
+                img.style.cssText =
+                    'width:48px;height:48px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:border-color 0.2s;object-fit:cover;background:#222;';
+                img.addEventListener('mouseover', () => (img.style.borderColor = '#4caf50'));
+                img.addEventListener('mouseout', () => (img.style.borderColor = 'transparent'));
+                img.addEventListener('click', () => {
+                    selectedAvatarUrl = url;
+                    Swal.close();
+                });
+                grid.appendChild(img);
+            }
+            const attribution = document.createElement('p');
+            attribution.innerHTML =
+                'Robots lovingly delivered by <a href="https://robohash.org" target="_blank" rel="noopener noreferrer" style="color:#4caf50;">Robohash.org</a>';
+            attribution.style.cssText = 'color:#666;font-size:11px;margin:6px 0 0;text-align:center;';
+            input.parentNode.insertBefore(label, input.nextSibling);
+            input.parentNode.insertBefore(grid, label.nextSibling);
+            input.parentNode.insertBefore(attribution, grid.nextSibling);
+        },
     });
+
+    if (selectedAvatarUrl) {
+        applyPeerAvatar(selectedAvatarUrl);
+        return;
+    }
 
     if (!result.isConfirmed || !result.value) return;
 
+    applyPeerAvatar(result.value);
+}
+
+function applyPeerAvatar(avatarSrc) {
     try {
-        peer_avatar = result.value;
+        peer_avatar = avatarSrc;
         hasTemporaryAvatar = true;
 
         myProfileAvatar.setAttribute('src', peer_avatar);
