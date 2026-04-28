@@ -6160,7 +6160,11 @@ class RoomClient {
         // set via setAttribute — no XSS risk. filterXSS must NOT be applied here because it encodes
         // '<', '>' and '&' which breaks SVG data URIs produced by genAvatarSvg.
         const getImg =
-            this.isValidAvatarURL(img) || (typeof img === 'string' && img.startsWith('data:image/')) ? img : '';
+            this.isValidAvatarURL(img) ||
+            (typeof img === 'string' && img.startsWith('data:image/')) ||
+            (typeof img === 'string' && (img.startsWith('../') || img.startsWith('/')))
+                ? img
+                : '';
         const getFromName = filterXSS(fromName);
         const getFromId = filterXSS(fromId);
         const getMsg = filterXSS(msg);
