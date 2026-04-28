@@ -81,7 +81,7 @@ const icons = {
     infoCpu: '<i class="fa-solid fa-microchip"></i>',
     infoDevice: '<i class="fa-solid fa-laptop"></i>',
     infoEngine: '<i class="fa-solid fa-gear"></i>',
-    infoOs: '<span class="extra-info-icon extra-info-icon--os" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1 14 4 8 7 2 4 8 1Z" fill="currentColor"/><path d="M2 7l6 3 6-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10l6 3 6-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>',
+    infoOs: '<i class="fa-solid fa-layer-group"></i>',
     infoDefault: '<i class="fa-solid fa-circle-info"></i>',
 };
 

@@ -1170,10 +1170,10 @@ function getInfo() {
 
         const sectionMeta = {
             browser: { iconMarkup: icons.infoBrowser, label: 'Browser' },
-            cpu: { iconMarkup: icons.infoCpu, label: 'CPU' },
+            cpu: { iconMarkup: icons.infoCpu, label: 'CPU info' },
             device: { iconMarkup: icons.infoDevice, label: 'Device' },
             engine: { iconMarkup: icons.infoEngine, label: 'Engine' },
-            os: { iconMarkup: icons.infoOs, label: 'OS' },
+            os: { iconMarkup: icons.infoOs, label: 'OS info' },
         };
 
         const rows = Object.entries(filteredResult)

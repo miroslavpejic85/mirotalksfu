@@ -1042,16 +1042,6 @@ body {
     color: rgba(255, 255, 255, 0.4);
 }
 
-.extra-info-icon svg {
-    display: block;
-    width: 18px;
-    height: 18px;
-}
-
-.extra-info-icon--os {
-    color: #2f80ff;
-}
-
 .extra-info-values {
     display: flex;
     flex-wrap: wrap;
