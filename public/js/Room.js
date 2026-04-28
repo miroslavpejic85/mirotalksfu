@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.24
+ * @version 2.2.25
  *
  */
 
@@ -998,9 +998,9 @@ function generateRandomName() {
 function getPeerAvatar() {
     const avatar = getQueryParam('avatar');
     const avatarDisabled = avatar === '0' || avatar === 'false';
-    const isBase64Avatar = typeof avatar === 'string' && avatar.startsWith('data:image/');
+    const isBase64Avatar = typeof avatar === 'string' && avatar.startsWith('data:');
     console.log('Direct join', { avatar: avatar });
-    if (avatarDisabled || isBase64Avatar || !isImageURL(avatar)) {
+    if (avatarDisabled || isBase64Avatar || !isValidAvatarURL(avatar)) {
         return false;
     }
     return avatar;
@@ -1748,7 +1748,7 @@ function roomIsReady() {
 
     makeRoomPopupQR();
 
-    if (peer_avatar && isImageURL(peer_avatar)) {
+    if (peer_avatar && isValidAvatarURL(peer_avatar)) {
         myProfileAvatar.setAttribute('src', peer_avatar);
     } else if (rc.isValidEmail(peer_name)) {
         myProfileAvatar.style.borderRadius = `50px`;
@@ -1926,11 +1926,22 @@ async function updateMyPeerAvatarByUrl() {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         inputValidator: (value) => {
             if (!value) return 'Please enter an image URL';
-            if (value.startsWith('data:image/')) return 'Base64 avatars are not supported';
-            if (!rc.isImageURL(value))
-                return 'Please provide a valid image URL (.jpg, .jpeg, .png, .gif, .webp, .bmp, .tiff, .svg)';
+            if (value.startsWith('data:')) return 'Base64 avatars are not supported';
+            if (!isValidAvatarURL(value)) return 'Only http/https URLs are supported';
             return null;
         },
+        preConfirm: (url) =>
+            new Promise((resolve) => {
+                const img = new Image();
+                img.onload = () => resolve(url);
+                img.onerror = () => {
+                    Swal.showValidationMessage(
+                        'Could not load the image — the URL may be invalid, restricted, or not an image'
+                    );
+                    resolve(false);
+                };
+                img.src = url;
+            }),
         didOpen: () => {
             const input = document.querySelector('.swal2-input');
             if (!input) return;
@@ -4555,6 +4566,16 @@ function isValidEmail(email) {
     return emailRegex.test(email);
 }
 
+function isValidAvatarURL(url) {
+    if (!url || typeof url !== 'string') return false;
+    try {
+        const parsed = new URL(url);
+        return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+    } catch {
+        return false;
+    }
+}
+
 async function isImageURL(url) {
     if (!url) return false;
     try {
@@ -6425,7 +6446,7 @@ function refreshParticipantsCount(count, adapt = true) {
 }
 
 function getParticipantAvatar(peerName, peerAvatar = false) {
-    if (peerAvatar && rc.isImageURL(peerAvatar)) {
+    if (peerAvatar && isValidAvatarURL(peerAvatar)) {
         return peerAvatar;
     }
     if (rc.isValidEmail(peerName)) {
@@ -7233,7 +7254,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.24',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.25',
         html: `
             <br />
             <div id="about">

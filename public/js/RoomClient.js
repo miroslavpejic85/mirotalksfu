@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.24
+ * @version 2.2.25
  *
  */
 
@@ -4283,7 +4283,7 @@ class RoomClient {
 
     setVideoAvatarImgName(elemId, peer_name, peer_avatar = false) {
         let elem = this.getId(elemId);
-        if (peer_avatar && rc.isImageURL(peer_avatar)) {
+        if (peer_avatar && this.isValidAvatarURL(peer_avatar)) {
             elem.setAttribute('src', peer_avatar);
         } else if (cfg.useAvatarSvg) {
             rc.isValidEmail(peer_name)
@@ -6146,7 +6146,7 @@ class RoomClient {
 
     setMsgAvatar(avatar, peerName, peerAvatar = false) {
         const avatarImg =
-            peerAvatar && this.isImageURL(peerAvatar)
+            peerAvatar && this.isValidAvatarURL(peerAvatar)
                 ? peerAvatar
                 : this.isValidEmail(peerName)
                   ? this.genGravatar(peerName)
@@ -6182,9 +6182,12 @@ class RoomClient {
                 </button>`
             : '';
 
+        // getImg is a user-controlled URL; use a temporary id and setAttribute
+        // after insertion to avoid double-decode XSS via insertAdjacentHTML.
+        const msgAvatarTmpId = `msg-av-${chatMessagesId}`;
         const positionFirst = myMessage
-            ? `<img src="${getImg}" alt="avatar" />${timeAndName}`
-            : `${timeAndName}<img src="${getImg}" alt="avatar" />`;
+            ? `<img id="${msgAvatarTmpId}" alt="avatar" />${timeAndName}`
+            : `${timeAndName}<img id="${msgAvatarTmpId}" alt="avatar" />`;
 
         const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
         const reactionButtons = reactionEmojis
@@ -6255,6 +6258,12 @@ class RoomClient {
             default:
                 chatPrivateMessages.insertAdjacentHTML('beforeend', newMessageHTML);
                 break;
+        }
+
+        const msgAvatarEl = document.getElementById(msgAvatarTmpId);
+        if (msgAvatarEl) {
+            msgAvatarEl.setAttribute('src', getImg);
+            msgAvatarEl.removeAttribute('id');
         }
 
         const message = getId(`message-${chatMessagesId}`);
@@ -6542,6 +6551,16 @@ class RoomClient {
             new URL(input);
             return true;
         } catch (_) {
+            return false;
+        }
+    }
+
+    isValidAvatarURL(url) {
+        if (!url || typeof url !== 'string') return false;
+        try {
+            const parsed = new URL(url);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch {
             return false;
         }
     }
@@ -9261,7 +9280,7 @@ class RoomClient {
             const { peer_name, peer_avatar } = this.lobbyPears[peer_id];
 
             const avatarImg =
-                peer_avatar && this.isImageURL(peer_avatar)
+                peer_avatar && this.isValidAvatarURL(peer_avatar)
                     ? peer_avatar
                     : this.isValidEmail(peer_name)
                       ? this.genGravatar(peer_name, 32)
