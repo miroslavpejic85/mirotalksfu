@@ -259,7 +259,11 @@ let room_password = getRoomPassword();
 let room_duration = getRoomDuration();
 let peer_name = getPeerName();
 let peer_avatar = getPeerAvatar();
-let hasTemporaryAvatar = false;
+let hasTemporaryAvatar = !!(
+    peer_avatar &&
+    localStorageSettings.peer_avatar &&
+    peer_avatar === localStorageSettings.peer_avatar
+);
 let peer_uuid = getPeerUUID();
 let peer_token = getPeerToken();
 let isScreenAllowed = getScreen();
@@ -1001,6 +1005,11 @@ function getPeerAvatar() {
     const isBase64Avatar = typeof avatar === 'string' && avatar.startsWith('data:');
     console.log('Direct join', { avatar: avatar });
     if (avatarDisabled || isBase64Avatar || !isValidAvatarURL(avatar)) {
+        const saved = localStorageSettings.peer_avatar;
+        if (saved && isValidAvatarURL(saved)) {
+            console.log('Restored avatar from localStorage', { avatar: saved });
+            return saved;
+        }
         return false;
     }
     return avatar;
@@ -2026,6 +2035,9 @@ function applyPeerAvatar(avatarSrc) {
         peer_avatar = avatarSrc;
         hasTemporaryAvatar = true;
 
+        localStorageSettings.peer_avatar = peer_avatar;
+        lS.setSettings(localStorageSettings);
+
         myProfileAvatar.setAttribute('src', peer_avatar);
         rc.setVideoAvatarImgName(rc.peer_id + '__img', peer_name, peer_avatar);
         rc.setMsgAvatar('left', peer_name, peer_avatar);
@@ -2045,6 +2057,8 @@ function applyPeerAvatar(avatarSrc) {
 function resetMyPeerAvatarInMemory() {
     peer_avatar = false;
     hasTemporaryAvatar = false;
+    localStorageSettings.peer_avatar = '';
+    lS.setSettings(localStorageSettings);
 
     if (rc.isValidEmail(peer_name)) {
         myProfileAvatar.style.borderRadius = '50px';

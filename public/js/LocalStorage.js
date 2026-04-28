@@ -54,6 +54,7 @@ class LocalStorage {
             theme_custom: false, // keep custom theme
             buttons_bar: 0, // vertical
             pin_grid: 0, // vertical
+            peer_avatar: '', // persisted avatar URL
         };
 
         this.DEVICES_COUNT = {
