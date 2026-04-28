@@ -1975,7 +1975,8 @@ async function updateMyPeerAvatarByUrl() {
 
             const localGrid = document.createElement('div');
             localGrid.style.cssText =
-                'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:120px;overflow-y:auto;padding:4px 2px;margin-bottom:4px;';
+                'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;max-height:120px;overflow-y:scroll;-webkit-overflow-scrolling:touch;touch-action:pan-y;padding:4px 2px;margin-bottom:4px;';
+            localGrid.addEventListener('touchmove', (e) => e.stopPropagation(), { passive: true });
 
             for (let i = 1; i <= 25; i++) {
                 const url = `${window.location.origin}/images/avatars/avatar_${String(i).padStart(2, '0')}.png`;
