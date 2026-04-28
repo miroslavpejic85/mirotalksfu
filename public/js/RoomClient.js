@@ -6156,7 +6156,11 @@ class RoomClient {
 
     appendMessage(side, img, fromName, fromId, msg, toId, toName, msgId = '') {
         const getSide = filterXSS(side);
-        const getImg = filterXSS(img);
+        // img is always internally computed (isValidAvatarURL / genAvatarSvg / genGravatar) and is
+        // set via setAttribute — no XSS risk. filterXSS must NOT be applied here because it encodes
+        // '<', '>' and '&' which breaks SVG data URIs produced by genAvatarSvg.
+        const getImg =
+            this.isValidAvatarURL(img) || (typeof img === 'string' && img.startsWith('data:image/')) ? img : '';
         const getFromName = filterXSS(fromName);
         const getFromId = filterXSS(fromId);
         const getMsg = filterXSS(msg);
