@@ -1943,7 +1943,7 @@ async function updateMyPeerAvatarByUrl() {
                 img.onload = () => resolve(url);
                 img.onerror = () => {
                     Swal.showValidationMessage(
-                        'Could not load the image — the URL may be invalid, restricted, or not an image'
+                        'Could not load the image, the URL may be invalid, restricted, or not an image'
                     );
                     resolve(false);
                 };
