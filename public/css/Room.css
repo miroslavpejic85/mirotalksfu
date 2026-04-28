@@ -988,7 +988,87 @@ body {
 }
 
 #extraInfo {
-    margin-left: 5px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.extra-info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.extra-info-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 10px;
+    border: var(--border);
+    background: var(--select-bg);
+    font-size: 0.82rem;
+}
+
+.extra-info-label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    color: rgba(255, 255, 255, 0.55);
+    white-space: nowrap;
+    min-width: 70px;
+}
+
+.extra-info-label i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    font-size: 0.85rem;
+    line-height: 1;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.extra-info-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.extra-info-icon svg {
+    display: block;
+    width: 18px;
+    height: 18px;
+}
+
+.extra-info-icon--os {
+    color: #2f80ff;
+}
+
+.extra-info-values {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+    justify-content: flex-end;
+}
+
+.extra-info-badge {
+    display: inline-block;
+    padding: 2px 9px;
+    border-radius: 20px;
+    background: rgba(255, 255, 255, 0.08);
+    border: var(--border);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.78rem;
+    letter-spacing: 0.01em;
+    white-space: nowrap;
 }
 
 #applyAudioOptionsButton {

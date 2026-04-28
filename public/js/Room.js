@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.23
+ * @version 2.2.24
  *
  */
 
@@ -1168,10 +1168,37 @@ function getInfo() {
             os: filterUnknown(parserResult.os),
         };
 
-        // Convert the filtered result to a readable JSON string
-        const resultString = JSON.stringify(filteredResult, null, 2);
+        const sectionMeta = {
+            browser: { iconMarkup: icons.infoBrowser, label: 'Browser' },
+            cpu: { iconMarkup: icons.infoCpu, label: 'CPU' },
+            device: { iconMarkup: icons.infoDevice, label: 'Device' },
+            engine: { iconMarkup: icons.infoEngine, label: 'Engine' },
+            os: { iconMarkup: icons.infoOs, label: 'OS' },
+        };
 
-        extraInfo.innerText = resultString;
+        const rows = Object.entries(filteredResult)
+            .filter(([, data]) => Object.keys(data).length > 0)
+            .map(([section, data]) => {
+                const { iconMarkup, label } = sectionMeta[section] || {
+                    iconMarkup: icons.infoDefault,
+                    label: section,
+                };
+                const badges = Object.entries(data)
+                    .filter(([key]) => key !== 'major')
+                    .map(([, val]) => `<span class="extra-info-badge">${val}</span>`)
+                    .join('');
+                return `
+                    <div class="extra-info-row extra-info-row--${section}">
+                        <div class="extra-info-label">
+                            ${iconMarkup}
+                            <span>${label}</span>
+                        </div>
+                        <div class="extra-info-values">${badges}</div>
+                    </div>`;
+            })
+            .join('');
+
+        extraInfo.innerHTML = `<div class="extra-info-grid">${rows}</div>`;
 
         return parserResult;
     } catch (error) {
@@ -7205,7 +7232,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.23',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.24',
         html: `
             <br />
             <div id="about">

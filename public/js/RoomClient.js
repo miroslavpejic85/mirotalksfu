@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.23
+ * @version 2.2.24
  *
  */
 
@@ -77,6 +77,12 @@ const icons = {
     editor: '<i class="fas fa-pen-to-square"></i>',
     up: '<i class="fas fa-chevron-up"></i>',
     down: '<i class="fas fa-chevron-down"></i>',
+    infoBrowser: '<i class="fa-solid fa-globe"></i>',
+    infoCpu: '<i class="fa-solid fa-microchip"></i>',
+    infoDevice: '<i class="fa-solid fa-laptop"></i>',
+    infoEngine: '<i class="fa-solid fa-gear"></i>',
+    infoOs: '<span class="extra-info-icon extra-info-icon--os" aria-hidden="true"><svg viewBox="0 0 16 16" fill="none"><path d="M8 1 14 4 8 7 2 4 8 1Z" fill="currentColor"/><path d="M2 7l6 3 6-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M2 10l6 3 6-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>',
+    infoDefault: '<i class="fa-solid fa-circle-info"></i>',
 };
 
 const image = {
