@@ -397,8 +397,6 @@ async function initClient() {
     if (!isMobileDevice) {
         refreshMainButtonsToolTipPlacement();
         setTippy('mySettingsCloseBtn', 'Close', 'bottom');
-        setTippy('myProfileAvatarUploadBtn', 'Set temporary avatar URL', 'top');
-        setTippy('myProfileAvatarResetBtn', 'Reset temporary avatar', 'top');
         setTippy(
             'switchDominantSpeakerFocus',
             'If Active, When a participant speaks, their video will be focused and enlarged',
@@ -2047,7 +2045,7 @@ function applyPeerAvatar(avatarSrc) {
         rc.peer_info.peer_avatar = peer_avatar;
         rc.updatePeerInfo(peer_name, rc.peer_id, 'avatar', peer_avatar);
 
-        userLog('info', 'Temporary avatar applied (will reset on refresh)');
+        userLog('info', 'Avatar applied and saved for future sessions');
     } catch (err) {
         console.error('Failed to set avatar URL', err);
         userLog('error', 'Unable to apply avatar URL');
@@ -2075,7 +2073,7 @@ function resetMyPeerAvatarInMemory() {
     rc.peer_info.peer_avatar = false;
     rc.updatePeerInfo(peer_name, rc.peer_id, 'avatar', false);
 
-    userLog('info', 'Temporary avatar reset');
+    userLog('info', 'Avatar reset to default');
 }
 
 function updateMyAvatarResetButtonVisibility() {
