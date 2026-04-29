@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.26
+ * @version 2.2.27
  *
  */
 
@@ -347,6 +347,12 @@ class RoomClient {
         this.isChatMaximized = false;
         this.isToggleUnreadMsg = false;
         this.isToggleRaiseHand = false;
+        this.roomEmojiBurstState = {
+            startedAt: 0,
+            anchorX: 0,
+            anchorY: 0,
+            count: 0,
+        };
         this.pinnedVideoPlayerId = null;
         this.camVideo = false;
         this.videoQualitySelectedIndex = 0;
@@ -10028,18 +10034,78 @@ class RoomClient {
         cmd.redirect ? openURL(cmd.redirect) : this.exit();
     }
 
+    getRoomEmojiPlacement() {
+        const viewportWidth = Math.max(window.innerWidth || 0, 320);
+        const viewportHeight = Math.max(window.innerHeight || 0, 320);
+        const isCompactViewport = viewportWidth < 640;
+        const now = Date.now();
+        const burstWindow = 900;
+        const maxBurstSize = isCompactViewport ? 4 : 6;
+        const marginX = isCompactViewport ? 18 : 34;
+        const marginY = isCompactViewport ? 96 : 124;
+        const minAnchorX = viewportWidth * 0.2;
+        const maxAnchorX = viewportWidth * 0.8;
+        const minAnchorY = viewportHeight * 0.42;
+        const maxAnchorY = viewportHeight * 0.76;
+
+        if (now - this.roomEmojiBurstState.startedAt > burstWindow || this.roomEmojiBurstState.count >= maxBurstSize) {
+            this.roomEmojiBurstState.startedAt = now;
+            this.roomEmojiBurstState.count = 0;
+            this.roomEmojiBurstState.anchorX = minAnchorX + Math.random() * Math.max(1, maxAnchorX - minAnchorX);
+            this.roomEmojiBurstState.anchorY = minAnchorY + Math.random() * Math.max(1, maxAnchorY - minAnchorY);
+        }
+
+        const burstIndex = this.roomEmojiBurstState.count;
+        this.roomEmojiBurstState.count += 1;
+
+        const baseAngle = -90 + (burstIndex - (maxBurstSize - 1) / 2) * (isCompactViewport ? 24 : 18);
+        const jitterAngle = Math.random() * 12 - 6;
+        const angle = ((baseAngle + jitterAngle) * Math.PI) / 180;
+        const radius = (isCompactViewport ? 18 : 24) + burstIndex * (isCompactViewport ? 14 : 18) + Math.random() * 14;
+        const left = Math.min(
+            viewportWidth - marginX,
+            Math.max(marginX, this.roomEmojiBurstState.anchorX + Math.cos(angle) * radius)
+        );
+        const top = Math.min(
+            viewportHeight - marginY,
+            Math.max(marginY, this.roomEmojiBurstState.anchorY + Math.sin(angle) * radius * 0.6)
+        );
+        const drift = `${(Math.cos(angle) * (radius * 0.95) + (Math.random() * 18 - 9)).toFixed(0)}px`;
+        const rise = `-${(Math.abs(Math.sin(angle)) * 70 + Math.random() * 70 + (isCompactViewport ? 120 : 165)).toFixed(0)}px`;
+        const rotation = `${(Math.random() * 16 - 8).toFixed(1)}deg`;
+
+        return {
+            left,
+            top,
+            drift,
+            rise,
+            rotation,
+        };
+    }
+
     handleRoomEmoji(cmd, duration = 5000) {
         const userEmoji = document.getElementById(`userEmoji`);
         if (userEmoji) {
             const emojiDisplay = document.createElement('div');
-            emojiDisplay.className = 'animate__animated animate__backInUp';
-            emojiDisplay.style.padding = '10px';
-            emojiDisplay.style.fontSize = '2vh';
-            emojiDisplay.style.color = '#FFF';
-            emojiDisplay.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
-            emojiDisplay.style.borderRadius = '10px';
-            emojiDisplay.style.marginBottom = '5px';
-            emojiDisplay.innerText = `${cmd.emoji} ${cmd.peer_name}`;
+            const placement = this.getRoomEmojiPlacement();
+            const label = cmd.peer_name || 'Guest';
+            const emojiIcon = document.createElement('span');
+            const emojiName = document.createElement('span');
+
+            emojiDisplay.className = 'user-emoji-burst';
+            emojiDisplay.style.left = `${placement.left}px`;
+            emojiDisplay.style.top = `${placement.top}px`;
+            emojiDisplay.style.setProperty('--emoji-drift', placement.drift);
+            emojiDisplay.style.setProperty('--emoji-rise', placement.rise);
+            emojiDisplay.style.setProperty('--emoji-rotation', placement.rotation);
+
+            emojiIcon.className = 'user-emoji-burst__icon';
+            emojiIcon.textContent = cmd.emoji;
+            emojiName.className = 'user-emoji-burst__name';
+            emojiName.textContent = label;
+
+            emojiDisplay.appendChild(emojiIcon);
+            emojiDisplay.appendChild(emojiName);
             userEmoji.appendChild(emojiDisplay);
 
             setTimeout(() => {
