@@ -5685,11 +5685,10 @@ class RoomClient {
             return;
         }
         if (!this.isChatOpen) {
-            this.toggleChat(true);
+            await this.toggleChat(true);
             if (!BUTTONS.main.chatButton) {
                 elemDisplay('chat', false);
             }
-            await this.sleep(500);
         }
         if ((isDesktopDevice && this.isChatPinned) || !isDesktopDevice) {
             this.toggleShowParticipants();
