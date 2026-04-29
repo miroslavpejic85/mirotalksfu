@@ -359,6 +359,9 @@ class Transcription {
         document.documentElement.style.setProperty('--transcription-width', '25%');
         document.documentElement.style.setProperty('--transcription-height', '100%');
         rc.resizeVideoMenuBar();
+        transcriptionRoom.classList.remove('panel-slide-in');
+        void transcriptionRoom.offsetWidth;
+        transcriptionRoom.classList.add('panel-slide-in');
     }
 
     unpinned() {
@@ -368,6 +371,7 @@ class Transcription {
             rc.videoMediaContainer.style.width = '100%';
             rc.videoMediaContainer.style.height = '100%';
         }
+        transcriptionRoom.classList.remove('panel-slide-in');
         document.documentElement.style.setProperty('--transcription-width', '420px');
         document.documentElement.style.setProperty('--transcription-height', '680px');
         hide(transcriptionMinBtn);

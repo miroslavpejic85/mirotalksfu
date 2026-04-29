@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.25
+ * @version 2.2.26
  *
  */
 
@@ -5753,6 +5753,7 @@ class RoomClient {
         if (!this.isVideoPinned) {
             this.videoMediaContainerPin();
         }
+        if (chatRoom.classList.contains('container')) chatRoom.classList.remove('container');
         this.chatPinned();
         this.isChatPinned = true;
         setColor(chatTogglePin, 'lime');
@@ -5761,13 +5762,13 @@ class RoomClient {
         chatRoom.style.resize = 'none';
         if (!this.isMobileDevice) this.makeUnDraggable(chatRoom, chatHeader);
         if (this.isPlistOpen()) this.toggleShowParticipants();
-        if (chatRoom.classList.contains('container')) chatRoom.classList.remove('container');
     }
 
     chatUnpin() {
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
+        chatRoom.classList.remove('panel-slide-in');
         document.documentElement.style.setProperty('--msger-width', '800px');
         document.documentElement.style.setProperty('--msger-height', '700px');
         hide(chatMinButton);
@@ -5798,6 +5799,9 @@ class RoomClient {
         chatRoom.style.transform = null;
         document.documentElement.style.setProperty('--msger-width', '25%');
         document.documentElement.style.setProperty('--msger-height', '100%');
+        chatRoom.classList.remove('panel-slide-in');
+        void chatRoom.offsetWidth; // force reflow so the animation always restarts
+        chatRoom.classList.add('panel-slide-in');
     }
 
     toggleChatEmoji() {
@@ -6832,6 +6836,7 @@ class RoomClient {
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
+        pollRoom.classList.remove('panel-slide-in');
         pollRoom.style.maxWidth = '600px';
         pollRoom.style.maxHeight = '700px';
         this.pollCenter();
@@ -6850,6 +6855,9 @@ class RoomClient {
         pollRoom.style.transform = null;
         pollRoom.style.maxWidth = '25%';
         pollRoom.style.maxHeight = '100%';
+        pollRoom.classList.remove('panel-slide-in');
+        void pollRoom.offsetWidth;
+        pollRoom.classList.add('panel-slide-in');
     }
 
     pollCenter() {
@@ -6918,6 +6926,7 @@ class RoomClient {
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
+        breakoutPanel.classList.remove('panel-slide-in');
         this.breakoutCenter();
         this.isBreakoutPinned = false;
         setColor(breakoutTogglePin, 'white');
@@ -6931,7 +6940,7 @@ class RoomClient {
         breakoutPanel.style.top = '0';
         breakoutPanel.style.right = '0';
         breakoutPanel.style.left = 'auto';
-        breakoutPanel.style.transform = 'none';
+        breakoutPanel.style.transform = null;
         breakoutPanel.style.width = '30%';
         breakoutPanel.style.height = '100%';
         breakoutPanel.style.maxWidth = '30%';
@@ -6946,6 +6955,9 @@ class RoomClient {
         }
         const participantsList = breakoutPanel.querySelector('.breakout-participants-list');
         if (participantsList) participantsList.style.maxHeight = 'none';
+        breakoutPanel.classList.remove('panel-slide-in');
+        void breakoutPanel.offsetWidth;
+        breakoutPanel.classList.add('panel-slide-in');
     }
 
     breakoutCenter() {
@@ -7297,6 +7309,7 @@ class RoomClient {
         editorRoom.style.maxHeight = '100%';
         this.pollCenter();
         this.isEditorPinned = false;
+        editorRoom.classList.remove('panel-slide-in');
         setColor(editorTogglePin, 'white');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -7312,6 +7325,9 @@ class RoomClient {
         editorRoom.style.transform = null;
         editorRoom.style.maxWidth = '30%';
         editorRoom.style.maxHeight = '100%';
+        editorRoom.classList.remove('panel-slide-in');
+        void editorRoom.offsetWidth;
+        editorRoom.classList.add('panel-slide-in');
     }
 
     editorUpdate() {

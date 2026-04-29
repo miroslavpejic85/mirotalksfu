@@ -4063,6 +4063,25 @@ hr {
     }
 }
 
+/*--------------------------------------------------------------
+# Slide-in from right — shared panel pin animation
+--------------------------------------------------------------*/
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(110vw);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.panel-slide-in {
+    animation: slideInFromRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) both !important;
+    transition: none !important; /* suppress width/size transitions while slide is playing */
+}
+
 /*
 z-index:
     - 1 videoMediaContainer
