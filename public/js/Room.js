@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.27
+ * @version 2.2.28
  *
  */
 
@@ -2001,22 +2001,32 @@ async function updateMyPeerAvatarByUrl() {
                 localGrid.appendChild(makeAvatarImg(url));
             }
 
-            // Robohash random avatars
-            const roboLabel = document.createElement('p');
-            roboLabel.textContent = 'Or pick a random avatar:';
-            roboLabel.style.cssText = 'color:#aaa;font-size:12px;margin:10px 0 6px;text-align:center;';
+            // DiceBear random avatars
+            const randomAvatarLabel = document.createElement('p');
+            randomAvatarLabel.textContent = 'Or pick a random avatar:';
+            randomAvatarLabel.style.cssText = 'color:#aaa;font-size:12px;margin:10px 0 6px;text-align:center;';
 
-            const roboGrid = document.createElement('div');
-            roboGrid.style.cssText = 'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:4px;';
+            const randomAvatarGrid = document.createElement('div');
+            randomAvatarGrid.style.cssText =
+                'display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin-bottom:4px;';
+            const dicebearStyles = [
+                'bottts-neutral',
+                'adventurer-neutral',
+                'thumbs',
+                'initials',
+                'identicon',
+                'shapes',
+            ];
 
             for (let i = 0; i < 6; i++) {
                 const seed = Math.random().toString(36).substring(2, 10);
-                const url = `https://robohash.org/${seed}.png`;
-                roboGrid.appendChild(makeAvatarImg(url));
+                const style = dicebearStyles[i % dicebearStyles.length];
+                const url = `https://api.dicebear.com/9.x/${style}/svg?seed=${encodeURIComponent(seed)}`;
+                randomAvatarGrid.appendChild(makeAvatarImg(url));
             }
 
             let insertAfter = input;
-            for (const el of [localLabel, localGrid, roboLabel, roboGrid]) {
+            for (const el of [localLabel, localGrid, randomAvatarLabel, randomAvatarGrid]) {
                 insertAfter.parentNode.insertBefore(el, insertAfter.nextSibling);
                 insertAfter = el;
             }
@@ -7266,7 +7276,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.27',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.28',
         html: `
             <br />
             <div id="about">

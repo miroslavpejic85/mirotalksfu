@@ -237,7 +237,7 @@ To set up your own instance of `MiroTalk SFU` on a dedicated cloud server, pleas
 - [Davide Pacilio](https://cruip.com/demos/solid/) (html template)
 - [Dirk Vanbeveren](https://github.com/Dirvann) (sfu logic)
 - [Mediasoup](https://mediasoup.org) (sfu server)
-- [Robohash.org](https://robohash.org) (random avatars)
+- [DiceBear](https://www.dicebear.com/) (random avatars)
 - [Image by ddraw on Freepik](https://www.freepik.com/free-vector/collection-female-male-avatars_1105371.htm) (avatar illustrations)
 
 </details>
