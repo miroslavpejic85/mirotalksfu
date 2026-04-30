@@ -78,11 +78,6 @@ body {
     display: none;
     opacity: 0;
     pointer-events: none;
-    background:
-        linear-gradient(180deg, rgba(8, 10, 18, 0.46), rgba(8, 10, 18, 0.72)),
-        radial-gradient(circle at top, rgba(255, 112, 112, 0.08), transparent 34%);
-    backdrop-filter: blur(5px) saturate(110%);
-    -webkit-backdrop-filter: blur(5px) saturate(110%);
     transition: opacity 0.22s ease;
 }
 
@@ -285,8 +280,8 @@ body {
 
 .disconnect-banner.is-failed + .disconnect-overlay {
     background:
-        linear-gradient(180deg, rgba(20, 14, 7, 0.42), rgba(8, 10, 18, 0.72)),
-        radial-gradient(circle at top, rgba(255, 169, 76, 0.08), transparent 34%);
+        linear-gradient(180deg, rgba(20, 14, 7, 0.22), rgba(8, 10, 18, 0.34)),
+        radial-gradient(circle at top, rgba(255, 169, 76, 0.05), transparent 34%);
 }
 
 @media (max-width: 600px) {
