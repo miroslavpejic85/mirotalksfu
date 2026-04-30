@@ -2188,6 +2188,161 @@ body {
     border-radius: 12px !important;
     box-shadow: none !important;
 }
+
+.swal2-file {
+    color: white !important;
+    background-color: transparent !important;
+    border-radius: 12px !important;
+}
+
+.mirotalk-hidden-file-input {
+    display: none !important;
+}
+
+.mirotalk-file-picker-html {
+    margin-top: 1rem !important;
+}
+
+.mirotalk-file-picker {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.mirotalk-file-dropzone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 24px 20px;
+    border: 1px dashed rgba(255, 255, 255, 0.28);
+    border-radius: 20px;
+    background: radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 55%), rgba(255, 255, 255, 0.04);
+    color: #fff;
+    cursor: pointer;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.mirotalk-file-dropzone:hover,
+.mirotalk-file-dropzone.is-dragover {
+    border-color: var(--dd-color, #e8e8ec);
+    background:
+        radial-gradient(circle at top, rgba(255, 255, 255, 0.08), transparent 52%),
+        color-mix(in srgb, var(--dd-color, #e8e8ec) 14%, transparent);
+    box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.2),
+        0 18px 36px rgba(0, 0, 0, 0.2);
+}
+
+.mirotalk-file-dropzone.has-file {
+    border-style: solid;
+    border-color: rgba(102, 190, 255, 0.5);
+    background: radial-gradient(circle at top, rgba(102, 190, 255, 0.14), transparent 55%), rgba(255, 255, 255, 0.05);
+}
+
+.mirotalk-file-dropzone-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.08);
+    font-size: 1.5rem;
+}
+
+.mirotalk-file-dropzone-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+}
+
+.mirotalk-file-dropzone-subtitle,
+.mirotalk-file-dropzone-helper {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.mirotalk-file-dropzone-subtitle {
+    font-size: 0.95rem;
+}
+
+.mirotalk-file-dropzone-helper {
+    font-size: 0.82rem;
+}
+
+.mirotalk-file-dropzone-cta {
+    margin-top: 4px;
+    padding: 10px 16px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.1);
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.mirotalk-file-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.05);
+    text-align: left;
+}
+
+.mirotalk-file-preview-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--dd-color, #e8e8ec) 20%, transparent);
+    color: #fff;
+    flex: 0 0 auto;
+}
+
+.mirotalk-file-preview-meta {
+    flex: 1;
+    min-width: 0;
+}
+
+.mirotalk-file-preview-meta strong,
+.mirotalk-file-preview-meta span {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.mirotalk-file-preview-meta strong {
+    color: #fff;
+    font-size: 0.95rem;
+}
+
+.mirotalk-file-preview-meta span {
+    margin-top: 4px;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.82rem;
+}
+
+.mirotalk-file-preview-remove {
+    border: none;
+    border-radius: 12px;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    cursor: pointer;
+    transition: background 0.18s ease;
+}
+
+.mirotalk-file-preview-remove:hover {
+    background: rgba(255, 255, 255, 0.16);
+}
 .swal2-input:-webkit-autofill,
 .swal2-input:-webkit-autofill:hover,
 .swal2-input:-webkit-autofill:focus,
@@ -2478,18 +2633,18 @@ progress {
     cursor: move;
 }
 
-#dropArea {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 200px;
-    border: 2px dashed #ccc;
-    padding: 20px;
-    text-align: center;
-}
+@media (max-width: 640px) {
+    .mirotalk-file-dropzone {
+        padding: 20px 16px;
+    }
 
-#dropArea p {
-    margin: 0;
+    .mirotalk-file-preview {
+        flex-wrap: wrap;
+    }
+
+    .mirotalk-file-preview-remove {
+        width: 100%;
+    }
 }
 
 /*--------------------------------------------------------------

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.28
+ * @version 2.2.29
  *
  */
 
@@ -8209,78 +8209,223 @@ class RoomClient {
         }
     }
 
-    selectFileToShare(peer_id, broadcast = false, peer_name = 'all') {
-        this.sound('open');
+    formatAcceptedFileTypes(accept = '*') {
+        if (!accept || accept === '*') {
+            return 'any file type';
+        }
 
-        Swal.fire({
+        return accept
+            .split(',')
+            .map((type) => type.trim())
+            .filter(Boolean)
+            .map((type) => {
+                if (type === '*') return 'any file';
+                if (type.endsWith('/*')) return `${type.slice(0, -2).toUpperCase()} files`;
+                if (type.startsWith('.')) return `${type.slice(1).toUpperCase()} files`;
+                if (type.includes('/')) return type.split('/')[1].toUpperCase();
+                return type.toUpperCase();
+            })
+            .join(', ');
+    }
+
+    async openFilePickerModal({
+        title = 'Share file',
+        accept = '*',
+        confirmButtonText = 'Send',
+        imageUrl = image.share,
+    } = {}) {
+        const acceptedFileTypes = this.formatAcceptedFileTypes(accept);
+        const helperText = `Accepted: ${acceptedFileTypes}`;
+        const emptyStateTitle = 'Drag and drop a file';
+        const emptyStateSubtitle = 'or click to browse from your device';
+        let selectedFile = null;
+
+        const result = await Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
             imageAlt: 'mirotalksfu-file-sharing',
-            imageUrl: image.share,
+            imageUrl,
             position: 'center',
-            title: 'Share file',
+            title,
             input: 'file',
             html: `
-            <div id="dropArea">
-                <p>Drag and drop your file here</p>
+            <div class="mirotalk-file-picker">
+                <button type="button" id="mirotalkFileDropzone" class="mirotalk-file-dropzone">
+                    <span class="mirotalk-file-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                    <span id="mirotalkFileDropzoneTitle" class="mirotalk-file-dropzone-title">${emptyStateTitle}</span>
+                    <span id="mirotalkFileDropzoneSubtitle" class="mirotalk-file-dropzone-subtitle">${emptyStateSubtitle}</span>
+                    <span class="mirotalk-file-dropzone-helper">${helperText}</span>
+                    <span id="mirotalkFileBrowseBtn" class="mirotalk-file-dropzone-cta">Browse files</span>
+                </button>
+                <div id="mirotalkFilePreview" class="mirotalk-file-preview" hidden>
+                    <div class="mirotalk-file-preview-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="mirotalk-file-preview-meta">
+                        <strong id="mirotalkFileName">No file selected</strong>
+                        <span id="mirotalkFileDetails"></span>
+                    </div>
+                    <button type="button" id="mirotalkFileRemoveBtn" class="mirotalk-file-preview-remove">Remove</button>
+                </div>
             </div>
             `,
             inputAttributes: {
-                accept: this.fileSharingInput,
-                'aria-label': 'Select file',
+                accept,
+                'aria-label': title,
+            },
+            customClass: {
+                htmlContainer: 'mirotalk-file-picker-html',
             },
             didOpen: () => {
-                const dropArea = document.getElementById('dropArea');
-                dropArea.addEventListener('dragenter', handleDragEnter);
-                dropArea.addEventListener('dragover', handleDragOver);
-                dropArea.addEventListener('dragleave', handleDragLeave);
-                dropArea.addEventListener('drop', handleDrop);
+                const input = Swal.getInput();
+                const confirmButton = Swal.getConfirmButton();
+                const dropzone = document.getElementById('mirotalkFileDropzone');
+                const dropzoneTitle = document.getElementById('mirotalkFileDropzoneTitle');
+                const dropzoneSubtitle = document.getElementById('mirotalkFileDropzoneSubtitle');
+                const browseBtn = document.getElementById('mirotalkFileBrowseBtn');
+                const preview = document.getElementById('mirotalkFilePreview');
+                const fileName = document.getElementById('mirotalkFileName');
+                const fileDetails = document.getElementById('mirotalkFileDetails');
+                const removeBtn = document.getElementById('mirotalkFileRemoveBtn');
+
+                if (!input || !dropzone || !confirmButton) return;
+
+                input.classList.add('mirotalk-hidden-file-input');
+                confirmButton.disabled = true;
+
+                const resetSelection = () => {
+                    selectedFile = null;
+                    input.value = '';
+                    preview.hidden = true;
+                    dropzone.classList.remove('has-file', 'is-dragover');
+                    dropzoneTitle.textContent = emptyStateTitle;
+                    dropzoneSubtitle.textContent = emptyStateSubtitle;
+                    browseBtn.textContent = 'Browse files';
+                    fileName.textContent = 'No file selected';
+                    fileDetails.textContent = '';
+                    confirmButton.disabled = true;
+                    Swal.resetValidationMessage();
+                };
+
+                const applySelection = (file) => {
+                    if (!file) {
+                        resetSelection();
+                        return;
+                    }
+
+                    if (file.size <= 0) {
+                        resetSelection();
+                        return Swal.showValidationMessage('The selected file is empty.');
+                    }
+
+                    selectedFile = file;
+                    fileName.textContent = file.name;
+                    fileDetails.textContent = `${this.bytesToSize(file.size)}${file.type ? ` • ${file.type}` : ''}`;
+                    preview.hidden = false;
+                    dropzone.classList.add('has-file');
+                    dropzone.classList.remove('is-dragover');
+                    dropzoneTitle.textContent = 'File ready';
+                    dropzoneSubtitle.textContent = 'Drop another file here or browse to replace it';
+                    browseBtn.textContent = 'Browse another file';
+                    Swal.resetValidationMessage();
+                    confirmButton.disabled = false;
+                };
+
+                const openSystemPicker = (event) => {
+                    if (event) {
+                        event.preventDefault();
+                        event.stopPropagation();
+                    }
+                    input.click();
+                };
+
+                const handleDragState = (event, isDragOver) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    dropzone.classList.toggle('is-dragover', isDragOver);
+                    if (event.dataTransfer) event.dataTransfer.dropEffect = 'copy';
+                };
+
+                browseBtn.addEventListener('click', openSystemPicker);
+                dropzone.addEventListener('click', openSystemPicker);
+                removeBtn.addEventListener('click', (event) => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    resetSelection();
+                });
+
+                input.addEventListener('change', () => {
+                    applySelection(input.files && input.files.length ? input.files[0] : null);
+                });
+
+                dropzone.addEventListener('dragenter', (event) => handleDragState(event, true));
+                dropzone.addEventListener('dragover', (event) => handleDragState(event, true));
+                dropzone.addEventListener('dragleave', (event) => {
+                    if (event.target === dropzone) {
+                        handleDragState(event, false);
+                    }
+                });
+                dropzone.addEventListener('drop', (event) => {
+                    handleDragState(event, false);
+
+                    const transfer = event.dataTransfer;
+                    if (!transfer) return;
+
+                    if (transfer.items && transfer.items.length > 1) {
+                        resetSelection();
+                        return Swal.showValidationMessage('Please choose a single file.');
+                    }
+
+                    const item = transfer.items && transfer.items.length ? transfer.items[0] : null;
+                    const entry = item && typeof item.webkitGetAsEntry === 'function' ? item.webkitGetAsEntry() : null;
+
+                    if (entry && entry.isDirectory) {
+                        resetSelection();
+                        return Swal.showValidationMessage('Folders are not supported.');
+                    }
+
+                    if (item && item.kind && item.kind !== 'file') {
+                        resetSelection();
+                        return Swal.showValidationMessage('Only files can be uploaded here.');
+                    }
+
+                    const file = item && typeof item.getAsFile === 'function' ? item.getAsFile() : transfer.files[0];
+
+                    if (!file) {
+                        resetSelection();
+                        return Swal.showValidationMessage('Could not read the selected file.');
+                    }
+
+                    applySelection(file);
+                });
             },
             showDenyButton: true,
-            confirmButtonText: `Send`,
-            denyButtonText: `Cancel`,
+            confirmButtonText,
+            denyButtonText: 'Cancel',
+            preConfirm: () => {
+                if (!selectedFile) {
+                    Swal.showValidationMessage('Choose a file before continuing.');
+                    return false;
+                }
+                return selectedFile;
+            },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.sendFileInformations(result.value, peer_id, broadcast, peer_name);
-            }
         });
 
-        function handleDragEnter(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.target.style.background = 'var(--body-bg)';
-        }
+        return result.isConfirmed ? result.value : null;
+    }
 
-        function handleDragOver(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.dataTransfer.dropEffect = 'copy';
-        }
+    async selectFileToShare(peer_id, broadcast = false, peer_name = 'all') {
+        this.sound('open');
 
-        function handleDragLeave(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            e.target.style.background = '';
-        }
+        const file = await this.openFilePickerModal({
+            title: 'Share file',
+            accept: this.fileSharingInput,
+            confirmButtonText: 'Send',
+            imageUrl: image.share,
+        });
 
-        function handleDrop(e) {
-            e.preventDefault();
-            e.stopPropagation();
-            const dt = e.dataTransfer;
-            const files = dt.files;
-            handleFiles(files);
-            e.target.style.background = '';
-        }
-
-        function handleFiles(files) {
-            if (files.length > 0) {
-                const file = files[0];
-                console.log('Selected file:', file);
-                Swal.close();
-                rc.sendFileInformations(file, peer_id, broadcast, peer_name);
-            }
+        if (file) {
+            this.sendFileInformations(file, peer_id, broadcast, peer_name);
         }
     }
 
