@@ -1572,26 +1572,84 @@ access to use this app.
         <div id="localAudio"></div>
         <div id="remoteAudios"></div>
 
-        <div id="sendFileDiv" class="fadein center">
-            <img id="imgShareSend" src="../images/share.png" alt="mirotalksfu-share-send" class="center-img" /><br />
-            <div id="sendFileInfo"></div>
-            <div id="sendFilePercentage"></div>
-            <progress id="sendProgress" max="0" value="0"></progress>
-            <button id="sendAbortBtn"><i class="fas fa-stop-circle"></i>&nbsp; Abort</button>
+        <div
+            id="sendFileDiv"
+            class="center fadein file-transfer-card file-transfer-card-send"
+            role="status"
+            aria-live="polite"
+        >
+            <div class="file-transfer-shell">
+                <div id="sendFileDragHandle" class="file-transfer-hero file-transfer-drag-handle">
+                    <div class="file-transfer-icon-wrap">
+                        <img
+                            id="imgShareSend"
+                            src="../images/share.png"
+                            alt="mirotalksfu-share-send"
+                            class="file-transfer-image"
+                        />
+                    </div>
+                    <div class="file-transfer-copy">
+                        <span class="file-transfer-kicker">Outgoing transfer</span>
+                        <h3 class="file-transfer-title">Sending file</h3>
+                        <p class="file-transfer-subtitle">Keep this window open while the transfer completes.</p>
+                    </div>
+                </div>
+                <div class="file-transfer-meta">
+                    <div id="sendFileInfo" class="file-transfer-info"></div>
+                    <div id="sendFilePercentage" class="file-transfer-percentage">Preparing transfer...</div>
+                </div>
+                <div class="file-transfer-progress-wrap">
+                    <progress id="sendProgress" max="0" value="0"></progress>
+                </div>
+                <div class="file-transfer-actions">
+                    <button id="sendAbortBtn" class="file-transfer-btn file-transfer-btn-danger">
+                        <i class="fas fa-stop-circle"></i>
+                        <span>Abort</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
-        <div id="receiveFileDiv" class="fadein center">
-            <img
-                id="imgShareReceive"
-                src="../images/share.png"
-                alt="mirotalksfu-share-receive"
-                class="center-img"
-            /><br />
-            <div id="receiveFileInfo"></div>
-            <div id="receiveFilePercentage"></div>
-            <progress id="receiveProgress" max="0" value="0"></progress>
-            <button id="receiveHideBtn"><i class="fas fa-eye-slash"></i>&nbsp; Hide</button>
-            <button id="receiveAbortBtn"><i class="fas fa-stop-circle"></i>&nbsp; Abort</button>
+        <div
+            id="receiveFileDiv"
+            class="center fadein file-transfer-card file-transfer-card-receive"
+            role="status"
+            aria-live="polite"
+        >
+            <div class="file-transfer-shell">
+                <div id="receiveFileDragHandle" class="file-transfer-hero file-transfer-drag-handle">
+                    <div class="file-transfer-icon-wrap">
+                        <img
+                            id="imgShareReceive"
+                            src="../images/share.png"
+                            alt="mirotalksfu-share-receive"
+                            class="file-transfer-image"
+                        />
+                    </div>
+                    <div class="file-transfer-copy">
+                        <span class="file-transfer-kicker">Incoming transfer</span>
+                        <h3 class="file-transfer-title">Receiving file</h3>
+                        <p class="file-transfer-subtitle">You can hide this panel and let the download continue.</p>
+                    </div>
+                </div>
+                <div class="file-transfer-meta">
+                    <div id="receiveFileInfo" class="file-transfer-info"></div>
+                    <div id="receiveFilePercentage" class="file-transfer-percentage">Waiting for data...</div>
+                </div>
+                <div class="file-transfer-progress-wrap">
+                    <progress id="receiveProgress" max="0" value="0"></progress>
+                </div>
+                <div class="file-transfer-actions">
+                    <button id="receiveAbortBtn" class="file-transfer-btn file-transfer-btn-danger">
+                        <i class="fas fa-stop-circle"></i>
+                        <span>Abort</span>
+                    </button>
+                    <button id="receiveHideBtn" class="file-transfer-btn file-transfer-btn-secondary">
+                        <i class="fas fa-eye-slash"></i>
+                        <span>Hide</span>
+                    </button>
+                </div>
+            </div>
         </div>
 
         <section id="whiteboard" class="fadein center hidden">

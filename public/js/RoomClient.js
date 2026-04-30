@@ -8508,7 +8508,7 @@ class RoomClient {
             fileToName
         );
         receiveFileInfo.innerText = fileToReceiveInfo;
-        receiveFileDiv.style.display = 'inline';
+        receiveFileDiv.style.display = 'block';
         receiveProgress.max = this.incomingFileInfo.fileSize;
         this.userLog('info', fileToReceiveInfo, 'top-end');
         this.receiveInProgress = true;
@@ -8534,7 +8534,7 @@ class RoomClient {
             this.bytesToSize(this.fileToSend.size) +
             html.newline;
 
-        sendFileDiv.style.display = 'inline';
+        sendFileDiv.style.display = 'block';
         sendProgress.max = this.fileToSend.size;
 
         this.fileReader = new FileReader();

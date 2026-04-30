@@ -1830,8 +1830,8 @@ function roomIsReady() {
         //rc.makeDraggable(editorRoom, editorHeader);
         rc.makeDraggable(mySettings, mySettingsHeader);
         rc.makeDraggable(whiteboard, whiteboardHeader);
-        rc.makeDraggable(sendFileDiv, imgShareSend);
-        rc.makeDraggable(receiveFileDiv, imgShareReceive);
+        rc.makeDraggable(sendFileDiv, sendFileDragHandle);
+        rc.makeDraggable(receiveFileDiv, receiveFileDragHandle);
         rc.makeDraggable(lobby, lobbyHeader);
         rc.makeDraggable(transcriptionRoom, transcriptionHeader);
         rc.makeDraggable(breakoutToolbar, breakoutToolbarHandle);

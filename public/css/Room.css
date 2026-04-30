@@ -2596,41 +2596,283 @@ button:hover {
 #receiveFileDiv {
     z-index: 8;
     display: none;
-    padding: 20px;
+    width: min(92vw, 440px);
     margin: auto;
     min-width: 320px;
-    background: var(--body-bg);
-    border: var(--border);
-    border-radius: var(--border-radius);
     color: #fff;
+    font-size: 1rem;
+    background: transparent;
+    box-shadow: none;
+    overflow: visible;
+}
+
+#sendFileDiv {
+    --file-transfer-accent: #6fb4ff;
+    --file-transfer-accent-soft: rgba(111, 180, 255, 0.18);
+}
+
+#receiveFileDiv {
+    --file-transfer-accent: #59d7a5;
+    --file-transfer-accent-soft: rgba(89, 215, 165, 0.18);
+}
+
+.file-transfer-shell {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 22px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 24px;
+    background: var(--body-bg);
+    backdrop-filter: blur(18px);
+    box-shadow: 0 14px 34px rgba(0, 0, 0, 0.18);
     overflow: hidden;
+}
+
+.file-transfer-hero {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.file-transfer-drag-handle {
+    cursor: move;
+}
+
+.file-transfer-drag-handle * {
+    cursor: inherit;
+}
+
+.file-transfer-icon-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 72px;
+    width: 72px;
+    height: 72px;
+    border-radius: 22px;
+    background: linear-gradient(145deg, rgba(255, 255, 255, 0.12), var(--file-transfer-accent-soft));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.file-transfer-image {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.2));
+}
+
+.file-transfer-copy {
+    min-width: 0;
+}
+
+.file-transfer-kicker {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 6px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--file-transfer-accent);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+.file-transfer-title {
+    margin: 0;
+    font-size: 1.35rem;
+    font-weight: 700;
+    line-height: 1.1;
+}
+
+.file-transfer-subtitle {
+    margin: 8px 0 0;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.76);
+}
+
+.file-transfer-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+    border-radius: 18px;
+    background: rgba(0, 0, 0, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.file-transfer-info {
+    white-space: pre-line;
+    line-height: 1.55;
+    color: rgba(255, 255, 255, 0.88);
+    word-break: break-word;
+}
+
+.file-transfer-percentage {
+    font-size: 0.92rem;
+    font-weight: 600;
+    color: var(--file-transfer-accent);
+}
+
+.file-transfer-progress-wrap {
+    display: flex;
+}
+
+#sendProgress,
+#receiveProgress {
+    width: 100%;
+    min-width: 100%;
+    height: 12px;
+    overflow: hidden;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+}
+
+#sendProgress::-webkit-progress-bar,
+#receiveProgress::-webkit-progress-bar {
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 999px;
+}
+
+#sendProgress::-webkit-progress-value,
+#receiveProgress::-webkit-progress-value {
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        var(--file-transfer-accent),
+        color-mix(in srgb, var(--file-transfer-accent) 55%, white)
+    );
+}
+
+#sendProgress::-moz-progress-bar,
+#receiveProgress::-moz-progress-bar {
+    border-radius: 999px;
+    background: linear-gradient(
+        90deg,
+        var(--file-transfer-accent),
+        color-mix(in srgb, var(--file-transfer-accent) 55%, white)
+    );
+}
+
+.file-transfer-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
 }
 
 #sendAbortBtn,
 #receiveAbortBtn,
 #receiveHideBtn {
-    padding: 5px;
-    border-radius: 10px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-height: 46px;
+    margin-top: 0;
+    padding: 0 18px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px;
+    font-size: 0.96rem;
+    font-weight: 600;
     color: #fff;
-    background: transparent;
+    background-color: rgba(255, 255, 255, 0.04);
+    transition:
+        transform 0.23s ease,
+        background 0.23s ease,
+        border-color 0.23s ease,
+        color 0.23s ease,
+        box-shadow 0.23s ease;
+}
+
+#sendAbortBtn,
+#receiveAbortBtn {
+    background: rgba(255, 89, 89, 0.12);
+    border-color: rgba(255, 89, 89, 0.2);
+}
+
+#receiveHideBtn {
+    background: rgba(255, 255, 255, 0.04);
+}
+
+#sendAbortBtn i,
+#receiveAbortBtn i,
+#receiveHideBtn i {
+    font-size: 1rem;
 }
 
 #sendAbortBtn:hover,
 #receiveAbortBtn:hover,
 #receiveHideBtn:hover {
-    color: rgb(255, 0, 0);
-    transform: translateY(-3px);
-    transition: all 0.3s ease-in-out;
+    transform: translateY(-2px);
+    box-shadow: 0 16px 30px rgba(0, 0, 0, 0.22);
 }
 
-progress {
-    width: 0;
-    min-width: 100%;
+#sendAbortBtn:hover,
+#receiveAbortBtn:hover {
+    color: #ffb4b4;
+    background: rgba(255, 89, 89, 0.18);
+    border-color: rgba(255, 89, 89, 0.35);
 }
 
-#imgShareSend:hover,
-#imgShareReceive:hover {
-    cursor: move;
+#receiveHideBtn:hover {
+    color: var(--file-transfer-accent);
+    background: rgba(255, 255, 255, 0.08);
+    border-color: rgba(255, 255, 255, 0.12);
+}
+
+@media (max-width: 640px) {
+    #sendFileDiv,
+    #receiveFileDiv {
+        width: min(94vw, 420px);
+        min-width: 0;
+    }
+
+    .file-transfer-shell {
+        gap: 16px;
+        padding: 18px;
+        border-radius: 22px;
+    }
+
+    .file-transfer-hero {
+        align-items: flex-start;
+    }
+
+    .file-transfer-icon-wrap {
+        flex-basis: 62px;
+        width: 62px;
+        height: 62px;
+        border-radius: 18px;
+    }
+
+    .file-transfer-image {
+        width: 36px;
+        height: 36px;
+    }
+
+    .file-transfer-title {
+        font-size: 1.18rem;
+    }
+
+    .file-transfer-subtitle {
+        font-size: 0.88rem;
+    }
+
+    .file-transfer-actions {
+        flex-direction: column;
+    }
+
+    #sendAbortBtn,
+    #receiveAbortBtn,
+    #receiveHideBtn {
+        width: 100%;
+    }
 }
 
 @media (max-width: 640px) {
