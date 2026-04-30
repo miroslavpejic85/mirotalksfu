@@ -8228,12 +8228,7 @@ class RoomClient {
             .join(', ');
     }
 
-    async openFilePickerModal({
-        title = 'Share file',
-        accept = '*',
-        confirmButtonText = 'Send',
-        imageUrl = image.share,
-    } = {}) {
+    async openFilePickerModal({ title = 'Share file', accept = '*', confirmButtonText = 'Send', imageUrl } = {}) {
         const acceptedFileTypes = this.formatAcceptedFileTypes(accept);
         const helperText = `Accepted: ${acceptedFileTypes}`;
         const emptyStateTitle = 'Drag and drop a file';
@@ -8243,8 +8238,6 @@ class RoomClient {
         const result = await Swal.fire({
             allowOutsideClick: false,
             background: swalBackground,
-            imageAlt: 'mirotalksfu-file-sharing',
-            imageUrl,
             position: 'center',
             title,
             input: 'file',
@@ -8407,6 +8400,12 @@ class RoomClient {
                 }
                 return selectedFile;
             },
+            ...(imageUrl
+                ? {
+                      imageAlt: 'mirotalksfu-file-sharing',
+                      imageUrl,
+                  }
+                : {}),
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         });
@@ -8421,7 +8420,6 @@ class RoomClient {
             title: 'Share file',
             accept: this.fileSharingInput,
             confirmButtonText: 'Send',
-            imageUrl: image.share,
         });
 
         if (file) {
