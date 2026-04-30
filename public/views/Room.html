@@ -139,6 +139,35 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
 
+        <div
+            id="disconnectBanner"
+            class="disconnect-banner"
+            role="status"
+            aria-live="assertive"
+            aria-atomic="true"
+            aria-hidden="true"
+            style="display: none"
+        >
+            <div class="disconnect-banner__inner">
+                <span class="disconnect-banner__icon-wrap" aria-hidden="true">
+                    <i id="disconnectBannerIcon" class="fa-solid fa-plug"></i>
+                </span>
+                <div class="disconnect-banner__copy">
+                    <span id="disconnectBannerTitle" class="disconnect-banner__title">Connection lost</span>
+                    <span id="disconnectBannerMessage" class="disconnect-banner__message"
+                        >Trying to restore the room connection...</span
+                    >
+                </div>
+                <span id="disconnectBannerMeta" class="disconnect-banner__meta">Retrying...</span>
+                <button id="disconnectBannerAction" class="disconnect-banner__action" type="button">Join Room</button>
+                <span id="disconnectBannerSpinner" class="disconnect-banner__spinner" aria-hidden="true">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                </span>
+            </div>
+        </div>
+
+        <div id="disconnectOverlay" class="disconnect-overlay" aria-hidden="true"></div>
+
         <div id="loadingDiv" class="center">
             <div class="loading-spinner">
                 <div class="spinner-ring"></div>

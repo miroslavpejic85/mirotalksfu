@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.29
+ * @version 2.2.30
  *
  */
 
@@ -257,11 +257,15 @@ class RoomClient {
         // Handle Socket
         this.socket = socket;
         this.reconnectAlert = null;
-        this.maxReconnectAttempts = 5;
-        this.reconnectInterval = 3000;
-        this.maxReconnectInterval = 15000;
+        this.reconnectBanner = null;
+        this.reconnectBannerHideTimer = null;
+        this.maxReconnectAttempts = Number(this.socket?.io?.opts?.reconnectionAttempts) || 10;
+        this.reconnectInterval = Number(this.socket?.io?.opts?.reconnectionDelay) || 3000;
+        this.maxReconnectInterval = Number(this.socket?.io?.opts?.reconnectionDelayMax) || 15000;
         this.serverAwayShown = false;
         this.silentReconnect = false; // If true, no popup will be shown on reconnect
+
+        this.cacheReconnectBannerElements();
 
         // Handle ICE
         this.iceRestarting = false;
@@ -1578,44 +1582,140 @@ class RoomClient {
     // SOCKET RECONNECT/DISCONNECT
     // ####################################################
 
-    showReconnectAlert(reason) {
+    cacheReconnectBannerElements() {
+        this.reconnectBanner = {
+            root: this.getId('disconnectBanner'),
+            overlay: this.getId('disconnectOverlay'),
+            iconWrap: this.getId('disconnectBanner')?.querySelector('.disconnect-banner__icon-wrap'),
+            icon: this.getId('disconnectBannerIcon'),
+            title: this.getId('disconnectBannerTitle'),
+            message: this.getId('disconnectBannerMessage'),
+            meta: this.getId('disconnectBannerMeta'),
+            action: this.getId('disconnectBannerAction'),
+            spinner: this.getId('disconnectBannerSpinner'),
+        };
+    }
+
+    getReconnectBanner() {
+        if (!this.reconnectBanner?.root) {
+            this.cacheReconnectBannerElements();
+        }
+        return this.reconnectBanner;
+    }
+
+    renderReconnectBanner({
+        title,
+        message,
+        meta = '',
+        icon = 'fa-solid fa-plug',
+        state = 'reconnecting',
+        showSpinner = true,
+        actionLabel = '',
+        onAction = null,
+        blockUi = state !== 'restored',
+    }) {
         if (this.silentReconnect) return;
-        this.reconnectAlert = Swal.fire({
-            background: swalBackground,
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showDenyButton: false,
-            showConfirmButton: false,
-            position: 'top',
-            icon: 'warning',
-            title: 'Lost connection',
-            text: `${reason}, trying to reconnect...`,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+
+        const banner = this.getReconnectBanner();
+        if (!banner?.root) return;
+
+        if (this.reconnectBannerHideTimer) {
+            clearTimeout(this.reconnectBannerHideTimer);
+            this.reconnectBannerHideTimer = null;
+        }
+
+        banner.root.style.display = 'flex';
+        banner.root.setAttribute('aria-hidden', 'false');
+        banner.root.classList.remove('is-reconnecting', 'is-restored', 'is-failed', 'is-interactive');
+        banner.root.classList.add('is-visible', `is-${state}`);
+
+        if (banner.overlay) {
+            banner.overlay.style.display = blockUi ? 'block' : 'none';
+            banner.overlay.setAttribute('aria-hidden', blockUi ? 'false' : 'true');
+            banner.overlay.classList.toggle('is-visible', blockUi);
+        }
+
+        if (banner.iconWrap) {
+            banner.iconWrap.style.display = 'inline-flex';
+        }
+
+        if (banner.icon) banner.icon.className = icon;
+        if (banner.title) banner.title.textContent = title;
+        if (banner.message) banner.message.textContent = message;
+
+        if (banner.meta) {
+            banner.meta.textContent = meta;
+            banner.meta.style.display = meta ? 'inline-flex' : 'none';
+        }
+
+        if (banner.action) {
+            banner.action.textContent = actionLabel || 'Join Room';
+            banner.action.style.display = actionLabel ? 'inline-flex' : 'none';
+            banner.action.onclick = typeof onAction === 'function' ? () => onAction() : null;
+        }
+
+        if (banner.spinner) {
+            banner.spinner.style.display = showSpinner ? 'inline-flex' : 'none';
+        }
+
+        if (actionLabel && typeof onAction === 'function') {
+            banner.root.classList.add('is-interactive');
+        }
+    }
+
+    hideReconnectBanner(delay = 0) {
+        const banner = this.getReconnectBanner();
+        if (!banner?.root) return;
+
+        if (this.reconnectBannerHideTimer) {
+            clearTimeout(this.reconnectBannerHideTimer);
+        }
+
+        const hide = () => {
+            banner.root.classList.remove('is-visible', 'is-reconnecting', 'is-restored', 'is-failed', 'is-interactive');
+            banner.root.setAttribute('aria-hidden', 'true');
+            banner.root.style.display = 'none';
+            if (banner.overlay) {
+                banner.overlay.classList.remove('is-visible');
+                banner.overlay.setAttribute('aria-hidden', 'true');
+                banner.overlay.style.display = 'none';
+            }
+            if (banner.action) {
+                banner.action.style.display = 'none';
+                banner.action.onclick = null;
+            }
+            this.reconnectBannerHideTimer = null;
+        };
+
+        if (delay > 0) {
+            this.reconnectBannerHideTimer = setTimeout(hide, delay);
+            return;
+        }
+
+        hide();
+    }
+
+    showReconnectAlert(reason) {
+        this.renderReconnectBanner({
+            title: 'Connection lost',
+            message: `${reason || 'Network issue'}.`,
+            meta: 'Retrying',
+            icon: 'fa-solid fa-plug',
+            state: 'reconnecting',
+            showSpinner: true,
         });
     }
 
     showMaxAttemptsAlert() {
-        if (this.silentReconnect) return;
-        Swal.fire({
-            allowOutsideClick: false,
-            allowEscapeKey: false,
-            showDenyButton: false,
-            showConfirmButton: true,
-            background: swalBackground,
-            position: 'top',
-            icon: 'warning',
+        this.renderReconnectBanner({
             title: 'Unable to reconnect',
-            text: 'Please check your internet connection!',
-            icon: 'error',
-            confirmButtonText: 'Join Room',
-            confirmButtonColor: '#18392B',
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.refreshBrowser();
-            }
+            message: 'Connection could not be restored.',
+            meta: '',
+            icon: 'fa-solid fa-triangle-exclamation',
+            state: 'failed',
+            showSpinner: false,
+            actionLabel: 'Join Room',
+            onAction: () => this.refreshBrowser(),
         });
     }
 
@@ -1628,18 +1728,20 @@ class RoomClient {
     }
 
     attemptReconnect(attempt) {
-        if (this._isConnected || attempt >= this.maxReconnectAttempts) return;
+        if (this._isConnected) return;
 
-        const delay = Math.min(this.reconnectInterval * attempt, this.maxReconnectInterval);
+        const currentAttempt = Math.min(attempt, this.maxReconnectAttempts);
 
-        this.updateReconnectAlert(delay);
+        const delay = Math.min(this.reconnectInterval * currentAttempt, this.maxReconnectInterval);
+
+        this.updateReconnectAlert(delay, currentAttempt);
     }
 
     handleDisconnect(reason) {
         endRoomSession();
 
         window.localStorage.isReconnected = true;
-        console.log('Disconnected. Attempting to reconnect...');
+        console.log('Disconnected.');
 
         // Immediately save recording if active
         if (this.isRecording()) {
@@ -1653,13 +1755,14 @@ class RoomClient {
     }
 
     handleReconnectAttempt(attempt) {
-        attempt < this.maxReconnectAttempts ? this.attemptReconnect(attempt) : this.showServerAwayMessage();
+        if (this._isConnected || attempt > this.maxReconnectAttempts) return;
+        this.attemptReconnect(attempt);
     }
 
     handleReconnect() {
         this._isConnected = true;
-        this.closeReconnectAlert();
-        this.refreshBrowser();
+        this.closeReconnectAlert(true);
+        setTimeout(() => this.refreshBrowser(), 1400);
     }
 
     handleReconnectFailed() {
@@ -1669,19 +1772,41 @@ class RoomClient {
         }
     }
 
-    updateReconnectAlert(delay) {
-        if (this.reconnectAlert) {
-            this.reconnectAlert.update({
-                title: 'Reconnecting',
-                text: `Reconnection attempt in ${delay / 1000} seconds...`,
-            });
-        }
+    updateReconnectAlert(delay, attempt = 1) {
+        const seconds = Math.max(1, Math.round(delay / 1000));
+
+        this.renderReconnectBanner({
+            title: 'Reconnecting',
+            message: `Attempt ${attempt} of ${this.maxReconnectAttempts}.`,
+            meta: `Retry in ${seconds}s`,
+            icon: 'fa-solid fa-rotate-right',
+            state: 'reconnecting',
+            showSpinner: true,
+        });
     }
 
-    closeReconnectAlert() {
+    closeReconnectAlert(showRestoredState = false) {
         if (this.reconnectAlert) {
             this.reconnectAlert.close();
+            this.reconnectAlert = null;
         }
+
+        if (!showRestoredState) {
+            this.hideReconnectBanner();
+            return;
+        }
+
+        this.renderReconnectBanner({
+            title: 'Back online',
+            message: 'Connection restored.',
+            meta: 'Reloading',
+            icon: 'fa-solid fa-wifi',
+            state: 'restored',
+            showSpinner: false,
+            blockUi: false,
+        });
+
+        this.hideReconnectBanner(1500);
     }
 
     // ####################################################

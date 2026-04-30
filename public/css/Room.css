@@ -43,6 +43,294 @@ body {
 }
 
 /*--------------------------------------------------------------
+# Disconnect Banner
+--------------------------------------------------------------*/
+
+.disconnect-banner {
+    position: fixed;
+    top: 18px;
+    left: 0;
+    right: 0;
+    z-index: 1002;
+    display: flex;
+    justify-content: center;
+    width: 100%;
+    max-width: none;
+    padding: 0 12px;
+    box-sizing: border-box;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-20px) scale(0.96);
+    transition:
+        opacity 0.24s ease,
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.disconnect-banner.is-visible {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+}
+
+.disconnect-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1001;
+    display: none;
+    opacity: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(180deg, rgba(8, 10, 18, 0.46), rgba(8, 10, 18, 0.72)),
+        radial-gradient(circle at top, rgba(255, 112, 112, 0.08), transparent 34%);
+    backdrop-filter: blur(5px) saturate(110%);
+    -webkit-backdrop-filter: blur(5px) saturate(110%);
+    transition: opacity 0.22s ease;
+}
+
+.disconnect-overlay.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.disconnect-banner__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: max-content;
+    max-width: min(100%, 720px);
+    padding: 13px 15px;
+    border: 1px solid rgba(255, 132, 132, 0.3);
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at top left, rgba(255, 112, 112, 0.2), transparent 42%),
+        linear-gradient(135deg, rgba(42, 13, 13, 0.92), rgba(18, 19, 26, 0.94));
+    box-shadow:
+        0 18px 40px rgba(0, 0, 0, 0.28),
+        inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(18px) saturate(150%);
+    -webkit-backdrop-filter: blur(18px) saturate(150%);
+    overflow: hidden;
+}
+
+.disconnect-banner__inner::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0.06),
+        transparent 22%,
+        transparent 78%,
+        rgba(255, 255, 255, 0.04)
+    );
+    pointer-events: none;
+}
+
+.disconnect-banner__icon-wrap,
+.disconnect-banner__spinner,
+.disconnect-banner__meta,
+.disconnect-banner__action {
+    position: relative;
+    z-index: 1;
+}
+
+.disconnect-banner__icon-wrap {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    border-radius: 16px;
+    color: #fff;
+    font-size: 1.2rem;
+    background: linear-gradient(145deg, rgba(255, 116, 116, 0.35), rgba(255, 132, 132, 0.12));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 24px rgba(255, 90, 90, 0.18);
+}
+
+.disconnect-banner__copy {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 0 1 auto;
+    min-width: 0;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.disconnect-banner__title {
+    color: #fff;
+    font-size: 0.98rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+
+.disconnect-banner__message {
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.84rem;
+    line-height: 1.35;
+}
+
+.disconnect-banner__meta {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 7px 11px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: rgba(255, 255, 255, 0.86);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    white-space: nowrap;
+}
+
+.disconnect-banner__spinner {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.88);
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.disconnect-banner__action {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    min-height: 38px;
+    padding: 0 14px;
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        border-color 0.2s ease,
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+}
+
+.disconnect-banner__action:hover {
+    background: rgba(255, 255, 255, 0.14);
+    border-color: rgba(255, 255, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.disconnect-banner__action:focus-visible {
+    outline: 2px solid rgba(255, 255, 255, 0.35);
+    outline-offset: 2px;
+}
+
+.disconnect-banner.is-interactive {
+    pointer-events: auto;
+}
+
+.disconnect-banner.is-interactive .disconnect-banner__inner {
+    pointer-events: auto;
+}
+
+.disconnect-banner.is-reconnecting .disconnect-banner__inner {
+    animation: disconnectBannerPulse 1.8s ease-in-out infinite;
+}
+
+.disconnect-banner.is-restored .disconnect-banner__inner {
+    border-color: rgba(89, 215, 165, 0.34);
+    background:
+        radial-gradient(circle at top left, rgba(89, 215, 165, 0.2), transparent 42%),
+        linear-gradient(135deg, rgba(11, 42, 31, 0.92), rgba(18, 19, 26, 0.94));
+}
+
+.disconnect-banner.is-restored .disconnect-banner__icon-wrap {
+    background: linear-gradient(145deg, rgba(89, 215, 165, 0.35), rgba(89, 215, 165, 0.12));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 24px rgba(89, 215, 165, 0.16);
+}
+
+.disconnect-banner.is-failed .disconnect-banner__inner {
+    border-color: rgba(255, 169, 76, 0.36);
+    background:
+        radial-gradient(circle at top left, rgba(255, 169, 76, 0.2), transparent 42%),
+        linear-gradient(135deg, rgba(56, 30, 4, 0.94), rgba(22, 19, 26, 0.95));
+}
+
+.disconnect-banner.is-failed .disconnect-banner__icon-wrap {
+    background: linear-gradient(145deg, rgba(255, 169, 76, 0.35), rgba(255, 169, 76, 0.12));
+    box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.12),
+        0 10px 24px rgba(255, 169, 76, 0.16);
+}
+
+.disconnect-banner.is-failed .disconnect-banner__action {
+    background: linear-gradient(135deg, rgba(255, 169, 76, 0.22), rgba(255, 169, 76, 0.12));
+    border-color: rgba(255, 169, 76, 0.28);
+    color: #fff6df;
+    box-shadow: 0 10px 22px rgba(255, 169, 76, 0.12);
+}
+
+.disconnect-banner.is-failed + .disconnect-overlay {
+    background:
+        linear-gradient(180deg, rgba(20, 14, 7, 0.42), rgba(8, 10, 18, 0.72)),
+        radial-gradient(circle at top, rgba(255, 169, 76, 0.08), transparent 34%);
+}
+
+@media (max-width: 600px) {
+    .disconnect-banner__inner {
+        gap: 10px;
+        padding: 11px 13px;
+        border-radius: 18px;
+    }
+
+    .disconnect-banner__icon-wrap {
+        flex-basis: 42px;
+        width: 42px;
+        height: 42px;
+        border-radius: 14px;
+        font-size: 1.05rem;
+    }
+
+    .disconnect-banner__title {
+        font-size: 0.9rem;
+    }
+
+    .disconnect-banner__message,
+    .disconnect-banner__meta,
+    .disconnect-banner__action {
+        font-size: 0.76rem;
+    }
+}
+
+@keyframes disconnectBannerPulse {
+    0%,
+    100% {
+        box-shadow:
+            0 18px 40px rgba(0, 0, 0, 0.28),
+            inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    }
+    50% {
+        box-shadow:
+            0 20px 46px rgba(0, 0, 0, 0.32),
+            0 0 0 1px rgba(255, 112, 112, 0.18),
+            inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+}
+
+/*--------------------------------------------------------------
 # Google Translate
 --------------------------------------------------------------*/
 
