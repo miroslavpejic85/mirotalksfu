@@ -4505,7 +4505,6 @@ hr {
 
 .mic-guidance.ios {
     background: var(--body-bg);
-    border-left: 3px solid #ffc107;
 }
 
 .mic-guidance.ios .title {
@@ -4514,7 +4513,6 @@ hr {
 
 .mic-guidance.mobile {
     background: var(--body-bg);
-    border-left: 3px solid #2196f3;
 }
 
 .mic-guidance.mobile .title {
