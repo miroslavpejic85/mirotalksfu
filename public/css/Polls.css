@@ -71,8 +71,25 @@
     padding: 10px;
     border: var(--border);
     border-radius: 8px;
+    background: var(--select-bg);
+    color: #fff;
     width: 100%;
     box-sizing: border-box;
+    outline: none;
+    transition:
+        border-color 0.2s ease,
+        box-shadow 0.2s ease,
+        background 0.2s ease;
+}
+
+.form input::placeholder {
+    color: rgba(255, 255, 255, 0.35);
+}
+
+.form input:focus {
+    border-color: #66beff;
+    background: color-mix(in srgb, var(--select-bg) 88%, rgba(255, 255, 255, 0.05));
+    box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.18);
 }
 
 .poll-btns {
@@ -150,7 +167,7 @@
 }
 
 .option-input {
-    margin-bottom: 5px;
+    margin-bottom: 8px;
 }
 
 .options label {
