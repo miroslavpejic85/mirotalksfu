@@ -2799,19 +2799,19 @@ button:hover {
 --------------------------------------------------------------*/
 
 #lobby {
+    --lobby-accent: var(--tab-btn-active, #66beff);
+    --lobby-surface: var(--body-bg);
+    --lobby-surface-strong: color-mix(in srgb, var(--body-bg) 82%, var(--select-bg) 18%);
+    --lobby-border: color-mix(in srgb, var(--border) 72%, rgba(255, 255, 255, 0.08));
     z-index: 7;
     position: absolute;
     margin: auto;
     width: min(92vw, 36rem);
     min-width: 20rem;
     padding: 0.8rem;
-    background:
-        radial-gradient(circle at top, rgba(102, 194, 255, 0.12), transparent 36%),
-        linear-gradient(180deg, rgba(21, 28, 38, 0.98), rgba(10, 14, 20, 0.98));
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    box-shadow:
-        0 26px 52px rgba(0, 0, 0, 0.32),
-        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+    background: var(--lobby-surface);
+    border: 1px solid var(--lobby-border);
+    box-shadow: var(--box-shadow);
     border-radius: 20px;
     overflow: hidden;
 }
@@ -2820,8 +2820,8 @@ button:hover {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(255, 255, 255, 0.03));
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: var(--lobby-surface-strong);
+    border: 1px solid var(--lobby-border);
     border-radius: 16px;
     padding: 0.9rem 1rem;
     color: #fff;
@@ -2857,7 +2857,7 @@ button:hover {
     border-collapse: separate;
     border-spacing: 0 0.65rem;
     width: 100%;
-    table-layout: fixed;
+    table-layout: auto;
 }
 
 #lobbyUsers td,
@@ -2872,9 +2872,9 @@ button:hover {
 }
 
 .lobby-row td {
-    background: rgba(255, 255, 255, 0.05);
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: var(--lobby-surface-strong);
+    border-top: 1px solid var(--lobby-border);
+    border-bottom: 1px solid var(--lobby-border);
     transition:
         transform 0.18s ease,
         background-color 0.18s ease,
@@ -2883,22 +2883,22 @@ button:hover {
 }
 
 .lobby-row:hover td {
-    background: rgba(255, 255, 255, 0.075);
-    border-color: rgba(102, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--lobby-surface-strong) 94%, rgba(255, 255, 255, 0.06));
+    border-color: color-mix(in srgb, var(--lobby-accent) 22%, rgba(255, 255, 255, 0.08));
 }
 
 .lobby-row td:first-child {
-    border-left: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 1px solid var(--lobby-border);
     border-radius: 16px 0 0 16px;
 }
 
 .lobby-row td:last-child {
-    border-right: 1px solid rgba(255, 255, 255, 0.06);
+    border-right: 1px solid var(--lobby-border);
     border-radius: 0 16px 16px 0;
 }
 
 .lobby-row--bulk td {
-    background: linear-gradient(90deg, rgba(102, 194, 255, 0.12), rgba(255, 255, 255, 0.04));
+    background: color-mix(in srgb, var(--lobby-accent) 10%, var(--lobby-surface-strong) 90%);
 }
 
 .lobby-cell--avatar {
@@ -2911,7 +2911,8 @@ button:hover {
 }
 
 .lobby-cell--action {
-    width: 4rem;
+    width: 3.35rem;
+    padding: 0 0.45rem 0 0 !important;
     text-align: center !important;
 }
 
@@ -2927,7 +2928,11 @@ button:hover {
 
 .lobby-avatar {
     border-radius: 0.95rem;
-    background: linear-gradient(145deg, rgba(102, 194, 255, 0.18), rgba(62, 142, 255, 0.08));
+    background: linear-gradient(
+        145deg,
+        color-mix(in srgb, var(--lobby-accent) 20%, rgba(255, 255, 255, 0.05)),
+        color-mix(in srgb, var(--select-bg) 84%, rgba(255, 255, 255, 0.03))
+    );
     box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.12),
         0 10px 18px rgba(0, 0, 0, 0.16);
@@ -2972,10 +2977,10 @@ button:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.55rem;
-    height: 2.55rem;
+    width: 2.35rem;
+    height: 2.35rem;
     border: 1px solid transparent;
-    border-radius: 0.9rem;
+    border-radius: 0.82rem;
     color: #fff;
     cursor: pointer;
     transition:
@@ -3079,13 +3084,15 @@ button:hover {
 .lobby-join-popup {
     width: min(92vw, 30rem) !important;
     padding: 1.4rem 1.4rem 1.2rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.09) !important;
+    border: 1px solid color-mix(in srgb, var(--border) 72%, rgba(255, 255, 255, 0.08)) !important;
     background:
-        radial-gradient(circle at top, rgba(102, 194, 255, 0.14), transparent 38%),
-        linear-gradient(180deg, rgba(20, 27, 37, 0.98), rgba(11, 15, 22, 0.98)) !important;
-    box-shadow:
-        0 24px 60px rgba(0, 0, 0, 0.38),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+        radial-gradient(
+            circle at top,
+            color-mix(in srgb, var(--tab-btn-active, #66beff) 14%, transparent),
+            transparent 38%
+        ),
+        color-mix(in srgb, var(--settings-bg) 94%, rgba(255, 255, 255, 0.03)) !important;
+    box-shadow: var(--box-shadow) !important;
 }
 
 .lobby-join-popup .swal2-title {
@@ -3135,7 +3142,7 @@ button:hover {
     padding: 0.8rem 1.15rem !important;
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     border-radius: 999px !important;
-    background: rgba(255, 255, 255, 0.08) !important;
+    background: color-mix(in srgb, var(--select-bg) 88%, rgba(255, 255, 255, 0.05)) !important;
     color: #fff !important;
     font-weight: 700;
     letter-spacing: 0.02em;
@@ -3149,7 +3156,7 @@ button:hover {
 .lobby-join-popup .swal2-deny:hover {
     transform: translateY(-1px);
     border-color: rgba(255, 255, 255, 0.2) !important;
-    background: rgba(255, 255, 255, 0.12) !important;
+    background: color-mix(in srgb, var(--select-bg) 82%, rgba(255, 255, 255, 0.08)) !important;
     box-shadow: 0 12px 24px rgba(0, 0, 0, 0.22);
 }
 
@@ -3177,14 +3184,10 @@ button:hover {
 .lobby-join-toast {
     width: min(92vw, 28rem) !important;
     padding: 0.75rem 0.9rem !important;
-    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border: 1px solid color-mix(in srgb, var(--border) 72%, rgba(255, 255, 255, 0.08)) !important;
     border-radius: 1.1rem !important;
-    background:
-        radial-gradient(circle at top left, rgba(63, 203, 136, 0.18), transparent 34%),
-        linear-gradient(135deg, rgba(15, 31, 23, 0.98), rgba(11, 18, 18, 0.98)) !important;
-    box-shadow:
-        0 22px 44px rgba(0, 0, 0, 0.28),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    background: var(--body-bg) !important;
+    box-shadow: var(--box-shadow) !important;
 }
 
 .lobby-join-toast-html {
@@ -3295,9 +3298,7 @@ button:hover {
 }
 
 .lobby-join-popup--reject {
-    background:
-        radial-gradient(circle at top, rgba(255, 110, 110, 0.16), transparent 38%),
-        linear-gradient(180deg, rgba(28, 18, 20, 0.98), rgba(16, 12, 15, 0.98)) !important;
+    background: var(--body-bg) !important;
 }
 
 .lobby-join-waiting {
@@ -3389,7 +3390,7 @@ button:hover {
     padding: 0.8rem 0.95rem;
     border: 1px solid rgba(255, 255, 255, 0.08);
     border-radius: 1rem;
-    background: rgba(255, 255, 255, 0.04);
+    background: color-mix(in srgb, var(--select-bg) 86%, rgba(255, 255, 255, 0.04));
     color: rgba(255, 255, 255, 0.72);
     font-size: 0.88rem;
     line-height: 1.45;
