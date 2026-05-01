@@ -2810,7 +2810,7 @@ button:hover {
     z-index: 7;
     position: absolute;
     margin: auto;
-    width: min(92vw, 36rem);
+    width: min(92vw, 32rem);
     min-width: 20rem;
     padding: 0.8rem;
     background: var(--lobby-surface);
@@ -2906,17 +2906,17 @@ button:hover {
 }
 
 .lobby-cell--avatar {
-    width: 4.4rem;
-    padding-left: 0.8rem !important;
+    width: 4rem;
+    padding-left: 0.7rem !important;
 }
 
 .lobby-cell--user {
-    padding: 0.95rem 0.45rem 0.95rem 0 !important;
+    padding: 0.78rem 0.4rem 0.78rem 0 !important;
 }
 
 .lobby-cell--action {
-    width: 3.35rem;
-    padding: 0 0.45rem 0 0 !important;
+    width: 3rem;
+    padding: 0 0.35rem 0 0 !important;
     text-align: center !important;
 }
 
@@ -2925,13 +2925,13 @@ button:hover {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.8rem;
-    height: 2.8rem;
+    width: 2.5rem;
+    height: 2.5rem;
     object-fit: cover;
 }
 
 .lobby-avatar {
-    border-radius: 0.95rem;
+    border-radius: 0.82rem;
     background: linear-gradient(
         145deg,
         color-mix(in srgb, var(--lobby-accent) 20%, rgba(255, 255, 255, 0.05)),
@@ -2951,20 +2951,20 @@ button:hover {
 
 .lobby-avatar {
     color: #d8f2ff;
-    font-size: 1rem;
+    font-size: 0.92rem;
 }
 
 .lobby-user-meta {
     display: flex;
     min-width: 0;
     flex-direction: column;
-    gap: 0.28rem;
+    gap: 0.2rem;
 }
 
 .lobby-user-name {
     overflow: hidden;
     color: #fff;
-    font-size: 0.95rem;
+    font-size: 0.92rem;
     font-weight: 700;
     letter-spacing: 0.01em;
     text-overflow: ellipsis;
@@ -2973,18 +2973,18 @@ button:hover {
 
 .lobby-user-status {
     color: rgba(255, 255, 255, 0.62);
-    font-size: 0.78rem;
-    line-height: 1.35;
+    font-size: 0.74rem;
+    line-height: 1.3;
 }
 
 .lobby-action-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 2.35rem;
-    height: 2.35rem;
+    width: 2.15rem;
+    height: 2.15rem;
     border: 1px solid transparent;
-    border-radius: 0.82rem;
+    border-radius: 0.72rem;
     color: #fff;
     cursor: pointer;
     transition:
