@@ -43,16 +43,20 @@ body {
 }
 
 /*--------------------------------------------------------------
-        height: 100%;
+# Disconnect Banner
+--------------------------------------------------------------*/
 
+.disconnect-banner {
     position: fixed;
-        border: 0;
-    }
-
-    .lobby-row td {
-        background: rgba(255, 255, 255, 0.05);
-    .disconnect-banner {
-        position: fixed;
+    top: 18px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1002;
+    display: flex;
+    justify-content: center;
+    width: min(calc(100% - 24px), 820px);
+    pointer-events: none;
+}
 
 .disconnect-overlay {
     position: fixed;
