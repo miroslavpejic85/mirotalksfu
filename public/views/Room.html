@@ -2277,7 +2277,10 @@ access to use this app.
 
         <section id="lobby" class="fadein center">
             <header id="lobbyHeader" class="lobby-header">
-                <div id="lobbyHeaderTitle" class="lobby-header-title">Lobby users</div>
+                <div class="lobby-header-copy">
+                    <div id="lobbyHeaderTitle" class="lobby-header-title">Lobby users</div>
+                    <div class="lobby-header-subtitle">Approve or dismiss guests waiting to join</div>
+                </div>
             </header>
             <main>
                 <div id="lobbyUsers">
@@ -2288,11 +2291,34 @@ access to use this app.
                             <th></th>
                             <th></th>
                         </tr>
-                        <tr id="lobbyAll">
-                            <td>&nbsp;<i class="fas fa-users fa-lg"></i></td>
-                            <td>All</td>
-                            <td><button id="lobbyAcceptAllBtn" class="fas fa-check"></button></td>
-                            <td><button id="lobbyRejectAllBtn" class="fas fa-times"></button></td>
+                        <tr id="lobbyAll" class="lobby-row lobby-row--bulk">
+                            <td class="lobby-cell lobby-cell--avatar">
+                                <span class="lobby-avatar lobby-avatar--group"><i class="fas fa-users"></i></span>
+                            </td>
+                            <td class="lobby-cell lobby-cell--user">
+                                <div class="lobby-user-meta">
+                                    <span class="lobby-user-name">All requests</span>
+                                    <span class="lobby-user-status">Review every guest currently waiting</span>
+                                </div>
+                            </td>
+                            <td class="lobby-cell lobby-cell--action">
+                                <button
+                                    id="lobbyAcceptAllBtn"
+                                    class="lobby-action-btn lobby-action-btn--accept"
+                                    aria-label="Accept all waiting guests"
+                                >
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </td>
+                            <td class="lobby-cell lobby-cell--action">
+                                <button
+                                    id="lobbyRejectAllBtn"
+                                    class="lobby-action-btn lobby-action-btn--reject"
+                                    aria-label="Reject all waiting guests"
+                                >
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </td>
                         </tr>
                     </template>
 

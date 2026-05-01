@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.30
+ * @version 2.2.31
  *
  */
 
@@ -89,7 +89,6 @@ const image = {
     about: '../images/mirotalk-logo.gif',
     avatar: '../images/mirotalksfu-logo.png',
     audio: '../images/audio.gif',
-    poster: '../images/loader.gif',
     rec: '../images/rec.png',
     recording: '../images/recording.png',
     delete: '../images/delete.png',
@@ -9465,31 +9464,14 @@ class RoomClient {
                 this.RoomLobbyAccepted = true;
                 await this.joinAllowed(data.room);
                 bottomButtons.style.display = 'flex';
-                this.msgPopup('info', 'Your join meeting request was accepted by the moderator', 3000, 'top');
+                this.showLobbyDecision('accept');
                 break;
             case 'reject':
                 if (this.lobbyRemovePearForPresenter(data)) {
                     return;
                 }
                 this.RoomLobbyAccepted = false;
-                this.sound('eject');
-                Swal.fire({
-                    icon: 'warning',
-                    allowOutsideClick: false,
-                    allowEscapeKey: true,
-                    showDenyButton: false,
-                    showConfirmButton: true,
-                    background: swalBackground,
-                    title: 'Rejected',
-                    text: 'Your join meeting request was rejected by the moderator',
-                    confirmButtonText: `Ok`,
-                    showClass: { popup: 'animate__animated animate__fadeInDown' },
-                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-                }).then((result) => {
-                    if (result.isConfirmed) {
-                        this.exit();
-                    }
-                });
+                this.showLobbyDecision('reject');
                 break;
             default:
                 break;
@@ -9575,6 +9557,7 @@ class RoomClient {
 
         for (const peer_id of Object.keys(this.lobbyPears)) {
             const { peer_name, peer_avatar } = this.lobbyPears[peer_id];
+            const displayName = filterXSS(peer_name);
 
             const avatarImg =
                 peer_avatar && this.isValidAvatarURL(peer_avatar)
@@ -9587,11 +9570,32 @@ class RoomClient {
             const lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
 
             lobbyTr += `
-            <tr id='${peer_id}'>
-                <td><img src="${avatarImg}" /></td>
-                <td>${peer_name}</td>
-                <td><button id='${lobbyAcceptId}' onclick="rc.lobbyAction(this.id, 'accept')">${_PEER.acceptPeer}</button></td>
-                <td><button id='${lobbyRejectId}' onclick="rc.lobbyAction(this.id, 'reject')">${_PEER.ejectPeer}</button></td>
+            <tr id='${peer_id}' class='lobby-row'>
+                <td class='lobby-cell lobby-cell--avatar'>
+                    <img class='lobby-avatar-img' src="${avatarImg}" alt="${displayName}" />
+                </td>
+                <td class='lobby-cell lobby-cell--user'>
+                    <div class='lobby-user-meta'>
+                        <span class='lobby-user-name'>${displayName}</span>
+                        <span class='lobby-user-status'>Waiting in lobby</span>
+                    </div>
+                </td>
+                <td class='lobby-cell lobby-cell--action'>
+                    <button
+                        id='${lobbyAcceptId}'
+                        class='lobby-action-btn lobby-action-btn--accept'
+                        onclick="rc.lobbyAction(this.id, 'accept')"
+                        aria-label='Accept ${displayName}'
+                    >${_PEER.acceptPeer}</button>
+                </td>
+                <td class='lobby-cell lobby-cell--action'>
+                    <button
+                        id='${lobbyRejectId}'
+                        class='lobby-action-btn lobby-action-btn--reject'
+                        onclick="rc.lobbyAction(this.id, 'reject')"
+                        aria-label='Reject ${displayName}'
+                    ><i class='fas fa-times'></i></button>
+                </td>
             </tr>
             `;
 
@@ -9780,15 +9784,99 @@ class RoomClient {
             showDenyButton: true,
             showConfirmButton: false,
             background: swalBackground,
-            imageUrl: image.poster,
             title: 'Room has lobby enabled',
-            text: 'Asking to join meeting...',
+            html: `
+                <div class="lobby-join-waiting">
+                    <div class="lobby-join-waiting__hero" aria-hidden="true">
+                        <span class="lobby-join-waiting__pulse"></span>
+                        <span class="lobby-join-waiting__spinner"></span>
+                        <span class="lobby-join-waiting__icon"><i class="fas fa-shield-halved"></i></span>
+                    </div>
+                    <div class="lobby-join-waiting__status">Waiting for approval</div>
+                    <p class="lobby-join-waiting__message">
+                        Asking to join meeting. A presenter will let you in as soon as they are ready.
+                    </p>
+                    <div class="lobby-join-waiting__hint">
+                        <i class="fas fa-circle-info"></i>
+                        <span>Keep this window open while we hold your request.</span>
+                    </div>
+                </div>
+            `,
             confirmButtonText: `Ok`,
             denyButtonText: `Leave room`,
+            customClass: {
+                popup: 'lobby-join-popup',
+                htmlContainer: 'lobby-join-popup-html',
+                denyButton: 'lobby-join-popup-deny',
+            },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             result.isConfirmed ? (bottomButtons.style.display = 'none') : this.exit();
+        });
+    }
+
+    showLobbyDecision(status) {
+        const isAccepted = status === 'accept';
+
+        if (isAccepted) {
+            Swal.fire({
+                toast: true,
+                position: 'top',
+                showConfirmButton: false,
+                timer: 2800,
+                timerProgressBar: true,
+                background: swalBackground,
+                html: `
+                    <div class="lobby-join-outcome lobby-join-outcome--accept">
+                        <span class="lobby-join-outcome__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+                        <div class="lobby-join-outcome__copy">
+                            <strong class="lobby-join-outcome__title">You are in</strong>
+                            <span class="lobby-join-outcome__message">Your join request was approved by the moderator.</span>
+                        </div>
+                    </div>
+                `,
+                customClass: {
+                    popup: 'lobby-join-toast lobby-join-toast--accept',
+                    htmlContainer: 'lobby-join-toast-html',
+                },
+                showClass: { popup: 'animate__animated animate__fadeInDown' },
+                hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+            });
+            return;
+        }
+
+        this.sound('eject');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: true,
+            showDenyButton: false,
+            showConfirmButton: true,
+            background: swalBackground,
+            title: 'Request declined',
+            html: `
+                <div class="lobby-join-outcome lobby-join-outcome--reject">
+                    <div class="lobby-join-outcome__hero" aria-hidden="true">
+                        <span class="lobby-join-outcome__halo"></span>
+                        <span class="lobby-join-outcome__badge"><i class="fas fa-xmark"></i></span>
+                    </div>
+                    <p class="lobby-join-outcome__message lobby-join-outcome__message--centered">
+                        Your join request was rejected by the moderator. You can try again later if the room becomes available.
+                    </p>
+                </div>
+            `,
+            confirmButtonText: `Leave room`,
+            customClass: {
+                popup: 'lobby-join-popup lobby-join-popup--reject',
+                htmlContainer: 'lobby-join-popup-html lobby-join-outcome-html',
+                confirmButton: 'lobby-join-popup-confirm lobby-join-popup-confirm--reject',
+            },
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                this.exit();
+            }
         });
     }
 
