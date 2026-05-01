@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.2.31",
+    "version": "2.2.32",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -72,7 +72,7 @@
         "compression": "1.8.1",
         "cors": "2.8.6",
         "crypto-js": "4.2.0",
-        "discord.js": "^14.26.3",
+        "discord.js": "^14.26.4",
         "dompurify": "^3.4.2",
         "dotenv": "^17.4.2",
         "express": "5.2.1",

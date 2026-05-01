@@ -4675,15 +4675,15 @@ hr {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 420px;
+    width: 440px;
     max-width: 95vw;
     max-height: 85vh;
     z-index: 6;
-    border-radius: 16px;
+    border-radius: 18px;
     background: var(--settings-bg);
     border: var(--border);
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
     box-shadow: var(--box-shadow);
     font-family: 'Montserrat', sans-serif;
     overflow: hidden;
@@ -4693,8 +4693,9 @@ hr {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 12px 16px;
+    padding: 13px 16px;
     border-bottom: var(--border);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent);
     cursor: grab;
     user-select: none;
 }
@@ -4801,14 +4802,14 @@ hr {
 }
 
 .breakout-panel-body {
-    padding: 14px 16px;
+    padding: 15px 16px;
     overflow-y: auto;
     max-height: calc(85vh - 55px);
 }
 
 /* Create Room Section */
 .breakout-create-section {
-    margin-bottom: 14px;
+    margin-bottom: 12px;
 }
 
 .breakout-create-row {
@@ -4822,7 +4823,7 @@ hr {
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 7px 14px;
+    padding: 8px 14px;
     border: var(--border);
     border-radius: 10px;
     background: var(--select-bg);
@@ -4839,11 +4840,16 @@ hr {
 .breakout-action-btn:hover {
     background: rgba(102, 190, 255, 0.1);
     border-color: #66beff;
+    transform: translateY(-1px);
 }
 
 /* Section Labels */
 .breakout-section {
-    margin-bottom: 10px;
+    margin-bottom: 12px;
+    padding: 12px;
+    border: var(--border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--settings-bg) 86%, rgba(255, 255, 255, 0.03));
 }
 
 .breakout-section:last-child {
@@ -4858,8 +4864,8 @@ hr {
     display: flex;
     align-items: center;
     gap: 8px;
-    margin-bottom: 8px;
-    padding-bottom: 4px;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.06);
 }
 
@@ -4875,24 +4881,26 @@ hr {
 .breakout-rooms-list {
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 8px;
 }
 
 .breakout-room-card {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
-    border-radius: 10px;
+    padding: 10px 12px;
+    border-radius: 12px;
     border: var(--border);
     background: var(--select-bg);
     transition:
+        transform 0.18s ease,
         border-color 0.2s ease,
         background 0.2s ease;
 }
 
 .breakout-room-card:hover {
     background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-1px);
 }
 
 .breakout-room-peer-icon {
@@ -5031,11 +5039,12 @@ hr {
 .breakout-actions-bar {
     display: flex;
     align-items: center;
-    gap: 6px;
-    padding: 10px 0;
+    gap: 8px;
+    padding: 12px;
     margin-bottom: 10px;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
-    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    border: var(--border);
+    border-radius: 14px;
+    background: color-mix(in srgb, var(--settings-bg) 86%, rgba(255, 255, 255, 0.03));
     flex-wrap: wrap;
 }
 
@@ -5059,6 +5068,7 @@ hr {
 }
 
 .breakout-auto-assign-btn {
+    margin-left: auto;
     padding: 4px 10px;
     border-radius: 6px;
     border: none;
@@ -5099,6 +5109,7 @@ hr {
 
 .breakout-broadcast-input:focus {
     border-color: #66beff;
+    box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.16);
 }
 
 .breakout-broadcast-input::placeholder {
@@ -5160,7 +5171,7 @@ hr {
 .breakout-room-actions {
     display: flex;
     align-items: center;
-    gap: 4px;
+    gap: 6px;
     flex-shrink: 0;
 }
 
@@ -5250,6 +5261,7 @@ hr {
 
 .breakout-participant-search:focus {
     border-color: #66beff;
+    box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.16);
 }
 
 .breakout-participant-search::placeholder {
@@ -5259,7 +5271,7 @@ hr {
 .breakout-participants-list {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 6px;
     max-height: 250px;
     overflow-y: auto;
     flex: 1;
@@ -5270,15 +5282,18 @@ hr {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 6px 10px;
-    border-radius: 8px;
+    padding: 8px 10px;
+    border-radius: 10px;
     border: var(--border);
     background: var(--select-bg);
-    transition: background 0.2s;
+    transition:
+        background 0.2s,
+        transform 0.18s ease;
 }
 
 .breakout-participant-row:hover {
     background: rgba(255, 255, 255, 0.04);
+    transform: translateY(-1px);
 }
 
 .breakout-participant-info {
