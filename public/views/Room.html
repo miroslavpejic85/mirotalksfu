@@ -2326,7 +2326,9 @@ access to use this app.
             </main>
         </section>
 
-        <!-- POPUP TEMPLATES -->
+        <!-- HTML TEMPLATES -->
+
+        <!-- Popup Templates -->
 
         <template id="popupLobbyWaitJoinTemplate">
             <div class="lobby-join-waiting">
@@ -2397,10 +2399,103 @@ access to use this app.
             </div>
         </template>
 
-        <template id="lastRecordingInfoTemplate">
-            <span>Last Recording Info:</span>
-            <span data-template-html="recordingInfo"></span>
+        <template id="popupShareRoomTemplate">
+            <div id="qrRoomContainer">
+                <canvas id="qrRoom"></canvas>
+            </div>
+            <br />
+            <p class="qr-room-copy qr-room-copy--accent">Join from your mobile device</p>
+            <p class="qr-room-copy qr-room-copy--body">
+                No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by
+                sending them the following URL
+            </p>
+            <p class="qr-room-copy qr-room-copy--accent" data-template-text="roomUrl"></p>
         </template>
+
+        <template id="popupStickyNoteTemplate">
+            <div class="sticky-note-form">
+                <textarea
+                    id="stickyNoteText"
+                    class="sticky-note-textarea"
+                    rows="4"
+                    placeholder="Type your note here..."
+                >
+Note</textarea
+                >
+                <div class="sticky-note-colors-row">
+                    <div class="sticky-note-color-group">
+                        <label for="stickyNoteColor" class="sticky-note-color-label">
+                            <i class="fas fa-palette"></i> Background
+                        </label>
+                        <input id="stickyNoteColor" type="color" value="#FFEB3B" class="sticky-note-color-input" />
+                    </div>
+                    <div class="sticky-note-color-group">
+                        <label for="stickyNoteTextColor" class="sticky-note-color-label">
+                            <i class="fas fa-font"></i> Text
+                        </label>
+                        <input id="stickyNoteTextColor" type="color" value="#000000" class="sticky-note-color-input" />
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="popupFileDropTemplate">
+            <div id="dropArea">
+                <p>Drag and drop your file here</p>
+            </div>
+        </template>
+
+        <template id="popupAboutTemplate">
+            <br />
+            <div id="about" data-template-html="aboutContent"></div>
+        </template>
+
+        <template id="popupUsernameInUseTemplate">
+            <div>
+                The Username is already in use. <br />
+                Please try with another one
+            </div>
+        </template>
+
+        <template id="popupMirotalkFilePickerTemplate">
+            <div class="mirotalk-file-picker">
+                <button type="button" id="mirotalkFileDropzone" class="mirotalk-file-dropzone">
+                    <span class="mirotalk-file-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></span>
+                    <span
+                        id="mirotalkFileDropzoneTitle"
+                        class="mirotalk-file-dropzone-title"
+                        data-template-text="emptyStateTitle"
+                    ></span>
+                    <span
+                        id="mirotalkFileDropzoneSubtitle"
+                        class="mirotalk-file-dropzone-subtitle"
+                        data-template-text="emptyStateSubtitle"
+                    ></span>
+                    <span class="mirotalk-file-dropzone-helper" data-template-text="helperText"></span>
+                    <span id="mirotalkFileBrowseBtn" class="mirotalk-file-dropzone-cta">Browse files</span>
+                </button>
+                <div id="mirotalkFilePreview" class="mirotalk-file-preview" hidden>
+                    <div class="mirotalk-file-preview-icon"><i class="fas fa-file-alt"></i></div>
+                    <div class="mirotalk-file-preview-meta">
+                        <strong id="mirotalkFileName">No file selected</strong>
+                        <span id="mirotalkFileDetails"></span>
+                    </div>
+                    <button type="button" id="mirotalkFileRemoveBtn" class="mirotalk-file-preview-remove">
+                        Remove
+                    </button>
+                </div>
+            </div>
+        </template>
+
+        <template id="popupGeoLocationPromptTemplate">
+            <div data-template-text="message"></div>
+        </template>
+
+        <template id="popupDateTimePickerTemplate">
+            <input type="text" id="datetimePicker" class="flatpickr" />
+        </template>
+
+        <!-- Breakout Templates -->
 
         <template id="breakoutRoomOptionTemplate">
             <option data-template-attr-value="value" data-template-text="label"></option>
@@ -2502,28 +2597,6 @@ access to use this app.
             </div>
         </template>
 
-        <template id="popupDateTimePickerTemplate">
-            <input type="text" id="datetimePicker" class="flatpickr" />
-        </template>
-
-        <template id="extraInfoGridTemplate">
-            <div class="extra-info-grid" data-template-html="rows"></div>
-        </template>
-
-        <template id="extraInfoRowTemplate">
-            <div data-template-attr-class="rowClass">
-                <div class="extra-info-label">
-                    <span data-template-html="iconMarkup"></span>
-                    <span data-template-text="label"></span>
-                </div>
-                <div class="extra-info-values" data-template-html="badges"></div>
-            </div>
-        </template>
-
-        <template id="extraInfoBadgeTemplate">
-            <span class="extra-info-badge" data-template-text="value"></span>
-        </template>
-
         <template id="popupBreakoutHelpTemplate">
             <div class="breakout-popup breakout-popup--help">
                 <div class="breakout-popup-hero">
@@ -2612,97 +2685,7 @@ access to use this app.
             </div>
         </template>
 
-        <template id="popupShareRoomTemplate">
-            <div id="qrRoomContainer">
-                <canvas id="qrRoom"></canvas>
-            </div>
-            <br />
-            <p class="qr-room-copy qr-room-copy--accent">Join from your mobile device</p>
-            <p class="qr-room-copy qr-room-copy--body">
-                No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by
-                sending them the following URL
-            </p>
-            <p class="qr-room-copy qr-room-copy--accent" data-template-text="roomUrl"></p>
-        </template>
-
-        <template id="popupStickyNoteTemplate">
-            <div class="sticky-note-form">
-                <textarea
-                    id="stickyNoteText"
-                    class="sticky-note-textarea"
-                    rows="4"
-                    placeholder="Type your note here..."
-                >
-Note</textarea
-                >
-                <div class="sticky-note-colors-row">
-                    <div class="sticky-note-color-group">
-                        <label for="stickyNoteColor" class="sticky-note-color-label">
-                            <i class="fas fa-palette"></i> Background
-                        </label>
-                        <input id="stickyNoteColor" type="color" value="#FFEB3B" class="sticky-note-color-input" />
-                    </div>
-                    <div class="sticky-note-color-group">
-                        <label for="stickyNoteTextColor" class="sticky-note-color-label">
-                            <i class="fas fa-font"></i> Text
-                        </label>
-                        <input id="stickyNoteTextColor" type="color" value="#000000" class="sticky-note-color-input" />
-                    </div>
-                </div>
-            </div>
-        </template>
-
-        <template id="popupFileDropTemplate">
-            <div id="dropArea">
-                <p>Drag and drop your file here</p>
-            </div>
-        </template>
-
-        <template id="popupAboutTemplate">
-            <br />
-            <div id="about" data-template-html="aboutContent"></div>
-        </template>
-
-        <template id="popupUsernameInUseTemplate">
-            <div>
-                The Username is already in use. <br />
-                Please try with another one
-            </div>
-        </template>
-
-        <template id="popupMirotalkFilePickerTemplate">
-            <div class="mirotalk-file-picker">
-                <button type="button" id="mirotalkFileDropzone" class="mirotalk-file-dropzone">
-                    <span class="mirotalk-file-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></span>
-                    <span
-                        id="mirotalkFileDropzoneTitle"
-                        class="mirotalk-file-dropzone-title"
-                        data-template-text="emptyStateTitle"
-                    ></span>
-                    <span
-                        id="mirotalkFileDropzoneSubtitle"
-                        class="mirotalk-file-dropzone-subtitle"
-                        data-template-text="emptyStateSubtitle"
-                    ></span>
-                    <span class="mirotalk-file-dropzone-helper" data-template-text="helperText"></span>
-                    <span id="mirotalkFileBrowseBtn" class="mirotalk-file-dropzone-cta">Browse files</span>
-                </button>
-                <div id="mirotalkFilePreview" class="mirotalk-file-preview" hidden>
-                    <div class="mirotalk-file-preview-icon"><i class="fas fa-file-alt"></i></div>
-                    <div class="mirotalk-file-preview-meta">
-                        <strong id="mirotalkFileName">No file selected</strong>
-                        <span id="mirotalkFileDetails"></span>
-                    </div>
-                    <button type="button" id="mirotalkFileRemoveBtn" class="mirotalk-file-preview-remove">
-                        Remove
-                    </button>
-                </div>
-            </div>
-        </template>
-
-        <template id="popupGeoLocationPromptTemplate">
-            <div data-template-text="message"></div>
-        </template>
+        <!-- Participant Templates -->
 
         <template id="participantListItemTemplate">
             <li
@@ -2769,6 +2752,33 @@ Note</textarea
             <div class="about-buttons mt5" data-template-html="buttons"></div>
         </template>
 
+        <!-- Utility Templates -->
+
+        <template id="lastRecordingInfoTemplate">
+            <span>Last Recording Info:</span>
+            <span data-template-html="recordingInfo"></span>
+        </template>
+
+        <template id="extraInfoGridTemplate">
+            <div class="extra-info-grid" data-template-html="rows"></div>
+        </template>
+
+        <template id="extraInfoRowTemplate">
+            <div data-template-attr-class="rowClass">
+                <div class="extra-info-label">
+                    <span data-template-html="iconMarkup"></span>
+                    <span data-template-text="label"></span>
+                </div>
+                <div class="extra-info-values" data-template-html="badges"></div>
+            </div>
+        </template>
+
+        <template id="extraInfoBadgeTemplate">
+            <span class="extra-info-badge" data-template-text="value"></span>
+        </template>
+
+        <!-- UI Fragment Templates -->
+
         <template id="themeCardTemplate">
             <i data-template-attr-class="iconClass"></i><span data-template-text="label"></span>
         </template>
@@ -2781,7 +2791,8 @@ Note</textarea
         </template>
 
         <template id="reactionBadgeTemplate">
-            <span data-template-text="emoji"></span> <span class="reaction-count" data-template-text="countValue"></span>
+            <span data-template-text="emoji"></span>
+            <span class="reaction-count" data-template-text="countValue"></span>
         </template>
     </body>
 </html>

@@ -7783,18 +7783,17 @@ async function launchBreakoutRooms() {
         roomCounts[name] = (roomCounts[name] || 0) + 1;
     });
     const summary = Object.entries(roomCounts)
-        .map(
-            ([name, count]) =>
-                rc.renderHtmlTemplate('popupBreakoutSummaryRowTemplate', {
-                    text: {
-                        roomName: name,
-                        countValue: String(count),
-                    },
-                    attrs: {
-                        roomIconClass: 'fas fa-door-open',
-                        countIconClass: `fas fa-user${count > 1 ? 's' : ''}`,
-                    },
-                })
+        .map(([name, count]) =>
+            rc.renderHtmlTemplate('popupBreakoutSummaryRowTemplate', {
+                text: {
+                    roomName: name,
+                    countValue: String(count),
+                },
+                attrs: {
+                    roomIconClass: 'fas fa-door-open',
+                    countIconClass: `fas fa-user${count > 1 ? 's' : ''}`,
+                },
+            })
         )
         .join('');
 
