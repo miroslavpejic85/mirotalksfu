@@ -2397,5 +2397,109 @@ access to use this app.
                 <div data-template-text="recordingMsg"></div>
             </div>
         </template>
+
+        <template id="popupBreakoutLaunchTemplate">
+            <div class="breakout-popup breakout-popup--launch">
+                <div class="breakout-popup-hero">
+                    <span class="breakout-popup-icon breakout-popup-icon--launch"><i class="fas fa-rocket"></i></span>
+                    <div class="breakout-popup-copy">
+                        <p class="breakout-popup-eyebrow">Ready to start</p>
+                        <p class="breakout-popup-message">
+                            Move <strong><span data-template-text="participantCount"></span></strong>
+                            <span data-template-text="participantLabel"></span> into breakout sessions.
+                        </p>
+                    </div>
+                </div>
+                <div class="breakout-popup-summary" data-template-html="summary"></div>
+            </div>
+        </template>
+
+        <template id="popupBreakoutHelpTemplate">
+            <div class="breakout-popup breakout-popup--help">
+                <div class="breakout-popup-hero">
+                    <span class="breakout-popup-icon breakout-popup-icon--help"><i class="fas fa-hand-paper"></i></span>
+                    <div class="breakout-popup-copy">
+                        <p class="breakout-popup-eyebrow">Presenter assist</p>
+                        <p class="breakout-popup-message">
+                            <strong data-template-text="peerName"></strong> in
+                            <strong data-template-text="roomLabel"></strong> is asking for help.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </template>
+
+        <template id="popupBreakoutJoinTemplate">
+            <div class="breakout-popup breakout-popup--join">
+                <div class="breakout-assign-spinner" aria-hidden="true">
+                    <div class="breakout-spinner-orbit">
+                        <span class="breakout-spinner-core"></span>
+                        <span class="breakout-spinner-dot breakout-spinner-dot--one"></span>
+                        <span class="breakout-spinner-dot breakout-spinner-dot--two"></span>
+                        <span class="breakout-spinner-dot breakout-spinner-dot--three"></span>
+                    </div>
+                </div>
+                <div class="breakout-popup-hero breakout-popup-hero--stacked">
+                    <span class="breakout-popup-icon breakout-popup-icon--join"
+                        ><i class="fas fa-object-ungroup"></i
+                    ></span>
+                    <div class="breakout-popup-copy">
+                        <p class="breakout-popup-eyebrow">Assigned session</p>
+                        <p class="breakout-popup-message">
+                            You have been assigned to <strong data-template-text="displayName"></strong>.
+                        </p>
+                    </div>
+                </div>
+                <div data-template-html="durationChip"></div>
+            </div>
+        </template>
+
+        <template id="popupBreakoutEndTemplate">
+            <div class="breakout-popup breakout-popup--end">
+                <div class="breakout-popup-hero breakout-popup-hero--stacked">
+                    <span class="breakout-popup-icon breakout-popup-icon--end"><i class="fas fa-door-open"></i></span>
+                    <div class="breakout-popup-copy">
+                        <p class="breakout-popup-eyebrow">Return everyone</p>
+                        <p class="breakout-popup-message">
+                            Notify <strong><span data-template-text="participantCount"></span></strong>
+                            <span data-template-text="participantLabel"></span> to rejoin the main room and close every
+                            breakout session.
+                        </p>
+                    </div>
+                </div>
+                <div class="breakout-popup-summary breakout-popup-summary--end">
+                    <div class="breakout-popup-summary-row">
+                        <span class="breakout-popup-summary-room">
+                            <i class="fas fa-users"></i>
+                            <span>Participants returning</span>
+                        </span>
+                        <span
+                            class="breakout-popup-summary-count breakout-popup-summary-count--end"
+                            data-template-text="participantCount"
+                        ></span>
+                    </div>
+                    <div class="breakout-popup-summary-row">
+                        <span class="breakout-popup-summary-room">
+                            <i class="fas fa-layer-group"></i>
+                            <span>Breakout rooms removed</span>
+                        </span>
+                        <span class="breakout-popup-summary-count breakout-popup-summary-count--end">All rooms</span>
+                    </div>
+                </div>
+                <div class="breakout-countdown-card">
+                    <label for="breakoutEndCountdown" class="breakout-countdown-label">Countdown before closing</label>
+                    <select
+                        id="breakoutEndCountdown"
+                        class="form-select text-light bg-dark breakout-countdown-select breakout-countdown-select--end"
+                    >
+                        <option value="0">Immediately</option>
+                        <option value="10">10 seconds</option>
+                        <option value="30" selected>30 seconds</option>
+                        <option value="60">60 seconds</option>
+                        <option value="120">2 minutes</option>
+                    </select>
+                </div>
+            </div>
+        </template>
     </body>
 </html>

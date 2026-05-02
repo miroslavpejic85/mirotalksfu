@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.34
+ * @version 2.2.40
  *
  */
 
@@ -1522,11 +1522,22 @@ class RoomClient {
         Swal.fire({
             background: swalBackground,
             position: 'top',
-            title: '<i class="fas fa-hand-paper" style="color:#ff9800"></i> Help Requested',
-            html: `<p style="color:#fff"><b>${data.peer_name}</b> in <b>${roomLabel}</b> is asking for help.</p>`,
+            title: 'Help Requested',
+            html: this.renderHtmlTemplate('popupBreakoutHelpTemplate', {
+                text: {
+                    peerName: data.peer_name,
+                    roomLabel,
+                },
+            }),
             showDenyButton: true,
             confirmButtonText: '<i class="fas fa-sign-in-alt"></i> Join Room',
             denyButtonText: 'Dismiss',
+            customClass: {
+                popup: 'breakout-swal breakout-swal--help',
+                htmlContainer: 'breakout-swal-html',
+                confirmButton: 'breakout-swal-confirm breakout-swal-confirm--help',
+                denyButton: 'breakout-swal-deny',
+            },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
@@ -1538,21 +1549,33 @@ class RoomClient {
 
     async joinBreakoutRoom(breakoutRoom, mainRoom, duration = 'unlimited', roomName = '') {
         const displayName = roomName || breakoutRoom;
-        const durationText =
+        const durationChip =
             duration && duration !== 'unlimited'
-                ? `<br/><br/><i class="fas fa-clock"></i> Duration: <strong>${duration}</strong>`
-                : '';
+                ? `<div class="breakout-popup-chip"><i class="fas fa-clock"></i><span>${duration}</span></div>`
+                : '<div class="breakout-popup-chip breakout-popup-chip--open"><i class="fas fa-infinity"></i><span>No time limit</span></div>';
         const confirmResult = await Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
             background: swalBackground,
             position: 'center',
-            title: '<i class="fas fa-object-ungroup breakout-accent"></i> Breakout Room',
-            html: `<div class="breakout-assign-spinner"><div class="breakout-spinner"></div></div>
-                   You have been assigned to a breakout room.<br/><br/><strong class="breakout-accent">${displayName}</strong>${durationText}`,
+            title: 'Breakout Room Ready',
+            html: this.renderHtmlTemplate('popupBreakoutJoinTemplate', {
+                text: {
+                    displayName,
+                },
+                html: {
+                    durationChip,
+                },
+            }),
             showDenyButton: true,
             confirmButtonText: '<i class="fas fa-arrow-right"></i> Join',
             denyButtonText: 'Stay',
+            customClass: {
+                popup: 'breakout-swal breakout-swal--join',
+                htmlContainer: 'breakout-swal-html',
+                confirmButton: 'breakout-swal-confirm breakout-swal-confirm--join',
+                denyButton: 'breakout-swal-deny breakout-swal-deny--quiet',
+            },
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         });
@@ -7084,7 +7107,23 @@ class RoomClient {
         if (!this.isMobileDevice) this.makeDraggable(breakoutPanel, breakoutPanelHeader);
     }
 
+    getBreakoutPanelLayoutElements() {
+        const body = breakoutPanel.querySelector('.breakout-panel-body');
+        const sections = breakoutPanel.querySelectorAll('.breakout-section');
+
+        return {
+            body,
+            roomsSection: sections[0],
+            participantsSection: sections[1],
+            roomsList: breakoutPanel.querySelector('.breakout-rooms-list'),
+            participantsList: breakoutPanel.querySelector('.breakout-participants-list'),
+        };
+    }
+
     breakoutPinned() {
+        const { body, roomsSection, participantsSection, roomsList, participantsList } =
+            this.getBreakoutPanelLayoutElements();
+
         breakoutPanel.style.position = 'absolute';
         breakoutPanel.style.top = '0';
         breakoutPanel.style.right = '0';
@@ -7095,21 +7134,56 @@ class RoomClient {
         breakoutPanel.style.maxWidth = '30%';
         breakoutPanel.style.maxHeight = '100%';
         breakoutPanel.style.borderRadius = '14px 0 0 14px';
-        const body = breakoutPanel.querySelector('.breakout-panel-body');
+
         if (body) {
             body.style.maxHeight = 'calc(100vh - 55px)';
             body.style.height = 'calc(100vh - 55px)';
-            body.style.display = 'flex';
-            body.style.flexDirection = 'column';
+            body.style.display = 'grid';
+            body.style.flex = '1 1 auto';
+            body.style.gridTemplateRows = 'auto minmax(0, 1fr) auto minmax(0, 1fr)';
+            body.style.gap = '0';
+            body.style.minHeight = '0';
+            body.style.overflowY = 'hidden';
+            body.style.overscrollBehavior = 'contain';
+            body.style.scrollbarGutter = '';
         }
-        const participantsList = breakoutPanel.querySelector('.breakout-participants-list');
-        if (participantsList) participantsList.style.maxHeight = 'none';
+        if (roomsSection) {
+            roomsSection.style.display = 'flex';
+            roomsSection.style.flexDirection = 'column';
+            roomsSection.style.minHeight = '0';
+            roomsSection.style.overflow = 'hidden';
+        }
+        if (roomsList) {
+            roomsList.style.flex = '1 1 auto';
+            roomsList.style.minHeight = '0';
+            roomsList.style.maxHeight = 'none';
+            roomsList.style.overflowY = 'auto';
+            roomsList.style.scrollbarGutter = '';
+        }
+        if (participantsSection) {
+            participantsSection.style.display = 'flex';
+            participantsSection.style.flexDirection = 'column';
+            participantsSection.style.minHeight = '0';
+            participantsSection.style.overflow = 'hidden';
+            participantsSection.style.flex = '1 1 auto';
+            participantsSection.style.alignSelf = 'stretch';
+        }
+        if (participantsList) {
+            participantsList.style.maxHeight = 'none';
+            participantsList.style.flex = '1 1 auto';
+            participantsList.style.minHeight = '0';
+            participantsList.style.overflowY = 'auto';
+            participantsList.style.scrollbarGutter = '';
+        }
         breakoutPanel.classList.remove('panel-slide-in');
         void breakoutPanel.offsetWidth;
         breakoutPanel.classList.add('panel-slide-in');
     }
 
     breakoutCenter() {
+        const { body, roomsSection, participantsSection, roomsList, participantsList } =
+            this.getBreakoutPanelLayoutElements();
+
         breakoutPanel.style.position = 'fixed';
         breakoutPanel.style.transform = 'translate(-50%, -50%)';
         breakoutPanel.style.top = '50%';
@@ -7120,15 +7194,47 @@ class RoomClient {
         breakoutPanel.style.maxWidth = '95vw';
         breakoutPanel.style.maxHeight = '85vh';
         breakoutPanel.style.borderRadius = '16px';
-        const body = breakoutPanel.querySelector('.breakout-panel-body');
+
         if (body) {
             body.style.maxHeight = 'calc(85vh - 55px)';
             body.style.height = '';
             body.style.display = '';
-            body.style.flexDirection = '';
+            body.style.flex = '';
+            body.style.gridTemplateRows = '';
+            body.style.gap = '';
+            body.style.minHeight = '';
+            body.style.overflowY = '';
+            body.style.overscrollBehavior = '';
+            body.style.scrollbarGutter = '';
         }
-        const participantsList = breakoutPanel.querySelector('.breakout-participants-list');
-        if (participantsList) participantsList.style.maxHeight = '';
+        if (roomsSection) {
+            roomsSection.style.display = '';
+            roomsSection.style.flexDirection = '';
+            roomsSection.style.minHeight = '';
+            roomsSection.style.overflow = '';
+        }
+        if (roomsList) {
+            roomsList.style.flex = '';
+            roomsList.style.minHeight = '';
+            roomsList.style.maxHeight = '';
+            roomsList.style.overflowY = '';
+            roomsList.style.scrollbarGutter = '';
+        }
+        if (participantsSection) {
+            participantsSection.style.display = '';
+            participantsSection.style.flexDirection = '';
+            participantsSection.style.minHeight = '';
+            participantsSection.style.overflow = '';
+            participantsSection.style.flex = '';
+            participantsSection.style.alignSelf = '';
+        }
+        if (participantsList) {
+            participantsList.style.maxHeight = '';
+            participantsList.style.flex = '';
+            participantsList.style.minHeight = '';
+            participantsList.style.overflowY = '';
+            participantsList.style.scrollbarGutter = '';
+        }
     }
 
     pollsUpdate(polls) {

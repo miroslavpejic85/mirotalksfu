@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.34
+ * @version 2.2.40
  *
  */
 
@@ -7276,7 +7276,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.34',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.40',
         html: `
             <br />
             <div id="about">
@@ -7579,6 +7579,8 @@ async function refreshBreakoutPanel() {
     hasRooms ? show(actionsBar) : hide(actionsBar);
     hasActivePeers ? show(endAllBtn) : hide(endAllBtn);
 
+    syncPinnedBreakoutPanelLayout(hasRooms);
+
     broadcastAllBtn.disabled = !hasRooms;
 
     // Show/hide auto-assign button when rooms and participants exist
@@ -7624,6 +7626,31 @@ async function refreshBreakoutPanel() {
     });
 }
 
+function syncPinnedBreakoutPanelLayout(hasRooms) {
+    if (!rc || !rc.isBreakoutPinned) return;
+
+    const body = getId('breakoutPanel')?.querySelector('.breakout-panel-body');
+    const sections = document.querySelectorAll('#breakoutPanel .breakout-section');
+    const roomsSection = sections[0];
+
+    if (!body || !roomsSection) return;
+
+    if (hasRooms) {
+        roomsSection.style.display = 'flex';
+        roomsSection.style.flexDirection = 'column';
+        roomsSection.style.minHeight = '0';
+        roomsSection.style.overflow = 'hidden';
+        body.style.gridTemplateRows = 'auto minmax(0, 1fr) auto minmax(0, 1fr)';
+        return;
+    }
+
+    roomsSection.style.display = 'none';
+    roomsSection.style.flexDirection = '';
+    roomsSection.style.minHeight = '';
+    roomsSection.style.overflow = '';
+    body.style.gridTemplateRows = 'auto minmax(220px, 1fr)';
+}
+
 async function launchBreakoutRooms() {
     const selects = document.querySelectorAll('.breakout-room-select');
     const assignments = [];
@@ -7653,18 +7680,41 @@ async function launchBreakoutRooms() {
     const summary = Object.entries(roomCounts)
         .map(
             ([name, count]) =>
-                `<i class="fas fa-door-open"></i> ${name}: <i class="fas fa-user${count > 1 ? 's' : ''}"></i> ${count}`
+                `<div class="breakout-popup-summary-row">
+                    <span class="breakout-popup-summary-room">
+                        <i class="fas fa-door-open"></i>
+                        <span>${name}</span>
+                    </span>
+                    <span class="breakout-popup-summary-count">
+                        <i class="fas fa-user${count > 1 ? 's' : ''}"></i>
+                        <span>${count}</span>
+                    </span>
+                </div>`
         )
-        .join('<br>');
+        .join('');
 
     const confirmed = await Swal.fire({
         background: swalBackground,
         position: 'top',
-        title: 'Launch Breakout Rooms?',
-        html: `<p style="color:#fff">Move <b>${assignments.length}</b> participant(s) to breakout rooms?</p><p style="color:#b0b0b0;font-size:13px">${summary}</p>`,
+        title: 'Launch Breakout Rooms',
+        html: rc.renderHtmlTemplate('popupBreakoutLaunchTemplate', {
+            text: {
+                participantCount: String(assignments.length),
+                participantLabel: `participant${assignments.length !== 1 ? 's' : ''}`,
+            },
+            html: {
+                summary,
+            },
+        }),
         showDenyButton: true,
-        confirmButtonText: 'Launch',
+        confirmButtonText: '<i class="fas fa-rocket"></i> Launch',
         denyButtonText: 'Cancel',
+        customClass: {
+            popup: 'breakout-swal breakout-swal--launch',
+            htmlContainer: 'breakout-swal-html',
+            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--launch',
+            denyButton: 'breakout-swal-deny',
+        },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
@@ -7887,21 +7937,21 @@ async function endAllBreakoutSessions() {
         background: swalBackground,
         position: 'top',
         title: 'End All Breakout Sessions?',
-        html: `
-            <p style="color:#fff">This will notify <b>${totalPeers}</b> participant(s) to return to the main room and remove all rooms.</p>
-            <div class="breakout-countdown-section">
-                <label class="breakout-countdown-label">Countdown before closing:</label>
-                <select id="breakoutEndCountdown" class="form-select text-light bg-dark breakout-countdown-select">
-                    <option value="0">Immediately</option>
-                    <option value="10">10 seconds</option>
-                    <option value="30" selected>30 seconds</option>
-                    <option value="60">60 seconds</option>
-                    <option value="120">2 minutes</option>
-                </select>
-            </div>`,
+        html: rc.renderHtmlTemplate('popupBreakoutEndTemplate', {
+            text: {
+                participantCount: String(totalPeers),
+                participantLabel: `participant${totalPeers !== 1 ? 's' : ''}`,
+            },
+        }),
         showDenyButton: true,
-        confirmButtonText: 'End All',
+        confirmButtonText: '<i class="fas fa-door-open"></i> End All',
         denyButtonText: 'Cancel',
+        customClass: {
+            popup: 'breakout-swal breakout-swal--end',
+            htmlContainer: 'breakout-swal-html',
+            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end',
+            denyButton: 'breakout-swal-deny',
+        },
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });
