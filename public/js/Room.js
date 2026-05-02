@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.40
+ * @version 2.2.41
  *
  */
 
@@ -1601,14 +1601,11 @@ async function shareRoom(useNavigator = false) {
             background: swalBackground,
             position: 'center',
             title: 'Share the room',
-            html: `
-            <div id="qrRoomContainer">
-                <canvas id="qrRoom"></canvas>
-            </div>
-            <br/>
-            <p style="background:transparent; color:rgb(8, 189, 89);">Join from your mobile device</p>
-            <p style="background:transparent; color:white; font-family: Arial, Helvetica, sans-serif;">No need for apps, simply capture the QR code with your mobile camera Or Invite someone else to join by sending them the following URL</p>
-            <p style="background:transparent; color:rgb(8, 189, 89);">${RoomURL}</p>`,
+            html: rc.renderHtmlTemplate('popupShareRoomTemplate', {
+                text: {
+                    roomUrl: RoomURL,
+                },
+            }),
             showDenyButton: true,
             showCancelButton: true,
             cancelButtonColor: 'red',
@@ -5427,25 +5424,7 @@ function createStickyNote() {
     Swal.fire({
         background: swalBackground,
         title: 'Create Sticky Note',
-        html: `
-        <div class="sticky-note-form">
-            <textarea id="stickyNoteText" class="sticky-note-textarea" rows="4" placeholder="Type your note here...">Note</textarea>
-            <div class="sticky-note-colors-row">
-                <div class="sticky-note-color-group">
-                    <label for="stickyNoteColor" class="sticky-note-color-label">
-                        <i class="fas fa-palette"></i> Background
-                    </label>
-                    <input id="stickyNoteColor" type="color" value="#FFEB3B" class="sticky-note-color-input">
-                </div>
-                <div class="sticky-note-color-group">
-                    <label for="stickyNoteTextColor" class="sticky-note-color-label">
-                        <i class="fas fa-font"></i> Text
-                    </label>
-                    <input id="stickyNoteTextColor" type="color" value="#000000" class="sticky-note-color-input">
-                </div>
-            </div>
-        </div>
-        `,
+        html: rc.renderHtmlTemplate('popupStickyNoteTemplate'),
         showCancelButton: true,
         confirmButtonText: 'Create',
         cancelButtonText: 'Cancel',
@@ -5535,11 +5514,7 @@ function setupFileSelection(title, accept, renderToCanvas) {
         position: 'center',
         title: title,
         input: 'file',
-        html: `
-        <div id="dropArea">
-            <p>Drag and drop your file here</p>
-        </div>
-        `,
+        html: rc.renderHtmlTemplate('popupFileDropTemplate'),
         inputAttributes: {
             accept: accept,
             'aria-label': title,
@@ -7276,45 +7251,43 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.40',
-        html: `
-            <br />
-            <div id="about">
-                ${
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.41',
+        html: rc.renderHtmlTemplate('popupAboutTemplate', {
+            html: {
+                aboutContent:
                     BRAND.about?.html && BRAND.about.html.trim() !== ''
                         ? BRAND.about.html
                         : `
-                            <button 
-                                id="support-button" 
-                                data-umami-event="Support button" 
+                            <button
+                                id="support-button"
+                                data-umami-event="Support button"
                                 onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
                                 <i class="fas fa-heart"></i> Support
                             </button>
                             <br /><br /><br />
-                            Author: 
-                            <a 
-                                id="linkedin-button" 
-                                data-umami-event="Linkedin button" 
-                                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" 
-                                target="_blank"> 
+                            Author:
+                            <a
+                                id="linkedin-button"
+                                data-umami-event="Linkedin button"
+                                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
+                                target="_blank">
                                 Miroslav Pejic
                             </a>
                             <br /><br />
-                            Email: 
-                            <a 
-                                id="email-button" 
-                                data-umami-event="Email button" 
-                                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
+                            Email:
+                            <a
+                                id="email-button"
+                                data-umami-event="Email button"
+                                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info">
                                 miroslav.pejic.85@gmail.com
                             </a>
                             <br /><br />
                             <hr />
                             <span>&copy; 2026 MiroTalk SFU, all rights reserved</span>
                             <hr />
-                        `
-                }
-            </div>
-        `,
+                        `,
+            },
+        }),
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     });

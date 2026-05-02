@@ -58,6 +58,10 @@ body {
     pointer-events: none;
 }
 
+.disconnect-banner[aria-hidden='true'] {
+    display: none;
+}
+
 .disconnect-overlay {
     position: fixed;
     inset: 0;
@@ -1076,6 +1080,19 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.qr-room-copy {
+    background: transparent;
+}
+
+.qr-room-copy--accent {
+    color: rgb(8, 189, 89);
+}
+
+.qr-room-copy--body {
+    color: #fff;
+    font-family: Arial, Helvetica, sans-serif;
 }
 
 #qrRoomPopupContainer {

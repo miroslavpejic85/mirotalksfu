@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.40
+ * @version 2.2.41
  *
  */
 
@@ -1930,7 +1930,7 @@ class RoomClient {
             imageUrl: image.user,
             position: 'center',
             title: 'Username',
-            html: `The Username is already in use. <br/> Please try with another one`,
+            html: this.renderHtmlTemplate('popupUsernameInUseTemplate'),
             showDenyButton: false,
             confirmButtonText: `OK`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -8485,25 +8485,13 @@ class RoomClient {
             position: 'center',
             title,
             input: 'file',
-            html: `
-            <div class="mirotalk-file-picker">
-                <button type="button" id="mirotalkFileDropzone" class="mirotalk-file-dropzone">
-                    <span class="mirotalk-file-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></span>
-                    <span id="mirotalkFileDropzoneTitle" class="mirotalk-file-dropzone-title">${emptyStateTitle}</span>
-                    <span id="mirotalkFileDropzoneSubtitle" class="mirotalk-file-dropzone-subtitle">${emptyStateSubtitle}</span>
-                    <span class="mirotalk-file-dropzone-helper">${helperText}</span>
-                    <span id="mirotalkFileBrowseBtn" class="mirotalk-file-dropzone-cta">Browse files</span>
-                </button>
-                <div id="mirotalkFilePreview" class="mirotalk-file-preview" hidden>
-                    <div class="mirotalk-file-preview-icon"><i class="fas fa-file-alt"></i></div>
-                    <div class="mirotalk-file-preview-meta">
-                        <strong id="mirotalkFileName">No file selected</strong>
-                        <span id="mirotalkFileDetails"></span>
-                    </div>
-                    <button type="button" id="mirotalkFileRemoveBtn" class="mirotalk-file-preview-remove">Remove</button>
-                </div>
-            </div>
-            `,
+            html: this.renderHtmlTemplate('popupMirotalkFilePickerTemplate', {
+                text: {
+                    emptyStateTitle,
+                    emptyStateSubtitle,
+                    helperText,
+                },
+            }),
             inputAttributes: {
                 accept,
                 'aria-label': title,
@@ -11664,7 +11652,11 @@ class RoomClient {
             imageUrl: image.geolocation,
             position: 'center',
             title: 'Geo Location',
-            html: `Would you like to share your location to ${cmd.from_peer_name}?`,
+            html: this.renderHtmlTemplate('popupGeoLocationPromptTemplate', {
+                text: {
+                    message: `Would you like to share your location to ${cmd.from_peer_name}?`,
+                },
+            }),
             showDenyButton: true,
             confirmButtonText: `Yes`,
             denyButtonText: `No`,
@@ -11756,7 +11748,11 @@ class RoomClient {
             imageUrl: image.geolocation,
             position: 'center',
             title: 'Geo Location',
-            html: `Would you like to open ${cmd.from_peer_name} geolocation?`,
+            html: this.renderHtmlTemplate('popupGeoLocationPromptTemplate', {
+                text: {
+                    message: `Would you like to open ${cmd.from_peer_name} geolocation?`,
+                },
+            }),
             showDenyButton: true,
             confirmButtonText: `Yes`,
             denyButtonText: `No`,
