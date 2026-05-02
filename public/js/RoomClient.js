@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.33
+ * @version 2.2.34
  *
  */
 
@@ -1823,7 +1823,7 @@ class RoomClient {
             position: 'top',
             icon: 'warning',
             title: 'Server away',
-            text: 'The server seems away or in maintenance, please wait until it come back up.',
+            html: this.renderHtmlTemplate('popupServerAwayTemplate'),
             denyButtonText: `Leave room`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -4635,6 +4635,26 @@ class RoomClient {
         } catch (err) {
             return false;
         }
+    }
+
+    renderHtmlTemplate(templateId, { text = {}, html = {} } = {}) {
+        const template = this.getId(templateId);
+        if (!template || !template.content) return '';
+
+        const wrapper = document.createElement('div');
+        wrapper.appendChild(template.content.cloneNode(true));
+
+        wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
+            const key = element.getAttribute('data-template-text');
+            element.textContent = text[key] ?? '';
+        });
+
+        wrapper.querySelectorAll('[data-template-html]').forEach((element) => {
+            const key = element.getAttribute('data-template-html');
+            element.innerHTML = html[key] ?? '';
+        });
+
+        return wrapper.innerHTML.trim();
     }
 
     userLog(icon, message, position, timer = 5000) {
@@ -7647,12 +7667,7 @@ class RoomClient {
             position: 'center',
             imageUrl: image.recording,
             title: 'Recording is ON',
-            html: `
-                <div style="text-align:left;">
-                    <b>Please stop the recording before leaving the room.</b><br><br>
-                    If you leave the room while recording is active, the recording will be stopped automatically and downloaded to your device (if local recording is enabled).
-                </div>
-            `,
+            html: this.renderHtmlTemplate('popupRecordingOnLeaveRoomTemplate'),
             confirmButtonText: 'OK',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -7669,13 +7684,7 @@ class RoomClient {
             position: 'center',
             imageUrl: image.recording,
             title: 'Server Sync Recording Enabled',
-            html: `
-                <div style="text-align:left;">
-                    <b>Your recording session will be stored on the server.</b><br><br>
-                    If you do not agree, please switch off this option.<br>
-                    The recording will then be stored in your browser and downloaded to your device after stopping.
-                </div>
-            `,
+            html: this.renderHtmlTemplate('popupRecordingServerAdviceTemplate'),
             showDenyButton: true,
             confirmButtonText: 'OK',
             denyButtonText: 'Switch Off',
@@ -8141,11 +8150,16 @@ class RoomClient {
                 background: swalBackground,
                 position: 'top',
                 title: 'Recording',
-                html: `<div style="text-align: left;">
-                🔴 ${recType} Recording Info: 
-                ${recordingInfo}
-                ${recordingMsg}
-                </div>`,
+                html: this.renderHtmlTemplate('popupRecordingInfoTemplate', {
+                    text: {
+                        indicator: '🔴',
+                        recType: recType,
+                        recordingMsg: recordingMsg,
+                    },
+                    html: {
+                        recordingInfo: recordingInfo,
+                    },
+                }),
                 showClass: { popup: 'animate__animated animate__fadeInDown' },
                 hideClass: { popup: 'animate__animated animate__fadeOutUp' },
             });
@@ -9785,23 +9799,7 @@ class RoomClient {
             showConfirmButton: false,
             background: swalBackground,
             title: 'Room has lobby enabled',
-            html: `
-                <div class="lobby-join-waiting">
-                    <div class="lobby-join-waiting__hero" aria-hidden="true">
-                        <span class="lobby-join-waiting__pulse"></span>
-                        <span class="lobby-join-waiting__spinner"></span>
-                        <span class="lobby-join-waiting__icon"><i class="fas fa-shield-halved"></i></span>
-                    </div>
-                    <div class="lobby-join-waiting__status">Waiting for approval</div>
-                    <p class="lobby-join-waiting__message">
-                        Asking to join meeting. A presenter will let you in as soon as they are ready.
-                    </p>
-                    <div class="lobby-join-waiting__hint">
-                        <i class="fas fa-circle-info"></i>
-                        <span>Keep this window open while we hold your request.</span>
-                    </div>
-                </div>
-            `,
+            html: this.renderHtmlTemplate('popupLobbyWaitJoinTemplate'),
             confirmButtonText: `Ok`,
             denyButtonText: `Leave room`,
             customClass: {
@@ -9827,15 +9825,7 @@ class RoomClient {
                 timer: 2800,
                 timerProgressBar: true,
                 background: swalBackground,
-                html: `
-                    <div class="lobby-join-outcome lobby-join-outcome--accept">
-                        <span class="lobby-join-outcome__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
-                        <div class="lobby-join-outcome__copy">
-                            <strong class="lobby-join-outcome__title">You are in</strong>
-                            <span class="lobby-join-outcome__message">Your join request was approved by the moderator.</span>
-                        </div>
-                    </div>
-                `,
+                html: this.renderHtmlTemplate('popupLobbyAcceptTemplate'),
                 customClass: {
                     popup: 'lobby-join-toast lobby-join-toast--accept',
                     htmlContainer: 'lobby-join-toast-html',
@@ -9854,17 +9844,7 @@ class RoomClient {
             showConfirmButton: true,
             background: swalBackground,
             title: 'Request declined',
-            html: `
-                <div class="lobby-join-outcome lobby-join-outcome--reject">
-                    <div class="lobby-join-outcome__hero" aria-hidden="true">
-                        <span class="lobby-join-outcome__halo"></span>
-                        <span class="lobby-join-outcome__badge"><i class="fas fa-xmark"></i></span>
-                    </div>
-                    <p class="lobby-join-outcome__message lobby-join-outcome__message--centered">
-                        Your join request was rejected by the moderator. You can try again later if the room becomes available.
-                    </p>
-                </div>
-            `,
+            html: this.renderHtmlTemplate('popupLobbyRejectTemplate'),
             confirmButtonText: `Leave room`,
             customClass: {
                 popup: 'lobby-join-popup lobby-join-popup--reject',

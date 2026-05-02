@@ -2453,6 +2453,10 @@ body {
     background-color: transparent !important;
 }
 
+.popup-template-copy--left {
+    text-align: left;
+}
+
 .swal2-input {
     border: var(--border) !important;
     border-radius: 12px !important;

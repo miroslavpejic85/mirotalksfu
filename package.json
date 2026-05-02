@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.2.33",
+    "version": "2.2.34",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -60,8 +60,8 @@
         "node": ">=22"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.1040.0",
-        "@aws-sdk/lib-storage": "^3.1040.0",
+        "@aws-sdk/client-s3": "^3.1041.0",
+        "@aws-sdk/lib-storage": "^3.1041.0",
         "@mattermost/client": "11.6.0",
         "@ngrok/ngrok": "1.7.0",
         "@sentry/node": "^10.51.0",

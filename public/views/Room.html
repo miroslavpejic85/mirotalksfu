@@ -2326,5 +2326,76 @@ access to use this app.
                 </div>
             </main>
         </section>
+
+        <!-- POPUP TEMPLATES -->
+
+        <template id="popupLobbyWaitJoinTemplate">
+            <div class="lobby-join-waiting">
+                <div class="lobby-join-waiting__hero" aria-hidden="true">
+                    <span class="lobby-join-waiting__pulse"></span>
+                    <span class="lobby-join-waiting__spinner"></span>
+                    <span class="lobby-join-waiting__icon"><i class="fas fa-shield-halved"></i></span>
+                </div>
+                <div class="lobby-join-waiting__status">Waiting for approval</div>
+                <p class="lobby-join-waiting__message">
+                    Asking to join meeting. A presenter will let you in as soon as they are ready.
+                </p>
+                <div class="lobby-join-waiting__hint">
+                    <i class="fas fa-circle-info"></i>
+                    <span>Keep this window open while we hold your request.</span>
+                </div>
+            </div>
+        </template>
+
+        <template id="popupLobbyAcceptTemplate">
+            <div class="lobby-join-outcome lobby-join-outcome--accept">
+                <span class="lobby-join-outcome__icon" aria-hidden="true"><i class="fas fa-check"></i></span>
+                <div class="lobby-join-outcome__copy">
+                    <strong class="lobby-join-outcome__title">You are in</strong>
+                    <span class="lobby-join-outcome__message">Your join request was approved by the moderator.</span>
+                </div>
+            </div>
+        </template>
+
+        <template id="popupLobbyRejectTemplate">
+            <div class="lobby-join-outcome lobby-join-outcome--reject">
+                <div class="lobby-join-outcome__hero" aria-hidden="true">
+                    <span class="lobby-join-outcome__halo"></span>
+                    <span class="lobby-join-outcome__badge"><i class="fas fa-xmark"></i></span>
+                </div>
+                <p class="lobby-join-outcome__message lobby-join-outcome__message--centered">
+                    Your join request was rejected by the moderator. You can try again later if the room becomes
+                    available.
+                </p>
+            </div>
+        </template>
+
+        <template id="popupRecordingOnLeaveRoomTemplate">
+            <div class="popup-template-copy popup-template-copy--left">
+                <b>Please stop the recording before leaving the room.</b><br /><br />
+                If you leave the room while recording is active, the recording will be stopped automatically and
+                downloaded to your device (if local recording is enabled).
+            </div>
+        </template>
+
+        <template id="popupServerAwayTemplate">
+            <div>The server seems away or in maintenance, please wait until it come back up.</div>
+        </template>
+
+        <template id="popupRecordingServerAdviceTemplate">
+            <div class="popup-template-copy popup-template-copy--left">
+                <b>Your recording session will be stored on the server.</b><br /><br />
+                If you do not agree, please switch off this option.<br />
+                The recording will then be stored in your browser and downloaded to your device after stopping.
+            </div>
+        </template>
+
+        <template id="popupRecordingInfoTemplate">
+            <div class="popup-template-copy popup-template-copy--left">
+                <span data-template-text="indicator"></span> <span data-template-text="recType"></span> Recording Info:
+                <div data-template-html="recordingInfo"></div>
+                <div data-template-text="recordingMsg"></div>
+            </div>
+        </template>
     </body>
 </html>
