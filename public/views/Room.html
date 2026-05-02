@@ -2185,21 +2185,10 @@ access to use this app.
                 <div class="breakout-panel-header-actions">
                     <button id="breakoutTogglePin" class="fas fa-map-pin hidden"></button>
                     <button id="breakoutRefreshBtn" class="fas fa-sync-alt"></button>
-                    <div id="breakoutMenuDropdown" class="dropdown hidden">
-                        <button
-                            id="breakoutMenuBtn"
-                            class="fas fa-bars dropdown-toggle breakout-header-menu-btn"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                        ></button>
-                        <ul class="dropdown-menu dropdown-menu-end breakout-header-dropdown">
-                            <li>
-                                <button id="breakoutDeleteAllBtn" class="dropdown-item breakout-header-dropdown-item">
-                                    <i class="fas fa-trash"></i> Delete all rooms
-                                </button>
-                            </li>
-                        </ul>
-                    </div>
+                    <button id="breakoutDeleteAllBtn" class="breakout-header-action-btn hidden" type="button">
+                        <i class="fas fa-trash"></i>
+                        <span>Delete all</span>
+                    </button>
                     <button id="breakoutPanelCloseBtn" class="fas fa-times"></button>
                 </div>
             </header>

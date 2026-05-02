@@ -7517,18 +7517,60 @@ async function deleteAllBreakoutRooms() {
     if (breakoutRooms.length === 0) return;
 
     const breakoutInfo = await getBreakoutRoomsInfo();
-    const hasActivePeers = breakoutInfo.some((r) => r.peers > 0);
-    if (hasActivePeers) {
+    const activeRoomIds = new Set(breakoutInfo.filter((room) => room.peers > 0).map((room) => room.room));
+    const inactiveRooms = breakoutRooms.filter((room) => !activeRoomIds.has(room.id));
+    const activeRooms = breakoutRooms.filter((room) => activeRoomIds.has(room.id));
+
+    if (inactiveRooms.length === 0) {
         return rc.userLog(
             'warning',
-            'Cannot delete all rooms while participants are still in breakout rooms. Wait for them to return or broadcast a message first.',
+            'No inactive breakout rooms available to delete. Active breakout rooms must be ended first.',
             'top-end',
             5000
         );
     }
 
-    breakoutRooms = [];
+    const deletingAllRooms = activeRooms.length === 0;
+    const confirmed = await Swal.fire({
+        background: swalBackground,
+        position: 'top',
+        title: deletingAllRooms ? 'Delete All Breakout Rooms?' : 'Delete Inactive Breakout Rooms?',
+        html: `
+            <div class="popup-template-copy popup-template-copy--left">
+                <b>${deletingAllRooms ? 'This will remove every breakout room.' : `This will remove ${inactiveRooms.length} inactive breakout room${inactiveRooms.length !== 1 ? 's' : ''}.`}</b><br /><br />
+                ${
+                    activeRooms.length > 0
+                        ? `${activeRooms.length} active breakout room${activeRooms.length !== 1 ? 's will remain open because participant' : ' will remain open because a participant is'} still inside.`
+                        : 'Participants will no longer be able to join these rooms until you create them again.'
+                }
+            </div>
+        `,
+        showDenyButton: true,
+        confirmButtonText: '<i class="fas fa-trash"></i> Delete',
+        denyButtonText: 'Cancel',
+        customClass: {
+            popup: 'breakout-swal breakout-swal--end',
+            htmlContainer: 'breakout-swal-html',
+            confirmButton: 'breakout-swal-confirm breakout-swal-confirm--end',
+            denyButton: 'breakout-swal-deny',
+        },
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    });
+
+    if (!confirmed.isConfirmed) return;
+
+    breakoutRooms = activeRooms;
     refreshBreakoutPanel();
+
+    return rc.userLog(
+        'info',
+        deletingAllRooms
+            ? 'All breakout rooms deleted'
+            : `Deleted ${inactiveRooms.length} inactive breakout room${inactiveRooms.length !== 1 ? 's' : ''}`,
+        'top-end',
+        3000
+    );
 }
 
 async function removeBreakoutRoom(index) {
@@ -7653,15 +7695,11 @@ async function refreshBreakoutPanel() {
     hasRooms ? hide(emptyState) : show(emptyState);
     hasRooms ? show(roomsList) : hide(roomsList);
 
-    // Show/hide launch button and header menu
+    // Show/hide launch button and header actions
     const launchBtn = getId('breakoutLaunchBtn');
-    const menuDropdown = getId('breakoutMenuDropdown');
+    const deleteAllBtn = getId('breakoutDeleteAllBtn');
     hasRooms ? show(launchBtn) : hide(launchBtn);
-    hasRooms ? show(menuDropdown) : hide(menuDropdown);
-
-    // Enable desktop hover for header dropdown
-    const headerDropdown = menuDropdown;
-    if (headerDropdown) handleDropdownHover([headerDropdown]);
+    hasRooms ? show(deleteAllBtn) : hide(deleteAllBtn);
 
     // Show/hide actions bar when rooms exist
     const actionsBar = getId('breakoutActionsBar');
