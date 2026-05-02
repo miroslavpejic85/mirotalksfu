@@ -5563,6 +5563,10 @@ hr {
     text-align: left;
 }
 
+.breakout-popup--join [data-template-html='durationChip'] {
+    justify-self: center;
+}
+
 .breakout-popup-hero {
     display: grid;
     grid-template-columns: auto minmax(0, 1fr);

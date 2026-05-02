@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.42
+ * @version 2.2.43
  *
  */
 
@@ -140,6 +140,44 @@ const image = {
         eleven: '../images/virtual-background/default/background-11.gif',
     },
 };
+
+function renderRoomTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
+    const template = document.getElementById(templateId);
+    if (!template || !template.content) return '';
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(template.content.cloneNode(true));
+
+    wrapper.querySelectorAll('*').forEach((element) => {
+        element.getAttributeNames().forEach((name) => {
+            if (!name.startsWith('data-template-attr-')) return;
+
+            const attrName = name.replace('data-template-attr-', '');
+            const key = element.getAttribute(name);
+            const value = attrs[key];
+
+            if (value === undefined || value === null) {
+                element.removeAttribute(attrName);
+            } else {
+                element.setAttribute(attrName, value);
+            }
+
+            element.removeAttribute(name);
+        });
+    });
+
+    wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
+        const key = element.getAttribute('data-template-text');
+        element.textContent = text[key] ?? '';
+    });
+
+    wrapper.querySelectorAll('[data-template-html]').forEach((element) => {
+        const key = element.getAttribute('data-template-html');
+        element.innerHTML = html[key] ?? '';
+    });
+
+    return wrapper.innerHTML.trim();
+}
 
 const mediaType = {
     audio: 'audioType',
@@ -2902,11 +2940,7 @@ class RoomClient {
         const loader = document.createElement('div');
         loader.id = id;
         loader.className = 'video-loader';
-        loader.innerHTML = `
-            <div class="loading-spinner">
-                <div class="spinner-ring"></div>
-                <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
-            </div>`;
+        loader.innerHTML = this.renderHtmlTemplate('videoLoaderTemplate');
         return loader;
     }
 
@@ -4661,41 +4695,7 @@ class RoomClient {
     }
 
     renderHtmlTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
-        const template = this.getId(templateId);
-        if (!template || !template.content) return '';
-
-        const wrapper = document.createElement('div');
-        wrapper.appendChild(template.content.cloneNode(true));
-
-        wrapper.querySelectorAll('*').forEach((element) => {
-            element.getAttributeNames().forEach((name) => {
-                if (!name.startsWith('data-template-attr-')) return;
-
-                const attrName = name.replace('data-template-attr-', '');
-                const key = element.getAttribute(name);
-                const value = attrs[key];
-
-                if (value === undefined || value === null || value === '') {
-                    element.removeAttribute(attrName);
-                } else {
-                    element.setAttribute(attrName, value);
-                }
-
-                element.removeAttribute(name);
-            });
-        });
-
-        wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
-            const key = element.getAttribute('data-template-text');
-            element.textContent = text[key] ?? '';
-        });
-
-        wrapper.querySelectorAll('[data-template-html]').forEach((element) => {
-            const key = element.getAttribute('data-template-html');
-            element.innerHTML = html[key] ?? '';
-        });
-
-        return wrapper.innerHTML.trim();
+        return renderRoomTemplate(templateId, { text, html, attrs });
     }
 
     userLog(icon, message, position, timer = 5000) {
@@ -6548,7 +6548,12 @@ class RoomClient {
                 badge.setAttribute('data-emoji', emoji);
                 badge.setAttribute('data-peers', JSON.stringify([peerName]));
                 badge.setAttribute('data-tooltip', peerName);
-                badge.innerHTML = `${emoji} <span class="reaction-count">1</span>`;
+                badge.innerHTML = this.renderHtmlTemplate('reactionBadgeTemplate', {
+                    text: {
+                        emoji,
+                        countValue: '1',
+                    },
+                });
                 badge.addEventListener('click', () => this.sendChatReaction(msgEl.id, emoji));
                 reactionsEl.appendChild(badge);
             }
@@ -8257,7 +8262,11 @@ class RoomClient {
     saveLastRecordingInfo(recordingInfo) {
         const lastRecordingInfo = document.getElementById('lastRecordingInfo');
         lastRecordingInfo.style.color = '#FFFFFF';
-        lastRecordingInfo.innerHTML = `Last Recording Info: ${recordingInfo}`;
+        lastRecordingInfo.innerHTML = this.renderHtmlTemplate('lastRecordingInfoTemplate', {
+            html: {
+                recordingInfo,
+            },
+        });
         show(lastRecordingInfo);
     }
 
