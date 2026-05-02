@@ -429,7 +429,7 @@
 .chat .chat-history .my-message {
     background: linear-gradient(135deg, #1e3a5f, #1a2d47);
     border: 1px solid rgba(59, 130, 246, 0.15);
-    border-bottom-left-radius: 4px;
+    border-bottom-right-radius: 4px;
 }
 
 .chat .chat-history .my-message:after {
@@ -440,7 +440,7 @@
     background: rgba(255, 255, 255, 0.06);
     border: 1px solid rgba(255, 255, 255, 0.06);
     text-align: left;
-    border-bottom-right-radius: 4px;
+    border-bottom-left-radius: 4px;
 }
 
 .chat .chat-history .other-message:after {

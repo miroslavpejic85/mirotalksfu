@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.43
+ * @version 2.2.44
  *
  */
 
@@ -6325,9 +6325,11 @@ class RoomClient {
         const getMsgId = filterXSS(msgId || '');
         const time = this.getTimeNow();
 
+        // Caller side convention is: left = local user, right = remote/assistant.
+        // UI convention is: local user on the right, remote on the left.
         const myMessage = getSide === 'left';
-        const messageClass = myMessage ? 'my-message' : 'other-message float-right';
-        const messageData = myMessage ? 'text-start' : 'text-end';
+        const messageClass = myMessage ? 'my-message float-right' : 'other-message';
+        const messageData = myMessage ? 'text-end' : 'text-start';
         const timeAndName = myMessage
             ? `<span class="message-data-time">${time}, ${getFromName} ( me ) </span>`
             : `<span class="message-data-time">${time}, ${getFromName} </span>`;
@@ -6346,8 +6348,8 @@ class RoomClient {
         // after insertion to avoid double-decode XSS via insertAdjacentHTML.
         const msgAvatarTmpId = `msg-av-${chatMessagesId}`;
         const positionFirst = myMessage
-            ? `<img id="${msgAvatarTmpId}" alt="avatar" />${timeAndName}`
-            : `${timeAndName}<img id="${msgAvatarTmpId}" alt="avatar" />`;
+            ? `${timeAndName}<img id="${msgAvatarTmpId}" alt="avatar" />`
+            : `<img id="${msgAvatarTmpId}" alt="avatar" />${timeAndName}`;
 
         const reactionEmojis = ['👍', '❤️', '😂', '😮', '😢', '🔥'];
         const reactionButtons = reactionEmojis
