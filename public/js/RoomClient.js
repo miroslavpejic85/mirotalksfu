@@ -141,44 +141,6 @@ const image = {
     },
 };
 
-function renderRoomTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
-    const template = document.getElementById(templateId);
-    if (!template || !template.content) return '';
-
-    const wrapper = document.createElement('div');
-    wrapper.appendChild(template.content.cloneNode(true));
-
-    wrapper.querySelectorAll('*').forEach((element) => {
-        element.getAttributeNames().forEach((name) => {
-            if (!name.startsWith('data-template-attr-')) return;
-
-            const attrName = name.replace('data-template-attr-', '');
-            const key = element.getAttribute(name);
-            const value = attrs[key];
-
-            if (value === undefined || value === null) {
-                element.removeAttribute(attrName);
-            } else {
-                element.setAttribute(attrName, value);
-            }
-
-            element.removeAttribute(name);
-        });
-    });
-
-    wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
-        const key = element.getAttribute('data-template-text');
-        element.textContent = text[key] ?? '';
-    });
-
-    wrapper.querySelectorAll('[data-template-html]').forEach((element) => {
-        const key = element.getAttribute('data-template-html');
-        element.innerHTML = html[key] ?? '';
-    });
-
-    return wrapper.innerHTML.trim();
-}
-
 const mediaType = {
     audio: 'audioType',
     audioTab: 'audioTab',
@@ -1561,7 +1523,7 @@ class RoomClient {
             background: swalBackground,
             position: 'top',
             title: 'Help Requested',
-            html: this.renderHtmlTemplate('popupBreakoutHelpTemplate', {
+            html: renderRoomTemplate('popupBreakoutHelpTemplate', {
                 text: {
                     peerName: data.peer_name,
                     roomLabel,
@@ -1597,7 +1559,7 @@ class RoomClient {
             background: swalBackground,
             position: 'center',
             title: 'Breakout Room Ready',
-            html: this.renderHtmlTemplate('popupBreakoutJoinTemplate', {
+            html: renderRoomTemplate('popupBreakoutJoinTemplate', {
                 text: {
                     displayName,
                 },
@@ -1884,7 +1846,7 @@ class RoomClient {
             position: 'top',
             icon: 'warning',
             title: 'Server away',
-            html: this.renderHtmlTemplate('popupServerAwayTemplate'),
+            html: renderRoomTemplate('popupServerAwayTemplate'),
             denyButtonText: `Leave room`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1968,7 +1930,7 @@ class RoomClient {
             imageUrl: image.user,
             position: 'center',
             title: 'Username',
-            html: this.renderHtmlTemplate('popupUsernameInUseTemplate'),
+            html: renderRoomTemplate('popupUsernameInUseTemplate'),
             showDenyButton: false,
             confirmButtonText: `OK`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -2940,7 +2902,7 @@ class RoomClient {
         const loader = document.createElement('div');
         loader.id = id;
         loader.className = 'video-loader';
-        loader.innerHTML = this.renderHtmlTemplate('videoLoaderTemplate');
+        loader.innerHTML = renderRoomTemplate('videoLoaderTemplate');
         return loader;
     }
 
@@ -4692,10 +4654,6 @@ class RoomClient {
         } catch (err) {
             return false;
         }
-    }
-
-    renderHtmlTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
-        return renderRoomTemplate(templateId, { text, html, attrs });
     }
 
     userLog(icon, message, position, timer = 5000) {
@@ -6548,7 +6506,7 @@ class RoomClient {
                 badge.setAttribute('data-emoji', emoji);
                 badge.setAttribute('data-peers', JSON.stringify([peerName]));
                 badge.setAttribute('data-tooltip', peerName);
-                badge.innerHTML = this.renderHtmlTemplate('reactionBadgeTemplate', {
+                badge.innerHTML = renderRoomTemplate('reactionBadgeTemplate', {
                     text: {
                         emoji,
                         countValue: '1',
@@ -7796,7 +7754,7 @@ class RoomClient {
             position: 'center',
             imageUrl: image.recording,
             title: 'Recording is ON',
-            html: this.renderHtmlTemplate('popupRecordingOnLeaveRoomTemplate'),
+            html: renderRoomTemplate('popupRecordingOnLeaveRoomTemplate'),
             confirmButtonText: 'OK',
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -7813,7 +7771,7 @@ class RoomClient {
             position: 'center',
             imageUrl: image.recording,
             title: 'Server Sync Recording Enabled',
-            html: this.renderHtmlTemplate('popupRecordingServerAdviceTemplate'),
+            html: renderRoomTemplate('popupRecordingServerAdviceTemplate'),
             showDenyButton: true,
             confirmButtonText: 'OK',
             denyButtonText: 'Switch Off',
@@ -8262,7 +8220,7 @@ class RoomClient {
     saveLastRecordingInfo(recordingInfo) {
         const lastRecordingInfo = document.getElementById('lastRecordingInfo');
         lastRecordingInfo.style.color = '#FFFFFF';
-        lastRecordingInfo.innerHTML = this.renderHtmlTemplate('lastRecordingInfoTemplate', {
+        lastRecordingInfo.innerHTML = renderRoomTemplate('lastRecordingInfoTemplate', {
             html: {
                 recordingInfo,
             },
@@ -8283,7 +8241,7 @@ class RoomClient {
                 background: swalBackground,
                 position: 'top',
                 title: 'Recording',
-                html: this.renderHtmlTemplate('popupRecordingInfoTemplate', {
+                html: renderRoomTemplate('popupRecordingInfoTemplate', {
                     text: {
                         indicator: '🔴',
                         recType: recType,
@@ -8512,7 +8470,7 @@ class RoomClient {
             position: 'center',
             title,
             input: 'file',
-            html: this.renderHtmlTemplate('popupMirotalkFilePickerTemplate', {
+            html: renderRoomTemplate('popupMirotalkFilePickerTemplate', {
                 text: {
                     emptyStateTitle,
                     emptyStateSubtitle,
@@ -9920,7 +9878,7 @@ class RoomClient {
             showConfirmButton: false,
             background: swalBackground,
             title: 'Room has lobby enabled',
-            html: this.renderHtmlTemplate('popupLobbyWaitJoinTemplate'),
+            html: renderRoomTemplate('popupLobbyWaitJoinTemplate'),
             confirmButtonText: `Ok`,
             denyButtonText: `Leave room`,
             customClass: {
@@ -9946,7 +9904,7 @@ class RoomClient {
                 timer: 2800,
                 timerProgressBar: true,
                 background: swalBackground,
-                html: this.renderHtmlTemplate('popupLobbyAcceptTemplate'),
+                html: renderRoomTemplate('popupLobbyAcceptTemplate'),
                 customClass: {
                     popup: 'lobby-join-toast lobby-join-toast--accept',
                     htmlContainer: 'lobby-join-toast-html',
@@ -9965,7 +9923,7 @@ class RoomClient {
             showConfirmButton: true,
             background: swalBackground,
             title: 'Request declined',
-            html: this.renderHtmlTemplate('popupLobbyRejectTemplate'),
+            html: renderRoomTemplate('popupLobbyRejectTemplate'),
             confirmButtonText: `Leave room`,
             customClass: {
                 popup: 'lobby-join-popup lobby-join-popup--reject',
@@ -11679,7 +11637,7 @@ class RoomClient {
             imageUrl: image.geolocation,
             position: 'center',
             title: 'Geo Location',
-            html: this.renderHtmlTemplate('popupGeoLocationPromptTemplate', {
+            html: renderRoomTemplate('popupGeoLocationPromptTemplate', {
                 text: {
                     message: `Would you like to share your location to ${cmd.from_peer_name}?`,
                 },
@@ -11775,7 +11733,7 @@ class RoomClient {
             imageUrl: image.geolocation,
             position: 'center',
             title: 'Geo Location',
-            html: this.renderHtmlTemplate('popupGeoLocationPromptTemplate', {
+            html: renderRoomTemplate('popupGeoLocationPromptTemplate', {
                 text: {
                     message: `Would you like to open ${cmd.from_peer_name} geolocation?`,
                 },

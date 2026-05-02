@@ -1599,7 +1599,7 @@ async function shareRoom(useNavigator = false) {
             background: swalBackground,
             position: 'center',
             title: 'Share the room',
-            html: rc.renderHtmlTemplate('popupShareRoomTemplate', {
+            html: renderRoomTemplate('popupShareRoomTemplate', {
                 text: {
                     roomUrl: RoomURL,
                 },
@@ -2103,6 +2103,44 @@ function updateMyAvatarResetButtonVisibility() {
 // ####################################################
 // UTILS
 // ####################################################
+
+function renderRoomTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
+    const template = document.getElementById(templateId);
+    if (!template || !template.content) return '';
+
+    const wrapper = document.createElement('div');
+    wrapper.appendChild(template.content.cloneNode(true));
+
+    wrapper.querySelectorAll('*').forEach((element) => {
+        element.getAttributeNames().forEach((name) => {
+            if (!name.startsWith('data-template-attr-')) return;
+
+            const attrName = name.replace('data-template-attr-', '');
+            const key = element.getAttribute(name);
+            const value = attrs[key];
+
+            if (value === undefined || value === null) {
+                element.removeAttribute(attrName);
+            } else {
+                element.setAttribute(attrName, value);
+            }
+
+            element.removeAttribute(name);
+        });
+    });
+
+    wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
+        const key = element.getAttribute('data-template-text');
+        element.textContent = text[key] ?? '';
+    });
+
+    wrapper.querySelectorAll('[data-template-html]').forEach((element) => {
+        const key = element.getAttribute('data-template-html');
+        element.innerHTML = html[key] ?? '';
+    });
+
+    return wrapper.innerHTML.trim();
+}
 
 function updateChatConversationsCount() {
     const el = getId('chatConversationsCount');
@@ -5435,7 +5473,7 @@ function createStickyNote() {
     Swal.fire({
         background: swalBackground,
         title: 'Create Sticky Note',
-        html: rc.renderHtmlTemplate('popupStickyNoteTemplate'),
+        html: renderRoomTemplate('popupStickyNoteTemplate'),
         showCancelButton: true,
         confirmButtonText: 'Create',
         cancelButtonText: 'Cancel',
@@ -5525,7 +5563,7 @@ function setupFileSelection(title, accept, renderToCanvas) {
         position: 'center',
         title: title,
         input: 'file',
-        html: rc.renderHtmlTemplate('popupFileDropTemplate'),
+        html: renderRoomTemplate('popupFileDropTemplate'),
         inputAttributes: {
             accept: accept,
             'aria-label': title,
@@ -6142,13 +6180,13 @@ function getParticipantsList(peers) {
     let li = '';
 
     function renderParticipantStatus(statusText) {
-        return rc.renderHtmlTemplate('participantListStatusTemplate', {
+        return renderRoomTemplate('participantListStatusTemplate', {
             text: { statusText },
         });
     }
 
     function renderParticipantActionButton({ buttonClass = 'ml5', buttonId, onClick, iconHtml, label = '' }) {
-        return rc.renderHtmlTemplate('participantListActionButtonTemplate', {
+        return renderRoomTemplate('participantListActionButtonTemplate', {
             text: { label },
             html: { iconHtml },
             attrs: {
@@ -6166,14 +6204,14 @@ function getParticipantsList(peers) {
     }
 
     function renderParticipantDropdown(menuId, menuItems) {
-        return rc.renderHtmlTemplate('participantListDropdownTemplate', {
+        return renderRoomTemplate('participantListDropdownTemplate', {
             html: { menuItems },
             attrs: { menuId },
         });
     }
 
     function renderParticipantButtons(buttons) {
-        return rc.renderHtmlTemplate('participantListActionButtonsTemplate', {
+        return renderRoomTemplate('participantListActionButtonsTemplate', {
             html: { buttons },
         });
     }
@@ -6191,7 +6229,7 @@ function getParticipantsList(peers) {
         dropdownHtml = '',
         buttonsHtml = '',
     }) {
-        return rc.renderHtmlTemplate('participantListItemTemplate', {
+        return renderRoomTemplate('participantListItemTemplate', {
             text: { name },
             html: { nameSuffix, statusHtml, dropdownHtml, buttonsHtml },
             attrs: {
@@ -7401,7 +7439,7 @@ function showAbout() {
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
         title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.43',
-        html: rc.renderHtmlTemplate('popupAboutTemplate', {
+        html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
             },
@@ -7646,7 +7684,7 @@ async function refreshBreakoutPanel() {
         const countId = `breakoutRoomCount-${idx}`;
         const nameId = `breakoutRoomName-${idx}`;
         const durationId = `breakoutRoomDuration-${idx}`;
-        roomsHtml += rc.renderHtmlTemplate('breakoutRoomCardTemplate', {
+        roomsHtml += renderRoomTemplate('breakoutRoomCardTemplate', {
             text: {
                 displayName,
                 peerCountLabel: `${peerCount} peer${peerCount !== 1 ? 's' : ''}`,
@@ -7740,7 +7778,7 @@ async function refreshBreakoutPanel() {
 
     let participantsHtml = '';
     for (const p of peerList) {
-        participantsHtml += rc.renderHtmlTemplate('breakoutParticipantRowTemplate', {
+        participantsHtml += renderRoomTemplate('breakoutParticipantRowTemplate', {
             text: {
                 peerName: p.name,
             },
@@ -7822,7 +7860,7 @@ async function launchBreakoutRooms() {
     });
     const summary = Object.entries(roomCounts)
         .map(([name, count]) =>
-            rc.renderHtmlTemplate('popupBreakoutSummaryRowTemplate', {
+            renderRoomTemplate('popupBreakoutSummaryRowTemplate', {
                 text: {
                     roomName: name,
                     countValue: String(count),
@@ -7839,7 +7877,7 @@ async function launchBreakoutRooms() {
         background: swalBackground,
         position: 'top',
         title: 'Launch Breakout Rooms',
-        html: rc.renderHtmlTemplate('popupBreakoutLaunchTemplate', {
+        html: renderRoomTemplate('popupBreakoutLaunchTemplate', {
             text: {
                 participantCount: String(assignments.length),
                 participantLabel: `participant${assignments.length !== 1 ? 's' : ''}`,
@@ -7982,7 +8020,7 @@ function editBreakoutDuration(index) {
         background: swalBackground,
         position: 'center',
         title: 'Set Room Duration',
-        html: rc.renderHtmlTemplate('popupBreakoutDurationPickerTemplate'),
+        html: renderRoomTemplate('popupBreakoutDurationPickerTemplate'),
         showCancelButton: true,
         showDenyButton: true,
         confirmButtonText: 'Set',
@@ -8079,7 +8117,7 @@ async function endAllBreakoutSessions() {
         background: swalBackground,
         position: 'top',
         title: 'End All Breakout Sessions?',
-        html: rc.renderHtmlTemplate('popupBreakoutEndTemplate', {
+        html: renderRoomTemplate('popupBreakoutEndTemplate', {
             text: {
                 participantCount: String(totalPeers),
                 participantLabel: `participant${totalPeers !== 1 ? 's' : ''}`,

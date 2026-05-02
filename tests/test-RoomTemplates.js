@@ -51,6 +51,23 @@ function extractNamedFunction(source, functionName) {
     throw new Error(`Unable to parse ${functionName} from source file`);
 }
 
+function loadNamedFunctionSource(functionName, relativePaths) {
+    for (const relativePath of relativePaths) {
+        const sourcePath = path.join(__dirname, '..', ...relativePath.split('/'));
+        const source = fs.readFileSync(sourcePath, 'utf8');
+
+        try {
+            return extractNamedFunction(source, functionName);
+        } catch (error) {
+            if (!error.message.includes(`Unable to find ${functionName}`)) {
+                throw error;
+            }
+        }
+    }
+
+    throw new Error(`Unable to find ${functionName} in source file`);
+}
+
 describe('test-RoomTemplates', () => {
     let renderRoomTemplate;
     let document;
@@ -59,9 +76,7 @@ describe('test-RoomTemplates', () => {
         const dom = new JSDOM('<!doctype html><html><body></body></html>');
         document = dom.window.document;
 
-        const roomClientPath = path.join(__dirname, '..', 'public', 'js', 'RoomClient.js');
-        const roomClientSource = fs.readFileSync(roomClientPath, 'utf8');
-        const functionSource = extractNamedFunction(roomClientSource, 'renderRoomTemplate');
+        const functionSource = loadNamedFunctionSource('renderRoomTemplate', ['public/js/Room.js']);
 
         renderRoomTemplate = vm.runInNewContext(`(${functionSource})`, { document });
     });
