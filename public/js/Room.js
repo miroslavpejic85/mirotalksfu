@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.41
+ * @version 2.2.42
  *
  */
 
@@ -6130,29 +6130,81 @@ async function getRoomParticipants() {
 function getParticipantsList(peers) {
     let li = '';
 
+    function renderParticipantStatus(statusText) {
+        return rc.renderHtmlTemplate('participantListStatusTemplate', {
+            text: { statusText },
+        });
+    }
+
+    function renderParticipantActionButton({ buttonClass = 'ml5', buttonId, onClick, iconHtml, label = '' }) {
+        return rc.renderHtmlTemplate('participantListActionButtonTemplate', {
+            text: { label },
+            html: { iconHtml },
+            attrs: {
+                buttonClass,
+                buttonId,
+                onClick,
+            },
+        });
+    }
+
+    function renderParticipantDropdown(menuId, menuItems) {
+        return rc.renderHtmlTemplate('participantListDropdownTemplate', {
+            html: { menuItems },
+            attrs: { menuId },
+        });
+    }
+
+    function renderParticipantButtons(buttons) {
+        return rc.renderHtmlTemplate('participantListActionButtonsTemplate', {
+            html: { buttons },
+        });
+    }
+
+    function renderParticipantItem({
+        itemId,
+        toId,
+        toName,
+        itemClass,
+        onClick,
+        avatarSrc,
+        name,
+        nameSuffix = '',
+        statusHtml,
+        dropdownHtml = '',
+        buttonsHtml = '',
+    }) {
+        return rc.renderHtmlTemplate('participantListItemTemplate', {
+            text: { name },
+            html: { nameSuffix, statusHtml, dropdownHtml, buttonsHtml },
+            attrs: {
+                itemId,
+                toId,
+                toName,
+                itemClass,
+                onClick,
+                avatarSrc,
+            },
+        });
+    }
+
     const chatGPT = BUTTONS.chat.chatGPT !== undefined ? BUTTONS.chat.chatGPT : true;
 
     // CHAT-GPT
     if (chatGPT) {
         const chatgpt_active = rc.chatPeerName === 'ChatGPT' ? ' active' : '';
 
-        li = `
-        <li 
-            id="ChatGPT" 
-            data-to-id="ChatGPT"
-            data-to-name="ChatGPT"
-            class="clearfix${chatgpt_active}" 
-            onclick="rc.showPeerAboutAndMessages(this.id, 'ChatGPT', '', event)"
-        >
-            <img 
-                src="${image.chatgpt}"
-                alt="avatar"
-            />
-            <div class="about">
-                <div class="name">ChatGPT <span class="chat-peer-badge assistant-green">Assistant</span></div>
-                <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private assistant replies</span>
-            </div>
-        </li>`;
+        li = renderParticipantItem({
+            itemId: 'ChatGPT',
+            toId: 'ChatGPT',
+            toName: 'ChatGPT',
+            itemClass: `clearfix${chatgpt_active}`,
+            onClick: "rc.showPeerAboutAndMessages(this.id, 'ChatGPT', '', event)",
+            avatarSrc: image.chatgpt,
+            name: 'ChatGPT',
+            nameSuffix: ' <span class="chat-peer-badge assistant-green">Assistant</span>',
+            statusHtml: renderParticipantStatus('Private assistant replies'),
+        });
     }
 
     const deepSeek = BUTTONS.chat.deepSeek !== undefined ? BUTTONS.chat.deepSeek : true;
@@ -6161,89 +6213,76 @@ function getParticipantsList(peers) {
     if (deepSeek) {
         const deepSeek_active = rc.chatPeerName === 'DeepSeek' ? ' active' : '';
 
-        li += `
-        <li 
-            id="DeepSeek" 
-            data-to-id="DeepSeek"
-            data-to-name="DeepSeek"
-            class="clearfix${deepSeek_active}" 
-            onclick="rc.showPeerAboutAndMessages(this.id, 'DeepSeek', '', event)"
-        >
-            <img 
-                src="${image.deepSeek}"
-                alt="avatar"
-            />
-            <div class="about">
-                <div class="name">DeepSeek <span class="chat-peer-badge assistant">Assistant</span></div>
-                <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private assistant replies</span>
-            </div>
-        </li>`;
+        li += renderParticipantItem({
+            itemId: 'DeepSeek',
+            toId: 'DeepSeek',
+            toName: 'DeepSeek',
+            itemClass: `clearfix${deepSeek_active}`,
+            onClick: "rc.showPeerAboutAndMessages(this.id, 'DeepSeek', '', event)",
+            avatarSrc: image.deepSeek,
+            name: 'DeepSeek',
+            nameSuffix: ' <span class="chat-peer-badge assistant">Assistant</span>',
+            statusHtml: renderParticipantStatus('Private assistant replies'),
+        });
     }
 
     const public_chat_active = rc.chatPeerName === 'all' ? ' active' : '';
 
     // ALL
-    li += `
-    <li id="all"
-        data-to-id="all"
-        data-to-name="all"
-        class="clearfix${public_chat_active}" 
-        onclick="rc.showPeerAboutAndMessages(this.id, 'all', '', event)"
-    >
-        <img 
-            src="${image.all}"
-            alt="avatar"
-        />
-        <div class="about">
-            <div class="name">Public chat <span id="all-unread-count" class="unread-count hidden"></span></div>
-            <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Everyone in room ${participantsCount}</span>
-        </div>`;
+    let publicDropdownHtml = '';
+    let publicButtonsHtml = '';
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
     if (!isRulesActive || isPresenter) {
-        li += `
-        <div class="dropdown">
-            <button 
-                class="dropdown-toggle" 
-                type="button" 
-                id="${socket.id}-chatDropDownMenu" 
-                data-bs-toggle="dropdown" 
-                aria-expanded="false"
-                style="float: right"
-            >
-            <i class="fas fa-bars"></i>
-            </button>
-            <ul class="dropdown-menu text-start" aria-labelledby="${socket.id}-chatDropDownMenu">`;
+        let menuItems = '';
 
-        li += `<li><button class="ml5" id="muteAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff} Mute all participants</button></li>`;
-        li += `<li><button class="ml5" id="hideAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff} Hide all participants</button></li>`;
-        li += `<li><button class="ml5" id="stopAllParticipantsButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff} Stop all screens sharing</button></li>`;
+        menuItems += `<li>${renderParticipantActionButton({ buttonId: 'muteAllParticipantsButton', onClick: `rc.peerAction('me','${socket.id}','mute',true,true)`, iconHtml: _PEER.audioOff, label: 'Mute all participants' })}</li>`;
+        menuItems += `<li>${renderParticipantActionButton({ buttonId: 'hideAllParticipantsButton', onClick: `rc.peerAction('me','${socket.id}','hide',true,true)`, iconHtml: _PEER.videoOff, label: 'Hide all participants' })}</li>`;
+        menuItems += `<li>${renderParticipantActionButton({ buttonId: 'stopAllParticipantsButton', onClick: `rc.peerAction('me','${socket.id}','stop',true,true)`, iconHtml: _PEER.screenOff, label: 'Stop all screens sharing' })}</li>`;
 
         if (BUTTONS.participantsList.sendFileAllButton) {
-            li += `<li><button class="btn-sm ml5" id="sendAllButton" onclick="rc.selectFileToShare('${socket.id}', true)">${_PEER.sendFile} Share file to all</button></li>`;
+            menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: 'sendAllButton', onClick: `rc.selectFileToShare('${socket.id}', true)`, iconHtml: _PEER.sendFile, label: 'Share file to all' })}</li>`;
         }
 
-        li += `<li><button class="btn-sm ml5" id="sendVideoToAll" onclick="rc.shareVideo('all');">${_PEER.sendVideo} Share audio/video to all</button></li>`;
+        menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: 'sendVideoToAll', onClick: `rc.shareVideo('all');`, iconHtml: _PEER.sendVideo, label: 'Share audio/video to all' })}</li>`;
 
         if (BUTTONS.participantsList.ejectAllButton) {
-            li += `<li><button class="btn-sm ml5" id="ejectAllButton" onclick="rc.peerAction('me','${socket.id}','eject',true,true)">${_PEER.ejectPeer} Eject all participants</button></li>`;
+            menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: 'ejectAllButton', onClick: `rc.peerAction('me','${socket.id}','eject',true,true)`, iconHtml: _PEER.ejectPeer, label: 'Eject all participants' })}</li>`;
         }
 
-        li += `</ul>
-        </div>
-
-        <br/>
-
-        <div class="about-buttons mt5">
-            <button class="ml5" id="muteAllButton" onclick="rc.peerAction('me','${socket.id}','mute',true,true)">${_PEER.audioOff}</button>
-            <button class="ml5" id="hideAllButton" onclick="rc.peerAction('me','${socket.id}','hide',true,true)">${_PEER.videoOff}</button>
-            <button class="ml5" id="stopAllButton" onclick="rc.peerAction('me','${socket.id}','stop',true,true)">${_PEER.screenOff}</button>
-        </div>`;
+        publicDropdownHtml = renderParticipantDropdown(`${socket.id}-chatDropDownMenu`, menuItems);
+        publicButtonsHtml = renderParticipantButtons(
+            renderParticipantActionButton({
+                buttonId: 'muteAllButton',
+                onClick: `rc.peerAction('me','${socket.id}','mute',true,true)`,
+                iconHtml: _PEER.audioOff,
+            }) +
+                renderParticipantActionButton({
+                    buttonId: 'hideAllButton',
+                    onClick: `rc.peerAction('me','${socket.id}','hide',true,true)`,
+                    iconHtml: _PEER.videoOff,
+                }) +
+                renderParticipantActionButton({
+                    buttonId: 'stopAllButton',
+                    onClick: `rc.peerAction('me','${socket.id}','stop',true,true)`,
+                    iconHtml: _PEER.screenOff,
+                })
+        );
     }
 
-    li += `
-    </li>
-    `;
+    li += renderParticipantItem({
+        itemId: 'all',
+        toId: 'all',
+        toName: 'all',
+        itemClass: `clearfix${public_chat_active}`,
+        onClick: "rc.showPeerAboutAndMessages(this.id, 'all', '', event)",
+        avatarSrc: image.all,
+        name: 'Public chat',
+        nameSuffix: ' <span id="all-unread-count" class="unread-count hidden"></span>',
+        statusHtml: renderParticipantStatus(`Everyone in room ${participantsCount}`),
+        dropdownHtml: publicDropdownHtml,
+        buttonsHtml: publicButtonsHtml,
+    });
 
     // PEERS IN THE CURRENT ROOM
     for (const peer of Array.from(peers.keys())) {
@@ -6270,146 +6309,114 @@ function getParticipantsList(peers) {
         if (socket.id !== peer_id) {
             // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
-                li += `
-                <li 
-                    id='${peer_id}'
-                    data-to-id="${peer_id}" 
-                    data-to-name="${peer_name}"
-                    class="clearfix${peer_chat_active}" 
-                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', '${peer_avatar}', event)"
-                >
-                    <img
-                        src="${avatarImg}"
-                        alt="avatar" 
-                    />
-                    <div class="about">
-                        <div class="name">${peer_name_limited} <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
-                        <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
-                    </div>
+                let menuItems = '';
 
-                    <div class="dropdown">
-                        <button 
-                            class="dropdown-toggle" 
-                            type="button" 
-                            id="${peer_id}-chatDropDownMenu" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false"
-                            style="float: right"
-                        >
-                        <i class="fas fa-bars"></i>
-                        </button>
-                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
-
-                li += `<li><button class="ml5" id='${peer_id}___pAudioMute' onclick="rc.peerAction('me',this.id,'mute')">${_PEER.audioOn} Toggle audio</button></li>`;
-                li += `<li><button class="ml5" id='${peer_id}___pVideoHide' onclick="rc.peerAction('me',this.id,'hide')">${_PEER.videoOn} Toggle video</button></li>`;
-                li += `<li><button class="ml5" id='${peer_id}___pScreenStop' onclick="rc.peerAction('me',this.id,'stop')">${_PEER.screenOn} Toggle screen</button></li>`;
+                menuItems += `<li>${renderParticipantActionButton({ buttonId: `${peer_id}___pAudioMute`, onClick: `rc.peerAction('me',this.id,'mute')`, iconHtml: _PEER.audioOn, label: 'Toggle audio' })}</li>`;
+                menuItems += `<li>${renderParticipantActionButton({ buttonId: `${peer_id}___pVideoHide`, onClick: `rc.peerAction('me',this.id,'hide')`, iconHtml: _PEER.videoOn, label: 'Toggle video' })}</li>`;
+                menuItems += `<li>${renderParticipantActionButton({ buttonId: `${peer_id}___pScreenStop`, onClick: `rc.peerAction('me',this.id,'stop')`, iconHtml: _PEER.screenOn, label: 'Toggle screen' })}</li>`;
 
                 if (BUTTONS.participantsList.sendFileButton) {
-                    li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false, '${peer_name}')">${peer_sendFile} Share file</button></li>`;
+                    menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___shareFile`, onClick: `rc.selectFileToShare('${peer_id}', false, ${JSON.stringify(peer_name)})`, iconHtml: peer_sendFile, label: 'Share file' })}</li>`;
                 }
 
-                li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}', '${peer_name}');">${_PEER.sendVideo} Share audio/video</button></li>`;
+                menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___sendVideoTo`, onClick: `rc.shareVideo('${peer_id}', ${JSON.stringify(peer_name)});`, iconHtml: _PEER.sendVideo, label: 'Share audio/video' })}</li>`;
 
                 if (BUTTONS.participantsList.geoLocationButton) {
-                    li += `<li><button class="btn-sm ml5" id='${peer_id}___geoLocation' onclick="rc.askPeerGeoLocation(this.id)">${peer_geoLocation} Get geolocation</button></li>`;
+                    menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___geoLocation`, onClick: `rc.askPeerGeoLocation(this.id)`, iconHtml: peer_geoLocation, label: 'Get geolocation' })}</li>`;
                 }
                 if (BUTTONS.participantsList.banButton) {
-                    li += `<li><button class="btn-sm ml5" id='${peer_id}___pBan' onclick="rc.peerAction('me',this.id,'ban')">${peer_ban} Ban participant</button></li>`;
+                    menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___pBan`, onClick: `rc.peerAction('me',this.id,'ban')`, iconHtml: peer_ban, label: 'Ban participant' })}</li>`;
                 }
                 if (BUTTONS.participantsList.ejectButton) {
-                    li += `<li><button class="btn-sm ml5" id='${peer_id}___pEject' onclick="rc.peerAction('me',this.id,'eject')">${peer_eject} Eject participant</button></li>`;
+                    menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___pEject`, onClick: `rc.peerAction('me',this.id,'eject')`, iconHtml: peer_eject, label: 'Eject participant' })}</li>`;
                 }
+                const dropdownHtml = renderParticipantDropdown(`${peer_id}-chatDropDownMenu`, menuItems);
 
-                li += `</ul>
-                    </div>
-
-                    <br/>
-
-                    <div class="about-buttons mt5"> 
-                        <button class="ml5" id='${peer_id}___pAudio' onclick="rc.peerAction('me',this.id,'mute')">${peer_audio}</button>
-                        <button class="ml5" id='${peer_id}___pVideo' onclick="rc.peerAction('me',this.id,'hide')">${peer_video}</button>
-                        <button class="ml5" id='${peer_id}___pScreen' onclick="rc.peerAction('me',this.id,'stop')">${peer_screen}</button>
-                `;
-
-                // li += `
-                //         <button class="ml5" >${peer_presenter}</button>`;
+                let buttons =
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pAudio`,
+                        onClick: `rc.peerAction('me',this.id,'mute')`,
+                        iconHtml: peer_audio,
+                    }) +
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pVideo`,
+                        onClick: `rc.peerAction('me',this.id,'hide')`,
+                        iconHtml: peer_video,
+                    }) +
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pScreen`,
+                        onClick: `rc.peerAction('me',this.id,'stop')`,
+                        iconHtml: peer_screen,
+                    });
 
                 if (peer_info.peer_hand) {
-                    li += `
-                        <button class="ml5" >${peer_hand}</button>`;
+                    buttons += renderParticipantActionButton({ iconHtml: peer_hand });
                 }
 
-                li += ` 
-                    </div>
-                </li>
-                `;
+                li += renderParticipantItem({
+                    itemId: peer_id,
+                    toId: peer_id,
+                    toName: peer_name,
+                    itemClass: `clearfix${peer_chat_active}`,
+                    onClick: `rc.showPeerAboutAndMessages(this.id, ${JSON.stringify(peer_name)}, ${JSON.stringify(peer_avatar || '')}, event)`,
+                    avatarSrc: avatarImg,
+                    name: peer_name_limited,
+                    nameSuffix: ` <span id="${peer_id}-unread-count" class="unread-count hidden"></span>`,
+                    statusHtml: renderParticipantStatus('Private messages'),
+                    dropdownHtml,
+                    buttonsHtml: renderParticipantButtons(buttons),
+                });
             } else {
                 // GUEST USER
-                li += `
-                <li 
-                    id='${peer_id}' 
-                    data-to-id="${peer_id}"
-                    data-to-name="${peer_name}"
-                    class="clearfix${peer_chat_active}" 
-                    onclick="rc.showPeerAboutAndMessages(this.id, '${peer_name}', '${peer_avatar}', event)"
-                >
-                <img 
-                    src="${avatarImg}"
-                    alt="avatar" 
-                />
-                    <div class="about">
-                        <div class="name">${peer_name_limited} <span id="${peer_id}-unread-count" class="unread-count hidden"></span></div>
-                        <span class="chat-peer-status-text"><i class="fa fa-circle online"></i> Private messages</span>
-                    </div>
-                `;
+                let dropdownHtml = '';
 
                 // NO ROOM BROADCASTING
                 if (!isBroadcastingEnabled) {
-                    li += `
-                    <div class="dropdown">
-                        <button 
-                            class="dropdown-toggle" 
-                            type="button" 
-                            id="${peer_id}-chatDropDownMenu" 
-                            data-bs-toggle="dropdown" 
-                            aria-expanded="false"
-                            style="float: right"
-                        >
-                        <i class="fas fa-bars"></i>
-                        </button>
-                        <ul class="dropdown-menu text-start" aria-labelledby="${peer_id}-chatDropDownMenu">`;
+                    let menuItems = '';
 
                     if (BUTTONS.participantsList.sendFileButton) {
-                        li += `<li><button class="btn-sm ml5" id='${peer_id}___shareFile' onclick="rc.selectFileToShare('${peer_id}', false, '${peer_name}')">${peer_sendFile} Share file</button></li>`;
+                        menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___shareFile`, onClick: `rc.selectFileToShare('${peer_id}', false, ${JSON.stringify(peer_name)})`, iconHtml: peer_sendFile, label: 'Share file' })}</li>`;
                     }
 
-                    li += `<li><button class="btn-sm ml5" id="${peer_id}___sendVideoTo" onclick="rc.shareVideo('${peer_id}', '${peer_name}');">${_PEER.sendVideo} Share Audio/Video</button></li>
-                        </ul>
-                    </div>
-                    `;
+                    menuItems += `<li>${renderParticipantActionButton({ buttonClass: 'btn-sm ml5', buttonId: `${peer_id}___sendVideoTo`, onClick: `rc.shareVideo('${peer_id}', ${JSON.stringify(peer_name)});`, iconHtml: _PEER.sendVideo, label: 'Share Audio/Video' })}</li>`;
+
+                    dropdownHtml = renderParticipantDropdown(`${peer_id}-chatDropDownMenu`, menuItems);
                 }
 
-                li += `
-                    <br/>
-
-                    <div class="about-buttons mt5"> 
-                        <button class="ml5" id='${peer_id}___pAudio' onclick="rc.peerGuestNotAllowed('audio')">${peer_audio}</button>
-                        <button class="ml5" id='${peer_id}___pVideo' onclick="rc.peerGuestNotAllowed('video')">${peer_video}</button>
-                        <button class="ml5" id='${peer_id}___pScreen' onclick="rc.peerGuestNotAllowed('screen')">${peer_screen}</button>
-                        `;
-
-                // li += `
-                //         <button class="ml5" >${peer_presenter}</button>`;
+                let buttons =
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pAudio`,
+                        onClick: `rc.peerGuestNotAllowed('audio')`,
+                        iconHtml: peer_audio,
+                    }) +
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pVideo`,
+                        onClick: `rc.peerGuestNotAllowed('video')`,
+                        iconHtml: peer_video,
+                    }) +
+                    renderParticipantActionButton({
+                        buttonId: `${peer_id}___pScreen`,
+                        onClick: `rc.peerGuestNotAllowed('screen')`,
+                        iconHtml: peer_screen,
+                    });
 
                 if (peer_info.peer_hand) {
-                    li += ` 
-                        <button class="ml5" >${peer_hand}</button>`;
+                    buttons += renderParticipantActionButton({ iconHtml: peer_hand });
                 }
 
-                li += ` 
-                    </div>
-                </li>
-                `;
+                li += renderParticipantItem({
+                    itemId: peer_id,
+                    toId: peer_id,
+                    toName: peer_name,
+                    itemClass: `clearfix${peer_chat_active}`,
+                    onClick: `rc.showPeerAboutAndMessages(this.id, ${JSON.stringify(peer_name)}, ${JSON.stringify(peer_avatar || '')}, event)`,
+                    avatarSrc: avatarImg,
+                    name: peer_name_limited,
+                    nameSuffix: ` <span id="${peer_id}-unread-count" class="unread-count hidden"></span>`,
+                    statusHtml: renderParticipantStatus('Private messages'),
+                    dropdownHtml,
+                    buttonsHtml: renderParticipantButtons(buttons),
+                });
             }
         }
     }
@@ -7251,7 +7258,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.41',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.42',
         html: rc.renderHtmlTemplate('popupAboutTemplate', {
             html: {
                 aboutContent:

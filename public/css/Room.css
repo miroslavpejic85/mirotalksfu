@@ -1648,6 +1648,15 @@ body {
     color: #66beff !important;
 }
 
+.participant-list-dropdown-toggle {
+    float: right;
+}
+
+.participant-list-dropdown-slot,
+.participant-list-buttons-slot {
+    display: contents;
+}
+
 /* Hide the default Bootstrap dropdown icon */
 .dropdown-toggle::after {
     display: none !important;

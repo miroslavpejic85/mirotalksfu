@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.41
+ * @version 2.2.42
  *
  */
 
@@ -4660,12 +4660,30 @@ class RoomClient {
         }
     }
 
-    renderHtmlTemplate(templateId, { text = {}, html = {} } = {}) {
+    renderHtmlTemplate(templateId, { text = {}, html = {}, attrs = {} } = {}) {
         const template = this.getId(templateId);
         if (!template || !template.content) return '';
 
         const wrapper = document.createElement('div');
         wrapper.appendChild(template.content.cloneNode(true));
+
+        wrapper.querySelectorAll('*').forEach((element) => {
+            element.getAttributeNames().forEach((name) => {
+                if (!name.startsWith('data-template-attr-')) return;
+
+                const attrName = name.replace('data-template-attr-', '');
+                const key = element.getAttribute(name);
+                const value = attrs[key];
+
+                if (value === undefined || value === null || value === '') {
+                    element.removeAttribute(attrName);
+                } else {
+                    element.setAttribute(attrName, value);
+                }
+
+                element.removeAttribute(name);
+            });
+        });
 
         wrapper.querySelectorAll('[data-template-text]').forEach((element) => {
             const key = element.getAttribute('data-template-text');

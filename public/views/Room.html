@@ -2592,5 +2592,66 @@ Note</textarea
         <template id="popupGeoLocationPromptTemplate">
             <div data-template-text="message"></div>
         </template>
+
+        <template id="participantListItemTemplate">
+            <li
+                data-template-attr-id="itemId"
+                data-template-attr-data-to-id="toId"
+                data-template-attr-data-to-name="toName"
+                data-template-attr-class="itemClass"
+                data-template-attr-onclick="onClick"
+            >
+                <img data-template-attr-src="avatarSrc" alt="avatar" />
+                <div class="about">
+                    <div class="name">
+                        <span data-template-text="name"></span>
+                        <span data-template-html="nameSuffix"></span>
+                    </div>
+                    <span class="chat-peer-status-text" data-template-html="statusHtml"></span>
+                </div>
+                <div class="participant-list-dropdown-slot" data-template-html="dropdownHtml"></div>
+                <div class="participant-list-buttons-slot" data-template-html="buttonsHtml"></div>
+            </li>
+        </template>
+
+        <template id="participantListStatusTemplate">
+            <i class="fa fa-circle online"></i>
+            <span data-template-text="statusText"></span>
+        </template>
+
+        <template id="participantListDropdownTemplate">
+            <div class="dropdown">
+                <button
+                    class="dropdown-toggle participant-list-dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    data-template-attr-id="menuId"
+                >
+                    <i class="fas fa-bars"></i>
+                </button>
+                <ul
+                    class="dropdown-menu text-start"
+                    data-template-attr-aria-labelledby="menuId"
+                    data-template-html="menuItems"
+                ></ul>
+            </div>
+        </template>
+
+        <template id="participantListActionButtonTemplate">
+            <button
+                data-template-attr-class="buttonClass"
+                data-template-attr-id="buttonId"
+                data-template-attr-onclick="onClick"
+            >
+                <span data-template-html="iconHtml"></span>
+                <span data-template-text="label"></span>
+            </button>
+        </template>
+
+        <template id="participantListActionButtonsTemplate">
+            <br />
+            <div class="about-buttons mt5" data-template-html="buttons"></div>
+        </template>
     </body>
 </html>
