@@ -15,11 +15,9 @@ function renderRoomTemplate(templateId, { text = {}, html = {}, attrs = {} } = {
             const key = element.getAttribute(name);
             const value = attrs[key];
 
-            if (value === undefined || value === null) {
-                element.removeAttribute(attrName);
-            } else {
-                element.setAttribute(attrName, value);
-            }
+            value === undefined || value === null
+                ? element.removeAttribute(attrName)
+                : element.setAttribute(attrName, value);
 
             element.removeAttribute(name);
         });
