@@ -7,66 +7,7 @@ const path = require('path');
 const vm = require('vm');
 const { JSDOM } = require('jsdom');
 
-function extractNamedFunction(source, functionName) {
-    const signature = `function ${functionName}`;
-    const start = source.indexOf(signature);
-
-    if (start === -1) {
-        throw new Error(`Unable to find ${functionName} in source file`);
-    }
-
-    const paramsStart = source.indexOf('(', start);
-    let paramsDepth = 0;
-    let bodyStart = -1;
-
-    for (let index = paramsStart; index < source.length; index++) {
-        const char = source[index];
-
-        if (char === '(') paramsDepth++;
-        if (char === ')') paramsDepth--;
-
-        if (paramsDepth === 0) {
-            bodyStart = source.indexOf('{', index);
-            break;
-        }
-    }
-
-    if (bodyStart === -1) {
-        throw new Error(`Unable to find ${functionName} body in source file`);
-    }
-
-    let depth = 0;
-
-    for (let index = bodyStart; index < source.length; index++) {
-        const char = source[index];
-
-        if (char === '{') depth++;
-        if (char === '}') depth--;
-
-        if (depth === 0) {
-            return source.slice(start, index + 1);
-        }
-    }
-
-    throw new Error(`Unable to parse ${functionName} from source file`);
-}
-
-function loadNamedFunctionSource(functionName, relativePaths) {
-    for (const relativePath of relativePaths) {
-        const sourcePath = path.join(__dirname, '..', ...relativePath.split('/'));
-        const source = fs.readFileSync(sourcePath, 'utf8');
-
-        try {
-            return extractNamedFunction(source, functionName);
-        } catch (error) {
-            if (!error.message.includes(`Unable to find ${functionName}`)) {
-                throw error;
-            }
-        }
-    }
-
-    throw new Error(`Unable to find ${functionName} in source file`);
-}
+const templateSource = fs.readFileSync(path.join(__dirname, '..', 'public', 'js', 'RoomTemplate.js'), 'utf8');
 
 describe('test-RoomTemplates', () => {
     let renderRoomTemplate;
@@ -76,9 +17,9 @@ describe('test-RoomTemplates', () => {
         const dom = new JSDOM('<!doctype html><html><body></body></html>');
         document = dom.window.document;
 
-        const functionSource = loadNamedFunctionSource('renderRoomTemplate', ['public/js/Room.js']);
-
-        renderRoomTemplate = vm.runInNewContext(`(${functionSource})`, { document });
+        const context = vm.createContext({ document, module: {}, exports: {} });
+        vm.runInContext(templateSource, context);
+        renderRoomTemplate = context.renderRoomTemplate;
     });
 
     it('preserves empty string attributes used by placeholder options', () => {
