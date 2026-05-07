@@ -735,8 +735,8 @@ class RoomClient {
             if (room.followMe && room.followMe.enabled && !isPresenter) {
                 this._pendingFollowMe = room.followMe;
             }
-            // Check if VideoAI is enabled
-            if (!room.videoAIEnabled) {
+            // Check if VideoAI is enabled and hide to guests by default
+            if (!isPresenter || !room.videoAIEnabled) {
                 VideoAI.enabled = false;
                 elemDisplay('tabVideoAIBtn', false);
             }
@@ -11997,6 +11997,22 @@ class RoomClient {
         };
 
         shareBtn.onclick = async () => {
+            if (!VideoAI.shareToRoom) {
+                const result = await Swal.fire({
+                    background: swalBackground,
+                    position: 'top',
+                    title: 'Share Avatar to Room?',
+                    text: 'Are you sure you want to share the avatar video and audio with all participants?',
+                    icon: 'question',
+                    showDenyButton: true,
+                    confirmButtonText: 'Yes',
+                    denyButtonText: 'No',
+                    showClass: { popup: 'animate__animated animate__fadeInDown' },
+                    hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+                });
+                if (!result.isConfirmed) return;
+            }
+
             VideoAI.shareToRoom = !VideoAI.shareToRoom;
             shareBtn.style.opacity = VideoAI.shareToRoom ? '1' : '0.4';
             shareBtn.style.color = VideoAI.shareToRoom ? 'lime' : '';
