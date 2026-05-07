@@ -12115,11 +12115,16 @@ class RoomClient {
         room.on(RoomEvent.TrackSubscribed, async (track, publication, participant) => {
             console.log('Video AI LiveKit track subscribed:', track.kind, participant.identity);
             if (track.kind === 'video' || track.kind === 'audio') {
-                const element = track.attach();
-                const rawTracks =
-                    track.kind === 'video' ? element.srcObject.getVideoTracks() : element.srcObject.getAudioTracks();
+                const mediaStreamTrack = track.mediaStreamTrack;
+                if (!mediaStreamTrack) {
+                    console.warn('Video AI: no mediaStreamTrack for', track.kind);
+                    return;
+                }
 
-                rawTracks.forEach((t) => mediaStream.addTrack(t));
+                const existing = track.kind === 'video' ? mediaStream.getVideoTracks() : mediaStream.getAudioTracks();
+                existing.forEach((t) => mediaStream.removeTrack(t));
+
+                mediaStream.addTrack(mediaStreamTrack);
 
                 this.videoAIElement.srcObject = mediaStream;
                 this.videoAIElement.play().catch(() => {});
@@ -12128,8 +12133,8 @@ class RoomClient {
                 }
 
                 // Re-publish the avatar track into mediasoup so all participants see/hear it
-                if (VideoAI.shareToRoom && rawTracks[0]) {
-                    await this.publishAvatarTrack(rawTracks[0]);
+                if (VideoAI.shareToRoom) {
+                    await this.publishAvatarTrack(mediaStreamTrack);
                 }
             }
         });
