@@ -3322,7 +3322,11 @@ function startServer() {
 
             log.debug('Video off data', data.peer_name);
 
-            const room = getRoom(socket);
+            const { room, peer } = getRoomAndPeer(socket);
+
+            // Persist peer_video=false so new participants joining later
+            // can correctly see the videoOff tile (e.g. after a VideoAI avatar is stopped)
+            if (peer) peer.updatePeerInfo({ type: 'video', status: false });
 
             room.broadCast(socket.id, 'setVideoOff', data);
         });
