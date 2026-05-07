@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.44
+ * @version 2.2.45
  *
  */
 
@@ -208,6 +208,8 @@ const VideoAI = {
     livekitRoom: null,
     sessionTimeLimit: 0,
     sessionCountdown: null,
+    avatarProducers: [],
+    shareToRoom: false,
 };
 
 // Recording
@@ -11921,6 +11923,14 @@ class RoomClient {
         const mic = this.createButton('avatar__mic', html.audioOn);
         const ss = this.createButton('avatar__stopSession', html.kickOut);
 
+        // Share-to-room toggle button
+        const shareBtn = document.createElement('button');
+        shareBtn.id = 'avatar__shareToRoom';
+        shareBtn.title = 'Share avatar to room';
+        shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>';
+        shareBtn.style.opacity = '0.4';
+        shareBtn.style.cursor = 'pointer';
+
         const avatarName = document.createElement('div');
         const an = document.createElement('span');
         an.id = 'avatar__name';
@@ -11953,6 +11963,7 @@ class RoomClient {
         this.isVideoFullScreenSupported && vb.appendChild(fs);
         vb.appendChild(interrupt);
         speechRecognition && vb.appendChild(mic);
+        vb.appendChild(shareBtn);
         !this.isMobileDevice && vb.appendChild(pin);
         vb.appendChild(sessionTimerSpan);
         avatarName.appendChild(an);
@@ -11985,10 +11996,34 @@ class RoomClient {
             this.stopSession();
         };
 
+        shareBtn.onclick = async () => {
+            VideoAI.shareToRoom = !VideoAI.shareToRoom;
+            shareBtn.style.opacity = VideoAI.shareToRoom ? '1' : '0.4';
+            shareBtn.style.color = VideoAI.shareToRoom ? 'lime' : '';
+            console.log('Video AI shareToRoom:', VideoAI.shareToRoom);
+
+            if (VideoAI.shareToRoom) {
+                // Start sharing: produce current tracks from the live mediaStream
+                if (this.videoAIElement.srcObject) {
+                    const tracks = [
+                        ...this.videoAIElement.srcObject.getVideoTracks(),
+                        ...this.videoAIElement.srcObject.getAudioTracks(),
+                    ];
+                    for (const rawTrack of tracks) {
+                        await this.publishAvatarTrack(rawTrack);
+                    }
+                }
+            } else {
+                // Stop sharing: close avatar producers (host keeps seeing/hearing locally)
+                this.stopAvatarProducers();
+            }
+        };
+
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
             this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
             this.setTippy(mic.id, 'Speech to avatar', 'bottom');
+            this.setTippy(shareBtn.id, 'Share avatar to room', 'bottom');
             this.setTippy(fs.id, 'Toggle full screen', 'bottom');
             this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
         }
@@ -12077,19 +12112,24 @@ class RoomClient {
         const mediaStream = new MediaStream();
 
         // Handle incoming tracks (avatar video/audio)
-        room.on(RoomEvent.TrackSubscribed, (track, publication, participant) => {
+        room.on(RoomEvent.TrackSubscribed, async (track, publication, participant) => {
             console.log('Video AI LiveKit track subscribed:', track.kind, participant.identity);
             if (track.kind === 'video' || track.kind === 'audio') {
                 const element = track.attach();
-                const tracks =
+                const rawTracks =
                     track.kind === 'video' ? element.srcObject.getVideoTracks() : element.srcObject.getAudioTracks();
 
-                tracks.forEach((t) => mediaStream.addTrack(t));
+                rawTracks.forEach((t) => mediaStream.addTrack(t));
 
                 this.videoAIElement.srcObject = mediaStream;
                 this.videoAIElement.play().catch(() => {});
                 if (track.kind === 'video') {
                     this.hideVideoLoaderOnPlay(this.videoAIElement);
+                }
+
+                // Re-publish the avatar track into mediasoup so all participants see/hear it
+                if (VideoAI.shareToRoom && rawTracks[0]) {
+                    await this.publishAvatarTrack(rawTracks[0]);
                 }
             }
         });
@@ -12391,7 +12431,63 @@ class RoomClient {
         });
     }
 
+    async publishAvatarTrack(rawTrack) {
+        if (!this.producerTransport || this.producerTransport.closed) return;
+        // Guard: skip if we already have an active producer of the same kind (prevents duplicates on track reconnect)
+        if (VideoAI.avatarProducers.some((p) => !p.closed && p.kind === rawTrack.kind)) {
+            console.warn('Video AI: skipping duplicate producer for kind:', rawTrack.kind);
+            return;
+        }
+        try {
+            const avatarProducer = await this.producerTransport.produce({
+                track: rawTrack.clone(), // clone so producer.close() doesn't kill the local track
+                appData: { mediaType: rawTrack.kind === 'video' ? mediaType.video : mediaType.audio },
+            });
+            VideoAI.avatarProducers.push(avatarProducer);
+            console.log('Video AI published track to room:', rawTrack.kind, avatarProducer.id);
+        } catch (err) {
+            console.warn('Video AI failed to publish track to room:', err);
+        }
+    }
+
+    stopAvatarProducers() {
+        if (VideoAI.avatarProducers.length > 0) {
+            let hadVideoProducer = false;
+            VideoAI.avatarProducers.forEach((producer) => {
+                if (producer.kind === 'video') hadVideoProducer = true;
+                try {
+                    if (!producer.closed) {
+                        this.socket.emit('producerClosed', {
+                            peer_name: this.peer_name,
+                            producer_id: producer.id,
+                            type: producer.kind === 'video' ? 'videoAI' : 'audioAI',
+                            status: false,
+                        });
+                        producer.close();
+                    }
+                } catch (err) {
+                    console.warn('Video AI producer close error:', err);
+                }
+            });
+            VideoAI.avatarProducers = [];
+            // If avatar video was shared but host's real camera is off,
+            // notify other participants to re-show the video-off tile
+            if (hadVideoProducer && !this.peer_info.peer_video) {
+                this.sendVideoOff();
+            }
+        }
+    }
+
     streamingStop() {
+        // Close mediasoup avatar producers and reset share state
+        this.stopAvatarProducers();
+        VideoAI.shareToRoom = false;
+        const shareBtn = this.getId('avatar__shareToRoom');
+        if (shareBtn) {
+            shareBtn.style.opacity = '0.4';
+            shareBtn.style.color = '';
+        }
+
         // Disconnect LiveKit room
         if (VideoAI.livekitRoom) {
             console.info('Video AI LiveKit room disconnect');
