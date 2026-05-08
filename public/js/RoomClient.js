@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.47
+ * @version 2.2.48
  *
  */
 
@@ -83,6 +83,17 @@ const icons = {
     infoEngine: '<i class="fa-solid fa-gear"></i>',
     infoOs: '<i class="fa-solid fa-layer-group"></i>',
     infoDefault: '<i class="fa-solid fa-circle-info"></i>',
+    signIn: '<i class="fas fa-sign-in-alt"></i>',
+    clock: '<i class="fas fa-clock"></i>',
+    infinity: '<i class="fas fa-infinity"></i>',
+    arrowRight: '<i class="fas fa-arrow-right"></i>',
+    paste: '<i class="fas fa-paste"></i>',
+    smile: '<i class="fas fa-face-smile"></i>',
+    trash: '<i class="fas fa-trash"></i>',
+    youtube: '<i class="fab fa-youtube"></i>',
+    times: '<i class="fas fa-times"></i>',
+    statusCircle: (status) => `<i class="fa fa-circle ${status}"></i>`,
+    robot: '<i class="fas fa-robot"></i>',
 };
 
 const image = {
@@ -1536,7 +1547,7 @@ class RoomClient {
                 },
             }),
             showDenyButton: true,
-            confirmButtonText: '<i class="fas fa-sign-in-alt"></i> Join Room',
+            confirmButtonText: `${icons.signIn} Join Room`,
             denyButtonText: 'Dismiss',
             customClass: {
                 popup: 'breakout-swal breakout-swal--help',
@@ -1557,8 +1568,8 @@ class RoomClient {
         const displayName = roomName || breakoutRoom;
         const durationChip =
             duration && duration !== 'unlimited'
-                ? `<div class="breakout-popup-chip"><i class="fas fa-clock"></i><span>${duration}</span></div>`
-                : '<div class="breakout-popup-chip breakout-popup-chip--open"><i class="fas fa-infinity"></i><span>No time limit</span></div>';
+                ? `<div class="breakout-popup-chip">${icons.clock}<span>${duration}</span></div>`
+                : `<div class="breakout-popup-chip breakout-popup-chip--open">${icons.infinity}<span>No time limit</span></div>`;
         const confirmResult = await Swal.fire({
             allowOutsideClick: false,
             allowEscapeKey: false,
@@ -1574,7 +1585,7 @@ class RoomClient {
                 },
             }),
             showDenyButton: true,
-            confirmButtonText: '<i class="fas fa-arrow-right"></i> Join',
+            confirmButtonText: `${icons.arrowRight} Join`,
             denyButtonText: 'Stay',
             customClass: {
                 popup: 'breakout-swal breakout-swal--join',
@@ -6380,7 +6391,7 @@ class RoomClient {
                     id="msg-speech-${chatMessagesId}" 
                     class="mr5" 
                     onclick="rc.speechElementText('message-${chatMessagesId}')">
-                    <i class="fas fa-volume-high"></i>
+                    ${icons.speech}
                 </button>`
             : '';
 
@@ -6420,20 +6431,20 @@ class RoomClient {
                             id="msg-copy-${chatMessagesId}" 
                             class="mr5" 
                             onclick="rc.copyToClipboard('message-${chatMessagesId}')">
-                            <i class="fas fa-paste"></i>
+                            ${icons.paste}
                         </button>
                         ${speechButton}
                         <button 
                             id="msg-react-${chatMessagesId}" 
                             class="mr5" 
                             onclick="rc.toggleReactionPicker('msg-${chatMessagesId}')">
-                            <i class="fas fa-face-smile"></i>
+                            ${icons.smile}
                         </button>
                         <button 
                             id="msg-delete-${chatMessagesId}"   
                             class="mr5" 
                             onclick="rc.deleteMessage('msg-${chatMessagesId}')">
-                            <i class="fas fa-trash"></i>
+                            ${icons.trash}
                         </button>
                     </div>
                     <div id="reaction-picker-${chatMessagesId}" class="reaction-picker" style="display:none">
@@ -9096,11 +9107,11 @@ class RoomClient {
 
         switch (action) {
             case 'open':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> opened the video`, 'top-end');
+                this.userLog('info', `${peer_name} ${icons.youtube} opened the video`, 'top-end');
                 this.openVideo(data);
                 break;
             case 'close':
-                this.userLog('info', `${peer_name} <i class="fab fa-youtube"></i> closed the video`, 'top-end');
+                this.userLog('info', `${peer_name} ${icons.youtube} closed the video`, 'top-end');
                 this.closeVideo();
                 break;
             default:
@@ -9729,7 +9740,7 @@ class RoomClient {
                         class='lobby-action-btn lobby-action-btn--reject'
                         onclick="rc.lobbyAction(this.id, 'reject')"
                         aria-label='Reject ${displayName}'
-                    ><i class='fas fa-times'></i></button>
+                    >${icons.times}</button>
                 </td>
             </tr>
             `;
@@ -11184,7 +11195,7 @@ class RoomClient {
                     ${categoryHTML}
                     <h6 class="mb-0">${truncatedTitle}</h6>
                     <span class="status">
-                        <i class="fa fa-circle ${status}"></i> ${statusText}
+                        ${icons.statusCircle(status)} ${statusText}
                     </span>
                 </div>
             `;
@@ -11965,7 +11976,7 @@ class RoomClient {
         const shareBtn = document.createElement('button');
         shareBtn.id = 'avatar__shareToRoom';
         shareBtn.title = 'Share avatar to room';
-        shareBtn.innerHTML = '<i class="fas fa-share-alt"></i>';
+        shareBtn.innerHTML = icons.share;
         shareBtn.style.opacity = '0.4';
         shareBtn.style.cursor = 'pointer';
 
@@ -11974,7 +11985,7 @@ class RoomClient {
         if (this.chatGPTEnabled) {
             chatGPTToggleBtn = document.createElement('button');
             chatGPTToggleBtn.id = 'avatar__chatGPTToggle';
-            chatGPTToggleBtn.innerHTML = '<i class="fas fa-robot"></i>';
+            chatGPTToggleBtn.innerHTML = icons.robot;
             chatGPTToggleBtn.style.opacity = VideoAI.useChatGPT ? '1' : '0.4';
             chatGPTToggleBtn.style.color = VideoAI.useChatGPT ? 'lime' : '';
             chatGPTToggleBtn.style.cursor = 'pointer';
