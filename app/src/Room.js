@@ -111,6 +111,7 @@ module.exports = class Room {
             redirect: this.redirect,
             videoAIEnabled: this.videoAIEnabled,
             videoAISessionTimeLimit: this.videoAISessionTimeLimit,
+            chatGPTEnabled: config?.integrations?.chatGPT?.enabled || false,
             thereIsPolls: this.thereIsPolls(),
             shareMediaData: this.shareMediaData,
             dominantSpeaker: this.activeSpeakerObserverEnabled,

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.46
+ * @version 2.2.47
  *
  */
 
@@ -210,6 +210,7 @@ const VideoAI = {
     sessionCountdown: null,
     avatarProducers: [],
     shareToRoom: false,
+    useChatGPT: true,
 };
 
 // Recording
@@ -365,6 +366,7 @@ class RoomClient {
         this.pollSelectedOptions = {};
         this.chatGPTContext = [];
         this.deepSeekContext = [];
+        this.chatGPTEnabled = false;
         this.chatMessages = [];
         this.leftMsgAvatar = null;
         this.rightMsgAvatar = null;
@@ -735,6 +737,8 @@ class RoomClient {
             if (room.followMe && room.followMe.enabled && !isPresenter) {
                 this._pendingFollowMe = room.followMe;
             }
+            // Store ChatGPT enabled state for VideoAI fallback
+            this.chatGPTEnabled = room.chatGPTEnabled || false;
             // Check if VideoAI is enabled and hide to guests by default
             if (!isPresenter || !room.videoAIEnabled) {
                 VideoAI.enabled = false;
@@ -5986,7 +5990,7 @@ class RoomClient {
     }
 
     sendMessage() {
-        if (!this.thereAreParticipants() && !isChatGPTOn && !isDeepSeekOn) {
+        if (!this.thereAreParticipants() && !isChatGPTOn && !isDeepSeekOn && !(VideoAI.enabled && VideoAI.active)) {
             this.cleanMessage();
             isChatPasteTxt = false;
             return this.userLog('info', 'No participants in the room', 'top-end');
@@ -6046,6 +6050,23 @@ class RoomClient {
         };
 
         if (isChatGPTOn) {
+            // If VideoAI is active and ChatGPT interaction is off (toggled or disabled), speak via avatar instead
+            if (VideoAI.enabled && VideoAI.active && !VideoAI.useChatGPT) {
+                this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
+                this.appendMessage(
+                    'left',
+                    this.leftMsgAvatar,
+                    this.peer_name,
+                    this.peer_id,
+                    peer_msg,
+                    'ChatGPT',
+                    'ChatGPT'
+                );
+                this.cleanMessage();
+                this.streamingTask(peer_msg);
+                return;
+            }
+
             data.to_peer_id = 'ChatGPT';
             data.to_peer_name = 'ChatGPT';
             console.log('Send message:', data);
@@ -6145,6 +6166,23 @@ class RoomClient {
                     this.hideAITypingIndicator('DeepSeek');
                     console.log('DeepSeek error:', err);
                 });
+        }
+
+        if (!isChatGPTOn && !isDeepSeekOn && VideoAI.enabled && VideoAI.active && this.chatPeerId === 'ChatGPT') {
+            // ChatGPT is off but LiveAvatar is active — speak the message directly via the avatar
+            this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
+            this.appendMessage(
+                'left',
+                this.leftMsgAvatar,
+                this.peer_name,
+                this.peer_id,
+                peer_msg,
+                'ChatGPT',
+                'ChatGPT'
+            );
+            this.cleanMessage();
+            this.streamingTask(peer_msg);
+            return;
         }
 
         if (!isChatGPTOn && !isDeepSeekOn) {
@@ -11931,6 +11969,17 @@ class RoomClient {
         shareBtn.style.opacity = '0.4';
         shareBtn.style.cursor = 'pointer';
 
+        // ChatGPT interaction toggle button (only when ChatGPT is enabled)
+        let chatGPTToggleBtn = null;
+        if (this.chatGPTEnabled) {
+            chatGPTToggleBtn = document.createElement('button');
+            chatGPTToggleBtn.id = 'avatar__chatGPTToggle';
+            chatGPTToggleBtn.innerHTML = '<i class="fas fa-robot"></i>';
+            chatGPTToggleBtn.style.opacity = VideoAI.useChatGPT ? '1' : '0.4';
+            chatGPTToggleBtn.style.color = VideoAI.useChatGPT ? 'lime' : '';
+            chatGPTToggleBtn.style.cursor = 'pointer';
+        }
+
         const avatarName = document.createElement('div');
         const an = document.createElement('span');
         an.id = 'avatar__name';
@@ -11964,6 +12013,7 @@ class RoomClient {
         vb.appendChild(interrupt);
         speechRecognition && vb.appendChild(mic);
         vb.appendChild(shareBtn);
+        chatGPTToggleBtn && vb.appendChild(chatGPTToggleBtn);
         !this.isMobileDevice && vb.appendChild(pin);
         vb.appendChild(sessionTimerSpan);
         avatarName.appendChild(an);
@@ -12035,11 +12085,21 @@ class RoomClient {
             }
         };
 
+        if (chatGPTToggleBtn) {
+            chatGPTToggleBtn.onclick = () => {
+                VideoAI.useChatGPT = !VideoAI.useChatGPT;
+                chatGPTToggleBtn.style.opacity = VideoAI.useChatGPT ? '1' : '0.4';
+                chatGPTToggleBtn.style.color = VideoAI.useChatGPT ? 'lime' : '';
+                console.log('Video AI useChatGPT:', VideoAI.useChatGPT);
+            };
+        }
+
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
             this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
             this.setTippy(mic.id, 'Speech to avatar', 'bottom');
             this.setTippy(shareBtn.id, 'Share avatar to room', 'bottom');
+            chatGPTToggleBtn && this.setTippy(chatGPTToggleBtn.id, 'Toggle ChatGPT interaction', 'bottom');
             this.setTippy(fs.id, 'Toggle full screen', 'bottom');
             this.setTippy(ss.id, 'Stop VideoAI session', 'bottom');
         }
@@ -12238,8 +12298,15 @@ class RoomClient {
             {
                 delay: 2000,
                 action: () => {
-                    chatMessage.value = 'Hello!';
-                    this.sendMessage();
+                    if (this.chatGPTEnabled && VideoAI.useChatGPT) {
+                        chatMessage.value = 'Hello!';
+                        this.sendMessage();
+                    } else {
+                        const hint = `I'm your AI Avatar. Type a message or use the microphone, and I will speak it for you.`;
+                        this.setMsgAvatar('right', 'Avatar');
+                        this.appendMessage('right', image.chatgpt, 'Avatar', this.peer_id, hint, 'VideoAI', 'Avatar');
+                        this.streamingTask(hint);
+                    }
                 },
             },
         ];
