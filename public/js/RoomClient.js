@@ -12077,7 +12077,6 @@ class RoomClient {
                     position: 'top',
                     title: 'Share Avatar to Room?',
                     text: 'Are you sure you want to share the avatar video and audio with all participants?',
-                    icon: 'question',
                     showDenyButton: true,
                     confirmButtonText: 'Yes',
                     denyButtonText: 'No',
