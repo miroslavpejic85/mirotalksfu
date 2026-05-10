@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.49
+ * @version 2.2.50
  *
  */
 
@@ -320,6 +320,7 @@ class RoomClient {
         // LiveAvatar Video AI
         this.videoAIContainer = null;
         this.videoAIElement = null;
+        this.videoAIRecognitionPersistent = false;
 
         this.dominantSpeaker = false;
         this.isAudioAllowed = isAudioAllowed;
@@ -12040,7 +12041,10 @@ class RoomClient {
                 return this.userLog('warning', 'Speech recognition is not supported in this browser', 'top-end', 6000);
             }
             if (this.videoAIRecording) {
-                this.videoAISpeechRecognition.stop();
+                this.videoAIRecognitionPersistent = false;
+                if (this.videoAISpeechRecognition) {
+                    this.videoAISpeechRecognition.stop();
+                }
             } else {
                 this.startVideoAISpeechRecognition(mic);
             }
@@ -12335,6 +12339,8 @@ class RoomClient {
             return this.userLog('warning', 'Speech recognition is not supported in this browser', 'top-end', 6000);
         }
 
+        this.videoAIRecognitionPersistent = true;
+
         this.videoAISpeechRecognition = new SpeechAPI();
         this.videoAISpeechRecognition.lang = typeof currentLangCode !== 'undefined' ? currentLangCode : 'en-US';
         this.videoAISpeechRecognition.continuous = false;
@@ -12343,8 +12349,7 @@ class RoomClient {
 
         this.videoAISpeechRecognition.onstart = () => {
             this.videoAIRecording = true;
-            micBtn.className = html.audioOff;
-            setColor(micBtn, 'red');
+            setColor(micBtn, 'lime');
             console.log('Video AI speech recognition started');
         };
 
@@ -12369,10 +12374,19 @@ class RoomClient {
         };
 
         this.videoAISpeechRecognition.onend = () => {
-            this.videoAIRecording = false;
-            micBtn.className = html.audioOn;
-            setColor(micBtn, 'white');
-            console.log('Video AI speech recognition stopped');
+            // Prevent stopping in the absence of speech...
+            if (this.videoAIRecognitionPersistent && VideoAI.active) {
+                this.videoAIRecording = false;
+                setTimeout(() => {
+                    if (this.videoAIRecognitionPersistent && VideoAI.active && !this.videoAIRecording) {
+                        this.startVideoAISpeechRecognition(micBtn);
+                    }
+                }, 2000);
+            } else {
+                this.videoAIRecording = false;
+                setColor(micBtn, 'white');
+                console.log('Video AI speech recognition stopped');
+            }
         };
 
         try {
@@ -12482,6 +12496,8 @@ class RoomClient {
 
     stopSession() {
         this.stopVideoAISessionTimer();
+
+        this.videoAIRecognitionPersistent = false;
 
         if (this.videoAISpeechRecognition) {
             this.videoAISpeechRecognition.stop();
