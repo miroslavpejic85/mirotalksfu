@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.48
+ * @version 2.2.49
  *
  */
 
@@ -49,6 +49,8 @@ const html = {
     draw: 'fas fa-pencil-alt',
     close: 'fas fa-times',
     stop: 'fas fa-circle-stop',
+    share: 'fas fa-share-alt',
+    robot: 'fas fa-robot',
 };
 
 const icons = {
@@ -11973,22 +11975,13 @@ class RoomClient {
         const ss = this.createButton('avatar__stopSession', html.kickOut);
 
         // Share-to-room toggle button
-        const shareBtn = document.createElement('button');
-        shareBtn.id = 'avatar__shareToRoom';
-        shareBtn.title = 'Share avatar to room';
-        shareBtn.innerHTML = icons.share;
-        shareBtn.style.opacity = '0.4';
-        shareBtn.style.cursor = 'pointer';
+        const shareBtn = this.createButton('avatar__shareToRoom', html.share);
 
         // ChatGPT interaction toggle button (only when ChatGPT is enabled)
         let chatGPTToggleBtn = null;
         if (this.chatGPTEnabled) {
-            chatGPTToggleBtn = document.createElement('button');
-            chatGPTToggleBtn.id = 'avatar__chatGPTToggle';
-            chatGPTToggleBtn.innerHTML = icons.robot;
-            chatGPTToggleBtn.style.opacity = VideoAI.useChatGPT ? '1' : '0.4';
-            chatGPTToggleBtn.style.color = VideoAI.useChatGPT ? 'lime' : '';
-            chatGPTToggleBtn.style.cursor = 'pointer';
+            chatGPTToggleBtn = this.createButton('avatar__chatGPTToggle', html.robot);
+            setColor(chatGPTToggleBtn, VideoAI.useChatGPT ? 'lime' : '');
         }
 
         const avatarName = document.createElement('div');
@@ -12075,7 +12068,6 @@ class RoomClient {
             }
 
             VideoAI.shareToRoom = !VideoAI.shareToRoom;
-            shareBtn.style.opacity = VideoAI.shareToRoom ? '1' : '0.4';
             shareBtn.style.color = VideoAI.shareToRoom ? 'lime' : '';
             console.log('Video AI shareToRoom:', VideoAI.shareToRoom);
 
@@ -12099,8 +12091,7 @@ class RoomClient {
         if (chatGPTToggleBtn) {
             chatGPTToggleBtn.onclick = () => {
                 VideoAI.useChatGPT = !VideoAI.useChatGPT;
-                chatGPTToggleBtn.style.opacity = VideoAI.useChatGPT ? '1' : '0.4';
-                chatGPTToggleBtn.style.color = VideoAI.useChatGPT ? 'lime' : '';
+                setColor(chatGPTToggleBtn, VideoAI.useChatGPT ? 'lime' : '');
                 console.log('Video AI useChatGPT:', VideoAI.useChatGPT);
             };
         }

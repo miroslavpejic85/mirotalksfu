@@ -231,6 +231,20 @@
     overflow: hidden;
 }
 
+/* Mobile: ensure avatar container and menu are above video menu */
+#videoAIContainer {
+    z-index: 100;
+    position: relative;
+}
+
+#videoAIContainer .videoAvatarMenuBar {
+    z-index: 101;
+}
+
+#videoAIElement {
+    z-index: 99;
+}
+
 .avatar-session-timer {
     font-size: 14px;
     color: white;
