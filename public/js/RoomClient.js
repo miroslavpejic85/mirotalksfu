@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.51
+ * @version 2.2.52
  *
  */
 
@@ -4351,12 +4351,21 @@ class RoomClient {
         const sinkId = speakerSelect?.value;
         if (!sinkId) return;
 
+        const outputElements = [];
+        const remoteAudioElements = Array.from(this.remoteAudioEl?.querySelectorAll('audio') || []);
+
+        audioElement ? outputElements.push(audioElement) : outputElements.push(...remoteAudioElements);
+
+        if (this.videoAIElement) outputElements.push(this.videoAIElement);
+
+        const els = [...new Set(outputElements.filter(Boolean))];
+        if (!els.length) return;
+
         // Defer until a user gesture if needed
         if (!this.hasUserActivation()) {
             this.pendingSinkId = sinkId;
             console.warn('Click once to apply the selected speaker');
             this.runOnNextUserActivation(async () => {
-                const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
                 for (const el of els) {
                     await this.attachSinkId(el, this.pendingSinkId);
                 }
@@ -4368,7 +4377,6 @@ class RoomClient {
             return;
         }
 
-        const els = audioElement ? [audioElement] : this.remoteAudioEl.querySelectorAll('audio');
         for (const el of els) {
             await this.attachSinkId(el, sinkId);
         }
@@ -12212,6 +12220,11 @@ class RoomClient {
             this.videoAIElement.play().catch((error) => {
                 console.warn('Video AI playback blocked:', error?.message || error);
             });
+
+            // Keep avatar audio on the selected output device when speaker changes.
+            if (sinkId && speakerSelect?.value) {
+                await this.changeAudioDestination(this.videoAIElement);
+            }
 
             if (kind === 'video') {
                 this.hideVideoLoaderOnPlay(this.videoAIElement);
