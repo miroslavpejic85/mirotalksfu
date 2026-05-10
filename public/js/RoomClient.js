@@ -12589,10 +12589,7 @@ class RoomClient {
         this.stopAvatarProducers();
         VideoAI.shareToRoom = false;
         const shareBtn = this.getId('avatar__shareToRoom');
-        if (shareBtn) {
-            shareBtn.style.opacity = '0.4';
-            shareBtn.style.color = '';
-        }
+        if (shareBtn) setColor(shareBtn, 'white');
 
         // Disconnect LiveKit room
         if (VideoAI.livekitRoom) {
