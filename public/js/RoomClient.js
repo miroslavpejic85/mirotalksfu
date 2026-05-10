@@ -12068,7 +12068,7 @@ class RoomClient {
             }
 
             VideoAI.shareToRoom = !VideoAI.shareToRoom;
-            shareBtn.style.color = VideoAI.shareToRoom ? 'lime' : '';
+            setColor(shareBtn, VideoAI.shareToRoom ? 'lime' : '');
             console.log('Video AI shareToRoom:', VideoAI.shareToRoom);
 
             if (VideoAI.shareToRoom) {
