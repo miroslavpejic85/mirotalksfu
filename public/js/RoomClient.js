@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.50
+ * @version 2.2.51
  *
  */
 
@@ -5663,6 +5663,11 @@ class RoomClient {
         if (btnMv && videoPlayer) {
             btnMv.addEventListener('click', () => {
                 videoPlayer.classList.toggle('mirror');
+                // Update only current session local webcam mirror preference.
+                const isLocalWebcam = videoPlayer.getAttribute('name') === this.peer_id;
+                if (isLocalWebcam) {
+                    sessionVideoMirror = videoPlayer.classList.contains('mirror');
+                }
             });
         }
     }
@@ -13059,7 +13064,10 @@ class RoomClient {
 
     toggleVideoMirror() {
         const peerVideo = this.getName(this.peer_id);
-        if (peerVideo) peerVideo.classList.toggle('mirror');
+        if (peerVideo) {
+            peerVideo.classList.toggle('mirror');
+            sessionVideoMirror = peerVideo.classList.contains('mirror');
+        }
     }
 
     sleep(ms) {

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.50
+ * @version 2.2.51
  *
  */
 
@@ -309,6 +309,7 @@ let video = false;
 let screen = false;
 let hand = false;
 let camera = 'user';
+let sessionVideoMirror = true;
 
 let recTimer = null;
 let recElapsedTime = null;
@@ -798,6 +799,7 @@ function setupInitButtons() {
     };
     initVideoMirrorButton.onclick = () => {
         initVideo.classList.toggle('mirror');
+        sessionVideoMirror = initVideo.classList.contains('mirror');
     };
     initVirtualBackgroundButton.onclick = () => {
         showImageSelector();
@@ -3150,9 +3152,13 @@ async function toggleScreenSharing() {
 }
 
 function handleCameraMirror(video) {
-    camera === 'environment'
-        ? video.classList.remove('mirror') // Back camera → No mirror
-        : video.classList.add('mirror'); // Disable mirror for rear camera
+    // Keep rear camera unmirrored and apply current session preference to front camera only.
+    if (camera === 'environment') {
+        video.classList.remove('mirror');
+        return;
+    }
+
+    video.classList.toggle('mirror', !!sessionVideoMirror);
 }
 
 function handleSelects() {
@@ -7402,7 +7408,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.50',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.51',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
