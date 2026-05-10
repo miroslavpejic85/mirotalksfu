@@ -224,6 +224,7 @@ const VideoAI = {
     avatarProducers: [],
     shareToRoom: false,
     useChatGPT: true,
+    mediaParticipantIdentity: null,
 };
 
 // Recording
@@ -12006,6 +12007,8 @@ class RoomClient {
         this.videoAIElement.id = 'videoAIElement';
         this.videoAIElement.setAttribute('playsinline', true);
         this.videoAIElement.autoplay = true;
+        this.videoAIElement.muted = false;
+        this.videoAIElement.volume = 1;
         this.videoAIElement.className = '';
         this.videoAIElement.style.objectFit = 'cover';
 
@@ -12197,33 +12200,83 @@ class RoomClient {
 
         // Collect tracks into a single MediaStream for the video element
         const mediaStream = new MediaStream();
+        const deferredAudioTracks = new Map();
+
+        const attachLiveKitTrack = async (kind, mediaStreamTrack) => {
+            const existing = kind === 'video' ? mediaStream.getVideoTracks() : mediaStream.getAudioTracks();
+            existing.forEach((t) => mediaStream.removeTrack(t));
+
+            mediaStream.addTrack(mediaStreamTrack);
+
+            this.videoAIElement.srcObject = mediaStream;
+            this.videoAIElement.play().catch((error) => {
+                console.warn('Video AI playback blocked:', error?.message || error);
+            });
+
+            if (kind === 'video') {
+                this.hideVideoLoaderOnPlay(this.videoAIElement);
+            }
+
+            // Re-publish the avatar track into mediasoup so all participants see/hear it
+            if (VideoAI.shareToRoom) {
+                await this.publishAvatarTrack(mediaStreamTrack);
+            }
+        };
 
         // Handle incoming tracks (avatar video/audio)
         room.on(RoomEvent.TrackSubscribed, async (track, publication, participant) => {
-            console.log('Video AI LiveKit track subscribed:', track.kind, participant.identity);
-            if (track.kind === 'video' || track.kind === 'audio') {
-                const mediaStreamTrack = track.mediaStreamTrack;
-                if (!mediaStreamTrack) {
-                    console.warn('Video AI: no mediaStreamTrack for', track.kind);
+            const participantIdentity = participant?.identity || 'unknown';
+
+            console.log('Video AI LiveKit track subscribed:', track.kind, participantIdentity);
+
+            if (track.kind !== 'video' && track.kind !== 'audio') {
+                return;
+            }
+
+            const mediaStreamTrack = track.mediaStreamTrack;
+            if (!mediaStreamTrack) {
+                console.warn('Video AI: no mediaStreamTrack for', track.kind);
+                return;
+            }
+
+            // Bind media playback to a single LiveKit participant to avoid replacing avatar audio
+            // with secondary agent/system audio tracks from other participants.
+            if (track.kind === 'video') {
+                if (!VideoAI.mediaParticipantIdentity) {
+                    VideoAI.mediaParticipantIdentity = participantIdentity;
+                    console.log('Video AI selected media participant:', VideoAI.mediaParticipantIdentity);
+
+                    const deferredAudioTrack = deferredAudioTracks.get(VideoAI.mediaParticipantIdentity);
+                    if (deferredAudioTrack) {
+                        console.log(
+                            'Video AI attaching deferred audio track for selected participant:',
+                            VideoAI.mediaParticipantIdentity
+                        );
+                        await attachLiveKitTrack('audio', deferredAudioTrack);
+                        deferredAudioTracks.delete(VideoAI.mediaParticipantIdentity);
+                    }
+                } else if (participantIdentity !== VideoAI.mediaParticipantIdentity) {
+                    console.log('Video AI ignoring video track from non-selected participant:', participantIdentity);
                     return;
                 }
+            }
 
-                const existing = track.kind === 'video' ? mediaStream.getVideoTracks() : mediaStream.getAudioTracks();
-                existing.forEach((t) => mediaStream.removeTrack(t));
-
-                mediaStream.addTrack(mediaStreamTrack);
-
-                this.videoAIElement.srcObject = mediaStream;
-                this.videoAIElement.play().catch(() => {});
-                if (track.kind === 'video') {
-                    this.hideVideoLoaderOnPlay(this.videoAIElement);
+            if (track.kind === 'audio') {
+                if (!VideoAI.mediaParticipantIdentity) {
+                    deferredAudioTracks.set(participantIdentity, mediaStreamTrack);
+                    console.log(
+                        'Video AI deferring audio track until video participant is selected:',
+                        participantIdentity
+                    );
+                    return;
                 }
-
-                // Re-publish the avatar track into mediasoup so all participants see/hear it
-                if (VideoAI.shareToRoom) {
-                    await this.publishAvatarTrack(mediaStreamTrack);
+                if (participantIdentity !== VideoAI.mediaParticipantIdentity) {
+                    console.log('Video AI ignoring audio track from non-selected participant:', participantIdentity);
+                    return;
                 }
             }
+
+            await attachLiveKitTrack(track.kind, mediaStreamTrack);
         });
 
         // Handle track unsubscribed
@@ -12618,6 +12671,7 @@ class RoomClient {
 
         VideoAI.active = false;
         VideoAI.sessionToken = null;
+        VideoAI.mediaParticipantIdentity = null;
     }
 
     // ##############################################
