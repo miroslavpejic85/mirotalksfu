@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.52
+ * @version 2.2.53
  *
  */
 
@@ -51,6 +51,7 @@ const html = {
     stop: 'fas fa-circle-stop',
     share: 'fas fa-share-alt',
     robot: 'fas fa-robot',
+    volume: 'fas fa-volume-mute',
 };
 
 const icons = {
@@ -225,6 +226,7 @@ const VideoAI = {
     shareToRoom: false,
     useChatGPT: true,
     mediaParticipantIdentity: null,
+    muteAvatarAudio: false,
 };
 
 // Recording
@@ -11989,6 +11991,9 @@ class RoomClient {
         const mic = this.createButton('avatar__mic', html.audioOn);
         const ss = this.createButton('avatar__stopSession', html.kickOut);
 
+        // Mute avatar audio (local only) toggle button
+        const muteAvatarAudioBtn = this.createButton('avatar__muteAvatarAudio', html.volume);
+
         // Share-to-room toggle button
         const shareBtn = this.createButton('avatar__shareToRoom', html.share);
 
@@ -12031,6 +12036,7 @@ class RoomClient {
         // Append elements to video container
         vb.appendChild(ss);
         this.isVideoFullScreenSupported && vb.appendChild(fs);
+        vb.appendChild(muteAvatarAudioBtn);
         vb.appendChild(interrupt);
         speechRecognition && vb.appendChild(mic);
         vb.appendChild(shareBtn);
@@ -12047,6 +12053,15 @@ class RoomClient {
 
         this.isVideoFullScreenSupported && this.handleFS(this.videoAIElement.id, fs.id);
         this.handlePN(this.videoAIElement.id, pin.id, this.videoAIContainer.id, true, true);
+
+        muteAvatarAudioBtn.onclick = () => {
+            VideoAI.muteAvatarAudio = !VideoAI.muteAvatarAudio;
+            setColor(muteAvatarAudioBtn, VideoAI.muteAvatarAudio ? 'lime' : '');
+            console.log('Video AI muteAvatarAudio:', VideoAI.muteAvatarAudio);
+            if (this.videoAIElement) {
+                this.videoAIElement.muted = VideoAI.muteAvatarAudio;
+            }
+        };
 
         interrupt.onclick = () => {
             this.streamingInterrupt();
@@ -12117,6 +12132,7 @@ class RoomClient {
 
         if (!this.isMobileDevice) {
             this.setTippy(pin.id, 'Toggle Pin', 'bottom');
+            this.setTippy(muteAvatarAudioBtn.id, 'Mute avatar audio (local only)', 'bottom');
             this.setTippy(interrupt.id, 'Interrupt avatar speaking', 'bottom');
             this.setTippy(mic.id, 'Speech to avatar', 'bottom');
             this.setTippy(shareBtn.id, 'Share avatar to room', 'bottom');
@@ -12566,6 +12582,12 @@ class RoomClient {
 
     stopSession() {
         this.stopVideoAISessionTimer();
+
+        // Restore avatar audio if muted
+        if (VideoAI.muteParticipants) {
+            if (this.videoAIElement) this.videoAIElement.muted = false;
+            VideoAI.muteParticipants = false;
+        }
 
         this.videoAIRecognitionPersistent = false;
 
