@@ -4409,7 +4409,7 @@ hr {
     gap: 10px;
     max-height: 400px;
     overflow-y: auto;
-    padding: 5px;
+    padding: 12px 5px 5px;
 }
 
 .avatarCount {
@@ -4426,6 +4426,7 @@ hr {
     cursor: pointer;
     border-radius: 12px;
     padding: 6px;
+    position: relative;
     transition:
         background 0.2s,
         transform 0.15s;
@@ -4438,8 +4439,25 @@ hr {
 
 .avatarCard.selected {
     background: var(--body-bg);
-    outline: 2px solid var(--body-color);
+    outline: 2px solid #4caf50;
     outline-offset: -2px;
+}
+
+.avatarCard.selected::after {
+    content: '\2713';
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 22px;
+    height: 22px;
+    background: #4caf50;
+    color: #fff;
+    font-size: 13px;
+    font-weight: bold;
+    border-radius: 50%;
+    line-height: 22px;
+    text-align: center;
+    z-index: 1;
 }
 
 .avatarImg {
