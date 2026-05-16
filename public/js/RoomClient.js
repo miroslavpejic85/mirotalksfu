@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.66
+ * @version 2.2.67
  *
  */
 
@@ -7480,9 +7480,13 @@ class RoomClient {
     }
 
     createPollInputs(poll) {
-        const questionInput = `<input id="swal-input-question" class="swal2-input" value="${poll.question}">`;
+        const safeQuestion = this.sanitizeHtml(String(poll.question ?? ''));
+        const questionInput = `<input id="swal-input-question" class="swal2-input" value="${safeQuestion}">`;
         const optionsInputs = poll.options
-            .map((option, i) => `<input id="swal-input-option${i}" class="swal2-input" value="${option}">`)
+            .map((option, i) => {
+                const safeOption = this.sanitizeHtml(String(option ?? ''));
+                return `<input id="swal-input-option${i}" class="swal2-input" value="${safeOption}">`;
+            })
             .join('');
         return questionInput + optionsInputs;
     }
