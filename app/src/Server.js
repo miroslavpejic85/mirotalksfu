@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.58
+ * @version 2.2.59
  *
  */
 
@@ -2100,6 +2100,12 @@ function startServer() {
         });
 
         socket.on('createRoom', async ({ room_id }, callback) => {
+            // Security: reject invalid room ids (XSS / path traversal / empty).
+            if (!Validator.isValidRoomName(room_id)) {
+                log.warn('[createRoom] - Invalid room name', { room_id });
+                return callback({ error: 'invalid room name' });
+            }
+
             socket.room_id = room_id;
 
             if (roomList.has(socket.room_id)) {
