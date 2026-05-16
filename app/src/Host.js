@@ -1,5 +1,8 @@
 'use strict';
 
+const config = require('./config');
+const trustProxy = Boolean(config?.server?.trustProxy);
+
 module.exports = class Host {
     constructor() {
         this.authorizedIPs = new Map();
@@ -11,7 +14,9 @@ module.exports = class Host {
      * @returns string IP
      */
     getIP(req) {
-        return req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || req.socket.remoteAddress || req.ip;
+        // Security: only trust X-Forwarded-For when behind a trusted reverse proxy.
+        const forwarded = trustProxy ? req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] : null;
+        return (forwarded && forwarded.split(',')[0].trim()) || req.socket.remoteAddress || req.ip;
     }
 
     /**

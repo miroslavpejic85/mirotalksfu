@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.60
+ * @version 2.2.61
  *
  */
 
@@ -113,11 +113,13 @@ const packageJson = require('../../package.json');
 const rateLimit = require('express-rate-limit');
 const maxAttempts = config?.security?.host?.maxAttempts || 5;
 const minBlockTime = config?.security?.host?.minBlockTime || 15; // minutes
-// Extract client IP (supports proxies)
-const ipKeyGenerator = (req) =>
-    (req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] || '').split(',')[0].trim() ||
-    req.socket?.remoteAddress ||
-    req.ip;
+// Extract client IP (only trust X-Forwarded-For when behind a trusted reverse proxy)
+const ipKeyGenerator = (req) => {
+    const forwarded = Boolean(config?.server?.trustProxy)
+        ? req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For']
+        : null;
+    return (forwarded || '').split(',')[0].trim() || req.socket?.remoteAddress || req.ip;
+};
 // Create login rate limiter
 const loginLimiter = rateLimit({
     windowMs: minBlockTime * 60 * 1000,
@@ -4831,7 +4833,8 @@ function startServer() {
     }
 
     function getIP(req) {
-        const forwarded = req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'];
+        // Security: only trust X-Forwarded-For when behind a trusted reverse proxy.
+        const forwarded = trustProxy ? req.headers['x-forwarded-for'] || req.headers['X-Forwarded-For'] : null;
         if (forwarded) {
             return forwarded.split(',')[0].trim();
         }
@@ -4839,7 +4842,10 @@ function startServer() {
     }
 
     function getIpSocket(socket) {
-        const forwarded = socket.handshake.headers['x-forwarded-for'] || socket.handshake.headers['X-Forwarded-For'];
+        // Security: only trust X-Forwarded-For when behind a trusted reverse proxy.
+        const forwarded = trustProxy
+            ? socket.handshake.headers['x-forwarded-for'] || socket.handshake.headers['X-Forwarded-For']
+            : null;
         if (forwarded) {
             return forwarded.split(',')[0].trim();
         }
