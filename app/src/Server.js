@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.63
+ * @version 2.2.64
  *
  */
 
@@ -169,6 +169,56 @@ const scheduleMeetingLimiter = rateLimit({
     },
     keyGenerator: getRequesterKey,
 });
+
+// Active rooms endpoint rate limiter (per IP) — public endpoint, so prevent
+// enumeration / scraping abuse without breaking the public "event zone" UX.
+const activeRoomsLimiterCfg = config.ui?.rooms?.activeRoomsRateLimit || {};
+const activeRoomsLimiterWindowMs = activeRoomsLimiterCfg.windowMs || 60 * 1000;
+const activeRoomsLimiterMax = activeRoomsLimiterCfg.max || 60;
+const activeRoomsLimiterMinutes = Math.ceil(activeRoomsLimiterWindowMs / (60 * 1000));
+const activeRoomsLimiter = rateLimit({
+    windowMs: activeRoomsLimiterWindowMs,
+    max: activeRoomsLimiterMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        error: `Too many requests. Please try again after ${minutesLabel(activeRoomsLimiterMinutes)}.`,
+    },
+    keyGenerator: (req) => ipKeyGenerator(req),
+});
+
+// Socket.IO createRoom rate limiter (per IP) — sliding window in memory.
+// Prevents unauthenticated sockets from spamming arbitrary room entries
+// into the in-memory roomList (which feeds /api/v1/activeRooms).
+const createRoomLimiterCfg = config.features?.createRoomRateLimit || {};
+const createRoomLimiterWindowMs = createRoomLimiterCfg.windowMs || 60 * 1000;
+const createRoomLimiterMax = createRoomLimiterCfg.max || 10;
+const createRoomLimiterMinutes = Math.ceil(createRoomLimiterWindowMs / (60 * 1000));
+const createRoomHits = new Map(); // ip -> number[] (timestamps)
+function checkCreateRoomLimit(ip) {
+    const now = Date.now();
+    const windowStart = now - createRoomLimiterWindowMs;
+    const hits = (createRoomHits.get(ip) || []).filter((t) => t > windowStart);
+    if (hits.length >= createRoomLimiterMax) {
+        createRoomHits.set(ip, hits);
+        return false;
+    }
+    hits.push(now);
+    createRoomHits.set(ip, hits);
+    return true;
+}
+// Periodic cleanup to bound memory.
+setInterval(
+    () => {
+        const cutoff = Date.now() - createRoomLimiterWindowMs;
+        for (const [ip, hits] of createRoomHits) {
+            const kept = hits.filter((t) => t > cutoff);
+            if (kept.length === 0) createRoomHits.delete(ip);
+            else createRoomHits.set(ip, kept);
+        }
+    },
+    Math.max(createRoomLimiterWindowMs, 60 * 1000)
+).unref?.();
 
 // Branding configuration
 const brandHtmlInjection = config?.ui?.brand?.htmlInjection ?? true;
@@ -1808,7 +1858,7 @@ function startServer() {
     // ####################################################
 
     // request active rooms endpoint
-    app.get(restApi.basePath + '/activeRooms', (req, res) => {
+    app.get(restApi.basePath + '/activeRooms', activeRoomsLimiter, (req, res) => {
         // Check if endpoint allowed
         if (!config.ui?.rooms?.showActive) {
             return res.status(403).json({
@@ -2126,6 +2176,15 @@ function startServer() {
             if (!Validator.isValidRoomName(room_id)) {
                 log.warn('[createRoom] - Invalid room name', { room_id });
                 return callback({ error: 'invalid room name' });
+            }
+
+            // Security: per-IP rate limit to prevent roomList spam/enumeration.
+            const ip = getIpSocket(socket);
+            if (!checkCreateRoomLimit(ip)) {
+                log.warn('[createRoom] - Rate limit exceeded', { ip, room_id });
+                return callback({
+                    error: `Too many room creation requests. Please try again after ${minutesLabel(createRoomLimiterMinutes)}.`,
+                });
             }
 
             socket.room_id = room_id;
