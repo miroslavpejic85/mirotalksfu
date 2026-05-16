@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.65
+ * @version 2.2.66
  *
  */
 
@@ -6400,9 +6400,10 @@ class RoomClient {
         const myMessage = getSide === 'left';
         const messageClass = myMessage ? 'my-message float-right' : 'other-message';
         const messageData = myMessage ? 'text-end' : 'text-start';
+        const safeFromName = this.sanitizeHtml(getFromName);
         const timeAndName = myMessage
-            ? `<span class="message-data-time">${time}, ${getFromName} ( me ) </span>`
-            : `<span class="message-data-time">${time}, ${getFromName} </span>`;
+            ? `<span class="message-data-time">${time}, ${safeFromName} ( me ) </span>`
+            : `<span class="message-data-time">${time}, ${safeFromName} </span>`;
 
         const formatMessage = this.formatMsg(getMsg);
         const speechButton = this.isSpeechSynthesisSupported
@@ -6431,11 +6432,11 @@ class RoomClient {
 
         const newMessageHTML = `
             <li id="msg-${chatMessagesId}"  
-                data-from-id="${getFromId}" 
-                data-from-name="${getFromName}"
-                data-to-id="${getToId}" 
-                data-to-name="${getToName}"
-                data-msg-id="${getMsgId}"
+                data-from-id="${this.sanitizeHtml(getFromId)}" 
+                data-from-name="${this.sanitizeHtml(getFromName)}"
+                data-to-id="${this.sanitizeHtml(getToId)}" 
+                data-to-name="${this.sanitizeHtml(getToName)}"
+                data-msg-id="${this.sanitizeHtml(getMsgId)}"
                 class="clearfix"
             >
                 <div class="message-data ${messageData}">

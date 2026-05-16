@@ -225,4 +225,54 @@ describe('test-XSS', () => {
             sanitized.should.equal('<a>x</a>');
         });
     });
+
+    describe('10. Chat peer_name XSS via HTML attribute (regression)', () => {
+        // Mirrors RoomClient.sanitizeHtml — used to encode values inlined into
+        // HTML attributes via insertAdjacentHTML (e.g. data-from-name="...").
+        function htmlAttrEscape(input) {
+            const map = {
+                '&': '&amp;',
+                '<': '&lt;',
+                '>': '&gt;',
+                '"': '&quot;',
+                "'": '&#039;',
+                '/': '&#x2F;',
+                '`': '&#96;',
+                '=': '&#61;',
+            };
+            return String(input).replace(/[&<>"'/`=]/g, (m) => map[m]);
+        }
+
+        it('confirms checkXSS leaves ASCII double-quotes intact in plain-text strings', () => {
+            // DOMPurify treats the input as a text node, so the bare quote is preserved.
+            // This is by design and why the client must HTML-encode attribute values.
+            const payload = '" onmouseover="alert(document.domain)';
+            const sanitized = checkXSS(payload);
+            sanitized.should.containEql('"');
+            sanitized.should.containEql('onmouseover');
+        });
+
+        it('neutralizes the payload once embedded via the client-side attribute encoder', () => {
+            const payload = '" onmouseover="alert(document.domain)';
+            const serverChecked = checkXSS(payload);
+            const attrSafe = htmlAttrEscape(serverChecked);
+            const html = `<li data-from-name="${attrSafe}"></li>`;
+
+            // The encoded value must not break out of the attribute context.
+            attrSafe.should.not.containEql('"');
+            attrSafe.should.containEql('&quot;');
+            html.should.not.match(/onmouseover\s*=\s*"alert/);
+            html.should.containEql('&quot; onmouseover&#61;&quot;alert');
+        });
+
+        it('encodes `<` and `>` so a peer_name cannot inject child elements', () => {
+            const payload = '<img src=x onerror=alert(1)>';
+            const serverChecked = checkXSS(payload); // strips to '<img src="x">'
+            const attrSafe = htmlAttrEscape(serverChecked);
+            attrSafe.should.not.containEql('<');
+            attrSafe.should.not.containEql('>');
+            attrSafe.should.containEql('&lt;');
+            attrSafe.should.containEql('&gt;');
+        });
+    });
 });
