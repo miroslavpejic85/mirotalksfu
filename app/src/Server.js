@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.56
+ * @version 2.2.57
  *
  */
 
@@ -126,6 +126,41 @@ const loginLimiter = rateLimit({
         message: `Too many login attempts. Please try again after ${minBlockTime} minute${minBlockTime == 1 ? '' : 's'}.`,
     },
     keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
+});
+
+// Room scheduler configuration and rate limiter
+const scheduleMeetingCfg = config.features?.scheduleMeeting || {};
+const scheduleMeetingAllowedDomains = scheduleMeetingCfg.allowedDomains || [];
+const scheduleMeetingLimiterWindowMs = scheduleMeetingCfg.rateLimit?.windowMs || 60 * 60 * 1000;
+const scheduleMeetingLimiterMax = scheduleMeetingCfg.rateLimit?.max || 5;
+const scheduleMeetingLimiterMinutes = Math.ceil(scheduleMeetingLimiterWindowMs / (60 * 1000));
+const scheduleMeetingMaxRecipients = scheduleMeetingCfg.maxRecipients || 20;
+
+const scheduleMeetingLimiter = rateLimit({
+    windowMs: scheduleMeetingLimiterWindowMs,
+    max: scheduleMeetingLimiterMax,
+    message: {
+        message: `Too many schedule meeting requests. Please try again after ${scheduleMeetingLimiterMinutes} minute${scheduleMeetingLimiterMinutes === 1 ? '' : 's'}.`,
+    },
+    keyGenerator: (req) => {
+        if (config?.security?.oidc?.enabled && req.oidc?.isAuthenticated()) {
+            return req.oidc?.user?.sub || req.oidc?.user?.email || ipKeyGenerator(req);
+        }
+        const token = getBearerToken(req);
+        if (token) {
+            try {
+                const { username } = decodeToken(token);
+                if (username) {
+                    return `user:${String(username).trim().toLowerCase()}`;
+                }
+            } catch (error) {
+                // Fall back to token hash key if the token cannot be decoded.
+            }
+            return `token:${token.slice(0, 48)}`;
+        }
+
+        return ipKeyGenerator(req);
+    },
 });
 
 // Branding configuration
@@ -746,40 +781,108 @@ function startServer() {
     });
 
     // Schedule Meeting - send email with .ics calendar attachment
-    app.post('/scheduleMeeting', async (req, res) => {
+    app.post('/scheduleMeeting', OIDCAuth, scheduleMeetingLimiter, async (req, res) => {
         if (!config.features?.scheduleMeeting?.enabled) {
             return res.status(403).json({ message: 'Schedule meeting is disabled' });
         }
 
+        const scheduleMeetingRequiresAuth = scheduleMeetingCfg.requireAuth !== false;
+        const hasAuthProviderEnabled = OIDC.enabled || hostCfg.protected || hostCfg.user_auth;
+
+        if (scheduleMeetingRequiresAuth) {
+            if (!hasAuthProviderEnabled) {
+                return res.status(403).json({
+                    message: 'Schedule meeting requires authentication, but no auth provider is enabled',
+                });
+            }
+
+            const authState = await getScheduleMeetingAuthState(req);
+            if (!authState.authorized) {
+                return res.status(401).json({ message: 'Unauthorized' });
+            }
+        }
+
         const safeBody = checkXSS(req.body) || {};
-        const { title, description, dateTime, duration, recipients, roomName } = safeBody;
+        const title = typeof safeBody.title === 'string' ? safeBody.title.trim() : '';
+        const description = typeof safeBody.description === 'string' ? safeBody.description.trim() : '';
+        const dateTime = typeof safeBody.dateTime === 'string' ? safeBody.dateTime.trim() : '';
+        const recipients = typeof safeBody.recipients === 'string' ? safeBody.recipients.trim() : '';
+        const roomName = typeof safeBody.roomName === 'string' ? safeBody.roomName.trim() : '';
+        const duration = parseInt(safeBody.duration, 10);
 
         if (!title || !dateTime || !duration || !recipients || !roomName) {
             return res.status(400).json({ message: 'Missing required fields' });
         }
 
-        const recipientList = recipients
-            .split(',')
-            .map((e) => e.trim())
-            .filter((e) => Validator.isValidEmail(e));
+        if (!Validator.isValidRoomName(roomName)) {
+            return res.status(400).json({ message: 'Invalid room name' });
+        }
+
+        if (title.length > 120 || description.length > 5000) {
+            return res.status(400).json({ message: 'Title or description is too long' });
+        }
+
+        if (!Number.isFinite(duration) || duration < 1 || duration > 24 * 60) {
+            return res.status(400).json({ message: 'Invalid duration' });
+        }
+
+        const scheduleStartDate = new Date(dateTime);
+        if (Number.isNaN(scheduleStartDate.getTime())) {
+            return res.status(400).json({ message: 'Invalid dateTime' });
+        }
+
+        const recipientList = Validator.parseEmailList(recipients);
 
         if (recipientList.length === 0) {
             return res.status(400).json({ message: 'No valid email recipients' });
         }
 
+        if (recipientList.length > scheduleMeetingMaxRecipients) {
+            return res.status(400).json({
+                message: `Too many recipients. Max allowed is ${scheduleMeetingMaxRecipients}`,
+            });
+        }
+
+        if (!Validator.hasAllowedEmailDomains(recipientList, scheduleMeetingAllowedDomains)) {
+            return res.status(400).json({ message: 'One or more recipients are outside allowed domains' });
+        }
+
+        const authState = await getScheduleMeetingAuthState(req);
+        const requesterIp = authHost.getIP(req);
+
+        log.info('scheduleMeeting request', {
+            requester: authState.requester,
+            ip: requesterIp,
+            recipientCount: recipientList.length,
+            title,
+        });
+
         try {
             await nodemailer.sendScheduleMeeting({
                 title,
-                description: description || '',
-                dateTime,
-                duration: parseInt(duration) || 60,
+                description,
+                dateTime: scheduleStartDate.toISOString(),
+                duration,
                 recipients: recipientList,
                 roomName,
                 hostUrl: config.server.hostUrl,
             });
+
+            log.info('scheduleMeeting invitations sent', {
+                requester: authState.requester,
+                ip: requesterIp,
+                recipientCount: recipientList.length,
+                roomName,
+            });
+
             res.status(200).json({ message: 'Meeting scheduled and invitations sent' });
         } catch (err) {
-            log.error('scheduleMeeting', err);
+            log.error('scheduleMeeting', {
+                error: err.message,
+                requester: authState.requester,
+                ip: requesterIp,
+                recipientCount: recipientList.length,
+            });
             res.status(500).json({ message: 'Failed to send meeting invitations' });
         }
     });
@@ -4706,6 +4809,62 @@ function startServer() {
             }
         }
     }
+}
+
+// ####################################################
+// AUTHENTICATION HELPERS
+// ####################################################
+
+function getBearerToken(req) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return null;
+    }
+    return authHeader.split(' ')[1] || null;
+}
+
+async function getScheduleMeetingAuthState(req) {
+    if (OIDC.enabled && req.oidc?.isAuthenticated()) {
+        return {
+            authorized: true,
+            requester: req.oidc?.user?.email || req.oidc?.user?.name || req.oidc?.user?.sub || 'oidc-user',
+        };
+    }
+
+    if (hostCfg.protected && allowedIP(getIP(req))) {
+        return { authorized: true, requester: 'host-ip-auth' };
+    }
+
+    if (hostCfg.user_auth) {
+        const token = getBearerToken(req);
+        if (!token) {
+            return { authorized: false, requester: 'anonymous' };
+        }
+
+        try {
+            const validToken = await isValidToken(token);
+
+            if (!validToken) {
+                return { authorized: false, requester: 'anonymous' };
+            }
+
+            const { username, password } = checkXSS(decodeToken(token));
+            const isPeerValid = await isAuthPeer(username, password);
+
+            return {
+                authorized: isPeerValid,
+                requester: isPeerValid ? username : 'anonymous',
+            };
+        } catch (error) {
+            log.warn('scheduleMeeting auth token validation failed', {
+                error: error.message,
+                ip: authHost.getIP(req),
+            });
+            return { authorized: false, requester: 'anonymous' };
+        }
+    }
+
+    return { authorized: false, requester: 'anonymous' };
 }
 
 // ####################################################

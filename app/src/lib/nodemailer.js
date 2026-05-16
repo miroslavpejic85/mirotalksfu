@@ -2,6 +2,7 @@
 
 const nodemailer = require('nodemailer');
 const icalGenerator = require('ical-generator').default;
+const he = require('he');
 const { isValidEmail } = require('../Validator');
 const config = require('../config');
 const Logger = require('../Logger');
@@ -263,12 +264,25 @@ function getCurrentDataTime() {
 // SCHEDULE MEETING
 // ####################################################
 
+function sanitizeScheduleMeetingText(value, maxLength = 2000) {
+    if (typeof value !== 'string') {
+        return '';
+    }
+
+    const stripped = value.replace(/<[^>]*>/g, ' ');
+    const decoded = he.decode(stripped);
+    const normalized = decoded.replace(/\s+/g, ' ').trim();
+    return normalized.slice(0, maxLength);
+}
+
 async function sendScheduleMeeting(data) {
     if (!EMAIL_HOST || !EMAIL_PORT || !EMAIL_USERNAME || !EMAIL_PASSWORD) {
         throw new Error('Email is not configured');
     }
 
     const { title, description, dateTime, duration, recipients, roomName, hostUrl } = data;
+    const safeTitle = sanitizeScheduleMeetingText(title, 120);
+    const safeDescription = sanitizeScheduleMeetingText(description, 2000);
 
     const start = new Date(dateTime);
     const end = new Date(start.getTime() + duration * 60 * 1000);
@@ -279,8 +293,8 @@ async function sendScheduleMeeting(data) {
     const event = calendar.createEvent({
         start: start,
         end: end,
-        summary: title,
-        description: `${description ? description + '\n\n' : ''}Join the meeting: ${roomUrl}`,
+        summary: safeTitle,
+        description: `${safeDescription ? safeDescription + '\n\n' : ''}Join the meeting: ${roomUrl}`,
         url: roomUrl,
         status: 'CONFIRMED',
         organizer: { name: APP_NAME, email: EMAIL_FROM },
@@ -288,8 +302,15 @@ async function sendScheduleMeeting(data) {
     recipients.forEach((email) => event.createAttendee({ email, rsvp: true, role: 'REQ-PARTICIPANT' }));
     const icsContent = calendar.toString();
 
-    const subject = `${APP_NAME} - Meeting Invitation: ${title}`;
-    const body = getScheduleMeetingBody({ title, description, roomUrl, start, end, duration });
+    const subject = `${APP_NAME} - Meeting Invitation: ${safeTitle}`;
+    const body = getScheduleMeetingBody({
+        title: safeTitle,
+        description: safeDescription,
+        roomUrl,
+        start,
+        end,
+        duration,
+    });
 
     const promises = recipients.map((recipient) => {
         return transport.sendMail({
@@ -312,6 +333,9 @@ async function sendScheduleMeeting(data) {
 
 function getScheduleMeetingBody(data) {
     const { title, description, roomUrl, start, end, duration } = data;
+    const escapedTitle = he.encode(title);
+    const escapedDescription = he.encode(description);
+    const escapedRoomUrl = he.encode(roomUrl);
 
     const formatDate = (d) =>
         d.toLocaleString('en-US', {
@@ -326,8 +350,8 @@ function getScheduleMeetingBody(data) {
     return `
         <div style="font-family: arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h1 style="color: #333;">📅 Meeting Invitation</h1>
-            <h2 style="color: #555;">${title}</h2>
-            ${description ? `<p style="color: #666;">${description}</p>` : ''}
+            <h2 style="color: #555;">${escapedTitle}</h2>
+            ${escapedDescription ? `<p style="color: #666;">${escapedDescription}</p>` : ''}
             <table style="font-family: arial, sans-serif; border-collapse: collapse; width: 100%; margin: 20px 0;">
                 <tr>
                     <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">📅 Date & Time</td>
@@ -340,12 +364,12 @@ function getScheduleMeetingBody(data) {
                 <tr>
                     <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">🔗 Join Link</td>
                     <td style="border: 1px solid #ddd; padding: 10px;">
-                        <a href="${roomUrl}" style="color: #0270D7;">${roomUrl}</a>
+                        <a href="${escapedRoomUrl}" style="color: #0270D7;">${escapedRoomUrl}</a>
                     </td>
                 </tr>
             </table>
             <p style="margin-top: 20px;">
-                <a href="${roomUrl}" 
+                <a href="${escapedRoomUrl}" 
                    style="display: inline-block; padding: 12px 24px; background-color: #0270D7; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
                     Join Meeting
                 </a>

@@ -61,6 +61,39 @@ function isValidEmail(email) {
     return emailRegex.test(email);
 }
 
+function parseEmailList(input) {
+    if (typeof input !== 'string') {
+        return [];
+    }
+
+    return [...new Set(input.split(',').map((email) => email.trim().toLowerCase()))].filter((email) =>
+        isValidEmail(email)
+    );
+}
+
+function hasAllowedEmailDomains(emails, allowedDomains = []) {
+    if (!Array.isArray(emails) || emails.length === 0) {
+        return false;
+    }
+
+    if (!Array.isArray(allowedDomains) || allowedDomains.length === 0) {
+        return true;
+    }
+
+    const normalizedAllowedDomains = allowedDomains
+        .map((domain) => String(domain).trim().toLowerCase())
+        .filter(Boolean);
+
+    if (normalizedAllowedDomains.length === 0) {
+        return true;
+    }
+
+    return emails.every((email) => {
+        const domain = email.split('@')[1]?.toLowerCase();
+        return normalizedAllowedDomains.includes(domain);
+    });
+}
+
 function isValidData(data) {
     if (!data || typeof data !== 'object') {
         return false;
@@ -73,5 +106,7 @@ module.exports = {
     isValidRecFileNameFormat,
     hasPathTraversal,
     isValidEmail,
+    parseEmailList,
+    hasAllowedEmailDomains,
     isValidData,
 };

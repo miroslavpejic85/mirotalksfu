@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.2.56 - Configuration File
+ * MiroTalk SFU v2.2.57 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1486,9 +1486,24 @@ module.exports = {
          * - enabled: Show "Schedule Meeting" button on landing/newroom pages
          * - Requires email configuration (integrations.email) to send invitations
          * - Sends .ics calendar attachments with meeting details
+         * - requireAuth: Require authenticated requester before sending invitations
+         * - maxRecipients: Maximum recipients accepted per request
+         * - allowedDomains: Optional recipient domain allow-list (empty = all domains)
+         * - rateLimit: Throttle requests to prevent abuse
          */
         scheduleMeeting: {
             enabled: process.env.SCHEDULE_MEETING_ENABLED === 'true',
+            requireAuth: process.env.SCHEDULE_MEETING_REQUIRE_AUTH !== 'false',
+            maxRecipients: Math.max(parseInt(process.env.SCHEDULE_MEETING_MAX_RECIPIENTS, 10) || 20, 1),
+            allowedDomains: (process.env.SCHEDULE_MEETING_ALLOWED_DOMAINS || '')
+                .split(splitChar)
+                .map((domain) => domain.trim().toLowerCase())
+                .filter(Boolean),
+            rateLimit: {
+                windowMs:
+                    Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_WINDOW_MINUTES, 10) || 60, 1) * 60 * 1000,
+                max: Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_MAX, 10) || 5, 1),
+            },
         },
 
         /**

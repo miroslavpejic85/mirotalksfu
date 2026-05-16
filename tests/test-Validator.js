@@ -133,4 +133,28 @@ describe('test-Validator', () => {
             checkValidator.hasPathTraversal('C:\\SomeDir\\OtherDir\\File.txt').should.be.false();
         });
     });
+
+    describe('4. Email list and domain validation', () => {
+        it('should parse, normalize and deduplicate valid emails', () => {
+            const emails = checkValidator.parseEmailList(' Alice@Example.com, bob@example.com, alice@example.com ');
+            emails.should.deepEqual(['alice@example.com', 'bob@example.com']);
+        });
+
+        it('should return empty list for invalid input', () => {
+            checkValidator.parseEmailList(null).should.deepEqual([]);
+            checkValidator.parseEmailList(123).should.deepEqual([]);
+            checkValidator.parseEmailList('').should.deepEqual([]);
+        });
+
+        it('should validate allowed domains when list is provided', () => {
+            const emails = ['alice@example.com', 'bob@company.org'];
+            checkValidator.hasAllowedEmailDomains(emails, ['example.com', 'company.org']).should.be.true();
+            checkValidator.hasAllowedEmailDomains(emails, ['example.com']).should.be.false();
+        });
+
+        it('should allow all domains when allowedDomains is empty', () => {
+            const emails = ['alice@example.com'];
+            checkValidator.hasAllowedEmailDomains(emails, []).should.be.true();
+        });
+    });
 });
