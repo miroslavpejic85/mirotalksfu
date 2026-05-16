@@ -1521,8 +1521,7 @@ module.exports = {
          * into the in-memory roomList (which feeds /api/v1/activeRooms).
          */
         createRoomRateLimit: {
-            windowMs:
-                Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_WINDOW_MINUTES, 10) || 1, 1) * 60 * 1000,
+            windowMs: Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_WINDOW_MINUTES, 10) || 1, 1) * 60 * 1000,
             max: Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_MAX, 10) || 10, 1),
         },
 
