@@ -1064,8 +1064,16 @@ module.exports = {
              * ---------------------
              * - showActive: Show active rooms in the UI (default: false)
              *   https://sfu.mirotalk.com/activeRooms
+             * - activeRoomsRateLimit: Throttle the public /api/v1/activeRooms
+             *   endpoint per IP to prevent enumeration/scraping abuse without
+             *   breaking the public "event zone" UX.
              */
             showActive: process.env.SHOW_ACTIVE_ROOMS === 'true',
+            activeRoomsRateLimit: {
+                windowMs:
+                    Math.max(parseInt(process.env.ACTIVE_ROOMS_RATE_LIMIT_WINDOW_MINUTES, 10) || 1, 1) * 60 * 1000,
+                max: Math.max(parseInt(process.env.ACTIVE_ROOMS_RATE_LIMIT_MAX, 10) || 60, 1),
+            },
         },
         brand: {
             /**
@@ -1504,6 +1512,18 @@ module.exports = {
                     Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_WINDOW_MINUTES, 10) || 60, 1) * 60 * 1000,
                 max: Math.max(parseInt(process.env.SCHEDULE_MEETING_RATE_LIMIT_MAX, 10) || 5, 1),
             },
+        },
+
+        /**
+         * Socket.IO createRoom rate limit (per IP)
+         * ----------------------------------------
+         * Prevents unauthenticated sockets from spamming arbitrary entries
+         * into the in-memory roomList (which feeds /api/v1/activeRooms).
+         */
+        createRoomRateLimit: {
+            windowMs:
+                Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_WINDOW_MINUTES, 10) || 1, 1) * 60 * 1000,
+            max: Math.max(parseInt(process.env.CREATE_ROOM_RATE_LIMIT_MAX, 10) || 10, 1),
         },
 
         /**
