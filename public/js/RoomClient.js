@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.59
+ * @version 2.2.60
  *
  */
 
@@ -6770,8 +6770,10 @@ class RoomClient {
             '"': '&quot;',
             "'": '&#039;',
             '/': '&#x2F;',
+            '`': '&#96;',
+            '=': '&#61;',
         };
-        return input.replace(/[&<>"'/]/g, (m) => map[m]);
+        return input.replace(/[&<>"'/`=]/g, (m) => map[m]);
     }
 
     isHtml(str) {
@@ -9722,7 +9724,9 @@ class RoomClient {
 
         for (const peer_id of Object.keys(this.lobbyPears)) {
             const { peer_name, peer_avatar } = this.lobbyPears[peer_id];
-            const displayName = filterXSS(peer_name);
+            // Security: escape for HTML attribute/text contexts (filterXSS does not encode quotes).
+            const displayName = this.sanitizeHtml(peer_name);
+            const safePeerId = this.sanitizeHtml(peer_id);
 
             const avatarImg =
                 peer_avatar && this.isValidAvatarURL(peer_avatar)
@@ -9731,11 +9735,11 @@ class RoomClient {
                       ? this.genGravatar(peer_name, 32)
                       : this.genAvatarSvg(peer_name, 32);
 
-            const lobbyAcceptId = `${peer_name}___${peer_id}___lobbyAccept`;
-            const lobbyRejectId = `${peer_name}___${peer_id}___lobbyReject`;
+            const lobbyAcceptId = `${displayName}___${safePeerId}___lobbyAccept`;
+            const lobbyRejectId = `${displayName}___${safePeerId}___lobbyReject`;
 
             lobbyTr += `
-            <tr id='${peer_id}' class='lobby-row'>
+            <tr id='${safePeerId}' class='lobby-row'>
                 <td class='lobby-cell lobby-cell--avatar'>
                     <img class='lobby-avatar-img' src="${avatarImg}" alt="${displayName}" />
                 </td>
