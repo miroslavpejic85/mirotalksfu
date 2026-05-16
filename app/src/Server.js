@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.62
+ * @version 2.2.63
  *
  */
 
@@ -599,31 +599,42 @@ function startServer() {
 
     // OpenID Connect - Dynamically set baseURL based on incoming host and protocol
     if (OIDC.enabled) {
+        // Skip OIDC for static assets to avoid state cookie races on /auth/callback
+        // when `authRequired: true`. See: https://github.com/miroslavpejic85/mirotalksfu/issues/251
+        const oidcStaticAssetRegex =
+            /\.(ico|png|jpe?g|gif|svg|webp|css|js|mjs|map|woff2?|ttf|eot|otf|mp3|mp4|webm|wav|ogg|txt|xml|json|manifest)$/i;
+        const skipStaticAssets = (mw) => (req, res, next) => {
+            if (oidcStaticAssetRegex.test(req.path)) return next();
+            return mw(req, res, next);
+        };
+
         if (OIDC.baseUrlDynamic) {
             // Cache auth middleware instances per origin to avoid re-running OIDC discovery on every request
             const authMiddlewareCache = new Map();
 
-            app.use((req, res, next) => {
-                const host = req.headers.host;
-                const protocol = req.protocol === 'https' ? 'https' : 'http';
-                const origin = `${protocol}://${host}`;
+            app.use(
+                skipStaticAssets((req, res, next) => {
+                    const host = req.headers.host;
+                    const protocol = req.protocol === 'https' ? 'https' : 'http';
+                    const origin = `${protocol}://${host}`;
 
-                let cachedAuth = authMiddlewareCache.get(origin);
-                if (!cachedAuth) {
-                    try {
-                        cachedAuth = auth({ ...OIDC.config, baseURL: origin });
-                        authMiddlewareCache.set(origin, cachedAuth);
-                    } catch (err) {
-                        log.error('OIDC Auth Middleware Error', err);
-                        return next(err);
+                    let cachedAuth = authMiddlewareCache.get(origin);
+                    if (!cachedAuth) {
+                        try {
+                            cachedAuth = auth({ ...OIDC.config, baseURL: origin });
+                            authMiddlewareCache.set(origin, cachedAuth);
+                        } catch (err) {
+                            log.error('OIDC Auth Middleware Error', err);
+                            return next(err);
+                        }
                     }
-                }
-                cachedAuth(req, res, next);
-            });
+                    cachedAuth(req, res, next);
+                })
+            );
         } else {
             // Static baseURL: create auth middleware once at startup
             try {
-                app.use(auth(OIDC.config));
+                app.use(skipStaticAssets(auth(OIDC.config)));
             } catch (err) {
                 log.error('OIDC Auth Middleware Error', err);
                 process.exit(1);
