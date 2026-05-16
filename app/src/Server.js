@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.57
+ * @version 2.2.58
  *
  */
 
@@ -2374,6 +2374,11 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const peerInfo = getPeerInfo(peer);
 
             log.debug('Request: getRouterRtpCapabilities', peerInfo);
@@ -2396,6 +2401,11 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const peerInfo = getPeerInfo(peer);
 
             log.debug('Create WebRTC transport request received', peerInfo);
@@ -2415,6 +2425,11 @@ function startServer() {
             }
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const peerInfo = getPeerInfo(peer);
 
             log.debug('Connect transport request received', { transport_id, peerInfo });
@@ -2437,6 +2452,10 @@ function startServer() {
 
             if (!peer) {
                 return callback({ error: 'Peer not found' });
+            }
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
             }
 
             const peerInfo = getPeerInfo(peer);
@@ -2471,6 +2490,10 @@ function startServer() {
 
             if (!peer) {
                 return callback({ error: 'Peer not found' });
+            }
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
             }
 
             const peerInfo = getPeerInfo(peer);
@@ -2530,6 +2553,10 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const peerInfo = getPeerInfo(peer);
 
             try {
@@ -2569,6 +2596,10 @@ function startServer() {
 
             if (!peer) {
                 return callback({ error: 'Peer not found' });
+            }
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
             }
 
             const peerInfo = getPeerInfo(peer);
@@ -2611,6 +2642,10 @@ function startServer() {
                 return callback({ error: 'Peer not found' });
             }
 
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const peerInfo = getPeerInfo(peer);
 
             try {
@@ -2638,6 +2673,9 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) return;
+
             const peerInfo = getPeerInfo(peer);
 
             log.debug('Get Data Producers', peerInfo);
@@ -2654,6 +2692,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) return;
 
             const peerInfo = getPeerInfo(peer);
 
@@ -2680,6 +2720,10 @@ function startServer() {
                 return callback({
                     error: `Peer with ID: ${socket.id} for producer with id "${producer_id}" type "${type}" not found`,
                 });
+            }
+
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
             }
 
             const producer = peer.getProducer(producer_id);
@@ -2718,6 +2762,10 @@ function startServer() {
                 });
             }
 
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const producer = peer.getProducer(producer_id);
 
             if (!producer) {
@@ -2754,6 +2802,10 @@ function startServer() {
                 });
             }
 
+            if (isPeerInLobby(peer)) {
+                return callback({ error: 'In lobby' });
+            }
+
             const consumer = peer.getConsumer(consumer_id);
 
             if (!consumer) {
@@ -2781,6 +2833,8 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const { room, peer } = getRoomAndPeer(socket);
+
+            if (isPeerInLobby(peer)) return;
 
             const { peer_name } = peer || 'undefined';
 
@@ -4305,6 +4359,11 @@ function startServer() {
 
         function roomExists(socket) {
             return roomList.has(socket.room_id);
+        }
+
+        // Security: block lobby-waiting peers from WebRTC/media handlers.
+        function isPeerInLobby(peer) {
+            return Boolean(peer && peer.peer_lobby === true);
         }
 
         function getPeerInfo(peer) {
