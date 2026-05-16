@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.61
+ * @version 2.2.62
  *
  */
 
@@ -120,12 +120,35 @@ const ipKeyGenerator = (req) => {
         : null;
     return (forwarded || '').split(',')[0].trim() || req.socket?.remoteAddress || req.ip;
 };
+// Pluralize "N minute(s)" consistently across limiter messages
+const minutesLabel = (n) => `${n} minute${n === 1 ? '' : 's'}`;
+
+// Derive a stable per-requester rate-limit key (OIDC user > bearer-token user > IP)
+const getRequesterKey = (req) => {
+    if (config?.security?.oidc?.enabled && req.oidc?.isAuthenticated()) {
+        return req.oidc?.user?.sub || req.oidc?.user?.email || ipKeyGenerator(req);
+    }
+    const token = getBearerToken(req);
+    if (token) {
+        try {
+            const { username } = decodeToken(token);
+            if (username) {
+                return `user:${String(username).trim().toLowerCase()}`;
+            }
+        } catch (_) {
+            // Fall back to token hash key if the token cannot be decoded.
+        }
+        return `token:${token.slice(0, 48)}`;
+    }
+    return ipKeyGenerator(req);
+};
+
 // Create login rate limiter
 const loginLimiter = rateLimit({
     windowMs: minBlockTime * 60 * 1000,
     max: maxAttempts,
     message: {
-        message: `Too many login attempts. Please try again after ${minBlockTime} minute${minBlockTime == 1 ? '' : 's'}.`,
+        message: `Too many login attempts. Please try again after ${minutesLabel(minBlockTime)}.`,
     },
     keyGenerator: (req) => req.body?.username || ipKeyGenerator(req),
 });
@@ -142,27 +165,9 @@ const scheduleMeetingLimiter = rateLimit({
     windowMs: scheduleMeetingLimiterWindowMs,
     max: scheduleMeetingLimiterMax,
     message: {
-        message: `Too many schedule meeting requests. Please try again after ${scheduleMeetingLimiterMinutes} minute${scheduleMeetingLimiterMinutes === 1 ? '' : 's'}.`,
+        message: `Too many schedule meeting requests. Please try again after ${minutesLabel(scheduleMeetingLimiterMinutes)}.`,
     },
-    keyGenerator: (req) => {
-        if (config?.security?.oidc?.enabled && req.oidc?.isAuthenticated()) {
-            return req.oidc?.user?.sub || req.oidc?.user?.email || ipKeyGenerator(req);
-        }
-        const token = getBearerToken(req);
-        if (token) {
-            try {
-                const { username } = decodeToken(token);
-                if (username) {
-                    return `user:${String(username).trim().toLowerCase()}`;
-                }
-            } catch (error) {
-                // Fall back to token hash key if the token cannot be decoded.
-            }
-            return `token:${token.slice(0, 48)}`;
-        }
-
-        return ipKeyGenerator(req);
-    },
+    keyGenerator: getRequesterKey,
 });
 
 // Branding configuration
@@ -187,6 +192,7 @@ function getRtmpTotalActiveStreamsCount() {
 
 // Email alerts and notifications
 const nodemailer = require('./lib/nodemailer');
+const { SCHEDULE_MEETING_LIMITS } = nodemailer;
 
 // Slack API
 const CryptoJS = require('crypto-js');
@@ -791,25 +797,26 @@ function startServer() {
         const scheduleMeetingRequiresAuth = scheduleMeetingCfg.requireAuth !== false;
         const hasAuthProviderEnabled = OIDC.enabled || hostCfg.protected || hostCfg.user_auth;
 
+        const authState = await getScheduleMeetingAuthState(req);
+
         if (scheduleMeetingRequiresAuth) {
             if (!hasAuthProviderEnabled) {
                 return res.status(403).json({
                     message: 'Schedule meeting requires authentication, but no auth provider is enabled',
                 });
             }
-
-            const authState = await getScheduleMeetingAuthState(req);
             if (!authState.authorized) {
                 return res.status(401).json({ message: 'Unauthorized' });
             }
         }
 
         const safeBody = checkXSS(req.body) || {};
-        const title = typeof safeBody.title === 'string' ? safeBody.title.trim() : '';
-        const description = typeof safeBody.description === 'string' ? safeBody.description.trim() : '';
-        const dateTime = typeof safeBody.dateTime === 'string' ? safeBody.dateTime.trim() : '';
-        const recipients = typeof safeBody.recipients === 'string' ? safeBody.recipients.trim() : '';
-        const roomName = typeof safeBody.roomName === 'string' ? safeBody.roomName.trim() : '';
+        const str = (v) => (typeof v === 'string' ? v.trim() : '');
+        const title = str(safeBody.title);
+        const description = str(safeBody.description);
+        const dateTime = str(safeBody.dateTime);
+        const recipients = str(safeBody.recipients);
+        const roomName = str(safeBody.roomName);
         const duration = parseInt(safeBody.duration, 10);
 
         if (!title || !dateTime || !duration || !recipients || !roomName) {
@@ -820,7 +827,10 @@ function startServer() {
             return res.status(400).json({ message: 'Invalid room name' });
         }
 
-        if (title.length > 120 || description.length > 5000) {
+        if (
+            title.length > SCHEDULE_MEETING_LIMITS.titleMax ||
+            description.length > SCHEDULE_MEETING_LIMITS.descriptionMax
+        ) {
             return res.status(400).json({ message: 'Title or description is too long' });
         }
 
@@ -849,7 +859,6 @@ function startServer() {
             return res.status(400).json({ message: 'One or more recipients are outside allowed domains' });
         }
 
-        const authState = await getScheduleMeetingAuthState(req);
         const requesterIp = authHost.getIP(req);
 
         log.info('scheduleMeeting request', {
@@ -4895,6 +4904,8 @@ function getBearerToken(req) {
 }
 
 async function getScheduleMeetingAuthState(req) {
+    const denied = { authorized: false, requester: 'anonymous' };
+
     if (OIDC.enabled && req.oidc?.isAuthenticated()) {
         return {
             authorized: true,
@@ -4908,34 +4919,25 @@ async function getScheduleMeetingAuthState(req) {
 
     if (hostCfg.user_auth) {
         const token = getBearerToken(req);
-        if (!token) {
-            return { authorized: false, requester: 'anonymous' };
-        }
+        if (!token) return denied;
 
         try {
-            const validToken = await isValidToken(token);
-
-            if (!validToken) {
-                return { authorized: false, requester: 'anonymous' };
-            }
+            if (!(await isValidToken(token))) return denied;
 
             const { username, password } = checkXSS(decodeToken(token));
             const isPeerValid = await isAuthPeer(username, password);
 
-            return {
-                authorized: isPeerValid,
-                requester: isPeerValid ? username : 'anonymous',
-            };
+            return isPeerValid ? { authorized: true, requester: username } : denied;
         } catch (error) {
             log.warn('scheduleMeeting auth token validation failed', {
                 error: error.message,
                 ip: authHost.getIP(req),
             });
-            return { authorized: false, requester: 'anonymous' };
+            return denied;
         }
     }
 
-    return { authorized: false, requester: 'anonymous' };
+    return denied;
 }
 
 // ####################################################

@@ -264,7 +264,9 @@ function getCurrentDataTime() {
 // SCHEDULE MEETING
 // ####################################################
 
-function sanitizeScheduleMeetingText(value, maxLength = 2000) {
+const SCHEDULE_MEETING_LIMITS = { titleMax: 120, descriptionMax: 2000 };
+
+function sanitizeScheduleMeetingText(value, maxLength = SCHEDULE_MEETING_LIMITS.descriptionMax) {
     if (typeof value !== 'string') {
         return '';
     }
@@ -281,8 +283,8 @@ async function sendScheduleMeeting(data) {
     }
 
     const { title, description, dateTime, duration, recipients, roomName, hostUrl } = data;
-    const safeTitle = sanitizeScheduleMeetingText(title, 120);
-    const safeDescription = sanitizeScheduleMeetingText(description, 2000);
+    const safeTitle = sanitizeScheduleMeetingText(title, SCHEDULE_MEETING_LIMITS.titleMax);
+    const safeDescription = sanitizeScheduleMeetingText(description, SCHEDULE_MEETING_LIMITS.descriptionMax);
 
     const start = new Date(dateTime);
     const end = new Date(start.getTime() + duration * 60 * 1000);
@@ -385,4 +387,5 @@ module.exports = {
     sendEmailAlert,
     sendEmailNotifications,
     sendScheduleMeeting,
+    SCHEDULE_MEETING_LIMITS,
 };
