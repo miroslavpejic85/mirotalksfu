@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.70
+ * @version 2.2.71
  *
  */
 
@@ -3593,9 +3593,28 @@ function startServer() {
 
             if (!Validator.isValidData(data)) return;
 
-            log.debug('Recording action', data);
-
             const room = getRoom(socket);
+
+            // Resolve sender from server-side state — never trust client-supplied identity
+            const peer = room.getPeer(socket.id);
+            if (!peer) return;
+
+            // If host-only recording is enabled, only the presenter may broadcast recording state
+            if (room.isHostOnlyRecording()) {
+                const isPresenter = isPeerPresenter(
+                    socket.room_id,
+                    socket.id,
+                    peer.peer_info?.peer_name,
+                    peer.peer_info?.peer_uuid
+                );
+                if (!isPresenter) return;
+            }
+
+            // Override client-supplied identity with server-side values to prevent spoofing
+            data.peer_name = peer.peer_info?.peer_name;
+            data.peer_id = socket.id;
+
+            log.debug('Recording action', data);
 
             room.broadCast(socket.id, 'recordingAction', data);
         });
