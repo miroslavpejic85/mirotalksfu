@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.69
+ * @version 2.2.70
  *
  */
 
@@ -4090,6 +4090,16 @@ function startServer() {
 
             const room = getRoom(socket);
 
+            const peer = room.getPeer(socket.id);
+            if (!peer) return;
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter) return;
+
             await room.stopRTMP();
 
             log.debug('stopRTMP - rtmpTotalActiveStreamsCount ---->', getRtmpTotalActiveStreamsCount());
@@ -4138,6 +4148,16 @@ function startServer() {
             if (!roomExists(socket)) return;
 
             const room = getRoom(socket);
+
+            const peer = room.getPeer(socket.id);
+            if (!peer) return;
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter) return;
 
             await room.stopRTMPfromURL();
 
