@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.2.67",
+    "version": "2.2.68",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -73,7 +73,7 @@
         "cors": "2.8.6",
         "crypto-js": "4.2.0",
         "discord.js": "^14.26.4",
-        "dompurify": "^3.4.3",
+        "dompurify": "^3.4.4",
         "dotenv": "^17.4.2",
         "express": "5.2.1",
         "express-openid-connect": "^3.0.0",
@@ -91,7 +91,7 @@
         "mime-types": "^3.0.2",
         "nodemailer": "^8.0.7",
         "openai": "^6.38.0",
-        "qs": "6.15.1",
+        "qs": "6.15.2",
         "sanitize-filename": "^1.6.4",
         "socket.io": "4.8.3",
         "swagger-ui-express": "5.0.1",
