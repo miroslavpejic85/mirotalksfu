@@ -31,6 +31,7 @@ class LocalStorage {
             moderator_chat_cant_chatgpt: false, // Everyone can't chat with ChatGPT
             moderator_chat_cant_deep_seek: false, // Everyone can't chat with DeepSeek
             moderator_media_cant_sharing: false, // Everyone can't share media
+            moderator_polls_cant_create: false, // Only presenter can create/edit/delete polls
             moderator_disconnect_all_on_leave: false, // Disconnect all participants on leave room
             dominant_speaker_focus: false, // Focus on dominant speaker
             mic_noise_suppression: true, // Noise suppression using RNNoise

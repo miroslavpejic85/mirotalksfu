@@ -55,6 +55,7 @@ module.exports = class Room {
             chat_cant_chatgpt: false,
             chat_cant_deep_seek: false,
             media_cant_sharing: false,
+            polls_cant_create: false,
         };
         this._followMe = null;
         this.survey = config?.features?.survey;
@@ -425,6 +426,9 @@ module.exports = class Room {
                 break;
             case 'media_cant_sharing':
                 this._moderator.media_cant_sharing = data.status;
+                break;
+            case 'polls_cant_create':
+                this._moderator.polls_cant_create = data.status;
                 break;
             default:
                 break;

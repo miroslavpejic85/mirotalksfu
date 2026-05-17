@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.72
+ * @version 2.2.73
  *
  */
 
@@ -3383,6 +3383,7 @@ function startServer() {
                 case 'chat_cant_chatgpt':
                 case 'chat_cant_deep_seek':
                 case 'media_cant_sharing':
+                case 'polls_cant_create':
                     room.broadCast(socket.id, 'updateRoomModerator', moderator);
                     break;
                 default:
@@ -4212,6 +4213,23 @@ function startServer() {
 
             const room = getRoom(socket);
 
+            // Enforce the moderator "only presenter can create/edit/delete polls" rule server-side.
+            if (room._moderator && room._moderator.polls_cant_create) {
+                const peer = room.getPeer(socket.id);
+                const isPresenter = isPeerPresenter(
+                    socket.room_id,
+                    socket.id,
+                    peer?.peer_info?.peer_name,
+                    peer?.peer_info?.peer_uuid
+                );
+                if (!isPresenter) {
+                    log.debug('createPoll blocked by moderator rule (polls_cant_create)', {
+                        peer_name: peer?.peer_info?.peer_name,
+                    });
+                    return;
+                }
+            }
+
             const newPoll = {
                 question: question,
                 options: options,
@@ -4270,6 +4288,23 @@ function startServer() {
 
             const room = getRoom(socket);
 
+            // Enforce the moderator "only presenter can create/edit/delete polls" rule server-side.
+            if (room._moderator && room._moderator.polls_cant_create) {
+                const peer = room.getPeer(socket.id);
+                const isPresenter = isPeerPresenter(
+                    socket.room_id,
+                    socket.id,
+                    peer?.peer_info?.peer_name,
+                    peer?.peer_info?.peer_uuid
+                );
+                if (!isPresenter) {
+                    log.debug('editPoll blocked by moderator rule (polls_cant_create)', {
+                        peer_name: peer?.peer_info?.peer_name,
+                    });
+                    return;
+                }
+            }
+
             const roomPolls = room.getPolls();
 
             if (roomPolls[index]) {
@@ -4285,11 +4320,16 @@ function startServer() {
 
             const { index, peer_name, peer_uuid } = checkXSS(data);
 
-            // Disable for now...
-            // const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
-            // if (!isPresenter) return;
-
             const room = getRoom(socket);
+
+            // Enforce the moderator "only presenter can create/edit/delete polls" rule server-side.
+            if (room._moderator && room._moderator.polls_cant_create) {
+                const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
+                if (!isPresenter) {
+                    log.debug('deletePoll blocked by moderator rule (polls_cant_create)', { peer_name });
+                    return;
+                }
+            }
 
             const roomPolls = room.getPolls();
 

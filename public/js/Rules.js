@@ -203,6 +203,7 @@ function handleRules(isPresenter) {
         switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
         switchEveryoneCantChatDeepSeek.checked = localStorageSettings.moderator_chat_cant_deep_seek;
         switchEveryoneCantMediaSharing.checked = localStorageSettings.moderator_media_cant_sharing;
+        switchEveryoneCantPolls.checked = localStorageSettings.moderator_polls_cant_create;
         switchDisconnectAllOnLeave.checked = localStorageSettings.moderator_disconnect_all_on_leave;
 
         // Update moderator settings...
@@ -217,6 +218,7 @@ function handleRules(isPresenter) {
             chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
             chat_cant_deep_seek: switchEveryoneCantChatDeepSeek.checked,
             media_cant_sharing: switchEveryoneCantMediaSharing.checked,
+            polls_cant_create: switchEveryoneCantPolls.checked,
         };
         console.log('Rules moderator data ---->', moderatorData);
         rc.updateRoomModeratorALL(moderatorData);

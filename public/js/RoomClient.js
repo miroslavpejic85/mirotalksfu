@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.72
+ * @version 2.2.73
  *
  */
 
@@ -305,6 +305,7 @@ class RoomClient {
             chat_cant_chatgpt: false,
             chat_cant_deep_seek: false,
             media_cant_sharing: false,
+            polls_cant_create: false,
         };
 
         // Chat messages
@@ -7447,6 +7448,15 @@ class RoomClient {
     pollCreateNewForm(e) {
         e.preventDefault();
 
+        if (this._moderator.polls_cant_create && !isPresenter) {
+            return userLog(
+                'warning',
+                'The moderator does not allow non-presenters to create or edit polls',
+                'top-end',
+                6000
+            );
+        }
+
         const question = e.target.question.value;
         const optionInputs = document.querySelectorAll('.option-input');
         const options = Array.from(optionInputs).map((input) => input.value.trim());
@@ -9578,6 +9588,13 @@ class RoomClient {
             case 'media_cant_sharing':
                 this.userLog('info', `${icons.moderator} Moderator: everyone can't share media ${status}`, 'top-end');
                 break;
+            case 'polls_cant_create':
+                this.userLog(
+                    'info',
+                    `${icons.moderator} Moderator: only presenter can create/edit/delete polls ${status}`,
+                    'top-end'
+                );
+                break;
             case 'disconnect_all_on_leave':
                 this.userLog('info', `${icons.moderator} Moderator: disconnect all on leave room ${status}`, 'top-end');
                 break;
@@ -11376,6 +11393,10 @@ class RoomClient {
             case 'media_cant_sharing':
                 this._moderator.media_cant_sharing = data.status;
                 rc.roomMessage('media_cant_sharing', data.status);
+                break;
+            case 'polls_cant_create':
+                this._moderator.polls_cant_create = data.status;
+                rc.roomMessage('polls_cant_create', data.status);
                 break;
             default:
                 break;
