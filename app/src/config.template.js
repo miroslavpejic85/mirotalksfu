@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.2.73 - Configuration File
+ * MiroTalk SFU v2.2.74 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -384,7 +384,21 @@ module.exports = {
          */
         oidc: {
             enabled: process.env.OIDC_ENABLED === 'true',
-            baseURLDynamic: false, // Set true if your app has dynamic base URLs
+            baseURLDynamic: process.env.OIDC_BASE_URL_DYNAMIC === 'true', // Set true if your app has dynamic base URLs
+
+            /*
+             * When `baseURLDynamic` is true, the OIDC baseURL (and therefore the redirect_uri
+             * sent to the IdP) is derived from the incoming `Host` header. To prevent
+             * Host-header injection from redirecting authorization codes to an attacker,
+             * list every origin the server is allowed to serve here (full origin, no path).
+             * The static `config.baseURL` is always trusted and does not need to be repeated.
+             * Example: ['https://meet.example.com', 'https://meet.eu.example.com']
+             */
+            allowedDynamicBaseURLs: process.env.OIDC_ALLOWED_DYNAMIC_BASE_URLS
+                ? process.env.OIDC_ALLOWED_DYNAMIC_BASE_URLS.split(splitChar)
+                      .map((u) => u.trim())
+                      .filter(Boolean)
+                : [],
 
             // ==================================================================================================
             allow_rooms_creation_for_auth_users: process.env.OIDC_ALLOW_ROOMS_CREATION_FOR_AUTH_USERS !== 'false',

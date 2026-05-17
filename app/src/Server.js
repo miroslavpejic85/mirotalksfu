@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.73
+ * @version 2.2.74
  *
  */
 
@@ -658,7 +658,30 @@ function startServer() {
             return mw(req, res, next);
         };
 
-        if (OIDC.baseUrlDynamic) {
+        // Support both `baseURLDynamic` (template key) and legacy `baseUrlDynamic`
+        const oidcDynamicBaseUrl = OIDC.baseURLDynamic === true || OIDC.baseUrlDynamic === true;
+
+        if (oidcDynamicBaseUrl) {
+            // Build an allowlist of origins permitted to be used as the OIDC baseURL.
+            // This prevents Host-header injection from rewriting the redirect_uri
+            // (see: https://portswigger.net/web-security/host-header).
+            // Sources, in order of precedence:
+            //   1. config.security.oidc.allowedDynamicBaseURLs (string[] of full origins)
+            //   2. config.security.oidc.config.baseURL (always trusted)
+            const configuredAllowlist = Array.isArray(OIDC.allowedDynamicBaseURLs) ? OIDC.allowedDynamicBaseURLs : [];
+            const allowedOrigins = new Set(
+                [OIDC.config?.baseURL, ...configuredAllowlist]
+                    .filter(Boolean)
+                    .map((u) => {
+                        try {
+                            return new URL(u).origin;
+                        } catch {
+                            return null;
+                        }
+                    })
+                    .filter(Boolean)
+            );
+
             // Cache auth middleware instances per origin to avoid re-running OIDC discovery on every request
             const authMiddlewareCache = new Map();
 
@@ -667,6 +690,18 @@ function startServer() {
                     const host = req.headers.host;
                     const protocol = req.protocol === 'https' ? 'https' : 'http';
                     const origin = `${protocol}://${host}`;
+
+                    // Reject Host headers that are not in the configured allowlist.
+                    // Without this, an attacker can force the OIDC library to emit a
+                    // redirect_uri pointing to an attacker-controlled domain.
+                    if (!allowedOrigins.has(origin)) {
+                        log.warn('OIDC Host header not in allowlist - rejecting request', {
+                            host,
+                            origin,
+                            allowed: [...allowedOrigins],
+                        });
+                        return res.status(400).send('Bad Request: invalid Host header');
+                    }
 
                     let cachedAuth = authMiddlewareCache.get(origin);
                     if (!cachedAuth) {
