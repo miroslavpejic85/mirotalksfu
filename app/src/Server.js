@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.71
+ * @version 2.2.72
  *
  */
 
@@ -3524,6 +3524,18 @@ function startServer() {
             log.debug('Share video: ', data);
 
             const room = getRoom(socket);
+
+            // Enforce the moderator "everyone can't share media" rule server-side.
+            // The presenter is exempt because they own/toggle the rule.
+            if (room._moderator && room._moderator.media_cant_sharing) {
+                const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.peer_name, data.peer_uuid);
+                if (!isPresenter) {
+                    log.debug('shareVideoAction blocked by moderator rule (media_cant_sharing)', {
+                        peer_name: data.peer_name,
+                    });
+                    return;
+                }
+            }
 
             room.updateShareMedia(data);
 
