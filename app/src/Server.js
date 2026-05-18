@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.76
+ * @version 2.2.77
  *
  */
 
@@ -3583,6 +3583,16 @@ function startServer() {
         socket.on('wbCanvasToJson', (dataObject) => {
             if (!roomExists(socket)) return;
 
+            // Security: cap whiteboard payload size. Fabric canvas JSON should comfortably
+            // fit in well under 2 MB; anything larger is either accidental (huge embedded
+            // images) or an attempt to abuse the broadcast channel as cheap amplification.
+            const rawSize =
+                typeof dataObject === 'string' ? dataObject.length : dataObject ? JSON.stringify(dataObject).length : 0;
+            if (rawSize > 2_000_000) {
+                log.debug('wbCanvasToJson blocked: payload too large', { size: rawSize });
+                return;
+            }
+
             const room = getRoom(socket);
 
             // Security: require the sender to be an actual joined peer of the room.
@@ -3616,11 +3626,19 @@ function startServer() {
 
             const data = checkXSS(dataObject);
 
+            // Security: strip fabric `image` objects whose `src` is not a safe http(s) URL
+            // or `data:image/*` URI. This prevents SSRF probes (http://127.0.0.1, AWS IMDS,
+            // 192.168/10/172.16/8 ranges…) and dangerous schemes (javascript:, file:, blob:)
+            // from being rendered by every other peer's browser.
+            const sanitized = Validator.sanitizeWbCanvasJson(data, ({ src }) => {
+                log.debug('wbCanvasToJson dropped unsafe image src', { src });
+            });
+
             // const objLength = bytesToSize(Object.keys(data).length);
 
             // log.debug('Send Whiteboard canvas JSON', { length: objLength });
 
-            room.broadCast(socket.id, 'wbCanvasToJson', data);
+            room.broadCast(socket.id, 'wbCanvasToJson', sanitized);
         });
 
         socket.on('whiteboardAction', (dataObject) => {
