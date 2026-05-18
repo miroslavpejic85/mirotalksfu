@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.75
+ * @version 2.2.76
  *
  */
 
@@ -5896,9 +5896,23 @@ function whiteboardAction(data, emit = true) {
             rc.socket.emit('whiteboardAction', data);
         }
     } else {
+        // Security: peer_name is attacker-controllable in upstream payloads and the
+        // Swal toast renders the title as HTML. Escape angle brackets / quotes so a
+        // crafted name like `<img src=//attacker/track>` can't trigger outbound
+        // requests in every recipient's browser.
+        const safePeerName = String(data.peer_name || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+        const safeAction = String(data.action || '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;');
         userLog(
             'info',
-            `${data.peer_name} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${data.action}`,
+            `${safePeerName} <i class="fas fa-chalkboard-teacher"></i> whiteboard action: ${safeAction}`,
             'top-end'
         );
     }
@@ -7416,7 +7430,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.75',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.76',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

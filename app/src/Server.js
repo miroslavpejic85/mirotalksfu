@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.75
+ * @version 2.2.76
  *
  */
 
@@ -3583,9 +3583,38 @@ function startServer() {
         socket.on('wbCanvasToJson', (dataObject) => {
             if (!roomExists(socket)) return;
 
-            const data = checkXSS(dataObject);
-
             const room = getRoom(socket);
+
+            // Security: require the sender to be an actual joined peer of the room.
+            // Without this a socket that only called `createRoom` (which sets socket.room_id
+            // before the "already exists" check) could broadcast whiteboard payloads to all
+            // real peers without ever joining the room / appearing in the attendee list.
+            const peer = room.getPeer(socket.id);
+            if (!peer) {
+                log.debug('wbCanvasToJson blocked: sender is not a joined peer', {
+                    room_id: socket.room_id,
+                    socket_id: socket.id,
+                });
+                return;
+            }
+
+            // Security: when the whiteboard is locked, only the presenter may overwrite
+            // the shared canvas. The lock state is server-authoritative and does not
+            // depend on the client toggling its local `wbIsLock` flag.
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter && room.getWhiteboardLock()) {
+                log.debug('wbCanvasToJson blocked: whiteboard is locked and sender is not presenter', {
+                    peer_name: peer.peer_info?.peer_name,
+                });
+                return;
+            }
+
+            const data = checkXSS(dataObject);
 
             // const objLength = bytesToSize(Object.keys(data).length);
 
@@ -3597,11 +3626,50 @@ function startServer() {
         socket.on('whiteboardAction', (dataObject) => {
             if (!roomExists(socket)) return;
 
+            const room = getRoom(socket);
+
+            // Security: require the sender to be an actual joined peer of the room
+            // (see wbCanvasToJson above for rationale).
+            const peer = room.getPeer(socket.id);
+            if (!peer) {
+                log.debug('whiteboardAction blocked: sender is not a joined peer', {
+                    room_id: socket.room_id,
+                    socket_id: socket.id,
+                });
+                return;
+            }
+
             const data = checkXSS(dataObject);
 
             if (!Validator.isValidData(data)) return;
 
-            const room = getRoom(socket);
+            // Security: whiteboardAction mutates global whiteboard state (clear / undo / redo /
+            // bgcolor / lock / unlock) for every other peer. Only the presenter is allowed
+            // to trigger these. Verify against server-known peer identity, not client-supplied
+            // peer_name / peer_uuid (which are attacker-controlled in the request body).
+            const isPresenter = isPeerPresenter(
+                socket.room_id,
+                socket.id,
+                peer.peer_info?.peer_name,
+                peer.peer_info?.peer_uuid
+            );
+            if (!isPresenter) {
+                log.debug('whiteboardAction blocked: sender is not presenter', {
+                    action: data.action,
+                    peer_name: peer.peer_info?.peer_name,
+                });
+                return;
+            }
+
+            // Overwrite the broadcast peer_name with the server-known value so a presenter
+            // can't be tricked into proxying an HTML payload supplied in the request body
+            // (the client renders `data.peer_name` inside a SweetAlert toast).
+            data.peer_name = peer.peer_info?.peer_name || data.peer_name;
+
+            // Track lock state server-side so late-joining peers / future requests are
+            // gated even if the presenter never re-toggles the button.
+            if (data.action === 'lock') room.setWhiteboardLock(true);
+            if (data.action === 'unlock') room.setWhiteboardLock(false);
 
             log.debug('Whiteboard', data);
             room.broadCast(socket.id, 'whiteboardAction', data);
