@@ -8079,11 +8079,13 @@ class RoomClient {
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
             this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
             this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
-            // Always pass a timeslice so the browser flushes encoded chunks into
-            // recordedBlobs periodically instead of buffering the entire recording
-            // in renderer memory. This makes long (>1h) client-side recordings
-            // stable and avoids MediaRecorder auto-stops caused by memory pressure.
-            this.mediaRecorder.start(this.recSyncTime);
+            // Always pass a timeslice so the browser flushes encoded chunks periodically
+            // instead of buffering the entire recording in renderer memory.
+            // - Server sync: 4 s chunks → fewer HTTP POSTs to /recSync.
+            // - Local blob: 1 s chunks → faster internal flush, lighter recorder buffer.
+            rc.recording.recSyncServerRecording
+                ? this.mediaRecorder.start(this.recSyncTime)
+                : this.mediaRecorder.start(1000);
         }
     }
 
