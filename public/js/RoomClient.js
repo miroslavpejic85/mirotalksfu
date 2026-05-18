@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.74
+ * @version 2.2.75
  *
  */
 
@@ -8079,9 +8079,11 @@ class RoomClient {
             this.mediaRecorder.addEventListener('start', this.handleMediaRecorderStart);
             this.mediaRecorder.addEventListener('dataavailable', this.handleMediaRecorderData);
             this.mediaRecorder.addEventListener('stop', this.handleMediaRecorderStop);
-            rc.recording.recSyncServerRecording
-                ? this.mediaRecorder.start(this.recSyncTime)
-                : this.mediaRecorder.start();
+            // Always pass a timeslice so the browser flushes encoded chunks into
+            // recordedBlobs periodically instead of buffering the entire recording
+            // in renderer memory. This makes long (>1h) client-side recordings
+            // stable and avoids MediaRecorder auto-stops caused by memory pressure.
+            this.mediaRecorder.start(this.recSyncTime);
         }
     }
 
