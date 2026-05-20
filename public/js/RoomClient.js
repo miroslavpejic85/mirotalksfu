@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.78
+ * @version 2.2.79
  *
  */
 
@@ -359,6 +359,9 @@ class RoomClient {
         this.isEditorOpen = false;
         this.isEditorLocked = false;
         this.isEditorPinned = false;
+        this.isEditorPrivate = false;
+        this.collabEditorDelta = null;
+        this._privatePersistTimer = null;
         this.isBreakoutPinned = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.isParticipantsOpen = false;
@@ -7656,6 +7659,7 @@ class RoomClient {
     }
 
     editorUpdate() {
+        if (this.isEditorPrivate) return;
         if (this.isEditorOpen && (!isRulesActive || isPresenter)) {
             console.log('IsPresenter: update editor content to the participants in the room');
             const content = quill.getContents(); // Get content in Delta format
@@ -7666,11 +7670,27 @@ class RoomClient {
     }
 
     handleEditorUpdateData(data) {
+        if (this.isEditorPrivate) {
+            // In private mode: keep collab buffer up to date but do NOT touch the visible editor
+            this.collabEditorDelta = data;
+            return;
+        }
         this.editorOpen();
         quill.setContents(data);
     }
 
     handleEditorData(data) {
+        if (this.isEditorPrivate) {
+            // In private mode: compose incoming delta into the cached collab buffer
+            try {
+                const Delta = Quill.import('delta');
+                const base = new Delta(this.collabEditorDelta || { ops: [] });
+                this.collabEditorDelta = base.compose(new Delta(data));
+            } catch (e) {
+                console.warn('handleEditorData (private) compose failed', e);
+            }
+            return;
+        }
         this.editorOpen();
         quill.updateContents(data);
     }
@@ -7696,15 +7716,31 @@ class RoomClient {
                 this.userLog('info', `${icons.editor} ${peer_name} close editor`, 'top-end', 6000);
                 break;
             case 'clean':
+                if (this.isEditorPrivate) {
+                    // Don't wipe private notes when others clean the collaborative editor
+                    this.collabEditorDelta = null;
+                    this.userLog('info', `${icons.editor} ${peer_name} cleared editor`, 'top-end', 6000);
+                    break;
+                }
                 quill.setText('');
                 this.userLog('info', `${icons.editor} ${peer_name} cleared editor`, 'top-end', 6000);
                 break;
             case 'lock':
+                if (this.isEditorPrivate) {
+                    this.isEditorLocked = true;
+                    this.userLog('info', `${icons.editor} ${peer_name} locked the editor`, 'top-end', 6000);
+                    break;
+                }
                 this.isEditorLocked = true;
                 quill.enable(false);
                 this.userLog('info', `${icons.editor} ${peer_name} locked the editor`, 'top-end', 6000);
                 break;
             case 'unlock':
+                if (this.isEditorPrivate) {
+                    this.isEditorLocked = false;
+                    this.userLog('info', `${icons.editor} ${peer_name} unlocked the editor`, 'top-end', 6000);
+                    break;
+                }
                 this.isEditorLocked = false;
                 quill.enable(true);
                 this.userLog('info', `${icons.editor} ${peer_name} unlocked the editor`, 'top-end', 6000);
@@ -7716,6 +7752,85 @@ class RoomClient {
 
     editorIsLocked() {
         return this.isEditorLocked;
+    }
+
+    // ####################################################
+    // EDITOR PRIVATE NOTE MODE (local-only, never broadcasted)
+    // ####################################################
+
+    privateEditorStorageKey() {
+        return `editor_private_${this.room_id}_${this.peer_name}`;
+    }
+
+    loadPrivateEditorDelta() {
+        try {
+            const raw = localStorage.getItem(this.privateEditorStorageKey());
+            return raw ? JSON.parse(raw) : { ops: [] };
+        } catch (e) {
+            console.warn('loadPrivateEditorDelta failed', e);
+            return { ops: [] };
+        }
+    }
+
+    persistPrivateEditor() {
+        if (!this.isEditorPrivate) return;
+        // debounce writes
+        clearTimeout(this._privatePersistTimer);
+        this._privatePersistTimer = setTimeout(() => {
+            try {
+                const content = quill.getContents();
+                localStorage.setItem(this.privateEditorStorageKey(), JSON.stringify(content));
+            } catch (e) {
+                console.warn('persistPrivateEditor failed', e);
+            }
+        }, 300);
+    }
+
+    toggleEditorPrivate() {
+        if (this.isEditorPrivate) {
+            // Persist current private buffer before switching back
+            try {
+                const privateContent = quill.getContents();
+                localStorage.setItem(this.privateEditorStorageKey(), JSON.stringify(privateContent));
+            } catch (e) {
+                console.warn('persist on toggle off failed', e);
+            }
+            this._exitEditorPrivateMode();
+            return;
+        }
+
+        // Entering private mode -> cache collab buffer, load (or init) private buffer
+        this.collabEditorDelta = quill.getContents();
+        this.isEditorPrivate = true;
+        const privateDelta = this.loadPrivateEditorDelta();
+        quill.setContents(privateDelta);
+        quill.enable(true); // always editable in private mode
+        show(editorPrivateBtn);
+        hide(editorCollabBtn);
+        editorRoom.classList.add('editor-private-mode');
+        this.userLog(
+            'info',
+            `${icons.editor} Private Note mode: your edits are NOT shared with participants`,
+            'top-end',
+            6000
+        );
+        this.sound('click');
+    }
+
+    _exitEditorPrivateMode() {
+        this.isEditorPrivate = false;
+        quill.setContents(this.collabEditorDelta || { ops: [] });
+        // Re-apply presenter lock state if any
+        if (!isPresenter && this.isEditorLocked) {
+            quill.enable(false);
+        } else {
+            quill.enable(true);
+        }
+        show(editorCollabBtn);
+        hide(editorPrivateBtn);
+        editorRoom.classList.remove('editor-private-mode');
+        this.userLog('info', `${icons.editor} Collaborative editor restored`, 'top-end', 4000);
+        this.sound('click');
     }
 
     editorUndo() {
@@ -7735,7 +7850,7 @@ class RoomClient {
     }
 
     editorClean() {
-        if (!isPresenter && this.editorIsLocked()) {
+        if (!isPresenter && this.editorIsLocked() && !this.isEditorPrivate) {
             userLog('info', 'The Editor is locked. \n You cannot interact with it.', 'top-right');
             return;
         }
@@ -7746,7 +7861,7 @@ class RoomClient {
         Swal.fire({
             background: swalBackground,
             position: 'center',
-            title: 'Clear the editor content?',
+            title: this.isEditorPrivate ? 'Clear your private note?' : 'Clear the editor content?',
             imageUrl: image.delete,
             showDenyButton: true,
             confirmButtonText: `Yes`,
@@ -7756,7 +7871,11 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) {
                 quill.setText('');
-                this.editorSendAction('clean');
+                if (this.isEditorPrivate) {
+                    this.persistPrivateEditor();
+                } else {
+                    this.editorSendAction('clean');
+                }
                 this.sound('delete');
             }
         });

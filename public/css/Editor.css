@@ -42,6 +42,7 @@
     color: white !important;
     border-radius: 10px 10px 0px 0px; /* Top-left, top-right, bottom-right, bottom-left */
     border: var(--border) !important;
+    margin-top: 6px;
 }
 
 /* Optional: Customize code block appearance */
@@ -57,6 +58,38 @@
 
 .ql-snow .ql-code-block {
     font-family: monospace;
+}
+
+/* Private Note mode visual indicator (local-only editor, not broadcasted) */
+.editor-container.editor-private-mode {
+    box-shadow:
+        inset 3px 0 0 0 #ffb300,
+        var(--box-shadow);
+}
+.editor-container.editor-private-mode::before {
+    content: 'PRIVATE NOTE — not shared';
+    position: absolute;
+    top: 12px;
+    left: 20px;
+    font-size: 11px;
+    letter-spacing: 1px;
+    font-weight: bold;
+    color: #ffb300;
+    pointer-events: none;
+    z-index: 6;
+}
+.editor-container.editor-private-mode .editor-header-btns {
+    margin-top: 18px;
+}
+.editor-container.editor-private-mode #editorPrivateBtn {
+    color: #ffb300 !important;
+}
+/* In private mode hide media/embed toolbar buttons to keep notes light (text-only) */
+.editor-container.editor-private-mode .ql-toolbar .ql-image,
+.editor-container.editor-private-mode .ql-toolbar .ql-video,
+.editor-container.editor-private-mode .ql-toolbar .ql-formula,
+.editor-container.editor-private-mode .ql-toolbar .ql-code-block {
+    display: none !important;
 }
 
 .ql-toolbar button:hover {

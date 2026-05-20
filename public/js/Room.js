@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.78
+ * @version 2.2.79
  *
  */
 
@@ -486,6 +486,8 @@ async function initClient() {
         setTippy('pollCloseBtn', 'Close', 'bottom');
         setTippy('editorLockBtn', 'Toggle Lock editor', 'bottom');
         setTippy('editorUnlockBtn', 'Toggle Lock editor', 'bottom');
+        setTippy('editorCollabBtn', 'Switch to Private Note (your notes will NOT be shared)', 'bottom');
+        setTippy('editorPrivateBtn', 'Switch back to Collaborative editor', 'bottom');
         setTippy('editorTogglePin', 'Toggle pin', 'bottom');
         setTippy('editorUndoBtn', 'Undo', 'bottom');
         setTippy('editorRedoBtn', 'Redo', 'bottom');
@@ -2504,6 +2506,12 @@ function handleButtons() {
     editorUnlockBtn.onclick = () => {
         rc.toggleLockUnlockEditor();
     };
+    editorCollabBtn.onclick = () => {
+        rc.toggleEditorPrivate();
+    };
+    editorPrivateBtn.onclick = () => {
+        rc.toggleEditorPrivate();
+    };
     editorCleanBtn.onclick = () => {
         rc.editorClean();
     };
@@ -3991,12 +3999,24 @@ function handleEditor() {
 
     applySyntaxHighlighting();
 
+    // In Private Note mode strip media/embeds pasted from the clipboard so notes stay
+    // lightweight (text-only) and fit safely in localStorage.
+    const QuillDelta = Quill.import('delta');
+    const stripIfPrivate = (node, delta) => (rc && rc.isEditorPrivate ? new QuillDelta() : delta);
+    quill.clipboard.addMatcher('IMG', stripIfPrivate);
+    quill.clipboard.addMatcher('VIDEO', stripIfPrivate);
+    quill.clipboard.addMatcher('IFRAME', stripIfPrivate);
+
     quill.on('text-change', (delta, oldDelta, source) => {
-        if (!isPresenter && rc.editorIsLocked()) {
+        if (!isPresenter && rc.editorIsLocked() && !rc.isEditorPrivate) {
             return;
         }
         // console.log('text-change', { delta, oldDelta, source });
         applySyntaxHighlighting();
+        if (rc.isEditorPrivate && source === 'user') {
+            rc.persistPrivateEditor();
+            return;
+        }
         if (rc.thereAreParticipants() && source === 'user') {
             socket.emit('editorChange', delta);
         }
@@ -7430,7 +7450,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.78',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.79',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
