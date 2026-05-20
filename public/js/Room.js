@@ -4013,8 +4013,8 @@ function handleEditor() {
         }
         // console.log('text-change', { delta, oldDelta, source });
         applySyntaxHighlighting();
-        if (rc.isEditorPrivate && source === 'user') {
-            rc.persistPrivateEditor();
+        if (rc.isEditorPrivate) {
+            // Private mode: never broadcast, never persist
             return;
         }
         if (rc.thereAreParticipants() && source === 'user') {

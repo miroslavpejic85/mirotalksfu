@@ -7755,66 +7755,74 @@ class RoomClient {
     }
 
     // ####################################################
-    // EDITOR PRIVATE NOTE MODE (local-only, never broadcasted)
+    // EDITOR PRIVATE NOTE MODE (local-only, never broadcasted, never persisted)
+    // Notes live only in memory for the current session. The user is
+    // prompted to Save or Discard when switching back to collaborative mode.
     // ####################################################
 
-    privateEditorStorageKey() {
-        return `editor_private_${this.room_id}_${this.peer_name}`;
-    }
-
-    loadPrivateEditorDelta() {
-        try {
-            const raw = localStorage.getItem(this.privateEditorStorageKey());
-            return raw ? JSON.parse(raw) : { ops: [] };
-        } catch (e) {
-            console.warn('loadPrivateEditorDelta failed', e);
-            return { ops: [] };
-        }
-    }
-
+    // No-op kept for backward compatibility with existing callers (e.g. quill 'text-change').
     persistPrivateEditor() {
-        if (!this.isEditorPrivate) return;
-        // debounce writes
-        clearTimeout(this._privatePersistTimer);
-        this._privatePersistTimer = setTimeout(() => {
-            try {
-                const content = quill.getContents();
-                localStorage.setItem(this.privateEditorStorageKey(), JSON.stringify(content));
-            } catch (e) {
-                console.warn('persistPrivateEditor failed', e);
-            }
-        }, 300);
+        /* intentionally empty: private notes are not persisted */
     }
 
-    toggleEditorPrivate() {
+    async toggleEditorPrivate() {
         if (this.isEditorPrivate) {
-            // Persist current private buffer before switching back
-            try {
-                const privateContent = quill.getContents();
-                localStorage.setItem(this.privateEditorStorageKey(), JSON.stringify(privateContent));
-            } catch (e) {
-                console.warn('persist on toggle off failed', e);
-            }
-            this._exitEditorPrivateMode();
+            await this._promptExitEditorPrivateMode();
             return;
         }
 
-        // Entering private mode -> cache collab buffer, load (or init) private buffer
+        // Entering private mode -> cache collab buffer, start with an empty private buffer
         this.collabEditorDelta = quill.getContents();
         this.isEditorPrivate = true;
-        const privateDelta = this.loadPrivateEditorDelta();
-        quill.setContents(privateDelta);
+        quill.setContents({ ops: [] });
         quill.enable(true); // always editable in private mode
         show(editorPrivateBtn);
         hide(editorCollabBtn);
         editorRoom.classList.add('editor-private-mode');
         this.userLog(
             'info',
-            `${icons.editor} Private Note mode: your edits are NOT shared with participants`,
+            `${icons.editor} Private Note mode: your edits are NOT shared and NOT saved`,
             'top-end',
             6000
         );
         this.sound('click');
+    }
+
+    async _promptExitEditorPrivateMode() {
+        // If the buffer is empty there is nothing to lose, exit silently.
+        if (quill.getText().trim().length === 0) {
+            this._exitEditorPrivateMode();
+            return;
+        }
+
+        const result = await Swal.fire({
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.editor || image.delete,
+            title: 'Exit Private Note mode?',
+            text: 'Your private note will be lost unless you save it to a file.',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: 'Save as Text',
+            denyButtonText: 'Save as HTML',
+            cancelButtonText: 'Discard',
+            reverseButtons: true,
+            allowOutsideClick: false,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        });
+
+        if (result.isConfirmed) {
+            this.saveEditorAsText();
+            this._exitEditorPrivateMode();
+        } else if (result.isDenied) {
+            this.saveEditorAsHtml();
+            this._exitEditorPrivateMode();
+        } else if (result.dismiss === Swal.DismissReason.cancel) {
+            // User chose Discard
+            this._exitEditorPrivateMode();
+        }
+        // Any other dismissal: stay in private mode (no-op)
     }
 
     _exitEditorPrivateMode() {
@@ -7871,9 +7879,7 @@ class RoomClient {
         }).then((result) => {
             if (result.isConfirmed) {
                 quill.setText('');
-                if (this.isEditorPrivate) {
-                    this.persistPrivateEditor();
-                } else {
+                if (!this.isEditorPrivate) {
                     this.editorSendAction('clean');
                 }
                 this.sound('delete');
