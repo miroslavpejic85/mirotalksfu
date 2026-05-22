@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.2.81 - Configuration File
+ * MiroTalk SFU v2.2.82 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -144,6 +144,32 @@ module.exports = {
         cors: {
             origin: process.env.CORS_ORIGIN || '*',
             methods: ['GET', 'POST'],
+        },
+
+        /**
+         * Embed (iframe) Restrictions
+         * ---------------------------
+         * Controls which origins are allowed to embed MiroTalk SFU in an <iframe>
+         * via the HTTP `Content-Security-Policy: frame-ancestors` header
+         * (also mirrored to `X-Frame-Options` when possible for legacy browsers).
+         *
+         * Behavior:
+         * - Empty / unset  → header NOT set, embedding allowed anywhere (default).
+         * - 'none'         → block ALL embedding (frame-ancestors 'none' + X-Frame-Options: DENY).
+         * - 'self'         → only same-origin embedding (frame-ancestors 'self' + X-Frame-Options: SAMEORIGIN).
+         * - list           → comma-separated origins, 'self' is always implicitly included.
+         *                    Wildcards like https://*.example.com are valid in CSP.
+         *
+         * IMPORTANT: This affects the widget too — the MiroTalk widget embeds
+         * the room in an iframe on the host site, so every site that should
+         * load the widget must be listed here.
+         */
+        embed: {
+            allowedOrigins: process.env.ALLOWED_EMBED_ORIGINS
+                ? process.env.ALLOWED_EMBED_ORIGINS.split(',')
+                      .map((o) => o.trim())
+                      .filter(Boolean)
+                : [],
         },
     },
 

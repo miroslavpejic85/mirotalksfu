@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.81
+ * @version 2.2.82
  *
  */
 
@@ -107,6 +107,7 @@ const Sentry = require('@sentry/node');
 const Discord = require('./Discord');
 const Mattermost = require('./Mattermost');
 const restrictAccessByIP = require('./middleware/IpWhitelist');
+const { applyEmbedHeaders, embedAllowedOrigins, embedCsp } = require('./middleware/EmbedHeaders');
 const packageJson = require('../../package.json');
 
 // Login attempts limit
@@ -586,6 +587,7 @@ function startServer() {
     // Start the app
     app.set('trust proxy', trustProxy); // Enables trust for proxy headers (e.g., X-Forwarded-For) based on the trustProxy setting
     app.use(helmet.noSniff()); // Enable content type sniffing prevention
+    app.use(applyEmbedHeaders); // Apply iframe embedding restrictions (CSP frame-ancestors / X-Frame-Options)
     // Use all static files from the public folder
     app.use(
         express.static(dir.public, {
@@ -1964,6 +1966,10 @@ function startServer() {
             // Security & Authentication
             security: {
                 cors: corsOptions,
+                embed: {
+                    allowedOrigins: embedAllowedOrigins.length ? embedAllowedOrigins : 'any',
+                    csp: embedCsp ? embedCsp.csp : 'not set (embedding allowed from any origin)',
+                },
                 jwtCfg: jwtCfg,
                 host: hostCfg?.protected || hostCfg?.user_auth ? hostCfg : { presenters: hostCfg.presenters },
                 ip_lookup: config.integrations?.IPLookup?.enabled ? config.integrations.IPLookup : false,
