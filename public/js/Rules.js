@@ -200,6 +200,7 @@ function handleRules(isPresenter) {
         switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
         switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
         switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
+        switchEveryoneCantChatPublicly.checked = localStorageSettings.moderator_chat_cant_publicly;
         switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
         switchEveryoneCantChatDeepSeek.checked = localStorageSettings.moderator_chat_cant_deep_seek;
         switchEveryoneCantMediaSharing.checked = localStorageSettings.moderator_media_cant_sharing;
@@ -215,6 +216,7 @@ function handleRules(isPresenter) {
             video_cant_unhide: switchEveryoneCantUnhide.checked,
             screen_cant_share: switchEveryoneCantShareScreen.checked,
             chat_cant_privately: switchEveryoneCantChatPrivately.checked,
+            chat_cant_publicly: switchEveryoneCantChatPublicly.checked,
             chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
             chat_cant_deep_seek: switchEveryoneCantChatDeepSeek.checked,
             media_cant_sharing: switchEveryoneCantMediaSharing.checked,

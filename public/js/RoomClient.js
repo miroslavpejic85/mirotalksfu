@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.79
+ * @version 2.2.80
  *
  */
 
@@ -302,6 +302,7 @@ class RoomClient {
             video_cant_unhide: false,
             screen_cant_share: false,
             chat_cant_privately: false,
+            chat_cant_publicly: false,
             chat_cant_chatgpt: false,
             chat_cant_deep_seek: false,
             media_cant_sharing: false,
@@ -1387,6 +1388,20 @@ class RoomClient {
 
     handleMessage = (data) => {
         console.log('SocketOn New message:', data);
+        // Drop messages that violate the current moderator restrictions (defense-in-depth
+        // in case a peer bypasses the client-side send guards).
+        const isPublicMessage = data.to_peer_id === 'all';
+        const isAIMessage = ['ChatGPT', 'DeepSeek'].includes(data.to_peer_id);
+        if (!isAIMessage) {
+            if (isPublicMessage && this._moderator.chat_cant_publicly) {
+                console.warn('Dropping public message: disabled by moderator', data);
+                return;
+            }
+            if (!isPublicMessage && this._moderator.chat_cant_privately) {
+                console.warn('Dropping private message: disabled by moderator', data);
+                return;
+            }
+        }
         this.showMessage(data);
     };
 
@@ -3579,6 +3594,19 @@ class RoomClient {
                     const msg = JSON.parse(data);
                     if (msg.type === 'chat') {
                         console.log('DataChannel chat message received', msg);
+                        // Drop messages that violate current moderator restrictions
+                        const isPublicMessage = msg.to_peer_id === 'all';
+                        const isAIMessage = ['ChatGPT', 'DeepSeek'].includes(msg.to_peer_id);
+                        if (!isAIMessage) {
+                            if (isPublicMessage && this._moderator.chat_cant_publicly) {
+                                console.warn('Dropping DataChannel public message: disabled by moderator', msg);
+                                return;
+                            }
+                            if (!isPublicMessage && this._moderator.chat_cant_privately) {
+                                console.warn('Dropping DataChannel private message: disabled by moderator', msg);
+                                return;
+                            }
+                        }
                         this.showMessage(msg);
                     }
                 } catch (error) {
@@ -6084,6 +6112,15 @@ class RoomClient {
         };
 
         if (isChatGPTOn) {
+            if (this._moderator.chat_cant_chatgpt) {
+                this.cleanMessage();
+                return this.userLog(
+                    'warning',
+                    'The moderator does not allow you to chat with ChatGPT',
+                    'top-end',
+                    6000
+                );
+            }
             // If VideoAI is active and ChatGPT interaction is off (toggled or disabled), speak via avatar instead
             if (VideoAI.enabled && VideoAI.active && !VideoAI.useChatGPT) {
                 this.setMsgAvatar('left', this.peer_name, this.peer_avatar);
@@ -6148,6 +6185,15 @@ class RoomClient {
         }
 
         if (isDeepSeekOn) {
+            if (this._moderator.chat_cant_deep_seek) {
+                this.cleanMessage();
+                return this.userLog(
+                    'warning',
+                    'The moderator does not allow you to chat with DeepSeek',
+                    'top-end',
+                    6000
+                );
+            }
             data.to_peer_id = 'DeepSeek';
             data.to_peer_name = 'DeepSeek';
             console.log('Send message:', data);
@@ -6227,9 +6273,30 @@ class RoomClient {
                 if (li.classList.contains('active')) {
                     data.to_peer_id = li.getAttribute('data-to-id');
                     data.to_peer_name = li.getAttribute('data-to-name');
-                    console.log('Send message:', data);
 
                     const isPublicMessage = data.to_peer_id === 'all';
+
+                    if (isPublicMessage && this._moderator.chat_cant_publicly) {
+                        this.cleanMessage();
+                        return this.userLog(
+                            'warning',
+                            'The moderator does not allow you to chat publicly',
+                            'top-end',
+                            6000
+                        );
+                    }
+
+                    if (!isPublicMessage && this._moderator.chat_cant_privately) {
+                        this.cleanMessage();
+                        return this.userLog(
+                            'warning',
+                            'The moderator does not allow you to chat privately',
+                            'top-end',
+                            6000
+                        );
+                    }
+
+                    console.log('Send message:', data);
 
                     // Try DataChannel for public messages, fallback to signaling
                     if (isPublicMessage && this.useDataChannel && this.isChatDataChannelOpen()) {
@@ -9700,6 +9767,9 @@ class RoomClient {
                     'top-end'
                 );
                 break;
+            case 'chat_cant_publicly':
+                this.userLog('info', `${icons.moderator} Moderator: everyone can't chat publicly ${status}`, 'top-end');
+                break;
             case 'chat_cant_chatgpt':
                 this.userLog(
                     'info',
@@ -11337,6 +11407,21 @@ class RoomClient {
     // ####################################################
 
     showPeerAboutAndMessages(peer_id, peer_name, peer_avatar = false, event = null) {
+        // Early moderator guards: refuse to switch (and to mutate any state) when the
+        // requested chat is currently blocked by the moderator.
+        if (peer_id === 'ChatGPT' && this._moderator.chat_cant_chatgpt) {
+            return userLog('warning', 'The moderator does not allow you to chat with ChatGPT', 'top-end', 6000);
+        }
+        if (peer_id === 'DeepSeek' && this._moderator.chat_cant_deep_seek) {
+            return userLog('warning', 'The moderator does not allow you to chat with DeepSeek', 'top-end', 6000);
+        }
+        if (peer_id === 'all' && this._moderator.chat_cant_publicly) {
+            return userLog('warning', 'The moderator does not allow you to chat publicly', 'top-end', 6000);
+        }
+        if (!['all', 'ChatGPT', 'DeepSeek'].includes(peer_id) && this._moderator.chat_cant_privately) {
+            return userLog('warning', 'The moderator does not allow you to chat privately', 'top-end', 6000);
+        }
+
         this.hidePeerMessages();
 
         this.chatPeerId = peer_id;
@@ -11422,6 +11507,9 @@ class RoomClient {
                 this.getId('deepSeekMessages').style.display = 'block';
                 break;
             case 'all':
+                if (this._moderator.chat_cant_publicly) {
+                    return userLog('warning', 'The moderator does not allow you to chat publicly', 'top-end', 6000);
+                }
                 chatAbout.innerHTML = generateChatAboutHTML(image.all, 'Public chat', 'online', participantsCount);
                 this.getId('chatPublicMessages').style.display = 'block';
                 break;
@@ -11514,6 +11602,10 @@ class RoomClient {
             case 'chat_cant_privately':
                 this._moderator.chat_cant_privately = data.status;
                 rc.roomMessage('chat_cant_privately', data.status);
+                break;
+            case 'chat_cant_publicly':
+                this._moderator.chat_cant_publicly = data.status;
+                rc.roomMessage('chat_cant_publicly', data.status);
                 break;
             case 'chat_cant_chatgpt':
                 this._moderator.chat_cant_chatgpt = data.status;

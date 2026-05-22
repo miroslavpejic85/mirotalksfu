@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.79
+ * @version 2.2.80
  *
  */
 
@@ -3415,6 +3415,7 @@ function startServer() {
                 case 'video_cant_unhide':
                 case 'screen_cant_share':
                 case 'chat_cant_privately':
+                case 'chat_cant_publicly':
                 case 'chat_cant_chatgpt':
                 case 'chat_cant_deep_seek':
                 case 'media_cant_sharing':
@@ -3793,6 +3794,31 @@ function startServer() {
 
             log.debug('message', data);
 
+            // Enforce moderator chat restrictions server-side
+            const isPublicMessage = data.to_peer_id === 'all';
+            const isChatGPTMessage = data.to_peer_id === 'ChatGPT';
+            const isDeepSeekMessage = data.to_peer_id === 'DeepSeek';
+            if (room._moderator) {
+                if (isChatGPTMessage && room._moderator.chat_cant_chatgpt) {
+                    log.debug('Blocking ChatGPT message: disabled by moderator', { peer_name });
+                    return;
+                }
+                if (isDeepSeekMessage && room._moderator.chat_cant_deep_seek) {
+                    log.debug('Blocking DeepSeek message: disabled by moderator', { peer_name });
+                    return;
+                }
+                if (!isChatGPTMessage && !isDeepSeekMessage) {
+                    if (isPublicMessage && room._moderator.chat_cant_publicly) {
+                        log.debug('Blocking public message: disabled by moderator', { peer_name });
+                        return;
+                    }
+                    if (!isPublicMessage && room._moderator.chat_cant_privately) {
+                        log.debug('Blocking private message: disabled by moderator', { peer_name });
+                        return;
+                    }
+                }
+            }
+
             data.to_peer_id == 'all'
                 ? room.broadCast(socket.id, 'message', data)
                 : room.sendTo(data.to_peer_id, 'message', data);
@@ -3809,6 +3835,12 @@ function startServer() {
         socket.on('getChatGPT', async ({ time, room, name, prompt, context }, cb) => {
             if (!roomExists(socket)) {
                 return cb({ message: 'Room not found' });
+            }
+
+            const roomObj = getRoom(socket);
+            if (roomObj && roomObj._moderator && roomObj._moderator.chat_cant_chatgpt) {
+                log.debug('Blocking ChatGPT request: disabled by moderator', { name });
+                return cb({ message: 'The moderator does not allow you to chat with ChatGPT' });
             }
 
             if (!config?.integrations?.chatGPT?.enabled) {
@@ -3873,6 +3905,12 @@ function startServer() {
         socket.on('getDeepSeek', async ({ time, room, name, prompt, context }, cb) => {
             if (!roomExists(socket)) {
                 return cb({ message: 'Room not found' });
+            }
+
+            const roomObj = getRoom(socket);
+            if (roomObj && roomObj._moderator && roomObj._moderator.chat_cant_deep_seek) {
+                log.debug('Blocking DeepSeek request: disabled by moderator', { name });
+                return cb({ message: 'The moderator does not allow you to chat with DeepSeek' });
             }
 
             if (!config?.integrations?.deepSeek?.enabled) {
