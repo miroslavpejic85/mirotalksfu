@@ -21,7 +21,10 @@ if (togglePasswordBtn) {
         const isPassword = passwordInput.type === 'password';
         passwordInput.type = isPassword ? 'text' : 'password';
         togglePasswordBtn.querySelector('i').className = isPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye';
-        togglePasswordBtn.title = isPassword ? 'Hide password' : 'Show password';
+        const label = isPassword ? 'Hide password' : 'Show password';
+        togglePasswordBtn.title = label;
+        togglePasswordBtn.setAttribute('aria-label', label);
+        togglePasswordBtn.setAttribute('aria-pressed', isPassword ? 'true' : 'false');
     };
 }
 

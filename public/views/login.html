@@ -140,12 +140,21 @@
                                             id="togglePassword"
                                             class="password-toggle"
                                             title="Show password"
+                                            aria-label="Show password"
+                                            aria-pressed="false"
+                                            aria-controls="password"
                                         >
-                                            <i class="fa-solid fa-eye"></i>
+                                            <i class="fa-solid fa-eye" aria-hidden="true"></i>
                                         </button>
                                     </div>
-                                    <div id="loginError" class="login-error">
-                                        <i class="fa-solid fa-circle-exclamation"></i>
+                                    <div
+                                        id="loginError"
+                                        class="login-error"
+                                        role="alert"
+                                        aria-live="polite"
+                                        aria-atomic="true"
+                                    >
+                                        <i class="fa-solid fa-circle-exclamation" aria-hidden="true"></i>
                                         <span id="loginErrorText"></span>
                                     </div>
                                     <button id="loginButton" class="login-btn pulse" type="button">

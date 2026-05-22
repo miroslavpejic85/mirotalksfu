@@ -354,9 +354,15 @@ body {
     font-family: 'Montserrat';
     border-radius: 14px;
 }
-#loadingDiv pre {
+#loadingDiv pre,
+#loadingDiv .loading-message {
     padding: 10px;
+    margin: 0 auto;
+    max-width: 32ch;
     font-family: 'Montserrat';
+    font-size: var(--font-base, 15px);
+    line-height: var(--lh-base, 1.5);
+    color: var(--fg-2, rgba(255, 255, 255, 0.78));
     border-radius: 14px;
 }
 
@@ -1070,6 +1076,52 @@ body {
         top: 0px;
         right: 0px;
     }
+}
+
+/* Toolbar chat unread badge */
+#chatButton {
+    position: relative;
+}
+#chatButton .unread-badge,
+#chatUnreadBadge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 5px;
+    background: var(--color-danger, #ff4b4b);
+    color: #fff;
+    border-radius: var(--radius-pill, 999px);
+    font-size: 11px;
+    font-weight: var(--fw-semibold, 600);
+    line-height: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    box-shadow: 0 0 0 2px var(--btns-bg-color, #1c1e20);
+    z-index: 2;
+    box-sizing: border-box;
+}
+#chatUnreadBadge.hidden {
+    display: none;
+}
+
+/* Active state for chat / participants toolbar buttons */
+#bottomButtons #chatButton.is-active,
+#bottomButtons #participantsButton.is-active {
+    background: var(--color-accent-soft, rgba(70, 120, 249, 0.12)) !important;
+    box-shadow: inset 0 0 0 1px var(--color-accent, #4678f9);
+    color: var(--color-accent, #4678f9);
+}
+#bottomButtons #chatButton.is-active i,
+#bottomButtons #participantsButton.is-active i {
+    color: var(--color-accent, #4678f9) !important;
+}
+#bottomButtons #chatButton.is-active:hover,
+#bottomButtons #participantsButton.is-active:hover {
+    background: var(--color-accent-soft, rgba(70, 120, 249, 0.18)) !important;
 }
 
 /*--------------------------------------------------------------

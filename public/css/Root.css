@@ -47,6 +47,89 @@
     --dd-color: #e8e8ec;
 
     --videoBar-active: 1px solid rgba(102, 190, 255, 0.32);
+
+    /* Design tokens (additive, non-breaking) */
+
+    /* Semantic colors */
+    --color-accent: #4678f9;
+    --color-accent-strong: #3b5de7;
+    --color-accent-soft: rgba(70, 120, 249, 0.12);
+    --color-success: #2ece89;
+    --color-warning: #fbbf24;
+    --color-danger: #ff4b4b;
+    --color-danger-strong: #dc3545;
+    --color-focus: rgba(102, 190, 255, 0.65);
+
+    /* Foreground */
+    --fg-1: rgba(255, 255, 255, 0.95);
+    --fg-2: rgba(255, 255, 255, 0.78);
+    --fg-3: rgba(255, 255, 255, 0.62);
+    --fg-muted: rgba(255, 255, 255, 0.48);
+    --fg-disabled: rgba(255, 255, 255, 0.32);
+
+    /* Surfaces */
+    --surface-1: rgba(255, 255, 255, 0.04);
+    --surface-2: rgba(255, 255, 255, 0.08);
+    --surface-3: rgba(255, 255, 255, 0.14);
+    --border-subtle: rgba(255, 255, 255, 0.1);
+    --border-strong: rgba(255, 255, 255, 0.2);
+
+    /* Spacing */
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-7: 32px;
+    --space-8: 40px;
+    --space-9: 48px;
+
+    /* Radius */
+    --radius-sm: 8px;
+    --radius-md: 12px;
+    --radius-lg: 16px;
+    --radius-xl: 20px;
+    --radius-pill: 999px;
+
+    /* Typography */
+    --font-xs: 11px;
+    --font-sm: 13px;
+    --font-base: 15px;
+    --font-md: 16px;
+    --font-lg: 18px;
+    --font-xl: 22px;
+    --font-2xl: 28px;
+    --fw-regular: 400;
+    --fw-medium: 500;
+    --fw-semibold: 600;
+    --fw-bold: 700;
+    --lh-tight: 1.25;
+    --lh-base: 1.5;
+    --lh-loose: 1.7;
+
+    /* Motion */
+    --motion-fast: 120ms;
+    --motion-base: 200ms;
+    --motion-slow: 320ms;
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-emphasized: cubic-bezier(0.3, 0, 0, 1);
+
+    /* Z-index */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-dropdown: 100;
+    --z-sticky: 200;
+    --z-overlay: 900;
+    --z-modal: 1000;
+    --z-toast: 1100;
+    --z-tooltip: 1200;
+    --z-critical: 2000;
+
+    /* Breakpoints */
+    --bp-sm: 640px;
+    --bp-md: 1024px;
+    --bp-lg: 1280px;
 }
 
 * {
@@ -57,4 +140,21 @@
 *:focus-visible {
     outline: 2px solid var(--select-focus-color);
     outline-offset: 2px;
+}
+
+:where(button, a, input, select, textarea, [role='button'], [tabindex]):focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.001ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.001ms !important;
+        scroll-behavior: auto !important;
+    }
 }

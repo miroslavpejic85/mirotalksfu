@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.80
+ * @version 2.2.81
  *
  */
 
@@ -5848,6 +5848,10 @@ class RoomClient {
         isParticipantsListOpen = !isParticipantsListOpen;
         this.isChatOpen = !this.isChatOpen;
 
+        if (!this.isChatOpen) this.isParticipantsOpen = false;
+        this.syncChatToolbarButtons();
+        this.updateUnreadCountBadge(this.chatPeerId || 'all');
+
         if (this.isChatPinned) this.chatUnpin();
 
         if (!this.isMobileDevice && this.isChatOpen && this.canBePinned() && isChatPinEnabled) {
@@ -5897,6 +5901,7 @@ class RoomClient {
 
     async toggleParticipants() {
         this.isParticipantsOpen = !this.isParticipantsOpen;
+        this.syncChatToolbarButtons();
         if (!this.isParticipantsOpen && this.isChatOpen) {
             this.toggleChat(true);
             return;
@@ -5909,6 +5914,22 @@ class RoomClient {
         }
         if ((isDesktopDevice && this.isChatPinned) || !isDesktopDevice) {
             this.toggleShowParticipants();
+        }
+    }
+
+    syncChatToolbarButtons() {
+        const participantsActive = !!this.isParticipantsOpen && !!this.isChatOpen;
+        const chatActive = !!this.isChatOpen && !participantsActive;
+
+        const chatBtn = document.getElementById('chatButton');
+        if (chatBtn) {
+            chatBtn.classList.toggle('is-active', chatActive);
+            chatBtn.setAttribute('aria-pressed', chatActive ? 'true' : 'false');
+        }
+        const pBtn = document.getElementById('participantsButton');
+        if (pBtn) {
+            pBtn.classList.toggle('is-active', participantsActive);
+            pBtn.setAttribute('aria-pressed', participantsActive ? 'true' : 'false');
         }
     }
 
@@ -6434,6 +6455,24 @@ class RoomClient {
             }
         } catch (e) {
             // Badge element may not exist yet if participants list hasn't rendered
+        }
+        try {
+            const total = Object.values(this.unreadMessageCounts || {}).reduce(
+                (sum, n) => sum + (typeof n === 'number' ? n : 0),
+                0
+            );
+            const toolbarBadge = document.getElementById('chatUnreadBadge');
+            if (toolbarBadge) {
+                if (total > 0 && !this.isChatOpen) {
+                    toolbarBadge.textContent = total > 99 ? '99+' : String(total);
+                    toolbarBadge.classList.remove('hidden');
+                } else {
+                    toolbarBadge.textContent = '';
+                    toolbarBadge.classList.add('hidden');
+                }
+            }
+        } catch (e) {
+            // ignore
         }
     }
 

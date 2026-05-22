@@ -70,7 +70,7 @@
 /* Conversations count */
 .chat-conversations-count {
     font-size: 12px;
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.72);
     margin-top: 14px;
     margin-bottom: 4px;
     padding-left: 2px;
@@ -98,7 +98,7 @@
 }
 
 .chat-peer-status-text {
-    color: rgba(255, 255, 255, 0.45);
+    color: rgba(255, 255, 255, 0.7);
     font-size: 12px;
     display: block;
     margin-top: 1px;
@@ -471,7 +471,7 @@
 
 .chat-char-count {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.35);
+    color: rgba(255, 255, 255, 0.62);
     font-variant-numeric: tabular-nums;
 }
 
@@ -485,7 +485,7 @@
 
 .chat-input-hint {
     font-size: 11px;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.62);
 }
 
 /* Chat header category label */
@@ -494,7 +494,7 @@
     font-weight: 600;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.4);
+    color: rgba(255, 255, 255, 0.7);
     display: block;
     margin-bottom: 1px;
 }

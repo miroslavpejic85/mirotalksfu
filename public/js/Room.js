@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.80
+ * @version 2.2.81
  *
  */
 
@@ -2294,8 +2294,33 @@ function handleButtons() {
     bottomButtons.onmouseout = () => {
         isButtonsBarOver = false;
     };
-    exitButton.onclick = () => {
-        leaveRoom();
+    exitButton.onclick = (e) => {
+        if (e && e.shiftKey) {
+            leaveRoom();
+            return;
+        }
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: true,
+            background: swalBackground,
+            position: 'top',
+            title: 'Leave the room?',
+            text: 'You will be disconnected from this meeting.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Leave',
+            cancelButtonText: 'Cancel',
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            reverseButtons: true,
+            focusCancel: true,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                leaveRoom();
+            }
+        });
     };
     shareButton.onclick = () => {
         shareRoom(true);
@@ -7458,7 +7483,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.80',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.81',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

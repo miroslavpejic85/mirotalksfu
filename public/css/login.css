@@ -228,16 +228,28 @@
 .password-toggle {
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.3);
+    color: rgba(255, 255, 255, 0.45);
     cursor: pointer;
-    padding: 4px 0 4px 8px;
-    font-size: 14px;
+    width: 44px;
+    height: 44px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
     line-height: 1;
-    transition: color 0.2s ease;
+    border-radius: 12px;
+    margin-right: -8px;
+    transition:
+        color 0.2s ease,
+        background-color 0.2s ease;
     flex-shrink: 0;
 }
 .password-toggle:hover {
-    color: rgba(255, 255, 255, 0.6);
+    color: rgba(255, 255, 255, 0.85);
+    background: rgba(255, 255, 255, 0.06);
+}
+.password-toggle[aria-pressed='true'] {
+    color: var(--color-accent, #4678f9);
 }
 
 /* Login button */

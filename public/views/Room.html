@@ -168,16 +168,16 @@
 
         <div id="disconnectOverlay" class="disconnect-overlay" aria-hidden="true"></div>
 
-        <div id="loadingDiv" class="center">
-            <div class="loading-spinner">
+        <div id="loadingDiv" class="center" role="status" aria-live="polite" aria-busy="true">
+            <div class="loading-spinner" aria-hidden="true">
                 <div class="spinner-ring"></div>
-                <img class="spinner-logo" src="../images/logo.svg" alt="logo" />
+                <img class="spinner-logo" src="../images/logo.svg" alt="" />
             </div>
-            <h1>Loading</h1>
-            <pre>
-Please allow the camera or microphone
-access to use this app.
-            </pre>
+            <h1 id="loadingTitle">Loading</h1>
+            <p id="loadingMessage" class="loading-message">
+                Please allow the camera or microphone<br />
+                access to use this app.
+            </p>
         </div>
 
         <section>
@@ -300,9 +300,12 @@ access to use this app.
             <button id="stopScreenButton" class="orange hidden"><i class="fas fa-stop-circle"></i></button>
             <button id="raiseHandButton" class="hidden"><i class="fas fa-hand-paper"></i></button>
             <button id="lowerHandButton" class="hidden"><i id="lowerHandIcon" class="fas fa-hand-paper"></i></button>
-            <button id="chatButton" class="hidden"><i class="fas fa-comments"></i></button>
-            <button id="participantsButton" class="hidden">
-                <i class="fas fa-users"></i>
+            <button id="chatButton" class="hidden" aria-label="Chat" aria-pressed="false">
+                <i class="fas fa-comments" aria-hidden="true"></i>
+                <span id="chatUnreadBadge" class="unread-badge hidden" aria-live="polite" aria-atomic="true"></span>
+            </button>
+            <button id="participantsButton" class="hidden" aria-label="Participants" aria-pressed="false">
+                <i class="fas fa-users" aria-hidden="true"></i>
                 <span id="participantsCountBadge"></span>
             </button>
             <div id="settingsSplit" class="split-btn">
