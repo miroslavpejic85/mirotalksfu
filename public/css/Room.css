@@ -358,7 +358,7 @@ body {
 #loadingDiv .loading-message {
     padding: 10px;
     margin: 0 auto;
-    max-width: 32ch;
+    max-width: min(90vw, 60ch);
     font-family: 'Montserrat';
     font-size: var(--font-base, 15px);
     line-height: var(--lh-base, 1.5);
