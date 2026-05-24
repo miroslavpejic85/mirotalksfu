@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.82
+ * @version 2.2.83
  *
  */
 
@@ -2308,9 +2308,12 @@ function handleButtons() {
             text: 'You will be disconnected from this meeting.',
             icon: 'warning',
             showCancelButton: true,
+            showDenyButton: isPresenter,
             confirmButtonText: 'Leave',
+            denyButtonText: 'Leave for all',
             cancelButtonText: 'Cancel',
             confirmButtonColor: '#dc3545',
+            denyButtonColor: '#f59e0b',
             cancelButtonColor: '#6c757d',
             reverseButtons: true,
             focusCancel: true,
@@ -2319,6 +2322,8 @@ function handleButtons() {
         }).then((result) => {
             if (result.isConfirmed) {
                 leaveRoom();
+            } else if (result.isDenied) {
+                leaveRoom(true, true);
             }
         });
     };
@@ -4379,14 +4384,14 @@ function initLeaveMeeting() {
     openURL('/newroom');
 }
 
-async function leaveRoom(allowCancel = true) {
+async function leaveRoom(allowCancel = true, disconnectAll = false) {
     if (rc.isRecording() || rc.hasActiveRecorder()) {
         recShowInfo = false;
         rc.saveRecording('User is leaving the room, saving recording before exit');
         rc.popupRecordingOnLeaveRoom();
         return;
     }
-    survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave();
+    survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave(disconnectAll);
 }
 
 function leaveFeedback(allowCancel) {
@@ -4418,9 +4423,9 @@ function leaveFeedback(allowCancel) {
     });
 }
 
-function redirectOnLeave() {
+function redirectOnLeave(disconnectAll = false) {
     endRoomSession();
-    rc.exitRoom();
+    rc.exitRoom(disconnectAll);
     redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
 }
 
@@ -7483,7 +7488,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.82',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.2.83',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
