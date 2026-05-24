@@ -226,6 +226,11 @@ const settingsExtraToggle = getId('settingsExtraToggle');
 const settingsExtraMenu = getId('settingsExtraMenu');
 const noExtraButtons = getId('noExtraButtons');
 
+const exitDropdown = getId('exitDropdown');
+const exitMenu = getId('exitMenu');
+const exitLeaveBtn = getId('exitLeaveBtn');
+const exitLeaveAllBtn = getId('exitLeaveAllBtn');
+
 // ####################################################
 // VIRTUAL BACKGROUND DEFAULT IMAGES AND INIT CLASS
 // ####################################################
@@ -2295,38 +2300,12 @@ function handleButtons() {
         isButtonsBarOver = false;
     };
     exitButton.onclick = (e) => {
-        if (e && e.shiftKey) {
-            leaveRoom();
-            return;
-        }
-        Swal.fire({
-            allowOutsideClick: false,
-            allowEscapeKey: true,
-            background: swalBackground,
-            position: 'top',
-            title: 'Leave the room?',
-            text: 'You will be disconnected from this meeting.',
-            icon: 'warning',
-            showCancelButton: true,
-            showDenyButton: isPresenter,
-            confirmButtonText: 'Leave',
-            denyButtonText: 'Leave for all',
-            cancelButtonText: 'Cancel',
-            confirmButtonColor: '#dc3545',
-            denyButtonColor: '#f59e0b',
-            cancelButtonColor: '#6c757d',
-            reverseButtons: true,
-            focusCancel: true,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                leaveRoom();
-            } else if (result.isDenied) {
-                leaveRoom(true, true);
-            }
-        });
+        if (e && e.shiftKey) return leaveRoom();
+        toggleExitMenu();
     };
+    if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
+    if (exitLeaveAllBtn) exitLeaveAllBtn.onclick = handleExitLeaveForAll;
+    document.addEventListener('click', handleExitMenuOutsideClick);
     shareButton.onclick = () => {
         shareRoom(true);
     };
@@ -8307,4 +8286,30 @@ function updateTimerDisplay(el, seconds) {
     if (seconds <= 30) {
         el.parentElement.classList.add('breakout-timer-warning');
     }
+}
+
+// ####################################################
+// EXIT MENU
+// ####################################################
+
+function toggleExitMenu() {
+    if (!exitMenu) return leaveRoom();
+    if (exitLeaveAllBtn) isPresenter ? show(exitLeaveAllBtn) : hide(exitLeaveAllBtn);
+    exitMenu.classList.contains('hidden') ? show(exitMenu) : hide(exitMenu);
+}
+
+function handleExitLeave() {
+    hide(exitMenu);
+    leaveRoom();
+}
+
+function handleExitLeaveForAll() {
+    hide(exitMenu);
+    leaveRoom(true, true);
+}
+
+function handleExitMenuOutsideClick(e) {
+    if (!exitDropdown || !exitMenu) return;
+    if (exitMenu.classList.contains('hidden')) return;
+    if (!exitDropdown.contains(e.target)) hide(exitMenu);
 }
