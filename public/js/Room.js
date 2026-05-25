@@ -2306,6 +2306,7 @@ function handleButtons() {
     if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
     if (exitLeaveAllBtn) exitLeaveAllBtn.onclick = handleExitLeaveForAll;
     document.addEventListener('click', handleExitMenuOutsideClick);
+
     shareButton.onclick = () => {
         shareRoom(true);
     };
@@ -4370,10 +4371,10 @@ async function leaveRoom(allowCancel = true, disconnectAll = false) {
         rc.popupRecordingOnLeaveRoom();
         return;
     }
-    survey && survey.enabled ? leaveFeedback(allowCancel) : redirectOnLeave(disconnectAll);
+    survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : redirectOnLeave(disconnectAll);
 }
 
-function leaveFeedback(allowCancel) {
+function leaveFeedback(allowCancel, disconnectAll = false) {
     Swal.fire({
         allowOutsideClick: false,
         allowEscapeKey: false,
@@ -4395,9 +4396,10 @@ function leaveFeedback(allowCancel) {
     }).then((result) => {
         if (result.isConfirmed) {
             endRoomSession();
+            rc.exitRoom(disconnectAll);
             openURL(survey.url);
         } else if (result.isDenied) {
-            redirectOnLeave();
+            redirectOnLeave(disconnectAll);
         }
     });
 }
@@ -8294,7 +8296,12 @@ function updateTimerDisplay(el, seconds) {
 
 function toggleExitMenu() {
     if (!exitMenu) return leaveRoom();
-    if (exitLeaveAllBtn) isPresenter ? show(exitLeaveAllBtn) : hide(exitLeaveAllBtn);
+    // Non-presenters skip the dropdown and leave the room directly
+    if (!isPresenter) {
+        hide(exitMenu);
+        return leaveRoom();
+    }
+    if (exitLeaveAllBtn) show(exitLeaveAllBtn);
     exitMenu.classList.contains('hidden') ? show(exitMenu) : hide(exitMenu);
 }
 
