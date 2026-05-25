@@ -10782,7 +10782,22 @@ class RoomClient {
 
     handleEjectAllFromRoom(cmd) {
         if (typeof preventExit !== 'undefined') preventExit = false;
-        cmd.redirect ? openURL(cmd.redirect) : this.exit();
+        if (cmd.redirect) return openURL(cmd.redirect);
+        // Detach disconnect / reconnect handlers BEFORE exiting.
+        if (this.socket) {
+            this.socket.off('disconnect');
+            this.socket.off('connect_error');
+            if (this.socket.io) {
+                this.socket.io.off('reconnect_attempt');
+                this.socket.io.off('reconnect');
+                this.socket.io.off('reconnect_failed');
+            }
+        }
+        if (typeof leaveRoom === 'function') {
+            leaveRoom(false);
+        } else {
+            this.exit();
+        }
     }
 
     getRoomEmojiPlacement() {

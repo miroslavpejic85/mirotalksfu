@@ -4371,6 +4371,11 @@ async function leaveRoom(allowCancel = true, disconnectAll = false) {
         rc.popupRecordingOnLeaveRoom();
         return;
     }
+    // Broadcast the eject-all command up-front, BEFORE any Swal or navigation.
+    if (isPresenter && disconnectAll) {
+        rc.ejectAllOnLeave();
+        disconnectAll = false; // already handled, prevent double-eject below
+    }
     survey && survey.enabled ? leaveFeedback(allowCancel, disconnectAll) : redirectOnLeave(disconnectAll);
 }
 
