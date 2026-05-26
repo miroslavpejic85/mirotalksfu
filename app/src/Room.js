@@ -525,7 +525,13 @@ module.exports = class Room {
     // ####################################################
 
     getWebRtcTransportOptions() {
-        const { iceConsentTimeout = 35, initialAvailableOutgoingBitrate, listenInfos } = this.webRtcTransport;
+        const {
+            iceConsentTimeout = 35,
+            initialAvailableOutgoingBitrate,
+            listenInfos,
+            maxSendMessageSize = 262144,
+            maxReceiveMessageSize = 262144,
+        } = this.webRtcTransport;
         return {
             ...(this.webRtcServerActive ? { webRtcServer: this.webRtcServer } : { listenInfos: listenInfos }),
             enableUdp: true,
@@ -534,7 +540,10 @@ module.exports = class Room {
             iceConsentTimeout,
             initialAvailableOutgoingBitrate,
             enableSctp: true,
-            numSctpStreams: { OS: 1024, MIS: 1024 },
+            // mediasoup 3.20.0: numSctpStreams/maxSctpMessageSize removed;
+            // use maxSendMessageSize / maxReceiveMessageSize instead.
+            maxSendMessageSize,
+            maxReceiveMessageSize,
         };
     }
 

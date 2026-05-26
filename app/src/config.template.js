@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.2.83 - Configuration File
+ * MiroTalk SFU v2.2.84 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1895,12 +1895,16 @@ module.exports = {
             maxIncomingBitrate: 3000000, // 3 Mbps max per producer
 
             /**
-             * Data Channel Settings
+             * Data Channel Settings (mediasoup 3.20.0+)
+             * - maxSendMessageSize    : Max size for outgoing SCTP messages (data channels)
+             * - maxReceiveMessageSize : Max size for incoming SCTP messages (data channels)
+             * Replaces the legacy `maxSctpMessageSize` / `numSctpStreams` options.
              * Kubernetes implications:
              * - Affects memory allocation per transport
              * - Larger sizes may require Pod resource adjustments
              */
-            maxSctpMessageSize: 262144, // 256 KB max message size for data channels
+            maxSendMessageSize: 262144, // 256 KB max outgoing data-channel message size
+            maxReceiveMessageSize: 262144, // 256 KB max incoming data-channel message size
         },
     },
 };
