@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.85
+ * @version 2.2.86
  *
  */
 
@@ -2221,9 +2221,12 @@ class RoomClient {
 
             const params = {
                 track,
-                headerExtensionOptions: {
-                    absCaptureTime: true,
-                },
+                // NOTE: `headerExtensionOptions.absCaptureTime` was removed to work around a
+                // Chrome 148+ regression where munging the local SDP to add the
+                // `abs-capture-time` RTP header extension causes:
+                //   "A BUNDLE group contains a codec collision for header extension id=X.
+                //    The id must be the same across all bundled media descriptions"
+                // See https://github.com/versatica/mediasoup-client/issues/373
                 appData: {
                     mediaType: type,
                 },
