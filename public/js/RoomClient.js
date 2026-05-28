@@ -2221,12 +2221,16 @@ class RoomClient {
 
             const params = {
                 track,
-                // NOTE: `headerExtensionOptions.absCaptureTime` was removed to work around a
+                // NOTE: `headerExtensionOptions.absCaptureTime` is disabled to work around a
                 // Chrome 148+ regression where munging the local SDP to add the
                 // `abs-capture-time` RTP header extension causes:
                 //   "A BUNDLE group contains a codec collision for header extension id=X.
                 //    The id must be the same across all bundled media descriptions"
+                // TODO: Re-enable once Chrome / mediasoup-client ship a fix.
                 // See https://github.com/versatica/mediasoup-client/issues/373
+                // headerExtensionOptions: {
+                //     absCaptureTime: true,
+                // },
                 appData: {
                     mediaType: type,
                 },
