@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.87
+ * @version 2.2.88
  *
  */
 
@@ -3940,7 +3940,7 @@ class RoomClient {
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
 
                 if (sinkId && speakerSelect.value) {
-                    this.changeAudioDestination(elem);
+                    this.changeAudioDestination(elem, false);
                 }
 
                 //elem.addEventListener('play', () => { elem.volume = 0.1 });
@@ -4388,7 +4388,7 @@ class RoomClient {
         return cleanup;
     }
 
-    async changeAudioDestination(audioElement = false) {
+    async changeAudioDestination(audioElement = false, deferUntilUserActivation = true) {
         const sinkId = speakerSelect?.value;
         if (!sinkId) return;
 
@@ -4404,6 +4404,12 @@ class RoomClient {
 
         // Defer until a user gesture if needed
         if (!this.hasUserActivation()) {
+            // Automatic calls (e.g. on new audio consumer) must NOT register a global
+            // user-activation listener: applying setSinkId() on an unrelated click resets
+            // the audio pipeline and breaks echo cancellation. The selected speaker is
+            // re-applied the next time the user explicitly interacts with speakerSelect.
+            if (!deferUntilUserActivation) return;
+
             this.pendingSinkId = sinkId;
             console.warn('Click once to apply the selected speaker');
             this.runOnNextUserActivation(async () => {
@@ -12550,7 +12556,7 @@ class RoomClient {
 
             // Keep avatar audio on the selected output device when speaker changes.
             if (sinkId && speakerSelect?.value) {
-                await this.changeAudioDestination(this.videoAIElement);
+                await this.changeAudioDestination(this.videoAIElement, false);
             }
 
             if (kind === 'video') {
