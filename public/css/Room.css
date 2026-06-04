@@ -978,11 +978,12 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     transform: none !important;
-    transition: padding-left 0.2s ease;
+    transition: padding 0.2s ease;
 }
 
 #bottomButtons #settingsExtraMenu button:hover {
     padding-left: 22px;
+    padding-right: 10px;
 }
 
 #bottomButtons #settingsExtraMenu button i {
