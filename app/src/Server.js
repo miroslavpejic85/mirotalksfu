@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.2.94
+ * @version 2.2.95
  *
  */
 
@@ -3861,13 +3861,35 @@ function startServer() {
                 // Add the prompt to the context
                 context.push({ role: 'user', content: prompt });
 
-                // Call OpenAI's API to generate response
-                const completion = await chatGPT.chat.completions.create({
-                    model: config?.integrations?.chatGPT?.model || 'gpt-3.5-turbo',
-                    messages: context,
-                    max_tokens: config?.integrations?.chatGPT?.max_tokens || 1024,
-                    temperature: config?.integrations?.chatGPT?.temperature || 0.7,
-                });
+                // Call OpenAI's API to generate response (with retry on transient 5xx errors)
+                const MAX_RETRIES = 3;
+                let completion;
+                for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                    try {
+                        completion = await chatGPT.chat.completions.create({
+                            model: config?.integrations?.chatGPT?.model || 'gpt-3.5-turbo',
+                            messages: context,
+                            max_tokens: config?.integrations?.chatGPT?.max_tokens || 1024,
+                            temperature: config?.integrations?.chatGPT?.temperature || 0.7,
+                        });
+                        break; // success
+                    } catch (retryError) {
+                        const isTransient = retryError.status >= 500 && retryError.status < 600;
+                        if (isTransient && attempt < MAX_RETRIES) {
+                            const delay = Math.pow(2, attempt) * 500; // 1s, 2s backoff
+                            log.warn(
+                                `ChatGPT transient error (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms`,
+                                {
+                                    status: retryError.status,
+                                    message: retryError.message,
+                                }
+                            );
+                            await new Promise((resolve) => setTimeout(resolve, delay));
+                        } else {
+                            throw retryError;
+                        }
+                    }
+                }
 
                 // Extract the assistant's response
                 const message = completion.choices[0].message.content.trim();
@@ -4187,7 +4209,29 @@ function startServer() {
                     messages: [...context, { role: 'system', content: systemLimit }, { role: 'user', content: text }],
                     model: 'gpt-3.5-turbo',
                 };
-                const chatCompletion = await chatGPT.chat.completions.create(arr);
+                const MAX_RETRIES = 3;
+                let chatCompletion;
+                for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+                    try {
+                        chatCompletion = await chatGPT.chat.completions.create(arr);
+                        break; // success
+                    } catch (retryError) {
+                        const isTransient = retryError.status >= 500 && retryError.status < 600;
+                        if (isTransient && attempt < MAX_RETRIES) {
+                            const delay = Math.pow(2, attempt) * 500; // 1s, 2s backoff
+                            log.warn(
+                                `talkToOpenAI transient error (attempt ${attempt}/${MAX_RETRIES}), retrying in ${delay}ms`,
+                                {
+                                    status: retryError.status,
+                                    message: retryError.message,
+                                }
+                            );
+                            await new Promise((resolve) => setTimeout(resolve, delay));
+                        } else {
+                            throw retryError;
+                        }
+                    }
+                }
                 const chatText = chatCompletion.choices[0].message.content;
                 context.push({ role: 'system', content: chatText });
                 context.push({ role: 'assistant', content: chatText });
