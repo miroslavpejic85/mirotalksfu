@@ -278,11 +278,11 @@ To obtain a [MiroTalk SFU license](https://docs.mirotalk.com/license/licensing-o
 
 Do you find MiroTalk SFU indispensable for your needs? Join us in supporting this transformative project by [becoming a backer or sponsor](https://github.com/sponsors/miroslavpejic85). By doing so, not only will your logo prominently feature here, but you'll also drive the growth and sustainability of MiroTalk SFU. Your support is vital in ensuring that this valuable platform continues to thrive and remain accessible for all. Make an impact - back MiroTalk SFU today and be part of this exciting journey!
 
-|                                                                                |                                                                                                                                   |                                                                              |
-| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| [![EvoPlat](public/sponsors/EvoPlat.png)](https://evoplat.com)                 | [![Cloudron](public/sponsors/Cloudron.png)](https://cloudron.io)                                                                  | [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)      |
-| [![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com) | [![BrowserStack](public/sponsors/BrowserStack.png)](https://www.browserstack.com)                                                 | [![CrystalSound](public/sponsors/CrystalSound.png)](https://crystalsound.ai) |
-| [![Netcup](public/sponsors/Netcup.png)](https://www.netcup.com/en/?ref=309627) | [![LiveAvatar](public/sponsors/LiveAvatarByHeyGen.png)](https://www.liveavatar.com/?utm_medium=sponsership&utm_campaign=mirotalk) |                                                                              |
+|                                                                                |                                                                                                                                   |                                                                                   |
+| ------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| [![EvoPlat](public/sponsors/EvoPlat.png)](https://evoplat.com)                 | [![Cloudron](public/sponsors/Cloudron.png)](https://cloudron.io)                                                                  | [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)           |
+| [![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com) | [![TestMuAI](public/sponsors/TestMuAIBlack.svg)](https://www.testmuai.com/?utm_medium=sponsor&utm_source=mirotalk)                | [![BrowserStack](public/sponsors/BrowserStack.png)](https://www.browserstack.com) | [![CrystalSound](public/sponsors/CrystalSound.png)](https://crystalsound.ai) |
+| [![Netcup](public/sponsors/Netcup.png)](https://www.netcup.com/en/?ref=309627) | [![LiveAvatar](public/sponsors/LiveAvatarByHeyGen.png)](https://www.liveavatar.com/?utm_medium=sponsership&utm_campaign=mirotalk) |                                                                                   |
 
 </details>
 
@@ -293,10 +293,10 @@ Do you find MiroTalk SFU indispensable for your needs? Join us in supporting thi
 
 We are grateful to our past sponsors for their support!
 
-|                                                                                        |                                                                                                                    |                                                                         |
-| -------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------- |
-| [![Hetzner](public/sponsors/HetznerLogo.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn) | [![Kiquix](public/sponsors/KiquixLogo.png)](https://kiquix.com)                                                    | [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/) |
-| [![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)                    | [![TestMuAI](public/sponsors/TestMuAIBlack.svg)](https://www.testmuai.com/?utm_medium=sponsor&utm_source=mirotalk) |                                                                         |
+|                                                                                        |                                                                 |                                                                         |
+| -------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| [![Hetzner](public/sponsors/HetznerLogo.png)](https://hetzner.cloud/?ref=XdRifCzCK3bn) | [![Kiquix](public/sponsors/KiquixLogo.png)](https://kiquix.com) | [![BroadcastX](public/sponsors/BroadcastX.png)](https://broadcastx.de/) |
+| [![LuvLounge](public/sponsors/LuvLounge.png)](https://luvlounge.ca)                    |                                                                 |                                                                         |
 
 </details>
 
