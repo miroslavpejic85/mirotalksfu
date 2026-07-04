@@ -84,7 +84,7 @@ class WebmContainer extends WebmBase {
     }
     updateBySource() {
         this.data = [];
-        for (this.offset = 0; this.offset < this.source.length; ) {
+        for (this.offset = 0; this.offset < this.source.length;) {
             const id = this.readVint();
             const len = this.readVint();
             const end = Math.min(this.offset + len, this.source.length);
