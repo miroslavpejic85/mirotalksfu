@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.04 - Configuration File
+ * MiroTalk SFU v2.3.05 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -195,6 +195,14 @@ module.exports = {
          * - dir            : Storage directory for recordings (Relative to app/src/ default: app/rec)
          * - maxFileSize    : Maximum recording size (1GB default)
          *
+         * Upload Security:
+         * ------------------------
+         * - uploadTokenExp : Lifetime of the per-session upload token issued on join and
+         *                    required by the /recSync* endpoints (default '24h'). Must be
+         *                    long enough to outlast the longest expected recording.
+         * - rateLimit      : Per-IP rate limit for /recSync* upload requests
+         *                    (default: 300 requests / 60s) to mitigate flooding.
+         *
          * Docker Note:
          * ------------
          * - When running in Docker, ensure the recording directory exists and is properly mounted:
@@ -209,6 +217,11 @@ module.exports = {
             endpoint: process.env.RECORDING_ENDPOINT || '',
             dir: process.env.RECORDING_DIR || '../rec',
             maxFileSize: process.env.RECORDING_MAX_FILE_SIZE || 1 * 1024 * 1024 * 1024, // 1GB
+            uploadTokenExp: process.env.RECORDING_UPLOAD_TOKEN_EXP || '24h',
+            rateLimit: {
+                windowMs: parseInt(process.env.RECORDING_RATE_LIMIT_WINDOW_MS) || 60 * 1000,
+                max: parseInt(process.env.RECORDING_RATE_LIMIT_MAX) || 300,
+            },
         },
 
         /**

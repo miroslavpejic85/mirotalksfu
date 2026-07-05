@@ -6,6 +6,8 @@ const fs = require('fs');
 const path = require('path');
 const sanitizeFilename = require('sanitize-filename');
 const helmet = require('helmet');
+const jwt = require('jsonwebtoken');
+const rateLimit = require('express-rate-limit');
 const app = express();
 const port = process.env.PORT || 8080;
 
@@ -25,6 +27,19 @@ const recordingDirectory = path.join(__dirname, 'rec');
 // Flag to enable/disable server recording
 const isServerRecordingEnabled = true;
 
+// Secret used to verify the per-session upload token.
+// IMPORTANT: must match JWT_SECRET on the main MiroTalk SFU server that issues the token.
+const jwtKey = process.env.JWT_SECRET || 'mirotalksfu_jwt_secret';
+
+// Per-IP rate limiter for recording uploads (mitigates flooding / disk exhaustion)
+const recSyncLimiter = rateLimit({
+    windowMs: parseInt(process.env.RECORDING_RATE_LIMIT_WINDOW_MS) || 60 * 1000,
+    max: parseInt(process.env.RECORDING_RATE_LIMIT_MAX) || 300,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: 'Too many recording upload requests. Please try again later.',
+});
+
 // CORS options
 const corsOptions = {
     origin: '*',
@@ -43,8 +58,45 @@ function ensureRecordingDirectoryExists() {
     }
 }
 
+// Extract the recording upload token from an Authorization: Bearer header or query param
+function getRecUploadToken(req) {
+    const auth = req.headers['authorization'] || '';
+    if (auth.startsWith('Bearer ')) return auth.slice(7).trim();
+    if (typeof req.query.uploadToken === 'string') return req.query.uploadToken;
+    return null;
+}
+
+// Parse the roomId embedded in a recording filename (Rec_<roomId>_<...>.webm)
+function getRoomIdFromFilename(fileName) {
+    const parts = String(fileName).split('_');
+    return parts.length >= 2 ? parts[1] : null;
+}
+
+// Authorize /recSync uploads: require a valid, unexpired token issued on join whose
+// room matches the room encoded in the target filename.
+function checkRecUploadToken(req, res, next) {
+    try {
+        const token = getRecUploadToken(req);
+        if (!token) {
+            return res.status(401).send('Missing upload token');
+        }
+        const decoded = jwt.verify(token, jwtKey);
+        if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
+            return res.status(401).send('Invalid upload token');
+        }
+        const { fileName } = req.query;
+        if (!fileName || getRoomIdFromFilename(fileName) !== String(decoded.roomId)) {
+            return res.status(403).send('Upload token room mismatch');
+        }
+        next();
+    } catch (err) {
+        log.warn('[RecSync] - Rejected upload with invalid token:', err.message);
+        return res.status(401).send('Invalid or expired upload token');
+    }
+}
+
 // Endpoint to handle recording uploads
-app.post('/recSync', (req, res) => {
+app.post('/recSync', recSyncLimiter, checkRecUploadToken, (req, res) => {
     try {
         if (!isServerRecordingEnabled) {
             return res.status(403).send('Server recording is disabled');

@@ -14,12 +14,14 @@
     "author": "Miroslav Pejic",
     "license": "AGPLv3",
     "dependencies": {
-        "cors": "2.8.5",
-        "express": "^5.1.0",
-        "helmet": "^8.1.0",
-        "sanitize-filename": "^1.6.3"
+        "cors": "2.8.6",
+        "express": "^5.2.1",
+        "express-rate-limit": "^8.5.2",
+        "helmet": "^8.2.0",
+        "jsonwebtoken": "^9.0.3",
+        "sanitize-filename": "^1.6.4"
     },
     "devDependencies": {
-        "nodemon": "^3.1.10"
+        "nodemon": "^3.1.14"
     }
 }

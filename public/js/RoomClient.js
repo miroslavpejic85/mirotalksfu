@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.04
+ * @version 2.3.05
  *
  */
 
@@ -439,6 +439,7 @@ class RoomClient {
         };
         this.recSyncTime = 4000; // 4 sec
         this.recSyncChunkSize = 1000000; // 1MB
+        this.recUploadToken = ''; // Per-session token authorizing /recSync* uploads (issued on join)
 
         // Encodings
         this.preferLocalCodecsOrder = false; // Prefer local codecs order
@@ -593,6 +594,9 @@ class RoomClient {
                 // ##########################################
                 this.peers = new Map(JSON.parse(room.peers));
                 // ##########################################
+
+                // Store the per-session token used to authorize server recording uploads
+                if (room.recUploadToken) this.recUploadToken = room.recUploadToken;
 
                 if (this.usernameExists(this.peers)) {
                     return this.userNameAlreadyInRoom();
@@ -8373,6 +8377,7 @@ class RoomClient {
                     {
                         headers: {
                             'Content-Type': 'application/octet-stream',
+                            Authorization: `Bearer ${rc.recUploadToken}`,
                         },
                     }
                 );
@@ -8414,6 +8419,7 @@ class RoomClient {
                     try {
                         await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFinalize`, null, {
                             params: { fileName: rc.recServerFileName, durationMs },
+                            headers: { Authorization: `Bearer ${rc.recUploadToken}` },
                         });
                         console.log('Finalized (with duration fix) and uploaded to S3');
                         if (recShowInfo) userLog('success', 'Recording successfully uploaded to S3.', 'top-end', 3000);
@@ -8429,6 +8435,7 @@ class RoomClient {
                     try {
                         await axios.post(`${rc.recording.recSyncServerEndpoint}/recSyncFixWebm`, null, {
                             params: { fileName: rc.recServerFileName, durationMs },
+                            headers: { Authorization: `Bearer ${rc.recUploadToken}` },
                         });
                         console.log('Server-side WEBM duration fixed for', rc.recServerFileName);
                     } catch (error) {

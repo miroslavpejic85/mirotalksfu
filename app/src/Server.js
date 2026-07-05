@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.04
+ * @version 2.3.05
  *
  */
 
@@ -188,6 +188,24 @@ const activeRoomsLimiter = rateLimit({
     keyGenerator: (req) => ipKeyGenerator(req),
 });
 
+// Server recording chunk upload rate limiter (per IP). The /recSync* endpoints
+// accept binary writes to disk, so cap request volume to mitigate flooding and
+// disk exhaustion even from an authenticated/joined peer.
+const recSyncLimiterCfg = config.media?.recording?.rateLimit || {};
+const recSyncLimiterWindowMs = recSyncLimiterCfg.windowMs || 60 * 1000;
+const recSyncLimiterMax = recSyncLimiterCfg.max || 300;
+const recSyncLimiterMinutes = Math.ceil(recSyncLimiterWindowMs / (60 * 1000));
+const recSyncLimiter = rateLimit({
+    windowMs: recSyncLimiterWindowMs,
+    max: recSyncLimiterMax,
+    standardHeaders: true,
+    legacyHeaders: false,
+    message: {
+        error: `Too many recording upload requests. Please try again after ${minutesLabel(recSyncLimiterMinutes)}.`,
+    },
+    keyGenerator: (req) => ipKeyGenerator(req),
+});
+
 // Socket.IO createRoom rate limiter (per IP) — sliding window in memory.
 // Prevents unauthenticated sockets from spamming arbitrary room entries
 // into the in-memory roomList (which feeds /api/v1/activeRooms).
@@ -278,6 +296,18 @@ const jwtCfg = {
     JWT_KEY: config?.security?.jwt?.key || 'mirotalksfu_jwt_secret',
     JWT_EXP: config?.security?.jwt?.exp || '1h',
 };
+
+// Lifetime of the per-session server recording upload token (must outlive long recordings)
+const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
+
+// Create a signed upload token bound to a specific room. It proves the requester
+// actually passed the Socket.IO `join` auth for that room before allowing writes
+// to the recording directory via the /recSync* endpoints.
+function createRecUploadToken(roomId) {
+    return jwt.sign({ scope: 'rec-upload', roomId: String(roomId) }, jwtCfg.JWT_KEY, {
+        expiresIn: recUploadTokenExp,
+    });
+}
 
 const hostCfg = {
     protected: config?.security?.host?.protected,
@@ -1282,6 +1312,38 @@ function startServer() {
         throw new Error('Invalid file name format');
     }
 
+    // Extract the recording upload token from an Authorization: Bearer header or query param
+    function getRecUploadToken(req) {
+        const auth = req.headers['authorization'] || '';
+        if (auth.startsWith('Bearer ')) return auth.slice(7).trim();
+        if (typeof req.query.uploadToken === 'string') return req.query.uploadToken;
+        return null;
+    }
+
+    // Authorize /recSync* requests: recording must be enabled and the caller must
+    // present a valid, unexpired upload token issued on join. The room the token was
+    // issued for is stored on req and later matched against the target file's room.
+    function checkRecUploadToken(req, res, next) {
+        if (!serverRecordingEnabled) {
+            return res.status(403).json({ error: 'Recording disabled' });
+        }
+        try {
+            const token = getRecUploadToken(req);
+            if (!token) {
+                return res.status(401).json({ error: 'Missing upload token' });
+            }
+            const decoded = jwt.verify(token, jwtCfg.JWT_KEY);
+            if (!decoded || decoded.scope !== 'rec-upload' || !decoded.roomId) {
+                return res.status(401).json({ error: 'Invalid upload token' });
+            }
+            req.recUploadRoomId = String(decoded.roomId);
+            next();
+        } catch (err) {
+            log.warn('[recSync] Rejected upload with invalid token', { error: err.message });
+            return res.status(401).json({ error: 'Invalid or expired upload token' });
+        }
+    }
+
     function deleteFile(filePath) {
         if (!fs.existsSync(filePath)) return false;
 
@@ -1355,11 +1417,7 @@ function startServer() {
     // RECORDING ROUTE HANDLER
     // ####################################################
 
-    app.post('/recSync', async (req, res) => {
-        if (!serverRecordingEnabled) {
-            return res.status(403).json({ error: 'Recording disabled' });
-        }
-
+    app.post('/recSync', recSyncLimiter, checkRecUploadToken, async (req, res) => {
         if (!fs.existsSync(dir.rec)) {
             fs.mkdirSync(dir.rec, { recursive: true });
         }
@@ -1371,6 +1429,11 @@ function startServer() {
             const roomId = getRoomIdFromFilename(fileName);
 
             isValidRequest(req, fileName, roomId);
+
+            // The upload token must have been issued for this exact room
+            if (req.recUploadRoomId !== roomId) {
+                throw new Error('Invalid room ID');
+            }
 
             const filePath = path.resolve(dir.rec, fileName);
             const passThrough = new PassThrough();
@@ -1408,12 +1471,17 @@ function startServer() {
         }
     });
 
-    app.post('/recSyncFixWebm', async (req, res) => {
+    app.post('/recSyncFixWebm', recSyncLimiter, checkRecUploadToken, async (req, res) => {
         try {
             const { fileName, durationMs } = checkXSS(req.query);
             const roomId = getRoomIdFromFilename(fileName);
 
             isValidRequest(req, fileName, roomId, durationMs, false);
+
+            // The upload token must have been issued for this exact room
+            if (req.recUploadRoomId !== roomId) {
+                return res.status(403).json({ message: 'Upload token room mismatch' });
+            }
 
             const filePath = path.resolve(dir.rec, fileName);
 
@@ -1436,7 +1504,7 @@ function startServer() {
         }
     });
 
-    app.post('/recSyncFinalize', async (req, res) => {
+    app.post('/recSyncFinalize', recSyncLimiter, checkRecUploadToken, async (req, res) => {
         try {
             const shouldUploadToS3 = config?.integrations?.s3?.enabled && config?.media?.recording?.uploadToS3;
             if (!shouldUploadToS3 || !serverRecordingEnabled) {
@@ -1448,6 +1516,11 @@ function startServer() {
             const roomId = getRoomIdFromFilename(fileName);
 
             isValidRequest(req, fileName, roomId, durationMs, false);
+
+            // The upload token must have been issued for this exact room
+            if (req.recUploadRoomId !== roomId) {
+                return res.status(403).json({ error: 'Upload token room mismatch' });
+            }
 
             const filePath = path.resolve(dir.rec, fileName);
 
@@ -2493,7 +2566,15 @@ function startServer() {
                 notifyMainRoomBreakoutCountChanged(socket.room_id);
             }
 
-            cb(room.toJson());
+            const roomJson = room.toJson();
+
+            // Issue a per-session, room-bound token authorizing this peer to upload
+            // its own server recording chunks via the /recSync* endpoints.
+            if (serverRecordingEnabled) {
+                roomJson.recUploadToken = createRecUploadToken(room.id);
+            }
+
+            cb(roomJson);
         });
 
         socket.on('getRouterRtpCapabilities', (_, callback) => {
