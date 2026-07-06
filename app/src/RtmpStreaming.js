@@ -7,6 +7,7 @@ const RtmpUrl = require('./RtmpUrl');
 const fs = require('fs');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const Validator = require('./Validator');
 const Logger = require('./Logger');
 const log = new Logger('RtmpStreaming');
 
@@ -144,6 +145,14 @@ class RtmpStreaming {
             const parsedUrl = new URL(inputVideoURL);
             if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
                 log.error(`[startRTMPfromURL] Invalid URL scheme: ${parsedUrl.protocol}`);
+                return false;
+            }
+
+            // Check for private, loopback, or link-local addresses to prevent SSRF
+            let hostname = parsedUrl.hostname || '';
+            if (hostname.startsWith('[') && hostname.endsWith(']')) hostname = hostname.slice(1, -1); // IPv6 literal
+            if (Validator.isPrivateOrLoopbackHost(hostname)) {
+                log.error(`[startRTMPfromURL] Blocked private/loopback/link-local host (SSRF): ${hostname}`);
                 return false;
             }
         } catch (err) {
