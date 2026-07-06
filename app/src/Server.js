@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.07
+ * @version 2.3.08
  *
  */
 
@@ -2561,7 +2561,7 @@ function startServer() {
                 }
             }
 
-            handleJoinWebHook(room.id, data.peer_info);
+            handleJoinWebHook(room.id, room.getSessionId(), data.peer_info);
 
             // Notify main room when a peer joins a breakout room
             if (socket.room_id.includes('_breakout_')) {
@@ -3237,7 +3237,7 @@ function startServer() {
 
                     peer.updatePeerInfo({ type: 'lobby', status: false });
 
-                    handleJoinWebHook(room.id, peer.peer_info);
+                    handleJoinWebHook(room.id, room.getSessionId(), peer.peer_info);
                 }
             }
         });
@@ -4687,6 +4687,7 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
+                    session_id: room?.getSessionId ? room.getSessionId() : undefined,
                     peer: peer?.peer_info,
                     reason: reason,
                 };
@@ -4757,6 +4758,7 @@ function startServer() {
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id: socket.room_id,
+                    session_id: room?.getSessionId ? room.getSessionId() : undefined,
                     peer: peer?.peer_info,
                 };
                 // Trigger a POST request when a user exits
@@ -4803,13 +4805,14 @@ function startServer() {
 
         // Helpers
 
-        async function handleJoinWebHook(room_id, peer_info) {
+        async function handleJoinWebHook(room_id, session_id, peer_info) {
             // handle WebHook
             if (webhook.enabled) {
                 // Trigger a POST request when a user joins
                 const data = {
                     timestamp: log.getDateTime(false),
                     room_id,
+                    session_id,
                     peer_info,
                 };
 

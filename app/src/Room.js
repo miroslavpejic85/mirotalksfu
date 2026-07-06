@@ -1,5 +1,6 @@
 'use strict';
 
+const { v4: uuidv4 } = require('uuid');
 const config = require('./config');
 const RtmpStreaming = require('./RtmpStreaming');
 const Logger = require('./Logger');
@@ -10,6 +11,11 @@ const { audioLevelObserverEnabled, activeSpeakerObserverEnabled } = config.media
 module.exports = class Room {
     constructor(room_id, worker, io) {
         this.id = room_id;
+        // Unique, one-time-use identifier for this specific room/conference instance.
+        // Generated when the room is created (first peer joins) and destroyed with the room
+        // (last peer leaves). Reusing the same room name later yields a brand-new sessionId,
+        // so webhook events and recordings can be reliably grouped per meeting instance.
+        this.sessionId = uuidv4();
         this.worker = worker;
         this.webRtcServer = worker.appData.webRtcServer;
         this.webRtcServerActive = config.mediasoup.webRtcServerActive;
@@ -95,6 +101,7 @@ module.exports = class Room {
     toJson() {
         return {
             id: this.id,
+            sessionId: this.sessionId,
             broadcasting: this._isBroadcasting,
             recording: this.recording,
             config: {
@@ -126,6 +133,10 @@ module.exports = class Room {
             maxParticipantsReached: this.peers.size > this.maxParticipants,
             globalLobby: this.globalLobby,
         };
+    }
+
+    getSessionId() {
+        return this.sessionId;
     }
 
     // ##############################################

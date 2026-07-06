@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.07
+ * @version 2.3.08
  *
  */
 
@@ -440,6 +440,7 @@ class RoomClient {
         this.recSyncTime = 4000; // 4 sec
         this.recSyncChunkSize = 1000000; // 1MB
         this.recUploadToken = ''; // Per-session token authorizing /recSync* uploads (issued on join)
+        this.sessionId = ''; // Server-side unique conference-instance ID (issued on join)
 
         // Encodings
         this.preferLocalCodecsOrder = false; // Prefer local codecs order
@@ -597,6 +598,9 @@ class RoomClient {
 
                 // Store the per-session token used to authorize server recording uploads
                 if (room.recUploadToken) this.recUploadToken = room.recUploadToken;
+
+                // Store the server-side unique conference-instance ID for this room instance
+                if (room.sessionId) this.sessionId = room.sessionId;
 
                 if (this.usernameExists(this.peers)) {
                     return this.userNameAlreadyInRoom();
@@ -8346,7 +8350,9 @@ class RoomClient {
     getServerRecFileName() {
         const roomName = this.room_id.trim();
         const dateTime = getDataTimeStringFormat();
-        const uuid = this.generateUUIDv4();
+        // Prefer the server-side session ID so recordings correlate with join/exit webhook
+        // events for the same conference instance; fall back to a client UUID if unavailable.
+        const uuid = this.sessionId || this.generateUUIDv4();
         return `Rec_${roomName}_${dateTime}_${uuid}.webm`;
     }
 
