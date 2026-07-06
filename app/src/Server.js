@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.05
+ * @version 2.3.06
  *
  */
 
@@ -1975,9 +1975,11 @@ function startServer() {
                 error: 'This endpoint has been disabled. Please contact the administrator for further information.',
             });
         }
-        // check if user was authorized for the api call
-        const { host, authorization = config.api.keySecret } = req.headers;
-        const api = new ServerApi(host, authorization);
+        // Public endpoint gated only by config.ui.rooms.showActive: when enabled it
+        // intentionally returns the active rooms list without authorization so the
+        // event-zone dashboard (/activeRooms) can display it.
+        const { host } = req.headers;
+        const api = new ServerApi(host);
 
         // Get active rooms
         const activeRooms = api.getActiveRooms(roomList);
