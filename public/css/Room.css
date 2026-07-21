@@ -4032,6 +4032,60 @@ button:hover {
     background: var(--body-bg);
 }
 
+/* Bottom-right Secondary Drag Handle */
+.whiteboard-bottom-handle {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    background-color: rgba(44, 44, 44, 0.85);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-left-radius: 8px;
+    border-bottom-right-radius: 10px;
+    cursor: move;
+    z-index: 100;
+    opacity: 0;
+    transition:
+        background-color 0.2s ease,
+        opacity 0.3s ease-in-out;
+}
+
+.whiteboard-bottom-handle:hover {
+    background-color: rgb(75, 75, 75);
+    opacity: 1;
+}
+
+/* Bottom-left Secondary Drag Handle */
+.whiteboard-bottom-left-handle {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 32px;
+    height: 32px;
+    background-color: rgba(44, 44, 44, 0.85);
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-top-right-radius: 8px;
+    border-bottom-left-radius: 10px;
+    cursor: move;
+    z-index: 100;
+    opacity: 0;
+    transition:
+        background-color 0.2s ease,
+        opacity 0.3s ease-in-out;
+}
+
+.whiteboard-bottom-left-handle:hover {
+    background-color: rgb(75, 75, 75);
+    opacity: 1;
+}
+
 .whiteboardColorPicker {
     -webkit-appearance: none;
     -moz-appearance: none;

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.14
+ * @version 2.3.15
  *
  */
 
@@ -5811,7 +5811,10 @@ class RoomClient {
             pos2 = pos4 - e.clientY;
             pos3 = e.clientX;
             pos4 = e.clientY;
-            elmnt.style.top = elmnt.offsetTop - pos2 + 'px';
+            // set the element's new position with top boundary check (min 0px):
+            let newTop = elmnt.offsetTop - pos2;
+            if (newTop < 0) newTop = 0;
+            elmnt.style.top = newTop + 'px';
             elmnt.style.left = elmnt.offsetLeft - pos1 + 'px';
         }
         function closeDragElement() {
