@@ -726,7 +726,7 @@ body {
 --------------------------------------------------------------*/
 
 #bottomButtons {
-    z-index: 3;
+    z-index: 12;
     position: fixed;
     display: none;
     padding: 5px;
