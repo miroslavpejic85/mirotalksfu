@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.18
+ * @version 2.3.19
  *
  */
 
@@ -4040,7 +4040,7 @@ function startServer() {
                 const response = await axios.post(
                     `${config?.integrations?.deepSeek?.basePath}chat/completions`,
                     {
-                        model: config?.integrations?.deepSeek?.model || 'deepseek-chat',
+                        model: config?.integrations?.deepSeek?.model || 'deepseek-v4-flash',
                         messages: context,
                         max_tokens: config?.integrations?.deepSeek?.max_tokens || 1024,
                         temperature: config?.integrations?.deepSeek?.temperature || 0.7,

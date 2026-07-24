@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.18 - Configuration File
+ * MiroTalk SFU v2.3.19 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -708,10 +708,8 @@ module.exports = {
          * Usage Example:
          * -------------
          * 1. Supported Models:
-         *  - deepseek-chat (recommended)
-         *  - deepseek-coder
-         *  - deepseek-math
-         *  - deepseek-llm
+         *  - deepseek-v4-flash (recommended)
+         *  - deepseek-v4-pro
          *  - ...
          *
          * 2. Temperature Guide:
@@ -724,7 +722,7 @@ module.exports = {
             enabled: process.env.DEEP_SEEK_ENABLED === 'true',
             basePath: process.env.DEEP_SEEK_BASE_PATH || 'https://api.deepseek.com/v1/',
             apiKey: process.env.DEEP_SEEK_API_KEY || '',
-            model: process.env.DEEP_SEEK_MODEL || 'deepseek-chat',
+            model: process.env.DEEP_SEEK_MODEL || 'deepseek-v4-flash',
             max_tokens: parseInt(process.env.DEEP_SEEK_MAX_TOKENS) || 1024,
             temperature: parseInt(process.env.DEEP_SEEK_TEMPERATURE) || 0.7,
         },
