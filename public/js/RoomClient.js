@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.17
+ * @version 2.3.18
  *
  */
 
@@ -2376,12 +2376,19 @@ class RoomClient {
     // ####################################################
 
     showVideoImageSelector() {
+        const videoVirtualBackground = document.getElementById('videoVirtualBackground');
         const imageGrid = document.getElementById('imageGrid');
         const imageGridVideo = document.getElementById('imageGridVideo');
 
-        if (!imageGrid || !imageGridVideo) return;
+        // Grid elements missing: keep the whole section (label + grid) hidden to avoid a lonely label
+        if (!imageGrid || !imageGridVideo) {
+            if (videoVirtualBackground) hide(videoVirtualBackground);
+            return;
+        }
 
         elemDisplay('imageGridVideo', true, 'grid');
+        // Reveal the section (label + grid) only now that the grid is visible/populated
+        if (videoVirtualBackground) show(videoVirtualBackground);
         if (imageGridVideo.innerHTML != '') return;
 
         imageGrid.innerHTML = ''; // Clear previous init images
