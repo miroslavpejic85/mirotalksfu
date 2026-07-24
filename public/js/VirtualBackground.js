@@ -12,18 +12,43 @@ class VirtualBackground {
 
         // Check for API support
         this.isSupported = this.checkSupport();
-        if (!this.isSupported) {
-            console.warn(
-                '⚠️ MediaStreamTrackProcessor, MediaStreamTrackGenerator, or TransformStream is not supported in this environment.'
-            );
-        }
 
         this.resetState();
     }
 
     checkSupport() {
-        // Check if required APIs are supported
-        return Boolean(window.MediaStreamTrackProcessor && window.MediaStreamTrackGenerator && window.TransformStream);
+        // Check if required APIs are supported.
+        // Note: MediaStreamTrackGenerator is a non-standard/experimental API that newer
+        // Chromium builds are phasing out in favor of VideoTrackGenerator, so accept either.
+        const hasProcessor = Boolean(window.MediaStreamTrackProcessor);
+        const hasTransformStream = Boolean(window.TransformStream);
+        const hasGenerator = Boolean(window.MediaStreamTrackGenerator || window.VideoTrackGenerator);
+
+        if (!hasProcessor || !hasTransformStream || !hasGenerator) {
+            const missing = [];
+            if (!hasProcessor) missing.push('MediaStreamTrackProcessor');
+            if (!hasGenerator) missing.push('MediaStreamTrackGenerator/VideoTrackGenerator');
+            if (!hasTransformStream) missing.push('TransformStream');
+            console.warn(
+                `⚠️ Virtual background unsupported in this environment. Missing API(s): ${missing.join(', ')}`
+            );
+        }
+
+        return hasProcessor && hasTransformStream && hasGenerator;
+    }
+
+    createVideoTrackGenerator() {
+        // MediaStreamTrackGenerator (legacy, main-thread) is itself a MediaStreamTrack and exposes a writable.
+        if (window.MediaStreamTrackGenerator) {
+            const generator = new MediaStreamTrackGenerator({ kind: 'video' });
+            return { generator, track: generator };
+        }
+        // VideoTrackGenerator (newer replacement) exposes a writable and a separate .track.
+        if (window.VideoTrackGenerator) {
+            const generator = new VideoTrackGenerator();
+            return { generator, track: generator.track };
+        }
+        throw new Error('Neither MediaStreamTrackGenerator nor VideoTrackGenerator is available.');
     }
 
     resetState() {
@@ -154,7 +179,7 @@ class VirtualBackground {
 
         // Create new processor and generator for stream transformation
         const processor = new MediaStreamTrackProcessor({ track: videoTrack });
-        const generator = new MediaStreamTrackGenerator({ kind: 'video' });
+        const { generator, track: outputTrack } = this.createVideoTrackGenerator();
 
         const transformer = new TransformStream({
             transform: async (videoFrame, controller) => {
@@ -229,7 +254,7 @@ class VirtualBackground {
                 }
             });
 
-            return new MediaStream([generator]);
+            return new MediaStream([outputTrack]);
         } catch (error) {
             console.error('Error setting up processing pipeline', error);
             await this.stopCurrentProcessor();

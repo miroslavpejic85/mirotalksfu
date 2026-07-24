@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.3.16",
+    "version": "2.3.17",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -60,8 +60,8 @@
         "node": ">=22"
     },
     "dependencies": {
-        "@aws-sdk/client-s3": "^3.1093.0",
-        "@aws-sdk/lib-storage": "^3.1093.0",
+        "@aws-sdk/client-s3": "^3.1094.0",
+        "@aws-sdk/lib-storage": "^3.1094.0",
         "@mattermost/client": "11.8.0",
         "@ngrok/ngrok": "1.7.0",
         "@sentry/node": "^10.67.0",
@@ -83,14 +83,14 @@
         "helmet": "^8.3.0",
         "httpolyglot": "0.1.2",
         "ical-generator": "^11.0.0",
-        "js-yaml": "^5.2.1",
+        "js-yaml": "^5.2.2",
         "jsdom": "^29.1.1",
         "jsonwebtoken": "^9.0.3",
         "mediasoup": "^3.22.0",
         "mediasoup-client": "3.21.0",
         "mime-types": "^3.0.2",
         "nodemailer": "^9.0.3",
-        "openai": "^6.48.0",
+        "openai": "^6.49.0",
         "qs": "6.15.3",
         "sanitize-filename": "^1.6.4",
         "socket.io": "4.8.3",
