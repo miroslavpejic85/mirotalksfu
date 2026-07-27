@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.6
 
-# Use Node.js 22 LTS slim image as base
-FROM node:22-slim
+# Use Node.js 24 LTS slim image as base
+FROM node:24-slim
 
 # Set working directory
 WORKDIR /src
