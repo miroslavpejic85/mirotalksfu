@@ -1,6 +1,6 @@
 {
     "name": "mirotalksfu",
-    "version": "2.3.24",
+    "version": "2.3.25",
     "description": "WebRTC SFU browser-based video calls",
     "main": "Server.js",
     "scripts": {
@@ -99,7 +99,7 @@
     },
     "devDependencies": {
         "esbuild": "^0.28.1",
-        "mocha": "^11.7.6",
+        "mocha": "^11.8.0",
         "node-fetch": "^3.3.2",
         "nodemon": "^3.1.14",
         "prettier": "3.9.6",

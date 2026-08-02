@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.24
+ * @version 2.3.25
  *
  */
 
@@ -628,6 +628,11 @@ class RoomClient {
                 if (room === 'isBanned') {
                     console.warn('00-WARNING ----> You are Banned from the Room!');
                     return this.isBanned();
+                }
+
+                if (room === 'isNameInUse') {
+                    console.warn('00-WARNING ----> Username already in use');
+                    return this.userNameAlreadyInRoom();
                 }
 
                 // ##########################################
