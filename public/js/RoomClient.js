@@ -645,10 +645,6 @@ class RoomClient {
                 // Store the server-side unique conference-instance ID for this room instance
                 if (room.sessionId) this.sessionId = room.sessionId;
 
-                if (this.usernameExists(this.peers)) {
-                    return this.userNameAlreadyInRoom();
-                }
-
                 await this.joinAllowed(room);
             })
             .catch((error) => {
@@ -656,24 +652,6 @@ class RoomClient {
                 //
                 popupHtmlMessage(null, image.network, 'Join Room', error, 'center', false, true);
             });
-    }
-
-    usernameExists(peers) {
-        if (!peer_info.peer_token) {
-            // hack...
-            for (let peer of Array.from(peers.keys()).filter((id) => id !== this.peer_id)) {
-                const _peer_info = peers.get(peer).peer_info;
-                if (_peer_info.peer_name == this.peer_name) {
-                    if (_peer_info.peer_uuid === this.peer_uuid) {
-                        console.log('Same user reconnecting', this.peer_name);
-                        continue;
-                    }
-                    console.log('07.0-WARNING ----> Username already in use');
-                    return true;
-                }
-            }
-        }
-        return false;
     }
 
     async joinAllowed(room) {
