@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.23
+ * @version 2.3.24
  *
  */
 
@@ -3040,12 +3040,12 @@ function startServer() {
             }
         });
 
-        socket.on('getProducers', () => {
-            if (!roomExists(socket)) return;
+        socket.on('getProducers', (data, callback) => {
+            if (!roomExists(socket)) return callback?.({ error: 'Room not found' });
 
             const { room, peer } = getRoomAndPeer(socket);
 
-            if (isPeerInLobby(peer)) return;
+            if (isPeerInLobby(peer)) return callback?.({ error: 'In lobby' });
 
             const { peer_name } = peer || 'undefined';
 
@@ -3053,8 +3053,18 @@ function startServer() {
 
             // send all the current producer to newly joined member (excluding own producers)
             const producerList = room.getProducerListForPeer(socket.id);
+            const knownProducerIds = new Set(
+                Array.isArray(data?.knownProducerIds)
+                    ? data.knownProducerIds
+                          .slice(0, producerList.length)
+                          .filter((producerId) => typeof producerId === 'string')
+                    : []
+            );
+            const missingProducers = knownProducerIds.size
+                ? producerList.filter(({ producer_id }) => !knownProducerIds.has(producer_id))
+                : producerList;
 
-            socket.emit('newProducers', producerList);
+            callback ? callback(missingProducers) : socket.emit('newProducers', missingProducers);
         });
 
         socket.on('getPeerCounts', async ({}, callback) => {

@@ -37,6 +37,8 @@ module.exports = class Peer {
 
         this.transports = new Map();
         this.consumers = new Map();
+        this.consumerByTransportProducer = new Map();
+        this.consumerCreatePromises = new Map();
         this.producers = new Map();
         this.dataProducers = new Map();
         this.dataConsumers = new Map();
@@ -280,12 +282,34 @@ module.exports = class Peer {
         return this.consumers.get(consumer_id);
     }
 
+    getConsumerKey(consumer_transport_id, producer_id) {
+        return `${consumer_transport_id}:${producer_id}`;
+    }
+
+    getConsumerByProducerId(producer_id, consumer_transport_id) {
+        const key = this.getConsumerKey(consumer_transport_id, producer_id);
+        const consumerId = this.consumerByTransportProducer.get(key);
+        const consumer = consumerId ? this.consumers.get(consumerId) : null;
+        if (consumer && !consumer.closed) return consumer;
+        this.consumerByTransportProducer.delete(key);
+        return null;
+    }
+
     delConsumer(consumer_id) {
+        const consumer = this.consumers.get(consumer_id);
+        if (consumer) {
+            const key = this.getConsumerKey(consumer.appData?.consumerTransportId, consumer.producerId);
+            if (this.consumerByTransportProducer.get(key) === consumer_id) {
+                this.consumerByTransportProducer.delete(key);
+            }
+        }
         this.consumers.delete(consumer_id);
     }
 
     addConsumer(consumer_id, consumer) {
         this.consumers.set(consumer_id, consumer);
+        const key = this.getConsumerKey(consumer.appData?.consumerTransportId, consumer.producerId);
+        this.consumerByTransportProducer.set(key, consumer_id);
     }
 
     async createConsumer(consumer_transport_id, producerId, rtpCapabilities) {
@@ -303,6 +327,40 @@ module.exports = class Peer {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found for peer ${this.peer_name}`);
         }
 
+        const existingConsumer = this.getConsumerByProducerId(producerId, consumer_transport_id);
+        if (existingConsumer) {
+            return {
+                consumer: existingConsumer,
+                params: this.getConsumerParams(existingConsumer),
+                reused: true,
+            };
+        }
+
+        const creationKey = this.getConsumerKey(consumer_transport_id, producerId);
+        const pendingCreation = this.consumerCreatePromises.get(creationKey);
+        if (pendingCreation) {
+            const result = await pendingCreation;
+            return { ...result, reused: true };
+        }
+
+        const creation = this.createConsumerOnTransport(
+            consumerTransport,
+            consumer_transport_id,
+            producerId,
+            rtpCapabilities
+        );
+        this.consumerCreatePromises.set(creationKey, creation);
+
+        try {
+            return await creation;
+        } finally {
+            if (this.consumerCreatePromises.get(creationKey) === creation) {
+                this.consumerCreatePromises.delete(creationKey);
+            }
+        }
+    }
+
+    async createConsumerOnTransport(consumerTransport, consumer_transport_id, producerId, rtpCapabilities) {
         let consumer;
         try {
             consumer = await consumerTransport.consume({
@@ -311,6 +369,7 @@ module.exports = class Peer {
                 enableRtx: true, // Enable NACK for OPUS.
                 paused: true, // Start the consumer in a paused state
                 ignoreDtx: true, // Ignore DTX (Discontinuous Transmission)
+                appData: { consumerTransportId: consumer_transport_id },
             });
 
             this.addConsumer(consumer.id, consumer);
@@ -326,7 +385,7 @@ module.exports = class Peer {
             throw new Error(`Consumer creation failed for transport ID ${consumer_transport_id}`);
         }
 
-        const { id, type, kind, rtpParameters, producerPaused } = consumer;
+        const { id, type, kind, rtpParameters } = consumer;
 
         if (['simulcast', 'svc'].includes(type)) {
             // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
@@ -361,15 +420,14 @@ module.exports = class Peer {
 
         return {
             consumer,
-            params: {
-                producerId,
-                id,
-                kind,
-                rtpParameters,
-                type,
-                producerPaused,
-            },
+            params: this.getConsumerParams(consumer),
+            reused: false,
         };
+    }
+
+    getConsumerParams(consumer) {
+        const { producerId, id, kind, rtpParameters, type, producerPaused } = consumer;
+        return { producerId, id, kind, rtpParameters, type, producerPaused };
     }
 
     removeConsumer(consumer_id) {
@@ -613,6 +671,7 @@ module.exports = class Peer {
             }
         }
         this.consumers.clear();
+        this.consumerByTransportProducer.clear();
 
         // Close all data consumers
         for (const [dataConsumer_id, dataConsumer] of this.dataConsumers.entries()) {

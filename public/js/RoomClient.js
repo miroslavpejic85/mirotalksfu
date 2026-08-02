@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.23
+ * @version 2.3.24
  *
  */
 
@@ -470,9 +470,14 @@ class RoomClient {
 
         this.peers = new Map();
         this.consumers = new Map();
+        this.consumersProducer = new Map(); // producer_id -> consumer_id (reconcile/dedup)
+        this.consumingProducers = new Set(); // producer_ids with an in-flight consume() (dedup)
+        this.resumedConsumers = new Set(); // consumer_ids confirmed resumed (skip redundant reconcile)
         this.producers = new Map();
         this.producerLabel = new Map();
         this.eventListeners = new Map();
+        this.consumerReconcileInterval = null;
+        this.consumerReconcileInProgress = false;
 
         this.debug = false;
         this.debug ? window.localStorage.setItem('debug', 'mediasoup*') : window.localStorage.removeItem('debug');
@@ -492,16 +497,49 @@ class RoomClient {
             this.eventListeners.set(evt, []);
         });
 
-        this.socket.request = function request(type, data = {}) {
+        this.socket.request = function request(type, data = {}, timeout = 20000) {
             return new Promise((resolve, reject) => {
-                socket.emit(type, data, (data) => {
-                    if (data.error) {
-                        reject(data.error);
+                let settled = false;
+                let timer = null;
+                const finish = (fn, arg) => {
+                    if (settled) return;
+                    settled = true;
+                    if (timer) clearTimeout(timer);
+                    fn(arg);
+                };
+                if (timeout && timeout > 0) {
+                    timer = setTimeout(() => {
+                        finish(reject, new Error(`Request '${type}' timed out after ${timeout}ms`));
+                    }, timeout);
+                }
+                socket.emit(type, data, (response) => {
+                    if (response && response.error) {
+                        finish(reject, response.error);
                     } else {
-                        resolve(data);
+                        finish(resolve, response);
                     }
                 });
             });
+        };
+
+        this.socket.requestWithRetry = async function requestWithRetry(
+            type,
+            data = {},
+            { attempts = 3, timeout = 5000, delay = 500 } = {}
+        ) {
+            let lastError;
+            for (let attempt = 1; attempt <= attempts; attempt++) {
+                try {
+                    return await socket.request(type, data, timeout);
+                } catch (error) {
+                    lastError = error;
+                    if (attempt < attempts) {
+                        console.warn(`Retrying '${type}' request`, { attempt, error });
+                        await new Promise((resolve) => setTimeout(resolve, delay * attempt));
+                    }
+                }
+            }
+            throw lastError;
         };
 
         // ####################################################
@@ -643,6 +681,10 @@ class RoomClient {
         // ###############################################
         this.socket.emit('getProducers'); // newProducers
         // ###############################################
+
+        // Periodically reconcile consumers so a missed newProducers broadcast or a failed
+        // resume can't leave a peer permanently silent for one participant.
+        this.startConsumerReconcile();
 
         // Initialize chat DataChannel
         await this.initChatDataProducer();
@@ -1342,19 +1384,21 @@ class RoomClient {
         if (isBreakoutPanelOpen) refreshBreakoutPanel();
     };
 
-    handleNewProducers = async (data) => {
+    handleNewProducers = async (data, reconcile = false) => {
         if (data.length > 0) {
-            console.log('SocketOn New producers', {
-                data,
-                password: {
-                    roomIsLocked: this.RoomIsLocked,
-                    roomPasswordValid: this.RoomPasswordValid,
-                },
-                lobby: {
-                    roomIsLobby: this.RoomIsLobby,
-                    roomLobbyAccepted: this.RoomLobbyAccepted,
-                },
-            });
+            if (!reconcile) {
+                console.log('SocketOn New producers', {
+                    data,
+                    password: {
+                        roomIsLocked: this.RoomIsLocked,
+                        roomPasswordValid: this.RoomPasswordValid,
+                    },
+                    lobby: {
+                        roomIsLobby: this.RoomIsLobby,
+                        roomLobbyAccepted: this.RoomLobbyAccepted,
+                    },
+                });
+            }
 
             if (this.RoomIsLocked && !this.RoomPasswordValid) {
                 console.log('Access denied: Room is locked and password has not been validated yet', data);
@@ -3500,22 +3544,47 @@ class RoomClient {
     // ####################################################
 
     async consume(producer_id, peer_name, peer_info, type) {
+        let createdConsumer = null;
+        const existingConsumerId = this.consumersProducer.get(producer_id);
+        if (existingConsumerId && this.consumers.has(existingConsumerId)) {
+            if (this.resumedConsumers.has(existingConsumerId)) return;
+            const resumed = await this.resumeConsumerWithRetry(existingConsumerId, type);
+            if (!resumed) {
+                console.error('Reconcile: could not resume existing consumer, removing for recreate', {
+                    producer_id,
+                    consumer_id: existingConsumerId,
+                    type,
+                });
+                this.removeConsumer(existingConsumerId, this.consumers.get(existingConsumerId).kind);
+            }
+            return;
+        }
+
+        if (this.consumingProducers.has(producer_id)) return;
+        this.consumingProducers.add(producer_id);
+
         try {
             const { consumer, stream, kind } = await this.getConsumeStream(producer_id, peer_info.peer_id, type);
+            createdConsumer = consumer;
 
             console.log('CONSUMER MEDIA TYPE ----> ' + type);
             console.log('CONSUMER', consumer);
 
             this.consumers.set(consumer.id, consumer);
+            this.consumersProducer.set(producer_id, consumer.id);
 
             await this.handleConsumer(consumer.id, type, stream, peer_name, peer_info);
 
             // https://mediasoup.discourse.group/t/create-server-side-consumers-with-paused-true/244
-            try {
-                const response = await this.socket.request('resumeConsumer', { consumer_id: consumer.id, type });
-                console.log('Consumer resumed', response);
-            } catch (error) {
-                console.error('Error resuming consumer', error);
+            const resumed = await this.resumeConsumerWithRetry(consumer.id, type);
+            if (!resumed) {
+                console.error('Failed to resume consumer after retries, removing it for later reconcile', {
+                    consumer_id: consumer.id,
+                    producer_id,
+                    type,
+                });
+                this.removeConsumer(consumer.id, kind);
+                return;
             }
 
             if (kind === 'video' && isParticipantsListOpen) {
@@ -3538,7 +3607,70 @@ class RoomClient {
         } catch (error) {
             console.error('Error in consume', error);
 
+            if (createdConsumer && this.consumers.has(createdConsumer.id)) {
+                this.removeConsumer(createdConsumer.id, createdConsumer.kind);
+            }
+
             popupHtmlMessage(null, image.network, 'Consume', error, 'center', false, false);
+        } finally {
+            this.consumingProducers.delete(producer_id);
+        }
+    }
+
+    async resumeConsumerWithRetry(consumer_id, type) {
+        try {
+            const response = await this.socket.requestWithRetry('resumeConsumer', { consumer_id, type });
+            this.resumedConsumers.add(consumer_id);
+            console.log('Consumer resumed', { consumer_id, type, response });
+            return true;
+        } catch (error) {
+            console.error('Error resuming consumer after retries', { consumer_id, type, error });
+            return false;
+        }
+    }
+
+    // ####################################################
+    // CONSUMER RECONCILIATION
+    // ####################################################
+
+    startConsumerReconcile(intervalMs = 30000) {
+        if (this.consumerReconcileInterval) return;
+        const schedule = () => {
+            const delay = Math.round(intervalMs * (0.8 + Math.random() * 0.4));
+            this.consumerReconcileInterval = setTimeout(async () => {
+                await this.reconcileConsumers();
+                if (this.consumerReconcileInterval) schedule();
+            }, delay);
+        };
+        schedule();
+        console.log('Consumer reconcile started', { intervalMs });
+    }
+
+    stopConsumerReconcile() {
+        if (this.consumerReconcileInterval) {
+            clearTimeout(this.consumerReconcileInterval);
+            this.consumerReconcileInterval = null;
+            console.log('Consumer reconcile stopped');
+        }
+    }
+
+    async reconcileConsumers() {
+        if (!this._isConnected || !this.socket || !this.socket.connected) return;
+        if (this.RoomIsLocked && !this.RoomPasswordValid) return;
+        if (this.RoomIsLobby && !this.RoomLobbyAccepted) return;
+        if (this.consumerReconcileInProgress) return;
+        this.consumerReconcileInProgress = true;
+        try {
+            const producers = await this.socket.request(
+                'getProducers',
+                { knownProducerIds: [...this.consumersProducer.keys()] },
+                5000
+            );
+            await this.handleNewProducers(producers, true);
+        } catch (error) {
+            console.warn('Consumer reconcile failed', error);
+        } finally {
+            this.consumerReconcileInProgress = false;
         }
     }
 
@@ -3691,7 +3823,7 @@ class RoomClient {
 
         const { rtpCapabilities } = this.device;
 
-        const data = await this.socket.request('consume', {
+        const data = await this.socket.requestWithRetry('consume', {
             consumerTransportId: this.consumerTransport.id,
             rtpCapabilities,
             producerId,
@@ -3974,10 +4106,8 @@ class RoomClient {
 
         const elem = this.getId(consumer_id);
         if (elem) {
-            elem.srcObject.getTracks().forEach(function (track) {
-                track.stop();
-            });
-            elem.parentNode.removeChild(elem);
+            elem.srcObject?.getTracks().forEach((track) => track.stop());
+            elem.remove();
         }
 
         if (consumer_kind === 'video') {
@@ -4005,8 +4135,8 @@ class RoomClient {
                         dhaBtn.click();
                     }
                 }
-                d.parentNode.removeChild(d);
-                vb.parentNode.removeChild(vb);
+                d.remove();
+                vb?.remove();
 
                 //alert(this.pinnedVideoPlayerId + '==' + consumer_id);
                 if (this.isVideoPinned && this.pinnedVideoPlayerId == consumer_id) {
@@ -4041,6 +4171,10 @@ class RoomClient {
 
         this.consumers.get(consumer_id).close();
         this.consumers.delete(consumer_id);
+        this.consumersProducer.forEach((cId, pId) => {
+            if (cId === consumer_id) this.consumersProducer.delete(pId);
+        });
+        this.resumedConsumers.delete(consumer_id);
         this.sound('left');
     }
 
@@ -4254,6 +4388,7 @@ class RoomClient {
 
         const clean = () => {
             this._isConnected = false;
+            this.stopConsumerReconcile();
             if (this.consumerTransport) this.consumerTransport.close();
             if (this.producerTransport) this.producerTransport.close();
             if (this.socket) {
@@ -12290,9 +12425,13 @@ class RoomClient {
                         try {
                             voicePreviewPlayer.pause();
                             voicePreviewPlayer.src = '';
-                            const result = await this.socket.request('previewVoice', {
-                                voice_id: event.target.value,
-                            });
+                            const result = await this.socket.request(
+                                'previewVoice',
+                                {
+                                    voice_id: event.target.value,
+                                },
+                                0 // external API, no timeout
+                            );
                             if (result?.audio) {
                                 voicePreviewPlayer.src = result.audio;
                                 voicePreviewPlayer.play().catch(() => {});
@@ -12494,11 +12633,15 @@ class RoomClient {
             const { quality, avatarId, avatarVoice } = VideoAI;
 
             // Step 1: Create session token
-            const tokenResponse = await this.socket.request('createSessionToken', {
-                quality: quality,
-                avatar_id: avatarId,
-                voice_id: avatarVoice,
-            });
+            const tokenResponse = await this.socket.request(
+                'createSessionToken',
+                {
+                    quality: quality,
+                    avatar_id: avatarId,
+                    voice_id: avatarVoice,
+                },
+                0 // external API, no timeout
+            );
 
             if (!tokenResponse || Object.keys(tokenResponse).length === 0 || tokenResponse.error) {
                 const errMsg =
@@ -12521,9 +12664,13 @@ class RoomClient {
             console.log('Video AI createSessionToken', VideoAI);
 
             // Step 2: Start session to get LiveKit credentials
-            const startResponse = await this.socket.request('startSession', {
-                session_token: session_token,
-            });
+            const startResponse = await this.socket.request(
+                'startSession',
+                {
+                    session_token: session_token,
+                },
+                0 // external API, no timeout
+            );
 
             if (!startResponse || startResponse.error) {
                 const errMsg =

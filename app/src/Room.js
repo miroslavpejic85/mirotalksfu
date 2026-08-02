@@ -877,24 +877,26 @@ module.exports = class Room {
             throw new Error(`Consumer transport with ID ${consumer_transport_id} not found for peer ${peer_name}`);
         }
 
-        const { consumer, params } = peerConsumer;
+        const { consumer, params, reused } = peerConsumer;
         const { id, kind } = consumer;
 
-        consumer.once('producerclose', () => {
-            log.debug('Consumer closed due to "producerclose" event', {
-                consumer_id: id,
-                producer_id: producerId,
-                peer_name,
-            });
+        if (!reused) {
+            consumer.once('producerclose', () => {
+                log.debug('Consumer closed due to "producerclose" event', {
+                    consumer_id: id,
+                    producer_id: producerId,
+                    peer_name,
+                });
 
-            peer.removeConsumer(id);
+                peer.removeConsumer(id);
 
-            // Notify the client that the consumer is closed
-            this.send(socket_id, 'consumerClosed', {
-                consumer_id: id,
-                consumer_kind: kind,
+                // Notify the client that the consumer is closed
+                this.send(socket_id, 'consumerClosed', {
+                    consumer_id: id,
+                    consumer_kind: kind,
+                });
             });
-        });
+        }
 
         log.debug('Consumer created successfully', {
             consumer_transport_id,
@@ -905,6 +907,7 @@ module.exports = class Room {
             type,
             paused: consumer.paused,
             producerPaused: consumer.producerPaused,
+            reused,
             transport_state: `ICE:${consumerTransport.iceState}, DTLS:${consumerTransport.dtlsState}`,
         });
 
