@@ -599,6 +599,40 @@ body {
     transition: box-shadow 0.2s ease-in-out;
 }
 
+/* Larger preview in the dedicated Virtual Background settings tab */
+#tabVirtualBackground #imageGridVideo {
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    max-height: none;
+    overflow-y: visible;
+}
+
+#tabVirtualBackground #imageGridVideo img {
+    max-width: 100%;
+    width: 100%;
+    height: 80px;
+}
+
+/* Virtual background action icons kept on a single row */
+#tabVirtualBackground #imageGridVideoControls {
+    grid-template-columns: repeat(6, 1fr);
+    max-height: none;
+    overflow: visible;
+    margin-bottom: 6px;
+}
+
+#tabVirtualBackground #imageGridVideoControls img {
+    max-width: 100%;
+    width: 100%;
+    height: 70px;
+    object-fit: contain;
+}
+
+/* Custom images share the same grid cell sizing as the icon images */
+#tabVirtualBackground #imageGridVideo .image-wrapper {
+    display: block;
+    width: 100%;
+}
+
 @keyframes shockwave {
     0% {
         transform: scale(1.2);

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.25
+ * @version 2.3.26
  *
  */
 
@@ -787,6 +787,7 @@ class RoomClient {
                 //
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
+                if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
             }
             // Handle Follow Me state for late joiners
             if (room.followMe && room.followMe.enabled && !isPresenter) {
@@ -2406,6 +2407,7 @@ class RoomClient {
         const videoVirtualBackground = document.getElementById('videoVirtualBackground');
         const imageGrid = document.getElementById('imageGrid');
         const imageGridVideo = document.getElementById('imageGridVideo');
+        const imageGridVideoControls = document.getElementById('imageGridVideoControls');
 
         // Grid elements missing: keep the whole section (label + grid) hidden to avoid a lonely label
         if (!imageGrid || !imageGridVideo) {
@@ -2414,20 +2416,22 @@ class RoomClient {
         }
 
         elemDisplay('imageGridVideo', true, 'grid');
+        if (imageGridVideoControls) elemDisplay('imageGridVideoControls', true, 'grid');
         // Reveal the section (label + grid) only now that the grid is visible/populated
         if (videoVirtualBackground) show(videoVirtualBackground);
         if (imageGridVideo.innerHTML != '') return;
 
         imageGrid.innerHTML = ''; // Clear previous init images
         imageGridVideo.innerHTML = ''; // Clear previous images
+        if (imageGridVideoControls) imageGridVideoControls.innerHTML = ''; // Clear previous controls
 
-        function createImage(id, src, tooltip, index, clickHandler) {
+        function createImage(id, src, tooltip, index, clickHandler, target = imageGridVideo) {
             const img = document.createElement('img');
             img.id = id;
             img.src = src;
             img.dataset.index = index;
             img.addEventListener('click', clickHandler);
-            imageGridVideo.appendChild(img);
+            target.appendChild(img);
             if (tooltip) {
                 setTippy(img.id, tooltip, 'top');
             }
@@ -2444,18 +2448,42 @@ class RoomClient {
         }
 
         // Create clean virtual bg Image
-        createImage('cleanVbImg', image.user, 'Remove virtual background', 'cleanVb', () =>
-            handleVirtualBackground(null, null)
+        createImage(
+            'cleanVbImg',
+            image.user,
+            'Remove virtual background',
+            'cleanVb',
+            () => handleVirtualBackground(null, null),
+            imageGridVideoControls
         );
         // Create High Blur Image
-        createImage('highBlurImg', image.blurHigh, 'High Blur', 'high', () => handleVirtualBackground(20));
+        createImage(
+            'highBlurImg',
+            image.blurHigh,
+            'High Blur',
+            'high',
+            () => handleVirtualBackground(20),
+            imageGridVideoControls
+        );
 
         // Create Low Blur Image
-        createImage('lowBlurImg', image.blurLow, 'Low Blur', 'low', () => handleVirtualBackground(10));
+        createImage(
+            'lowBlurImg',
+            image.blurLow,
+            'Low Blur',
+            'low',
+            () => handleVirtualBackground(10),
+            imageGridVideoControls
+        );
 
         // Create transparent virtual bg Image
-        createImage('transparentBg', image.transparentBg, 'Transparent Virtual background', 'transparentVb', () =>
-            handleVirtualBackground(null, null, true)
+        createImage(
+            'transparentBg',
+            image.transparentBg,
+            'Transparent Virtual background',
+            'transparentVb',
+            () => handleVirtualBackground(null, null, true),
+            imageGridVideoControls
         );
 
         // Handle file upload (common logic for file selection)
@@ -2464,7 +2492,7 @@ class RoomClient {
             imgButton.id = buttonId;
             imgButton.src = sourceImg;
             imgButton.addEventListener('click', handler);
-            imageGridVideo.appendChild(imgButton);
+            imageGridVideoControls.appendChild(imgButton);
             setTippy(imgButton.id, tooltip, 'top');
         }
 
@@ -11801,6 +11829,7 @@ class RoomClient {
             case 'video_cant_unhide':
                 this._moderator.video_cant_unhide = data.status;
                 this._moderator.video_cant_unhide ? hide(tabVideoDevicesBtn) : show(tabVideoDevicesBtn);
+                if (this._moderator.video_cant_unhide) hide(tabVirtualBackgroundBtn);
                 rc.roomMessage('video_cant_unhide', data.status);
                 break;
             case 'screen_cant_share':

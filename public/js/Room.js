@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.25
+ * @version 2.3.26
  *
  */
 
@@ -1897,6 +1897,8 @@ function roomIsReady() {
     if (!BUTTONS.main.startVideoButton) {
         elemDisplay('tabVideoDevicesBtn', false);
         elemDisplay('tabVideoDevices', false);
+        elemDisplay('tabVirtualBackgroundBtn', false);
+        elemDisplay('tabVirtualBackground', false);
     }
     BUTTONS.settings.activeRooms && show(activeRoomsButton);
     BUTTONS.settings.fileSharing && show(fileShareButton);
@@ -1914,6 +1916,7 @@ function roomIsReady() {
         isMediaStreamTrackAndTransformerSupported &&
         (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
     ) {
+        show(tabVirtualBackgroundBtn);
         rc.showVideoImageSelector();
     }
     handleButtons();
@@ -2343,6 +2346,9 @@ function handleButtons() {
     };
     tabVideoDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabVideoDevices');
+    };
+    tabVirtualBackgroundBtn.onclick = (e) => {
+        rc.openTab(e, 'tabVirtualBackground');
     };
     tabAudioDevicesBtn.onclick = (e) => {
         rc.openTab(e, 'tabAudioDevices');
@@ -7480,7 +7486,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.25',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.26',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
