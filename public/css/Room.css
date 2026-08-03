@@ -601,9 +601,9 @@ body {
 
 /* Larger preview in the dedicated Virtual Background settings tab */
 #tabVirtualBackground #imageGridVideo {
-    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
-    max-height: none;
-    overflow-y: visible;
+    grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+    max-height: 70vh;
+    overflow-y: auto;
 }
 
 #tabVirtualBackground #imageGridVideo img {
