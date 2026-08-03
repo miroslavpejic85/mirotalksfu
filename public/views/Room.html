@@ -2509,9 +2509,12 @@ Note</textarea>
         </template>
 
         <template id="popupUsernameInUseTemplate">
-            <div>
-                The Username is already in use. <br />
-                Please try with another one
+            <div class="username-in-use">
+                <div class="username-in-use__icon"><i class="fas fa-user-slash"></i></div>
+                <p class="username-in-use__title">This username is already taken</p>
+                <p class="username-in-use__text">
+                    Someone in this room is already using that name. Please pick a different one to join.
+                </p>
             </div>
         </template>
 

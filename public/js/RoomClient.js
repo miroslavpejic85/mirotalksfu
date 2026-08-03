@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.27
+ * @version 2.3.28
  *
  */
 
@@ -1135,10 +1135,6 @@ class RoomClient {
     }
 
     // ####################################################
-    // TODO: DATA TRANSPORT
-    // ####################################################
-
-    // ####################################################
     // HANDLE ICE
     // ####################################################
 
@@ -2005,12 +2001,11 @@ class RoomClient {
             allowOutsideClick: false,
             allowEscapeKey: false,
             background: swalBackground,
-            imageUrl: image.user,
             position: 'center',
-            title: 'Username',
+            title: 'Username already in use',
             html: renderRoomTemplate('popupUsernameInUseTemplate'),
             showDenyButton: false,
-            confirmButtonText: `OK`,
+            confirmButtonText: `${icons.user} Change username`,
             showClass: { popup: 'animate__animated animate__fadeInDown' },
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {

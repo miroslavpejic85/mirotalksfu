@@ -2639,6 +2639,38 @@ body {
     text-align: left;
 }
 
+.username-in-use {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 6px;
+}
+.username-in-use__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: rgba(255, 193, 7, 0.15);
+    color: #ffc107;
+    font-size: 24px;
+}
+.username-in-use__title {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+}
+.username-in-use__text {
+    margin: 0;
+    font-size: 14px;
+    line-height: 1.5;
+    color: whitesmoke;
+    max-width: 320px;
+}
+
 .swal2-input {
     border: var(--border) !important;
     border-radius: 12px !important;
