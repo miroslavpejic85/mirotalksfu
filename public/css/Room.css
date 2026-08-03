@@ -633,6 +633,14 @@ body {
     width: 100%;
 }
 
+/* Highlight the currently selected virtual background / control */
+#tabVirtualBackground #imageGridVideoControls img.vb-selected,
+#tabVirtualBackground #imageGridVideo img.vb-selected {
+    outline: 3px solid #4caf50;
+    outline-offset: -3px;
+    box-shadow: 0px 0px 12px rgba(76, 175, 80, 0.6);
+}
+
 @keyframes shockwave {
     0% {
         transform: scale(1.2);

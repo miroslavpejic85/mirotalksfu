@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.26
+ * @version 2.3.27
  *
  */
 
@@ -2437,6 +2437,14 @@ class RoomClient {
             }
         }
 
+        // Highlight the currently selected virtual background / control with a border
+        function setSelectedVb(el) {
+            document
+                .querySelectorAll('#imageGridVideoControls img.vb-selected, #imageGridVideo img.vb-selected')
+                .forEach((img) => img.classList.remove('vb-selected'));
+            if (el) el.classList.add('vb-selected');
+        }
+
         // Common function to handle virtual background changes
         async function handleVirtualBackground(blurLevel = null, imgSrc = null, transparentBg = null) {
             if (!blurLevel && !imgSrc && !transparentBg) {
@@ -2453,7 +2461,10 @@ class RoomClient {
             image.user,
             'Remove virtual background',
             'cleanVb',
-            () => handleVirtualBackground(null, null),
+            (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(null, null);
+            },
             imageGridVideoControls
         );
         // Create High Blur Image
@@ -2462,7 +2473,10 @@ class RoomClient {
             image.blurHigh,
             'High Blur',
             'high',
-            () => handleVirtualBackground(20),
+            (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(20);
+            },
             imageGridVideoControls
         );
 
@@ -2472,7 +2486,10 @@ class RoomClient {
             image.blurLow,
             'Low Blur',
             'low',
-            () => handleVirtualBackground(10),
+            (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(10);
+            },
             imageGridVideoControls
         );
 
@@ -2482,7 +2499,10 @@ class RoomClient {
             image.transparentBg,
             'Transparent Virtual background',
             'transparentVb',
-            () => handleVirtualBackground(null, null, true),
+            (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(null, null, true);
+            },
             imageGridVideoControls
         );
 
@@ -2529,7 +2549,10 @@ class RoomClient {
 
             const customImg = document.createElement('img');
             customImg.src = imgData;
-            customImg.addEventListener('click', () => handleVirtualBackground(null, imgData));
+            customImg.addEventListener('click', (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(null, imgData);
+            });
 
             const deleteBtn = document.createElement('span');
             deleteBtn.className = 'delete-icon fas fa-times';
@@ -2599,7 +2622,10 @@ class RoomClient {
 
         // Load default virtual backgrounds
         virtualBackgrounds.forEach((imageUrl, index) => {
-            createImage(`virtualBg${index}`, imageUrl, null, index + 1, () => handleVirtualBackground(null, imageUrl));
+            createImage(`virtualBg${index}`, imageUrl, null, index + 1, (e) => {
+                setSelectedVb(e.currentTarget);
+                handleVirtualBackground(null, imageUrl);
+            });
         });
 
         // Load stored images and add to image grid UI
