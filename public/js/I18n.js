@@ -39,6 +39,7 @@
         ja: { flag: '🇯🇵', name: '日本語' },
         ar: { flag: '🇸🇦', name: 'العربية' },
         hi: { flag: '🇮🇳', name: 'हिन्दी' },
+        sr: { flag: '🇷🇸', name: 'Srpski' },
     };
 
     const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
