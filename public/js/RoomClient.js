@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.29
+ * @version 2.3.30
  *
  */
 
@@ -11790,14 +11790,17 @@ class RoomClient {
         // Update placeholder, and empty notice
         const displayName = peer_id === 'all' ? 'Public chat' : peer_name;
 
+        // Native (human) translation for dynamically-set strings; falls back to English when inactive.
+        const t = (s) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(s) : s);
+
         const chatMsg = this.getId('chatMessage');
         if (chatMsg) {
             const isAI = ['ChatGPT', 'DeepSeek'].includes(peer_id);
-            chatMsg.placeholder = isAI ? `Ask ${peer_name} anything...` : `Type a message...`;
+            chatMsg.placeholder = isAI ? `Ask ${peer_name} anything...` : t('Type a message...');
         }
 
         const emptyTitle = document.querySelector('.empty-chat-title');
-        if (emptyTitle) emptyTitle.textContent = `Start with ${displayName}`;
+        if (emptyTitle) emptyTitle.textContent = t('Start with {name}').replace('{name}', t(displayName));
 
         const clickedElement = event ? event.target : null;
         if (!event || (clickedElement.tagName != 'BUTTON' && clickedElement.tagName != 'I')) {

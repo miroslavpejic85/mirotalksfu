@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.29 - Configuration File
+ * MiroTalk SFU v2.3.30 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1140,6 +1140,7 @@ module.exports = {
 
             app: {
                 language: process.env.UI_LANGUAGE || 'en',
+                translationMode: process.env.UI_TRANSLATION_MODE || 'google', // auto (native else Google) | native (no Google) | google (default, always Google)
                 name: process.env.APP_NAME || 'MiroTalk SFU',
                 title:
                     process.env.APP_TITLE ||

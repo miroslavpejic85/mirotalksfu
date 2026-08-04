@@ -101,7 +101,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.3.29</strong>',
+        title: '<strong>WebRTC SFU v2.3.30</strong>',
         html: `
             <button 
                 id="support-button" 
@@ -185,6 +185,9 @@ async function initialize() {
     customizeLogin();
 
     checkBrand();
+
+    // Notify listeners (e.g. I18n.js) that BRAND is fully resolved.
+    document.dispatchEvent(new CustomEvent('brand:ready'));
 }
 
 async function getBrand() {
