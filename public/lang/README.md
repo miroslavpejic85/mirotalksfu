@@ -14,7 +14,7 @@ default `en`). See [app/src/config.template.js](../../app/src/config.template.js
 ## Translation mode (`UI_TRANSLATION_MODE`)
 
 `config.ui.brand.app.translationMode` (env `UI_TRANSLATION_MODE`) controls the strategy.
-**The default is `google`** — if the value is unset, empty, or invalid, MiroTalk behaves
+**The default is `google`**, if the value is unset, empty, or invalid, MiroTalk behaves
 exactly as before native translation existed (backward compatible). Native translation is
 opt-in via `auto` or `native`.
 
@@ -67,7 +67,7 @@ Notes on behavior:
     With the default `google` mode the native file is ignored, so `auto` or `native` is
     required to activate it.
 
-Missing or empty values fall back to the original English text — you can translate
+Missing or empty values fall back to the original English text, you can translate
 incrementally and ship a partial file.
 
 ## Namespaces
