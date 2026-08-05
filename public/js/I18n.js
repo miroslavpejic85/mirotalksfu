@@ -40,6 +40,9 @@
         ar: { flag: '🇸🇦', name: 'العربية' },
         hi: { flag: '🇮🇳', name: 'हिन्दी' },
         sr: { flag: '🇷🇸', name: 'Srpski' },
+        id: { flag: '🇮🇩', name: 'Bahasa Indonesia' },
+        ko: { flag: '🇰🇷', name: '한국어' },
+        tr: { flag: '🇹🇷', name: 'Türkçe' },
     };
 
     const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
