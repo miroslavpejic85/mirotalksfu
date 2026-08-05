@@ -492,6 +492,7 @@
         "Test Speaker": "स्पीकर परखें",
         "Open Audio Settings": "ऑडियो सेटिंग्स खोलें",
         "Open Video Settings": "वीडियो सेटिंग्स खोलें",
+        "Open Virtual Background": "वर्चुअल बैकग्राउंड खोलें",
         "Private assistant replies": "निजी सहायक उत्तर",
         "Assistant": "सहायक"
     },
@@ -583,7 +584,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.3.31": "WebRTC SFU v2.3.31",
+        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",

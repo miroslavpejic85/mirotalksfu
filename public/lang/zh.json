@@ -492,6 +492,7 @@
         "Test Speaker": "测试扬声器",
         "Open Audio Settings": "打开音频设置",
         "Open Video Settings": "打开视频设置",
+        "Open Virtual Background": "打开虚拟背景",
         "Private assistant replies": "私人助手回复",
         "Assistant": "助手"
     },
@@ -583,7 +584,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.3.31": "WebRTC SFU v2.3.31",
+        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

@@ -492,6 +492,7 @@
         "Test Speaker": "スピーカーをテスト",
         "Open Audio Settings": "オーディオ設定を開く",
         "Open Video Settings": "ビデオ設定を開く",
+        "Open Virtual Background": "仮想背景を開く",
         "Private assistant replies": "アシスタントのプライベートな返信",
         "Assistant": "アシスタント"
     },
@@ -583,7 +584,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.3.31": "WebRTC SFU v2.3.31",
+        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
