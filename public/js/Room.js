@@ -5000,7 +5000,7 @@ function setupQuickDeviceSwitchDropdowns() {
         videoMenu.appendChild(settingsBtn);
 
         // Virtual background button (only when the virtual background feature is enabled)
-        if (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true) {
+        if (isMediaStreamTrackAndTransformerSupported && (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)) {
             const virtualBgBtn = document.createElement('button');
             virtualBgBtn.type = 'button';
             virtualBgBtn.className = 'device-menu-action-btn';
