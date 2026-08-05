@@ -493,6 +493,7 @@
         "Open Audio Settings": "Open Audio Settings",
         "Open Video Settings": "Open Video Settings",
         "Open Virtual Background": "Open Virtual Background",
+        "Open Video AI": "Open Video AI",
         "Private assistant replies": "Private assistant replies",
         "Assistant": "Assistant"
     },
@@ -584,7 +585,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
+        "WebRTC SFU v2.3.33": "WebRTC SFU v2.3.33",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",

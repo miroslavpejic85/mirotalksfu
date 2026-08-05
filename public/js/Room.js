@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.32
+ * @version 2.3.33
  *
  */
 
@@ -5017,6 +5017,32 @@ function setupQuickDeviceSwitchDropdowns() {
             });
             videoMenu.appendChild(virtualBgBtn);
         }
+
+        // Video AI button (mirror the Video AI settings tab: show only when that tab is visible)
+        const videoAITabBtn = getId('tabVideoAIBtn');
+        const videoAITabVisible =
+            VideoAI.enabled &&
+            videoAITabBtn &&
+            !videoAITabBtn.classList.contains('hidden') &&
+            videoAITabBtn.style.display !== 'none';
+        if (videoAITabVisible) {
+            appendMenuDivider(videoMenu);
+            const videoAIBtn = document.createElement('button');
+            videoAIBtn.type = 'button';
+            videoAIBtn.className = 'device-menu-action-btn';
+            const videoAIIcon = document.createElement('i');
+            videoAIIcon.className = 'fas fa-robot';
+            videoAIBtn.appendChild(videoAIIcon);
+            videoAIBtn.appendChild(document.createTextNode(' Open Video AI'));
+            videoAIBtn.addEventListener('click', () => {
+                rc.toggleMySettings();
+                // Simulate tab click to open video AI tab
+                setTimeout(() => {
+                    tabVideoAIBtn.click();
+                }, 100);
+            });
+            videoMenu.appendChild(videoAIBtn);
+        }
     }
 
     function buildAudioMenu() {
@@ -7506,7 +7532,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.32',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.33',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

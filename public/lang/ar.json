@@ -493,6 +493,7 @@
         "Open Audio Settings": "فتح إعدادات الصوت",
         "Open Video Settings": "فتح إعدادات الفيديو",
         "Open Virtual Background": "فتح الخلفية الافتراضية",
+        "Open Video AI": "فتح الفيديو بالذكاء الاصطناعي",
         "Private assistant replies": "ردود المساعد الخاصة",
         "Assistant": "المساعد"
     },
@@ -584,7 +585,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
+        "WebRTC SFU v2.3.33": "WebRTC SFU v2.3.33",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",

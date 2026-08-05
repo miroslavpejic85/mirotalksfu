@@ -493,6 +493,7 @@
         "Open Audio Settings": "Hangbeállítások megnyitása",
         "Open Video Settings": "Videóbeállítások megnyitása",
         "Open Virtual Background": "Virtuális háttér megnyitása",
+        "Open Video AI": "Videó AI megnyitása",
         "Private assistant replies": "Privát asszisztensválaszok",
         "Assistant": "Asszisztens"
     },
@@ -584,7 +585,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.3.32": "WebRTC SFU v2.3.32",
+        "WebRTC SFU v2.3.33": "WebRTC SFU v2.3.33",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
