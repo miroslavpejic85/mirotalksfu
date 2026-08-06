@@ -599,6 +599,11 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
 
+        if (!peer) {
+            if (!transport.closed) transport.close();
+            throw new Error(`Peer with socket ID ${socket_id} left before transport could be added`);
+        }
+
         try {
             peer.addTransport(transport);
         } catch (error) {
