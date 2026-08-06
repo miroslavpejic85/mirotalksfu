@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.35
+ * @version 2.3.36
  *
  */
 
@@ -8966,8 +8966,11 @@ class RoomClient {
     }
 
     formatAcceptedFileTypes(accept = '*') {
+        // Native (human) translation for dynamically-built strings; falls back to English when inactive.
+        const t = (s) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(s) : s);
+
         if (!accept || accept === '*') {
-            return 'any file type';
+            return t('any file type');
         }
 
         return accept
@@ -8975,9 +8978,9 @@ class RoomClient {
             .map((type) => type.trim())
             .filter(Boolean)
             .map((type) => {
-                if (type === '*') return 'any file';
-                if (type.endsWith('/*')) return `${type.slice(0, -2).toUpperCase()} files`;
-                if (type.startsWith('.')) return `${type.slice(1).toUpperCase()} files`;
+                if (type === '*') return t('any file');
+                if (type.endsWith('/*')) return `${type.slice(0, -2).toUpperCase()} ${t('files')}`;
+                if (type.startsWith('.')) return `${type.slice(1).toUpperCase()} ${t('files')}`;
                 if (type.includes('/')) return type.split('/')[1].toUpperCase();
                 return type.toUpperCase();
             })
@@ -8985,10 +8988,13 @@ class RoomClient {
     }
 
     async openFilePickerModal({ title = 'Share file', accept = '*', confirmButtonText = 'Send', imageUrl } = {}) {
+        // Native (human) translation for dynamically-set strings; falls back to English when inactive.
+        const t = (s) => (window.i18n && typeof window.i18n.t === 'function' ? window.i18n.t(s) : s);
+
         const acceptedFileTypes = this.formatAcceptedFileTypes(accept);
-        const helperText = `Accepted: ${acceptedFileTypes}`;
-        const emptyStateTitle = 'Drag and drop a file';
-        const emptyStateSubtitle = 'or click to browse from your device';
+        const helperText = `${t('Accepted:')} ${acceptedFileTypes}`;
+        const emptyStateTitle = t('Drag and drop a file');
+        const emptyStateSubtitle = t('or click to browse from your device');
         let selectedFile = null;
 
         const result = await Swal.fire({
@@ -9035,8 +9041,8 @@ class RoomClient {
                     dropzone.classList.remove('has-file', 'is-dragover');
                     dropzoneTitle.textContent = emptyStateTitle;
                     dropzoneSubtitle.textContent = emptyStateSubtitle;
-                    browseBtn.textContent = 'Browse files';
-                    fileName.textContent = 'No file selected';
+                    browseBtn.textContent = t('Browse files');
+                    fileName.textContent = t('No file selected');
                     fileDetails.textContent = '';
                     confirmButton.disabled = true;
                     Swal.resetValidationMessage();
@@ -9050,7 +9056,7 @@ class RoomClient {
 
                     if (file.size <= 0) {
                         resetSelection();
-                        return Swal.showValidationMessage('The selected file is empty.');
+                        return Swal.showValidationMessage(t('The selected file is empty.'));
                     }
 
                     selectedFile = file;
@@ -9059,9 +9065,9 @@ class RoomClient {
                     preview.hidden = false;
                     dropzone.classList.add('has-file');
                     dropzone.classList.remove('is-dragover');
-                    dropzoneTitle.textContent = 'File ready';
-                    dropzoneSubtitle.textContent = 'Drop another file here or browse to replace it';
-                    browseBtn.textContent = 'Browse another file';
+                    dropzoneTitle.textContent = t('File ready');
+                    dropzoneSubtitle.textContent = t('Drop another file here or browse to replace it');
+                    browseBtn.textContent = t('Browse another file');
                     Swal.resetValidationMessage();
                     confirmButton.disabled = false;
                 };
@@ -9108,7 +9114,7 @@ class RoomClient {
 
                     if (transfer.items && transfer.items.length > 1) {
                         resetSelection();
-                        return Swal.showValidationMessage('Please choose a single file.');
+                        return Swal.showValidationMessage(t('Please choose a single file.'));
                     }
 
                     const item = transfer.items && transfer.items.length ? transfer.items[0] : null;
@@ -9116,19 +9122,19 @@ class RoomClient {
 
                     if (entry && entry.isDirectory) {
                         resetSelection();
-                        return Swal.showValidationMessage('Folders are not supported.');
+                        return Swal.showValidationMessage(t('Folders are not supported.'));
                     }
 
                     if (item && item.kind && item.kind !== 'file') {
                         resetSelection();
-                        return Swal.showValidationMessage('Only files can be uploaded here.');
+                        return Swal.showValidationMessage(t('Only files can be uploaded here.'));
                     }
 
                     const file = item && typeof item.getAsFile === 'function' ? item.getAsFile() : transfer.files[0];
 
                     if (!file) {
                         resetSelection();
-                        return Swal.showValidationMessage('Could not read the selected file.');
+                        return Swal.showValidationMessage(t('Could not read the selected file.'));
                     }
 
                     applySelection(file);
@@ -9139,7 +9145,7 @@ class RoomClient {
             denyButtonText: 'Cancel',
             preConfirm: () => {
                 if (!selectedFile) {
-                    Swal.showValidationMessage('Choose a file before continuing.');
+                    Swal.showValidationMessage(t('Choose a file before continuing.'));
                     return false;
                 }
                 return selectedFile;

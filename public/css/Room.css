@@ -4096,11 +4096,17 @@ button:hover {
 
 .whiteboard-header-options .dropdown-menu {
     max-height: calc(var(--wb-height) * 1px) !important;
-    max-width: 130px;
+    max-width: 260px;
 }
 
 .whiteboard-header-options .dropdown-menu button {
     width: 100%;
+    min-width: 0;
+    height: auto;
+    min-height: 36px;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    line-height: 1.3;
 }
 .whiteboard-header-options .dropdown-menu button:hover {
     background: var(--body-bg);
