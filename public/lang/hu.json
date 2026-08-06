@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "Tükrözés",
+        "Private Message": "Privát üzenet",
+        "Send File": "Fájl küldése",
+        "Send Video/Audio": "Videó/hang küldése",
+        "Kick Out": "Eltávolítás",
         "Drag and drop a file": "Húzzon ide egy fájlt",
         "or click to browse from your device": "vagy kattintson a tallózáshoz az eszközén",
         "Accepted:": "Elfogadott:",

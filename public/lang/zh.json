@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "镜像",
+        "Private Message": "私信",
+        "Send File": "发送文件",
+        "Send Video/Audio": "发送视频/音频",
+        "Kick Out": "移出",
         "Drag and drop a file": "拖放文件到此处",
         "or click to browse from your device": "或点击从您的设备浏览",
         "Accepted:": "接受:",

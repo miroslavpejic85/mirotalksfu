@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "미러",
+        "Private Message": "비공개 메시지",
+        "Send File": "파일 보내기",
+        "Send Video/Audio": "비디오/오디오 보내기",
+        "Kick Out": "내보내기",
         "Drag and drop a file": "파일을 끌어다 놓으세요",
         "or click to browse from your device": "또는 클릭하여 기기에서 찾아보기",
         "Accepted:": "허용됨:",

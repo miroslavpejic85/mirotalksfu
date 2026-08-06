@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "Зеркало",
+        "Private Message": "Личное сообщение",
+        "Send File": "Отправить файл",
+        "Send Video/Audio": "Отправить видео/аудио",
+        "Kick Out": "Исключить",
         "Drag and drop a file": "Перетащите файл сюда",
         "or click to browse from your device": "или нажмите, чтобы выбрать на устройстве",
         "Accepted:": "Допустимо:",

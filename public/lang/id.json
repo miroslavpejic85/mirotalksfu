@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "Cermin",
+        "Private Message": "Pesan pribadi",
+        "Send File": "Kirim file",
+        "Send Video/Audio": "Kirim video/audio",
+        "Kick Out": "Keluarkan",
         "Drag and drop a file": "Seret dan lepas file",
         "or click to browse from your device": "atau klik untuk menjelajah dari perangkat Anda",
         "Accepted:": "Diterima:",

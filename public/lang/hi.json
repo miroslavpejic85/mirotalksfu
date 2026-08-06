@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "मिरर",
+        "Private Message": "निजी संदेश",
+        "Send File": "फ़ाइल भेजें",
+        "Send Video/Audio": "वीडियो/ऑडियो भेजें",
+        "Kick Out": "निकालें",
         "Drag and drop a file": "फ़ाइल यहाँ खींचें और छोड़ें",
         "or click to browse from your device": "या अपने डिवाइस से ब्राउज़ करने के लिए क्लिक करें",
         "Accepted:": "स्वीकृत:",

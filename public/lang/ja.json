@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "ミラー",
+        "Private Message": "プライベートメッセージ",
+        "Send File": "ファイルを送信",
+        "Send Video/Audio": "ビデオ/オーディオを送信",
+        "Kick Out": "退出させる",
         "Drag and drop a file": "ファイルをドラッグ＆ドロップ",
         "or click to browse from your device": "またはクリックしてデバイスから参照",
         "Accepted:": "許可:",

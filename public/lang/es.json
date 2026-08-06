@@ -235,6 +235,11 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "Mirror": "Reflejar",
+        "Private Message": "Mensaje privado",
+        "Send File": "Enviar archivo",
+        "Send Video/Audio": "Enviar vídeo/audio",
+        "Kick Out": "Expulsar",
         "Drag and drop a file": "Arrastra y suelta un archivo",
         "or click to browse from your device": "o haz clic para explorar desde tu dispositivo",
         "Accepted:": "Aceptados:",
