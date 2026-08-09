@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.39
+ * @version 2.3.40
  *
  */
 
@@ -4069,8 +4069,14 @@ function startServer() {
                 );
 
                 // Extract the assistant's response
-                const message = response.data.choices[0]?.message?.content?.trim();
+                // Reasoning models (e.g. deepseek-reasoner) may return text in `reasoning_content`
+                const choice = response.data?.choices?.[0];
+                const message = (choice?.message?.content || choice?.message?.reasoning_content || '').trim();
                 if (!message) {
+                    log.warn('DeepSeek empty response', {
+                        finishReason: choice?.finish_reason,
+                        data: response.data,
+                    });
                     throw new Error('DeepSeek returned an empty response.');
                 }
 

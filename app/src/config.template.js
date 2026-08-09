@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.39 - Configuration File
+ * MiroTalk SFU v2.3.40 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -683,22 +683,22 @@ module.exports = {
         },
 
         /**
-         * DeepDeek Integration Configuration
+         * DeepSeek Integration Configuration
          * ================================
-         * DeepDeek API integration for AI-powered chat functionality
+         * DeepSeek API integration for AI-powered chat functionality
          *
          * Setup Instructions:
          * ------------------
          * 1. Go to https://deepseek.com/
-         * 2. Create your DeepDeek account
+         * 2. Create your DeepSeek account
          * 3. Generate your API key at https://deepseek.com/account/api-keys
          *
          * Core Settings:
          * -------------
-         * - enabled    : Enable/disable DeepDeek integration [true/false] (default: false)
-         * - basePath   : DeepDeek API endpoint (default: 'https://api.deepseek.com/v1/')
-         * - apiKey     : DeepDeek API secret key (ALWAYS store in .env)
-         * - model      : DeepDeek model version (default: 'deepdeek-chat')
+         * - enabled    : Enable/disable DeepSeek integration [true/false] (default: false)
+         * - basePath   : DeepSeek API endpoint (default: 'https://api.deepseek.com/v1/')
+         * - apiKey     : DeepSeek API secret key (ALWAYS store in .env)
+         * - model      : DeepSeek model version (default: 'deepseek-v4-flash')
          *
          * Advanced Settings:
          * -----------------

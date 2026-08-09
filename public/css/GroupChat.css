@@ -330,6 +330,9 @@
 
 /* Participants toggle button */
 .chat-header-participants-btn {
+    width: 38px;
+    height: 38px;
+    font-size: 16px;
     background: rgba(0, 168, 255, 0.15) !important;
     color: #00a8ff !important;
 }
@@ -502,10 +505,11 @@
 /* Input container with textarea + send button */
 .chat-input-container {
     display: flex;
-    align-items: flex-end;
-    gap: 8px;
-    padding: 8px 12px;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 0 0 12px;
     border-radius: 16px;
+    overflow: hidden;
     background: color-mix(in srgb, var(--select-bg) 80%, transparent);
     border: 1px solid rgba(255, 255, 255, 0.08);
     transition:
@@ -529,7 +533,7 @@
     color: #fff !important;
     font-size: 14px;
     line-height: 1.5;
-    padding: 6px 4px;
+    padding: 8px 4px;
     resize: none;
     max-height: 120px;
     min-height: 24px;
@@ -545,48 +549,40 @@
 /* Send button */
 .chat-send-btn {
     flex-shrink: 0;
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
+    align-self: stretch;
+    width: 44px;
+    border-radius: 0;
     background: var(--dd-color);
     color: #111;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    border: none;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
     font-size: 14px;
     transition:
-        transform 0.2s ease,
         background 0.2s ease,
-        box-shadow 0.2s ease,
         filter 0.2s ease,
         opacity 0.2s ease;
-    box-shadow: 0 2px 8px color-mix(in srgb, var(--dd-color) 35%, transparent);
     animation: sendBtnIn 0.2s ease-out;
 }
 
 @keyframes sendBtnIn {
     from {
         opacity: 0;
-        transform: scale(0.6);
     }
     to {
         opacity: 1;
-        transform: scale(1);
     }
 }
 
 .chat-send-btn:hover {
     color: #fff;
     filter: brightness(1.12);
-    transform: scale(1.08);
-    box-shadow: 0 3px 10px color-mix(in srgb, var(--dd-color) 40%, transparent);
 }
 
 .chat-send-btn:active {
-    filter: brightness(0.92);
-    transform: scale(0.95);
+    filter: brightness(0.9);
 }
 
 .chat-send-btn:disabled {
@@ -609,6 +605,13 @@
     align-items: center;
     gap: 2px;
     flex-wrap: wrap;
+}
+
+.chat-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-left: auto;
 }
 
 /* Toolbar buttons */
