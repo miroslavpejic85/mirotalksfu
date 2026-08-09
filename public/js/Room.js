@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.38
+ * @version 2.3.39
  *
  */
 
@@ -5000,7 +5000,10 @@ function setupQuickDeviceSwitchDropdowns() {
         videoMenu.appendChild(settingsBtn);
 
         // Virtual background button (only when the virtual background feature is enabled)
-        if (isMediaStreamTrackAndTransformerSupported && (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)) {
+        if (
+            isMediaStreamTrackAndTransformerSupported &&
+            (BUTTONS.settings.virtualBackground !== undefined ? BUTTONS.settings.virtualBackground : true)
+        ) {
             const virtualBgBtn = document.createElement('button');
             virtualBgBtn.type = 'button';
             virtualBgBtn.className = 'device-menu-action-btn';
@@ -7532,7 +7535,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.38',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.39',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
