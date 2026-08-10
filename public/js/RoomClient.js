@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.41
+ * @version 2.3.42
  *
  */
 
@@ -366,6 +366,7 @@ class RoomClient {
         this.isBreakoutPinned = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.isParticipantsOpen = false;
+        this.isChatOpenedByParticipantsBtn = false;
         this.speechInMessages = false;
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
@@ -6046,7 +6047,10 @@ class RoomClient {
         isParticipantsListOpen = !isParticipantsListOpen;
         this.isChatOpen = !this.isChatOpen;
 
-        if (!this.isChatOpen) this.isParticipantsOpen = false;
+        if (!this.isChatOpen) {
+            this.isParticipantsOpen = false;
+            this.isChatOpenedByParticipantsBtn = false;
+        }
         this.syncChatToolbarButtons();
         this.updateUnreadCountBadge(this.chatPeerId || 'all');
 
@@ -6072,6 +6076,13 @@ class RoomClient {
         const chat = this.getId('chat');
         plist.classList.toggle('hidden');
         const isParticipantsListHidden = !this.isPlistOpen();
+
+        // Chat was opened only to show participants: close everything instead of leaving the chat visible.
+        if (fromUser && isParticipantsListHidden && this.isChatOpenedByParticipantsBtn) {
+            this.isChatOpenedByParticipantsBtn = false;
+            if (this.isChatOpen) this.toggleChat(true);
+            return;
+        }
 
         if (!BUTTONS.main.chatButton) {
             elemDisplay(chat.id, false);
@@ -6101,10 +6112,13 @@ class RoomClient {
         this.isParticipantsOpen = !this.isParticipantsOpen;
         this.syncChatToolbarButtons();
         if (!this.isParticipantsOpen && this.isChatOpen) {
+            this.isChatOpenedByParticipantsBtn = false;
             this.toggleChat(true);
             return;
         }
         if (!this.isChatOpen) {
+            // Chat is being opened solely to display the participants list
+            this.isChatOpenedByParticipantsBtn = true;
             await this.toggleChat(true);
             if (!BUTTONS.main.chatButton) {
                 elemDisplay('chat', false);

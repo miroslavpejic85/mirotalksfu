@@ -239,6 +239,7 @@
 .people-list .about {
     float: left;
     padding-left: 8px;
+    width: 160px;
 }
 
 .people-list .about-buttons {
