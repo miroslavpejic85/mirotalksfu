@@ -6185,6 +6185,9 @@ class RoomClient {
         document.documentElement.style.setProperty('--msger-width', '100%');
         document.documentElement.style.setProperty('--msger-height', '100%');
         this.toggleChatHistorySize(true);
+        chatRoom.classList.remove('chat-maximize-in');
+        void chatRoom.offsetWidth;
+        chatRoom.classList.add('chat-maximize-in');
     }
 
     chatMinimize() {
@@ -6193,11 +6196,17 @@ class RoomClient {
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         if (this.isChatPinned) {
             this.chatPin();
+            chatRoom.classList.remove('panel-slide-in', 'chat-dock-in');
+            void chatRoom.offsetWidth; // force reflow so the animation always restarts
+            chatRoom.classList.add('chat-dock-in');
         } else {
             this.chatCenter();
             document.documentElement.style.setProperty('--msger-width', '800px');
             document.documentElement.style.setProperty('--msger-height', '700px');
             this.toggleChatHistorySize(false);
+            chatRoom.classList.remove('chat-minimize-in');
+            void chatRoom.offsetWidth; // force reflow so the animation always restarts
+            chatRoom.classList.add('chat-minimize-in');
         }
     }
 
@@ -6243,7 +6252,7 @@ class RoomClient {
     }
 
     chatCenter() {
-        chatRoom.classList.remove('panel-slide-in');
+        chatRoom.classList.remove('panel-slide-in', 'chat-maximize-in', 'chat-minimize-in', 'chat-dock-in');
         chatRoom.style.right = null;
         chatRoom.style.position = 'fixed';
         chatRoom.style.transform = 'translate(-50%, -50%)';
@@ -6259,7 +6268,7 @@ class RoomClient {
         chatRoom.style.transform = null;
         document.documentElement.style.setProperty('--msger-width', '25%');
         document.documentElement.style.setProperty('--msger-height', '100%');
-        chatRoom.classList.remove('panel-slide-in');
+        chatRoom.classList.remove('panel-slide-in', 'chat-dock-in');
         void chatRoom.offsetWidth; // force reflow so the animation always restarts
         chatRoom.classList.add('panel-slide-in');
     }

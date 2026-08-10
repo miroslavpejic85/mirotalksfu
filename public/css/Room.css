@@ -6138,6 +6138,61 @@ hr {
     transition: none !important; /* suppress width/size transitions while slide is playing */
 }
 
+/*--------------------------------------------------------------
+# Chat maximize — pop/zoom-in when expanding to full size
+--------------------------------------------------------------*/
+@keyframes chatMaximizeIn {
+    from {
+        transform: translate(-50%, -50%) scale(0.9);
+        opacity: 0.4;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.chat-maximize-in {
+    animation: chatMaximizeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/*--------------------------------------------------------------
+# Chat minimize — settle back into the right dock (pinned)
+--------------------------------------------------------------*/
+@keyframes chatDockIn {
+    from {
+        transform: translateX(28px) scale(0.96);
+        opacity: 0.35;
+    }
+    to {
+        transform: translateX(0) scale(1);
+        opacity: 1;
+    }
+}
+
+.chat-dock-in {
+    animation: chatDockIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: none !important; /* let width snap to 25% while only transform/opacity animate */
+}
+
+/*--------------------------------------------------------------
+# Chat minimize — soft shrink back to floating size (not pinned)
+--------------------------------------------------------------*/
+@keyframes chatMinimizeIn {
+    from {
+        transform: translate(-50%, -50%) scale(1.06);
+        opacity: 0.4;
+    }
+    to {
+        transform: translate(-50%, -50%) scale(1);
+        opacity: 1;
+    }
+}
+
+.chat-minimize-in {
+    animation: chatMinimizeIn 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 /*
 z-index:
     - 1 videoMediaContainer
