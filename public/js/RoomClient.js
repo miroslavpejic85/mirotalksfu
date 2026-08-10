@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.43
+ * @version 2.3.44
  *
  */
 
@@ -6243,6 +6243,8 @@ class RoomClient {
     }
 
     chatCenter() {
+        chatRoom.classList.remove('panel-slide-in');
+        chatRoom.style.right = null;
         chatRoom.style.position = 'fixed';
         chatRoom.style.transform = 'translate(-50%, -50%)';
         chatRoom.style.top = '50%';
