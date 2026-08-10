@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.45
+ * @version 2.3.46
  *
  */
 
@@ -432,7 +432,9 @@ class RoomClient {
         this._recStartTs = null;
         this.mediaRecorder = null;
         this.audioRecorder = null;
+        this.screenAudioRecorder = null; // mixes participant audio with system/tab audio
         this.recScreenStream = null;
+        this.recScreenAudioTracks = []; // raw system/tab audio tracks to stop on recording end
         this.recording = {
             recSyncServerRecording: false,
             recSyncServerToS3: false,
@@ -8450,21 +8452,39 @@ class RoomClient {
 
     startDesktopRecording(options, audioMixerTracks) {
         // On desktop devices, record camera or screen/window... + all audio tracks
-        const constraints = { video: true };
+        const constraints = { video: true, audio: true }; // audio: allow capturing system/tab audio when the user shares it
         navigator.mediaDevices
             .getDisplayMedia(constraints)
             .then((screenStream) => {
                 const screenTracks = screenStream.getVideoTracks();
                 console.log('Screen video tracks --->', screenTracks);
 
+                // Get system/tab audio tracks the user chose to share (if any)
+                const screenAudioTracks = screenStream.getAudioTracks();
+                console.log('Screen audio tracks --->', screenAudioTracks);
+
                 const combinedTracks = [];
 
                 if (Array.isArray(screenTracks)) {
                     combinedTracks.push(...screenTracks);
                 }
+
+                // Determine the audio to record: participant mix, plus system/tab audio if shared
+                let recordAudioTracks = [];
                 if (Array.isArray(audioMixerTracks)) {
-                    combinedTracks.push(...audioMixerTracks);
+                    recordAudioTracks = [...audioMixerTracks];
                 }
+                if (screenAudioTracks.length > 0) {
+                    // MediaRecorder encodes only one audio track, so mix participant + system/tab audio into one
+                    this.screenAudioRecorder = new MixedAudioRecorder();
+                    const streamsToMix = [
+                        ...recordAudioTracks.map((track) => new MediaStream([track])),
+                        ...screenAudioTracks.map((track) => new MediaStream([track])),
+                    ];
+                    recordAudioTracks = this.screenAudioRecorder.getMixedAudioStream(streamsToMix).getTracks();
+                    this.recScreenAudioTracks = screenAudioTracks; // keep raw tracks to stop them on recording end
+                }
+                combinedTracks.push(...recordAudioTracks);
 
                 const recScreenStream = new MediaStream(combinedTracks);
                 console.log('New Screen/Window Media Stream tracks  --->', recScreenStream.getTracks());
@@ -8868,6 +8888,15 @@ class RoomClient {
                 this.recScreenStream.getTracks().forEach((track) => {
                     if (track.kind === 'video') track.stop();
                 });
+            }
+            // Stop system/tab audio capture and its mixer, if used
+            if (this.recScreenAudioTracks.length) {
+                this.recScreenAudioTracks.forEach((track) => track.stop());
+                this.recScreenAudioTracks = [];
+            }
+            if (this.screenAudioRecorder) {
+                this.screenAudioRecorder.stopMixedAudioStream();
+                this.screenAudioRecorder = null;
             }
             if (this.isMobileDevice) this.getId('swapCameraButton').className = '';
             this.event(_EVENTS.stopRec);
