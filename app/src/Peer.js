@@ -591,12 +591,26 @@ module.exports = class Peer {
 
             this.addDataConsumer(dataConsumer.id, dataConsumer);
         } catch (error) {
-            log.error(`Error creating data consumer for transport ID ${consumerTransportId}`, {
+            // A closed/missing data producer or transport is an expected race (e.g. the producing peer left mid-join)
+            const isTransient = consumerTransport.closed || /not found|closed/i.test(error.message || '');
+
+            const logDetails = {
                 error: error.message,
                 dataProducerId,
                 peer_name: this.peer_name,
-            });
-            throw new Error(`Failed to create data consumer for transport ID ${consumerTransportId}`);
+            };
+            isTransient
+                ? log.warn(
+                      `Skipped data consumer for transport ID ${consumerTransportId} (producer/transport gone)`,
+                      logDetails
+                  )
+                : log.error(`Error creating data consumer for transport ID ${consumerTransportId}`, logDetails);
+
+            const wrapped = new Error(
+                `Failed to create data consumer for transport ID ${consumerTransportId}: ${error.message}`
+            );
+            wrapped.transient = isTransient;
+            throw wrapped;
         }
 
         dataConsumer.once('transportclose', () => {

@@ -994,14 +994,24 @@ module.exports = class Room {
         try {
             result = await peer.createDataConsumer(consumerTransportId, dataProducerId);
         } catch (error) {
-            log.error(`Error creating data consumer for peer ${peer_name} with socket ID ${socket_id}`, {
+            const logDetails = {
                 consumerTransportId,
                 dataProducerId,
                 error: error.message,
-            });
-            throw new Error(
-                `Failed to create data consumer for peer ${peer_name} with transport ID ${consumerTransportId}`
+            };
+            // Transient races (producer/transport already closed) are expected, not real errors
+            error.transient
+                ? log.warn(`Skipped data consumer for peer ${peer_name} with socket ID ${socket_id}`, logDetails)
+                : log.error(
+                      `Error creating data consumer for peer ${peer_name} with socket ID ${socket_id}`,
+                      logDetails
+                  );
+
+            const wrapped = new Error(
+                `Failed to create data consumer for peer ${peer_name} with transport ID ${consumerTransportId}: ${error.message}`
             );
+            wrapped.transient = error.transient;
+            throw wrapped;
         }
 
         if (!result) {
