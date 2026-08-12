@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.47
+ * @version 2.3.48
  *
  */
 
@@ -4909,6 +4909,146 @@ function setupQuickDeviceSwitchDropdowns() {
         audioDropdown.classList.toggle('hidden', !showAudio);
     }
 
+    function createDeviceAudioMeter() {
+        const meter = document.createElement('span');
+        meter.className = 'device-menu-audio-meter';
+        const barEls = [];
+        for (let i = 0; i < 8; i++) {
+            const bar = document.createElement('span');
+            bar.className = 'device-meter-bar';
+            meter.appendChild(bar);
+            barEls.push(bar);
+        }
+        return { meter, barEls };
+    }
+
+    // Live audio input level meters shown next to each microphone in the audio device menu.
+    // Uses a single AudioContext and one analyser per device; runs only while the menu is open.
+    const audioMeterManager = {
+        active: false,
+        rafId: null,
+        audioContext: null,
+        meters: new Map(), // deviceId -> { stream, source, analyser, dataArray }
+        barTargets: new Map(), // deviceId -> [barEl, ...]
+
+        async ensureContext() {
+            const AC = window.AudioContext || window.webkitAudioContext;
+            if (!AC) return null;
+            if (!this.audioContext || this.audioContext.state === 'closed') {
+                this.audioContext = new AC();
+            }
+            if (this.audioContext.state === 'suspended') {
+                try {
+                    await this.audioContext.resume();
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            return this.audioContext;
+        },
+
+        setBarTargets(entries) {
+            this.barTargets.clear();
+            entries.forEach(({ deviceId, barEls }) => {
+                if (deviceId) this.barTargets.set(deviceId, barEls);
+            });
+        },
+
+        async start(entries) {
+            if (!isAudioContextSupported()) return;
+            this.active = true;
+            this.setBarTargets(entries);
+            for (const { deviceId } of entries) {
+                if (deviceId && !this.meters.has(deviceId)) {
+                    await this.createMeter(deviceId);
+                }
+            }
+            if (this.active && !this.rafId) {
+                this.rafId = requestAnimationFrame(() => this.tick());
+            }
+        },
+
+        async createMeter(deviceId) {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    audio: {
+                        deviceId: { exact: deviceId },
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false,
+                    },
+                });
+                if (!this.active) {
+                    stream.getTracks().forEach((t) => t.stop());
+                    return;
+                }
+                const ctx = await this.ensureContext();
+                if (!ctx) {
+                    stream.getTracks().forEach((t) => t.stop());
+                    return;
+                }
+                const source = ctx.createMediaStreamSource(stream);
+                const analyser = ctx.createAnalyser();
+                analyser.fftSize = 256;
+                analyser.smoothingTimeConstant = 0.6;
+                source.connect(analyser);
+                const dataArray = new Uint8Array(analyser.fftSize);
+                this.meters.set(deviceId, { stream, source, analyser, dataArray });
+            } catch (err) {
+                console.warn('Audio meter init failed for device', deviceId, err);
+            }
+        },
+
+        tick() {
+            if (!this.active) return;
+            this.meters.forEach((meter, deviceId) => {
+                const barEls = this.barTargets.get(deviceId);
+                if (!barEls || !barEls.length) return;
+                meter.analyser.getByteTimeDomainData(meter.dataArray);
+                let sum = 0;
+                for (let i = 0; i < meter.dataArray.length; i++) {
+                    const v = (meter.dataArray[i] - 128) / 128;
+                    sum += v * v;
+                }
+                const rms = Math.sqrt(sum / meter.dataArray.length);
+                const level = Math.min(1, rms * 3.5);
+                const activeBars = Math.round(level * barEls.length);
+                barEls.forEach((bar, i) => bar.classList.toggle('active', i < activeBars));
+            });
+            this.rafId = requestAnimationFrame(() => this.tick());
+        },
+
+        stop() {
+            this.active = false;
+            if (this.rafId) {
+                cancelAnimationFrame(this.rafId);
+                this.rafId = null;
+            }
+            this.meters.forEach((meter) => {
+                try {
+                    meter.source.disconnect();
+                } catch (err) {
+                    /* ignore */
+                }
+                try {
+                    meter.stream.getTracks().forEach((t) => t.stop());
+                } catch (err) {
+                    /* ignore */
+                }
+            });
+            this.meters.clear();
+            this.barTargets.clear();
+            if (this.audioContext && this.audioContext.state !== 'closed') {
+                try {
+                    this.audioContext.close();
+                } catch (err) {
+                    /* ignore */
+                }
+            }
+            this.audioContext = null;
+        },
+    };
+
     function appendMenuHeader(menuEl, iconClass, title) {
         const header = document.createElement('div');
         header.className = 'device-menu-header';
@@ -4930,7 +5070,7 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(divider);
     }
 
-    function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn) {
+    function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn, meterCollector) {
         if (!selectEl) return;
 
         const options = Array.from(selectEl.options || []).filter((o) => o && o.value);
@@ -4955,13 +5095,23 @@ function setupQuickDeviceSwitchDropdowns() {
                 const icon = document.createElement('i');
                 icon.className = 'fas fa-check';
                 btn.appendChild(icon);
-                btn.appendChild(document.createTextNode(` ${label}`));
             } else {
                 const spacer = document.createElement('span');
                 spacer.style.display = 'inline-block';
                 spacer.style.width = '1.25em';
                 btn.appendChild(spacer);
-                btn.appendChild(document.createTextNode(label));
+            }
+
+            const labelSpan = document.createElement('span');
+            labelSpan.className = 'device-menu-label';
+            labelSpan.textContent = isSelected ? ` ${label}` : label;
+            btn.appendChild(labelSpan);
+
+            // Live audio input level meter (microphones only)
+            if (meterCollector) {
+                const { meter, barEls } = createDeviceAudioMeter();
+                btn.appendChild(meter);
+                meterCollector.push({ deviceId: opt.value, barEls });
             }
 
             btn.addEventListener('click', () => {
@@ -5054,7 +5204,9 @@ function setupQuickDeviceSwitchDropdowns() {
         audioMenu.innerHTML = '';
 
         appendMenuHeader(audioMenu, 'fas fa-microphone', 'Microphones');
-        appendSelectOptions(audioMenu, microphoneSelect, 'No microphones found', buildAudioMenu);
+        const audioMeterEntries = [];
+        appendSelectOptions(audioMenu, microphoneSelect, 'No microphones found', buildAudioMenu, audioMeterEntries);
+        if (audioMeterManager.active) audioMeterManager.start(audioMeterEntries);
 
         // Noise cancellation toggle (only when custom noise suppression is enabled & supported)
         if (BUTTONS.settings.customNoiseSuppression && rc.isRNNoiseSupported) {
@@ -5164,6 +5316,15 @@ function setupQuickDeviceSwitchDropdowns() {
     audioDropdown.addEventListener('click', rebuildAudioMenu);
     videoToggle.addEventListener('mouseenter', rebuildVideoMenu);
     audioToggle.addEventListener('mouseenter', rebuildAudioMenu);
+
+    // Live audio input level meters: run only while the audio menu is open
+    audioDropdown.addEventListener('shown.bs.dropdown', () => {
+        audioMeterManager.active = true;
+        buildAudioMenu();
+    });
+    audioDropdown.addEventListener('hidden.bs.dropdown', () => {
+        audioMeterManager.stop();
+    });
 
     // Keep UI synced when settings panel changes device
     if (videoSelect) videoSelect.addEventListener('change', rebuildVideoMenu);
@@ -7535,7 +7696,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.47',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.48',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
