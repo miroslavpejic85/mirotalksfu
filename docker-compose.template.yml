@@ -3,6 +3,9 @@ services:
         image: mirotalk/sfu:latest
         container_name: mirotalksfu
         hostname: mirotalksfu
+        # Run as non-root (uid:gid). The image already defaults to the non-root
+        # "node" user (1000:1000); set this to override with a different uid/gid.
+        user: '1000:1000'
         restart: unless-stopped
         # The following ports are only required if 'network_mode: host' is NOT enabled.
         # If you enable 'network_mode: host', you can comment out or remove the 'ports' section below.

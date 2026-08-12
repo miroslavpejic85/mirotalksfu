@@ -30,5 +30,9 @@ COPY public ./public
 # Copy config template → config
 COPY app/src/config.template.js app/src/config.js
 
+# Run as the non-root "node" user (uid/gid 1000) shipped with the base image
+RUN chown -R node:node /src
+USER node
+
 # Default command
 CMD ["npm", "start"]
