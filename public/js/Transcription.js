@@ -117,6 +117,8 @@ class Transcription {
             };
 
             this.transcription.onresult = (e) => {
+                // Skip capturing while the microphone is off.
+                if (this.isAudioOff()) return;
                 const current = e.resultIndex;
                 const transcript = e.results[current][0].transcript;
                 const transcriptionData = {
@@ -503,7 +505,7 @@ class Transcription {
                     transcriptionLanguage.selectedIndex = transcriptionLanguageIndex;
                     this.updateCountry();
                     transcriptionDialect.selectedIndex = transcriptionDialectIndex;
-                    transcription.start();
+                    transcription.start(true);
                 }
             }
         });
@@ -511,7 +513,7 @@ class Transcription {
 
     startAll() {
         if (!this.transcriptionRunning) {
-            transcription.start();
+            transcription.start(true);
         }
         rc.emitCmd({
             type: 'transcriptionAll',
@@ -526,7 +528,16 @@ class Transcription {
         });
     }
 
-    start() {
+    start(notifyIfAudioOff = false) {
+        // Transcription can only capture speech when the microphone is on.
+        if (notifyIfAudioOff && this.isAudioOff()) {
+            this.confirmStartWithAudioOff();
+            return;
+        }
+        this.doStart();
+    }
+
+    doStart() {
         if (this.whisper.mode) {
             this.whisper.start();
             return;
@@ -541,6 +552,33 @@ class Transcription {
             userLog('error', `Transcription start error ${error.message}`, 'top-end', 6000);
             console.error('Transcription start error', error);
         }
+    }
+
+    isAudioOff() {
+        return !(rc && rc.peer_info && rc.peer_info.peer_audio === true);
+    }
+
+    confirmStartWithAudioOff() {
+        Swal.fire({
+            allowOutsideClick: false,
+            background: swalBackground,
+            position: 'center',
+            imageUrl: image.transcription,
+            title: 'Your microphone is off',
+            text: 'Transcription needs your microphone on to capture your speech. Turn it on to start transcribing.',
+            showDenyButton: true,
+            confirmButtonText: 'Turn on microphone',
+            denyButtonText: 'Cancel',
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then((result) => {
+            if (result.isConfirmed) {
+                if (typeof startAudioButton !== 'undefined' && startAudioButton) {
+                    startAudioButton.click();
+                }
+                this.doStart();
+            }
+        });
     }
 
     stop() {

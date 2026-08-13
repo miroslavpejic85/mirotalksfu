@@ -157,7 +157,8 @@ class WhisperTranscription {
         recorder.onstop = () => {
             clearInterval(levelMonitor);
             const blob = new Blob(chunks, { type: mimeType });
-            if (hasSpeech && blob.size > 1000) {
+            // Skip sending while the microphone is off.
+            if (hasSpeech && blob.size > 1000 && !this.transcription.isAudioOff()) {
                 this.sendBlob(blob, mimeType);
             }
             if (this.active) this.recordSegment();
