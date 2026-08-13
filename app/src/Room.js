@@ -124,6 +124,8 @@ module.exports = class Room {
             videoAIEnabled: this.videoAIEnabled,
             videoAISessionTimeLimit: this.videoAISessionTimeLimit,
             chatGPTEnabled: config?.integrations?.chatGPT?.enabled || false,
+            whisperEnabled: config?.integrations?.whisper?.enabled || false,
+            whisperSegmentSeconds: config?.integrations?.whisper?.segmentSeconds || 5,
             thereIsPolls: this.thereIsPolls(),
             shareMediaData: this.shareMediaData,
             dominantSpeaker: this.activeSpeakerObserverEnabled,

@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.49 - Configuration File
+ * MiroTalk SFU v2.3.50 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -725,6 +725,45 @@ module.exports = {
             model: process.env.DEEP_SEEK_MODEL || 'deepseek-v4-flash',
             max_tokens: parseInt(process.env.DEEP_SEEK_MAX_TOKENS) || 1024,
             temperature: parseInt(process.env.DEEP_SEEK_TEMPERATURE) || 0.7,
+        },
+
+        /**
+         * Whisper Speech-to-Text Configuration
+         * ====================================
+         * Server-side audio transcription using an OpenAI-compatible
+         * Whisper endpoint. Works with the official OpenAI API or any
+         * self-hosted, OpenAI-compatible server (whisper.cpp server,
+         * faster-whisper / whisper-asr-webservice, etc.).
+         *
+         * When enabled, the room Transcription panel shows a "Whisper mode"
+         * switch. In that mode the browser records short audio segments and
+         * sends them here for transcription instead of using the browser's
+         * built-in Web Speech API.
+         *
+         * Core Settings:
+         * -------------
+         * - enabled    : Enable/disable Whisper transcription [true/false] (default: false)
+         * - basePath   : OpenAI-compatible API endpoint (default: 'https://api.openai.com/v1/')
+         *                For a self-hosted server use e.g. 'http://localhost:9000/v1/'
+         * - apiKey     : API secret key (ALWAYS store in .env). May be empty for
+         *                self-hosted servers that don't require authentication.
+         * - model      : Whisper model name (default: 'whisper-1')
+         * - language   : Optional ISO-639-1 language hint (e.g. 'en'). Empty = auto-detect.
+         *
+         * Advanced Settings:
+         * -----------------
+         * - segmentSeconds : Length of each recorded audio segment sent for
+         *                    transcription (default: 5 seconds)
+         * - maxAudioBytes  : Reject audio segments larger than this (default: 25MB)
+         */
+        whisper: {
+            enabled: process.env.WHISPER_ENABLED === 'true',
+            basePath: process.env.WHISPER_BASE_PATH || 'https://api.openai.com/v1/',
+            apiKey: process.env.WHISPER_API_KEY || '',
+            model: process.env.WHISPER_MODEL || 'whisper-1',
+            language: process.env.WHISPER_LANGUAGE || '',
+            segmentSeconds: parseInt(process.env.WHISPER_SEGMENT_SECONDS) || 5,
+            maxAudioBytes: parseInt(process.env.WHISPER_MAX_AUDIO_BYTES) || 25 * 1024 * 1024,
         },
 
         /**

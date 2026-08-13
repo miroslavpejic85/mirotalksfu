@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.49
+ * @version 2.3.50
  *
  */
 
@@ -422,6 +422,37 @@ if (config?.integrations?.chatGPT?.enabled) {
 
 // OpenID Connect
 const OIDC = config?.security?.oidc || { enabled: false };
+
+// Whisper: common phrases the model hallucinates on silent/near-silent audio (normalized: lowercase, no spaces/punctuation)
+const WHISPER_HALLUCINATIONS = new Set([
+    'thanksforwatching',
+    'thankyouforwatching',
+    'thanksforwatchingandseeyouinthenextvideo',
+    'thankyou',
+    'thankyouverymuch',
+    'pleasesubscribe',
+    'pleasesubscribetomychannel',
+    'subscribe',
+    'likeandsubscribe',
+    'seeyouinthenextvideo',
+    'seeyounexttime',
+    'bye',
+    'byebye',
+    'goodbye',
+    'youtube',
+    'thankyouforlistening',
+    'thanksforlistening',
+    '謝謝觀看',
+    'ご視聴ありがとうございました',
+    '字幕by',
+]);
+
+// Normalize transcript text for hallucination comparison
+function normalizeWhisperText(text) {
+    return String(text)
+        .toLowerCase()
+        .replace(/[\s.,!?。！？、·・…]+/g, '');
+}
 
 // directory
 const dir = {
@@ -4108,6 +4139,95 @@ function startServer() {
                 // Handle general errors
                 log.error('DeepSeek Error', error);
                 cb({ message: `Error: ${error.message}` });
+            }
+        });
+
+        // https://platform.openai.com/docs/api-reference/audio/createTranscription
+        // Whisper speech-to-text (OpenAI API or any OpenAI-compatible self-hosted server)
+        socket.on('getWhisperTranscription', async ({ audio, mimeType, language }, cb) => {
+            if (!roomExists(socket)) {
+                return cb({ error: 'Room not found' });
+            }
+
+            const whisper = config?.integrations?.whisper;
+            if (!whisper?.enabled) {
+                return cb({ error: 'Whisper transcription is disabled. Please try again later!' });
+            }
+
+            try {
+                if (!audio || typeof audio !== 'string') {
+                    throw new Error('Invalid audio payload');
+                }
+
+                const buffer = Buffer.from(audio, 'base64');
+                if (buffer.length === 0) {
+                    return cb({ text: '' });
+                }
+
+                const maxBytes = whisper.maxAudioBytes || 25 * 1024 * 1024;
+                if (buffer.length > maxBytes) {
+                    return cb({ error: 'Audio segment too large' });
+                }
+
+                const type = typeof mimeType === 'string' && mimeType.startsWith('audio/') ? mimeType : 'audio/webm';
+                const ext = type.includes('mp4')
+                    ? 'mp4'
+                    : type.includes('wav')
+                      ? 'wav'
+                      : type.includes('mpeg')
+                        ? 'mp3'
+                        : 'webm';
+
+                const FormData = require('form-data');
+                const form = new FormData();
+                form.append('file', buffer, { filename: `audio.${ext}`, contentType: type });
+                form.append('model', whisper.model || 'whisper-1');
+                form.append('response_format', 'verbose_json');
+
+                const lang = typeof language === 'string' && language ? language : whisper.language;
+                if (lang) form.append('language', lang);
+
+                const headers = { ...form.getHeaders() };
+                if (whisper.apiKey) headers['Authorization'] = `Bearer ${whisper.apiKey}`;
+
+                const base = (whisper.basePath || 'https://api.openai.com/v1/').replace(/\/?$/, '/');
+                const url = `${base}audio/transcriptions`;
+
+                const response = await axios.post(url, form, {
+                    headers,
+                    timeout: 30000,
+                    maxBodyLength: Infinity,
+                    maxContentLength: Infinity,
+                });
+
+                const raw = response.data && (response.data.text || response.data.transcript);
+                let text = typeof raw === 'string' ? raw.trim() : '';
+
+                // Filter out Whisper hallucinations that occur on silent/near-silent audio
+                const segments = Array.isArray(response.data?.segments) ? response.data.segments : [];
+                const normalized = normalizeWhisperText(text);
+
+                if (text) {
+                    // Text made only of punctuation, or a known hallucination phrase
+                    if (normalized === '' || WHISPER_HALLUCINATIONS.has(normalized)) {
+                        text = '';
+                    } else if (segments.length) {
+                        // Low-confidence / no-speech segments => treat as silence
+                        const avgNoSpeech =
+                            segments.reduce((sum, s) => sum + (s.no_speech_prob || 0), 0) / segments.length;
+                        const avgLogprob = segments.reduce((sum, s) => sum + (s.avg_logprob || 0), 0) / segments.length;
+                        if (avgNoSpeech > 0.6 && avgLogprob < -0.4) {
+                            text = '';
+                        }
+                    }
+                }
+
+                log.debug('Whisper transcription', { language: lang || 'auto', bytes: buffer.length, text });
+
+                cb({ text });
+            } catch (error) {
+                log.error('Whisper transcription error', error?.response?.data || error.message);
+                cb({ error: `Whisper error: ${error?.response?.data?.error?.message || error.message}` });
             }
         });
 
