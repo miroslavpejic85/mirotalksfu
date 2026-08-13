@@ -175,6 +175,7 @@ class Transcription {
                 'This browser not support Transcription, check out supported browsers: https://developer.mozilla.org/en-US/docs/Web/API/Web_Speech_API#browser_compatibility'
             );
         }
+        this.updateSelectorsVisibility();
     }
 
     sendTranscript(transcriptionData) {
@@ -556,5 +557,11 @@ class Transcription {
     selectDisabled(disabled = false) {
         transcriptionLanguage.disabled = disabled;
         transcriptionDialect.disabled = disabled;
+    }
+
+    updateSelectorsVisibility() {
+        const hideSelectors = this.whisper.mode || !this.isSupported();
+        hideSelectors ? hide(transcriptionLanguage) : show(transcriptionLanguage);
+        hideSelectors ? hide(transcriptionDialect) : show(transcriptionDialect);
     }
 }

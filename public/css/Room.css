@@ -2369,7 +2369,9 @@ body {
 --------------------------------------------------------------*/
 
 .transcription-inputarea {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
+    width: 100%;
     padding: 10px;
     background: var(--body-bg);
     border: none !important;
@@ -2379,6 +2381,11 @@ body {
     margin: 0 5px;
     background-color: var(--select-bg) !important;
     cursor: pointer;
+}
+
+#transcriptionSpeechStart,
+#transcriptionSpeechStop {
+    margin-left: auto;
 }
 
 /*--------------------------------------------------------------
