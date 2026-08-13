@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.50
+ * @version 2.3.51
  *
  */
 
@@ -801,8 +801,8 @@ class RoomClient {
             // Whisper server-side transcription
             this.whisperEnabled = room.whisperEnabled || false;
             if (typeof transcription !== 'undefined' && transcription) {
-                transcription.isWhisperEnabled = this.whisperEnabled;
-                transcription.whisperSegmentMs = (room.whisperSegmentSeconds || 5) * 1000;
+                transcription.whisper.isEnabled = this.whisperEnabled;
+                transcription.whisper.segmentMs = (room.whisperSegmentSeconds || 5) * 1000;
                 this.whisperEnabled ? show('transcriptWhisperLi') : hide('transcriptWhisperLi');
             }
             // Check if VideoAI is enabled and hide to guests by default

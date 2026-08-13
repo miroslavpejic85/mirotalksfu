@@ -90,16 +90,7 @@ class Transcription {
         this.showOnMessage = true;
         this.sendToAll = true;
         // Whisper (server-side) transcription
-        this.isWhisperEnabled = false; // set from server room config on join
-        this.whisperMode = false; // user toggle: use Whisper instead of the Web Speech API
-        this.whisperSegmentMs = 5000; // length of each recorded audio segment
-        this.whisperStream = null;
-        this.whisperRecorder = null;
-        this.whisperActive = false;
-        this.whisperTimer = null;
-        this.whisperAudioContext = null;
-        this.whisperAnalyser = null;
-        this.whisperSilenceThreshold = 12; // 0-128 peak on the time-domain waveform; below this = silence
+        this.whisper = new WhisperTranscription(this);
     }
 
     isSupported() {
@@ -535,8 +526,8 @@ class Transcription {
     }
 
     start() {
-        if (this.whisperMode) {
-            this.startWhisper();
+        if (this.whisper.mode) {
+            this.whisper.start();
             return;
         }
         try {
@@ -552,8 +543,8 @@ class Transcription {
     }
 
     stop() {
-        if (this.whisperMode) {
-            this.stopWhisper();
+        if (this.whisper.mode) {
+            this.whisper.stop();
             return;
         }
         this.transcriptionRunning = false;
@@ -565,180 +556,5 @@ class Transcription {
     selectDisabled(disabled = false) {
         transcriptionLanguage.disabled = disabled;
         transcriptionDialect.disabled = disabled;
-    }
-
-    toggleWhisperMode(enabled) {
-        if (this.transcriptionRunning) {
-            userLog('info', 'Please stop the current transcription before changing mode', 'top-end');
-            return false;
-        }
-        this.whisperMode = enabled && this.isWhisperEnabled;
-        return this.whisperMode;
-    }
-
-    startWhisper() {
-        if (!this.isWhisperEnabled) {
-            return userLog('warning', 'Whisper transcription is not enabled on this server', 'top-end');
-        }
-        if (this.whisperActive) return;
-        navigator.mediaDevices
-            .getUserMedia({ audio: true })
-            .then((stream) => {
-                this.whisperStream = stream;
-                this.whisperActive = true;
-                this.transcriptionRunning = true;
-                this.selectDisabled(true);
-                this.setupWhisperAnalyser(stream);
-                hide(transcriptionSpeechStart);
-                show(transcriptionSpeechStop);
-                setColor(transcriptionSpeechStatus, 'lime');
-                userLog('info', 'Whisper transcription started', 'top-end');
-                this.recordWhisperSegment();
-            })
-            .catch((error) => {
-                this.whisperActive = false;
-                this.transcriptionRunning = false;
-                this.selectDisabled(false);
-                userLog('error', `Microphone access error ${error.message}`, 'top-end', 6000);
-                console.error('Whisper getUserMedia error', error);
-            });
-    }
-
-    stopWhisper() {
-        this.whisperActive = false;
-        this.transcriptionRunning = false;
-        if (this.whisperTimer) {
-            clearTimeout(this.whisperTimer);
-            this.whisperTimer = null;
-        }
-        try {
-            if (this.whisperRecorder && this.whisperRecorder.state !== 'inactive') {
-                this.whisperRecorder.stop();
-            }
-        } catch (error) {
-            console.warn('Whisper recorder stop error', error);
-        }
-        if (this.whisperStream) {
-            this.whisperStream.getTracks().forEach((track) => track.stop());
-            this.whisperStream = null;
-        }
-        if (this.whisperAudioContext) {
-            try {
-                this.whisperAudioContext.close();
-            } catch (error) {
-                console.warn('Whisper audio context close error', error);
-            }
-            this.whisperAudioContext = null;
-            this.whisperAnalyser = null;
-        }
-        this.whisperRecorder = null;
-        this.selectDisabled(false);
-        hide(transcriptionSpeechStop);
-        show(transcriptionSpeechStart);
-        setColor(transcriptionSpeechStatus, 'white');
-        userLog('info', 'Whisper transcription stopped', 'top-end');
-    }
-
-    setupWhisperAnalyser(stream) {
-        try {
-            const AudioContext = window.AudioContext || window.webkitAudioContext;
-            this.whisperAudioContext = new AudioContext();
-            const source = this.whisperAudioContext.createMediaStreamSource(stream);
-            this.whisperAnalyser = this.whisperAudioContext.createAnalyser();
-            this.whisperAnalyser.fftSize = 2048;
-            source.connect(this.whisperAnalyser);
-        } catch (error) {
-            this.whisperAnalyser = null;
-            console.warn('Whisper analyser setup error', error);
-        }
-    }
-
-    getWhisperPeakLevel() {
-        if (!this.whisperAnalyser) return 255; // no analyser: never skip
-        const data = new Uint8Array(this.whisperAnalyser.frequencyBinCount);
-        this.whisperAnalyser.getByteTimeDomainData(data);
-        let peak = 0;
-        for (let i = 0; i < data.length; i++) {
-            const v = Math.abs(data[i] - 128);
-            if (v > peak) peak = v;
-        }
-        return peak;
-    }
-
-    recordWhisperSegment() {
-        if (!this.whisperActive || !this.whisperStream) return;
-
-        const mimeType =
-            typeof MediaRecorder !== 'undefined' && MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
-                ? 'audio/webm;codecs=opus'
-                : 'audio/webm';
-
-        let recorder;
-        try {
-            recorder = new MediaRecorder(this.whisperStream, { mimeType });
-        } catch (error) {
-            this.stopWhisper();
-            return userLog('error', `Whisper recording not supported ${error.message}`, 'top-end', 6000);
-        }
-
-        this.whisperRecorder = recorder;
-        const chunks = [];
-        let hasSpeech = false;
-
-        recorder.ondataavailable = (e) => {
-            if (e.data && e.data.size > 0) chunks.push(e.data);
-        };
-
-        // Sample the mic level during the segment; only send if real speech was detected
-        const levelMonitor = setInterval(() => {
-            if (this.getWhisperPeakLevel() > this.whisperSilenceThreshold) hasSpeech = true;
-        }, 150);
-
-        recorder.onstop = () => {
-            clearInterval(levelMonitor);
-            const blob = new Blob(chunks, { type: mimeType });
-            if (hasSpeech && blob.size > 1000) {
-                this.sendWhisperBlob(blob, mimeType);
-            }
-            if (this.whisperActive) this.recordWhisperSegment();
-        };
-
-        recorder.start();
-
-        this.whisperTimer = setTimeout(() => {
-            if (recorder.state !== 'inactive') recorder.stop();
-        }, this.whisperSegmentMs);
-    }
-
-    sendWhisperBlob(blob, mimeType) {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-            const base64 = String(reader.result).split(',')[1];
-            if (!base64) return;
-
-            const language = (transcriptionDialect.value || 'en-US').split('-')[0];
-
-            rc.socket
-                .request('getWhisperTranscription', { audio: base64, mimeType, language }, 30000)
-                .then((res) => {
-                    const text = res && res.text ? res.text.trim() : '';
-                    if (!text) return;
-                    const transcriptionData = {
-                        type: 'transcript',
-                        room_id: room_id,
-                        peer_name: peer_name,
-                        peer_avatar: peer_avatar,
-                        text_data: text,
-                        time_stamp: new Date(),
-                        broadcast: true,
-                    };
-                    this.sendTranscript(transcriptionData);
-                    this.handleTranscript(transcriptionData);
-                })
-                .catch((error) => {
-                    console.error('Whisper transcription request error', error);
-                });
-        };
-        reader.readAsDataURL(blob);
     }
 }

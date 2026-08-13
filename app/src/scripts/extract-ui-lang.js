@@ -21,6 +21,7 @@ const JS_FILES = [
     path.join(ROOT, 'public/js/Room.js'),
     path.join(ROOT, 'public/js/RoomClient.js'),
     path.join(ROOT, 'public/js/Transcription.js'),
+    path.join(ROOT, 'public/js/whisperTranscription.js'),
 ];
 const OUT_FILE = path.join(ROOT, 'public/lang/en.json');
 
