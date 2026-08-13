@@ -331,16 +331,13 @@
 
 /* Participants toggle button */
 .chat-header-participants-btn {
-    width: 38px;
-    height: 38px;
-    font-size: 16px;
-    background: rgba(0, 168, 255, 0.15) !important;
-    color: #00a8ff !important;
+    background: #1e3a8a !important;
+    color: #fff !important;
 }
 
 .chat-header-participants-btn:hover {
     color: #fff !important;
-    background: rgba(0, 168, 255, 0.35) !important;
+    background: #1d4ed8 !important;
 }
 
 .chat-header-participants-btn:active {
@@ -604,30 +601,32 @@
 .chat-toolbar-left {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     flex-wrap: wrap;
 }
 
 .chat-toolbar-right {
     display: flex;
     align-items: center;
-    gap: 2px;
+    gap: 4px;
     margin-left: auto;
 }
 
 /* Toolbar buttons */
 .chat-toolbar-btn {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
     border: none;
-    background: transparent;
-    color: rgba(255, 255, 255, 0.5);
+    background: rgba(255, 255, 255, 0.08);
+    color: #fff;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 14px;
+    font-size: 13px;
+    padding: 0;
+    flex-shrink: 0;
     transition:
         color 0.2s ease,
         background 0.2s ease,
@@ -636,8 +635,8 @@
 
 .chat-toolbar-btn:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.08);
-    transform: translateY(-1px);
+    background: rgba(255, 255, 255, 0.16);
+    transform: none;
 }
 
 .chat-toolbar-btn:active {
