@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.53
+ * @version 2.3.54
  *
  */
 
@@ -263,6 +263,9 @@ function getRtmpTotalActiveStreamsCount() {
 const nodemailer = require('./lib/nodemailer');
 const { SCHEDULE_MEETING_LIMITS } = nodemailer;
 
+// Whisper transcription helpers (pure, unit-testable)
+const { resolveAudioExtension, decodeAudioPayload, filterTranscript } = require('./lib/whisper');
+
 // Slack API
 const CryptoJS = require('crypto-js');
 const qS = require('qs');
@@ -422,37 +425,6 @@ if (config?.integrations?.chatGPT?.enabled) {
 
 // OpenID Connect
 const OIDC = config?.security?.oidc || { enabled: false };
-
-// Whisper: common phrases the model hallucinates on silent/near-silent audio (normalized: lowercase, no spaces/punctuation)
-const WHISPER_HALLUCINATIONS = new Set([
-    'thanksforwatching',
-    'thankyouforwatching',
-    'thanksforwatchingandseeyouinthenextvideo',
-    'thankyou',
-    'thankyouverymuch',
-    'pleasesubscribe',
-    'pleasesubscribetomychannel',
-    'subscribe',
-    'likeandsubscribe',
-    'seeyouinthenextvideo',
-    'seeyounexttime',
-    'bye',
-    'byebye',
-    'goodbye',
-    'youtube',
-    'thankyouforlistening',
-    'thanksforlistening',
-    '謝謝觀看',
-    'ご視聴ありがとうございました',
-    '字幕by',
-]);
-
-// Normalize transcript text for hallucination comparison
-function normalizeWhisperText(text) {
-    return String(text)
-        .toLowerCase()
-        .replace(/[\s.,!?。！？、·・…]+/g, '');
-}
 
 // directory
 const dir = {
@@ -4155,28 +4127,19 @@ function startServer() {
             }
 
             try {
-                if (!audio || typeof audio !== 'string') {
-                    throw new Error('Invalid audio payload');
-                }
-
-                const buffer = Buffer.from(audio, 'base64');
-                if (buffer.length === 0) {
-                    return cb({ text: '' });
-                }
-
                 const maxBytes = whisper.maxAudioBytes || 25 * 1024 * 1024;
-                if (buffer.length > maxBytes) {
-                    return cb({ error: 'Audio segment too large' });
+
+                let buffer;
+                try {
+                    buffer = decodeAudioPayload(audio, maxBytes);
+                } catch (err) {
+                    if (err.message === 'Empty audio payload') return cb({ text: '' });
+                    if (err.message === 'Audio segment too large') return cb({ error: err.message });
+                    throw err;
                 }
 
                 const type = typeof mimeType === 'string' && mimeType.startsWith('audio/') ? mimeType : 'audio/webm';
-                const ext = type.includes('mp4')
-                    ? 'mp4'
-                    : type.includes('wav')
-                      ? 'wav'
-                      : type.includes('mpeg')
-                        ? 'mp3'
-                        : 'webm';
+                const ext = resolveAudioExtension(type);
 
                 const FormData = require('form-data');
                 const form = new FormData();
@@ -4201,26 +4164,11 @@ function startServer() {
                 });
 
                 const raw = response.data && (response.data.text || response.data.transcript);
-                let text = typeof raw === 'string' ? raw.trim() : '';
+                const rawText = typeof raw === 'string' ? raw.trim() : '';
 
                 // Filter out Whisper hallucinations that occur on silent/near-silent audio
                 const segments = Array.isArray(response.data?.segments) ? response.data.segments : [];
-                const normalized = normalizeWhisperText(text);
-
-                if (text) {
-                    // Text made only of punctuation, or a known hallucination phrase
-                    if (normalized === '' || WHISPER_HALLUCINATIONS.has(normalized)) {
-                        text = '';
-                    } else if (segments.length) {
-                        // Low-confidence / no-speech segments => treat as silence
-                        const avgNoSpeech =
-                            segments.reduce((sum, s) => sum + (s.no_speech_prob || 0), 0) / segments.length;
-                        const avgLogprob = segments.reduce((sum, s) => sum + (s.avg_logprob || 0), 0) / segments.length;
-                        if (avgNoSpeech > 0.6 && avgLogprob < -0.4) {
-                            text = '';
-                        }
-                    }
-                }
+                const text = filterTranscript(rawText, segments);
 
                 log.debug('Whisper transcription', { language: lang || 'auto', bytes: buffer.length, text });
 
