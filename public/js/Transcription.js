@@ -595,6 +595,7 @@ class Transcription {
     selectDisabled(disabled = false) {
         transcriptionLanguage.disabled = disabled;
         transcriptionDialect.disabled = disabled;
+        transcriptWhisperMode.disabled = disabled;
     }
 
     updateSelectorsVisibility() {
