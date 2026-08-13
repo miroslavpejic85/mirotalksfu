@@ -1876,8 +1876,7 @@ body {
 }
 
 .participant-list-dropdown-toggle:focus-visible {
-    outline: 2px solid var(--dd-color);
-    outline-offset: 2px;
+    outline: none;
 }
 
 /* Fixed width so every participant menu (and every row in it) is the same size */
