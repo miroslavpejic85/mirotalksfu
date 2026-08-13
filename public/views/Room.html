@@ -2801,27 +2801,42 @@ Note</textarea>
                     class="dropdown-toggle participant-list-dropdown-toggle"
                     type="button"
                     data-bs-toggle="dropdown"
+                    data-bs-offset="-10,8"
                     aria-expanded="false"
+                    aria-haspopup="true"
                     data-template-attr-id="menuId"
+                    data-template-attr-aria-label="ariaLabel"
                 >
-                    <i class="fas fa-bars"></i>
+                    <i class="fas fa-ellipsis-vertical"></i>
                 </button>
                 <ul
-                    class="dropdown-menu text-start"
+                    class="dropdown-menu dropdown-menu-end text-start participant-list-dropdown-menu"
                     data-template-attr-aria-labelledby="menuId"
                     data-template-html="menuItems"
                 ></ul>
             </div>
         </template>
 
+        <template id="participantListMenuHeaderTemplate">
+            <li class="participant-menu-header" role="presentation">
+                <img class="participant-menu-header-avatar" data-template-attr-src="avatarSrc" alt="" />
+                <span class="participant-menu-header-title" data-template-text="title"></span>
+            </li>
+        </template>
+
+        <template id="participantListMenuGroupTemplate">
+            <li class="participant-menu-group-label" role="presentation" data-template-text="label"></li>
+        </template>
+
         <template id="participantListActionButtonTemplate">
             <button
+                type="button"
                 data-template-attr-class="buttonClass"
                 data-template-attr-id="buttonId"
                 data-template-attr-onclick="onClick"
             >
-                <span data-template-html="iconHtml"></span>
-                <span data-template-text="label"></span>
+                <span class="participant-action-icon" data-template-html="iconHtml"></span>
+                <span class="participant-action-label" data-template-text="label"></span>
             </button>
         </template>
 

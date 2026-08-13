@@ -1836,8 +1836,157 @@ body {
     color: #66beff !important;
 }
 
+/* Pin the kebab to the row's top-right so it never drifts with the floated content */
+.people-list .chat-list > li .dropdown {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    z-index: 31;
+}
+
 .participant-list-dropdown-toggle {
-    float: right;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.06);
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.75;
+    cursor: pointer;
+    transition:
+        background 0.2s ease,
+        opacity 0.2s ease;
+}
+
+.people-list .chat-list > li:hover .participant-list-dropdown-toggle,
+.participant-list-dropdown-toggle:hover,
+.participant-list-dropdown-toggle:focus-visible,
+.participant-list-dropdown-toggle[aria-expanded='true'] {
+    opacity: 1;
+}
+
+.participant-list-dropdown-toggle:hover,
+.participant-list-dropdown-toggle[aria-expanded='true'] {
+    background: rgba(102, 190, 255, 0.18);
+}
+
+.participant-list-dropdown-toggle:focus-visible {
+    outline: 2px solid var(--dd-color);
+    outline-offset: 2px;
+}
+
+/* Fixed width so every participant menu (and every row in it) is the same size */
+/* !important: bootstrap.min.css is linked after this file and resets .dropdown-menu */
+.participant-list-dropdown-menu {
+    width: 240px !important;
+    min-width: 0 !important;
+    max-width: calc(100vw - 30px) !important;
+    max-height: min(70vh, 520px) !important;
+    padding: 8px !important;
+    z-index: 1085 !important;
+}
+
+.participant-list-dropdown-menu li {
+    padding: 0 !important;
+}
+
+/* `width: 100%` + `min-width: 0` make every row span the menu's content box exactly, instead of
+   shrinking to its label or overflowing via the generic `.dropdown-menu button { min-width: 240px }` */
+.participant-list-dropdown-menu button {
+    display: flex !important;
+    box-sizing: border-box;
+    width: 95% !important;
+    min-width: 0 !important;
+    max-width: 100%;
+    gap: 10px;
+    padding: 9px 12px;
+    border-radius: 10px;
+    color: #fff;
+}
+
+/* Keep the row stable on hover instead of shifting its text */
+.participant-list-dropdown-menu button:hover {
+    padding-left: 12px;
+}
+
+.participant-list-dropdown-menu .participant-action-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 18px;
+    width: 18px;
+    opacity: 0.9;
+}
+
+.participant-list-dropdown-menu .participant-action-icon i,
+.participant-list-dropdown-menu .participant-action-icon svg {
+    margin-right: 0;
+}
+
+.participant-list-dropdown-menu .participant-action-label {
+    flex: 1 1 auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.participant-list-dropdown-menu .participant-action-danger {
+    color: #ff8080;
+}
+
+.participant-list-dropdown-menu .participant-action-danger:hover {
+    background: rgba(255, 82, 82, 0.16);
+    color: #ff5252;
+}
+
+.participant-menu-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: -8px -8px 6px;
+    padding: 12px 14px !important;
+    background: rgba(255, 255, 255, 0.04);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+/* Outranks `.people-list .chat-list img`, which would otherwise size/float this avatar */
+.participant-menu-header .participant-menu-header-avatar,
+.people-list .chat-list .participant-menu-header .participant-menu-header-avatar {
+    float: none;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.06);
+    flex: 0 0 26px;
+}
+
+.participant-menu-header-title {
+    color: #fff;
+    font-size: 0.82em;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.participant-menu-group-label {
+    padding: 8px 12px 4px !important;
+    color: rgba(255, 255, 255, 0.45);
+    font-size: 0.7em;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.participant-menu-header + .participant-menu-group-label {
+    padding-top: 4px !important;
 }
 
 .participant-list-dropdown-slot,

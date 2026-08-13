@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.56
+ * @version 2.3.57
  *
  */
 
@@ -6436,13 +6436,49 @@ async function getRoomParticipants() {
     const peers = await getRoomPeers();
     const lists = getParticipantsList(peers);
     participantsCount = peers.size;
+    dropParticipantMenuPortals();
     participantsList.innerHTML = lists;
-    handleDropdownHover(participantsList.querySelectorAll('.dropdown'));
+    const dropdowns = participantsList.querySelectorAll('.dropdown');
+    handleParticipantDropdownPortal(dropdowns);
+    handleDropdownHover(dropdowns);
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
     updateChatConversationsCount();
     if (isBreakoutPanelOpen) refreshBreakoutPanel();
     console.log('*** Refresh Chat participant lists ***');
+}
+
+function dropParticipantMenuPortals() {
+    document.querySelectorAll('body > .participant-list-dropdown-menu').forEach((menu) => menu.remove());
+}
+
+/**
+ * The participants list scrolls (overflow) and the chat panel is transformed when centered,
+ * which clips the absolutely positioned menu. Move it to <body> while open so it can overflow.
+ * @param {NodeList} dropdowns
+ */
+function handleParticipantDropdownPortal(dropdowns) {
+    dropdowns.forEach((dropdown) => {
+        const toggle = dropdown.querySelector('.dropdown-toggle');
+        const menu = dropdown.querySelector('.dropdown-menu');
+
+        if (!toggle || !menu) return;
+
+        let placeholder = null;
+
+        toggle.addEventListener('show.bs.dropdown', () => {
+            if (placeholder) return;
+            placeholder = document.createComment('participant-menu');
+            menu.replaceWith(placeholder);
+            document.body.appendChild(menu);
+        });
+
+        toggle.addEventListener('hidden.bs.dropdown', () => {
+            if (!placeholder) return;
+            placeholder.replaceWith(menu);
+            placeholder = null;
+        });
+    });
 }
 
 function getParticipantsList(peers) {
@@ -6472,10 +6508,23 @@ function getParticipantsList(peers) {
         });
     }
 
-    function renderParticipantDropdown(menuId, menuItems) {
+    function renderParticipantMenuHeader(title, avatarSrc) {
+        return renderRoomTemplate('participantListMenuHeaderTemplate', {
+            text: { title },
+            attrs: { avatarSrc },
+        });
+    }
+
+    function renderParticipantMenuGroup(label) {
+        return renderRoomTemplate('participantListMenuGroupTemplate', {
+            text: { label },
+        });
+    }
+
+    function renderParticipantDropdown(menuId, menuItems, ariaLabel = 'Participant actions') {
         return renderRoomTemplate('participantListDropdownTemplate', {
             html: { menuItems },
-            attrs: { menuId },
+            attrs: { menuId, ariaLabel },
         });
     }
 
@@ -6558,7 +6607,9 @@ function getParticipantsList(peers) {
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
     if (!isRulesActive || isPresenter) {
-        let menuItems = '';
+        let menuItems = renderParticipantMenuHeader('Public chat', image.all);
+
+        menuItems += renderParticipantMenuGroup('Moderation');
 
         menuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
@@ -6585,6 +6636,8 @@ function getParticipantsList(peers) {
             })
         );
 
+        menuItems += renderParticipantMenuGroup('Share');
+
         if (BUTTONS.participantsList.sendFileAllButton) {
             menuItems += renderParticipantMenuItem(
                 renderParticipantActionButton({
@@ -6608,9 +6661,10 @@ function getParticipantsList(peers) {
         );
 
         if (BUTTONS.participantsList.ejectAllButton) {
+            menuItems += renderParticipantMenuGroup('Danger zone');
             menuItems += renderParticipantMenuItem(
                 renderParticipantActionButton({
-                    buttonClass: 'btn-sm ml5',
+                    buttonClass: 'btn-sm ml5 participant-action-danger',
                     buttonId: 'ejectAllButton',
                     onClick: `rc.peerAction('me','${socket.id}','eject',true,true)`,
                     iconHtml: _PEER.ejectPeer,
@@ -6619,7 +6673,11 @@ function getParticipantsList(peers) {
             );
         }
 
-        publicDropdownHtml = renderParticipantDropdown(`${socket.id}-chatDropDownMenu`, menuItems);
+        publicDropdownHtml = renderParticipantDropdown(
+            `${socket.id}-chatDropDownMenu`,
+            menuItems,
+            'Actions for all participants'
+        );
         publicButtonsHtml = renderParticipantButtons(
             renderParticipantActionButton({
                 buttonId: 'muteAllButton',
@@ -6678,7 +6736,9 @@ function getParticipantsList(peers) {
         if (socket.id !== peer_id) {
             // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
-                let menuItems = '';
+                let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                menuItems += renderParticipantMenuGroup('Moderation');
 
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
@@ -6704,6 +6764,8 @@ function getParticipantsList(peers) {
                         label: 'Toggle screen',
                     })
                 );
+
+                menuItems += renderParticipantMenuGroup('Share');
 
                 if (BUTTONS.participantsList.sendFileButton) {
                     menuItems += renderParticipantMenuItem(
@@ -6738,10 +6800,13 @@ function getParticipantsList(peers) {
                         })
                     );
                 }
+                if (BUTTONS.participantsList.banButton || BUTTONS.participantsList.ejectButton) {
+                    menuItems += renderParticipantMenuGroup('Danger zone');
+                }
                 if (BUTTONS.participantsList.banButton) {
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({
-                            buttonClass: 'btn-sm ml5',
+                            buttonClass: 'btn-sm ml5 participant-action-danger',
                             buttonId: `${peer_id}___pBan`,
                             onClick: `rc.peerAction('me',this.id,'ban')`,
                             iconHtml: peer_ban,
@@ -6752,7 +6817,7 @@ function getParticipantsList(peers) {
                 if (BUTTONS.participantsList.ejectButton) {
                     menuItems += renderParticipantMenuItem(
                         renderParticipantActionButton({
-                            buttonClass: 'btn-sm ml5',
+                            buttonClass: 'btn-sm ml5 participant-action-danger',
                             buttonId: `${peer_id}___pEject`,
                             onClick: `rc.peerAction('me',this.id,'eject')`,
                             iconHtml: peer_eject,
@@ -6760,7 +6825,11 @@ function getParticipantsList(peers) {
                         })
                     );
                 }
-                const dropdownHtml = renderParticipantDropdown(`${peer_id}-chatDropDownMenu`, menuItems);
+                const dropdownHtml = renderParticipantDropdown(
+                    `${peer_id}-chatDropDownMenu`,
+                    menuItems,
+                    `Actions for ${peer_name_limited}`
+                );
 
                 let buttons =
                     renderParticipantActionButton({
@@ -6802,7 +6871,9 @@ function getParticipantsList(peers) {
 
                 // NO ROOM BROADCASTING
                 if (!isBroadcastingEnabled) {
-                    let menuItems = '';
+                    let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                    menuItems += renderParticipantMenuGroup('Share');
 
                     if (BUTTONS.participantsList.sendFileButton) {
                         menuItems += renderParticipantMenuItem(
@@ -6826,7 +6897,11 @@ function getParticipantsList(peers) {
                         })
                     );
 
-                    dropdownHtml = renderParticipantDropdown(`${peer_id}-chatDropDownMenu`, menuItems);
+                    dropdownHtml = renderParticipantDropdown(
+                        `${peer_id}-chatDropDownMenu`,
+                        menuItems,
+                        `Actions for ${peer_name_limited}`
+                    );
                 }
 
                 let buttons =
@@ -7707,7 +7782,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.56',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.57',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
