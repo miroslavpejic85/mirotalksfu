@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.60
+ * @version 2.3.61
  *
  */
 
@@ -470,6 +470,8 @@ class RoomClient {
         this.screenProducerId = null;
         this.audioProducerId = null;
         this.audioConsumers = new Map();
+
+        this.masterOutputVolume = 1; // 0..1 master speaker volume, multiplied with each per-peer volume
 
         this.peers = new Map();
         this.consumers = new Map();
@@ -10737,16 +10739,100 @@ class RoomClient {
                 audioPlayer.volume = 0;
                 return;
             }
-            if (this.isMobileDevice) {
-                audioPlayer.muted = volume === 0;
-                if (!audioPlayer.muted) {
-                    // Adjust playback rate as volume on mobile devices
-                    audioPlayer.playbackRate = Math.max(0.1, volume);
-                }
-            } else {
-                // Set volume directly on desktop devices
-                audioPlayer.volume = volume;
+            audioPlayer.dataset.peerVolume = volume;
+            this.applyOutputVolume(audioPlayer);
+        }
+    }
+
+    // ####################################################
+    // MASTER OUTPUT (SPEAKER) VOLUME
+    // ####################################################
+
+    getOutputAudioElements() {
+        const elements = Array.from(this.remoteAudioEl?.querySelectorAll('audio') || []);
+        if (this.videoAIElement) elements.push(this.videoAIElement);
+        return elements;
+    }
+
+    setMasterOutputVolume(volume) {
+        const value = Number(volume);
+        this.masterOutputVolume = Math.min(1, Math.max(0, isNaN(value) ? 1 : value));
+        this.getOutputAudioElements().forEach((elem) => this.applyOutputVolume(elem));
+    }
+
+    applyOutputVolume(audioPlayer) {
+        if (!audioPlayer) return;
+
+        const peerVolume = audioPlayer.dataset.peerVolume !== undefined ? Number(audioPlayer.dataset.peerVolume) : 1;
+        const volume = Math.min(1, Math.max(0, (isNaN(peerVolume) ? 1 : peerVolume) * this.masterOutputVolume));
+
+        const gainNode = this.getOutputGainNode(audioPlayer, volume);
+        if (gainNode) {
+            gainNode.gain.value = volume;
+            return;
+        }
+
+        if (this.isMobileDevice) {
+            audioPlayer.muted = volume === 0;
+            if (!audioPlayer.muted) {
+                // Adjust playback rate as volume on mobile devices
+                audioPlayer.playbackRate = Math.max(0.1, volume);
             }
+        } else {
+            // Set volume directly on desktop devices
+            audioPlayer.volume = volume;
+        }
+    }
+
+    canSetElementVolume() {
+        if (this._elementVolumeWritable === undefined) {
+            const probe = document.createElement('audio');
+            try {
+                probe.volume = 0.5;
+            } catch {
+                // ignore, handled by the read back below
+            }
+            this._elementVolumeWritable = probe.volume === 0.5;
+        }
+        return this._elementVolumeWritable;
+    }
+
+    getOutputAudioContext() {
+        if (!this._outputAudioContext) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (!AudioContextClass) return null;
+            this._outputAudioContext = new AudioContextClass();
+        }
+        if (this._outputAudioContext.state === 'suspended') {
+            this._outputAudioContext.resume().catch((err) => console.warn('Output AudioContext resume', err));
+        }
+        return this._outputAudioContext;
+    }
+
+    getOutputGainNode(elem, volume) {
+        if (elem._outputGainNode) return elem._outputGainNode;
+
+        // Web Audio routing is engaged lazily and only where HTMLMediaElement.volume is
+        // read-only (iOS), so the default full-volume output path stays untouched elsewhere.
+        if (volume >= 1 || elem._outputGainUnavailable || this.canSetElementVolume()) return null;
+
+        const audioContext = this.getOutputAudioContext();
+        if (!audioContext) {
+            elem._outputGainUnavailable = true;
+            return null;
+        }
+
+        try {
+            const source = audioContext.createMediaElementSource(elem);
+            const gainNode = audioContext.createGain();
+            source.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            elem._outputGainNode = gainNode;
+            return gainNode;
+        } catch (err) {
+            console.error('Create output gain node error', err);
+            elem._outputGainUnavailable = true;
+            return null;
         }
     }
 

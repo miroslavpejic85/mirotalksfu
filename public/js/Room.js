@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.60
+ * @version 2.3.61
  *
  */
 
@@ -209,6 +209,8 @@ const microphoneSelect = getId('microphoneSelect');
 const initMicrophoneSelect = getId('initMicrophoneSelect');
 const speakerSelect = getId('speakerSelect');
 const initSpeakerSelect = getId('initSpeakerSelect');
+const speakerVolume = getId('speakerVolume');
+const speakerVolumeValue = getId('speakerVolumeValue');
 
 const startVideoBtn = getId('startVideoButton');
 const startAudioBtn = getId('startAudioButton');
@@ -3236,6 +3238,13 @@ function handleSelects() {
         rc.changeAudioDestination();
         refreshLsDevices();
     };
+    speakerVolume.oninput = () => {
+        setSpeakerVolume(speakerVolume.value);
+    };
+    speakerVolume.onchange = () => {
+        localStorageSettings.speaker_volume = Number(speakerVolume.value);
+        lS.setSettings(localStorageSettings);
+    };
     switchDominantSpeakerFocus.onchange = async (e) => {
         localStorageSettings.dominant_speaker_focus = e.currentTarget.checked;
         lS.setSettings(localStorageSettings);
@@ -4109,6 +4118,8 @@ function loadSettingsFromLocalStorage() {
     switchDominantSpeakerFocus.checked = localStorageSettings.dominant_speaker_focus;
     switchNoiseSuppression.checked = localStorageSettings.mic_noise_suppression;
 
+    setSpeakerVolume(localStorageSettings.speaker_volume !== undefined ? localStorageSettings.speaker_volume : 100);
+
     screenOptimization.selectedIndex = localStorageSettings.screen_optimization;
     videoFps.selectedIndex = localStorageSettings.video_fps;
     screenFps.selectedIndex = localStorageSettings.screen_fps;
@@ -4645,6 +4656,20 @@ function setVideoButtonsDisabled(disabled) {
     stopVideoButton.disabled = disabled;
 }
 
+function setSpeakerVolume(value) {
+    const volume = Math.min(100, Math.max(0, Number(value) || 0));
+
+    if (speakerVolume) speakerVolume.value = volume;
+    if (speakerVolumeValue) speakerVolumeValue.textContent = `${volume}%`;
+
+    const menuSlider = getId('deviceMenuSpeakerVolume');
+    if (menuSlider) menuSlider.value = volume;
+    const menuValue = getId('deviceMenuSpeakerVolumeValue');
+    if (menuValue) menuValue.textContent = `${volume}%`;
+
+    if (rc) rc.setMasterOutputVolume(volume / 100);
+}
+
 async function playSpeaker(deviceId = null, name, path = '../sounds/') {
     const selectedDeviceId = deviceId || audioOutputSelect?.value;
     if (selectedDeviceId) {
@@ -4654,7 +4679,7 @@ async function playSpeaker(deviceId = null, name, path = '../sounds/') {
             if (typeof audioToPlay.setSinkId === 'function') {
                 await audioToPlay.setSinkId(selectedDeviceId);
             }
-            audioToPlay.volume = 0.5;
+            audioToPlay.volume = 0.5 * (rc ? rc.masterOutputVolume : 1);
             await audioToPlay.play();
         } catch (err) {
             console.error('Cannot play test sound:', err);
@@ -5269,9 +5294,43 @@ function setupQuickDeviceSwitchDropdowns() {
             btn.disabled = true;
             btn.textContent = 'Speaker selection not supported';
             audioMenu.appendChild(btn);
-            return;
+        } else {
+            appendSelectOptions(audioMenu, speakerSelect, 'No speakers found', buildAudioMenu);
         }
-        appendSelectOptions(audioMenu, speakerSelect, 'No speakers found', buildAudioMenu);
+
+        // Master output volume
+        const volumeRow = document.createElement('div');
+        volumeRow.className = 'device-menu-volume-row';
+
+        const volumeIcon = document.createElement('i');
+        volumeIcon.className = 'fas fa-volume-high';
+        volumeRow.appendChild(volumeIcon);
+
+        const volumeSlider = document.createElement('input');
+        volumeSlider.id = 'deviceMenuSpeakerVolume';
+        volumeSlider.className = 'output-volume-slider';
+        volumeSlider.type = 'range';
+        volumeSlider.min = '0';
+        volumeSlider.max = '100';
+        volumeSlider.step = '1';
+        volumeSlider.value = speakerVolume ? speakerVolume.value : 100;
+        volumeRow.appendChild(volumeSlider);
+
+        const volumeValue = document.createElement('span');
+        volumeValue.id = 'deviceMenuSpeakerVolumeValue';
+        volumeValue.className = 'output-volume-value';
+        volumeValue.textContent = `${volumeSlider.value}%`;
+        volumeRow.appendChild(volumeValue);
+
+        volumeSlider.addEventListener('input', () => {
+            setSpeakerVolume(volumeSlider.value);
+        });
+        volumeSlider.addEventListener('change', () => {
+            localStorageSettings.speaker_volume = Number(volumeSlider.value);
+            lS.setSettings(localStorageSettings);
+        });
+
+        audioMenu.appendChild(volumeRow);
 
         // Add action buttons
         appendMenuDivider(audioMenu);
@@ -7807,7 +7866,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.60',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.61',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -788,6 +788,25 @@
                             </button>
                             <br />
                         </div>
+                        <div id="speakerVolumeDiv">
+                            <div class="title">
+                                <i class="fas fa-volume-high"></i>
+                                <p>Output volume:</p>
+                            </div>
+                            <div class="output-volume-row">
+                                <input
+                                    id="speakerVolume"
+                                    class="output-volume-slider"
+                                    type="range"
+                                    min="0"
+                                    max="100"
+                                    step="1"
+                                    value="100"
+                                />
+                                <span id="speakerVolumeValue" class="output-volume-value">100%</span>
+                            </div>
+                            <br />
+                        </div>
                         <div id="pushToTalkDiv" class="hidden">
                             <hr />
                             <table class="settingsTable">
