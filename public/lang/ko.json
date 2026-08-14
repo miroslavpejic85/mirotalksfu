@@ -517,7 +517,10 @@
         "Open Virtual Background": "가상 배경 열기",
         "Open Video AI": "Video AI 열기",
         "Private assistant replies": "비공개 어시스턴트 응답",
-        "Assistant": "어시스턴트"
+        "Assistant": "어시스턴트",
+        "View": "보기",
+        "Pin video": "비디오 고정",
+        "Unpin video": "비디오 고정 해제"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "회의를 시작하려면 발표자가 필요합니다. 나중에 다시 참가해 주세요.",
@@ -607,7 +610,7 @@
         "Unmute": "음소거 해제",
         "Unmute Video": "비디오 음소거 해제",
         "Username already in use": "사용자 이름이 이미 사용 중입니다",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "화이트보드 단축키",
         "Would you like to continue the room broadcast?": "방 방송을 계속하시겠습니까?",
         "Yes": "예",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList 오류:",
         "Video AI session time limit reached": "Video AI 세션 시간 제한에 도달했습니다",
         "Video AI streaming started": "Video AI 스트리밍이 시작되었습니다",
-        "You cannot send files to yourself.": "자신에게 파일을 보낼 수 없습니다."
+        "You cannot send files to yourself.": "자신에게 파일을 보낼 수 없습니다.",
+        "Pin video is not supported on mobile devices": "모바일 기기에서는 비디오 고정이 지원되지 않습니다",
+        "No video available to pin for this participant": "이 참가자에 대해 고정할 수 있는 비디오가 없습니다"
     }
 }

@@ -517,7 +517,10 @@
         "Open Virtual Background": "Virtuellen Hintergrund öffnen",
         "Open Video AI": "Video-KI öffnen",
         "Private assistant replies": "Private Assistentenantworten",
-        "Assistant": "Assistent"
+        "Assistant": "Assistent",
+        "View": "Ansicht",
+        "Pin video": "Video anheften",
+        "Unpin video": "Video lösen"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Zum Starten der Besprechung ist ein Moderator erforderlich. Bitte versuchen Sie später erneut beizutreten.",
@@ -607,7 +610,7 @@
         "Unmute": "Stummschaltung aufheben",
         "Unmute Video": "Ton des Videos aktivieren",
         "Username already in use": "Benutzername bereits vergeben",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "Whiteboard-Tastenkürzel",
         "Would you like to continue the room broadcast?": "Möchten Sie die Raumübertragung fortsetzen?",
         "Yes": "Ja",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video-AI-getAvatarList-Fehler:",
         "Video AI session time limit reached": "Zeitlimit der Video-AI-Sitzung erreicht",
         "Video AI streaming started": "Video-AI-Streaming gestartet",
-        "You cannot send files to yourself.": "Sie können keine Dateien an sich selbst senden."
+        "You cannot send files to yourself.": "Sie können keine Dateien an sich selbst senden.",
+        "Pin video is not supported on mobile devices": "Video anheften wird auf Mobilgeräten nicht unterstützt",
+        "No video available to pin for this participant": "Für diesen Teilnehmer ist kein Video zum Anheften verfügbar"
     }
 }

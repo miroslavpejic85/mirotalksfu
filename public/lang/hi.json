@@ -517,7 +517,10 @@
         "Open Virtual Background": "वर्चुअल बैकग्राउंड खोलें",
         "Open Video AI": "वीडियो AI खोलें",
         "Private assistant replies": "निजी सहायक उत्तर",
-        "Assistant": "सहायक"
+        "Assistant": "सहायक",
+        "View": "दृश्य",
+        "Pin video": "वीडियो पिन करें",
+        "Unpin video": "वीडियो अनपिन करें"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "मीटिंग शुरू करने के लिए एक प्रस्तुतकर्ता आवश्यक है। कृपया बाद में फिर से शामिल होने का प्रयास करें।",
@@ -607,7 +610,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList त्रुटि:",
         "Video AI session time limit reached": "Video AI सत्र की समय सीमा पर पहुँच गए",
         "Video AI streaming started": "Video AI स्ट्रीमिंग शुरू हुई",
-        "You cannot send files to yourself.": "आप स्वयं को फ़ाइलें नहीं भेज सकते।"
+        "You cannot send files to yourself.": "आप स्वयं को फ़ाइलें नहीं भेज सकते।",
+        "Pin video is not supported on mobile devices": "मोबाइल डिवाइस पर वीडियो पिन करना समर्थित नहीं है",
+        "No video available to pin for this participant": "इस प्रतिभागी के लिए पिन करने हेतु कोई वीडियो उपलब्ध नहीं है"
     }
 }

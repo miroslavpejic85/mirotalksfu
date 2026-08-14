@@ -517,7 +517,10 @@
         "Open Virtual Background": "فتح الخلفية الافتراضية",
         "Open Video AI": "فتح الفيديو بالذكاء الاصطناعي",
         "Private assistant replies": "ردود المساعد الخاصة",
-        "Assistant": "المساعد"
+        "Assistant": "المساعد",
+        "View": "عرض",
+        "Pin video": "تثبيت الفيديو",
+        "Unpin video": "إلغاء تثبيت الفيديو"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "يلزم وجود مقدّم عرض لبدء الاجتماع. يُرجى محاولة الانضمام مرة أخرى لاحقًا.",
@@ -607,7 +610,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "خطأ getAvatarList في Video AI:",
         "Video AI session time limit reached": "تم بلوغ الحد الزمني لجلسة Video AI",
         "Video AI streaming started": "بدأ بث Video AI",
-        "You cannot send files to yourself.": "لا يمكنك إرسال ملفات إلى نفسك."
+        "You cannot send files to yourself.": "لا يمكنك إرسال ملفات إلى نفسك.",
+        "Pin video is not supported on mobile devices": "تثبيت الفيديو غير مدعوم على الأجهزة المحمولة",
+        "No video available to pin for this participant": "لا يوجد فيديو متاح لتثبيته لهذا المشارك"
     }
 }

@@ -517,7 +517,10 @@
         "Open Virtual Background": "仮想背景を開く",
         "Open Video AI": "ビデオAIを開く",
         "Private assistant replies": "アシスタントのプライベートな返信",
-        "Assistant": "アシスタント"
+        "Assistant": "アシスタント",
+        "View": "表示",
+        "Pin video": "ビデオをピン留め",
+        "Unpin video": "ビデオのピン留めを解除"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "会議を開始するには発表者が必要です。後でもう一度参加を試みてください。",
@@ -607,7 +610,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList エラー：",
         "Video AI session time limit reached": "Video AI セッションの制限時間に達しました",
         "Video AI streaming started": "Video AI のストリーミングを開始しました",
-        "You cannot send files to yourself.": "自分自身にファイルを送信することはできません。"
+        "You cannot send files to yourself.": "自分自身にファイルを送信することはできません。",
+        "Pin video is not supported on mobile devices": "モバイル端末ではビデオのピン留めはサポートされていません",
+        "No video available to pin for this participant": "この参加者にピン留めできるビデオがありません"
     }
 }

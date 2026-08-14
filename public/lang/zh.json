@@ -517,7 +517,10 @@
         "Open Virtual Background": "打开虚拟背景",
         "Open Video AI": "打开视频 AI",
         "Private assistant replies": "私人助手回复",
-        "Assistant": "助手"
+        "Assistant": "助手",
+        "View": "视图",
+        "Pin video": "固定视频",
+        "Unpin video": "取消固定视频"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "启动会议需要一位演示者。请稍后再尝试加入。",
@@ -607,7 +610,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList 错误：",
         "Video AI session time limit reached": "已达到 Video AI 会话时间限制",
         "Video AI streaming started": "Video AI 推流已开始",
-        "You cannot send files to yourself.": "您不能向自己发送文件。"
+        "You cannot send files to yourself.": "您不能向自己发送文件。",
+        "Pin video is not supported on mobile devices": "移动设备不支持固定视频",
+        "No video available to pin for this participant": "该参与者没有可固定的视频"
     }
 }

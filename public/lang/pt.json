@@ -517,7 +517,10 @@
         "Open Virtual Background": "Abrir fundo virtual",
         "Open Video AI": "Abrir Video AI",
         "Private assistant replies": "Respostas privadas do assistente",
-        "Assistant": "Assistente"
+        "Assistant": "Assistente",
+        "View": "Visualização",
+        "Pin video": "Fixar vídeo",
+        "Unpin video": "Desafixar vídeo"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "É necessário um apresentador para iniciar a reunião. Tente entrar novamente mais tarde.",
@@ -607,7 +610,7 @@
         "Unmute": "Tirar o silêncio",
         "Unmute Video": "Ativar o som do vídeo",
         "Username already in use": "Nome de usuário já em uso",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "Atalhos do quadro branco",
         "Would you like to continue the room broadcast?": "Deseja continuar a transmissão da sala?",
         "Yes": "Sim",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Erro getAvatarList do Video AI:",
         "Video AI session time limit reached": "Limite de tempo da sessão do Video AI atingido",
         "Video AI streaming started": "Transmissão do Video AI iniciada",
-        "You cannot send files to yourself.": "Você não pode enviar arquivos para si mesmo."
+        "You cannot send files to yourself.": "Você não pode enviar arquivos para si mesmo.",
+        "Pin video is not supported on mobile devices": "Fixar vídeo não é suportado em dispositivos móveis",
+        "No video available to pin for this participant": "Não há vídeo disponível para fixar deste participante"
     }
 }

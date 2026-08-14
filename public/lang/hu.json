@@ -517,7 +517,10 @@
         "Open Virtual Background": "Virtuális háttér megnyitása",
         "Open Video AI": "Videó AI megnyitása",
         "Private assistant replies": "Privát asszisztensválaszok",
-        "Assistant": "Asszisztens"
+        "Assistant": "Asszisztens",
+        "View": "Nézet",
+        "Pin video": "Videó rögzítése",
+        "Unpin video": "Videó rögzítésének feloldása"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "A megbeszélés elindításához előadó szükséges. Kérjük, próbálj újra csatlakozni később.",
@@ -607,7 +610,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList hiba:",
         "Video AI session time limit reached": "A Video AI munkamenet elérte az időkorlátot",
         "Video AI streaming started": "A Video AI közvetítés elindult",
-        "You cannot send files to yourself.": "Nem küldhetsz fájlokat saját magadnak."
+        "You cannot send files to yourself.": "Nem küldhetsz fájlokat saját magadnak.",
+        "Pin video is not supported on mobile devices": "A videó rögzítése nem támogatott mobileszközökön",
+        "No video available to pin for this participant": "Ehhez a résztvevőhöz nincs rögzíthető videó"
     }
 }

@@ -517,7 +517,10 @@
         "Open Virtual Background": "Otvori virtuelnu pozadinu",
         "Open Video AI": "Otvori Video AI",
         "Private assistant replies": "Privatni odgovori asistenta",
-        "Assistant": "Asistent"
+        "Assistant": "Asistent",
+        "View": "Prikaz",
+        "Pin video": "Zakači video",
+        "Unpin video": "Otkači video"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Za početak sastanka potreban je voditelj. Pokušajte da se pridružite ponovo kasnije.",
@@ -607,7 +610,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Greška Video AI getAvatarList:",
         "Video AI session time limit reached": "Dostignuto vremensko ograničenje Video AI sesije",
         "Video AI streaming started": "Video AI striming je započet",
-        "You cannot send files to yourself.": "Ne možete slati datoteke sebi."
+        "You cannot send files to yourself.": "Ne možete slati datoteke sebi.",
+        "Pin video is not supported on mobile devices": "Kačenje videa nije podržano na mobilnim uređajima",
+        "No video available to pin for this participant": "Nema dostupnog videa za kačenje za ovog učesnika"
     }
 }

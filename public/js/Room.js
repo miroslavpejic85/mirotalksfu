@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.57
+ * @version 2.3.58
  *
  */
 
@@ -85,6 +85,7 @@ const _PEER = {
     sendFile: '<i class="fas fa-upload"></i>',
     sendMsg: '<i class="fas fa-paper-plane"></i>',
     sendVideo: '<i class="fab fa-youtube"></i>',
+    pinPeer: '<i class="fas fa-map-pin"></i>',
 };
 
 const initUser = document.getElementById('initUser');
@@ -6711,6 +6712,12 @@ function getParticipantsList(peers) {
         buttonsHtml: publicButtonsHtml,
     });
 
+    // Peer currently pinned in the video grid (if any)
+    const pinnedPeerId =
+        rc.isVideoPinned && rc.pinnedVideoPlayerId
+            ? rc.getId(rc.pinnedVideoPlayerId)?.getAttribute('name') || null
+            : null;
+
     // PEERS IN THE CURRENT ROOM
     for (const peer of Array.from(peers.keys())) {
         const peer_info = peers.get(peer).peer_info;
@@ -6732,11 +6739,26 @@ function getParticipantsList(peers) {
 
         const peer_chat_active = rc.chatPeerId === peer_id ? ' active' : '';
 
+        const peer_pinned = pinnedPeerId === peer_id;
+
+        const pinMenuItem = renderParticipantMenuItem(
+            renderParticipantActionButton({
+                buttonClass: 'btn-sm ml5',
+                buttonId: `${peer_id}___pPin`,
+                onClick: `rc.togglePinPeer('${peer_id}')`,
+                iconHtml: _PEER.pinPeer,
+                label: peer_pinned ? 'Unpin video' : 'Pin video',
+            })
+        );
+
         // NOT ME
         if (socket.id !== peer_id) {
             // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
                 let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                menuItems += renderParticipantMenuGroup('View');
+                menuItems += pinMenuItem;
 
                 menuItems += renderParticipantMenuGroup('Moderation');
 
@@ -6872,6 +6894,9 @@ function getParticipantsList(peers) {
                 // NO ROOM BROADCASTING
                 if (!isBroadcastingEnabled) {
                     let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                    menuItems += renderParticipantMenuGroup('View');
+                    menuItems += pinMenuItem;
 
                     menuItems += renderParticipantMenuGroup('Share');
 
@@ -7782,7 +7807,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.57',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.58',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

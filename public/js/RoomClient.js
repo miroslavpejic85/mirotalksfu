@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.57
+ * @version 2.3.58
  *
  */
 
@@ -12114,6 +12114,33 @@ class RoomClient {
             if (video.getAttribute('name') === peerId) return video;
         }
         return null;
+    }
+
+    // ####################################################
+    // PIN PEER FROM PARTICIPANTS LIST
+    // ####################################################
+
+    togglePinPeer(peerId) {
+        if (this.isMobileDevice) {
+            return this.userLog('info', 'Pin video is not supported on mobile devices', 'top-end');
+        }
+
+        const videoEl = this.getVideoElementByPeerId(peerId);
+        const btnPn = videoEl ? this.getId(`${videoEl.id}__pin`) : null;
+
+        if (!btnPn) {
+            return this.userLog('info', 'No video available to pin for this participant', 'top-end');
+        }
+
+        // Unpin the currently pinned video, otherwise pinning another one is rejected
+        if (this.isVideoPinned && this.pinnedVideoPlayerId !== videoEl.id) {
+            const pinnedBtn = this.getId(`${this.pinnedVideoPlayerId}__pin`);
+            if (pinnedBtn) pinnedBtn.click();
+        }
+
+        btnPn.click();
+
+        if (isParticipantsListOpen) getRoomParticipants();
     }
 
     // ####################################################

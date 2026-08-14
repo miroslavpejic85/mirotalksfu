@@ -517,7 +517,10 @@
         "Open Virtual Background": "Sanal arka planı aç",
         "Open Video AI": "Video AI'yı aç",
         "Private assistant replies": "Özel asistan yanıtları",
-        "Assistant": "Asistan"
+        "Assistant": "Asistan",
+        "View": "Görünüm",
+        "Pin video": "Videoyu sabitle",
+        "Unpin video": "Video sabitlemesini kaldır"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Toplantıyı başlatmak için bir sunum yapan gereklidir. Lütfen daha sonra tekrar katılmayı deneyin.",
@@ -607,7 +610,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.3.57": "WebRTC SFU v2.3.57",
+        "WebRTC SFU v2.3.58": "WebRTC SFU v2.3.58",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",
@@ -738,6 +741,8 @@
         "Video AI getAvatarList error:": "Video AI getAvatarList hatası:",
         "Video AI session time limit reached": "Video AI oturum süre sınırına ulaşıldı",
         "Video AI streaming started": "Video AI yayını başladı",
-        "You cannot send files to yourself.": "Kendinize dosya gönderemezsiniz."
+        "You cannot send files to yourself.": "Kendinize dosya gönderemezsiniz.",
+        "Pin video is not supported on mobile devices": "Video sabitleme mobil cihazlarda desteklenmiyor",
+        "No video available to pin for this participant": "Bu katılımcı için sabitlenecek video yok"
     }
 }
