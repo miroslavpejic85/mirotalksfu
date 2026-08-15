@@ -2402,6 +2402,42 @@ body {
     width: 100%;
 }
 
+.speaker-select-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.speaker-select-row select,
+#mySettings .speaker-select-row select {
+    flex: 1 1 auto;
+    min-width: 0;
+    margin: 0;
+}
+
+.speaker-select-row .btn-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: auto;
+    height: 40px;
+    margin: 0;
+    padding: 0 14px;
+    line-height: 1;
+    white-space: nowrap;
+    border: var(--border);
+    border-radius: var(--select-border-radius);
+}
+
+.speaker-select-row .btn-custom p {
+    margin: 0;
+    line-height: 1;
+}
+
 .output-volume-slider {
     flex: 1;
     min-width: 0;
