@@ -4545,24 +4545,28 @@ function handleDropdownHover(dropdownElement = null) {
 
         let timeoutId;
 
-        dropdown.addEventListener('mouseenter', () => {
-            clearTimeout(timeoutId);
-            const bsDropdown = bootstrap.Dropdown.getInstance(toggle) || new bootstrap.Dropdown(toggle);
-            bsDropdown.show();
-        });
-
-        dropdown.addEventListener('mouseleave', () => {
+        const hideDropdown = () => {
             timeoutId = setTimeout(() => {
                 const bsDropdown = bootstrap.Dropdown.getInstance(toggle);
                 if (bsDropdown) {
                     bsDropdown.hide();
                 }
             }, 200);
+        };
+
+        dropdown.addEventListener('mouseenter', () => {
+            clearTimeout(timeoutId);
+            const bsDropdown = bootstrap.Dropdown.getInstance(toggle) || new bootstrap.Dropdown(toggle);
+            bsDropdown.show();
         });
+
+        dropdown.addEventListener('mouseleave', hideDropdown);
 
         menu.addEventListener('mouseenter', () => {
             clearTimeout(timeoutId);
         });
+
+        menu.addEventListener('mouseleave', hideDropdown);
 
         toggle.addEventListener('click', (e) => {
             e.stopPropagation();
