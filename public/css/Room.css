@@ -1886,7 +1886,7 @@ body {
     min-width: 0 !important;
     max-width: calc(100vw - 30px) !important;
     max-height: min(70vh, 520px) !important;
-    padding: 8px !important;
+    padding: 8px 8px 12px !important;
     z-index: 1085 !important;
 }
 
@@ -2011,7 +2011,9 @@ body {
 }
 
 .participant-menu-group-label {
-    padding: 8px 12px 4px !important;
+    margin: 8px 6px 4px;
+    padding: 18px 6px 4px !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
     color: rgba(255, 255, 255, 0.45);
     font-size: 0.7em;
     font-weight: 700;
@@ -2020,7 +2022,9 @@ body {
 }
 
 .participant-menu-header + .participant-menu-group-label {
+    margin-top: 0;
     padding-top: 4px !important;
+    border-top: none;
 }
 
 .participant-list-dropdown-slot,
