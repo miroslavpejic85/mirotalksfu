@@ -521,7 +521,10 @@
         "Assistant": "Asistent",
         "View": "Prikaz",
         "Pin video": "Zakači video",
-        "Unpin video": "Otkači video"
+        "Unpin video": "Otkači video",
+        "Show camera-off": "Prikaži isključene kamere",
+        "Hide from grid": "Sakrij iz mreže",
+        "Show in grid": "Prikaži u mreži"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Za početak sastanka potreban je voditelj. Pokušajte da se pridružite ponovo kasnije.",
@@ -611,7 +614,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

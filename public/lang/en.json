@@ -521,7 +521,10 @@
         "Assistant": "Assistant",
         "View": "View",
         "Pin video": "Pin video",
-        "Unpin video": "Unpin video"
+        "Unpin video": "Unpin video",
+        "Show camera-off": "Show camera-off",
+        "Hide from grid": "Hide from grid",
+        "Show in grid": "Show in grid"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "A presenter is required to start the meeting. Please try joining again later.",
@@ -611,7 +614,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",

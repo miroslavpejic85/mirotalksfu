@@ -521,7 +521,10 @@
         "Assistant": "アシスタント",
         "View": "表示",
         "Pin video": "ビデオをピン留め",
-        "Unpin video": "ビデオのピン留めを解除"
+        "Unpin video": "ビデオのピン留めを解除",
+        "Show camera-off": "カメラオフを表示",
+        "Hide from grid": "グリッドから非表示",
+        "Show in grid": "グリッドに表示"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "会議を開始するには発表者が必要です。後でもう一度参加を試みてください。",
@@ -611,7 +614,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",

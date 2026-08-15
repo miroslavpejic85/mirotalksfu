@@ -521,7 +521,10 @@
         "Assistant": "助手",
         "View": "视图",
         "Pin video": "固定视频",
-        "Unpin video": "取消固定视频"
+        "Unpin video": "取消固定视频",
+        "Show camera-off": "显示已关闭的摄像头",
+        "Hide from grid": "从网格中隐藏",
+        "Show in grid": "在网格中显示"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "启动会议需要一位演示者。请稍后再尝试加入。",
@@ -611,7 +614,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

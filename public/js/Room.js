@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.61
+ * @version 2.3.62
  *
  */
 
@@ -117,6 +117,8 @@ const sinkId = 'sinkId' in HTMLMediaElement.prototype;
 const lS = new LocalStorage();
 
 const localStorageSettings = lS.getLocalStorageSettings() || lS.SFU_SETTINGS;
+
+const locallyHiddenPeerIds = new Set();
 
 const localStorageDevices = lS.getLocalStorageDevices() || lS.LOCAL_STORAGE_DEVICES;
 
@@ -260,6 +262,7 @@ let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)'
 let rc = null;
 let producer = null;
 let participantsCount = 0;
+let showCameraOffParticipants = true;
 let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
@@ -6568,6 +6571,18 @@ function getParticipantsList(peers) {
         });
     }
 
+    function renderParticipantSwitch({ switchId, onChange, iconHtml, label, checked }) {
+        return renderRoomTemplate('participantListSwitchTemplate', {
+            text: { label },
+            html: { iconHtml },
+            attrs: {
+                switchId,
+                onChange,
+                checked: checked ? '' : undefined,
+            },
+        });
+    }
+
     function renderParticipantMenuHeader(title, avatarSrc) {
         return renderRoomTemplate('participantListMenuHeaderTemplate', {
             text: { title },
@@ -6664,14 +6679,24 @@ function getParticipantsList(peers) {
     // ALL
     let publicDropdownHtml = '';
     let publicButtonsHtml = '';
+    let publicMenuItems = renderParticipantMenuHeader('Public chat', image.all);
+
+    publicMenuItems += renderParticipantMenuGroup('View');
+    publicMenuItems += renderParticipantMenuItem(
+        renderParticipantSwitch({
+            switchId: 'showCameraOffParticipantsSwitch',
+            onChange: 'toggleCameraOffParticipantsVisibility(this.checked)',
+            iconHtml: _PEER.videoOff,
+            label: 'Show camera-off',
+            checked: showCameraOffParticipants,
+        })
+    );
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
     if (!isRulesActive || isPresenter) {
-        let menuItems = renderParticipantMenuHeader('Public chat', image.all);
+        publicMenuItems += renderParticipantMenuGroup('Moderation');
 
-        menuItems += renderParticipantMenuGroup('Moderation');
-
-        menuItems += renderParticipantMenuItem(
+        publicMenuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
                 buttonId: 'muteAllParticipantsButton',
                 onClick: `rc.peerAction('me','${socket.id}','mute',true,true)`,
@@ -6679,7 +6704,7 @@ function getParticipantsList(peers) {
                 label: 'Mute all participants',
             })
         );
-        menuItems += renderParticipantMenuItem(
+        publicMenuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
                 buttonId: 'hideAllParticipantsButton',
                 onClick: `rc.peerAction('me','${socket.id}','hide',true,true)`,
@@ -6687,7 +6712,7 @@ function getParticipantsList(peers) {
                 label: 'Hide all participants',
             })
         );
-        menuItems += renderParticipantMenuItem(
+        publicMenuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
                 buttonId: 'stopAllParticipantsButton',
                 onClick: `rc.peerAction('me','${socket.id}','stop',true,true)`,
@@ -6696,10 +6721,10 @@ function getParticipantsList(peers) {
             })
         );
 
-        menuItems += renderParticipantMenuGroup('Share');
+        publicMenuItems += renderParticipantMenuGroup('Share');
 
         if (BUTTONS.participantsList.sendFileAllButton) {
-            menuItems += renderParticipantMenuItem(
+            publicMenuItems += renderParticipantMenuItem(
                 renderParticipantActionButton({
                     buttonClass: 'btn-sm ml5',
                     buttonId: 'sendAllButton',
@@ -6710,7 +6735,7 @@ function getParticipantsList(peers) {
             );
         }
 
-        menuItems += renderParticipantMenuItem(
+        publicMenuItems += renderParticipantMenuItem(
             renderParticipantActionButton({
                 buttonClass: 'btn-sm ml5',
                 buttonId: 'sendVideoToAll',
@@ -6721,8 +6746,8 @@ function getParticipantsList(peers) {
         );
 
         if (BUTTONS.participantsList.ejectAllButton) {
-            menuItems += renderParticipantMenuGroup('Danger zone');
-            menuItems += renderParticipantMenuItem(
+            publicMenuItems += renderParticipantMenuGroup('Danger zone');
+            publicMenuItems += renderParticipantMenuItem(
                 renderParticipantActionButton({
                     buttonClass: 'btn-sm ml5 participant-action-danger',
                     buttonId: 'ejectAllButton',
@@ -6733,11 +6758,6 @@ function getParticipantsList(peers) {
             );
         }
 
-        publicDropdownHtml = renderParticipantDropdown(
-            `${socket.id}-chatDropDownMenu`,
-            menuItems,
-            'Actions for all participants'
-        );
         publicButtonsHtml = renderParticipantButtons(
             renderParticipantActionButton({
                 buttonId: 'muteAllButton',
@@ -6756,6 +6776,12 @@ function getParticipantsList(peers) {
                 })
         );
     }
+
+    publicDropdownHtml = renderParticipantDropdown(
+        `${socket.id}-chatDropDownMenu`,
+        publicMenuItems,
+        'Actions for all participants'
+    );
 
     li += renderParticipantItem({
         itemId: 'all',
@@ -6799,6 +6825,7 @@ function getParticipantsList(peers) {
         const peer_chat_active = rc.chatPeerId === peer_id ? ' active' : '';
 
         const peer_pinned = pinnedPeerId === peer_id;
+        const peer_hidden = locallyHiddenPeerIds.has(peer_id);
 
         const pinMenuItem = renderParticipantMenuItem(
             renderParticipantActionButton({
@@ -6807,6 +6834,15 @@ function getParticipantsList(peers) {
                 onClick: `rc.togglePinPeer('${peer_id}')`,
                 iconHtml: _PEER.pinPeer,
                 label: peer_pinned ? 'Unpin video' : 'Pin video',
+            })
+        );
+        const hideFromGridMenuItem = renderParticipantMenuItem(
+            renderParticipantActionButton({
+                buttonClass: 'btn-sm ml5',
+                buttonId: `${peer_id}___pGridVisibility`,
+                onClick: `toggleParticipantGridVisibility('${peer_id}')`,
+                iconHtml: peer_hidden ? _PEER.videoOn : _PEER.videoOff,
+                label: peer_hidden ? 'Show in grid' : 'Hide from grid',
             })
         );
 
@@ -6818,6 +6854,7 @@ function getParticipantsList(peers) {
 
                 menuItems += renderParticipantMenuGroup('View');
                 menuItems += pinMenuItem;
+                menuItems += hideFromGridMenuItem;
 
                 menuItems += renderParticipantMenuGroup('Moderation');
 
@@ -6948,15 +6985,14 @@ function getParticipantsList(peers) {
                 });
             } else {
                 // GUEST USER
-                let dropdownHtml = '';
+                let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                menuItems += renderParticipantMenuGroup('View');
+                menuItems += pinMenuItem;
+                menuItems += hideFromGridMenuItem;
 
                 // NO ROOM BROADCASTING
                 if (!isBroadcastingEnabled) {
-                    let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
-
-                    menuItems += renderParticipantMenuGroup('View');
-                    menuItems += pinMenuItem;
-
                     menuItems += renderParticipantMenuGroup('Share');
 
                     if (BUTTONS.participantsList.sendFileButton) {
@@ -6980,13 +7016,13 @@ function getParticipantsList(peers) {
                             label: 'Share Audio/Video',
                         })
                     );
-
-                    dropdownHtml = renderParticipantDropdown(
-                        `${peer_id}-chatDropDownMenu`,
-                        menuItems,
-                        `Actions for ${peer_name_limited}`
-                    );
                 }
+
+                const dropdownHtml = renderParticipantDropdown(
+                    `${peer_id}-chatDropDownMenu`,
+                    menuItems,
+                    `Actions for ${peer_name_limited}`
+                );
 
                 let buttons =
                     renderParticipantActionButton({
@@ -7052,6 +7088,49 @@ function setParticipantsTippy(peers) {
 
 function refreshParticipantsCount(count, adapt = true) {
     if (adapt) adaptAspectRatio(count);
+}
+
+function toggleParticipantGridVisibility(peerId) {
+    const shouldHide = !locallyHiddenPeerIds.has(peerId);
+
+    if (shouldHide) {
+        const focusedTile = Array.from(videoMediaContainer.querySelectorAll('.Camera[focus-mode]')).find(
+            (camera) => camera.dataset.peerId === peerId
+        );
+        if (focusedTile) rc.toggleFocusMode(focusedTile.id);
+
+        const pinnedVideo = rc.isVideoPinned && rc.pinnedVideoPlayerId ? rc.getId(rc.pinnedVideoPlayerId) : null;
+        if (pinnedVideo?.getAttribute('name') === peerId) {
+            rc.getId(`${pinnedVideo.id}__pin`)?.click();
+        }
+
+        locallyHiddenPeerIds.add(peerId);
+    } else {
+        locallyHiddenPeerIds.delete(peerId);
+    }
+
+    applyParticipantGridVisibility();
+    getRoomParticipants();
+}
+
+function toggleCameraOffParticipantsVisibility(showCameraOff) {
+    showCameraOffParticipants = showCameraOff;
+    applyParticipantGridVisibility();
+}
+
+function applyParticipantGridVisibility() {
+    const focusModeTile = isHideALLVideosActive ? videoMediaContainer.querySelector('[focus-mode]') : null;
+
+    videoMediaContainer.querySelectorAll('.Camera').forEach((camera) => {
+        const peerId = camera.dataset.peerId;
+        const isCameraOff = camera.dataset.cameraOff === 'true';
+        const hiddenBySelfView = isHideMeActive && peerId === rc.peer_id;
+        const hiddenByPreference = locallyHiddenPeerIds.has(peerId) || (!showCameraOffParticipants && isCameraOff);
+        const hiddenByFocusMode = focusModeTile && camera !== focusModeTile;
+        camera.style.display = hiddenBySelfView || hiddenByPreference || hiddenByFocusMode ? 'none' : 'block';
+    });
+
+    handleAspectRatio();
 }
 
 function getParticipantAvatar(peerName, peerAvatar = false) {
@@ -7374,8 +7453,9 @@ function updateThemeCardsDisabled() {
 // ####################################################
 
 function handleAspectRatio() {
-    if (videoMediaContainer.childElementCount > 1) {
-        adaptAspectRatio(videoMediaContainer.childElementCount);
+    const visibleTileCount = getVisibleCameraElements().length;
+    if (visibleTileCount > 1) {
+        adaptAspectRatio(visibleTileCount);
     } else {
         resizeVideoMedia();
     }
@@ -7866,7 +7946,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.61',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.62',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

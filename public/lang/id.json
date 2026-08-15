@@ -521,7 +521,10 @@
         "Assistant": "Asisten",
         "View": "Tampilan",
         "Pin video": "Sematkan video",
-        "Unpin video": "Lepas sematan video"
+        "Unpin video": "Lepas sematan video",
+        "Show camera-off": "Tampilkan kamera mati",
+        "Hide from grid": "Sembunyikan dari kisi",
+        "Show in grid": "Tampilkan di kisi"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Presenter diperlukan untuk memulai rapat. Silakan coba bergabung lagi nanti.",
@@ -611,7 +614,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",

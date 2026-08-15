@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.61
+ * @version 2.3.62
  *
  */
 
@@ -3123,7 +3123,7 @@ class RoomClient {
         hideMeIcon.className = isHideMeActive ? html.hideMeOn : html.hideMeOff;
         hideMeIcon.style.color = isHideMeActive ? 'red' : 'white';
         isHideMeActive ? this.sound('left') : this.sound('joined');
-        resizeVideoMedia();
+        typeof applyParticipantGridVisibility === 'function' ? applyParticipantGridVisibility() : resizeVideoMedia();
     }
 
     producerExist(type) {
@@ -3161,6 +3161,8 @@ class RoomClient {
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
+                d.dataset.peerId = this.peer_id;
+                d.dataset.cameraOff = 'false';
 
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
@@ -3287,6 +3289,7 @@ class RoomClient {
                 vb.addEventListener('click', (e) => e.stopPropagation());
 
                 this.videoMediaContainer.appendChild(d);
+                if (typeof applyParticipantGridVisibility === 'function') applyParticipantGridVisibility();
 
                 await this.attachMediaStream(elem, stream, type, 'Producer');
 
@@ -3918,6 +3921,8 @@ class RoomClient {
                 d = document.createElement('div');
                 d.className = 'Camera';
                 d.id = id + '__video';
+                d.dataset.peerId = remotePeerId;
+                d.dataset.cameraOff = 'false';
 
                 elem = document.createElement('video');
                 elem.setAttribute('id', id);
@@ -4080,6 +4085,8 @@ class RoomClient {
                     });
                 }
 
+                if (typeof applyParticipantGridVisibility === 'function') applyParticipantGridVisibility();
+
                 if (!this.isMobileDevice) {
                     this.setTippy(pn.id, 'Toggle Pin', 'bottom');
                     this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
@@ -4237,6 +4244,8 @@ class RoomClient {
         d = document.createElement('div');
         d.className = 'Camera';
         d.id = peer_id + '__videoOff';
+        d.dataset.peerId = peer_id;
+        d.dataset.cameraOff = 'true';
 
         vb = document.createElement('div');
         vb.id = peer_id + '__vb';
@@ -4327,6 +4336,7 @@ class RoomClient {
         vb.addEventListener('click', (e) => e.stopPropagation());
 
         this.videoMediaContainer.appendChild(d);
+        if (typeof applyParticipantGridVisibility === 'function') applyParticipantGridVisibility();
         BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
 
         if (remotePeer) {

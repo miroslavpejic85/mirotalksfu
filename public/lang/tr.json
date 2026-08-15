@@ -521,7 +521,10 @@
         "Assistant": "Asistan",
         "View": "Görünüm",
         "Pin video": "Videoyu sabitle",
-        "Unpin video": "Video sabitlemesini kaldır"
+        "Unpin video": "Video sabitlemesini kaldır",
+        "Show camera-off": "Kapalı kameraları göster",
+        "Hide from grid": "Izgaradan gizle",
+        "Show in grid": "Izgarada göster"
     },
     "dialogs": {
         "A presenter is required to start the meeting. Please try joining again later.": "Toplantıyı başlatmak için bir sunum yapan gereklidir. Lütfen daha sonra tekrar katılmayı deneyin.",
@@ -611,7 +614,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.3.61": "WebRTC SFU v2.3.61",
+        "WebRTC SFU v2.3.62": "WebRTC SFU v2.3.62",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",

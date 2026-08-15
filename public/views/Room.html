@@ -2859,6 +2859,23 @@ Note</textarea>
             </button>
         </template>
 
+        <template id="participantListSwitchTemplate">
+            <label class="participant-menu-switch-row" onclick="event.stopPropagation()">
+                <span class="participant-action-icon" data-template-html="iconHtml"></span>
+                <span class="participant-action-label" data-template-text="label"></span>
+                <span class="form-check form-switch">
+                    <input
+                        class="form-check-input"
+                        type="checkbox"
+                        role="switch"
+                        data-template-attr-id="switchId"
+                        data-template-attr-checked="checked"
+                        data-template-attr-onchange="onChange"
+                    />
+                </span>
+            </label>
+        </template>
+
         <template id="participantListMenuItemTemplate">
             <li data-template-html="buttonHtml"></li>
         </template>

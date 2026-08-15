@@ -47,17 +47,15 @@ function resizeVideoMedia() {
 
     let Margin = 5;
     let videoMediaContainer = document.getElementById('videoMediaContainer');
-    let Cameras = document.getElementsByClassName('Camera');
+    let Cameras = getVisibleCameraElements();
     let Width = videoMediaContainer.offsetWidth - Margin * 2;
     let Height = videoMediaContainer.offsetHeight - Margin * 2;
     let max = 0;
-    let optional = isHideMeActive && videoMediaContainer.childElementCount <= 2 ? 1 : 0;
-    let isOneVideoElement = videoMediaContainer.childElementCount - optional == 1 ? true : false;
+    let isOneVideoElement = Cameras.length === 1;
 
     // console.log('videoMediaContainer.childElementCount', {
     //     isOneVideoElement: isOneVideoElement,
     //     children: videoMediaContainer.childElementCount,
-    //     optional: optional,
     // });
 
     // full screen mode
@@ -94,6 +92,10 @@ function resizeVideoMedia() {
     if (typeof VideoDrawingOverlay !== 'undefined') {
         VideoDrawingOverlay.resizeAll();
     }
+}
+
+function getVisibleCameraElements() {
+    return Array.from(document.getElementsByClassName('Camera')).filter((camera) => camera.style.display !== 'none');
 }
 
 function resetZoom() {
