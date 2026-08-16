@@ -4868,6 +4868,11 @@ hr {
     color: #ffd700;
     font-size: 14px;
     line-height: 1;
+    cursor: pointer;
+}
+
+.hidden-peer-badge:hover {
+    color: #ffffff;
 }
 
 /*--------------------------------------------------------------

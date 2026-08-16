@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.65
+ * @version 2.3.66
  *
  */
 
@@ -6881,7 +6881,7 @@ function getParticipantsList(peers) {
         const peer_pinned = pinnedPeerId === peer_id;
         const peer_hidden = locallyHiddenPeerIds.has(peer_id);
         const peer_hidden_badge = peer_hidden
-            ? ' <span class="hidden-peer-badge" title="Hidden from grid"><i class="fas fa-eye-slash"></i></span>'
+            ? ` <span id="${peer_id}___pHiddenBadge" class="hidden-peer-badge" role="button" tabindex="0" onclick="event.stopPropagation(); toggleParticipantGridVisibility('${peer_id}')"><i class="fas fa-eye-slash"></i></span>`
             : '';
 
         const pinMenuItem = renderParticipantMenuItem(
@@ -7143,6 +7143,9 @@ function setParticipantsTippy(peers) {
             if (peerAudioBtn) setTippy(peerAudioBtn.id, 'Mute', 'top');
             if (peerVideoBtn) setTippy(peerVideoBtn.id, 'Hide', 'top');
             if (peerScreenBtn) setTippy(peerScreenBtn.id, 'Stop', 'top');
+
+            const peerHiddenBadge = rc.getId(peer_id + '___pHiddenBadge');
+            if (peerHiddenBadge) setTippy(peerHiddenBadge.id, 'Show in grid', 'top');
         }
     }
 }
@@ -8081,7 +8084,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.65',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.66',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
