@@ -125,7 +125,7 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    padding: 9px 14px;
+    padding: 9px 12px;
     border: none;
     border-radius: 12px;
     background: rgba(255, 255, 255, 0.08);
@@ -136,7 +136,7 @@
     cursor: pointer;
     transition: background 0.2s ease;
     white-space: nowrap;
-    min-height: 36px;
+    min-height: 34px;
     flex-shrink: 0;
 }
 
@@ -147,7 +147,7 @@
 
 .chat-action-icon-btns {
     display: flex;
-    gap: 4px;
+    gap: 3px;
     margin-left: auto;
 }
 
@@ -155,13 +155,13 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
-    height: 36px;
+    width: 32px;
+    height: 32px;
     border: none;
-    border-radius: 10px;
+    border-radius: 9px;
     background: rgba(255, 255, 255, 0.08);
     color: #fff;
-    font-size: 13px;
+    font-size: 12px;
     cursor: pointer;
     transition: background 0.2s ease;
     padding: 0;
@@ -170,6 +170,32 @@
 
 .chat-action-icon-btns button:hover {
     background: rgba(255, 255, 255, 0.16);
+}
+
+.chat-action-icon-btns #participantsHiddenBtn {
+    color: #fff !important;
+}
+
+.chat-action-icon-btns #participantsHiddenBtn.is-filtering {
+    background: #ffd700;
+    color: #1a1a1a !important;
+}
+
+.chat-action-icon-btns #participantsHiddenBtn.is-filtering:hover {
+    background: #ffcd00;
+}
+
+.chat-action-icon-btns .participant-list-dropdown-menu button {
+    width: 95%;
+    height: auto;
+    justify-content: flex-start;
+    padding: 9px 12px;
+    background: transparent;
+    font-size: 0.8rem;
+}
+
+.chat-action-icon-btns .participant-list-dropdown-menu button:hover {
+    background: rgba(255, 255, 255, 0.08);
 }
 
 .chat-action-icon-btns #chatHideParticipantsList {
@@ -223,7 +249,19 @@
     font-size: 15px;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    min-width: 0;
+}
+
+/* Keep badges next to the name so they never collide with the actions dropdown */
+.people-list .chat-list > li .name > span:first-child {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.people-list .chat-list > li .name > span:not(:first-child) {
+    flex: 0 0 auto;
 }
 
 .people-list .chat-list img {
@@ -245,6 +283,9 @@
 .people-list .about-buttons {
     margin-top: 35px;
     max-height: 64px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 .people-list .dropdown {

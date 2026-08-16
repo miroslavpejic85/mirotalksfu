@@ -529,6 +529,10 @@
         "Show in grid": "Tampilkan di kisi"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Sembunyikan peserta dengan kamera mati?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Preferensi tersimpan Anda menyembunyikan peserta dengan kamera mati dari kisi di setiap ruangan. Pertahankan di sini?",
+        "Keep hidden": "Tetap sembunyikan",
+        "Show them": "Tampilkan mereka",
         "A presenter is required to start the meeting. Please try joining again later.": "Presenter diperlukan untuk memulai rapat. Silakan coba bergabung lagi nanti.",
         "Apply": "Terapkan",
         "Are you sure you want to clean the board?": "Apakah Anda yakin ingin membersihkan papan?",
@@ -621,7 +625,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",

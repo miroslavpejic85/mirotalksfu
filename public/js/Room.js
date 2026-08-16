@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.64
+ * @version 2.3.65
  *
  */
 
@@ -86,6 +86,8 @@ const _PEER = {
     sendMsg: '<i class="fas fa-paper-plane"></i>',
     sendVideo: '<i class="fab fa-youtube"></i>',
     pinPeer: '<i class="fas fa-map-pin"></i>',
+    gridShow: '<i class="fas fa-eye"></i>',
+    gridHide: '<i class="fas fa-eye-slash"></i>',
 };
 
 const initUser = document.getElementById('initUser');
@@ -119,6 +121,8 @@ const lS = new LocalStorage();
 const localStorageSettings = lS.getLocalStorageSettings() || lS.SFU_SETTINGS;
 
 const locallyHiddenPeerIds = new Set();
+
+let isHiddenParticipantsFilterActive = false;
 
 const localStorageDevices = lS.getLocalStorageDevices() || lS.LOCAL_STORAGE_DEVICES;
 
@@ -262,7 +266,7 @@ let swalBackground = 'radial-gradient(#393939, #000000)'; //'rgba(0, 0, 0, 0.7)'
 let rc = null;
 let producer = null;
 let participantsCount = 0;
-let showCameraOffParticipants = true;
+let showCameraOffParticipants = localStorageSettings.show_camera_off_participants !== false;
 let lobbyParticipantsCount = 0;
 let chatMessagesId = 0;
 
@@ -447,6 +451,7 @@ async function initClient() {
         );
         setTippy('switchPitchBar', 'Toggle audio pitch bar', 'right');
         setTippy('switchSounds', 'Toggle the sounds notifications', 'right');
+        setTippy('switchShowCameraOffParticipants', 'Show participants with the camera off in the grid', 'right');
         setTippy('switchShare', "Show 'Share Room' popup on join", 'right');
         setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
         setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
@@ -512,6 +517,7 @@ async function initClient() {
         setTippy('participantsSaveBtn', 'Save participants info', 'bottom');
         setTippy('participantsRaiseHandBtn', 'Toggle raise hands', 'bottom');
         setTippy('participantsUnreadMessagesBtn', 'Toggle unread messages', 'bottom');
+        setTippy('participantsHiddenBtn', 'Hidden participants', 'bottom');
         setTippy('transcriptionCloseBtn', 'Close', 'bottom');
         setTippy('transcriptionTogglePinBtn', 'Toggle pin', 'bottom');
         setTippy('transcriptionMaxBtn', 'Maximize', 'bottom');
@@ -1950,6 +1956,7 @@ function roomIsReady() {
     if (room_password) {
         lockRoomButton.click();
     }
+    advisePersistedCameraOffSetting();
     //show(restartICEButton); // TEST
 }
 
@@ -2167,7 +2174,9 @@ function updateChatConversationsCount() {
     const el = getId('chatConversationsCount');
     if (!el) return;
     const list = getId('participantsList');
-    const count = list ? list.querySelectorAll(':scope > li').length : 0;
+    const count = list
+        ? Array.from(list.querySelectorAll(':scope > li')).filter((li) => li.style.display !== 'none').length
+        : 0;
     el.textContent = count > 0 ? `${count} conversation${count !== 1 ? 's' : ''}` : '';
 }
 
@@ -2895,6 +2904,12 @@ function handleButtons() {
     participantsRaiseHandBtn.onclick = () => {
         rc.toggleRaiseHands();
     };
+    participantsHiddenViewBtn.onclick = () => {
+        toggleHiddenParticipantsFilter();
+    };
+    participantsHiddenShowAllBtn.onclick = () => {
+        showAllHiddenParticipants();
+    };
     searchParticipantsFromList.onkeyup = () => {
         rc.searchPeer();
     };
@@ -3357,6 +3372,12 @@ function handleSelects() {
         isSoundEnabled = e.currentTarget.checked;
         rc.roomMessage('sounds', isSoundEnabled);
         localStorageSettings.sounds = isSoundEnabled;
+        lS.setSettings(localStorageSettings);
+        e.target.blur();
+    };
+    switchShowCameraOffParticipants.onchange = (e) => {
+        toggleCameraOffParticipantsVisibility(e.currentTarget.checked);
+        localStorageSettings.show_camera_off_participants = showCameraOffParticipants;
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
@@ -4142,6 +4163,7 @@ function loadSettingsFromLocalStorage() {
     speechIncomingMsg.checked = rc.speechInMessages;
     switchPitchBar.checked = isPitchBarEnabled;
     switchSounds.checked = isSoundEnabled;
+    switchShowCameraOffParticipants.checked = showCameraOffParticipants;
     switchShare.checked = notify;
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
     switchChatPin.checked = isChatPinEnabled;
@@ -6547,6 +6569,7 @@ async function saveRoomPeers() {
 
 async function getRoomParticipants() {
     const peers = await getRoomPeers();
+    prunePeersLeftFromHiddenIds(peers);
     const lists = getParticipantsList(peers);
     participantsCount = peers.size;
     dropParticipantMenuPortals();
@@ -6557,6 +6580,8 @@ async function getRoomParticipants() {
     refreshParticipantsCount(participantsCount, false);
     setParticipantsTippy(peers);
     updateChatConversationsCount();
+    refreshHiddenParticipantsButton();
+    if (isHiddenParticipantsFilterActive) applyHiddenParticipantsFilter();
     if (isBreakoutPanelOpen) refreshBreakoutPanel();
     console.log('*** Refresh Chat participant lists ***');
 }
@@ -6618,18 +6643,6 @@ function getParticipantsList(peers) {
     function renderParticipantMenuItem(buttonHtml) {
         return renderRoomTemplate('participantListMenuItemTemplate', {
             html: { buttonHtml },
-        });
-    }
-
-    function renderParticipantSwitch({ switchId, onChange, iconHtml, label, checked }) {
-        return renderRoomTemplate('participantListSwitchTemplate', {
-            text: { label },
-            html: { iconHtml },
-            attrs: {
-                switchId,
-                onChange,
-                checked: checked ? '' : undefined,
-            },
         });
     }
 
@@ -6729,18 +6742,7 @@ function getParticipantsList(peers) {
     // ALL
     let publicDropdownHtml = '';
     let publicButtonsHtml = '';
-    let publicMenuItems = renderParticipantMenuHeader('Public chat', image.all);
-
-    publicMenuItems += renderParticipantMenuGroup('View');
-    publicMenuItems += renderParticipantMenuItem(
-        renderParticipantSwitch({
-            switchId: 'showCameraOffParticipantsSwitch',
-            onChange: 'toggleCameraOffParticipantsVisibility(this.checked)',
-            iconHtml: _PEER.videoOff,
-            label: 'Show camera-off',
-            checked: showCameraOffParticipants,
-        })
-    );
+    let publicMenuItems = '';
 
     // ONLY PRESENTER CAN EXECUTE THIS CMD
     if (!isRulesActive || isPresenter) {
@@ -6827,11 +6829,13 @@ function getParticipantsList(peers) {
         );
     }
 
-    publicDropdownHtml = renderParticipantDropdown(
-        `${socket.id}-chatDropDownMenu`,
-        publicMenuItems,
-        'Actions for all participants'
-    );
+    if (publicMenuItems) {
+        publicDropdownHtml = renderParticipantDropdown(
+            `${socket.id}-chatDropDownMenu`,
+            renderParticipantMenuHeader('Public chat', image.all) + publicMenuItems,
+            'Actions for all participants'
+        );
+    }
 
     li += renderParticipantItem({
         itemId: 'all',
@@ -6876,6 +6880,9 @@ function getParticipantsList(peers) {
 
         const peer_pinned = pinnedPeerId === peer_id;
         const peer_hidden = locallyHiddenPeerIds.has(peer_id);
+        const peer_hidden_badge = peer_hidden
+            ? ' <span class="hidden-peer-badge" title="Hidden from grid"><i class="fas fa-eye-slash"></i></span>'
+            : '';
 
         const pinMenuItem = renderParticipantMenuItem(
             renderParticipantActionButton({
@@ -6891,7 +6898,7 @@ function getParticipantsList(peers) {
                 buttonClass: 'btn-sm ml5',
                 buttonId: `${peer_id}___pGridVisibility`,
                 onClick: `toggleParticipantGridVisibility('${peer_id}')`,
-                iconHtml: peer_hidden ? _PEER.videoOn : _PEER.videoOff,
+                iconHtml: peer_hidden ? _PEER.gridShow : _PEER.gridHide,
                 label: peer_hidden ? 'Show in grid' : 'Hide from grid',
             })
         );
@@ -7020,6 +7027,8 @@ function getParticipantsList(peers) {
                     buttons += renderParticipantActionButton({ iconHtml: peer_hand });
                 }
 
+                buttons += peer_hidden_badge;
+
                 li += renderParticipantItem({
                     itemId: peer_id,
                     toId: peer_id,
@@ -7095,6 +7104,8 @@ function getParticipantsList(peers) {
                     buttons += renderParticipantActionButton({ iconHtml: peer_hand });
                 }
 
+                buttons += peer_hidden_badge;
+
                 li += renderParticipantItem({
                     itemId: peer_id,
                     toId: peer_id,
@@ -7163,9 +7174,83 @@ function toggleParticipantGridVisibility(peerId) {
     getRoomParticipants();
 }
 
+function toggleHiddenParticipantsFilter() {
+    if (!isHiddenParticipantsFilterActive && locallyHiddenPeerIds.size === 0) {
+        return userLog('info', 'No hidden participants', 'top-end');
+    }
+
+    setHiddenParticipantsFilter(!isHiddenParticipantsFilterActive);
+}
+
+// Peers that left keep their id in the set, which would leave the filter showing an empty list.
+function prunePeersLeftFromHiddenIds(peers) {
+    for (const peerId of locallyHiddenPeerIds) {
+        if (!peers.has(peerId)) locallyHiddenPeerIds.delete(peerId);
+    }
+    if (isHiddenParticipantsFilterActive && locallyHiddenPeerIds.size === 0) {
+        setHiddenParticipantsFilter(false);
+    }
+}
+
+function setHiddenParticipantsFilter(active) {
+    isHiddenParticipantsFilterActive = active;
+    applyHiddenParticipantsFilter();
+    refreshHiddenParticipantsButton();
+}
+
+// White like the other header buttons; turns yellow (badge color) only while filtering.
+function refreshHiddenParticipantsButton() {
+    participantsHiddenBtn.classList.toggle('is-filtering', isHiddenParticipantsFilterActive);
+}
+
+function applyHiddenParticipantsFilter() {
+    for (const li of participantsList.children) {
+        if (li.tagName !== 'LI') continue;
+        const showItem = !isHiddenParticipantsFilterActive || locallyHiddenPeerIds.has(li.id);
+        li.style.display = showItem ? '' : 'none';
+    }
+    updateChatConversationsCount();
+}
+
+function showAllHiddenParticipants() {
+    if (locallyHiddenPeerIds.size === 0) {
+        return userLog('info', 'No hidden participants', 'top-end');
+    }
+
+    locallyHiddenPeerIds.clear();
+    applyParticipantGridVisibility();
+    setHiddenParticipantsFilter(false);
+    getRoomParticipants();
+}
+
 function toggleCameraOffParticipantsVisibility(showCameraOff) {
     showCameraOffParticipants = showCameraOff;
     applyParticipantGridVisibility();
+}
+
+// Saved across rooms; on join, remind the user their grid hides camera-off participants.
+function advisePersistedCameraOffSetting() {
+    if (showCameraOffParticipants) return;
+    Swal.fire({
+        background: swalBackground,
+        position: 'center',
+        imageUrl: image.hide,
+        title: 'Hide camera-off participants?',
+        html: 'Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?',
+        showDenyButton: true,
+        confirmButtonText: 'Keep hidden',
+        denyButtonText: 'Show them',
+        denyButtonColor: 'green',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isDenied) {
+            switchShowCameraOffParticipants.checked = true;
+            toggleCameraOffParticipantsVisibility(true);
+            localStorageSettings.show_camera_off_participants = true;
+            lS.setSettings(localStorageSettings);
+        }
+    });
 }
 
 function applyParticipantGridVisibility() {
@@ -7996,7 +8081,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.64',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.65',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

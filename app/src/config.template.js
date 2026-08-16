@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.64 - Configuration File
+ * MiroTalk SFU v2.3.65 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1483,6 +1483,7 @@ module.exports = {
                 fullScreenButton: process.env.SHOW_FULLSCREEN !== 'false',
                 snapShotButton: process.env.SHOW_SNAPSHOT_BUTTON !== 'false',
                 focusVideoButton: process.env.SHOW_FOCUS_BUTTON !== 'false',
+                hideFromGridButton: process.env.SHOW_HIDE_FROM_GRID_BUTTON !== 'false',
                 sendMessageButton: process.env.SHOW_SEND_MESSAGE !== 'false',
                 sendFileButton: process.env.SHOW_SEND_FILE !== 'false',
                 sendVideoButton: process.env.SHOW_SEND_VIDEO !== 'false',
@@ -1497,6 +1498,7 @@ module.exports = {
 
             // Controls when video is off
             videoOff: {
+                hideFromGridButton: process.env.SHOW_HIDE_FROM_GRID_BUTTON !== 'false',
                 sendMessageButton: process.env.SHOW_SEND_MESSAGE !== 'false',
                 sendFileButton: process.env.SHOW_SEND_FILE !== 'false',
                 sendVideoButton: process.env.SHOW_SEND_VIDEO !== 'false',

@@ -529,6 +529,10 @@
         "Show in grid": "ग्रिड में दिखाएँ"
     },
     "dialogs": {
+        "Hide camera-off participants?": "कैमरा बंद करने वाले प्रतिभागियों को छिपाएँ?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "आपकी सहेजी गई प्राथमिकता हर कमरे में कैमरा बंद करने वाले प्रतिभागियों को ग्रिड से छिपाए रखती है। इसे यहाँ रखें?",
+        "Keep hidden": "छिपाए रखें",
+        "Show them": "उन्हें दिखाएँ",
         "A presenter is required to start the meeting. Please try joining again later.": "मीटिंग शुरू करने के लिए एक प्रस्तुतकर्ता आवश्यक है। कृपया बाद में फिर से शामिल होने का प्रयास करें।",
         "Apply": "लागू करें",
         "Are you sure you want to clean the board?": "क्या आप वाकई बोर्ड साफ़ करना चाहते हैं?",
@@ -621,7 +625,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",

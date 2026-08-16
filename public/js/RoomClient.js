@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.64
+ * @version 2.3.65
  *
  */
 
@@ -45,6 +45,7 @@ const html = {
     videoPrivacy: 'far fa-circle',
     expand: 'fas fa-ellipsis-vertical',
     hideALL: 'fas fa-eye',
+    hideFromGrid: 'fas fa-eye-slash',
     mirror: 'fas fa-arrow-right-arrow-left',
     draw: 'fas fa-pencil-alt',
     close: 'fas fa-times',
@@ -3909,7 +3910,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, mv, dw;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3969,6 +3970,7 @@ class RoomClient {
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
                 ha = this.createButton(id + '__hideALL', html.hideALL + ' focusMode');
+                hg = this.createButton(id + '___' + remotePeerId + '___hideFromGrid', html.hideFromGrid);
                 sf = this.createButton(id + '___' + remotePeerId + '___sendFile', html.sendFile);
                 sm = this.createButton(id + '___' + remotePeerId + '___sendMsg', html.sendMsg);
                 sv = this.createButton(id + '___' + remotePeerId + '___sendVideo', html.sendVideo);
@@ -4004,6 +4006,8 @@ class RoomClient {
                 pv.value = 100;
 
                 // Build dropdown items
+                BUTTONS.consumerVideo.hideFromGridButton &&
+                    eVc.appendChild(this.createDropdownItem(hg, 'Hide from grid', eVc));
                 eVc.appendChild(this.createDropdownItem(mv, 'Mirror', eVc));
                 BUTTONS.consumerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
@@ -4065,6 +4069,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
                 this.handleSF(sf.id, peer_name);
                 this.handleHA(ha.id, d.id);
+                this.handleHFG(hg.id, remotePeerId);
                 this.handleSM(sm.id, peer_name);
                 this.handleSV(sv.id, peer_name);
                 BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
@@ -4244,7 +4249,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, p, pm, pb, pv, st, ri;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, hg, p, pm, pb, pv, st, ri;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -4276,6 +4281,7 @@ class RoomClient {
             gl = this.createButton('remotePeer___' + peer_id + '___geoLocation', html.geolocation);
             ban = this.createButton('remotePeer___' + peer_id + '___ban', html.ban);
             ko = this.createButton('remotePeer___' + peer_id + '___kickOut', html.kickOut);
+            hg = this.createButton('remotePeer___' + peer_id + '___hideFromGrid', html.hideFromGrid);
         } else {
             st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
         }
@@ -4318,6 +4324,7 @@ class RoomClient {
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
         }
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
+        remotePeer && BUTTONS.videoOff.hideFromGridButton && vb.appendChild(hg);
 
         vb.appendChild(au);
         if (!remotePeer) vb.appendChild(st);
@@ -4356,6 +4363,7 @@ class RoomClient {
             this.handleGL(gl.id);
             this.handleBAN(ban.id);
             this.handleKO(ko.id);
+            this.handleHFG(hg.id, peer_id);
         } else {
             this.handlePV(this.audioConsumers.get(pv.id) + '___' + pv.id);
         }
@@ -4378,6 +4386,7 @@ class RoomClient {
             this.setTippy(gl.id, 'Geolocation', 'bottom');
             this.setTippy(ban.id, 'Ban', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
+            this.setTippy(hg.id, 'Hide from grid', 'bottom');
         }
 
         remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
@@ -11107,6 +11116,15 @@ class RoomClient {
         if (btnHa) {
             btnHa.addEventListener('click', (e) => {
                 this.toggleFocusMode(videoContainerId, btnHa);
+            });
+        }
+    }
+
+    handleHFG(uid, peerId) {
+        const btnHfg = this.getId(uid);
+        if (btnHfg) {
+            btnHfg.addEventListener('click', () => {
+                if (typeof toggleParticipantGridVisibility === 'function') toggleParticipantGridVisibility(peerId);
             });
         }
     }

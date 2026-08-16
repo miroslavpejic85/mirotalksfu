@@ -529,6 +529,10 @@
         "Show in grid": "Im Raster anzeigen"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Teilnehmer mit ausgeschalteter Kamera ausblenden?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Deine gespeicherte Einstellung blendet Teilnehmer mit ausgeschalteter Kamera in jedem Raum aus dem Raster aus. Hier beibehalten?",
+        "Keep hidden": "Ausgeblendet lassen",
+        "Show them": "Anzeigen",
         "A presenter is required to start the meeting. Please try joining again later.": "Zum Starten der Besprechung ist ein Moderator erforderlich. Bitte versuchen Sie später erneut beizutreten.",
         "Apply": "Anwenden",
         "Are you sure you want to clean the board?": "Möchten Sie das Board wirklich bereinigen?",
@@ -621,7 +625,7 @@
         "Unmute": "Stummschaltung aufheben",
         "Unmute Video": "Ton des Videos aktivieren",
         "Username already in use": "Benutzername bereits vergeben",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Whiteboard-Tastenkürzel",
         "Would you like to continue the room broadcast?": "Möchten Sie die Raumübertragung fortsetzen?",
         "Yes": "Ja",

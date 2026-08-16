@@ -582,6 +582,24 @@
                                     </div>
                                 </td>
                             </tr>
+                            <tr id="showCameraOffParticipantsButton">
+                                <td>
+                                    <div class="title">
+                                        <i class="fas fa-video-slash"></i>
+                                        <p>Show camera-off</p>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="form-check form-switch form-switch-md">
+                                        <input
+                                            id="switchShowCameraOffParticipants"
+                                            class="form-check-input"
+                                            type="checkbox"
+                                            checked
+                                        />
+                                    </div>
+                                </td>
+                            </tr>
                             <tr id="keepButtonsVisibleButton">
                                 <td>
                                     <div class="title">
@@ -1900,6 +1918,35 @@
                             <button id="participantsRaiseHandBtn">
                                 <i class="fas fa-hand-paper"></i>
                             </button>
+                            <div id="participantsHiddenDropdown" class="dropdown">
+                                <button
+                                    id="participantsHiddenBtn"
+                                    class="dropdown-toggle"
+                                    type="button"
+                                    data-bs-toggle="dropdown"
+                                    aria-expanded="false"
+                                    aria-label="Hidden participants"
+                                >
+                                    <i class="fas fa-eye-slash"></i>
+                                </button>
+                                <ul
+                                    class="dropdown-menu dropdown-menu-end text-start participant-list-dropdown-menu"
+                                    aria-labelledby="participantsHiddenBtn"
+                                >
+                                    <li>
+                                        <button id="participantsHiddenViewBtn" type="button">
+                                            <span class="participant-action-icon"><i class="fas fa-eye"></i></span>
+                                            <span class="participant-action-label">View all hidden</span>
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button id="participantsHiddenShowAllBtn" type="button">
+                                            <span class="participant-action-icon"><i class="fas fa-users"></i></span>
+                                            <span class="participant-action-label">Show all hidden</span>
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
                             <button id="participantsSaveBtn" class="hidden">
                                 <i class="fas fa-save"></i>
                             </button>
@@ -2867,23 +2914,6 @@ Note</textarea>
                 <span class="participant-action-icon" data-template-html="iconHtml"></span>
                 <span class="participant-action-label" data-template-text="label"></span>
             </button>
-        </template>
-
-        <template id="participantListSwitchTemplate">
-            <label class="participant-menu-switch-row" onclick="event.stopPropagation()">
-                <span class="participant-action-icon" data-template-html="iconHtml"></span>
-                <span class="participant-action-label" data-template-text="label"></span>
-                <span class="form-check form-switch">
-                    <input
-                        class="form-check-input"
-                        type="checkbox"
-                        role="switch"
-                        data-template-attr-id="switchId"
-                        data-template-attr-checked="checked"
-                        data-template-attr-onchange="onChange"
-                    />
-                </span>
-            </label>
         </template>
 
         <template id="participantListMenuItemTemplate">

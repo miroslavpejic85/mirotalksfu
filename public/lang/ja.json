@@ -529,6 +529,10 @@
         "Show in grid": "グリッドに表示"
     },
     "dialogs": {
+        "Hide camera-off participants?": "カメラをオフにしている参加者を非表示にしますか？",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "保存された設定により、カメラをオフにしている参加者はすべてのルームでグリッドから非表示になります。ここでも維持しますか？",
+        "Keep hidden": "非表示のままにする",
+        "Show them": "表示する",
         "A presenter is required to start the meeting. Please try joining again later.": "会議を開始するには発表者が必要です。後でもう一度参加を試みてください。",
         "Apply": "適用",
         "Are you sure you want to clean the board?": "本当にボードをクリアしますか？",
@@ -621,7 +625,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",

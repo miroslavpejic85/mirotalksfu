@@ -529,6 +529,10 @@
         "Show in grid": "Prikaži u mreži"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Sakriti učesnike sa isključenom kamerom?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Vaše sačuvano podešavanje drži učesnike sa isključenom kamerom sakrivene iz mreže u svakoj sobi. Zadržati ovde?",
+        "Keep hidden": "Zadrži sakriveno",
+        "Show them": "Prikaži ih",
         "A presenter is required to start the meeting. Please try joining again later.": "Za početak sastanka potreban je voditelj. Pokušajte da se pridružite ponovo kasnije.",
         "Apply": "Primeni",
         "Are you sure you want to clean the board?": "Da li ste sigurni da želite da očistite tablu?",
@@ -621,7 +625,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

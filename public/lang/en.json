@@ -529,6 +529,10 @@
         "Show in grid": "Show in grid"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Hide camera-off participants?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?",
+        "Keep hidden": "Keep hidden",
+        "Show them": "Show them",
         "A presenter is required to start the meeting. Please try joining again later.": "A presenter is required to start the meeting. Please try joining again later.",
         "Apply": "Apply",
         "Are you sure you want to clean the board?": "Are you sure you want to clean the board?",
@@ -621,7 +625,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",

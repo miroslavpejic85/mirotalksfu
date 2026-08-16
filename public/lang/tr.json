@@ -529,6 +529,10 @@
         "Show in grid": "Izgarada göster"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Kamerası kapalı katılımcılar gizlensin mi?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Kaydettiğiniz tercih, kamerası kapalı katılımcıları her odada ızgaradan gizli tutar. Burada da korunsun mu?",
+        "Keep hidden": "Gizli tut",
+        "Show them": "Onları göster",
         "A presenter is required to start the meeting. Please try joining again later.": "Toplantıyı başlatmak için bir sunum yapan gereklidir. Lütfen daha sonra tekrar katılmayı deneyin.",
         "Apply": "Uygula",
         "Are you sure you want to clean the board?": "Tahtayı temizlemek istediğinizden emin misiniz?",
@@ -621,7 +625,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",

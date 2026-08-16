@@ -529,6 +529,10 @@
         "Show in grid": "在网格中显示"
     },
     "dialogs": {
+        "Hide camera-off participants?": "隐藏关闭摄像头的参与者？",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "您保存的偏好会在每个房间中将关闭摄像头的参与者从网格中隐藏。在此处保留吗？",
+        "Keep hidden": "保持隐藏",
+        "Show them": "显示他们",
         "A presenter is required to start the meeting. Please try joining again later.": "启动会议需要一位演示者。请稍后再尝试加入。",
         "Apply": "应用",
         "Are you sure you want to clean the board?": "您确定要清理白板吗？",
@@ -621,7 +625,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

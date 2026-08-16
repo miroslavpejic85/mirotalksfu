@@ -529,6 +529,10 @@
         "Show in grid": "Megjelenítés a rácsban"
     },
     "dialogs": {
+        "Hide camera-off participants?": "Elrejti a kikapcsolt kamerájú résztvevőket?",
+        "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "A mentett beállításod minden szobában elrejti a rácsból a kikapcsolt kamerájú résztvevőket. Megtartod itt is?",
+        "Keep hidden": "Maradjon rejtve",
+        "Show them": "Megjelenítés",
         "A presenter is required to start the meeting. Please try joining again later.": "A megbeszélés elindításához előadó szükséges. Kérjük, próbálj újra csatlakozni később.",
         "Apply": "Alkalmaz",
         "Are you sure you want to clean the board?": "Biztosan törölni szeretnéd a táblát?",
@@ -621,7 +625,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.3.64": "WebRTC SFU v2.3.64",
+        "WebRTC SFU v2.3.65": "WebRTC SFU v2.3.65",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
