@@ -31,6 +31,7 @@ module.exports = class Room {
         // ##########################
         this._isLocked = false;
         this._isLobbyEnabled = false;
+        this._isJoinLocked = false;
         this._roomPassword = null;
         this._hostOnlyRecording = false;
         // Server-side whiteboard lock state. Authoritative — does not depend on the client
@@ -107,6 +108,7 @@ module.exports = class Room {
             config: {
                 isLocked: this._isLocked,
                 isLobbyEnabled: this._isLobbyEnabled,
+                isJoinLocked: this._isJoinLocked,
                 hostOnlyRecording: this._hostOnlyRecording,
             },
             rtmp: {
@@ -1117,6 +1119,9 @@ module.exports = class Room {
     isLobbyEnabled() {
         return this._isLobbyEnabled;
     }
+    isJoinLocked() {
+        return this._isJoinLocked;
+    }
     isGlobalLobbyEnabled() {
         return this.globalLobby;
     }
@@ -1134,6 +1139,9 @@ module.exports = class Room {
     }
     setLobbyEnabled(status) {
         this._isLobbyEnabled = status;
+    }
+    setJoinLocked(status) {
+        this._isJoinLocked = status;
     }
     setHostOnlyRecording(status) {
         this._hostOnlyRecording = status;

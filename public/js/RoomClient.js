@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.63
+ * @version 2.3.64
  *
  */
 
@@ -188,6 +188,8 @@ const _EVENTS = {
     roomLock: 'roomLock',
     lobbyOn: 'lobbyOn',
     lobbyOff: 'lobbyOff',
+    joinLockOn: 'joinLockOn',
+    joinLockOff: 'joinLockOff',
     roomUnlock: 'roomUnlock',
     hostOnlyRecordingOn: 'hostOnlyRecordingOn',
     hostOnlyRecordingOff: 'hostOnlyRecordingOff',
@@ -616,6 +618,11 @@ class RoomClient {
                     return this.userUnauthorized();
                 }
 
+                if (room === 'isJoinLocked') {
+                    console.warn('00-WARNING ----> Room is Locked for new participants');
+                    return this.roomJoinLocked();
+                }
+
                 if (room === 'isLocked') {
                     this.RoomIsLocked = true;
                     this.event(_EVENTS.roomLock);
@@ -748,6 +755,8 @@ class RoomClient {
                       this.event(_EVENTS.hostOnlyRecordingOn))
                     : this.event(_EVENTS.hostOnlyRecordingOff);
             }
+
+            this.event(room.config.isJoinLocked ? _EVENTS.joinLockOn : _EVENTS.joinLockOff);
 
             // ###################################################################################################
             if (room.recording) this.recording = room.recording;
@@ -9909,7 +9918,7 @@ class RoomClient {
                             background: swalBackground,
                             imageUrl: image.locked,
                             input: 'text',
-                            inputPlaceholder: 'Set Room password',
+                            inputPlaceholder: 'Set room password',
                             confirmButtonText: `OK`,
                             denyButtonText: `Cancel`,
                             showClass: { popup: 'animate__animated animate__fadeInDown' },
@@ -9936,6 +9945,14 @@ class RoomClient {
                     if (popup) this.roomStatus(action);
                     break;
                 case 'lobbyOff':
+                    this.socket.emit('roomAction', data);
+                    if (popup) this.roomStatus(action);
+                    break;
+                case 'joinLockOn':
+                    this.socket.emit('roomAction', data);
+                    if (popup) this.roomStatus(action);
+                    break;
+                case 'joinLockOff':
                     this.socket.emit('roomAction', data);
                     if (popup) this.roomStatus(action);
                     break;
@@ -9968,11 +9985,11 @@ class RoomClient {
                 if (!isPresenter) return;
                 this.sound('locked');
                 this.event(_EVENTS.roomLock);
-                this.userLog('info', `${icons.lock} LOCKED the room by the password`, 'top-end');
+                this.userLog('info', `${icons.lock} Room password set`, 'top-end');
                 break;
             case 'unlock':
                 if (!isPresenter) return;
-                this.userLog('info', `${icons.unlock} UNLOCKED the room`, 'top-end');
+                this.userLog('info', `${icons.unlock} Room password removed`, 'top-end');
                 this.event(_EVENTS.roomUnlock);
                 break;
             case 'lobbyOn':
@@ -9982,6 +9999,14 @@ class RoomClient {
             case 'lobbyOff':
                 this.event(_EVENTS.lobbyOff);
                 this.userLog('info', `${icons.lobby} Lobby is disabled`, 'top-end');
+                break;
+            case 'joinLockOn':
+                this.event(_EVENTS.joinLockOn);
+                this.userLog('info', `${icons.lock} The room is locked, no new participants can join`, 'top-end');
+                break;
+            case 'joinLockOff':
+                this.event(_EVENTS.joinLockOff);
+                this.userLog('info', `${icons.unlock} The room is unlocked, new participants can join`, 'top-end');
                 break;
             case 'hostOnlyRecordingOn':
                 this.event(_EVENTS.hostOnlyRecordingOn);
@@ -10453,6 +10478,23 @@ class RoomClient {
                 this.socket.emit('roomAction', data);
             });
         }
+    }
+
+    roomJoinLocked() {
+        this.sound('alert');
+        Swal.fire({
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            background: swalBackground,
+            imageUrl: image.locked,
+            title: 'Oops, Room is Locked',
+            text: 'The host has locked the room, new participants are not allowed to join.',
+            confirmButtonText: `OK`,
+            showClass: { popup: 'animate__animated animate__fadeInDown' },
+            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+        }).then(() => {
+            openURL('/');
+        });
     }
 
     roomIsLocked() {

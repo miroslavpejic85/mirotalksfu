@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.63
+ * @version 2.3.64
  *
  */
 
@@ -344,6 +344,7 @@ let isButtonsVisible = false;
 let isButtonsBarOver = false;
 
 let isRoomLocked = false;
+let isJoinLocked = false;
 
 let initStream = null;
 let isInitVideoLoaded = false;
@@ -1917,6 +1918,7 @@ function roomIsReady() {
     BUTTONS.settings.lockRoomButton && show(lockRoomButton);
     BUTTONS.settings.broadcastingButton && show(broadcastingButton);
     BUTTONS.settings.lobbyButton && show(lobbyButton);
+    updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation && show(sendEmailInvitation);
     !BUTTONS.settings.customNoiseSuppression && hide(noiseSuppressionButton);
     BUTTONS.settings.tabNotificationsBtn && show(tabNotificationsBtn);
@@ -1949,6 +1951,34 @@ function roomIsReady() {
         lockRoomButton.click();
     }
     //show(restartICEButton); // TEST
+}
+
+// ####################################################
+// LOCK/UNLOCK ROOM FOR NEW PARTICIPANTS
+// ####################################################
+
+function updateJoinLockButtons() {
+    const canLock = BUTTONS.settings.joinLockButton;
+    canLock && !isJoinLocked ? show(joinLockButton) : hide(joinLockButton);
+    canLock && isJoinLocked ? show(joinUnlockButton) : hide(joinUnlockButton);
+}
+
+function confirmJoinLock(lock) {
+    Swal.fire({
+        background: swalBackground,
+        imageUrl: image.locked,
+        title: lock ? 'Lock room?' : 'Unlock room?',
+        text: lock
+            ? 'Are you sure you want to lock the room? No new participants will be able to join from now on.'
+            : 'Are you sure you want to unlock the room? New participants will be able to join again.',
+        showDenyButton: true,
+        confirmButtonText: lock ? 'Lock room' : 'Unlock room',
+        denyButtonText: 'Cancel',
+        showClass: { popup: 'animate__animated animate__fadeInDown' },
+        hideClass: { popup: 'animate__animated animate__fadeOutUp' },
+    }).then((result) => {
+        if (result.isConfirmed) rc.roomAction(lock ? 'joinLockOn' : 'joinLockOff');
+    });
 }
 
 // ####################################################
@@ -2873,6 +2903,12 @@ function handleButtons() {
     };
     unlockRoomButton.onclick = () => {
         rc.roomAction('unlock');
+    };
+    joinLockButton.onclick = () => {
+        confirmJoinLock(true);
+    };
+    joinUnlockButton.onclick = () => {
+        confirmJoinLock(false);
     };
     aboutButton.onclick = () => {
         showAbout();
@@ -4322,6 +4358,16 @@ function handleRoomClientEvents() {
     rc.on(RoomClient.EVENTS.lobbyOff, () => {
         console.log('Room event: Client room lobby disabled');
         isLobbyEnabled = false;
+    });
+    rc.on(RoomClient.EVENTS.joinLockOn, () => {
+        console.log('Room event: Client room locked for new participants');
+        isJoinLocked = true;
+        updateJoinLockButtons();
+    });
+    rc.on(RoomClient.EVENTS.joinLockOff, () => {
+        console.log('Room event: Client room unlocked for new participants');
+        isJoinLocked = false;
+        updateJoinLockButtons();
     });
     rc.on(RoomClient.EVENTS.hostOnlyRecordingOn, () => {
         if (isRulesActive && !isPresenter) {
@@ -7950,7 +7996,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.63',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.64',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -50,6 +50,7 @@ let BUTTONS = {
         unlockRoomButton: true, // presenter
         broadcastingButton: true, // presenter
         lobbyButton: true, // presenter
+        joinLockButton: true, // presenter
         sendEmailInvitation: true, // presenter
         micOptionsButton: true,
         tabRTMPStreamingBtn: true, // presenter
@@ -143,6 +144,7 @@ function handleRules(isPresenter) {
         BUTTONS.settings.unlockRoomButton = false;
         BUTTONS.settings.broadcastingButton = false;
         BUTTONS.settings.lobbyButton = false;
+        BUTTONS.settings.joinLockButton = false;
         BUTTONS.settings.sendEmailInvitation = false;
         BUTTONS.settings.tabRTMPStreamingBtn = false;
         BUTTONS.settings.tabModerator = false;
@@ -239,6 +241,7 @@ function handleRules(isPresenter) {
     BUTTONS.settings.unlockRoomButton ? show(unlockRoomButton) : hide(unlockRoomButton);
     BUTTONS.settings.broadcastingButton ? show(broadcastingButton) : hide(broadcastingButton);
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
+    updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
     !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
     !BUTTONS.settings.tabNotificationsBtn && hide(tabNotificationsBtn);
@@ -278,6 +281,7 @@ function handleRulesBroadcasting() {
     BUTTONS.settings.lockRoomButton = false;
     BUTTONS.settings.unlockRoomButton = false;
     BUTTONS.settings.lobbyButton = false;
+    BUTTONS.settings.joinLockButton = false;
     BUTTONS.settings.tabRTMPStreamingBtn = false;
     BUTTONS.settings.tabNotificationsBtn = false;
     BUTTONS.videoOff.muteAudioButton = false;
@@ -315,6 +319,8 @@ function handleRulesBroadcasting() {
     elemDisplay('lockRoomButton', false);
     elemDisplay('unlockRoomButton', false);
     elemDisplay('lobbyButton', false);
+    elemDisplay('joinLockButton', false);
+    elemDisplay('joinUnlockButton', false);
     elemDisplay('settingsButton', false);
     elemDisplay('tabRTMPStreamingBtn', false);
     elemDisplay('tabNotificationsBtn', false);

@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.63
+ * @version 2.3.64
  *
  */
 
@@ -2505,6 +2505,11 @@ function startServer() {
 
             peer.updatePeerInfo({ type: 'presenter', status: isPresenter });
 
+            if (room.isJoinLocked() && !isPresenter) {
+                log.debug('The user was rejected because the room is locked for new participants');
+                return cb('isJoinLocked');
+            }
+
             if (room.isLocked() && !isPresenter) {
                 log.debug('The user was rejected because the room is locked, and they are not a presenter');
                 return cb('isLocked');
@@ -3186,6 +3191,16 @@ function startServer() {
                     room.setLobbyEnabled(false);
                     room.broadCast(socket.id, 'roomAction', data.action);
                     break;
+                case 'joinLockOn':
+                    if (!isPresenter) return;
+                    room.setJoinLocked(true);
+                    room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
+                case 'joinLockOff':
+                    if (!isPresenter) return;
+                    room.setJoinLocked(false);
+                    room.broadCast(socket.id, 'roomAction', data.action);
+                    break;
                 case 'hostOnlyRecordingOn':
                     if (!isPresenter) return;
                     room.setHostOnlyRecording(true);
@@ -3208,6 +3223,7 @@ function startServer() {
                 broadcasting: room.isBroadcasting(),
                 locked: room.isLocked(),
                 lobby: room.isLobbyEnabled(),
+                joinLocked: room.isJoinLocked(),
                 hostOnlyRecording: room.isHostOnlyRecording(),
             });
         });
