@@ -2376,6 +2376,7 @@ body {
     align-items: center;
     gap: 10px;
     width: 100%;
+    margin-top: 10px;
 }
 
 .speaker-select-row select,
