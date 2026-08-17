@@ -3148,8 +3148,10 @@ body {
 
 #about button {
     border: none;
-    width: 170px;
+    min-width: 170px;
+    width: auto;
     height: 40px;
+    padding: 0 18px;
     color: #ffffff;
     font-size: 1.2rem;
     border-radius: 10px;
@@ -4768,7 +4770,7 @@ hr {
 .user-hand {
     background: rgba(0, 0, 0, 0.55) !important;
     color: #ffd700 !important;
-    display: inline-flex !important;
+    display: none !important;
     align-items: center;
     justify-content: center;
     width: 44px !important;
