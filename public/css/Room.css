@@ -4766,8 +4766,18 @@ hr {
 }
 
 .user-hand {
-    background: transparent !important;
+    background: rgba(0, 0, 0, 0.55) !important;
     color: #ffd700 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 44px !important;
+    height: 44px !important;
+    aspect-ratio: 1 / 1;
+    border-radius: 50% !important;
+    box-shadow:
+        0 0 0 2px rgba(255, 215, 0, 0.35),
+        var(--box-shadow);
 }
 
 .fa-phone-slash,
