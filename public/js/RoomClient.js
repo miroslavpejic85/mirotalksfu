@@ -12319,7 +12319,7 @@ class RoomClient {
                     this.peer_info.peer_hand = status;
                     const peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
-                        if (peer_hand) peer_hand.style.display = 'flex';
+                        if (peer_hand) peer_hand.style.display = 'inline-flex';
                         this.event(_EVENTS.raiseHand);
                         this.sound('raiseHand');
                     } else {
@@ -12357,7 +12357,7 @@ class RoomClient {
                 case 'hand':
                     const peer_hand = this.getPeerHandBtn(peer_id);
                     if (status) {
-                        if (peer_hand) peer_hand.style.display = 'flex';
+                        if (peer_hand) peer_hand.style.display = 'inline-flex';
                         this.userLog(
                             'warning',
                             peer_name + '  ' + _PEER.raiseHand + ' has raised the hand',

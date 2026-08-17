@@ -4770,7 +4770,7 @@ hr {
 .user-hand {
     background: rgba(0, 0, 0, 0.55) !important;
     color: #ffd700 !important;
-    display: none !important;
+    display: none;
     align-items: center;
     justify-content: center;
     width: 44px !important;
