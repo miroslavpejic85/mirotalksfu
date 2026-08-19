@@ -89,6 +89,7 @@ let BUTTONS = {
         geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
+        presenterRoleButton: true, // presenter
         drawingButton: true, // presenter
     },
     videoOff: {
@@ -100,6 +101,7 @@ let BUTTONS = {
         geolocationButton: true, // Presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
+        presenterRoleButton: true, // presenter
     },
     chat: {
         chatPinButton: true,
@@ -124,6 +126,7 @@ let BUTTONS = {
         geoLocationButton: true, // presenter
         banButton: true, // presenter
         ejectButton: true, // presenter
+        presenterRoleButton: true, // presenter
     },
     whiteboard: {
         whiteboardLockButton: true, // presenter
@@ -131,9 +134,22 @@ let BUTTONS = {
     //...
 };
 
-function handleRules(isPresenter) {
+// Baseline snapshot of the server-merged BUTTONS config, used to restore state on role changes
+let buttonsBaseline = null;
+
+function handleRules(isPresenter, roomSetup = true) {
     console.log('07.1 ----> IsPresenter: ' + isPresenter);
     if (!isRulesActive) return;
+
+    // Capture the server-merged button config once, then restore it on every call so switching
+    // a participant's role re-derives button visibility from the original config instead of the
+    // previously mutated (guest/presenter) state.
+    if (!buttonsBaseline) {
+        buttonsBaseline = JSON.parse(JSON.stringify(BUTTONS));
+    } else {
+        BUTTONS = JSON.parse(JSON.stringify(buttonsBaseline));
+    }
+
     if (!isPresenter) {
         // ##################################
         // GUEST
@@ -153,12 +169,35 @@ function handleRules(isPresenter) {
         BUTTONS.videoOff.geolocationButton = false;
         BUTTONS.videoOff.banButton = false;
         BUTTONS.videoOff.ejectButton = false;
+        BUTTONS.videoOff.presenterRoleButton = false;
         BUTTONS.consumerVideo.geolocationButton = false;
         BUTTONS.consumerVideo.banButton = false;
         BUTTONS.consumerVideo.ejectButton = false;
+        BUTTONS.consumerVideo.presenterRoleButton = false;
+        BUTTONS.participantsList.presenterRoleButton = false;
         // BUTTONS.consumerVideo.drawingButton = false;
         // BUTTONS.producerVideo.drawingButton = false;
         BUTTONS.whiteboard.whiteboardLockButton = false;
+
+        // Hide presenter-only elements (covers demotion from presenter to guest)
+        hide(editorUnlockBtn);
+        hide(transcriptionAllLi);
+        hide(breakoutRoomButton);
+
+        // VideoAI is presenter-only
+        VideoAI.enabled = false;
+        elemDisplay('tabVideoAIBtn', false);
+
+        // If a presenter-only settings tab was open, reset to the default Room tab so its
+        // content isn't left visible after the tab button is hidden.
+        const openPresenterTab = ['tabModerator', 'tabRTMPStreaming', 'tabNotifications', 'tabVideoAI'].some((id) => {
+            const el = rc.getId(id);
+            return el && el.style.display === 'block';
+        });
+        if (openPresenterTab) {
+            const roomTabBtn = rc.getId('tabRoomBtn');
+            if (roomTabBtn) roomTabBtn.click();
+        }
 
         //...
     } else {
@@ -181,51 +220,40 @@ function handleRules(isPresenter) {
         // Auto detected rules for presenter
         // ##################################
 
-        // Room broadcasting
-        isBroadcastingEnabled = localStorageSettings.broadcasting;
-        switchBroadcasting.checked = isBroadcastingEnabled;
-        rc.roomAction('broadcasting', true, false);
-        if (isBroadcastingEnabled) rc.toggleRoomBroadcasting();
-        // Room lobby
-        isLobbyEnabled = localStorageSettings.lobby;
-        switchLobby.checked = isLobbyEnabled;
-        rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
-        // Room host-only-recording
-        hostOnlyRecording = localStorageSettings.host_only_recording;
-        switchHostOnlyRecording.checked = hostOnlyRecording;
-        rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
-        // Room moderator
-        switchEveryonePrivacy.checked = localStorageSettings.moderator_video_start_privacy;
-        switchEveryoneMute.checked = localStorageSettings.moderator_audio_start_muted;
-        switchEveryoneHidden.checked = localStorageSettings.moderator_video_start_hidden;
-        switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
-        switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
-        switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
-        switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
-        switchEveryoneCantChatPublicly.checked = localStorageSettings.moderator_chat_cant_publicly;
-        switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
-        switchEveryoneCantChatDeepSeek.checked = localStorageSettings.moderator_chat_cant_deep_seek;
-        switchEveryoneCantMediaSharing.checked = localStorageSettings.moderator_media_cant_sharing;
-        switchEveryoneCantPolls.checked = localStorageSettings.moderator_polls_cant_create;
-        switchDisconnectAllOnLeave.checked = localStorageSettings.moderator_disconnect_all_on_leave;
-
-        // Update moderator settings...
-        const moderatorData = {
-            video_start_privacy: switchEveryonePrivacy.checked,
-            audio_start_muted: switchEveryoneMute.checked,
-            video_start_hidden: switchEveryoneHidden.checked,
-            audio_cant_unmute: switchEveryoneCantUnmute.checked,
-            video_cant_unhide: switchEveryoneCantUnhide.checked,
-            screen_cant_share: switchEveryoneCantShareScreen.checked,
-            chat_cant_privately: switchEveryoneCantChatPrivately.checked,
-            chat_cant_publicly: switchEveryoneCantChatPublicly.checked,
-            chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
-            chat_cant_deep_seek: switchEveryoneCantChatDeepSeek.checked,
-            media_cant_sharing: switchEveryoneCantMediaSharing.checked,
-            polls_cant_create: switchEveryoneCantPolls.checked,
-        };
-        console.log('Rules moderator data ---->', moderatorData);
-        rc.updateRoomModeratorALL(moderatorData);
+        // Skipped when a participant is promoted mid-session, so the room state
+        // (broadcasting, lobby, recording, moderator) set by the original presenter is preserved.
+        if (roomSetup) {
+            // Room broadcasting
+            isBroadcastingEnabled = localStorageSettings.broadcasting;
+            switchBroadcasting.checked = isBroadcastingEnabled;
+            rc.roomAction('broadcasting', true, false);
+            if (isBroadcastingEnabled) rc.toggleRoomBroadcasting();
+            // Room lobby
+            isLobbyEnabled = localStorageSettings.lobby;
+            switchLobby.checked = isLobbyEnabled;
+            rc.roomAction(isLobbyEnabled ? 'lobbyOn' : 'lobbyOff', true, false);
+            // Room host-only-recording
+            hostOnlyRecording = localStorageSettings.host_only_recording;
+            switchHostOnlyRecording.checked = hostOnlyRecording;
+            rc.roomAction(hostOnlyRecording ? 'hostOnlyRecordingOn' : 'hostOnlyRecordingOff', true, false);
+            // Room moderator Sync moderator settings...
+            syncModeratorData();
+        } else {
+            // Promoted mid-session: reflect the room's current state on the switches without
+            // broadcasting, so the panel matches reality instead of showing this peer's defaults.
+            switchBroadcasting.checked = isBroadcastingEnabled;
+            switchLobby.checked = isLobbyEnabled;
+            switchHostOnlyRecording.checked = hostOnlyRecording;
+            loadModeratorDataFromRoom();
+        }
+        // VideoAI is presenter-only and shown only when the room has it enabled
+        if (rc.videoAIEnabled) {
+            VideoAI.enabled = true;
+            elemDisplay('tabVideoAIBtn', true);
+        } else {
+            VideoAI.enabled = false;
+            elemDisplay('tabVideoAIBtn', false);
+        }
     }
     // main. settings...
     BUTTONS.main.shareButton ? show(shareButton) : hide(shareButton);
@@ -243,9 +271,9 @@ function handleRules(isPresenter) {
     BUTTONS.settings.lobbyButton ? show(lobbyButton) : hide(lobbyButton);
     updateJoinLockButtons();
     BUTTONS.settings.sendEmailInvitation ? show(sendEmailInvitation) : hide(sendEmailInvitation);
-    !BUTTONS.settings.micOptionsButton && hide(micOptionsButton);
-    !BUTTONS.settings.tabNotificationsBtn && hide(tabNotificationsBtn);
-    !BUTTONS.settings.tabModerator && hide(tabModeratorBtn);
+    BUTTONS.settings.micOptionsButton ? show(micOptionsButton) : hide(micOptionsButton);
+    BUTTONS.settings.tabNotificationsBtn ? show(tabNotificationsBtn) : hide(tabNotificationsBtn);
+    BUTTONS.settings.tabModerator ? show(tabModeratorBtn) : hide(tabModeratorBtn);
     if (BUTTONS.settings.host_only_recording) {
         show(recordingImage);
         show(roomRecordingOptions);
@@ -258,6 +286,90 @@ function handleRules(isPresenter) {
     BUTTONS.participantsList.saveInfoButton ? show(participantsSaveBtn) : hide(participantsSaveBtn);
     BUTTONS.whiteboard.whiteboardLockButton ? show(whiteboardUnlockBtn) : hide(whiteboardUnlockBtn);
     //...
+}
+
+function syncModeratorData() {
+    loadModeratorData();
+    const syncModeratorData = getModeratorData();
+    console.log('Sync moderator data ---->', syncModeratorData);
+    rc.updateRoomModeratorALL(syncModeratorData);
+}
+
+function loadModeratorData() {
+    switchEveryonePrivacy.checked = localStorageSettings.moderator_video_start_privacy;
+    switchEveryoneMute.checked = localStorageSettings.moderator_audio_start_muted;
+    switchEveryoneHidden.checked = localStorageSettings.moderator_video_start_hidden;
+    switchEveryoneCantUnmute.checked = localStorageSettings.moderator_audio_cant_unmute;
+    switchEveryoneCantUnhide.checked = localStorageSettings.moderator_video_cant_unhide;
+    switchEveryoneCantShareScreen.checked = localStorageSettings.moderator_screen_cant_share;
+    switchEveryoneCantChatPrivately.checked = localStorageSettings.moderator_chat_cant_privately;
+    switchEveryoneCantChatPublicly.checked = localStorageSettings.moderator_chat_cant_publicly;
+    switchEveryoneCantChatChatGPT.checked = localStorageSettings.moderator_chat_cant_chatgpt;
+    switchEveryoneCantChatDeepSeek.checked = localStorageSettings.moderator_chat_cant_deep_seek;
+    switchEveryoneCantMediaSharing.checked = localStorageSettings.moderator_media_cant_sharing;
+    switchEveryoneCantPolls.checked = localStorageSettings.moderator_polls_cant_create;
+    switchDisconnectAllOnLeave.checked = localStorageSettings.moderator_disconnect_all_on_leave;
+}
+
+// Map the room's authoritative moderator state (rc._moderator) onto the switch UI.
+// Used when a peer is promoted mid-session so the panel matches the live room rules
+// (kept in sync across all peers via updateRoomModerator broadcasts) rather than this
+// peer's own localStorage defaults, and without broadcasting/overwriting the room state.
+function loadModeratorDataFromRoom() {
+    if (!rc || typeof rc.getModerator !== 'function') return;
+    const moderator = rc.getModerator();
+    if (!moderator) return;
+    switchEveryonePrivacy.checked = !!moderator.video_start_privacy;
+    switchEveryoneMute.checked = !!moderator.audio_start_muted;
+    switchEveryoneHidden.checked = !!moderator.video_start_hidden;
+    switchEveryoneCantUnmute.checked = !!moderator.audio_cant_unmute;
+    switchEveryoneCantUnhide.checked = !!moderator.video_cant_unhide;
+    switchEveryoneCantShareScreen.checked = !!moderator.screen_cant_share;
+    switchEveryoneCantChatPrivately.checked = !!moderator.chat_cant_privately;
+    switchEveryoneCantChatPublicly.checked = !!moderator.chat_cant_publicly;
+    switchEveryoneCantChatChatGPT.checked = !!moderator.chat_cant_chatgpt;
+    switchEveryoneCantChatDeepSeek.checked = !!moderator.chat_cant_deep_seek;
+    switchEveryoneCantMediaSharing.checked = !!moderator.media_cant_sharing;
+    switchEveryoneCantPolls.checked = !!moderator.polls_cant_create;
+}
+
+// Reflect a single moderator rule change on its switch, keeping every presenter's panel
+// in sync when another presenter toggles a rule. Programmatic .checked does not fire
+// onchange, so this never re-broadcasts.
+function updateModeratorSwitchUI(type, status) {
+    const switchByType = {
+        video_start_privacy: switchEveryonePrivacy,
+        audio_start_muted: switchEveryoneMute,
+        video_start_hidden: switchEveryoneHidden,
+        audio_cant_unmute: switchEveryoneCantUnmute,
+        video_cant_unhide: switchEveryoneCantUnhide,
+        screen_cant_share: switchEveryoneCantShareScreen,
+        chat_cant_privately: switchEveryoneCantChatPrivately,
+        chat_cant_publicly: switchEveryoneCantChatPublicly,
+        chat_cant_chatgpt: switchEveryoneCantChatChatGPT,
+        chat_cant_deep_seek: switchEveryoneCantChatDeepSeek,
+        media_cant_sharing: switchEveryoneCantMediaSharing,
+        polls_cant_create: switchEveryoneCantPolls,
+    };
+    const switchEl = switchByType[type];
+    if (switchEl) switchEl.checked = !!status;
+}
+
+function getModeratorData() {
+    return {
+        video_start_privacy: switchEveryonePrivacy.checked,
+        audio_start_muted: switchEveryoneMute.checked,
+        video_start_hidden: switchEveryoneHidden.checked,
+        audio_cant_unmute: switchEveryoneCantUnmute.checked,
+        video_cant_unhide: switchEveryoneCantUnhide.checked,
+        screen_cant_share: switchEveryoneCantShareScreen.checked,
+        chat_cant_privately: switchEveryoneCantChatPrivately.checked,
+        chat_cant_publicly: switchEveryoneCantChatPublicly.checked,
+        chat_cant_chatgpt: switchEveryoneCantChatChatGPT.checked,
+        chat_cant_deep_seek: switchEveryoneCantChatDeepSeek.checked,
+        media_cant_sharing: switchEveryoneCantMediaSharing.checked,
+        polls_cant_create: switchEveryoneCantPolls.checked,
+    };
 }
 
 function handleRulesBroadcasting() {

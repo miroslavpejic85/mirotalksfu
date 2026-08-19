@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.71 - Configuration File
+ * MiroTalk SFU v2.3.72 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1493,6 +1493,7 @@ module.exports = {
                 geolocationButton: process.env.SHOW_GEO_LOCATION !== 'false',
                 banButton: process.env.SHOW_BAN_BUTTON !== 'false',
                 ejectButton: process.env.SHOW_EJECT_BUTTON !== 'false',
+                presenterRoleButton: process.env.SHOW_PRESENTER_ROLE_BUTTON !== 'false',
                 drawingButton: process.env.SHOW_DRAWING_BUTTON !== 'false',
             },
 
@@ -1507,6 +1508,7 @@ module.exports = {
                 geolocationButton: process.env.SHOW_GEO_LOCATION !== 'false',
                 banButton: process.env.SHOW_BAN_BUTTON !== 'false',
                 ejectButton: process.env.SHOW_EJECT_BUTTON !== 'false',
+                presenterRoleButton: process.env.SHOW_PRESENTER_ROLE_BUTTON !== 'false',
             },
 
             // Chat interface controls
@@ -1537,6 +1539,7 @@ module.exports = {
                 geoLocationButton: process.env.SHOW_GEO_LOCATION !== 'false',
                 banButton: process.env.SHOW_BAN_BUTTON !== 'false',
                 ejectButton: process.env.SHOW_EJECT_BUTTON !== 'false',
+                presenterRoleButton: process.env.SHOW_PRESENTER_ROLE_BUTTON !== 'false',
             },
 
             // Whiteboard controls

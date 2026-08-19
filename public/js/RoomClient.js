@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.71
+ * @version 2.3.72
  *
  */
 
@@ -38,6 +38,8 @@ const html = {
     geolocation: 'fas fa-location-dot',
     ban: 'fas fa-ban',
     kickOut: 'fas fa-times',
+    presenterRole: 'fa-solid fa-user-shield',
+    presenterRoleRemove: 'fa-solid fa-user-shield',
     ghost: 'fas fa-ghost',
     undo: 'fas fa-undo',
     bg: 'fas fa-circle-half-stroke',
@@ -743,6 +745,10 @@ class RoomClient {
                 console.warn('7.1-WARNING ----> GLOBAL Room Lobby detected');
             }
 
+            // Room-level VideoAI availability, kept so handleRules can gate the tab correctly
+            // both at join and when a peer is promoted/demoted mid-session.
+            this.videoAIEnabled = room.videoAIEnabled || false;
+
             handleRules(isPresenter);
 
             // ###################################################################################################
@@ -818,7 +824,7 @@ class RoomClient {
                 this.whisperEnabled ? show('transcriptWhisperLi') : hide('transcriptWhisperLi');
             }
             // Check if VideoAI is enabled and hide to guests by default
-            if (!isPresenter || !room.videoAIEnabled) {
+            if (!isPresenter || !this.videoAIEnabled) {
                 VideoAI.enabled = false;
                 elemDisplay('tabVideoAIBtn', false);
             }
@@ -1282,6 +1288,7 @@ class RoomClient {
         this.socket.on('cmd', this.handleCmdData);
         this.socket.on('peerAction', this.handlePeerAction);
         this.socket.on('updatePeerInfo', this.handleUpdatePeerInfo);
+        this.socket.on('setPresenterRole', this.handleSetPresenterRole);
         this.socket.on('fileInfo', this.handleFileInfoData);
         this.socket.on('file', this.handleFileData);
         this.socket.on('shareVideoAction', this.handleShareVideoAction);
@@ -1487,6 +1494,11 @@ class RoomClient {
     handleUpdatePeerInfo = (data) => {
         console.log('SocketOn Peer info update:', data);
         this.updatePeerInfo(data.peer_name, data.peer_id, data.type, data.status, false, data.peer_presenter);
+    };
+
+    handleSetPresenterRole = (data) => {
+        console.log('SocketOn setPresenterRole:', data);
+        this.handlePresenterRole(data);
     };
 
     handleFileInfoData = (data) => {
@@ -3910,7 +3922,7 @@ class RoomClient {
     }
 
     async handleConsumer(id, type, stream, peer_name, peer_info) {
-        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw;
+        let elem, vb, d, p, i, cm, au, pip, fs, ts, sf, sm, sv, gl, ban, ko, pb, pm, pv, pn, ha, hg, mv, dw, role;
 
         let eDiv, eBtn, eVc; // expand buttons
 
@@ -3979,6 +3991,11 @@ class RoomClient {
                 gl = this.createButton(id + '___' + remotePeerId + '___geoLocation', html.geolocation);
                 ban = this.createButton(id + '___' + remotePeerId + '___ban', html.ban);
                 ko = this.createButton(id + '___' + remotePeerId + '___kickOut', html.kickOut);
+                role = this.createButton(
+                    id + '___' + remotePeerId + '___role',
+                    remotePeerPresenter ? html.presenterRoleRemove : html.presenterRole
+                );
+                if (remotePeerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
 
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
@@ -4006,6 +4023,14 @@ class RoomClient {
                 pv.value = 100;
 
                 // Build dropdown items
+                BUTTONS.consumerVideo.presenterRoleButton &&
+                    eVc.appendChild(
+                        this.createDropdownItem(
+                            role,
+                            remotePeerPresenter ? 'Remove presenter role' : 'Set as presenter',
+                            eVc
+                        )
+                    );
                 BUTTONS.consumerVideo.hideFromGridButton &&
                     eVc.appendChild(this.createDropdownItem(hg, 'Hide from grid', eVc));
                 eVc.appendChild(this.createDropdownItem(mv, 'Mirror', eVc));
@@ -4078,6 +4103,7 @@ class RoomClient {
                 this.handleGL(gl.id);
                 this.handleBAN(ban.id);
                 this.handleKO(ko.id);
+                this.handleRole(role.id, remotePeerId, remotePeerPresenter);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.handleZV(elem.id, d.id, remotePeerId);
                 this.popupPeerInfo(p.id, peer_info);
@@ -4249,7 +4275,7 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, hg, p, pm, pb, pv, st, ri;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, hg, p, pm, pb, pv, st, ri, role;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -4282,6 +4308,11 @@ class RoomClient {
             ban = this.createButton('remotePeer___' + peer_id + '___ban', html.ban);
             ko = this.createButton('remotePeer___' + peer_id + '___kickOut', html.kickOut);
             hg = this.createButton('remotePeer___' + peer_id + '___hideFromGrid', html.hideFromGrid);
+            role = this.createButton(
+                'remotePeer___' + peer_id + '___role',
+                peer_presenter ? html.presenterRoleRemove : html.presenterRole
+            );
+            if (peer_presenter) role.style.setProperty('color', '#5ad17f', 'important');
         } else {
             st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
         }
@@ -4318,15 +4349,16 @@ class RoomClient {
         if (remotePeer) {
             BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
             BUTTONS.videoOff.banButton && vb.appendChild(ban);
+            BUTTONS.videoOff.presenterRoleButton && vb.appendChild(role);
             BUTTONS.videoOff.geolocationButton && vb.appendChild(gl);
             BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
             BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
             BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
         }
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
-        remotePeer && BUTTONS.videoOff.hideFromGridButton && vb.appendChild(hg);
 
         vb.appendChild(au);
+        remotePeer && BUTTONS.videoOff.hideFromGridButton && vb.appendChild(hg);
         if (!remotePeer) vb.appendChild(st);
 
         d.appendChild(i);
@@ -4364,6 +4396,7 @@ class RoomClient {
             this.handleBAN(ban.id);
             this.handleKO(ko.id);
             this.handleHFG(hg.id, peer_id);
+            this.handleRole(role.id, peer_id, peer_presenter);
         } else {
             this.handlePV(this.audioConsumers.get(pv.id) + '___' + pv.id);
         }
@@ -4387,6 +4420,7 @@ class RoomClient {
             this.setTippy(ban.id, 'Ban', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
             this.setTippy(hg.id, 'Hide from grid', 'bottom');
+            this.setTippy(role.id, peer_presenter ? 'Remove presenter role' : 'Set as presenter', 'bottom');
         }
 
         remotePeer ? this.setPeerAudio(peer_id, peer_audio) : this.setIsAudio(peer_id, peer_audio);
@@ -4479,6 +4513,7 @@ class RoomClient {
                 this.socket.off('cmd');
                 this.socket.off('peerAction');
                 this.socket.off('updatePeerInfo');
+                this.socket.off('setPresenterRole');
                 this.socket.off('fileInfo');
                 this.socket.off('file');
                 this.socket.off('shareVideoAction');
@@ -11077,6 +11112,265 @@ class RoomClient {
     }
 
     // ####################################################
+    // HANDLE PRESENTER ROLE
+    // ###################################################
+
+    handleRole(uid, peer_id, peerIsPresenter) {
+        const btnRole = this.getId(uid);
+        if (btnRole) {
+            btnRole.dataset.peerPresenter = String(!!peerIsPresenter);
+            btnRole.addEventListener('click', () => {
+                const current = btnRole.dataset.peerPresenter === 'true';
+                this.setPresenterRole(peer_id, !current);
+            });
+        }
+    }
+
+    // Keep the role button icon/label in sync across the video tiles after a role change
+    updatePeerRoleButtons(peer_id, is_presenter) {
+        const buttons = document.querySelectorAll(`[id$="___${peer_id}___role"]`);
+        buttons.forEach((btn) => {
+            btn.dataset.peerPresenter = String(is_presenter);
+            btn.className = is_presenter ? html.presenterRoleRemove : html.presenterRole;
+            btn.style.setProperty('color', is_presenter ? '#5ad17f' : '', 'important');
+            const label = btn.nextElementSibling;
+            if (label && label.tagName === 'SPAN') {
+                label.textContent = is_presenter ? 'Remove presenter role' : 'Set as presenter';
+            }
+        });
+    }
+
+    setPresenterRole(peer_id, grant) {
+        if (!isPresenter) {
+            return this.userLog('warning', 'Only the presenter can change participant roles', 'top-end');
+        }
+        if (peer_id === this.peer_id) {
+            return this.userLog('warning', 'You cannot change your own role', 'top-end');
+        }
+        const data = {
+            room_id: this.room_id,
+            from_peer_name: this.peer_name,
+            from_peer_uuid: this.peer_uuid,
+            peer_id: peer_id,
+            action: grant ? 'grant' : 'revoke',
+        };
+        console.log('setPresenterRole', data);
+        this.socket.emit('setPresenterRole', data);
+    }
+
+    handlePresenterRole(data) {
+        const { peer_id, peer_name, is_presenter, from_peer_name } = data;
+
+        // Keep the cached peer info in sync so list/video re-renders reflect the new role
+        if (this.peers.has(peer_id)) {
+            this.peers.get(peer_id).peer_info.peer_presenter = is_presenter;
+        }
+
+        // Update the ⭐️ badge on the peer video tile name
+        this.updatePeerPresenterBadge(peer_id, is_presenter);
+
+        // Keep the per-video role buttons (icon/label) in sync
+        this.updatePeerRoleButtons(peer_id, is_presenter);
+
+        // My own role changed
+        if (peer_id === this.peer_id) {
+            isPresenter = is_presenter;
+            this.peer_info.peer_presenter = is_presenter;
+            const presenterEl = this.getId('isUserPresenter');
+            if (presenterEl) presenterEl.innerText = is_presenter;
+            // Apply presenter/guest permissions without re-running the room auto-setup, so the
+            // room state (broadcasting, lobby, recording, moderator) set by the original presenter
+            // is preserved instead of being reset to this peer's local defaults.
+            handleRules(is_presenter, false);
+            // Existing remote tiles were built with the previous role's flags; add/remove the
+            // presenter-only moderation items so their menus reflect the new role.
+            this.refreshRemoteVideoMenus();
+            this.userLog(
+                'info',
+                is_presenter
+                    ? `${from_peer_name} promoted you to presenter`
+                    : `${from_peer_name} removed your presenter role`,
+                'top-end',
+                6000
+            );
+        } else {
+            this.userLog(
+                'info',
+                is_presenter
+                    ? `${peer_name} is now a presenter`
+                    : `${peer_name} is no longer a presenter`,
+                'top-end',
+                6000
+            );
+        }
+
+        if (isParticipantsListOpen) getRoomParticipants();
+    }
+
+    updatePeerPresenterBadge(peer_id, is_presenter) {
+        const nameEl = this.getId(peer_id + '__name');
+        if (!nameEl) return;
+        const star = '⭐️ ';
+        // The visible name is stored in the first text node, preserving child elements (rec indicator)
+        const firstNode = nameEl.firstChild;
+        if (!firstNode || firstNode.nodeType !== Node.TEXT_NODE) return;
+        const text = firstNode.nodeValue;
+        const hasStar = text.startsWith(star);
+        if (is_presenter && !hasStar) {
+            firstNode.nodeValue = star + text;
+        } else if (!is_presenter && hasStar) {
+            firstNode.nodeValue = text.slice(star.length);
+        }
+    }
+
+    // Add or remove a presenter-only moderation control on an already-rendered tile menu,
+    // without re-consuming media. `container` is the dropdown (consumer) or menu bar (videoOff).
+    reconcilePresenterMenuItem(container, btnId, shouldExist, createFn) {
+        const existing = this.getId(btnId);
+        if (shouldExist && !existing) {
+            createFn();
+        } else if (!shouldExist && existing) {
+            const wrapper = existing.closest('.navbar-dropdown-item') || existing;
+            wrapper.remove();
+        }
+    }
+
+    // After a mid-session role change, reconcile the presenter-only moderation controls
+    // (set/remove presenter, geo location, ban, kick out) on every existing remote tile so
+    // the video-feed dropdowns and video-off tiles match the local user's new role.
+    refreshRemoteVideoMenus() {
+        const canModerate = isPresenter;
+
+        // Remote camera/screen tiles: controls live in a navbar dropdown (eVc)
+        this.videoMediaContainer.querySelectorAll('.Camera[id$="__video"]').forEach((tile) => {
+            const remotePeerId = tile.dataset.peerId;
+            if (!remotePeerId || remotePeerId === this.peer_id) return;
+
+            const consumerId = tile.id.replace('__video', '');
+            const vb = this.getId(consumerId + '__vb');
+            const expandBtn = vb ? vb.querySelector('[id$="_expandBtn"]') : null;
+            const eVc = expandBtn ? expandBtn._dropdownContent : null;
+            if (!eVc) return;
+
+            const peerPresenter = !!this.peers.get(remotePeerId)?.peer_info?.peer_presenter;
+            const prefix = `${consumerId}___${remotePeerId}___`;
+
+            this.reconcilePresenterMenuItem(
+                eVc,
+                `${prefix}role`,
+                canModerate && BUTTONS.consumerVideo.presenterRoleButton,
+                () => {
+                    const role = this.createButton(
+                        `${prefix}role`,
+                        peerPresenter ? html.presenterRoleRemove : html.presenterRole
+                    );
+                    if (peerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
+                    const item = this.createDropdownItem(
+                        role,
+                        peerPresenter ? 'Remove presenter role' : 'Set as presenter',
+                        eVc
+                    );
+                    eVc.insertBefore(item, eVc.firstChild);
+                    this.handleRole(role.id, remotePeerId, peerPresenter);
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                eVc,
+                `${prefix}geoLocation`,
+                canModerate && BUTTONS.consumerVideo.geolocationButton,
+                () => {
+                    const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
+                    eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
+                    this.handleGL(gl.id);
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                eVc,
+                `${prefix}ban`,
+                canModerate && BUTTONS.consumerVideo.banButton,
+                () => {
+                    const ban = this.createButton(`${prefix}ban`, html.ban);
+                    eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
+                    this.handleBAN(ban.id);
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                eVc,
+                `${prefix}kickOut`,
+                canModerate && BUTTONS.consumerVideo.ejectButton,
+                () => {
+                    const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
+                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                    this.handleKO(ko.id);
+                }
+            );
+        });
+
+        // Remote video-off tiles: controls are appended directly to the menu bar (vb)
+        this.videoMediaContainer.querySelectorAll('.Camera[id$="__videoOff"]').forEach((tile) => {
+            const peerId = tile.dataset.peerId;
+            if (!peerId || peerId === this.peer_id) return;
+
+            const vb = this.getId(peerId + '__vb');
+            if (!vb) return;
+
+            const peerPresenter = !!this.peers.get(peerId)?.peer_info?.peer_presenter;
+            const prefix = `remotePeer___${peerId}___`;
+
+            this.reconcilePresenterMenuItem(
+                vb,
+                `${prefix}kickOut`,
+                canModerate && BUTTONS.videoOff.ejectButton,
+                () => {
+                    const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
+                    vb.insertBefore(ko, vb.firstChild);
+                    this.handleKO(ko.id);
+                    if (!this.isMobileDevice) this.setTippy(ko.id, 'Eject', 'bottom');
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                vb,
+                `${prefix}ban`,
+                canModerate && BUTTONS.videoOff.banButton,
+                () => {
+                    const ban = this.createButton(`${prefix}ban`, html.ban);
+                    vb.insertBefore(ban, vb.firstChild);
+                    this.handleBAN(ban.id);
+                    if (!this.isMobileDevice) this.setTippy(ban.id, 'Ban', 'bottom');
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                vb,
+                `${prefix}role`,
+                canModerate && BUTTONS.videoOff.presenterRoleButton,
+                () => {
+                    const role = this.createButton(
+                        `${prefix}role`,
+                        peerPresenter ? html.presenterRoleRemove : html.presenterRole
+                    );
+                    if (peerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
+                    vb.insertBefore(role, vb.firstChild);
+                    this.handleRole(role.id, peerId, peerPresenter);
+                    if (!this.isMobileDevice) {
+                        this.setTippy(role.id, peerPresenter ? 'Remove presenter role' : 'Set as presenter', 'bottom');
+                    }
+                }
+            );
+            this.reconcilePresenterMenuItem(
+                vb,
+                `${prefix}geoLocation`,
+                canModerate && BUTTONS.videoOff.geolocationButton,
+                () => {
+                    const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
+                    vb.insertBefore(gl, vb.firstChild);
+                    this.handleGL(gl.id);
+                    if (!this.isMobileDevice) this.setTippy(gl.id, 'Geolocation', 'bottom');
+                }
+            );
+        });
+    }
+
+    // ####################################################
     // HANDLE VIDEO
     // ###################################################
 
@@ -11093,7 +11387,6 @@ class RoomClient {
             videoContainer.style.height = '100%';
             videoContainer.setAttribute('focus-mode', 'true');
         } else {
-            resizeVideoMedia();
             videoContainer.removeAttribute('focus-mode');
         }
         const children = this.videoMediaContainer.children;
@@ -11101,6 +11394,13 @@ class RoomClient {
             if (child.id != videoContainerId) {
                 child.style.display = isHideALLVideosActive ? 'none' : 'block';
             }
+        }
+        // Recompute the grid AFTER visibility changes so feeds lay out immediately
+        // instead of only after a manual window resize.
+        if (!isHideALLVideosActive) {
+            typeof applyParticipantGridVisibility === 'function'
+                ? applyParticipantGridVisibility()
+                : resizeVideoMedia();
         }
         if (this.isFollowMeActive && isPresenter) {
             const videoEl = videoContainer ? videoContainer.querySelector('video[name]') : null;
@@ -12077,6 +12377,19 @@ class RoomClient {
 
     handleUpdateRoomModerator(data) {
         switch (data.type) {
+            case 'video_start_privacy':
+                // Policy flag only: never applies privacy to an already-joined peer
+                this._moderator.video_start_privacy = data.status;
+                if (isPresenter) rc.roomMessage('video_start_privacy', data.status);
+                break;
+            case 'audio_start_muted':
+                this._moderator.audio_start_muted = data.status;
+                if (isPresenter) rc.roomMessage('audio_start_muted', data.status);
+                break;
+            case 'video_start_hidden':
+                this._moderator.video_start_hidden = data.status;
+                if (isPresenter) rc.roomMessage('video_start_hidden', data.status);
+                break;
             case 'audio_cant_unmute':
                 this._moderator.audio_cant_unmute = data.status;
                 this._moderator.audio_cant_unmute ? hide(tabAudioDevicesBtn) : show(tabAudioDevicesBtn);
@@ -12115,11 +12428,15 @@ class RoomClient {
             default:
                 break;
         }
+        // Keep this peer's moderator panel in sync when another presenter changes a rule
+        if (typeof updateModeratorSwitchUI === 'function') updateModeratorSwitchUI(data.type, data.status);
     }
 
     handleUpdateRoomModeratorALL(data) {
         this._moderator = data;
         console.log('Update Room Moderator data all', this._moderator);
+        // Reflect the full moderator state on the switches so every presenter stays aligned
+        if (typeof loadModeratorDataFromRoom === 'function') loadModeratorDataFromRoom();
     }
 
     getModerator() {

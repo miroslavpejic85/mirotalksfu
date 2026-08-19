@@ -4897,6 +4897,27 @@ hr {
     color: #ffffff;
 }
 
+.presenter-peer-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    margin-left: 4px;
+    color: #5ad17f;
+    font-size: 14px;
+    line-height: 1;
+}
+
+.presenter-peer-badge[role='button'] {
+    cursor: pointer;
+}
+
+.presenter-peer-badge[role='button']:hover {
+    color: #ffffff;
+}
+
 /*--------------------------------------------------------------
 # Video AI Avatars
 --------------------------------------------------------------*/

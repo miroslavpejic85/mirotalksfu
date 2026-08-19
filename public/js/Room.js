@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.71
+ * @version 2.3.72
  *
  */
 
@@ -69,6 +69,7 @@ let recCodecs = null;
 
 const _PEER = {
     presenter: '<i class="fa-solid fa-user-shield"></i>',
+    presenterActive: '<i class="fa-solid fa-user-shield" style="color: #5ad17f;"></i>',
     guest: '<i class="fa-solid fa-signal"></i>',
     audioOn: '<i class="fas fa-microphone"></i>',
     audioOff: '<i class="fas fa-microphone-slash red"></i>',
@@ -6879,9 +6880,18 @@ function getParticipantsList(peers) {
         const peer_chat_active = rc.chatPeerId === peer_id ? ' active' : '';
 
         const peer_pinned = pinnedPeerId === peer_id;
+        const peer_is_presenter = !!peer_info.peer_presenter;
         const peer_hidden = locallyHiddenPeerIds.has(peer_id);
         const peer_hidden_badge = peer_hidden
             ? ` <span id="${peer_id}___pHiddenBadge" class="hidden-peer-badge" role="button" tabindex="0" onclick="event.stopPropagation(); toggleParticipantGridVisibility('${peer_id}')"><i class="fas fa-eye-slash"></i></span>`
+            : '';
+        // Presenter status badge; clickable to remove the role when the viewer is a presenter
+        const peer_presenter_badge = peer_is_presenter
+            ? ` <span id="${peer_id}___pPresenterBadge" class="presenter-peer-badge"${
+                  isPresenter
+                      ? ` role="button" tabindex="0" onclick="event.stopPropagation(); rc.setPresenterRole('${peer_id}', false)"`
+                      : ''
+              }>${_PEER.presenter}</span>`
             : '';
 
         const pinMenuItem = renderParticipantMenuItem(
@@ -6902,12 +6912,28 @@ function getParticipantsList(peers) {
                 label: peer_hidden ? 'Show in grid' : 'Hide from grid',
             })
         );
+        const roleMenuItem = BUTTONS.participantsList.presenterRoleButton
+            ? renderParticipantMenuItem(
+                  renderParticipantActionButton({
+                      buttonClass: 'btn-sm ml5',
+                      buttonId: `${peer_id}___pRole`,
+                      onClick: `rc.setPresenterRole('${peer_id}', ${!peer_is_presenter})`,
+                      iconHtml: peer_is_presenter ? _PEER.presenterActive : _PEER.presenter,
+                      label: peer_is_presenter ? 'Remove presenter role' : 'Set as presenter',
+                  })
+              )
+            : '';
 
         // NOT ME
         if (socket.id !== peer_id) {
             // PRESENTER HAS MORE OPTIONS
             if (isRulesActive && isPresenter) {
                 let menuItems = renderParticipantMenuHeader(peer_name_limited, avatarImg);
+
+                if (roleMenuItem) {
+                    menuItems += renderParticipantMenuGroup('Role');
+                    menuItems += roleMenuItem;
+                }
 
                 menuItems += renderParticipantMenuGroup('View');
                 menuItems += pinMenuItem;
@@ -7028,6 +7054,7 @@ function getParticipantsList(peers) {
                 }
 
                 buttons += peer_hidden_badge;
+                buttons += peer_presenter_badge;
 
                 li += renderParticipantItem({
                     itemId: peer_id,
@@ -7105,6 +7132,7 @@ function getParticipantsList(peers) {
                 }
 
                 buttons += peer_hidden_badge;
+                buttons += peer_presenter_badge;
 
                 li += renderParticipantItem({
                     itemId: peer_id,
@@ -7146,6 +7174,11 @@ function setParticipantsTippy(peers) {
 
             const peerHiddenBadge = rc.getId(peer_id + '___pHiddenBadge');
             if (peerHiddenBadge) setTippy(peerHiddenBadge.id, 'Show in grid', 'top');
+
+            const peerPresenterBadge = rc.getId(peer_id + '___pPresenterBadge');
+            if (peerPresenterBadge) {
+                setTippy(peerPresenterBadge.id, isPresenter ? 'Remove presenter role' : 'Presenter', 'top');
+            }
         }
     }
 }
@@ -8084,7 +8117,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.71',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.72',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

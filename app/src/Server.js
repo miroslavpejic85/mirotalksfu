@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.71
+ * @version 2.3.72
  *
  */
 
@@ -3472,6 +3472,64 @@ function startServer() {
                 : room.sendTo(data.peer_id, 'peerAction', data);
         });
 
+        socket.on('setPresenterRole', async (dataObject) => {
+            if (!roomExists(socket)) return;
+
+            const data = checkXSS(dataObject);
+
+            if (!Validator.isValidData(data)) return;
+
+            // Only an existing presenter can grant or revoke the presenter role
+            const isPresenter = isPeerPresenter(socket.room_id, socket.id, data.from_peer_name, data.from_peer_uuid);
+            if (!isPresenter) return;
+
+            const room = getRoom(socket);
+            if (!room) return;
+
+            const targetPeer = room.getPeer(data.peer_id);
+            if (!targetPeer) return;
+
+            const grant = data.action === 'grant';
+
+            // A presenter defined in the host configuration cannot be demoted at runtime
+            if (!grant && hostCfg?.presenters?.list?.includes(targetPeer.peer_name)) {
+                log.debug('setPresenterRole - cannot revoke a configured presenter', {
+                    peer_name: targetPeer.peer_name,
+                });
+                return;
+            }
+
+            if (!(socket.room_id in presenters)) presenters[socket.room_id] = {};
+
+            if (grant) {
+                presenters[socket.room_id][data.peer_id] = {
+                    peer_ip: targetPeer.peer_info?.peer_ip || '',
+                    peer_name: targetPeer.peer_name,
+                    peer_uuid: targetPeer.peer_uuid,
+                    is_presenter: true,
+                };
+            } else if (presenters[socket.room_id]) {
+                delete presenters[socket.room_id][data.peer_id];
+            }
+
+            targetPeer.updatePeerInfo({ type: 'presenter', status: grant });
+
+            log.debug('setPresenterRole', {
+                room_id: socket.room_id,
+                from: data.from_peer_name,
+                target: targetPeer.peer_name,
+                grant: grant,
+            });
+
+            // Notify everyone (including the target and the sender) to refresh roles/UI
+            room.sendToAll('setPresenterRole', {
+                peer_id: data.peer_id,
+                peer_name: targetPeer.peer_name,
+                is_presenter: grant,
+                from_peer_name: data.from_peer_name,
+            });
+        });
+
         socket.on('updatePeerInfo', (dataObject) => {
             if (!roomExists(socket)) return;
 
@@ -3534,6 +3592,9 @@ function startServer() {
             room.updateRoomModerator(moderator);
 
             switch (moderator.type) {
+                case 'video_start_privacy':
+                case 'audio_start_muted':
+                case 'video_start_hidden':
                 case 'audio_cant_unmute':
                 case 'video_cant_unhide':
                 case 'screen_cant_share':
