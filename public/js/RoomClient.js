@@ -695,6 +695,10 @@ class RoomClient {
         } else {
             await this.startLocalMedia();
         }
+
+        // Ensure my own tile shows the presenter shield once media/tile exists,
+        // regardless of the order in which the local video tile was built.
+        this.updatePeerPresenterBadge(this.peer_id, isPresenter);
     }
 
     async loadDeviceAndInitTransports() {
@@ -3221,7 +3225,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = this.peer_id + '__name';
                 p.className = html.userName;
-                p.innerText = (isPresenter ? '⭐️ ' : '') + this.peer_name + ' (me)';
+                this.setPeerNameWithPresenter(p, isPresenter, this.peer_name + ' (me)');
 
                 ri = this.createElement(this.peer_id + '__recIndicator', 'span', 'rec-indicator');
                 ri.innerHTML = '🔴 ';
@@ -3995,7 +3999,7 @@ class RoomClient {
                     id + '___' + remotePeerId + '___role',
                     remotePeerPresenter ? html.presenterRoleRemove : html.presenterRole
                 );
-                if (remotePeerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
+                if (remotePeerPresenter) role.classList.add('presenter-role-active');
 
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
@@ -4004,7 +4008,7 @@ class RoomClient {
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
                 p.className = html.userName;
-                p.innerText = (remotePeerPresenter ? '⭐️ ' : '') + peer_name;
+                this.setPeerNameWithPresenter(p, remotePeerPresenter, peer_name);
 
                 pm = document.createElement('div');
                 pb = document.createElement('div');
@@ -4312,7 +4316,7 @@ class RoomClient {
                 'remotePeer___' + peer_id + '___role',
                 peer_presenter ? html.presenterRoleRemove : html.presenterRole
             );
-            if (peer_presenter) role.style.setProperty('color', '#5ad17f', 'important');
+            if (peer_presenter) role.classList.add('presenter-role-active');
         } else {
             st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
         }
@@ -4324,7 +4328,7 @@ class RoomClient {
         p = document.createElement('p');
         p.id = peer_id + '__name';
         p.className = html.userName;
-        p.innerText = (peer_presenter ? '⭐️ ' : '') + peer_name + (remotePeer ? '' : ' (me) ');
+        this.setPeerNameWithPresenter(p, peer_presenter, peer_name + (remotePeer ? '' : ' (me) '));
 
         if (!remotePeer) {
             ri = this.createElement(peer_id + '__recIndicator', 'span', 'rec-indicator');
@@ -11132,7 +11136,7 @@ class RoomClient {
         buttons.forEach((btn) => {
             btn.dataset.peerPresenter = String(is_presenter);
             btn.className = is_presenter ? html.presenterRoleRemove : html.presenterRole;
-            btn.style.setProperty('color', is_presenter ? '#5ad17f' : '', 'important');
+            btn.classList.toggle('presenter-role-active', is_presenter);
             const label = btn.nextElementSibling;
             if (label && label.tagName === 'SPAN') {
                 label.textContent = is_presenter ? 'Remove presenter role' : 'Set as presenter';
@@ -11166,7 +11170,7 @@ class RoomClient {
             this.peers.get(peer_id).peer_info.peer_presenter = is_presenter;
         }
 
-        // Update the ⭐️ badge on the peer video tile name
+        // Update the presenter shield badge on the peer video tile name
         this.updatePeerPresenterBadge(peer_id, is_presenter);
 
         // Keep the per-video role buttons (icon/label) in sync
@@ -11207,19 +11211,26 @@ class RoomClient {
         if (isParticipantsListOpen) getRoomParticipants();
     }
 
+    createPresenterNameBadge() {
+        const badge = document.createElement('i');
+        badge.className = 'fa-solid fa-user-shield presenter-name-badge';
+        return badge;
+    }
+
+    setPeerNameWithPresenter(nameEl, is_presenter, displayName) {
+        nameEl.textContent = '';
+        if (is_presenter) nameEl.appendChild(this.createPresenterNameBadge());
+        nameEl.appendChild(document.createTextNode(displayName));
+    }
+
     updatePeerPresenterBadge(peer_id, is_presenter) {
         const nameEl = this.getId(peer_id + '__name');
         if (!nameEl) return;
-        const star = '⭐️ ';
-        // The visible name is stored in the first text node, preserving child elements (rec indicator)
-        const firstNode = nameEl.firstChild;
-        if (!firstNode || firstNode.nodeType !== Node.TEXT_NODE) return;
-        const text = firstNode.nodeValue;
-        const hasStar = text.startsWith(star);
-        if (is_presenter && !hasStar) {
-            firstNode.nodeValue = star + text;
-        } else if (!is_presenter && hasStar) {
-            firstNode.nodeValue = text.slice(star.length);
+        const existing = nameEl.querySelector('.presenter-name-badge');
+        if (is_presenter && !existing) {
+            nameEl.insertBefore(this.createPresenterNameBadge(), nameEl.firstChild);
+        } else if (!is_presenter && existing) {
+            existing.remove();
         }
     }
 
@@ -11264,7 +11275,7 @@ class RoomClient {
                         `${prefix}role`,
                         peerPresenter ? html.presenterRoleRemove : html.presenterRole
                     );
-                    if (peerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
+                    if (peerPresenter) role.classList.add('presenter-role-active');
                     const item = this.createDropdownItem(
                         role,
                         peerPresenter ? 'Remove presenter role' : 'Set as presenter',
@@ -11348,7 +11359,7 @@ class RoomClient {
                         `${prefix}role`,
                         peerPresenter ? html.presenterRoleRemove : html.presenterRole
                     );
-                    if (peerPresenter) role.style.setProperty('color', '#5ad17f', 'important');
+                    if (peerPresenter) role.classList.add('presenter-role-active');
                     vb.insertBefore(role, vb.firstChild);
                     this.handleRole(role.id, peerId, peerPresenter);
                     if (!this.isMobileDevice) {

@@ -4918,6 +4918,24 @@ hr {
     color: #ffffff;
 }
 
+.presenter-role-active {
+    color: #5ad17f !important;
+}
+
+.presenter-name-badge {
+    /* Override #videoMediaContainer i { position:absolute; display:none } which hides tile icons by default */
+    position: static !important;
+    display: inline-block !important;
+    top: auto !important;
+    width: auto !important;
+    height: auto !important;
+    padding: 0 !important;
+    margin: 0 4px 0 0 !important;
+    background: transparent !important;
+    color: #5ad17f !important;
+    font-size: inherit !important;
+}
+
 /*--------------------------------------------------------------
 # Video AI Avatars
 --------------------------------------------------------------*/
