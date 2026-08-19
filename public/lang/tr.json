@@ -241,6 +241,8 @@
         "Private Message": "Özel mesaj",
         "Send File": "Dosya gönder",
         "Send Video/Audio": "Video/ses gönder",
+        "Set as presenter": "Sunum yapan olarak ayarla",
+        "Remove presenter role": "Sunum yapan rolünü kaldır",
         "Kick Out": "Çıkar",
         "Drag and drop a file": "Bir dosyayı sürükleyip bırakın",
         "or click to browse from your device": "veya cihazınızdan gözatmak için tıklayın",
