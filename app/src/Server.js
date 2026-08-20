@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.73
+ * @version 2.3.74
  *
  */
 
@@ -3117,6 +3117,8 @@ function startServer() {
                     const { peer_name, peer_uuid } = data;
                     const isPresenter = isPeerPresenter(socket.room_id, socket.id, peer_name, peer_uuid);
                     if (!isPresenter) return;
+                    // Only the server API (endMeeting) may force a redirect, never a peer
+                    delete data.redirect;
                     break;
                 case 'peerAudio':
                     // Keep producer volume to update consumer on join room...

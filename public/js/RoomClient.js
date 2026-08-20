@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.73
+ * @version 2.3.74
  *
  */
 
@@ -7225,6 +7225,16 @@ class RoomClient {
         }
     }
 
+    isSafeRedirectURL(url) {
+        if (!url || typeof url !== 'string') return false;
+        try {
+            const parsed = new URL(url, window.location.href);
+            return parsed.protocol === 'http:' || parsed.protocol === 'https:';
+        } catch {
+            return false;
+        }
+    }
+
     isImageURL(input) {
         if (!input || typeof input !== 'string') return false;
         try {
@@ -11511,7 +11521,7 @@ class RoomClient {
 
     handleEjectAllFromRoom(cmd) {
         if (typeof preventExit !== 'undefined') preventExit = false;
-        if (cmd.redirect) return openURL(cmd.redirect);
+        if (cmd.redirect && this.isSafeRedirectURL(cmd.redirect)) return openURL(cmd.redirect);
         // Detach disconnect / reconnect handlers BEFORE exiting.
         if (this.socket) {
             this.socket.off('disconnect');

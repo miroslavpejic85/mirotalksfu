@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.73 - Configuration File
+ * MiroTalk SFU v2.3.74 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -519,7 +519,11 @@ module.exports = {
          *
          * Presenter Management:
          * --------------------
-         * - list        : Array of usernames who can be presenters
+         * - list        : Array of usernames who can be presenters.
+         *                 WARNING: with no auth provider enabled (protected / user_auth / OIDC),
+         *                 the display name is unverified client input, so each entry acts as a
+         *                 shared secret. Use unique, non-guessable values (never a real name or
+         *                 email) or anyone who guesses it becomes presenter. Empty by default.
          * - join_first  : First joiner becomes presenter (default: true)
          *
          * Documentation:
@@ -583,7 +587,7 @@ module.exports = {
                     ? process.env.PRESENTERS.split(splitChar)
                           .map((presenter) => presenter.trim())
                           .filter((presenter) => presenter !== '')
-                    : ['Miroslav Pejic', 'miroslav.pejic.85@gmail.com'],
+                    : [], // Empty by default: a shipped name is a public credential. Set PRESENTERS to unique, non-guessable values.
                 join_first: process.env.PRESENTER_JOIN_FIRST !== 'false',
             },
         },
