@@ -33,5 +33,6 @@ We would like to extend our gratitude to the following individuals for their res
 | `Florian LELEU`                                      | https://hosting.cognix-systems.com                                            |
 | `Nozomu Sasaki (Paul)`                               | https://github.com/morimori-dev \| https://www.linkedin.com/in/nozomu-sasaki/ |
 | `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | https://github.com/shukla304                                                  |
+| `Tyler Boykin`                                       | https://github.com/CaptBoykin                                                 |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
