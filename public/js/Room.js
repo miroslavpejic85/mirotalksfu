@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.72
+ * @version 2.3.73
  *
  */
 
@@ -2364,6 +2364,7 @@ function handleButtons() {
     if (exitLeaveBtn) exitLeaveBtn.onclick = handleExitLeave;
     if (exitLeaveAllBtn) exitLeaveAllBtn.onclick = handleExitLeaveForAll;
     document.addEventListener('click', handleExitMenuOutsideClick);
+    setupExitMenuHover();
 
     shareButton.onclick = () => {
         shareRoom(true);
@@ -8117,7 +8118,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.72',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.73',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -8967,4 +8968,25 @@ function handleExitMenuOutsideClick(e) {
     if (!exitDropdown || !exitMenu) return;
     if (exitMenu.classList.contains('hidden')) return;
     if (!exitDropdown.contains(e.target)) hide(exitMenu);
+}
+
+function setupExitMenuHover() {
+    if (!isDesktopDevice || !exitDropdown || !exitMenu) return;
+    let closeTimeout;
+    const cancelClose = () => {
+        if (!closeTimeout) return;
+        clearTimeout(closeTimeout);
+        closeTimeout = null;
+    };
+    const scheduleClose = () => {
+        cancelClose();
+        closeTimeout = setTimeout(() => hide(exitMenu), 400);
+    };
+    exitDropdown.addEventListener('mouseenter', () => {
+        if (!isPresenter) return; // Non-presenters have no dropdown to show
+        cancelClose();
+        if (exitLeaveAllBtn) show(exitLeaveAllBtn);
+        show(exitMenu);
+    });
+    exitDropdown.addEventListener('mouseleave', scheduleClose);
 }

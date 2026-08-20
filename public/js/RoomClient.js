@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.72
+ * @version 2.3.73
  *
  */
 
@@ -11200,9 +11200,7 @@ class RoomClient {
         } else {
             this.userLog(
                 'info',
-                is_presenter
-                    ? `${peer_name} is now a presenter`
-                    : `${peer_name} is no longer a presenter`,
+                is_presenter ? `${peer_name} is now a presenter` : `${peer_name} is no longer a presenter`,
                 'top-end',
                 6000
             );
@@ -11295,16 +11293,11 @@ class RoomClient {
                     this.handleGL(gl.id);
                 }
             );
-            this.reconcilePresenterMenuItem(
-                eVc,
-                `${prefix}ban`,
-                canModerate && BUTTONS.consumerVideo.banButton,
-                () => {
-                    const ban = this.createButton(`${prefix}ban`, html.ban);
-                    eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
-                    this.handleBAN(ban.id);
-                }
-            );
+            this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.consumerVideo.banButton, () => {
+                const ban = this.createButton(`${prefix}ban`, html.ban);
+                eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
+                this.handleBAN(ban.id);
+            });
             this.reconcilePresenterMenuItem(
                 eVc,
                 `${prefix}kickOut`,
@@ -11328,28 +11321,18 @@ class RoomClient {
             const peerPresenter = !!this.peers.get(peerId)?.peer_info?.peer_presenter;
             const prefix = `remotePeer___${peerId}___`;
 
-            this.reconcilePresenterMenuItem(
-                vb,
-                `${prefix}kickOut`,
-                canModerate && BUTTONS.videoOff.ejectButton,
-                () => {
-                    const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
-                    vb.insertBefore(ko, vb.firstChild);
-                    this.handleKO(ko.id);
-                    if (!this.isMobileDevice) this.setTippy(ko.id, 'Eject', 'bottom');
-                }
-            );
-            this.reconcilePresenterMenuItem(
-                vb,
-                `${prefix}ban`,
-                canModerate && BUTTONS.videoOff.banButton,
-                () => {
-                    const ban = this.createButton(`${prefix}ban`, html.ban);
-                    vb.insertBefore(ban, vb.firstChild);
-                    this.handleBAN(ban.id);
-                    if (!this.isMobileDevice) this.setTippy(ban.id, 'Ban', 'bottom');
-                }
-            );
+            this.reconcilePresenterMenuItem(vb, `${prefix}kickOut`, canModerate && BUTTONS.videoOff.ejectButton, () => {
+                const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
+                vb.insertBefore(ko, vb.firstChild);
+                this.handleKO(ko.id);
+                if (!this.isMobileDevice) this.setTippy(ko.id, 'Eject', 'bottom');
+            });
+            this.reconcilePresenterMenuItem(vb, `${prefix}ban`, canModerate && BUTTONS.videoOff.banButton, () => {
+                const ban = this.createButton(`${prefix}ban`, html.ban);
+                vb.insertBefore(ban, vb.firstChild);
+                this.handleBAN(ban.id);
+                if (!this.isMobileDevice) this.setTippy(ban.id, 'Ban', 'bottom');
+            });
             this.reconcilePresenterMenuItem(
                 vb,
                 `${prefix}role`,
