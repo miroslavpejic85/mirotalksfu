@@ -1731,11 +1731,19 @@ body {
     flex-wrap: wrap;
 }
 
-.btn-rtmp-preset {
-    flex: 1;
+/* `.tabcontent button` forces width:100%/text-align:left/margin-top, undo it here so the presets stay on one row */
+.rtmp-preset-buttons .btn-rtmp-preset {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 1 1 0;
+    width: auto;
     min-width: 80px;
-    padding: 6px 10px;
+    margin-top: 0;
+    padding: 8px 10px;
     font-size: 12px;
+    text-align: center;
     background: var(--select-bg);
     color: #fff;
     border: var(--border);
@@ -1752,7 +1760,22 @@ body {
     color: rgb(8, 189, 89);
 }
 .btn-rtmp-preset i {
-    margin-right: 4px;
+    font-size: 14px;
+    line-height: 1;
+}
+
+/* Brand colors for the RTMP destination presets */
+#rtmpPresetYouTube i {
+    color: #ff0000;
+}
+#rtmpPresetFacebook i {
+    color: #1877f2;
+}
+#rtmpPresetTwitch i {
+    color: #9146ff;
+}
+#rtmpPresetCustom i {
+    color: #08bd59;
 }
 
 #rtmpCustomDestination,
