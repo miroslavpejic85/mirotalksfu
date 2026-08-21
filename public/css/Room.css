@@ -1731,6 +1731,10 @@ body {
     flex-wrap: wrap;
 }
 
+#rtmpCustomDestination > p {
+    margin-bottom: 8px;
+}
+
 /* `.tabcontent button` forces width:100%/text-align:left/margin-top, undo it here so the presets stay on one row */
 .rtmp-preset-buttons .btn-rtmp-preset {
     display: inline-flex;
@@ -1762,6 +1766,11 @@ body {
 .btn-rtmp-preset i {
     font-size: 14px;
     line-height: 1;
+}
+
+#mySettings .rtmp-preset-buttons .btn-rtmp-preset i {
+    margin: 0;
+    padding: 0;
 }
 
 /* Brand colors for the RTMP destination presets */
