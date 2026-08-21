@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.76 - Configuration File
+ * MiroTalk SFU v2.3.77 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -242,7 +242,9 @@ module.exports = {
          * - appName            : Application name (default: 'live')
          * - streamKey          : Optional authentication key (auto-generated UUID if empty)
          * - secret             : Must match NodeMediaServer's config.js (default: 'mirotalkRtmpSecret')
-         * - apiSecret          : WebRTC→RTMP API secret (default: 'mirotalkRtmpApiSecret')
+         * - apiSecret          : WebRTC→RTMP API secret. NO DEFAULT: set RTMP_API_SECRET to a strong,
+         *                        random value. When empty, /activeStreams, /initRTMP, /streamRTMP and
+         *                        /stopRTMP reject every request.
          * - expirationHours    : Stream URL expiry in hours (default: 4)
          * - dir                : Video storage directory (Relative to app/src/ default: app/rtmp)
          * - ffmpegPath         : FFmpeg binary path (auto-detected)
@@ -350,7 +352,7 @@ module.exports = {
             appName: process.env.RTMP_APP_NAME || 'live',
             streamKey: process.env.RTMP_STREAM_KEY || '',
             secret: process.env.RTMP_SECRET || 'mirotalkRtmpSecret',
-            apiSecret: process.env.RTMP_API_SECRET || 'mirotalkRtmpApiSecret',
+            apiSecret: process.env.RTMP_API_SECRET || '',
             expirationHours: parseInt(process.env.RTMP_EXPIRATION_HOURS) || 4,
             dir: process.env.RTMP_DIR || '../rtmp',
             ffmpegPath: RTMP_FFMPEG_PATH,

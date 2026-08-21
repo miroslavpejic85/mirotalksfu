@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.76
+ * @version 2.3.77
  *
  */
 
@@ -245,9 +245,20 @@ const brandHtmlInjection = config?.ui?.brand?.htmlInjection ?? true;
 // Incoming Stream to RTPM
 const { v4: uuidv4 } = require('uuid');
 const crypto = require('crypto-js');
+const nodeCrypto = require('node:crypto');
 const RtmpStreamer = require('./RtmpStreamer.js'); // Import the RtmpStreamer class
 const rtmpCfg = config?.media?.rtmp;
 const rtmpDir = rtmpCfg?.dir || 'rtmp';
+
+// Secrets previously shipped as defaults: treated as unset so they can never authorize a request.
+const RTMP_LEGACY_DEFAULT_API_SECRETS = ['mirotalkRtmpApiSecret'];
+
+function safeCompareSecret(provided, expected) {
+    const a = Buffer.from(String(provided));
+    const b = Buffer.from(String(expected));
+    if (a.length !== b.length) return false;
+    return nodeCrypto.timingSafeEqual(a, b);
+}
 
 // Compute total active RTMP streams from actual sources (live + file + URL)
 function getRtmpTotalActiveStreamsCount() {
@@ -309,6 +320,15 @@ const recUploadTokenExp = config?.media?.recording?.uploadTokenExp || '24h';
 function createRecUploadToken(roomId) {
     return jwt.sign({ scope: 'rec-upload', roomId: String(roomId) }, jwtCfg.JWT_KEY, {
         expiresIn: recUploadTokenExp,
+    });
+}
+
+// Create a signed token bound to a room, authorizing the /rtmp streamer page opened by
+// that peer to call the RTMP HTTP endpoints without sharing the server-wide apiSecret.
+function createRtmpStreamToken(roomId) {
+    const hours = parseInt(config?.media?.rtmp?.expirationHours, 10) || 4;
+    return jwt.sign({ scope: 'rtmp-stream', roomId: String(roomId) }, jwtCfg.JWT_KEY, {
+        expiresIn: `${hours}h`,
     });
 }
 
@@ -1560,14 +1580,33 @@ function startServer() {
     // ###############################################################
 
     function checkRTMPApiSecret(req, res, next) {
-        const expectedApiSecret = rtmpCfg && rtmpCfg.apiSecret;
-        const apiSecret = req.headers.authorization;
+        const authHeader = req.headers.authorization || '';
 
-        if (!apiSecret || apiSecret !== expectedApiSecret) {
-            log.warn('RTMP apiSecret Unauthorized', {
-                apiSecret: apiSecret,
-                expectedApiSecret: expectedApiSecret,
-            });
+        // Preferred path: per-session token issued on join to the peer that opened /rtmp.
+        if (authHeader.startsWith('Bearer ')) {
+            try {
+                const decoded = jwt.verify(authHeader.slice(7).trim(), jwtCfg.JWT_KEY);
+                if (decoded && decoded.scope === 'rtmp-stream' && decoded.roomId) {
+                    req.rtmpRoomId = String(decoded.roomId);
+                    return next();
+                }
+            } catch (err) {
+                log.warn('RTMP stream token rejected', { error: err.message });
+            }
+            return res.status(401).send('Unauthorized');
+        }
+
+        // Fallback for external/programmatic callers using the server-wide secret.
+        const expectedApiSecret = (rtmpCfg && rtmpCfg.apiSecret) || '';
+
+        // Fail closed: an unset or shipped-default secret is a public credential, not an authorization.
+        if (!expectedApiSecret || RTMP_LEGACY_DEFAULT_API_SECRETS.includes(expectedApiSecret)) {
+            log.warn('RTMP apiSecret not configured, rejecting request. Set a strong RTMP_API_SECRET');
+            return res.status(401).send('Unauthorized');
+        }
+
+        if (!authHeader || !safeCompareSecret(authHeader, expectedApiSecret)) {
+            log.warn('RTMP apiSecret Unauthorized');
             return res.status(401).send('Unauthorized');
         }
         next();
@@ -1581,6 +1620,12 @@ function startServer() {
             return res.status(429).send('Maximum number of streams reached, please try later!');
         }
         next();
+    }
+
+    // A token-authorized caller may only feed/stop streams started by its own room.
+    function isRtmpStreamOwner(req, stream) {
+        if (!req.rtmpRoomId) return true; // server-wide apiSecret caller
+        return stream.ownerRoomId === req.rtmpRoomId;
     }
 
     app.get('/activeStreams', checkRTMPApiSecret, (req, res) => {
@@ -1649,6 +1694,7 @@ function startServer() {
 
         const stream = new RtmpStreamer(rtmp, rtmpStreamKey);
         stream.lastActivity = Date.now();
+        stream.ownerRoomId = req.rtmpRoomId || null;
         streams[rtmpStreamKey] = stream;
 
         log.info('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
@@ -1673,6 +1719,10 @@ function startServer() {
             return res.status(404).send('FFmpeg Stream not found');
         }
 
+        if (!isRtmpStreamOwner(req, stream)) {
+            return res.status(403).send('Forbidden');
+        }
+
         log.debug('Received video data', {
             // data: req.body.slice(0, 20).toString('hex'),
             key: rtmpStreamKey,
@@ -1693,6 +1743,9 @@ function startServer() {
         const stream = streams[rtmpStreamKey];
 
         if (stream) {
+            if (!isRtmpStreamOwner(req, stream)) {
+                return res.status(403).send('Forbidden');
+            }
             stream.end();
             delete streams[rtmpStreamKey];
             log.debug('Active RTMP Streams', { total: getRtmpTotalActiveStreamsCount() });
@@ -2186,6 +2239,14 @@ function startServer() {
         if (jwtCfg.JWT_KEY === 'mirotalksfu_jwt_secret') {
             log.warn('WARNING: JWT_SECRET is set to the default value. Change it before deploying!');
         }
+        if (rtmpEnabled) {
+            const rtmpApiSecret = rtmpCfg?.apiSecret || '';
+            if (!rtmpApiSecret || RTMP_LEGACY_DEFAULT_API_SECRETS.includes(rtmpApiSecret)) {
+                log.warn(
+                    'WARNING: RTMP is enabled but RTMP_API_SECRET is unset or uses a known default. In-room streaming still works (per-session token), but external callers of the RTMP HTTP endpoints will be rejected until a strong secret is set!'
+                );
+            }
+        }
     });
 
     // ####################################################
@@ -2587,6 +2648,11 @@ function startServer() {
             // its own server recording chunks via the /recSync* endpoints.
             if (serverRecordingEnabled) {
                 roomJson.recUploadToken = createRecUploadToken(room.id);
+            }
+
+            // Same for the /rtmp streamer page (camera/screen -> RTMP).
+            if (rtmpEnabled && rtmpCfg?.fromStream) {
+                roomJson.rtmpStreamToken = createRtmpStreamToken(room.id);
             }
 
             cb(roomJson);

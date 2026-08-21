@@ -22,6 +22,22 @@ const color = filterXSS(qs.get('tc'));
 const customRtmpUrl = qs.get('customRtmpUrl') || null;
 const streamType = filterXSS(qs.get('st'));
 
+// Per-session token issued on room join. Removed from the URL right away so it is not
+// kept in browser history or leaked via the Referer of any later request.
+const rtmpStreamToken = qs.get('rt') || '';
+if (rtmpStreamToken) {
+    qs.delete('rt');
+    const query = qs.toString();
+    history.replaceState(null, '', window.location.pathname + (query ? `?${query}` : ''));
+    const apiSecretGroup = apiSecretInput.closest('.input-group-inline');
+    if (apiSecretGroup) apiSecretGroup.style.display = 'none';
+}
+
+// Authorization header value: session token when available, otherwise the manually entered API secret.
+function getAuthorization() {
+    return rtmpStreamToken ? `Bearer ${rtmpStreamToken}` : apiSecretInput.value;
+}
+
 console.log('RTMP settings', {
     videoId: videoId,
     videoRes: videoResolution,
@@ -114,7 +130,7 @@ function attachMediaStream(stream) {
 }
 
 async function initRTMP(stream) {
-    const apiSecret = apiSecretInput.value;
+    const apiSecret = getAuthorization();
     try {
         const response = await axios.post(`/initRTMP`, customRtmpUrl ? { customRtmpUrl } : null, {
             headers: {
@@ -148,7 +164,7 @@ async function initRTMP(stream) {
 }
 
 async function stopRTMP() {
-    const apiSecret = apiSecretInput.value;
+    const apiSecret = getAuthorization();
 
     stopStreaming();
 
@@ -165,7 +181,7 @@ async function stopRTMP() {
 }
 
 async function streamRTMPChunk(data) {
-    const apiSecret = apiSecretInput.value;
+    const apiSecret = getAuthorization();
 
     const arrayBuffer = await data.arrayBuffer();
     const chunkSize = 1000000; // 1mb

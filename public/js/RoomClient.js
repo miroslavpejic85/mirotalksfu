@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.76
+ * @version 2.3.77
  *
  */
 
@@ -448,6 +448,7 @@ class RoomClient {
         this.recSyncTime = 4000; // 4 sec
         this.recSyncChunkSize = 1000000; // 1MB
         this.recUploadToken = ''; // Per-session token authorizing /recSync* uploads (issued on join)
+        this.rtmpStreamToken = ''; // Per-session token authorizing the /rtmp streamer page (issued on join)
         this.sessionId = ''; // Server-side unique conference-instance ID (issued on join)
 
         // Encodings
@@ -656,6 +657,9 @@ class RoomClient {
 
                 // Store the per-session token used to authorize server recording uploads
                 if (room.recUploadToken) this.recUploadToken = room.recUploadToken;
+
+                // Store the per-session token used to authorize the RTMP streamer page
+                if (room.rtmpStreamToken) this.rtmpStreamToken = room.rtmpStreamToken;
 
                 // Store the server-side unique conference-instance ID for this room instance
                 if (room.sessionId) this.sessionId = room.sessionId;
@@ -14067,7 +14071,8 @@ class RoomClient {
             `&ts=${selectTheme.value}` +
             (themeCustom.keep ? `&tc=${themeColor}` : '') +
             (customRtmpUrl ? `&customRtmpUrl=${encodeURIComponent(customRtmpUrl)}` : '') +
-            (streamType ? `&st=${encodeURIComponent(streamType)}` : '');
+            (streamType ? `&st=${encodeURIComponent(streamType)}` : '') +
+            (this.rtmpStreamToken ? `&rt=${encodeURIComponent(this.rtmpStreamToken)}` : '');
 
         const url = `/rtmp?v=${videoSelect.value}&a=${microphoneSelect.value}${options}`;
 
