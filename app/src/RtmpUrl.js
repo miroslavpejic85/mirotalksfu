@@ -5,8 +5,15 @@ const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
 const ffmpeg = require('fluent-ffmpeg');
 ffmpeg.setFfmpegPath(ffmpegPath);
 
+const http = require('http');
+const https = require('https');
+const Validator = require('./Validator');
+
 const Logger = require('./Logger');
 const log = new Logger('RtmpUrl');
+
+const MAX_REDIRECTS = 5;
+const REQUEST_TIMEOUT_MS = 15000;
 
 class RtmpUrl {
     constructor(socket_id = false, room = false) {
@@ -14,7 +21,63 @@ class RtmpUrl {
         this.socketId = socket_id;
         this.rtmpUrl = '';
         this.ffmpegProcess = null;
+        this.inputRequest = null;
+        this.inputResponse = null;
         this.stopping = false;
+    }
+
+    /**
+     * Perform the HTTP(S) fetch in Node instead of letting FFmpeg do it, so that the
+     * initial URL and every redirect hop are validated against the SSRF denylist and
+     * connections can only be opened to the resolved public addresses.
+     * @param {string} inputVideoURL
+     * @returns {Promise<import('http').IncomingMessage>} the validated response stream
+     */
+    async openValidatedStream(inputVideoURL) {
+        let currentUrl = inputVideoURL;
+
+        for (let redirects = 0; redirects <= MAX_REDIRECTS; redirects++) {
+            if (!(await Validator.isPublicHttpUrl(currentUrl))) {
+                throw new Error(`Blocked unsafe URL (SSRF): ${currentUrl}`);
+            }
+
+            const response = await this.request(currentUrl);
+            const status = response.statusCode || 0;
+            const location = response.headers.location;
+
+            if (status >= 300 && status < 400 && location) {
+                response.resume(); // drain and drop
+                currentUrl = new URL(location, currentUrl).toString();
+                continue;
+            }
+
+            if (status < 200 || status >= 300) {
+                response.resume();
+                throw new Error(`Unexpected response status ${status} for the input video URL`);
+            }
+
+            return response;
+        }
+
+        throw new Error('Too many redirects for the input video URL');
+    }
+
+    request(url) {
+        return new Promise((resolve, reject) => {
+            const client = new URL(url).protocol === 'https:' ? https : http;
+            const req = client.get(
+                url,
+                {
+                    lookup: Validator.safeDnsLookup,
+                    timeout: REQUEST_TIMEOUT_MS,
+                    headers: { 'User-Agent': 'MiroTalkSFU' },
+                },
+                resolve
+            );
+            req.on('timeout', () => req.destroy(new Error('Input video URL request timed out')));
+            req.on('error', reject);
+            this.inputRequest = req;
+        });
     }
 
     async start(inputVideoURL, rtmpUrl) {
@@ -26,8 +89,16 @@ class RtmpUrl {
         this.rtmpUrl = rtmpUrl;
 
         try {
-            this.ffmpegProcess = ffmpeg(inputVideoURL)
-                .inputOptions('-re') // Read input in real-time
+            const inputStream = await this.openValidatedStream(inputVideoURL);
+            this.inputResponse = inputStream;
+            inputStream.on('error', (err) => log.warn('Input video stream error', err.message));
+
+            this.ffmpegProcess = ffmpeg(inputStream)
+                .inputOptions([
+                    '-re', // Read input in real-time
+                    '-protocol_whitelist',
+                    'pipe', // FFmpeg must never open a network resource on its own
+                ])
                 .audioCodec('aac') // Set audio codec to AAC
                 .audioBitrate('128k') // Set audio bitrate to 128 kbps
                 .videoCodec('libx264') // Set video codec to H.264
@@ -41,6 +112,7 @@ class RtmpUrl {
                 })
                 .on('error', (err, stdout, stderr) => {
                     this.ffmpegProcess = null;
+                    this.closeInput();
                     if (!err.message.includes('Exiting normally')) {
                         this.handleError(err.message, stdout, stderr);
                     }
@@ -48,6 +120,7 @@ class RtmpUrl {
                 .on('end', () => {
                     log.debug('FFmpeg processing finished');
                     this.ffmpegProcess = null;
+                    this.closeInput();
                     this.handleEnd();
                 })
                 .run();
@@ -55,14 +128,28 @@ class RtmpUrl {
             log.debug('RtmpUrl started', rtmpUrl);
             return true;
         } catch (error) {
+            this.closeInput();
             log.error('Error starting RtmpUrl', error.message);
             return false;
+        }
+    }
+
+    closeInput() {
+        if (this.inputResponse) {
+            this.inputResponse.destroy();
+            this.inputResponse = null;
+        }
+        if (this.inputRequest) {
+            this.inputRequest.destroy();
+            this.inputRequest = null;
         }
     }
 
     async stop() {
         if (this.stopping) return true;
         this.stopping = true;
+
+        this.closeInput();
 
         if (this.ffmpegProcess) {
             try {

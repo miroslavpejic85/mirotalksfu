@@ -141,22 +141,11 @@ class RtmpStreaming {
             return false;
         }
 
-        try {
-            const parsedUrl = new URL(inputVideoURL);
-            if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
-                log.error(`[startRTMPfromURL] Invalid URL scheme: ${parsedUrl.protocol}`);
-                return false;
-            }
-
-            // Check for private, loopback, or link-local addresses to prevent SSRF
-            let hostname = parsedUrl.hostname || '';
-            if (hostname.startsWith('[') && hostname.endsWith(']')) hostname = hostname.slice(1, -1); // IPv6 literal
-            if (Validator.isPrivateOrLoopbackHost(hostname)) {
-                log.error(`[startRTMPfromURL] Blocked private/loopback/link-local host (SSRF): ${hostname}`);
-                return false;
-            }
-        } catch (err) {
-            log.error(`[startRTMPfromURL] Invalid URL: ${inputVideoURL}`);
+        // Enforce http(s) and resolve the hostname, rejecting any URL whose resolved
+        // addresses are private/loopback/link-local or a known internal name (SSRF).
+        // Every redirect hop is re-validated later, in RtmpUrl.
+        if (!(await Validator.isPublicHttpUrl(inputVideoURL))) {
+            log.error(`[startRTMPfromURL] Blocked unsafe input video URL (SSRF): ${inputVideoURL}`);
             return false;
         }
 

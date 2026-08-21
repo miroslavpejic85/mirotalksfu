@@ -1,8 +1,21 @@
 'use strict';
 
 const path = require('path');
+const net = require('net');
+const dns = require('dns').promises;
 
 const checkXSS = require('./XSS.js');
+
+// Hostnames that are internal by definition and must never be fetched server side
+const BLOCKED_HOSTNAMES = new Set([
+    'localhost',
+    'metadata',
+    'metadata.google.internal',
+    'metadata.goog',
+    'instance-data',
+    'instance-data.ec2.internal',
+]);
+const BLOCKED_HOSTNAME_SUFFIXES = ['.localhost', '.internal', '.local', '.lan', '.intranet', '.home.arpa'];
 
 function isValidRoomName(input) {
     if (!input || typeof input !== 'string') {
@@ -102,20 +115,21 @@ function isValidData(data) {
 }
 
 /**
- * Block private / loopback / link-local / unspecified hosts.
+ * Block private / loopback / link-local / unspecified / well known internal hosts.
  * Note: does NOT do DNS resolution, so a public domain that resolves to
- * an internal IP (DNS rebinding) is not caught here — defending against
- * that on a signaling broadcast is out of scope.
+ * an internal IP is not caught here — use `isPublicHttpUrl()` when the server
+ * itself is about to fetch the URL.
  * @param {string} host hostname or IP literal (no brackets, no port)
  * @returns {boolean} true if the host is considered unsafe
  */
 function isPrivateOrLoopbackHost(host) {
     if (!host || typeof host !== 'string') return true;
-    const h = host.trim().toLowerCase();
+    const h = host.trim().toLowerCase().replace(/\.$/, ''); // strip FQDN trailing dot
     if (!h) return true;
 
-    // Hostnames that always resolve to loopback
-    if (h === 'localhost' || h.endsWith('.localhost')) return true;
+    // Hostnames that always point to loopback / internal / cloud metadata services
+    if (BLOCKED_HOSTNAMES.has(h)) return true;
+    if (BLOCKED_HOSTNAME_SUFFIXES.some((suffix) => h.endsWith(suffix))) return true;
 
     // IPv4 literal
     if (/^\d{1,3}(\.\d{1,3}){3}$/.test(h)) {
@@ -146,6 +160,58 @@ function isPrivateOrLoopbackHost(host) {
 
     // Plain hostname — not resolved here
     return false;
+}
+
+/**
+ * SSRF check for URLs the server itself will fetch: enforces http(s) and
+ * verifies that EVERY resolved address (all A/AAAA records) is public, so a
+ * public hostname pointing at an internal/metadata address is rejected too.
+ * @param {string} url
+ * @returns {Promise<boolean>} true if the URL is safe to fetch
+ */
+async function isPublicHttpUrl(url) {
+    let parsed;
+    try {
+        parsed = new URL(url);
+    } catch (_) {
+        return false;
+    }
+    if (!['http:', 'https:'].includes(parsed.protocol)) return false;
+
+    let host = parsed.hostname || '';
+    if (host.startsWith('[') && host.endsWith(']')) host = host.slice(1, -1); // IPv6 literal
+    if (isPrivateOrLoopbackHost(host)) return false;
+    if (net.isIP(host)) return true; // literal already fully checked above
+
+    try {
+        const records = await dns.lookup(host, { all: true });
+        if (!records || records.length === 0) return false;
+        return !records.some((record) => isPrivateOrLoopbackHost(record.address));
+    } catch (_) {
+        return false;
+    }
+}
+
+/**
+ * `dns.lookup` drop-in for http(s) requests that refuses to hand back any
+ * private/loopback/link-local address, so the address actually connected to is
+ * the one that was validated (defeats DNS rebinding on the second lookup).
+ */
+function safeDnsLookup(hostname, options, callback) {
+    if (typeof options === 'function') {
+        callback = options;
+        options = {};
+    }
+    dns.lookup(hostname, { ...options, all: true })
+        .then((records) => {
+            const blocked = records.find((record) => isPrivateOrLoopbackHost(record.address));
+            if (blocked) {
+                return callback(new Error(`Blocked private/internal address for ${hostname}: ${blocked.address}`));
+            }
+            if (options && options.all) return callback(null, records);
+            callback(null, records[0].address, records[0].family);
+        })
+        .catch((err) => callback(err));
 }
 
 /**
@@ -234,6 +300,8 @@ module.exports = {
     hasAllowedEmailDomains,
     isValidData,
     isPrivateOrLoopbackHost,
+    isPublicHttpUrl,
+    safeDnsLookup,
     isSafeImageSrc,
     sanitizeWbCanvasJson,
 };
