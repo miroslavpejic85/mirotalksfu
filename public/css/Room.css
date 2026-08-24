@@ -484,7 +484,7 @@ body {
     width: 100%;
     margin-right: 10px;
     overflow: hidden;
-    border: 1px solid var(--room-border);
+    border: none;
     border-radius: 14px;
     background: var(--room-stage-bg);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
@@ -989,7 +989,7 @@ body {
     max-width: calc(100vw - 24px) !important;
     text-align: left;
     border: var(--border) !important;
-    padding: 8px 0;
+    padding: 8px 6px;
 }
 
 #bottomButtons #settingsExtraMenu .extra-menu-group {
@@ -4516,7 +4516,10 @@ button:hover {
 
 .whiteboard-header-options .dropdown-menu {
     max-height: calc(var(--wb-height) * 1px) !important;
+    min-width: 200px;
     max-width: 260px;
+    padding-left: 6px;
+    padding-right: 6px;
 }
 
 .whiteboard-header-options .dropdown-menu button {
