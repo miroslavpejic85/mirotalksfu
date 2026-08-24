@@ -2500,7 +2500,8 @@ main {
 #supportUs .cta-inner {
     border: 1px solid var(--landing-border);
     border-radius: 8px;
-    background: linear-gradient(105deg, rgba(22, 140, 255, 0.1), transparent 44%), var(--landing-surface) !important;
+    background:
+        linear-gradient(to bottom right, transparent 60%, rgba(22, 140, 255, 0.1)), var(--landing-surface) !important;
     box-shadow:
         0 24px 70px rgba(0, 0, 0, 0.32),
         inset 0 1px 0 rgba(255, 255, 255, 0.04);
