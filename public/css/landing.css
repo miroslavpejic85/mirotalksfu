@@ -2498,7 +2498,12 @@ main {
 --------------------------------------------------------------*/
 
 #supportUs .cta-inner {
-    background: linear-gradient(135deg, #0a0c0f 0%, #15181d 50%, #1d2026 100%) !important;
+    border: 1px solid var(--landing-border);
+    border-radius: 8px;
+    background: linear-gradient(105deg, rgba(22, 140, 255, 0.1), transparent 44%), var(--landing-surface) !important;
+    box-shadow:
+        0 24px 70px rgba(0, 0, 0, 0.32),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .support-us-content {
@@ -2547,19 +2552,20 @@ main {
     flex-direction: column;
     align-items: center;
     padding: 28px 20px;
-    background-color: #1a1d23 !important;
-    background-image: linear-gradient(135deg, #1a1d23 0%, #1f2228 50%, #1a1d23 100%) !important;
-    border: 2px solid rgba(255, 255, 255, 0.1) !important;
-    border-radius: 20px;
+    background: rgba(25, 30, 38, 0.72) !important;
+    border: 1px solid var(--landing-border) !important;
+    border-radius: 8px;
     text-decoration: none;
-    color: #8a94a7 !important;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--landing-text-muted) !important;
+    transition:
+        border-color 0.25s ease,
+        background-color 0.25s ease,
+        box-shadow 0.25s ease,
+        transform 0.25s ease;
     min-height: 160px;
     position: relative;
     overflow: hidden;
-    box-shadow:
-        0 4px 20px rgba(0, 0, 0, 0.6),
-        inset 0 1px 0 rgba(255, 255, 255, 0.05) !important;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025) !important;
 }
 
 .support-card::after {
@@ -2589,15 +2595,11 @@ main {
 
 .support-card:hover {
     transform: translateY(-4px) !important;
-    border-color: rgba(255, 255, 255, 0.15) !important;
+    border-color: rgba(50, 184, 232, 0.28) !important;
     box-shadow:
-        0 8px 32px rgba(0, 0, 0, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.08) !important;
-    background-image: linear-gradient(135deg, #1f2228 0%, #24272d 50%, #1f2228 100%) !important;
-}
-
-.support-card-icon svg {
-    filter: brightness(0) invert(1) !important;
+        0 14px 32px rgba(0, 0, 0, 0.24),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04) !important;
+    background: rgba(32, 38, 48, 0.88) !important;
 }
 
 .support-card-icon {
@@ -2607,15 +2609,17 @@ main {
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(255, 255, 255, 0.08) !important;
-    border-radius: 50%;
+    background: var(--landing-surface-raised) !important;
+    border: 1px solid var(--landing-border);
+    border-radius: 8px;
     transition: all 0.3s ease;
     position: relative;
     z-index: 1;
 }
 
 .support-card:hover .support-card-icon {
-    background: rgba(255, 255, 255, 0.15) !important;
+    background: rgba(50, 184, 232, 0.1) !important;
+    border-color: var(--landing-border-strong);
     transform: scale(1.1);
 }
 
@@ -2623,14 +2627,14 @@ main {
     margin: 0 0 8px 0;
     font-size: 18px;
     font-weight: 600;
-    color: #fff !important;
+    color: var(--landing-text) !important;
     text-align: center;
 }
 
 .support-card-description-small {
     margin: 0;
     font-size: 13px;
-    color: rgba(255, 255, 255, 0.7) !important;
+    color: var(--landing-text-muted) !important;
     text-align: center;
     line-height: 1.5;
 }
@@ -2638,7 +2642,7 @@ main {
 .support-footer {
     margin-top: 32px;
     padding-top: 24px;
-    border-top: 1px solid rgba(255, 255, 255, 0.1) !important;
+    border-top: 1px solid var(--landing-border) !important;
 }
 
 .support-footer a {
@@ -2646,7 +2650,7 @@ main {
 }
 
 .support-footer a:hover {
-    color: #fff !important;
+    color: var(--landing-text) !important;
 }
 
 @media (max-width: 900px) {
