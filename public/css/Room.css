@@ -1,5 +1,18 @@
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@500&display=swap');
 
+:root {
+    --room-stage-bg: var(--body-bg);
+    --room-panel-raised: var(--settings-bg);
+    --room-control-bg: color-mix(in srgb, var(--select-bg) 78%, transparent);
+    --room-control-hover: color-mix(in srgb, var(--select-bg) 86%, white);
+    --room-border: color-mix(in srgb, var(--dd-color) 14%, transparent);
+    --room-border-strong: color-mix(in srgb, var(--dd-color) 24%, transparent);
+    --room-accent: var(--dd-color);
+    --room-accent-soft: color-mix(in srgb, var(--dd-color) 16%, transparent);
+    --room-danger-soft: rgba(255, 75, 75, 0.14);
+    --room-shadow: 0 18px 52px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.045);
+}
+
 /*--------------------------------------------------------------
 # Keyframes
 --------------------------------------------------------------*/
@@ -470,12 +483,19 @@ body {
     position: relative;
     width: 100%;
     margin-right: 10px;
+    overflow: hidden;
+    border: 1px solid var(--room-border);
+    border-radius: 14px;
+    background: var(--room-stage-bg);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
 }
 
 .init-video-container video {
     z-index: 0;
     position: relative;
+    width: 100%;
     height: 240px;
+    border-radius: 12px;
 }
 
 .initComands {
@@ -536,14 +556,20 @@ body {
     margin-top: 20px;
     margin-bottom: 10px;
     font-size: 1.2rem;
-    border: var(--border);
+    border: 1px solid var(--room-border);
     border-radius: 10px;
-    background-color: transparent;
+    background: var(--room-control-bg);
+    transition:
+        background-color var(--motion-base) ease,
+        border-color var(--motion-base) ease,
+        transform var(--motion-fast) ease;
 }
 
 .init-user button:hover {
     color: white;
-    background: var(--body-bg);
+    border-color: var(--room-border-strong);
+    background: var(--room-control-hover);
+    transform: translateY(-2px);
 }
 
 /*--------------------------------------------------------------
@@ -771,7 +797,7 @@ body {
     z-index: 3;
     position: fixed;
     display: none;
-    padding: 5px;
+    padding: 8px;
     top: var(--bottom-btns-top);
     left: var(--bottom-btns-left);
     bottom: var(--bottom-btns-bottom);
@@ -780,10 +806,9 @@ body {
     margin-bottom: var(--bottom-btns-margin-bottom);
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    border-radius: 14px;
+    gap: 6px;
     border: none !important;
-    /* box-shadow: var(--box-shadow); */
+    background: transparent;
 }
 
 /* Split button (main action + device arrow) */
@@ -792,7 +817,9 @@ body {
     display: inline-flex;
     align-items: stretch;
     overflow: visible;
-    border-radius: 14px;
+    gap: 0;
+    border-radius: 12px;
+    background: var(--btns-bg-color);
 }
 
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
@@ -814,12 +841,14 @@ body {
     right: 0;
     min-width: 220px;
     z-index: 9999;
-    background: var(--body-bg);
-    border: var(--border);
-    border-radius: 10px;
-    box-shadow: var(--box-shadow);
+    border: 1px solid var(--room-border) !important;
+    border-radius: 12px !important;
+    background: var(--room-panel-raised) !important;
+    box-shadow: var(--room-shadow);
     padding: 6px 0;
     text-align: left;
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
 }
 
 #bottomButtons #exitMenu button {
@@ -831,17 +860,17 @@ body {
     text-align: left;
     padding: 10px 16px;
     font-size: 0.9rem;
-    border-radius: 0;
+    border-radius: 8px;
     background: transparent;
     color: #fff;
     transition:
-        padding-left 0.2s ease,
-        background 0.2s ease;
+        color var(--motion-fast) ease,
+        background-color var(--motion-fast) ease;
 }
 
 #bottomButtons #exitMenu button:hover {
-    background: rgba(255, 255, 255, 0.08);
-    padding-left: 22px;
+    padding-left: 16px;
+    background: var(--room-control-hover) !important;
     transform: none;
 }
 
@@ -863,16 +892,21 @@ body {
 }
 
 #bottomButtons .split-btn > button:not(.device-dropdown-toggle) {
-    border-top-left-radius: 10px;
-    border-bottom-left-radius: 10px;
+    border-radius: 12px 0 0 12px;
 }
 
 #bottomButtons .split-btn .device-dropdown-toggle {
-    border-radius: 0;
-    border-top-right-radius: 10px;
-    border-bottom-right-radius: 10px;
-    border-left: var(--border);
+    width: 30px;
+    height: 48px;
+    padding: 0;
+    border-left: 1px solid var(--room-border) !important;
+    border-radius: 0 12px 12px 0;
     margin: 0;
+    background: var(--btns-bg-color);
+}
+
+#bottomButtons .split-btn:hover .device-dropdown-toggle {
+    border-left-color: var(--room-border-strong) !important;
 }
 
 /* Keep the group visually together when hovering. */
@@ -881,21 +915,24 @@ body {
 }
 
 #bottomButtons button {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
     font-size: 1.6rem;
-    padding: 10px;
-    border-radius: 14px;
+    padding: 0;
+    border: 1px solid transparent !important;
+    border-radius: 12px;
     background: var(--btns-bg-color);
-    border: none !important;
-    transition: all 0.3s ease-in-out;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+    transition:
+        color var(--motion-base) var(--ease-standard),
+        background-color var(--motion-base) var(--ease-standard),
+        border-color var(--motion-base) var(--ease-standard),
+        box-shadow var(--motion-base) var(--ease-standard),
+        transform var(--motion-fast) var(--ease-standard);
 }
 
 /* Quick device picker (Start Audio/Video) */
 #bottomButtons .device-dropdown-toggle {
-    width: 35px;
-    height: 50px;
-    padding: 0;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -913,9 +950,12 @@ body {
     left: 0;
     padding: 10px 5px;
     bottom: 14px !important;
-    border: var(--border);
-    background: var(--body-bg);
-    box-shadow: var(--box-shadow);
+    border: 1px solid var(--room-border) !important;
+    border-radius: 12px !important;
+    background: var(--room-panel-raised) !important;
+    box-shadow: var(--room-shadow);
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
 }
 
 /* Override bottomButtons button rule for dropdown menu items */
@@ -923,9 +963,11 @@ body {
     width: auto;
     font-size: 0.8em;
     padding: 8px 16px;
-    border-radius: 0;
+    border-radius: 8px;
     background: none;
-    transition: background 0.2s;
+    transition:
+        color var(--motion-fast) ease,
+        background-color var(--motion-fast) ease;
 }
 
 /* Quick device picker dropdown menu: keep items left-aligned and avoid wrapping */
@@ -1030,8 +1072,9 @@ body {
 }
 
 #bottomButtons #settingsExtraMenu button:hover {
-    padding-left: 22px;
+    padding-left: 16px;
     padding-right: 10px;
+    background: var(--room-control-hover) !important;
 }
 
 #bottomButtons #settingsExtraMenu button i {
@@ -1118,26 +1161,61 @@ body {
     background-color: #19bb5c;
 }
 
-#bottomButtons button:hover {
-    transform: var(--btns-hover-scale);
-    background: var(--body-bg) !important;
+#bottomButtons > button:hover,
+#bottomButtons > #exitDropdown > button:hover,
+#bottomButtons .split-btn > button:hover {
+    border-color: var(--room-border-strong) !important;
+    background: var(--room-control-hover) !important;
+    box-shadow:
+        0 8px 20px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    transform: none;
+}
+
+#bottomButtons > button:active,
+#bottomButtons > #exitDropdown > button:active,
+#bottomButtons .split-btn > button:active {
+    box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.25);
+    transform: none;
+}
+
+#bottomButtons button:focus-visible,
+#bottomButtons .dropdown-menu button:focus-visible {
+    outline: 2px solid var(--room-accent);
+    outline-offset: 2px;
+}
+
+#bottomButtons #exitButton {
+    background: var(--room-danger-soft);
+}
+
+#bottomButtons #exitButton:hover {
+    border-color: rgba(255, 90, 90, 0.35) !important;
+    background: rgba(255, 75, 75, 0.2) !important;
 }
 
 @media screen and (max-width: 500px) {
     #bottomButtons {
-        gap: 0.3rem;
-        padding: 3px;
+        max-width: calc(100vw - 16px);
+        padding: 5px;
+        gap: 3px;
+        border-radius: 14px;
     }
     #bottomButtons button {
-        width: 38px;
-        height: 38px;
-        font-size: 0.95rem;
-        padding: 8px;
-        margin: 0 1px;
+        width: 40px;
+        height: 40px;
+        margin: 0;
+        padding: 0;
+        font-size: 1rem;
+        border-radius: 10px;
     }
-    #bottomButtons .device-dropdown-toggle {
-        width: 19px;
-        height: 38px;
+    #bottomButtons .split-btn > button:not(.device-dropdown-toggle) {
+        border-radius: 10px 0 0 10px;
+    }
+    #bottomButtons .split-btn .device-dropdown-toggle {
+        width: 22px;
+        height: 40px;
+        border-radius: 0 10px 10px 0;
     }
     #bottomButtons .device-dropdown-toggle i {
         font-size: 0.8rem;
@@ -1145,20 +1223,14 @@ body {
 }
 
 @media screen and (max-width: 360px) {
-    #bottomButtons {
-        gap: 0.15rem;
-        padding: 2px;
-    }
     #bottomButtons button {
-        width: 28px;
-        height: 28px;
-        font-size: 0.65rem;
-        padding: 6px;
-        margin: 0 1px;
+        width: 32px;
+        height: 32px;
+        font-size: 0.75rem;
     }
-    #bottomButtons .device-dropdown-toggle {
-        width: 14px;
-        height: 28px;
+    #bottomButtons .split-btn .device-dropdown-toggle {
+        width: 16px;
+        height: 32px;
     }
     #bottomButtons .device-dropdown-toggle i {
         font-size: 0.7rem;
@@ -1247,13 +1319,16 @@ body {
 /* Active state for chat / participants toolbar buttons */
 #bottomButtons #chatButton.is-active,
 #bottomButtons #participantsButton.is-active {
-    background: color-mix(in srgb, var(--dd-color, #4678f9) 14%, transparent) !important;
-    box-shadow: inset 0 0 0 1px var(--dd-color, #4678f9);
-    color: var(--dd-color, #4678f9);
+    border-color: color-mix(in srgb, var(--room-accent) 52%, transparent) !important;
+    background: var(--room-accent-soft) !important;
+    box-shadow:
+        inset 0 0 0 1px color-mix(in srgb, var(--room-accent) 18%, transparent),
+        0 6px 18px color-mix(in srgb, var(--room-accent) 14%, transparent);
+    color: var(--room-accent);
 }
 #bottomButtons #chatButton.is-active i,
 #bottomButtons #participantsButton.is-active i {
-    color: var(--dd-color, #4678f9) !important;
+    color: var(--room-accent) !important;
 }
 #bottomButtons #chatButton.is-active:hover,
 #bottomButtons #participantsButton.is-active:hover {
@@ -1318,18 +1393,20 @@ body {
 #mySettings {
     z-index: 6;
     position: absolute;
-    padding: 10px;
-    width: 50%;
+    padding: 12px;
+    width: min(960px, calc(100% - 48px));
     min-height: 480px;
     max-height: 98vh; /* Prevents overflow */
-    background: var(--settings-bg);
-    box-shadow: var(--box-shadow);
-    border: var(--border);
-    border-radius: 14px;
+    background: var(--room-panel-raised);
+    box-shadow: var(--room-shadow);
+    border: 1px solid var(--room-border);
+    border-radius: 16px;
     overflow-y: auto; /* Single overflow handling */
     overflow-x: hidden;
     display: flex;
     flex-direction: column;
+    backdrop-filter: blur(20px) saturate(130%);
+    -webkit-backdrop-filter: blur(20px) saturate(130%);
 }
 
 .mySettingsMain {
@@ -1338,37 +1415,26 @@ body {
     min-height: 0;
 }
 
-/* Medium screens */
-@media screen and (max-width: 1030px) {
-    #mySettings {
-        width: 75%;
-    }
-}
-
 /* Smaller screens */
 @media screen and (max-width: 830px) {
     #mySettings {
         width: 100%;
-        height: 100%;
-        max-height: 100vh;
+        height: 100dvh;
+        max-height: 100dvh;
         min-height: auto;
+        padding: 8px;
+        border: none;
+        border-radius: 0;
     }
     .mySettingsMain {
         flex-direction: column;
     }
 }
 
-/* Fullscreen on mobile */
-@media screen and (max-width: 500px) {
-    #mySettings {
-        width: 100%;
-        height: 100%;
-        max-height: 100vh;
-    }
-}
-
 #mySettingsHeader {
-    height: 25px;
+    height: 40px;
+    margin: -4px -4px 8px;
+    border-bottom: 1px solid var(--room-border);
     cursor: move;
 }
 
@@ -1395,14 +1461,44 @@ body {
 }
 
 #mySettingsCloseBtn {
-    /* top right bottom left */
-    /* margin: 10px 0px 0px 10px; */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    padding: 0;
+    border: 1px solid transparent;
+    background: transparent;
     font-size: 1.4rem;
     float: right;
+    transition:
+        color var(--motion-fast) ease,
+        background-color var(--motion-fast) ease,
+        border-color var(--motion-fast) ease;
+}
+
+#mySettingsCloseBtn:hover {
+    border-color: var(--room-border);
+    background: var(--room-control-hover);
+    transform: none;
 }
 
 #mySettings button {
     border-radius: 10px;
+}
+
+#mySettings :is(.form-control, input[type='text'], input[type='url'], input[type='password'], input[type='number']) {
+    border: 1px solid var(--room-border);
+    border-radius: 10px;
+    background: var(--select-bg) !important;
+    color: var(--fg-1);
+    box-shadow: none;
+}
+
+#mySettings
+    :is(.form-control, input[type='text'], input[type='url'], input[type='password'], input[type='number']):focus {
+    border-color: var(--room-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--room-accent) 14%, transparent);
 }
 
 #myProfileAvatar {
@@ -1558,8 +1654,10 @@ body {
     color: #fff;
     table-layout: auto;
     border-collapse: collapse;
-    border-radius: 14px;
-    background: var(--body-bg);
+    overflow: hidden;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 64%, transparent);
 }
 
 .settingsTable td,
@@ -1603,8 +1701,10 @@ body {
     font-size: 16px;
     text-align: left;
     color: #fff;
-    border-radius: 14px;
-    background: var(--body-bg);
+    overflow: hidden;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 64%, transparent);
 }
 #shortcutsTable th,
 #shortcutsTable td {
@@ -1809,13 +1909,15 @@ body {
 .dropdown-menu {
     position: fixed;
     /* max-height: 300px; */
-    border: none !important;
-    border-radius: 14px !important;
-    background: var(--body-bg) !important;
-    box-shadow: var(--box-shadow);
+    border: 1px solid var(--room-border) !important;
+    border-radius: 12px !important;
+    background: var(--room-panel-raised) !important;
+    box-shadow: var(--room-shadow);
     overflow-y: auto;
     overflow-x: hidden;
     padding: 6px 0;
+    backdrop-filter: blur(18px) saturate(135%);
+    -webkit-backdrop-filter: blur(18px) saturate(135%);
 }
 
 .dropdown-menu button {
@@ -1830,14 +1932,14 @@ body {
     cursor: pointer;
     border-radius: 8px;
     transition:
-        background 0.2s ease,
-        padding-left 0.2s ease;
+        color var(--motion-fast) ease,
+        background-color var(--motion-fast) ease;
 }
 
 .dropdown-menu button:hover {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--room-control-hover) !important;
     color: #ffffff;
-    padding-left: 20px;
+    padding-left: 16px;
 }
 
 .dropdown-menu button i,
@@ -2039,15 +2141,16 @@ body {
 --------------------------------------------------------------*/
 
 .tab {
-    padding: 10px 10px 10px 0;
+    padding: 8px;
     overflow: hidden;
-    border-radius: 10px;
+    gap: 2px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
     width: 35%;
-    background-color: var(--body-bg);
+    background: color-mix(in srgb, var(--select-bg) 72%, transparent);
     min-height: 480px;
     display: flex;
     flex-direction: column;
-    border-right: var(--border);
 }
 
 .tabActions {
@@ -2056,6 +2159,10 @@ body {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    margin-left: 10px;
+    border: 1px solid var(--room-border);
+    border-radius: 12px;
+    background: color-mix(in srgb, var(--select-bg) 58%, transparent);
 }
 
 @media screen and (max-width: 830px) {
@@ -2067,11 +2174,10 @@ body {
         min-width: 60px;
         max-width: 60px;
         flex-direction: column;
-        border-right: var(--border);
         height: 100vh;
         min-height: 100vh;
-        padding: 10px 0;
-        background: var(--body-bg);
+        padding: 6px 4px;
+        border-radius: 10px;
     }
     .tab button {
         width: 44px;
@@ -2098,7 +2204,7 @@ body {
     }
     .tabActions {
         width: 100%;
-        border-radius: 14px;
+        margin-left: 6px;
         overflow: visible;
     }
 }
@@ -2108,8 +2214,6 @@ body {
         width: 48px;
         min-width: 48px;
         max-width: 48px;
-        padding: 6px 0;
-        border-radius: 12px;
     }
     .tab button {
         width: 38px;
@@ -2125,29 +2229,36 @@ body {
 
 /* Style the buttons inside the tab */
 .tab button {
-    margin: 3px;
+    margin: 1px 0;
     padding: 11px;
     float: left;
     text-align: left;
     color: #fff;
     font-size: 1rem;
-    border: var(--border);
+    border: 1px solid transparent;
     border-radius: 10px;
-    background-color: rgba(0, 0, 0, 0.2);
+    background: transparent;
     outline: none;
     cursor: pointer;
-    transition: 0.3s;
+    transition:
+        color var(--motion-fast) ease,
+        background-color var(--motion-fast) ease,
+        border-color var(--motion-fast) ease;
 }
 
 /* Change background color of buttons on hover */
 .tab button:hover {
-    background: var(--body-bg);
-    transform: translateY(-3px);
+    border-color: var(--room-border);
+    background: var(--room-control-bg);
+    transform: none;
 }
 
 /* Create an active/current tablink class */
 .tab button.active {
-    background-color: var(--tab-btn-active);
+    border-color: color-mix(in srgb, var(--room-accent) 34%, transparent);
+    background: var(--room-accent-soft);
+    color: #fff;
+    box-shadow: inset 3px 0 0 var(--room-accent);
 }
 
 /* Style the tab content */
@@ -2159,7 +2270,7 @@ body {
     max-height: none;
     min-height: auto;
     border-top: none;
-    background-color: var(--body-bg);
+    background: transparent;
     overflow: visible;
 }
 
@@ -4767,21 +4878,25 @@ button:hover {
 --------------------------------------------------------------*/
 
 ::-webkit-scrollbar {
-    width: 10px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-thumb {
-    background: var(--body-bg);
-    border-radius: 10px;
+    border: 2px solid transparent;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.2);
+    background-clip: padding-box;
     cursor: pointer;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--body-bg);
+    background: rgba(255, 255, 255, 0.32);
+    background-clip: padding-box;
 }
 
 ::-webkit-scrollbar-track {
-    background: #1a1b1f;
+    background: transparent;
 }
 
 /*--------------------------------------------------------------
