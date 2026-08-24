@@ -3062,6 +3062,13 @@ a:focus-visible {
     color: var(--landing-text);
 }
 
+@media (min-width: 1024px) {
+    .feature {
+        width: calc((100% - 40px) / 3);
+        max-width: calc((100% - 40px) / 3);
+    }
+}
+
 @media (min-width: 641px) {
     .site-header::before {
         height: 650px;
