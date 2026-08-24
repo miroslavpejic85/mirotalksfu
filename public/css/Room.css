@@ -845,7 +845,7 @@ body {
     border-radius: 12px !important;
     background: var(--room-panel-raised) !important;
     box-shadow: var(--room-shadow);
-    padding: 6px 0;
+    padding: 6px;
     text-align: left;
     backdrop-filter: blur(18px) saturate(135%);
     -webkit-backdrop-filter: blur(18px) saturate(135%);
