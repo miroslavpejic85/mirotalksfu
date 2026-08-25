@@ -64,7 +64,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.81
+ * @version 2.3.82
  *
  */
 
@@ -489,7 +489,6 @@ const s3Client = new S3Client({
 // html views
 const views = {
     html: path.join(__dirname, '../../public/views'),
-    about: path.join(__dirname, '../../', 'public/views/about.html'),
     landing: path.join(__dirname, '../../', 'public/views/landing.html'),
     login: path.join(__dirname, '../../', 'public/views/login.html'),
     activeRooms: path.join(__dirname, '../../', 'public/views/activeRooms.html'),
@@ -1201,11 +1200,6 @@ function startServer() {
     // privacy policy
     app.get('/privacy', (req, res) => {
         res.sendFile(views.privacy);
-    });
-
-    // mirotalk about
-    app.get('/about', (req, res) => {
-        res.sendFile(views.about);
     });
 
     // Get stats endpoint
