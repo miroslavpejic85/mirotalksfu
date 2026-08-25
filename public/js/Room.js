@@ -4509,6 +4509,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
     }).then((result) => {
         if (result.isConfirmed) {
+            isExiting = true;
             endRoomSession();
             rc.exitRoom(disconnectAll);
             openURL(survey.url);
@@ -4519,6 +4520,7 @@ function leaveFeedback(allowCancel, disconnectAll = false) {
 }
 
 function redirectOnLeave(disconnectAll = false) {
+    isExiting = true;
     endRoomSession();
     rc.exitRoom(disconnectAll);
     redirect && redirect.enabled ? openURL(redirect.url) : openURL('/newroom');
