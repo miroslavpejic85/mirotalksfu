@@ -956,18 +956,30 @@ body {
     font-size: 0.9rem;
 }
 
-#bottomButtons .dropup .dropdown-menu {
+#bottomButtons .split-btn .dropdown-menu {
     z-index: 9999;
     position: absolute;
-    left: 0;
     padding: 10px 5px;
-    bottom: 14px !important;
+    max-height: calc(100vh - 96px);
     border: 1px solid var(--room-border) !important;
     border-radius: 12px !important;
     background: var(--room-panel-raised) !important;
     box-shadow: var(--room-shadow);
     backdrop-filter: blur(18px) saturate(135%);
     -webkit-backdrop-filter: blur(18px) saturate(135%);
+}
+
+#bottomButtons .dropup .dropdown-menu {
+    left: 0;
+    bottom: 14px !important;
+}
+
+#bottomButtons[data-position='horizontal'] .dropdown-menu {
+    max-height: calc(100vh - 24px);
+}
+
+#bottomButtons[data-position='horizontal'] .device-dropdown-toggle i {
+    transform: rotate(90deg);
 }
 
 /* Override bottomButtons button rule for dropdown menu items */
