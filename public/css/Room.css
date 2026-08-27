@@ -1198,23 +1198,16 @@ body {
 }
 
 #bottomButtons #exitButton {
-    border-color: rgba(255, 255, 255, 0.18) !important;
-    background: #e02424 !important;
-    box-shadow:
-        0 6px 18px rgba(224, 36, 36, 0.45),
-        inset 0 1px 0 rgba(255, 255, 255, 0.18);
-}
-
-#bottomButtons #exitButton i {
-    color: #fff !important;
+    border-color: transparent !important;
+    background: var(--btns-bg-color) !important;
 }
 
 #bottomButtons > #exitDropdown > #exitButton:hover {
-    border-color: rgba(255, 255, 255, 0.32) !important;
-    background: #f03a3a !important;
+    border-color: var(--room-border-strong) !important;
+    background: var(--room-control-hover) !important;
     box-shadow:
-        0 8px 22px rgba(240, 58, 58, 0.55),
-        inset 0 1px 0 rgba(255, 255, 255, 0.22);
+        0 8px 20px rgba(0, 0, 0, 0.22),
+        inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 @media screen and (max-width: 500px) {
