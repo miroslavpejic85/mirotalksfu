@@ -562,7 +562,19 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('participantsButton', 'Toggle participants list', bPlacement);
         setTippy('settingsButton', 'Toggle the settings', bPlacement);
+        refreshExitButtonTooltip(bPlacement);
     }
+}
+
+function refreshExitButtonTooltip(placement) {
+    if (!exitButton || isMobileDevice) return;
+    if (isPresenter && participantsCount > 1) {
+        exitButton._tippy?.destroy();
+        return;
+    }
+    const buttonPlacement =
+        placement || (BtnsBarPosition.options[BtnsBarPosition.selectedIndex].value == 'vertical' ? 'top' : 'right');
+    setTippy('exitButton', 'Leave room', buttonPlacement);
 }
 
 // ####################################################
@@ -7188,6 +7200,7 @@ function setParticipantsTippy(peers) {
 
 function refreshParticipantsCount(count, adapt = true) {
     if (adapt) adaptAspectRatio(count);
+    refreshExitButtonTooltip();
 }
 
 function toggleParticipantGridVisibility(peerId) {
