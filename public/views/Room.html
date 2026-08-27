@@ -419,11 +419,22 @@
                 </div>
             </div>
             <div id="exitDropdown">
-                <button id="exitButton" class="hidden"><i class="fa-solid fa-phone-slash red"></i></button>
+                <button
+                    id="exitButton"
+                    class="hidden"
+                    type="button"
+                    aria-label="Leave room"
+                    aria-controls="exitMenu"
+                    aria-expanded="false"
+                >
+                    <i class="fa-solid fa-phone-slash red" aria-hidden="true"></i>
+                </button>
                 <div id="exitMenu" class="hidden" aria-labelledby="exitButton">
-                    <button id="exitLeaveBtn"><i class="fas fa-sign-out-alt"></i> Leave room</button>
-                    <button id="exitLeaveAllBtn" class="hidden">
-                        <i class="fas fa-power-off red"></i> <span class="red">End room for all</span>
+                    <button id="exitLeaveBtn" type="button">
+                        <i class="fas fa-sign-out-alt" aria-hidden="true"></i> Leave room
+                    </button>
+                    <button id="exitLeaveAllBtn" class="hidden" type="button">
+                        <i class="fas fa-power-off" aria-hidden="true"></i> End room for all
                     </button>
                 </div>
             </div>

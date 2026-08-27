@@ -8949,31 +8949,43 @@ function toggleExitMenu() {
     if (!exitMenu) return leaveRoom();
     // Only presenters with other participants need the end-for-all choice.
     if (!isPresenter || participantsCount <= 1) {
-        hide(exitMenu);
+        setExitMenuOpen(false);
         return leaveRoom();
     }
     if (exitLeaveAllBtn) show(exitLeaveAllBtn);
-    exitMenu.classList.contains('hidden') ? show(exitMenu) : hide(exitMenu);
+    setExitMenuOpen(exitMenu.classList.contains('hidden'));
+}
+
+function setExitMenuOpen(isOpen) {
+    if (!exitMenu) return;
+    isOpen ? show(exitMenu) : hide(exitMenu);
+    exitButton?.setAttribute('aria-expanded', String(isOpen));
 }
 
 function handleExitLeave() {
-    hide(exitMenu);
+    setExitMenuOpen(false);
     leaveRoom();
 }
 
 function handleExitLeaveForAll() {
-    hide(exitMenu);
+    setExitMenuOpen(false);
     leaveRoom(true, true);
 }
 
 function handleExitMenuOutsideClick(e) {
     if (!exitDropdown || !exitMenu) return;
     if (exitMenu.classList.contains('hidden')) return;
-    if (!exitDropdown.contains(e.target)) hide(exitMenu);
+    if (!exitDropdown.contains(e.target)) setExitMenuOpen(false);
 }
 
 function setupExitMenuHover() {
-    if (!isDesktopDevice || !exitDropdown || !exitMenu) return;
+    if (!exitDropdown || !exitMenu) return;
+    exitDropdown.addEventListener('keydown', (e) => {
+        if (e.key !== 'Escape' || exitMenu.classList.contains('hidden')) return;
+        setExitMenuOpen(false);
+        exitButton.focus();
+    });
+    if (!isDesktopDevice) return;
     let closeTimeout;
     const cancelClose = () => {
         if (!closeTimeout) return;
@@ -8982,13 +8994,13 @@ function setupExitMenuHover() {
     };
     const scheduleClose = () => {
         cancelClose();
-        closeTimeout = setTimeout(() => hide(exitMenu), 400);
+        closeTimeout = setTimeout(() => setExitMenuOpen(false), 400);
     };
     exitDropdown.addEventListener('mouseenter', () => {
         if (!isPresenter || participantsCount <= 1) return;
         cancelClose();
         if (exitLeaveAllBtn) show(exitLeaveAllBtn);
-        show(exitMenu);
+        setExitMenuOpen(true);
     });
     exitDropdown.addEventListener('mouseleave', scheduleClose);
 }

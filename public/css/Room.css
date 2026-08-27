@@ -886,6 +886,18 @@ body {
     color: #dc3545 !important;
 }
 
+#bottomButtons #exitLeaveAllBtn {
+    margin-top: 4px;
+    border-top: 1px solid var(--room-border) !important;
+    border-radius: 0 0 8px 8px;
+    color: #ff5c69;
+}
+
+#bottomButtons #exitLeaveAllBtn:hover,
+#bottomButtons #exitLeaveAllBtn:focus-visible {
+    background: rgba(224, 36, 36, 0.16) !important;
+}
+
 #bottomButtons .split-btn > button {
     border-radius: 0;
     margin: 0;
