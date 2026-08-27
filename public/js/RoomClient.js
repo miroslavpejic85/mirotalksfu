@@ -452,6 +452,9 @@ class RoomClient {
         this.sessionId = ''; // Server-side unique conference-instance ID (issued on join)
 
         // Encodings
+        // Opt-in RTP header extensions (mediasoup-client 3.23.0+), currently honored only by Chrome.
+        // Example: { 'http://www.webrtc.org/experiments/rtp-hdrext/abs-capture-time': true }
+        this.forcedRtpExtensions = null;
         this.preferLocalCodecsOrder = false; // Prefer local codecs order
         this.forceVP8 = false; // Force VP8 codec for webcam and screen sharing
         this.forceVP9 = false; // Force VP9 codec for webcam and screen sharing
@@ -938,9 +941,11 @@ class RoomClient {
 
         let device;
         try {
-            device = this.test.device.enabled
-                ? await this.mediasoupClient.Device.factory({ handlerName: this.test.device.handlerName })
-                : await this.mediasoupClient.Device.factory();
+            const deviceOptions = {};
+            if (this.test.device.enabled) deviceOptions.handlerName = this.test.device.handlerName;
+            if (this.forcedRtpExtensions) deviceOptions.forcedRtpExtensions = this.forcedRtpExtensions;
+
+            device = await this.mediasoupClient.Device.factory(deviceOptions);
 
             console.log('Device created successfully:', device.handlerName);
         } catch (error) {
@@ -2294,16 +2299,6 @@ class RoomClient {
 
             const params = {
                 track,
-                // NOTE: `headerExtensionOptions.absCaptureTime` is disabled to work around a
-                // Chrome 148+ regression where munging the local SDP to add the
-                // `abs-capture-time` RTP header extension causes:
-                //   "A BUNDLE group contains a codec collision for header extension id=X.
-                //    The id must be the same across all bundled media descriptions"
-                // TODO: Re-enable once Chrome / mediasoup-client ship a fix.
-                // See https://github.com/versatica/mediasoup-client/issues/373
-                // headerExtensionOptions: {
-                //     absCaptureTime: true,
-                // },
                 appData: {
                     mediaType: type,
                 },
