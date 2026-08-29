@@ -101,35 +101,50 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.3.88</strong>',
+        title: '<strong>WebRTC SFU v2.3.90</strong>',
         html: `
-            <button 
-                id="support-button" 
-                data-umami-event="Support button" 
-                onclick="window.open('https://codecanyon.net/user/miroslavpejic85', '_blank')">
-                <i class="fas fa-heart"></i> Support
-            </button>
-            <br /><br /><br />
-            Author: 
-            <a 
-                id="linkedin-button" 
-                data-umami-event="Linkedin button" 
-                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/" 
-                target="_blank"> 
-                Miroslav Pejic
-            </a>
-            <br /><br />
-            Email: 
-            <a 
-                id="email-button" 
-                data-umami-event="Email button" 
-                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"> 
-                miroslav.pejic.85@gmail.com
-            </a>
-            <br /><br />
-            <hr />
-            <span>&copy; 2026 MiroTalk SFU, all rights reserved</span>
-            <hr />
+            <div class="about-content">
+                <p class="about-description">
+                    Self-hosted group video meetings with scalable WebRTC conferencing.
+                </p>
+                <a
+                    class="about-primary-action"
+                    data-umami-event="About button"
+                    href="https://docs.mirotalk.com/sites/sfu.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    <span>About</span>
+                </a>
+                <dl class="about-details">
+                    <div>
+                        <dt>Author</dt>
+                        <dd>
+                            <a
+                                id="linkedin-button"
+                                data-umami-event="Linkedin button"
+                                href="https://www.linkedin.com/in/miroslav-pejic-976a07101/"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                            >Miroslav Pejic</a>
+                        </dd>
+                    </div>
+                    <div>
+                        <dt>Email</dt>
+                        <dd>
+                            <a
+                                id="email-button"
+                                data-umami-event="Email button"
+                                href="mailto:miroslav.pejic.85@gmail.com?subject=MiroTalk SFU info"
+                            >miroslav.pejic.85@gmail.com</a>
+                        </dd>
+                    </div>
+                </dl>
+                <footer class="about-footer">
+                    &copy; ${new Date().getFullYear()} MiroTalk SFU. All rights reserved.
+                </footer>
+            </div>
         `,
     },
     widget: {

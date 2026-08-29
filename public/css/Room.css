@@ -3307,6 +3307,23 @@ body {
     cursor: default;
 }
 
+.about-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    width: min(100%, 380px);
+    margin: 0 auto;
+}
+
+.about-description {
+    max-width: 32ch;
+    margin: 0;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
 #about b {
     color: rgb(0, 180, 50);
 }
@@ -3321,9 +3338,42 @@ body {
     text-decoration: none;
 }
 
-#about a:hover {
+#about a:not(.about-primary-action):hover {
     color: grey;
     transition: all 0.3s ease-in-out;
+}
+
+.about-primary-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    min-width: 180px;
+    min-height: 44px;
+    padding: 0 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #ffffff;
+    background: #0270d7;
+    font-size: 1rem;
+    font-weight: 600;
+    transition:
+        background-color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+    cursor: pointer;
+}
+
+#about .about-primary-action:hover {
+    color: #ffffff;
+    background: #025caf;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.24);
+}
+
+.about-primary-action:focus-visible {
+    outline: 3px solid var(--hover-color);
+    outline-offset: 3px;
 }
 
 #about button {
@@ -3345,6 +3395,45 @@ body {
     filter: brightness(1.1) saturate(1.2);
     transform: scale(1.05);
     box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.about-details {
+    width: 100%;
+    margin: 0;
+    padding: 16px 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+}
+
+.about-details > div {
+    display: grid;
+    grid-template-columns: 70px minmax(0, 1fr);
+    gap: 12px;
+    align-items: baseline;
+    text-align: left;
+}
+
+.about-details > div + div {
+    margin-top: 10px;
+}
+
+.about-details dt {
+    color: rgba(255, 255, 255, 0.62);
+    font-size: 0.82rem;
+    font-weight: 600;
+    text-transform: uppercase;
+}
+
+.about-details dd {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.about-footer {
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.78rem;
+    line-height: 1.4;
 }
 
 /*--------------------------------------------------------------

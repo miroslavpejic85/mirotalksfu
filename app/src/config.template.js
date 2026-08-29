@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.88 - Configuration File
+ * MiroTalk SFU v2.3.90 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1304,30 +1304,49 @@ module.exports = {
                 imageUrl: process.env.ABOUT_IMAGE_URL || '../images/mirotalk-logo.gif',
                 title: `WebRTC SFU v${packageJson.version}`,
                 html: `
-                    <button id="support-button" data-umami-event="Support button"
-                        onclick="window.open('${process.env.SUPPORT_URL || 'https://codecanyon.net/user/miroslavpejic85'}', '_blank')">
-                        <i class="fas fa-crown"></i> ${process.env.SUPPORT_TEXT || 'Support'}
-                    </button>
-                    <br />
-                    <br />
-                    ${process.env.AUTHOR_LABEL || 'Author'}: 
-                    <a id="linkedin-button" data-umami-event="Linkedin button"
-                        href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com/in/miroslav-pejic-976a07101/'}" 
-                        target="_blank">
-                        ${process.env.AUTHOR_NAME || 'Miroslav Pejic'}
-                    </a>
-                    <br />
-                    ${process.env.EMAIL_LABEL || 'Email'}: 
-                    <a id="email-button" data-umami-event="Email button"
-                        href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}">
-                        ${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}
-                    </a>
-                    <hr />
-                    <span>
-                        &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'MiroTalk SFU, all rights reserved'}
-                    </span>
-                    <hr />
-                    `,
+                    <div class="about-content">
+                        <p class="about-description">
+                            Self-hosted group video meetings with scalable WebRTC conferencing.
+                        </p>
+                        <a
+                            class="about-primary-action"
+                            data-umami-event="About button"
+                            href="${process.env.SUPPORT_URL || 'https://docs.mirotalk.com/sites/sfu.html'}"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <i class="fas fa-info-circle" aria-hidden="true"></i>
+                            <span>${process.env.SUPPORT_TEXT || 'About'}</span>
+                        </a>
+                        <dl class="about-details">
+                            <div>
+                                <dt>${process.env.AUTHOR_LABEL || 'Author'}</dt>
+                                <dd>
+                                    <a
+                                        id="linkedin-button"
+                                        data-umami-event="Linkedin button"
+                                        href="${process.env.LINKEDIN_URL || 'https://www.linkedin.com/in/miroslav-pejic-976a07101/'}"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                    >${process.env.AUTHOR_NAME || 'Miroslav Pejic'}</a>
+                                </dd>
+                            </div>
+                            <div>
+                                <dt>${process.env.EMAIL_LABEL || 'Email'}</dt>
+                                <dd>
+                                    <a
+                                        id="email-button"
+                                        data-umami-event="Email button"
+                                        href="mailto:${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}?subject=${process.env.EMAIL_SUBJECT || 'MiroTalk SFU info'}"
+                                    >${process.env.CONTACT_EMAIL || 'miroslav.pejic.85@gmail.com'}</a>
+                                </dd>
+                            </div>
+                        </dl>
+                        <footer class="about-footer">
+                            &copy; ${new Date().getFullYear()} ${process.env.COPYRIGHT_TEXT || 'MiroTalk SFU. All rights reserved.'}
+                        </footer>
+                    </div>
+                `,
             },
 
             /**
