@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.92
+ * @version 2.3.93
  *
  */
 
@@ -10299,14 +10299,15 @@ class RoomClient {
         return true;
     }
 
-    lobbyAction(id, lobby_status) {
-        const words = id.split('___');
-        const peer_name = words[0];
-        const peer_id = words[1];
+    lobbyAction(button, lobby_status) {
+        const peer_id = button.dataset.peerId;
+        const lobbyPeer = this.lobbyPears[peer_id];
+        if (!lobbyPeer) return;
+
         const data = {
             room_id: this.room_id,
             peer_id: peer_id,
-            peer_name: peer_name,
+            peer_name: lobbyPeer.peer_name,
             lobby_status: lobby_status,
             broadcast: true,
         };
@@ -10390,16 +10391,18 @@ class RoomClient {
                 <td class='lobby-cell lobby-cell--action'>
                     <button
                         id='${lobbyAcceptId}'
+                        data-peer-id='${safePeerId}'
                         class='lobby-action-btn lobby-action-btn--accept'
-                        onclick="rc.lobbyAction(this.id, 'accept')"
+                        onclick="rc.lobbyAction(this, 'accept')"
                         aria-label='Accept ${displayName}'
                     >${_PEER.acceptPeer}</button>
                 </td>
                 <td class='lobby-cell lobby-cell--action'>
                     <button
                         id='${lobbyRejectId}'
+                        data-peer-id='${safePeerId}'
                         class='lobby-action-btn lobby-action-btn--reject'
-                        onclick="rc.lobbyAction(this.id, 'reject')"
+                        onclick="rc.lobbyAction(this, 'reject')"
                         aria-label='Reject ${displayName}'
                     >${icons.times}</button>
                 </td>
