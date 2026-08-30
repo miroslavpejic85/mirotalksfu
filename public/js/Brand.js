@@ -55,7 +55,7 @@ let BRAND = {
         joinLastLabel: 'Your recent room:',
     },
     site: {
-        title: 'MiroTalk SFU – Open Source Zoom Alternative | Self-Hosted Video Conferencing',
+        title: 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
         icon: '../images/logo.svg',
         appleTouchIcon: '../images/logo.svg',
         newRoomTitle: 'Pick name. <br />Share URL. <br />Start conference.',
@@ -64,7 +64,7 @@ let BRAND = {
     },
     meta: {
         description:
-            'MiroTalk SFU is an open-source, self-hosted Zoom alternative for video conferencing. It lets developers, businesses and organizations run their own video communication infrastructure with full source-code access and customization.',
+            'Build your own Zoom alternative with MiroTalk SFU, an open-source, self-hosted WebRTC platform powered by Mediasoup for scalable video meetings.',
         keywords:
             'webrtc, miro, mediasoup, mediasoup-client, self hosted, voip, sip, real-time communications, chat, messaging, meet, webrtc stun, webrtc turn, webrtc p2p, webrtc sfu, video meeting, video chat, video conference, multi video chat, multi video conference, peer to peer, p2p, sfu, rtc, alternative to, zoom, microsoft teams, google meet, jitsi, meeting',
     },
@@ -101,7 +101,7 @@ let BRAND = {
     },
     about: {
         imageUrl: '../images/mirotalk-logo.gif',
-        title: '<strong>WebRTC SFU v2.3.91</strong>',
+        title: '<strong>WebRTC SFU v2.3.92</strong>',
         html: `
             <div class="about-content">
                 <p class="about-description">

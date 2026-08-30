@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.91 - Configuration File
+ * MiroTalk SFU v2.3.92 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1205,9 +1205,7 @@ module.exports = {
              * Site-wide settings including icons and page-specific content.
              */
             site: {
-                title:
-                    process.env.SITE_TITLE ||
-                    'MiroTalk SFU – Open Source Zoom Alternative | Self-Hosted Video Conferencing',
+                title: process.env.SITE_TITLE || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
                 appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
@@ -1223,7 +1221,7 @@ module.exports = {
             meta: {
                 description:
                     process.env.META_DESCRIPTION ||
-                    'MiroTalk SFU is an open-source, self-hosted Zoom alternative for video conferencing. It lets developers, businesses and organizations run their own video communication infrastructure with full source-code access and customization.',
+                    'Build your own Zoom alternative with MiroTalk SFU, an open-source, self-hosted WebRTC platform powered by Mediasoup for scalable video meetings.',
                 keywords: process.env.META_KEYWORDS || 'webrtc, video calls, conference, screen sharing, mirotalk, sfu',
             },
 
@@ -1235,9 +1233,10 @@ module.exports = {
             og: {
                 type: process.env.OG_TYPE || 'app-webrtc',
                 siteName: process.env.OG_SITE_NAME || 'MiroTalk SFU',
-                title: process.env.OG_TITLE || 'Click the link to make a call.',
+                title: process.env.OG_TITLE || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
                 description:
-                    process.env.OG_DESCRIPTION || 'MiroTalk SFU provides real-time video calls and screen sharing.',
+                    process.env.OG_DESCRIPTION ||
+                    'Build your own Zoom alternative with MiroTalk SFU, an open-source self-hosted WebRTC video conferencing platform powered by Mediasoup. Host scalable meetings, webinars, classrooms, screen sharing and real-time collaboration.',
                 image: process.env.OG_IMAGE_URL || 'https://sfu.mirotalk.com/images/mirotalksfu.png',
                 url: process.env.OG_URL || 'https://sfu.mirotalk.com',
             },

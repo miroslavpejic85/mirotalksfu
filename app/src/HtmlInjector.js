@@ -23,10 +23,10 @@ class HtmlInjector {
         return {
             OG_TYPE: this.config?.og?.type || 'app-webrtc',
             OG_SITE_NAME: this.config?.og?.siteName || 'MiroTalk SFU',
-            OG_TITLE: this.config?.og?.title || 'Click the link to make a call.',
+            OG_TITLE: this.config?.og?.title || 'MiroTalk SFU - Open Source WebRTC Video Conferencing',
             OG_DESCRIPTION:
                 this.config?.og?.description ||
-                'MiroTalk SFU calling provides real-time video calls, messaging and screen sharing.',
+                'Build your own Zoom alternative with MiroTalk SFU, an open-source self-hosted WebRTC video conferencing platform powered by Mediasoup. Host scalable meetings, webinars, classrooms, screen sharing and real-time collaboration.',
             OG_IMAGE: this.config?.og?.image || 'https://sfu.mirotalk.com/images/mirotalksfu.png',
             OG_URL: this.config?.og?.url || 'https://sfu.mirotalk.com',
             // Add more data here as needed with fallbacks
