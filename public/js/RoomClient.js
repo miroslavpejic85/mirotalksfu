@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.93
+ * @version 2.3.94
  *
  */
 
@@ -3329,7 +3329,7 @@ class RoomClient {
                 BUTTONS.producerVideo.drawingButton && isScreen && this.handleDW(dw.id, d.id);
                 this.handlePN(elem.id, pn.id, d.id, isScreen);
                 this.handleZV(elem.id, d.id, this.peer_id);
-                this.handlePV(id + '___' + pv.id);
+                this.handlePV(id, pv.id);
 
                 this.setAV(
                     this.audioConsumers.get(this.peer_id + '___pVolume'),
@@ -3374,7 +3374,7 @@ class RoomClient {
                 this.audioConsumers.set(audioConsumerId, elem.id);
 
                 this.setAV(elem.id, audioConsumerId, this.peer_info.peer_audio_volume);
-                this.handlePV(elem.id + '___' + audioConsumerId);
+                this.handlePV(elem.id, audioConsumerId);
 
                 console.log('[addProducer] audio-element-count', this.localAudioEl.childElementCount);
                 break;
@@ -4095,17 +4095,17 @@ class RoomClient {
                 this.handleTS(elem.id, ts.id);
                 this.handleMV(elem.id, mv.id);
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && this.handleDW(dw.id, d.id);
-                this.handleSF(sf.id, peer_name);
+                this.handleSF(sf.id, peer_name, remotePeerId);
                 this.handleHA(ha.id, d.id);
                 this.handleHFG(hg.id, remotePeerId);
-                this.handleSM(sm.id, peer_name);
-                this.handleSV(sv.id, peer_name);
-                BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id);
-                BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id);
-                this.handleCV(id + '___' + pv.id);
-                this.handleGL(gl.id);
-                this.handleBAN(ban.id);
-                this.handleKO(ko.id);
+                this.handleSM(sm.id, peer_name, remotePeerId);
+                this.handleSV(sv.id, peer_name, remotePeerId);
+                BUTTONS.consumerVideo.muteVideoButton && this.handleCM(cm.id, remotePeerId);
+                BUTTONS.consumerVideo.muteAudioButton && this.handleAU(au.id, remotePeerId);
+                this.handleCV(pv.id);
+                this.handleGL(gl.id, remotePeerId);
+                this.handleBAN(ban.id, remotePeerId);
+                this.handleKO(ko.id, remotePeerId);
                 this.handleRole(role.id, remotePeerId, remotePeerPresenter);
                 this.handlePN(elem.id, pn.id, d.id, remoteIsScreen);
                 this.handleZV(elem.id, d.id, remotePeerId);
@@ -4176,7 +4176,7 @@ class RoomClient {
 
                 // Use helper function to set audio volume
                 this.setAV(id, audioConsumerId, remotePeerAudioVolume, true);
-                this.handleCV(id + '___' + audioConsumerId);
+                this.handleCV(audioConsumerId);
 
                 this.setPeerAudio(remotePeerId, remotePeerAudio);
 
@@ -4388,20 +4388,20 @@ class RoomClient {
 
         this.videoMediaContainer.appendChild(d);
         if (typeof applyParticipantGridVisibility === 'function') applyParticipantGridVisibility();
-        BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id);
+        BUTTONS.videoOff.muteAudioButton && this.handleAU(au.id, peer_id);
 
         if (remotePeer) {
-            this.handleCV('remotePeer___' + pv.id);
-            this.handleSM(sm.id, peer_name);
-            this.handleSF(sf.id, peer_name);
-            this.handleSV(sv.id, peer_name);
-            this.handleGL(gl.id);
-            this.handleBAN(ban.id);
-            this.handleKO(ko.id);
+            this.handleCV(pv.id);
+            this.handleSM(sm.id, peer_name, peer_id);
+            this.handleSF(sf.id, peer_name, peer_id);
+            this.handleSV(sv.id, peer_name, peer_id);
+            this.handleGL(gl.id, peer_id);
+            this.handleBAN(ban.id, peer_id);
+            this.handleKO(ko.id, peer_id);
             this.handleHFG(hg.id, peer_id);
             this.handleRole(role.id, peer_id, peer_presenter);
         } else {
-            this.handlePV(this.audioConsumers.get(pv.id) + '___' + pv.id);
+            this.handlePV(this.audioConsumers.get(pv.id), pv.id);
         }
 
         this.handleVB(d.id, vb.id);
@@ -6094,10 +6094,7 @@ class RoomClient {
     // CHAT
     // ####################################################
 
-    handleSM(uid, name) {
-        const words = uid.split('___');
-        let peer_id = words[1];
-        let peer_name = name;
+    handleSM(uid, peer_name, peer_id) {
         let btnSm = this.getId(uid);
         if (btnSm) {
             btnSm.addEventListener('click', () => {
@@ -9059,10 +9056,7 @@ class RoomClient {
     // FILE SHARING
     // ####################################################
 
-    handleSF(uid, name) {
-        const words = uid.split('___');
-        let peer_id = words[1];
-        let peer_name = name;
+    handleSF(uid, peer_name, peer_id) {
         let btnSf = this.getId(uid);
         if (btnSf) {
             btnSf.addEventListener('click', () => {
@@ -9627,10 +9621,7 @@ class RoomClient {
     // SHARE VIDEO YOUTUBE - MP4 - WEBM - OGG or AUDIO mp3
     // ####################################################
 
-    handleSV(uid, name) {
-        const words = uid.split('___');
-        let peer_id = words[1];
-        let peer_name = name;
+    handleSV(uid, peer_name, peer_id) {
         let btnSv = this.getId(uid);
         if (btnSv) {
             btnSv.addEventListener('click', () => {
@@ -10760,12 +10751,12 @@ class RoomClient {
     // HANDLE PEERS AUDIO VOLUME
     // ####################################################
 
-    handleCV(uid) {
-        this.handleVolumeControl(uid, true); // Consumer
+    handleCV(volumeInputId) {
+        this.handleVolumeControl(null, volumeInputId, true); // Consumer
     }
 
-    handlePV(uid) {
-        this.handleVolumeControl(uid, false); // Producer
+    handlePV(audioElementId, volumeInputId) {
+        this.handleVolumeControl(audioElementId, volumeInputId, false); // Producer
     }
 
     setAV(audioElementId, volumeElementId, volumeValue, isConsumer = false) {
@@ -10796,10 +10787,8 @@ class RoomClient {
         volumeInput.disabled = volumeValue < 100;
     }
 
-    handleVolumeControl(uid, isConsumer = true) {
-        const words = uid.split('___');
-        const volumeInputId = `${words[1]}___pVolume`;
-        const audioPlayer = this.getId(isConsumer ? this.audioConsumers.get(volumeInputId) : words[0]);
+    handleVolumeControl(audioElementId, volumeInputId, isConsumer = true) {
+        const audioPlayer = this.getId(isConsumer ? this.audioConsumers.get(volumeInputId) : audioElementId);
         const inputElement = this.getId(volumeInputId);
 
         if (inputElement && audioPlayer) {
@@ -11085,9 +11074,7 @@ class RoomClient {
     // HANDLE BAN
     // ###################################################
 
-    handleGL(uid) {
-        const words = uid.split('___');
-        let peer_id = words[1] + '___pGeoLocation';
+    handleGL(uid, peer_id) {
         let btnGl = this.getId(uid);
         if (btnGl) {
             btnGl.addEventListener('click', () => {
@@ -11102,9 +11089,7 @@ class RoomClient {
     // HANDLE BAN
     // ###################################################
 
-    handleBAN(uid) {
-        const words = uid.split('___');
-        let peer_id = words[1] + '___pBan';
+    handleBAN(uid, peer_id) {
         let btnBan = this.getId(uid);
         if (btnBan) {
             btnBan.addEventListener('click', () => {
@@ -11119,9 +11104,7 @@ class RoomClient {
     // HANDLE KICK-OUT
     // ###################################################
 
-    handleKO(uid) {
-        const words = uid.split('___');
-        let peer_id = words[1] + '___pEject';
+    handleKO(uid, peer_id) {
         let btnKo = this.getId(uid);
         if (btnKo) {
             btnKo.addEventListener('click', () => {
@@ -11307,13 +11290,13 @@ class RoomClient {
                 () => {
                     const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
                     eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
-                    this.handleGL(gl.id);
+                    this.handleGL(gl.id, remotePeerId);
                 }
             );
             this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.consumerVideo.banButton, () => {
                 const ban = this.createButton(`${prefix}ban`, html.ban);
                 eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
-                this.handleBAN(ban.id);
+                this.handleBAN(ban.id, remotePeerId);
             });
             this.reconcilePresenterMenuItem(
                 eVc,
@@ -11322,7 +11305,7 @@ class RoomClient {
                 () => {
                     const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
                     eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
-                    this.handleKO(ko.id);
+                    this.handleKO(ko.id, remotePeerId);
                 }
             );
         });
@@ -11341,13 +11324,13 @@ class RoomClient {
             this.reconcilePresenterMenuItem(vb, `${prefix}kickOut`, canModerate && BUTTONS.videoOff.ejectButton, () => {
                 const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
                 vb.insertBefore(ko, vb.firstChild);
-                this.handleKO(ko.id);
+                this.handleKO(ko.id, peerId);
                 if (!this.isMobileDevice) this.setTippy(ko.id, 'Eject', 'bottom');
             });
             this.reconcilePresenterMenuItem(vb, `${prefix}ban`, canModerate && BUTTONS.videoOff.banButton, () => {
                 const ban = this.createButton(`${prefix}ban`, html.ban);
                 vb.insertBefore(ban, vb.firstChild);
-                this.handleBAN(ban.id);
+                this.handleBAN(ban.id, peerId);
                 if (!this.isMobileDevice) this.setTippy(ban.id, 'Ban', 'bottom');
             });
             this.reconcilePresenterMenuItem(
@@ -11374,7 +11357,7 @@ class RoomClient {
                 () => {
                     const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
                     vb.insertBefore(gl, vb.firstChild);
-                    this.handleGL(gl.id);
+                    this.handleGL(gl.id, peerId);
                     if (!this.isMobileDevice) this.setTippy(gl.id, 'Geolocation', 'bottom');
                 }
             );
@@ -11440,9 +11423,7 @@ class RoomClient {
         }
     }
 
-    handleCM(uid) {
-        const words = uid.split('___');
-        let peer_id = words[1] + '___pVideo';
+    handleCM(uid, peer_id) {
         let btnCm = this.getId(uid);
         if (btnCm) {
             btnCm.addEventListener('click', (e) => {
@@ -11463,9 +11444,7 @@ class RoomClient {
     // HANDLE AUDIO
     // ###################################################
 
-    handleAU(uid) {
-        const words = uid.split('__');
-        let peer_id = words[0] + '___pAudio';
+    handleAU(uid, peer_id) {
         let btnAU = this.getId(uid);
         if (btnAU) {
             btnAU.addEventListener('click', (e) => {
@@ -11687,8 +11666,7 @@ class RoomClient {
     // ####################################################
 
     async peerAction(from_peer_name, id, action, emit = true, broadcast = false, info = true, msg = '') {
-        const words = id.split('___');
-        const peer_id = words[0];
+        const peer_id = id;
 
         if (emit) {
             // send...
@@ -11763,7 +11741,8 @@ class RoomClient {
                     case 'stop':
                         const screenMessage =
                             'The participant screen is not shared, only the participant can initiate sharing';
-                        const peerScreenButton = this.getId(id);
+                        const peerScreenButton =
+                            this.getId(peer_id + '___pScreenStop') || this.getId(peer_id + '___pScreen');
                         if (peerScreenButton) {
                             const peerScreenStatus = peerScreenButton.querySelector('i');
                             if (peerScreenStatus && peerScreenStatus.classList.contains('red')) {
@@ -12768,9 +12747,7 @@ class RoomClient {
     // HANDLE PEER GEOLOCATION
     // ####################################################
 
-    askPeerGeoLocation(id) {
-        const words = id.split('___');
-        const peer_id = words[0];
+    askPeerGeoLocation(peer_id) {
         const cmd = {
             type: 'geoLocation',
             from_peer_name: this.peer_name,

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.93
+ * @version 2.3.94
  *
  */
 
@@ -6959,7 +6959,7 @@ function getParticipantsList(peers) {
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pAudioMute`,
-                        onClick: `rc.peerAction('me',this.id,'mute')`,
+                        onClick: `rc.peerAction('me','${peer_id}','mute')`,
                         iconHtml: _PEER.audioOn,
                         label: 'Toggle audio',
                     })
@@ -6967,7 +6967,7 @@ function getParticipantsList(peers) {
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pVideoHide`,
-                        onClick: `rc.peerAction('me',this.id,'hide')`,
+                        onClick: `rc.peerAction('me','${peer_id}','hide')`,
                         iconHtml: _PEER.videoOn,
                         label: 'Toggle video',
                     })
@@ -6975,7 +6975,7 @@ function getParticipantsList(peers) {
                 menuItems += renderParticipantMenuItem(
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pScreenStop`,
-                        onClick: `rc.peerAction('me',this.id,'stop')`,
+                        onClick: `rc.peerAction('me','${peer_id}','stop')`,
                         iconHtml: _PEER.screenOn,
                         label: 'Toggle screen',
                     })
@@ -7010,7 +7010,7 @@ function getParticipantsList(peers) {
                         renderParticipantActionButton({
                             buttonClass: 'btn-sm ml5',
                             buttonId: `${peer_id}___geoLocation`,
-                            onClick: `rc.askPeerGeoLocation(this.id)`,
+                            onClick: `rc.askPeerGeoLocation('${peer_id}')`,
                             iconHtml: peer_geoLocation,
                             label: 'Get geolocation',
                         })
@@ -7024,7 +7024,7 @@ function getParticipantsList(peers) {
                         renderParticipantActionButton({
                             buttonClass: 'btn-sm ml5 participant-action-danger',
                             buttonId: `${peer_id}___pBan`,
-                            onClick: `rc.peerAction('me',this.id,'ban')`,
+                            onClick: `rc.peerAction('me','${peer_id}','ban')`,
                             iconHtml: peer_ban,
                             label: 'Ban participant',
                         })
@@ -7035,7 +7035,7 @@ function getParticipantsList(peers) {
                         renderParticipantActionButton({
                             buttonClass: 'btn-sm ml5 participant-action-danger',
                             buttonId: `${peer_id}___pEject`,
-                            onClick: `rc.peerAction('me',this.id,'eject')`,
+                            onClick: `rc.peerAction('me','${peer_id}','eject')`,
                             iconHtml: peer_eject,
                             label: 'Eject participant',
                         })
@@ -7050,17 +7050,17 @@ function getParticipantsList(peers) {
                 let buttons =
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pAudio`,
-                        onClick: `rc.peerAction('me',this.id,'mute')`,
+                        onClick: `rc.peerAction('me','${peer_id}','mute')`,
                         iconHtml: peer_audio,
                     }) +
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pVideo`,
-                        onClick: `rc.peerAction('me',this.id,'hide')`,
+                        onClick: `rc.peerAction('me','${peer_id}','hide')`,
                         iconHtml: peer_video,
                     }) +
                     renderParticipantActionButton({
                         buttonId: `${peer_id}___pScreen`,
-                        onClick: `rc.peerAction('me',this.id,'stop')`,
+                        onClick: `rc.peerAction('me','${peer_id}','stop')`,
                         iconHtml: peer_screen,
                     });
 
@@ -8133,7 +8133,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.93',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.3.94',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
