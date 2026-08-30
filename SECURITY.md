@@ -21,14 +21,14 @@ Thanks in advance for your support to make our products safer!
 
 We would like to extend our gratitude to the following individuals for their responsible disclosure of security vulnerabilities:
 
-| Name                                                 | Contact                                                                       |
-| ---------------------------------------------------- | ----------------------------------------------------------------------------- |
-| `Hendrik Siewert`                                    | hendrik.siewert@upb.de                                                        |
-| `Caio Fook`                                          | https://github.com/caiofook                                                   |
-| `Nishant Jain`                                       | https://twitter.com/realArcherL                                               |
-| `Florian LELEU`                                      | https://hosting.cognix-systems.com                                            |
-| `Nozomu Sasaki (Paul)`                               | https://github.com/morimori-dev \| https://www.linkedin.com/in/nozomu-sasaki/ |
-| `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | https://github.com/shukla304                                                  |
-| `Tyler Boykin`                                       | https://github.com/CaptBoykin                                                 |
+| Name                                                 | Contact                                                                                             |
+| ---------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| `Hendrik Siewert`                                    | [Email](mailto:hendrik.siewert@upb.de)                                                              |
+| `Caio Fook`                                          | [GitHub](https://github.com/caiofook)                                                               |
+| `Nishant Jain`                                       | [X](https://twitter.com/realArcherL)                                                                |
+| `Florian LELEU`                                      | [Website](https://hosting.cognix-systems.com)                                                       |
+| `Nozomu Sasaki (Paul)`                               | [GitHub](https://github.com/morimori-dev) \| [LinkedIn](https://www.linkedin.com/in/nozomu-sasaki/) |
+| `Vishal Shukla (@shukla304) and sechub.dev AI Agent` | [GitHub](https://github.com/shukla304)                                                              |
+| `Tyler Boykin`                                       | [GitHub](https://github.com/CaptBoykin)                                                             |
 
 Their dedication to security has contributed to the continuous improvement of our systems, ensuring the safety and privacy of our users and data.
