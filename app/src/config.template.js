@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.3.90 - Configuration File
+ * MiroTalk SFU v2.3.91 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1205,7 +1205,9 @@ module.exports = {
              * Site-wide settings including icons and page-specific content.
              */
             site: {
-                title: process.env.SITE_TITLE || 'MiroTalk SFU, Free Video Calls, Messaging and Screen Sharing',
+                title:
+                    process.env.SITE_TITLE ||
+                    'MiroTalk SFU – Open Source Zoom Alternative | Self-Hosted Video Conferencing',
                 icon: process.env.SITE_ICON_PATH || '../images/logo.svg',
                 appleTouchIcon: process.env.APPLE_TOUCH_ICON_PATH || '../images/logo.svg',
                 newRoomTitle: process.env.NEW_ROOM_TITLE || 'Pick name. <br />Share URL. <br />Start conference.',
@@ -1221,7 +1223,7 @@ module.exports = {
             meta: {
                 description:
                     process.env.META_DESCRIPTION ||
-                    'MiroTalk SFU powered by WebRTC and mediasoup for real-time video communications.',
+                    'MiroTalk SFU is an open-source, self-hosted Zoom alternative for video conferencing. It lets developers, businesses and organizations run their own video communication infrastructure with full source-code access and customization.',
                 keywords: process.env.META_KEYWORDS || 'webrtc, video calls, conference, screen sharing, mirotalk, sfu',
             },
 
