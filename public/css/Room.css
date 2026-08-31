@@ -1003,6 +1003,7 @@ body {
     max-width: calc(100vw - 24px) !important;
     text-align: left;
     border: var(--border) !important;
+    padding: 8px 6px;
 }
 
 #bottomButtons #settingsExtraMenu {
@@ -1057,26 +1058,30 @@ body {
 #bottomButtons #startVideoDeviceMenu .device-menu-header {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 12px;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #fff;
+    gap: 7px;
+    padding: 12px 10px 6px;
+    color: rgba(255, 255, 255, 0.52);
+    font-size: 0.68rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-transform: uppercase;
     user-select: none;
+    pointer-events: none;
 }
 
 #bottomButtons #startAudioDeviceMenu .device-menu-header i,
 #bottomButtons #startVideoDeviceMenu .device-menu-header i {
-    width: 18px;
+    width: 14px;
     text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.8;
 }
 
 #bottomButtons #startAudioDeviceMenu .device-menu-divider,
 #bottomButtons #startVideoDeviceMenu .device-menu-divider {
     height: 1px;
-    background: var(--border-color);
-    opacity: 0.6;
-    margin: 8px 0;
+    margin: 7px 10px;
+    background: rgba(255, 255, 255, 0.08);
 }
 
 #bottomButtons #startAudioDeviceMenu button,
@@ -1093,6 +1098,13 @@ body {
     text-overflow: ellipsis;
     transform: none !important;
     transition: padding 0.2s ease;
+}
+
+#bottomButtons #startAudioDeviceMenu button,
+#bottomButtons #startVideoDeviceMenu button {
+    height: 38px;
+    padding-right: 12px;
+    padding-left: 12px;
 }
 
 #bottomButtons #settingsExtraMenu button:hover {
