@@ -449,9 +449,20 @@
             </header>
             <main class="mySettingsMain">
                 <div class="tab">
+                    <span class="settings-nav-label">Meeting</span>
                     <button id="tabRoomBtn" class="fas fa-home tablinks">
                         <p class="tabButtonText">Room</p>
                     </button>
+                    <button id="tabModeratorBtn" class="fas fa-user-shield tablinks">
+                        <p class="tabButtonText">Moderator</p>
+                    </button>
+                    <button id="tabNotificationsBtn" class="fas fa-bell tablinks hidden">
+                        <p class="tabButtonText">Notifications</p>
+                    </button>
+                    <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks">
+                        <p class="tabButtonText">Recording</p>
+                    </button>
+                    <span class="settings-nav-label">Devices</span>
                     <button id="tabVideoDevicesBtn" class="fas fa-video tablinks">
                         <p class="tabButtonText">Video</p>
                     </button>
@@ -461,24 +472,17 @@
                     <button id="tabAudioDevicesBtn" class="fas fa-microphone tablinks">
                         <p class="tabButtonText">Audio</p>
                     </button>
-                    <button id="tabNotificationsBtn" class="fas fa-bell tablinks hidden">
-                        <p class="tabButtonText">Notifications</p>
-                    </button>
-                    <button id="tabModeratorBtn" class="fas fa-user-shield tablinks">
-                        <p class="tabButtonText">Moderator</p>
-                    </button>
-                    <button id="tabRecordingBtn" class="fas fa-record-vinyl tablinks">
-                        <p class="tabButtonText">Recording</p>
-                    </button>
+                    <span class="settings-nav-label">Share and stream</span>
                     <button id="tabVideoAIBtn" class="fas fa-robot tablinks">
-                        <p class="tabButtonText">VideoAI</p>
+                        <p class="tabButtonText">AI avatar</p>
                     </button>
                     <button id="tabVideoShareBtn" class="fab fa-youtube tablinks">
-                        <p class="tabButtonText">Media</p>
+                        <p class="tabButtonText">Share media</p>
                     </button>
                     <button id="tabRTMPStreamingBtn" class="fa-solid fa-satellite-dish tablinks">
-                        <p class="tabButtonText">RTMP</p>
+                        <p class="tabButtonText">Live stream</p>
                     </button>
+                    <span class="settings-nav-label">Personal</span>
                     <button id="tabProfileBtn" class="fas fa-user tablinks">
                         <p class="tabButtonText">Profile</p>
                     </button>
@@ -486,10 +490,10 @@
                         <p class="tabButtonText">Shortcuts</p>
                     </button>
                     <button id="tabAspectBtn" class="fas fa-screwdriver-wrench tablinks">
-                        <p class="tabButtonText">Aspect</p>
+                        <p class="tabButtonText">Layout</p>
                     </button>
                     <button id="tabStylingBtn" class="fas fa-palette tablinks">
-                        <p class="tabButtonText">Style</p>
+                        <p class="tabButtonText">Appearance</p>
                     </button>
                     <button id="tabLanguagesBtn" class="fas fa-globe tablinks">
                         <p class="tabButtonText">Language</p>
@@ -498,6 +502,10 @@
 
                 <div class="tabActions">
                     <div id="tabRoom" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Room settings</h3>
+                            <p>Manage access, invitations, and your in-room preferences.</p>
+                        </div>
                         <button id="activeRoomsButton" class="hidden btn-custom">
                             <i class="fa-solid fa-circle-dot"></i>
                             <p>Active rooms</p>
@@ -532,7 +540,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-wifi"></i>
-                                        <p>Broadcast</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Broadcast mode</strong>
+                                            <small>Present one-way to a large audience</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -545,7 +556,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-shield-halved"></i>
-                                        <p>Lobby</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Waiting room</strong>
+                                            <small>Approve people before they join</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -558,7 +572,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-microphone-lines"></i>
-                                        <p>Volume bar</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Microphone level</strong>
+                                            <small>Show your input volume</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -571,7 +588,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-music"></i>
-                                        <p>Sounds</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Meeting sounds</strong>
+                                            <small>Play audio alerts for room events</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -584,7 +604,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-share-alt"></i>
-                                        <p>Share</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Room link on join</strong>
+                                            <small>Show the sharing prompt when you enter</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -597,7 +620,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-video-slash"></i>
-                                        <p>Show camera-off</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Camera-off participants</strong>
+                                            <small>Keep their tiles visible in the grid</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -615,7 +641,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-eye"></i>
-                                        <p>Buttons</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Keep controls visible</strong>
+                                            <small>Do not auto-hide the meeting toolbar</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -628,7 +657,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-mobile-screen"></i>
-                                        <p>Keep awake</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Keep device awake</strong>
+                                            <small>Prevent sleep while the meeting is open</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -641,7 +673,10 @@
                                 <td>
                                     <div class="title">
                                         <i class="fas fa-map-pin"></i>
-                                        <p>Chat pin</p>
+                                        <span class="settings-option-copy">
+                                            <strong>Pin chat when opened</strong>
+                                            <small>Keep chat beside the meeting view</small>
+                                        </span>
                                     </div>
                                 </td>
                                 <td>
@@ -675,7 +710,10 @@
                     </div>
 
                     <div id="tabVideoDevices" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Video</h3>
+                            <p>Choose your camera and balance image quality with performance.</p>
+                        </div>
                         <div class="title">
                             <i class="fas fa-video"></i>
                             <p>Video Source:</p>
@@ -689,10 +727,10 @@
                         </div>
                         <select id="videoQuality" class="form-select text-light bg-dark">
                             <option value="default">🎥&nbsp;Default</option>
-                            <option value="qvga">🎥&nbsp;QVGA</option>
-                            <option value="vga">🎥&nbsp;VGA</option>
-                            <option value="hd">🎥&nbsp;HD</option>
-                            <option value="fhd">🎥&nbsp;FULL HD</option>
+                            <option value="qvga">🎥&nbsp;Low (320×240)</option>
+                            <option value="vga">🎥&nbsp;Standard (640×480)</option>
+                            <option value="hd">🎥&nbsp;HD (720p)</option>
+                            <option value="fhd">🎥&nbsp;Full HD (1080p)</option>
                             <option value="2k">🎥&nbsp;2k</option>
                             <option value="4k">🎥&nbsp;4K</option>
                             <option value="6k">🎥&nbsp;6k</option>
@@ -722,8 +760,8 @@
                             </div>
                             <select id="screenOptimization" class="form-select text-light bg-dark">
                                 <option value="default">🖥&nbsp;None</option>
-                                <option value="detail">🖥&nbsp;Detail</option>
-                                <option value="motion">🖥&nbsp;Motion</option>
+                                <option value="detail">🖥&nbsp;Text and detail</option>
+                                <option value="motion">🖥&nbsp;Motion and video</option>
                             </select>
                         </div>
                         <hr />
@@ -733,11 +771,11 @@
                         </div>
                         <br />
                         <select id="videoFps" class="form-select text-light bg-dark">
-                            <option value="max">max frame-per-second</option>
-                            <option value="60">60 - frame-per-second</option>
-                            <option value="30">30 - frame-per-second</option>
-                            <option value="15">15 - frame-per-second</option>
-                            <option value="5">5 - frame-per-second</option>
+                            <option value="max">Maximum</option>
+                            <option value="60">60 fps</option>
+                            <option value="30">30 fps</option>
+                            <option value="15">15 fps</option>
+                            <option value="5">5 fps</option>
                         </select>
                         <br />
                         <div id="ScreenFpsDiv" class="hidden">
@@ -747,17 +785,20 @@
                             </div>
                             <br />
                             <select id="screenFps" class="form-select text-light bg-dark">
-                                <option value="max">max frame-per-second</option>
-                                <option value="60">60 - frame-per-second</option>
-                                <option value="30">30 - frame-per-second</option>
-                                <option value="15">15 - frame-per-second</option>
-                                <option value="5">5 - frame-per-second</option>
+                                <option value="max">Maximum</option>
+                                <option value="60">60 fps</option>
+                                <option value="30">30 fps</option>
+                                <option value="15">15 fps</option>
+                                <option value="5">5 fps</option>
                             </select>
                         </div>
                     </div>
 
                     <div id="tabVirtualBackground" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Background</h3>
+                            <p>Choose how the space behind you appears on camera.</p>
+                        </div>
                         <div id="videoVirtualBackground" class="hidden">
                             <div class="title">
                                 <i class="fa-solid fa-image"></i>
@@ -771,7 +812,10 @@
                     </div>
 
                     <div id="tabAudioDevices" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Audio</h3>
+                            <p>Select your microphone and speakers, then adjust call audio behavior.</p>
+                        </div>
                         <div class="title">
                             <i class="fas fa-microphone"></i>
                             <p>Microphone:</p>
@@ -888,8 +932,10 @@
                     </div>
 
                     <div id="tabNotifications" class="tabcontent">
-                        <span class="mod-title">Notifications mode</span>
-                        <hr />
+                        <div class="settings-section-intro">
+                            <h3>Email notifications</h3>
+                            <p>Choose which room events should send an email alert.</p>
+                        </div>
                         <div id="notificationsModeDiv">
                             <div class="title">
                                 <i class="fas fa-envelope"></i>
@@ -928,8 +974,10 @@
                     </div>
 
                     <div id="tabModerator" class="tabcontent">
-                        <span class="mod-title">Moderator options for Everyone</span>
-                        <hr />
+                        <div class="settings-section-intro">
+                            <h3>Participant permissions</h3>
+                            <p>Set how everyone enters and what participants can do in this room.</p>
+                        </div>
                         <table class="settingsTable">
                             <tr id="everyoneFollowMeBtn">
                                 <td>
@@ -1180,6 +1228,10 @@
                     </div>
 
                     <div id="tabRecording" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Recording</h3>
+                            <p>Control who can record and where meeting recordings are saved.</p>
+                        </div>
                         <img id="recordingImage" class="hidden" src="../images/recording.png" />
                         <div id="roomRecordingOptions" class="hidden">
                             <hr />
@@ -1188,7 +1240,7 @@
                                     <td>
                                         <div class="title">
                                             <i class="fa-solid fa-user-shield"></i>
-                                            <p>Only host</p>
+                                            <p>Only presenter can record</p>
                                         </div>
                                     </td>
                                     <td>
@@ -1205,7 +1257,7 @@
                                     <td>
                                         <div class="title">
                                             <i class="fas fa-cloud-arrow-up"></i>
-                                            <p>Save on server</p>
+                                            <p>Save recording on server</p>
                                         </div>
                                     </td>
                                     <td>
@@ -1253,6 +1305,10 @@
                     </div>
 
                     <div id="tabVideoAI" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>AI avatar</h3>
+                            <p>Select an avatar and voice to present in the meeting.</p>
+                        </div>
                         <div class="avatarsVideoAI">
                             <div id="avatarVideoAIPreviewContainer" class="avatar-preview-container">
                                 <div id="avatarVideoAISpinner" class="loading-spinner">
@@ -1298,6 +1354,10 @@
                     </div>
 
                     <div id="tabVideoShare" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Share media</h3>
+                            <p>Play a video or audio source for everyone in the room.</p>
+                        </div>
                         <button id="videoShareButton" class="btn-custom">
                             <i class="fab fa-youtube"></i>
                             <p>Share a Video or Audio</p>
@@ -1508,6 +1568,10 @@
                     </div>
 
                     <div id="tabProfile" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Your profile</h3>
+                            <p>Review your meeting identity and update your avatar.</p>
+                        </div>
                         <img id="myProfileAvatar" />
                         <div>
                             <button id="myProfileAvatarUploadBtn"><i class="fas fa-image"></i>&nbsp;Set avatar</button>
@@ -1551,6 +1615,10 @@
                     </div>
 
                     <div id="tabShortcuts" class="tabcontent">
+                        <div class="settings-section-intro">
+                            <h3>Keyboard shortcuts</h3>
+                            <p>Enable quick keyboard controls and review the available keys.</p>
+                        </div>
                         <table class="settingsTable">
                             <tr>
                                 <td>
@@ -1662,7 +1730,10 @@
                     </div>
 
                     <div id="tabAspect" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Video layout</h3>
+                            <p>Control the shape and cropping of video tiles.</p>
+                        </div>
                         <div class="title">
                             <i class="fa-solid fa-tv"></i>
                             <p>Aspect ratio:</p>
@@ -1682,11 +1753,11 @@
                         </div>
                         <br />
                         <select id="BtnVideoObjectFit" class="form-select text-light bg-dark">
-                            <option value="fill">fill</option>
-                            <option value="contain">contain</option>
-                            <option value="cover">cover</option>
-                            <option value="scale-down">scale-down</option>
-                            <option value="none">none</option>
+                            <option value="fill">Stretch to fill</option>
+                            <option value="contain">Fit entire video</option>
+                            <option value="cover">Fill and crop</option>
+                            <option value="scale-down">Fit without enlarging</option>
+                            <option value="none">Original size</option>
                         </select>
                         <br />
                         <div class="title">
@@ -1695,14 +1766,17 @@
                         </div>
                         <br />
                         <select id="BtnVideoControls" class="form-select text-light bg-dark">
-                            <option value="off">off</option>
-                            <option value="on">on</option>
+                            <option value="off">Hidden</option>
+                            <option value="on">Visible</option>
                         </select>
                         <br />
                     </div>
 
                     <div id="tabStyling" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Appearance</h3>
+                            <p>Personalize the interface theme and control placement.</p>
+                        </div>
                         <div class="title">
                             <i class="fa-solid fa-palette"></i>
                             <p>Theme:</p>
@@ -1773,7 +1847,7 @@
                         <div class="inline-check-box">
                             <div>
                                 <i class="fas fa-save"></i>
-                                <p>Keep custom</p>
+                                <p>Save custom color</p>
                             </div>
                             <div class="form-check form-switch form-switch-md title">
                                 <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
@@ -1806,7 +1880,10 @@
                     </div>
 
                     <div id="tabLanguages" class="tabcontent">
-                        <br />
+                        <div class="settings-section-intro">
+                            <h3>Language</h3>
+                            <p>Choose the language used by the meeting interface.</p>
+                        </div>
                         <div class="title">
                             <i class="fa-solid fa-language"></i>
                             <p>Language:</p>

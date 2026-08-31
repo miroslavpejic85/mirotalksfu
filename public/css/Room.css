@@ -1555,6 +1555,26 @@ body {
     color: white;
 }
 
+.settings-option-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    padding: 5px;
+}
+
+.settings-option-copy strong {
+    color: var(--fg-1);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.settings-option-copy small {
+    color: color-mix(in srgb, var(--fg-1) 58%, transparent);
+    font-size: 0.72rem;
+    line-height: 1.3;
+}
+
 /* Responsive adjustments */
 @media screen and (max-width: 500px) {
     .title p {
@@ -2471,7 +2491,8 @@ body {
 
 .tab {
     padding: 8px;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     gap: 2px;
     border: 1px solid var(--room-border);
     border-radius: 12px;
@@ -2480,6 +2501,40 @@ body {
     min-height: 480px;
     display: flex;
     flex-direction: column;
+}
+
+.settings-nav-label {
+    margin: 12px 10px 4px;
+    color: color-mix(in srgb, var(--fg-1) 55%, transparent);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.settings-nav-label:first-child {
+    margin-top: 4px;
+}
+
+.settings-section-intro {
+    margin: 0 -12px 18px;
+    padding: 14px 18px 16px;
+    border-bottom: 1px solid var(--room-border);
+}
+
+.settings-section-intro h3 {
+    margin: 0;
+    color: var(--fg-1);
+    font-size: 1.05rem;
+    font-weight: 700;
+}
+
+#mySettings .settings-section-intro p {
+    display: block;
+    margin: 5px 0 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    font-size: 0.82rem;
+    line-height: 1.45;
 }
 
 .tabActions {
@@ -2496,28 +2551,33 @@ body {
 
 @media screen and (max-width: 830px) {
     .mySettingsMain {
-        flex-direction: row;
+        flex-direction: column;
     }
     .tab {
-        width: 60px;
-        min-width: 60px;
-        max-width: 60px;
-        flex-direction: column;
-        height: 100vh;
-        min-height: 100vh;
-        padding: 6px 4px;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        min-height: 62px;
+        height: 62px;
+        padding: 6px;
+        flex-direction: row;
+        align-items: center;
+        overflow-x: auto;
+        overflow-y: hidden;
         border-radius: 10px;
     }
     .tab button {
-        width: 44px;
-        height: 44px;
-        margin: 10px auto;
+        width: auto;
+        min-width: max-content;
+        height: 46px;
+        margin: 0;
+        gap: 6px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.5rem;
-        padding: 0;
-        border-radius: 14px;
+        font-size: 1rem;
+        padding: 0 12px;
+        border-radius: 10px;
         box-sizing: border-box;
         transition:
             background 0.2s,
@@ -2526,30 +2586,33 @@ body {
     .tab button i,
     .tab button svg {
         margin: 0;
-        font-size: 1.5rem;
+        font-size: 1rem;
     }
     .tabButtonText {
-        display: none !important;
+        display: inline-flex !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        white-space: nowrap;
+        font-size: 0.82rem;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+    }
+    .settings-nav-label {
+        display: none;
     }
     .tabActions {
         width: 100%;
-        margin-left: 6px;
+        margin: 6px 0 0;
         overflow: visible;
     }
 }
 
 @media screen and (max-width: 500px) {
-    .tab {
-        width: 48px;
-        min-width: 48px;
-        max-width: 48px;
-    }
     .tab button {
-        width: 38px;
-        height: 38px;
-        margin: 8px auto;
-        font-size: 1.2rem;
-        border-radius: 12px;
+        height: 42px;
+        padding: 0 10px;
+        font-size: 0.9rem;
+        border-radius: 9px;
     }
     .tabActions {
         padding: 6px;
@@ -5509,16 +5572,9 @@ hr {
 --------------------------------------------------------------*/
 
 .avatarsVideoAI {
-    position: absolute;
-    top: 0;
-    left: 0;
-    padding: 10px;
     width: 100%;
-    height: 100%;
+    min-width: 0;
     color: #ffffff;
-    justify-content: center; /* Center horizontally */
-    align-items: center; /* Center vertically */
-    overflow: auto;
 }
 
 #avatarVideoAIPreview {
