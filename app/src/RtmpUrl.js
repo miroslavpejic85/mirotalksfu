@@ -2,11 +2,14 @@
 
 const config = require('./config');
 const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
-const ffmpeg = require('fluent-ffmpeg');
-ffmpeg.setFfmpegPath(ffmpegPath);
+const { spawnFfmpeg } = require('./FfmpegProcess');
 
+const fs = require('node:fs');
 const http = require('http');
 const https = require('https');
+const os = require('node:os');
+const path = require('node:path');
+const { pipeline } = require('node:stream/promises');
 const Validator = require('./Validator');
 
 const Logger = require('./Logger');
@@ -23,6 +26,7 @@ class RtmpUrl {
         this.ffmpegProcess = null;
         this.inputRequest = null;
         this.inputResponse = null;
+        this.tempDir = null;
         this.stopping = false;
     }
 
@@ -80,6 +84,18 @@ class RtmpUrl {
         });
     }
 
+    async downloadValidatedFile(inputVideoURL) {
+        const inputStream = await this.openValidatedStream(inputVideoURL);
+        this.inputResponse = inputStream;
+        this.tempDir = await fs.promises.mkdtemp(path.join(os.tmpdir(), 'mirotalk-rtmp-'));
+        const inputFilePath = path.join(this.tempDir, 'input-media');
+
+        await pipeline(inputStream, fs.createWriteStream(inputFilePath));
+        this.inputResponse = null;
+        this.inputRequest = null;
+        return inputFilePath;
+    }
+
     async start(inputVideoURL, rtmpUrl) {
         if (this.ffmpegProcess) {
             log.debug('Streaming is already in progress');
@@ -89,41 +105,44 @@ class RtmpUrl {
         this.rtmpUrl = rtmpUrl;
 
         try {
-            const inputStream = await this.openValidatedStream(inputVideoURL);
-            this.inputResponse = inputStream;
-            inputStream.on('error', (err) => log.warn('Input video stream error', err.message));
+            const inputFilePath = await this.downloadValidatedFile(inputVideoURL);
+            if (this.stopping) {
+                this.closeInput();
+                return false;
+            }
 
-            this.ffmpegProcess = ffmpeg(inputStream)
-                .inputOptions([
-                    '-re', // Read input in real-time
-                    '-protocol_whitelist',
-                    'pipe', // FFmpeg must never open a network resource on its own
-                ])
-                .audioCodec('aac') // Set audio codec to AAC
-                .audioBitrate('128k') // Set audio bitrate to 128 kbps
-                .videoCodec('libx264') // Set video codec to H.264
-                .videoBitrate('3000k') // Set video bitrate to 3000 kbps
-                .size('1280x720') // Scale video to 1280x720 resolution
-                .format('flv') // Set output format to FLV
-                .output(rtmpUrl)
-                .on('start', (commandLine) => log.debug('ffmpeg process starting with command:', commandLine))
-                .on('progress', (progress) => {
-                    /* log.debug('Processing', progress); */
-                })
-                .on('error', (err, stdout, stderr) => {
+            const args = [
+                '-re',
+                '-i',
+                inputFilePath,
+                '-c:a',
+                'aac',
+                '-b:a',
+                '128k',
+                '-c:v',
+                'libx264',
+                '-b:v',
+                '3000k',
+                '-s',
+                '1280x720',
+                '-f',
+                'flv',
+                rtmpUrl,
+            ];
+            this.ffmpegProcess = spawnFfmpeg(ffmpegPath, args, null, {
+                onStart: (commandLine) => log.debug('ffmpeg process starting with command:', commandLine),
+                onError: (err, stdout, stderr) => {
                     this.ffmpegProcess = null;
                     this.closeInput();
-                    if (!err.message.includes('Exiting normally')) {
-                        this.handleError(err.message, stdout, stderr);
-                    }
-                })
-                .on('end', () => {
+                    if (!this.stopping) this.handleError(err.message, stdout, stderr);
+                },
+                onEnd: () => {
                     log.debug('FFmpeg processing finished');
                     this.ffmpegProcess = null;
                     this.closeInput();
                     this.handleEnd();
-                })
-                .run();
+                },
+            });
 
             log.debug('RtmpUrl started', rtmpUrl);
             return true;
@@ -142,6 +161,10 @@ class RtmpUrl {
         if (this.inputRequest) {
             this.inputRequest.destroy();
             this.inputRequest = null;
+        }
+        if (this.tempDir) {
+            fs.rmSync(this.tempDir, { recursive: true, force: true });
+            this.tempDir = null;
         }
     }
 

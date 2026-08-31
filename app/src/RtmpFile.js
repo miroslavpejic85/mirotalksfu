@@ -2,8 +2,7 @@
 
 const config = require('./config');
 const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
-const ffmpeg = require('fluent-ffmpeg');
-ffmpeg.setFfmpegPath(ffmpegPath);
+const { spawnFfmpeg } = require('./FfmpegProcess');
 
 const Logger = require('./Logger');
 const log = new Logger('RtmpFile');
@@ -26,35 +25,40 @@ class RtmpFile {
         this.rtmpUrl = rtmpUrl;
 
         try {
-            this.ffmpegProcess = ffmpeg(inputStream)
-                .inputOptions(['-re']) // Read input at native frame rate
-                .outputOptions([
-                    '-c:v libx264', // Encode video to H.264
-                    '-preset veryfast', // Set preset to very fast
-                    '-maxrate 3000k', // Max bitrate for the video stream
-                    '-bufsize 6000k', // Buffer size
-                    '-g 50', // GOP size
-                    '-c:a aac', // Encode audio to AAC
-                    '-b:a 128k', // Bitrate for the audio stream
-                    '-f flv', // Output format
-                ])
-                .output(rtmpUrl)
-                .on('start', (commandLine) => log.debug('ffmpeg process starting with command:', commandLine))
-                .on('progress', (progress) => {
-                    /* log.debug('Processing', progress); */
-                })
-                .on('error', (err, stdout, stderr) => {
+            const args = [
+                '-re',
+                '-i',
+                'pipe:0',
+                '-c:v',
+                'libx264',
+                '-preset',
+                'veryfast',
+                '-maxrate',
+                '3000k',
+                '-bufsize',
+                '6000k',
+                '-g',
+                '50',
+                '-c:a',
+                'aac',
+                '-b:a',
+                '128k',
+                '-f',
+                'flv',
+                rtmpUrl,
+            ];
+            this.ffmpegProcess = spawnFfmpeg(ffmpegPath, args, inputStream, {
+                onStart: (commandLine) => log.debug('ffmpeg process starting with command:', commandLine),
+                onError: (err, stdout, stderr) => {
                     this.ffmpegProcess = null;
-                    if (!err.message.includes('Exiting normally')) {
-                        this.handleError(err.message, stdout, stderr);
-                    }
-                })
-                .on('end', () => {
+                    if (!this.stopping) this.handleError(err.message, stdout, stderr);
+                },
+                onEnd: () => {
                     log.debug('FFmpeg processing finished');
                     this.ffmpegProcess = null;
                     this.handleEnd();
-                })
-                .run();
+                },
+            });
 
             log.debug('RtmpFile started', rtmpUrl);
             return true;

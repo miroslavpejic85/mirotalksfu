@@ -2,9 +2,8 @@
 
 const config = require('./config');
 const { PassThrough } = require('stream');
-const ffmpeg = require('fluent-ffmpeg');
 const ffmpegPath = config.media?.rtmp?.ffmpegPath || '/usr/bin/ffmpeg';
-ffmpeg.setFfmpegPath(ffmpegPath);
+const { spawnFfmpeg } = require('./FfmpegProcess');
 
 const Logger = require('./Logger');
 const log = new Logger('RtmpStreamer');
@@ -22,32 +21,57 @@ class RtmpStreamer {
     }
 
     initFFmpeg() {
-        this.ffmpegStream = ffmpeg()
-            .input(this.stream)
-            .inputFormat('webm')
-            .inputOptions('-re')
-            .videoCodec('libx264')
-            .videoBitrate('3000k')
-            .size('1280x720')
-            .audioCodec('aac')
-            .audioBitrate('128k')
-            .outputOptions(['-f flv'])
-            .output(this.rtmpUrl)
-            .on('start', (commandLine) => this.log.debug('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }))
-            .on('progress', (progress) => {
-                /* log.debug('Processing', progress); */
-            })
-            .on('error', (err, stdout, stderr) => {
-                if (!err.message.includes('Exiting normally')) {
+        const args = [
+            '-f',
+            'webm',
+            '-re',
+            '-i',
+            'pipe:0',
+            '-c:a',
+            'aac',
+            '-b:a',
+            '128k',
+            '-c:v',
+            'libx264',
+            '-preset',
+            'veryfast',
+            '-tune',
+            'zerolatency',
+            '-b:v',
+            '3000k',
+            '-maxrate',
+            '3000k',
+            '-bufsize',
+            '6000k',
+            '-g',
+            '60',
+            '-keyint_min',
+            '60',
+            '-sc_threshold',
+            '0',
+            '-pix_fmt',
+            'yuv420p',
+            '-filter:v',
+            'scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2',
+            '-f',
+            'flv',
+            this.rtmpUrl,
+        ];
+        this.ffmpegStream = spawnFfmpeg(ffmpegPath, args, this.stream, {
+            onStart: (commandLine) => this.log.debug('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }),
+            onError: (err, stdout, stderr) => {
+                this.ffmpegStream = null;
+                if (!this.ending) {
                     this.log.error(`Error: ${err.message}`, { stdout, stderr });
                 }
                 this.end();
-            })
-            .on('end', () => {
+            },
+            onEnd: () => {
+                this.ffmpegStream = null;
                 this.log.debug('FFmpeg process ended', this.rtmpKey);
                 this.end();
-            })
-            .run();
+            },
+        });
     }
 
     write(data) {

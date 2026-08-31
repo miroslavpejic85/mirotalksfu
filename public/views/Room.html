@@ -1311,92 +1311,199 @@
 
                     <div id="tabRTMPStreaming" class="tabcontent">
                         <div id="rtmpUrlLive">
-                            <div id="rtmpUrlLiveContainer" class="input-container">
-                                <input
-                                    id="rtmpLiveUrl"
-                                    type="text"
-                                    value=""
-                                    placeholder="rtmp://server:port/app/streamKey"
-                                    readonly
-                                />
-                                <button id="copyRtmpUrlButton" class="fas fa-paste"></button>
+                            <div class="rtmp-intro">
+                                <span class="rtmp-intro-icon" aria-hidden="true">
+                                    <i class="fa-solid fa-satellite-dish"></i>
+                                </span>
+                                <div>
+                                    <h3>Broadcast with RTMP</h3>
+                                    <p>Choose a destination, then select one source to send live.</p>
+                                </div>
                             </div>
-                            <div id="rtmpCustomDestination">
-                                <p>Custom RTMP destination:</p>
-                                <div class="rtmp-preset-buttons">
-                                    <button id="rtmpPresetYouTube" class="btn-rtmp-preset" title="YouTube Live">
-                                        <i class="fa-brands fa-youtube"></i> YouTube
-                                    </button>
-                                    <button id="rtmpPresetFacebook" class="btn-rtmp-preset" title="Facebook Live">
-                                        <i class="fa-brands fa-facebook"></i> Facebook
-                                    </button>
-                                    <button id="rtmpPresetTwitch" class="btn-rtmp-preset" title="Twitch">
-                                        <i class="fa-brands fa-twitch"></i> Twitch
-                                    </button>
-                                    <button id="rtmpPresetCustom" class="btn-rtmp-preset" title="Custom RTMP URL">
-                                        <i class="fa-solid fa-globe"></i> Custom
+
+                            <section class="rtmp-section" aria-labelledby="rtmpDestinationTitle">
+                                <div class="rtmp-section-heading">
+                                    <span class="rtmp-step">1</span>
+                                    <div>
+                                        <h4 id="rtmpDestinationTitle">Confirm destination</h4>
+                                        <p>The room RTMP server is used unless you choose an override.</p>
+                                    </div>
+                                </div>
+                                <div class="rtmp-default-destination">
+                                    <i class="fa-solid fa-server" aria-hidden="true"></i>
+                                    <span
+                                        ><strong>Room default</strong
+                                        ><small>Configured by your administrator</small></span
+                                    >
+                                </div>
+                                <div id="rtmpCustomDestination">
+                                    <p class="rtmp-override-label">Override destination</p>
+                                    <div class="rtmp-preset-buttons">
+                                        <button
+                                            id="rtmpPresetYouTube"
+                                            class="btn-rtmp-preset"
+                                            title="Stream to YouTube Live"
+                                        >
+                                            <i class="fa-brands fa-youtube"></i> YouTube
+                                        </button>
+                                        <button
+                                            id="rtmpPresetFacebook"
+                                            class="btn-rtmp-preset"
+                                            title="Stream to Facebook Live"
+                                        >
+                                            <i class="fa-brands fa-facebook"></i> Facebook
+                                        </button>
+                                        <button id="rtmpPresetTwitch" class="btn-rtmp-preset" title="Stream to Twitch">
+                                            <i class="fa-brands fa-twitch"></i> Twitch
+                                        </button>
+                                        <button
+                                            id="rtmpPresetCustom"
+                                            class="btn-rtmp-preset"
+                                            title="Use a custom RTMP server"
+                                        >
+                                            <i class="fa-solid fa-globe"></i> Custom
+                                        </button>
+                                    </div>
+                                    <div class="rtmp-field">
+                                        <label for="rtmpCustomUrl">Server URL</label>
+                                        <input
+                                            id="rtmpCustomUrl"
+                                            type="text"
+                                            value=""
+                                            placeholder="rtmp://a.rtmp.youtube.com/live2"
+                                            autocomplete="off"
+                                        />
+                                        <small>The ingest server address provided by your streaming platform.</small>
+                                    </div>
+                                    <div class="rtmp-field">
+                                        <label for="rtmpCustomStreamKey">Stream key</label>
+                                        <input
+                                            id="rtmpCustomStreamKey"
+                                            type="password"
+                                            value=""
+                                            placeholder="Stream key"
+                                            autocomplete="off"
+                                        />
+                                        <small>Keep this private. It authorizes publishing to your channel.</small>
+                                    </div>
+                                    <button id="rtmpCustomClear" class="btn-custom">
+                                        <i class="fa-solid fa-eraser"></i>&nbsp;Use room default
                                     </button>
                                 </div>
-                                <input
-                                    id="rtmpCustomUrl"
-                                    type="text"
-                                    value=""
-                                    placeholder="rtmp://a.rtmp.youtube.com/live2"
-                                />
-                                <input id="rtmpCustomStreamKey" type="password" value="" placeholder="Stream key" />
-                                <button id="rtmpCustomClear" class="btn-custom">
-                                    <i class="fa-solid fa-eraser"></i>&nbsp;Clear custom destination
-                                </button>
-                                <hr />
+                            </section>
+
+                            <div class="rtmp-section rtmp-sources" aria-labelledby="rtmpSourceTitle">
+                                <div class="rtmp-section-heading">
+                                    <span class="rtmp-step">2</span>
+                                    <div>
+                                        <h4 id="rtmpSourceTitle">Choose one source</h4>
+                                        <p>Only one RTMP source can be active at a time.</p>
+                                    </div>
+                                </div>
+
+                                <section id="rtmpFromFile" class="rtmp-source" aria-labelledby="rtmpFileTitle">
+                                    <div class="rtmp-source-heading">
+                                        <span class="rtmp-source-icon"><i class="fa-solid fa-file-video"></i></span>
+                                        <div>
+                                            <h5 id="rtmpFileTitle">Server video file</h5>
+                                            <p>Broadcast a video already uploaded to this server.</p>
+                                        </div>
+                                    </div>
+                                    <table class="file-table">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <span>Available files</span>
+                                                    <button
+                                                        id="refreshVideoFiles"
+                                                        type="button"
+                                                        aria-label="Refresh video files"
+                                                        title="Refresh video files"
+                                                    >
+                                                        <i class="fa-solid fa-rotate" aria-hidden="true"></i>
+                                                    </button>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="file-list">
+                                            <!-- File items will be dynamically added here -->
+                                        </tbody>
+                                    </table>
+                                    <div id="file-name"></div>
+                                    <!-- <hr /> -->
+                                    <button id="startRtmpButton" class="hidden btn-custom">
+                                        <i class="fa-solid fa-play"></i>&nbsp;Start RTMP File Streaming
+                                    </button>
+                                    <button id="stopRtmpButton" class="hidden btn-custom rtmp-stop-button">
+                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP File Streaming
+                                    </button>
+                                </section>
+
+                                <section id="rtmpFromUrl" class="rtmp-source" aria-labelledby="rtmpUrlTitle">
+                                    <div class="rtmp-source-heading">
+                                        <span class="rtmp-source-icon"><i class="fa-solid fa-link"></i></span>
+                                        <div>
+                                            <h5 id="rtmpUrlTitle">Online media URL</h5>
+                                            <p>Relay a publicly reachable video file or media URL.</p>
+                                        </div>
+                                    </div>
+                                    <div class="rtmp-field">
+                                        <label for="rtmpStreamURL">Media URL</label>
+                                        <input
+                                            id="rtmpStreamURL"
+                                            type="text"
+                                            value=""
+                                            placeholder="https://domain/path/file.mp4"
+                                        />
+                                    </div>
+                                    <button id="startRtmpURLButton" class="hidden btn-custom">
+                                        <i class="fa-solid fa-play"></i>&nbsp;Start RTMP URL Streaming
+                                    </button>
+                                    <button id="stopRtmpURLButton" class="hidden btn-custom rtmp-stop-button">
+                                        <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP URL Streaming
+                                    </button>
+                                </section>
+
+                                <section id="rtmpFromStream" class="rtmp-source" aria-labelledby="rtmpLiveTitle">
+                                    <div class="rtmp-source-heading">
+                                        <span class="rtmp-source-icon"><i class="fa-solid fa-video"></i></span>
+                                        <div>
+                                            <h5 id="rtmpLiveTitle">Camera or screen</h5>
+                                            <p>Open the broadcast studio and stream live from this device.</p>
+                                        </div>
+                                    </div>
+                                    <button id="streamerRtmpButton" class="hidden btn-custom">
+                                        <i class="fa-solid fa-arrow-up-right-from-square"></i>&nbsp;Open broadcast
+                                        studio
+                                    </button>
+                                </section>
                             </div>
-                            <div id="rtmpFromFile">
-                                <table class="file-table">
-                                    <thead>
-                                        <tr>
-                                            <th>
-                                                <i id="refreshVideoFiles" class="fa-solid fa-rotate"></i> Video Files:
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="file-list">
-                                        <!-- File items will be dynamically added here -->
-                                    </tbody>
-                                </table>
-                                <div id="file-name"></div>
-                                <!-- <hr /> -->
-                                <button id="startRtmpButton" class="hidden btn-custom">
-                                    <i class="fa-solid fa-play"></i>&nbsp;Start RTMP File Streaming
-                                </button>
-                                <button id="stopRtmpButton" class="hidden btn-custom">
-                                    <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP File Streaming
-                                </button>
-                                <hr />
-                            </div>
-                            <div id="rtmpFromUrl">
-                                <p>Stream from URL:</p>
-                                <input
-                                    id="rtmpStreamURL"
-                                    type="text"
-                                    value=""
-                                    placeholder="https://domain/path/file.mp4"
-                                />
-                                <button id="startRtmpURLButton" class="hidden btn-custom">
-                                    <i class="fa-solid fa-play"></i>&nbsp;Start RTMP URL Streaming
-                                </button>
-                                <button id="stopRtmpURLButton" class="hidden btn-custom">
-                                    <i class="fas fa-stop-circle"></i>&nbsp;Stop RTMP URL Streaming
-                                </button>
-                                <hr />
-                            </div>
-                            <div id="rtmpFromStream">
-                                <p>
-                                    Select your desired video and audio sources from settings, then begin RTMP streaming
-                                </p>
-                                <button id="streamerRtmpButton" class="hidden btn-custom">
-                                    <i class="fa-solid fa-satellite-dish"></i>&nbsp;RTMP Streamer
-                                </button>
-                                <hr />
-                            </div>
+
+                            <section class="rtmp-section rtmp-output" aria-labelledby="rtmpOutputTitle">
+                                <div class="rtmp-section-heading">
+                                    <span class="rtmp-step">3</span>
+                                    <div>
+                                        <h4 id="rtmpOutputTitle">Live output</h4>
+                                        <p>The active RTMP address appears here after streaming starts.</p>
+                                    </div>
+                                </div>
+                                <div id="rtmpUrlLiveContainer" class="input-container">
+                                    <input
+                                        id="rtmpLiveUrl"
+                                        type="text"
+                                        value=""
+                                        placeholder="No active RTMP stream"
+                                        readonly
+                                        aria-label="Active RTMP stream URL"
+                                    />
+                                    <button
+                                        id="copyRtmpUrlButton"
+                                        class="fas fa-copy"
+                                        aria-label="Copy active RTMP URL"
+                                        title="Copy active RTMP URL"
+                                    ></button>
+                                </div>
+                            </section>
                         </div>
                     </div>
 

@@ -1,9 +1,6 @@
 <!doctype html>
 <html lang="en">
     <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
         <!-- Title and Icon -->
 
         <title id="title">MiroTalk RTMP Streamer</title>
@@ -45,49 +42,130 @@
         <script defer src="../js/RtmpStreamer.js"></script>
     </head>
     <body>
-        <div id="popup" class="popup fadein hidden">
-            <span id="popupMessage"></span>
-            <button id="closePopup"><i class="fas fa-close"></i></button>
+        <div id="popup" class="popup hidden" role="status" aria-live="polite" aria-atomic="true">
+            <span class="popup-icon" aria-hidden="true">
+                <i id="popupIcon" class="fas fa-circle-info"></i>
+            </span>
+            <span class="popup-content">
+                <strong id="popupTitle">Notice</strong>
+                <span id="popupMessage"></span>
+            </span>
+            <button id="closePopup" type="button" aria-label="Dismiss notification" title="Dismiss">
+                <i class="fas fa-xmark" aria-hidden="true"></i>
+            </button>
+            <span class="popup-progress" aria-hidden="true"></span>
         </div>
-        <div class="container fadein">
-            <h1>RTMP Streamer</h1>
-            <div class="input-group-inline">
-                <input
-                    id="apiSecret"
-                    type="password"
-                    value=""
-                    placeholder="API Secret"
-                    title="Enter the API secret here"
-                />
+        <header class="streamer-header fadein">
+            <a class="brand" href="/" aria-label="MiroTalk SFU home">
+                <img src="../images/logo.svg" alt="" width="34" height="34" />
+                <span>MiroTalk SFU</span>
+            </a>
+            <div class="header-status" aria-label="RTMP broadcast studio">
+                <span class="status-dot" aria-hidden="true"></span>
+                Broadcast studio
             </div>
-            <div class="input-group-inline">
-                <input
-                    id="rtmp"
-                    type="text"
-                    value=""
-                    placeholder="rtmp://server:port/app/streamKey"
-                    readonly
-                    title="This is your RTMP live URL. It cannot be edited."
-                />
-                <button id="copy" title="Click to copy the RTMP URL"><i class="fas fa-paste"></i>&nbsp;Copy</button>
-            </div>
+        </header>
 
-            <video id="video" width="640" height="480"></video>
+        <main class="container fadein">
+            <section class="preview-panel" aria-labelledby="streamerTitle">
+                <div class="preview-heading">
+                    <div>
+                        <p class="eyebrow">Live output</p>
+                        <h1 id="streamerTitle">RTMP Streamer</h1>
+                    </div>
+                    <span class="preview-status"><span aria-hidden="true"></span> Ready</span>
+                </div>
 
-            <div class="button-group">
-                <button id="startCamera" title="Click to start camera streaming">
-                    <i class="fas fa-video"></i>&nbsp;Start Streaming
-                </button>
-                <button id="startScreen" title="Click to start screen streaming">
-                    <i class="fas fa-desktop"></i>&nbsp;Start Streaming
-                </button>
-                <button id="stop" disabled title="Click to stop streaming">
-                    <i class="fas fa-stop-circle"></i>&nbsp;Stop Streaming
-                </button>
-            </div>
-        </div>
+                <div class="video-frame">
+                    <video id="video" width="1280" height="720" aria-label="Live stream preview"></video>
+                    <div class="video-placeholder" aria-hidden="true">
+                        <i class="fas fa-video"></i>
+                        <strong>Your preview will appear here</strong>
+                        <span>Choose camera or screen to begin</span>
+                    </div>
+                </div>
+            </section>
+
+            <aside class="control-panel" aria-label="Stream controls">
+                <div class="control-intro">
+                    <span class="control-step">01</span>
+                    <div>
+                        <h2>Connect</h2>
+                        <p>Authorize and prepare your RTMP destination.</p>
+                    </div>
+                </div>
+
+                <div class="input-group-inline field-group">
+                    <label for="apiSecret">API secret</label>
+                    <div class="input-shell">
+                        <i class="fas fa-key" aria-hidden="true"></i>
+                        <input
+                            id="apiSecret"
+                            type="password"
+                            value=""
+                            placeholder="Enter API secret"
+                            autocomplete="off"
+                            title="Enter the API secret here"
+                        />
+                    </div>
+                </div>
+
+                <div class="input-group-inline field-group destination-group">
+                    <label for="rtmp">RTMP destination</label>
+                    <div class="destination-row">
+                        <div class="input-shell">
+                            <i class="fas fa-tower-broadcast" aria-hidden="true"></i>
+                            <input
+                                id="rtmp"
+                                type="text"
+                                value=""
+                                placeholder="Generated when streaming starts"
+                                readonly
+                                title="This is your RTMP live URL. It cannot be edited."
+                            />
+                        </div>
+                        <button
+                            id="copy"
+                            class="icon-button"
+                            type="button"
+                            aria-label="Copy RTMP URL"
+                            title="Copy RTMP URL"
+                        >
+                            <i class="fas fa-copy" aria-hidden="true"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="control-divider" role="presentation"></div>
+
+                <div class="control-intro">
+                    <span class="control-step">02</span>
+                    <div>
+                        <h2>Choose a source</h2>
+                        <p>Broadcast your camera or share your screen.</p>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button id="startCamera" class="source-button" type="button" title="Start camera streaming">
+                        <span class="button-icon"><i class="fas fa-video" aria-hidden="true"></i></span>
+                        <span><strong>Camera</strong><small>Video and microphone</small></span>
+                        <i class="fas fa-chevron-right button-arrow" aria-hidden="true"></i>
+                    </button>
+                    <button id="startScreen" class="source-button" type="button" title="Start screen streaming">
+                        <span class="button-icon"><i class="fas fa-display" aria-hidden="true"></i></span>
+                        <span><strong>Screen</strong><small>Display and system audio</small></span>
+                        <i class="fas fa-chevron-right button-arrow" aria-hidden="true"></i>
+                    </button>
+                    <button id="stop" class="stop-button" type="button" disabled title="Stop streaming">
+                        <i class="fas fa-stop" aria-hidden="true"></i>
+                        Stop broadcast
+                    </button>
+                </div>
+            </aside>
+        </main>
         <footer id="footer">
-            <p>&copy; 2026 MiroTalk SFU, all rights reserved</p>
+            <p>&copy; 2026 MiroTalk SFU</p>
         </footer>
     </body>
 </html>

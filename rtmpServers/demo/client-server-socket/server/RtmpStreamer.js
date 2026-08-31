@@ -1,30 +1,8 @@
 'use strict';
 
+const { spawn } = require('node:child_process');
 const { PassThrough } = require('stream');
-const ffmpeg = require('fluent-ffmpeg');
-
-const os = require('os');
-
-const platform = os.platform();
-let ffmpegPath;
-
-switch (platform) {
-    case 'darwin':
-        ffmpegPath = '/usr/local/bin/ffmpeg'; // macOS
-        break;
-    case 'linux':
-        ffmpegPath = '/usr/bin/ffmpeg'; // Linux
-        break;
-    case 'win32':
-        ffmpegPath = 'C:\\ffmpeg\\bin\\ffmpeg.exe'; // Windows
-        break;
-    default:
-        ffmpegPath = '/usr/bin/ffmpeg'; // Centos or others...
-}
-
-ffmpeg.setFfmpegPath(ffmpegPath);
-
-console.log('FFmpeg', { platform, ffmpegPath });
+const ffmpegPath = require('@ffmpeg-installer/ffmpeg').path;
 
 class RtmpStreamer {
     constructor(rtmpUrl, rtmpKey, socket) {
@@ -38,29 +16,49 @@ class RtmpStreamer {
     }
 
     initFFmpeg() {
-        this.ffmpegStream = ffmpeg()
-            .input(this.stream)
-            .inputOptions('-re')
-            .videoCodec('libx264')
-            .videoBitrate('3000k')
-            .size('1280x720')
-            .audioCodec('aac')
-            .audioBitrate('128k')
-            .outputOptions(['-f flv'])
-            .output(this.rtmpUrl)
-            .on('start', (commandLine) => console.info('ffmpeg command', { id: this.rtmpKey, cmd: commandLine }))
-            .on('error', (err, stdout, stderr) => {
-                if (!err.message.includes('Exiting normally')) {
-                    console.error('FFmpeg error:', { id: this.rtmpKey, error: err.message });
-                    this.socket.emit('error', err.message);
-                }
-                this.end();
-            })
-            .on('end', () => {
+        const args = [
+            '-re',
+            '-i',
+            'pipe:0',
+            '-c:v',
+            'libx264',
+            '-b:v',
+            '3000k',
+            '-s',
+            '1280x720',
+            '-c:a',
+            'aac',
+            '-b:a',
+            '128k',
+            '-f',
+            'flv',
+            this.rtmpUrl,
+        ];
+        let spawnError = null;
+        let stderr = '';
+
+        this.ffmpegStream = spawn(ffmpegPath, args, { stdio: ['pipe', 'ignore', 'pipe'] });
+        this.stream.pipe(this.ffmpegStream.stdin);
+        this.ffmpegStream.stderr.on('data', (data) => (stderr += data));
+        this.ffmpegStream.stdin.on('error', (error) => {
+            if (error.code !== 'EPIPE') spawnError = error;
+        });
+        this.ffmpegStream.on('spawn', () =>
+            console.info('ffmpeg command', { id: this.rtmpKey, cmd: [ffmpegPath, ...args].join(' ') })
+        );
+        this.ffmpegStream.on('error', (error) => {
+            spawnError = error;
+        });
+        this.ffmpegStream.on('close', (code, signal) => {
+            if (!this.ending && (spawnError || code !== 0)) {
+                const error = spawnError || new Error(`FFmpeg exited with code ${code}${signal ? ` (${signal})` : ''}`);
+                console.error('FFmpeg error:', { id: this.rtmpKey, error: error.message, stderr });
+                this.socket.emit('error', error.message);
+            } else if (!this.ending) {
                 console.info('FFmpeg process ended', this.rtmpKey);
-                this.end();
-            })
-            .run();
+            }
+            this.end();
+        });
     }
 
     write(data) {
@@ -72,6 +70,9 @@ class RtmpStreamer {
     }
 
     end() {
+        if (this.ending) return;
+        this.ending = true;
+
         if (this.stream) {
             this.stream.end();
             this.stream = null;

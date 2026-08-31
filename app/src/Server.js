@@ -21,7 +21,6 @@ prod dependencies: {
     dompurify               : https://www.npmjs.com/package/dompurify
     express                 : https://www.npmjs.com/package/express
     express-openid-connect  : https://www.npmjs.com/package/express-openid-connect
-    fluent-ffmpeg           : https://www.npmjs.com/package/fluent-ffmpeg
     he                      : https://www.npmjs.com/package/he
     helmet                  : https://www.npmjs.com/package/helmet
     httpolyglot             : https://www.npmjs.com/package/httpolyglot
@@ -64,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.94
+ * @version 2.4.10
  *
  */
 

@@ -128,7 +128,7 @@ class RtmpStreaming {
         room,
         host = 'localhost',
         port = 1935,
-        inputVideoURL = 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+        inputVideoURL = 'https://download.blender.org/durian/trailer/sintel_trailer-480p.mp4',
         customRtmpUrl = null
     ) {
         if (!this.rtmp || !this.rtmp.enabled) {

@@ -9,7 +9,10 @@ const rtmpInput = document.getElementById('rtmp');
 const copyButton = document.getElementById('copy');
 const popup = document.getElementById('popup');
 const popupMessage = document.getElementById('popupMessage');
+const popupTitle = document.getElementById('popupTitle');
+const popupIcon = document.getElementById('popupIcon');
 const closePopup = document.getElementById('closePopup');
+const previewStatus = document.querySelector('.preview-status');
 
 const qs = new URLSearchParams(window.location.search);
 const videoId = filterXSS(qs.get('v'));
@@ -46,15 +49,16 @@ console.log('RTMP settings', {
     screenFps: screenFrameRate,
 });
 
-/* 
-Low Latency: 1-2 seconds
-Standard Use Case: 5 seconds
-High Bandwidth/Stability: 10 seconds
-*/
-const chunkDuration = 4000; // ms
+const chunkDuration = 1000;
+const videoBitsPerSecond = 4000000;
+const audioBitsPerSecond = 128000;
 
 let mediaRecorder = null;
 let rtmpKey = null; // To store the RTMP key
+let uploadQueue = Promise.resolve();
+let stopRtmpPromise = null;
+let popupTimer = null;
+let popupHideTimer = null;
 
 function toggleButtons(disabled = true) {
     startCameraButton.disabled = disabled;
@@ -63,17 +67,38 @@ function toggleButtons(disabled = true) {
 }
 
 function showPopup(message, type) {
+    const popupTypes = {
+        success: { title: 'Success', icon: 'fa-circle-check' },
+        error: { title: 'Something went wrong', icon: 'fa-circle-exclamation' },
+        warning: { title: 'Attention', icon: 'fa-triangle-exclamation' },
+        info: { title: 'Notice', icon: 'fa-circle-info' },
+    };
+    const popupType = popupTypes[type] || popupTypes.info;
+
+    clearTimeout(popupTimer);
+    clearTimeout(popupHideTimer);
     popup.classList.remove('success', 'error', 'warning', 'info');
-    popup.classList.add(type);
+    popup.classList.add(popupTypes[type] ? type : 'info');
+    popupTitle.textContent = popupType.title;
+    popupIcon.className = `fas ${popupType.icon}`;
     popupMessage.textContent = message;
-    popup.classList.remove('hidden');
-    setTimeout(() => {
-        hidePopup();
-    }, 5000); // Hide after 5 seconds
+    popup.setAttribute('role', type === 'error' ? 'alert' : 'status');
+    popup.setAttribute('aria-live', type === 'error' ? 'assertive' : 'polite');
+    popup.classList.remove('hidden', 'closing', 'visible');
+    void popup.offsetWidth;
+    popup.classList.add('visible');
+    popupTimer = setTimeout(hidePopup, 5000);
 }
 
 function hidePopup() {
-    popup.classList.add('hidden');
+    clearTimeout(popupTimer);
+    if (popup.classList.contains('hidden') || popup.classList.contains('closing')) return;
+
+    popup.classList.add('closing');
+    popupHideTimer = setTimeout(() => {
+        popup.classList.add('hidden');
+        popup.classList.remove('visible', 'closing');
+    }, 180);
 }
 
 function showError(message) {
@@ -127,6 +152,8 @@ function attachMediaStream(stream) {
     videoElement.muted = true;
     videoElement.volume = 0;
     videoElement.controls = false;
+    document.body.classList.add('stream-active');
+    previewStatus.lastChild.textContent = ' Live';
 }
 
 async function initRTMP(stream) {
@@ -164,19 +191,43 @@ async function initRTMP(stream) {
 }
 
 async function stopRTMP() {
+    if (stopRtmpPromise) return stopRtmpPromise;
+
+    stopRtmpPromise = stopRTMPStream().finally(() => {
+        stopRtmpPromise = null;
+    });
+    return stopRtmpPromise;
+}
+
+async function stopRTMPStream() {
     const apiSecret = getAuthorization();
+    const streamKey = rtmpKey;
+    const recorder = mediaRecorder;
+    const recorderStopped =
+        recorder && recorder.state !== 'inactive'
+            ? new Promise((resolve) => recorder.addEventListener('stop', resolve, { once: true }))
+            : Promise.resolve();
 
     stopStreaming();
+    toggleButtons(true);
 
     try {
-        await axios.post(`/stopRTMP?key=${rtmpKey}`, null, {
-            headers: {
-                authorization: apiSecret,
-            },
-        });
+        await recorderStopped;
+        await uploadQueue;
+        if (streamKey) {
+            await axios.post(`/stopRTMP?key=${streamKey}`, null, {
+                headers: {
+                    authorization: apiSecret,
+                },
+            });
+        }
     } catch (error) {
         showError('Error stopping RTMP. Please try again.');
         console.error('Error stopping RTMP:', error);
+    } finally {
+        rtmpKey = null;
+        toggleButtons(false);
+        stopButton.disabled = true;
     }
 }
 
@@ -197,27 +248,30 @@ async function streamRTMPChunk(data) {
                 },
             });
         } catch (error) {
-            if (mediaRecorder) {
-                stopStreaming();
+            if (rtmpKey) {
                 console.error('Error syncing chunk:', error.message);
                 showError(`Error syncing chunk: ${error.message}`);
+                void stopRTMP();
             }
+            return;
         }
     }
 }
 
 function stopStreaming() {
-    if (mediaRecorder) {
+    if (mediaRecorder?.state !== 'inactive') {
         mediaRecorder.stop();
     }
     videoElement.srcObject = null;
+    document.body.classList.remove('stream-active');
+    previewStatus.lastChild.textContent = ' Ready';
     rtmpInput.value = '';
     toggleButtons(false);
     stopButton.disabled = true;
 }
 
 function getSupportedMimeTypes() {
-    const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/mp4'];
+    const possibleTypes = ['video/webm;codecs=vp8,opus', 'video/webm'];
     return possibleTypes.filter((mimeType) => {
         return MediaRecorder.isTypeSupported(mimeType);
     });
@@ -234,11 +288,23 @@ async function startStreaming(stream) {
 
     const supportedMimeTypes = getSupportedMimeTypes();
     console.log('MediaRecorder supported options', supportedMimeTypes);
-    mediaRecorder = new MediaRecorder(stream, { mimeType: supportedMimeTypes[0] });
+    if (supportedMimeTypes.length === 0) {
+        showError('This browser cannot record WebM video required for RTMP streaming.');
+        stopTracks(stream);
+        await stopRTMP();
+        return;
+    }
 
-    mediaRecorder.ondataavailable = async (event) => {
+    uploadQueue = Promise.resolve();
+    mediaRecorder = new MediaRecorder(stream, {
+        mimeType: supportedMimeTypes[0],
+        videoBitsPerSecond,
+        audioBitsPerSecond,
+    });
+
+    mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-            await streamRTMPChunk(event.data);
+            uploadQueue = uploadQueue.then(() => streamRTMPChunk(event.data));
         }
     };
 
@@ -259,14 +325,27 @@ function stopTracks(stream) {
 
 async function startCameraStreaming() {
     const videoConstraints = videoId ? getRTMPVideoConstraints(videoId, videoResolution, videoFrameRate) : true;
-    const audioConstraints = audioId ? { deviceId: audioId } : true;
+    const audioConstraints = audioId ? { deviceId: { exact: audioId } } : true;
     const stream = await startCapture({ video: videoConstraints, audio: audioConstraints });
+    if (stream) {
+        console.log('RTMP capture devices', {
+            video: stream.getVideoTracks()[0]?.getSettings(),
+            audio: stream.getAudioTracks()[0]?.getSettings(),
+        });
+    }
     await startStreaming(stream);
 }
 
 async function startScreenStreaming() {
     const screenConstraints = getRTMPScreenConstraints(screenFrameRate);
     const stream = await startScreenCapture(screenConstraints);
+    stream?.getVideoTracks()[0]?.addEventListener(
+        'ended',
+        () => {
+            if (mediaRecorder) void stopRTMP();
+        },
+        { once: true }
+    );
     await startStreaming(stream);
 }
 
@@ -276,7 +355,7 @@ function getRTMPVideoConstraints(videoId, videoResolution, videoFrameRate) {
     const frameRate = videoFrameRate === 'max' ? defaultFrameRate : customFrameRate;
 
     const baseConstraints = {
-        deviceId: videoId,
+        deviceId: { exact: videoId },
         aspectRatio: 1.777, // 16:9
         frameRate: frameRate,
     };
@@ -401,12 +480,9 @@ startCameraButton.addEventListener('click', startCameraStreaming);
 startScreenButton.addEventListener('click', startScreenStreaming);
 stopButton.addEventListener('click', stopRTMP);
 
-if (!customRtmpUrl && !streamType) {
-    copyButton.addEventListener('click', copyRTMP);
-} else {
-    copyButton.style.display = 'none';
-    rtmpInput.style.display = 'none';
-}
+!customRtmpUrl && !streamType
+    ? copyButton.addEventListener('click', copyRTMP)
+    : (rtmpInput.closest('.destination-group').style.display = 'none');
 
 closePopup.addEventListener('click', hidePopup);
 

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.3.94
+ * @version 2.4.10
  *
  */
 
@@ -14072,7 +14072,7 @@ class RoomClient {
     cleanRTMPUrl() {
         const rtmpUrl = rc.getId('rtmpLiveUrl');
         rtmpUrl.value = '';
-        elemDisplay('rtmpUrlLiveContainer', true);
+        elemDisplay('rtmpUrlLiveContainer', true, 'grid');
     }
 
     showRTMP(rtmp, type = 'file') {
@@ -14102,7 +14102,7 @@ class RoomClient {
         if (isCustomDestination) {
             elemDisplay('rtmpUrlLiveContainer', false);
         } else {
-            elemDisplay('rtmpUrlLiveContainer', true);
+            elemDisplay('rtmpUrlLiveContainer', true, 'grid');
             const rtmpUrl = rc.getId('rtmpLiveUrl');
             rtmpUrl.value = filterXSS(rtmp);
         }

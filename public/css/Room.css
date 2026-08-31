@@ -1754,8 +1754,213 @@ body {
 # RTMP settings
 --------------------------------------------------------------*/
 
-.file-table {
+#tabRTMPStreaming {
+    color: var(--fg-1);
+}
+
+.rtmp-intro {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.rtmp-intro-icon {
+    width: 40px;
+    height: 40px;
+    flex: 0 0 40px;
+    display: grid;
+    place-items: center;
+    border-radius: 10px;
+    color: #fff;
+    background: var(--btns-bg-color);
+    border: var(--border);
+}
+
+.rtmp-intro h3,
+.rtmp-section-heading h4,
+.rtmp-source-heading h5 {
+    margin: 0;
+    color: var(--fg-1);
+    letter-spacing: 0;
+}
+
+.rtmp-intro h3 {
+    font-size: 16px;
+}
+
+.rtmp-intro p,
+.rtmp-section-heading p,
+.rtmp-source-heading p {
+    margin: 3px 0 0;
+    color: var(--fg-3);
+    line-height: 1.45;
+}
+
+.rtmp-intro p {
+    font-size: 11px;
+}
+
+.rtmp-section {
+    padding: 18px 0;
+    border-top: 1px solid var(--border-subtle);
+}
+
+.rtmp-section-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+
+.rtmp-step {
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    display: grid;
+    place-items: center;
+    border: 1px solid var(--border-strong);
+    border-radius: 50%;
+    color: var(--fg-2);
+    font-size: 10px;
+    font-weight: 700;
+}
+
+.rtmp-section-heading h4 {
+    font-size: 13px;
+}
+
+.rtmp-section-heading p {
+    font-size: 10px;
+}
+
+.rtmp-field {
     margin-top: 10px;
+}
+
+.rtmp-field label {
+    display: block;
+    margin: 0 0 5px 2px;
+    color: var(--fg-2);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.rtmp-field small {
+    display: block;
+    margin: 5px 2px 0;
+    color: var(--fg-muted);
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.rtmp-default-destination {
+    min-height: 58px;
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-1);
+}
+
+/* `#mySettings i` sets `margin: auto`, which would push the label to the far edge */
+#mySettings .rtmp-default-destination > i,
+.rtmp-default-destination > i {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 34px;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--border-subtle);
+    border-radius: 7px;
+    color: var(--fg-1);
+    background: var(--btns-bg-color);
+    font-size: 12px;
+}
+
+.rtmp-default-destination > span {
+    width: fit-content !important;
+    max-width: 100%;
+    min-width: 0;
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    text-align: left;
+}
+
+.rtmp-default-destination strong,
+.rtmp-default-destination small {
+    display: block;
+}
+
+.rtmp-default-destination strong {
+    color: var(--fg-1);
+    font-size: 11px;
+}
+
+.rtmp-default-destination small {
+    margin-top: 3px;
+    color: var(--fg-muted);
+    font-size: 9px;
+}
+
+.rtmp-override-label {
+    margin: 14px 0 8px;
+    color: var(--fg-2);
+    font-size: 10px;
+    font-weight: 600;
+}
+
+.rtmp-sources {
+    display: grid;
+    gap: 10px;
+}
+
+.rtmp-sources > .rtmp-section-heading {
+    margin-bottom: 4px;
+}
+
+.rtmp-source {
+    padding: 13px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    background: var(--surface-1);
+}
+
+.rtmp-source-heading {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.rtmp-source-icon {
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    display: grid;
+    place-items: center;
+    border-radius: 7px;
+    color: var(--fg-2);
+    background: var(--btns-bg-color);
+    font-size: 11px;
+}
+
+.rtmp-source-heading h5 {
+    font-size: 11px;
+}
+
+.rtmp-source-heading p {
+    font-size: 9px;
+}
+
+.file-table {
+    margin-top: 12px;
     color: #fff;
     width: 100%;
     border-collapse: collapse;
@@ -1773,6 +1978,14 @@ body {
 }
 .file-table th {
     background: var(--select-bg);
+}
+.file-table th {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    font-size: 10px;
+    font-weight: 600;
 }
 .file-table tbody {
     display: block;
@@ -1795,10 +2008,11 @@ body {
 }
 
 #file-name {
-    margin-top: 20px;
-    margin-left: 5px;
-    font-weight: bold;
-    color: #888;
+    min-height: 14px;
+    margin: 8px 2px 0;
+    color: var(--fg-3);
+    font-size: 9px;
+    font-weight: 600;
 }
 
 .input-container {
@@ -1819,7 +2033,6 @@ body {
 
 #rtmpStreamURL,
 #rtmpLiveUrl {
-    margin-top: 5px;
     padding: 10px;
     width: 100%;
     color: #fff;
@@ -1827,14 +2040,38 @@ body {
     background: var(--select-bg) !important;
 }
 
+#rtmpUrlLiveContainer {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 40px;
+    gap: 8px;
+    align-items: stretch;
+}
+
+#rtmpLiveUrl {
+    min-width: 0;
+    height: 40px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    text-overflow: ellipsis;
+}
+
 #refreshVideoFiles {
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
     cursor: pointer;
-    border-radius: 10px;
-    border: var(--border);
-    background: var(--btns-bg-color) !important;
+    border: 0;
+    border-radius: 6px;
+    color: var(--fg-2);
+    background: transparent;
+    text-align: center;
 }
 #refreshVideoFiles:hover {
-    background: var(--select-bg) !important;
+    color: #fff;
+    background: var(--btns-bg-color) !important;
 }
 
 .btn-custom {
@@ -1847,9 +2084,34 @@ body {
 }
 
 #copyRtmpUrlButton {
+    width: 40px;
     height: 40px;
-    margin-left: 5px;
-    border: var(--border);
+    min-width: 40px;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    place-items: center;
+    flex: 0 0 40px;
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    color: var(--fg-2);
+    background: var(--surface-1);
+    font-size: 13px;
+    text-align: center;
+    transition:
+        color var(--motion-fast),
+        border-color var(--motion-fast),
+        background var(--motion-fast);
+}
+
+#copyRtmpUrlButton:hover {
+    color: #fff;
+    border-color: var(--border-strong);
+    background: var(--surface-2) !important;
+}
+
+#copyRtmpUrlButton:active {
+    transform: scale(0.96);
 }
 
 .rtmp-preset-buttons {
@@ -1857,10 +2119,6 @@ body {
     gap: 6px;
     margin-bottom: 8px;
     flex-wrap: wrap;
-}
-
-#rtmpCustomDestination > p {
-    margin-bottom: 8px;
 }
 
 /* `.tabcontent button` forces width:100%/text-align:left/margin-top, undo it here so the presets stay on one row */
@@ -1922,12 +2180,55 @@ body {
 
 #rtmpCustomUrl,
 #rtmpCustomStreamKey {
-    margin-top: 5px;
     padding: 10px;
     width: 100%;
     color: #fff;
     border: none;
     background: var(--select-bg) !important;
+}
+
+#rtmpCustomDestination .btn-custom,
+.rtmp-source .btn-custom {
+    margin-top: 10px;
+    border-radius: 8px;
+    font-size: 10px;
+    text-align: center;
+}
+
+.rtmp-stop-button {
+    border: 1px solid rgba(255, 75, 75, 0.58) !important;
+    color: #fff !important;
+    background: rgba(210, 35, 48, 0.82) !important;
+    box-shadow: 0 6px 18px rgba(210, 35, 48, 0.2);
+}
+
+.rtmp-stop-button:hover {
+    background: rgb(220, 45, 57) !important;
+}
+
+.rtmp-stop-button i {
+    color: #fff !important;
+}
+
+.rtmp-source:has(.rtmp-stop-button:not(.hidden)) {
+    border-color: rgba(255, 75, 75, 0.5);
+    background: rgba(210, 35, 48, 0.08);
+    box-shadow: inset 3px 0 0 rgba(255, 75, 75, 0.8);
+}
+
+.rtmp-source:has(.rtmp-stop-button:not(.hidden)) .rtmp-source-icon {
+    color: #fff;
+    background: rgba(210, 35, 48, 0.82);
+}
+
+.rtmp-output {
+    padding-bottom: 0;
+}
+
+@media (max-width: 480px) {
+    .rtmp-preset-buttons .btn-rtmp-preset {
+        flex-basis: calc(50% - 3px);
+    }
 }
 
 /*--------------------------------------------------------------
