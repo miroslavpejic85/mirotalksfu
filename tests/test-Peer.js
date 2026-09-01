@@ -107,4 +107,59 @@ describe('test-Peer', () => {
         consumeCalls.should.equal(2);
         retry.reused.should.equal(false);
     });
+
+    it('uses zero-based preferred indexes for scalable consumers', async () => {
+        const peer = createPeer();
+        let preferredLayers;
+        peer.transports.set('transport-id', {
+            consume: async (options) => ({
+                ...createConsumer('consumer-id', options.producerId, options.appData),
+                type: 'svc',
+                kind: 'video',
+                rtpParameters: { encodings: [{ scalabilityMode: 'L3T3_KEY' }] },
+                setPreferredLayers: async (layers) => {
+                    preferredLayers = layers;
+                },
+            }),
+        });
+
+        await peer.createConsumer('transport-id', 'producer-id', {});
+
+        preferredLayers.should.deepEqual({ spatialLayer: 2, temporalLayer: 2 });
+    });
+
+    it('closes a consumer that resolves after the peer has closed', async () => {
+        const peer = createPeer();
+        let releaseConsume;
+        let lateConsumer;
+        const consumeGate = new Promise((resolve) => {
+            releaseConsume = resolve;
+        });
+        const transport = {
+            closed: false,
+            close() {
+                this.closed = true;
+            },
+            consume: async (options) => {
+                await consumeGate;
+                lateConsumer = {
+                    ...createConsumer('consumer-id', options.producerId, options.appData),
+                    close() {
+                        this.closed = true;
+                    },
+                };
+                return lateConsumer;
+            },
+        };
+        peer.transports.set('transport-id', transport);
+
+        const creation = peer.createConsumer('transport-id', 'producer-id', {});
+        peer.close();
+        releaseConsume();
+
+        await creation.should.be.rejected();
+        lateConsumer.closed.should.equal(true);
+        peer.consumers.size.should.equal(0);
+        peer.consumerCreatePromises.size.should.equal(0);
+    });
 });

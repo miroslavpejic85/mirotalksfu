@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.15
+ * @version 2.4.16
  *
  */
 
@@ -1299,6 +1299,7 @@ class RoomClient {
         this.socket.on('connect', this.handleSocketConnect);
         this.socket.on('connect_error', this.handleSocketConnectionError);
         this.socket.on('disconnect', this.handleSocketDisconnect);
+        this.socket.on('transportClosed', this.handleTransportClosed);
         this.socket.on('consumerClosed', this.handleConsumerClosed);
         this.socket.on('setVideoOff', this.handleSetVideoOff);
         this.socket.on('removeMe', this.handleRemoveMe);
@@ -1380,6 +1381,16 @@ class RoomClient {
     handleConsumerClosed = ({ consumer_id, consumer_kind }) => {
         console.log('SocketOn Closing consumer', { consumer_id, consumer_kind });
         this.removeConsumer(consumer_id, consumer_kind);
+    };
+
+    handleTransportClosed = ({ transport_id }) => {
+        const transport = [this.producerTransport, this.consumerTransport].find(
+            (candidate) => candidate?.id === transport_id
+        );
+        if (transport && !transport.closed) {
+            console.warn('SocketOn Closing transport', { transport_id });
+            transport.close();
+        }
     };
 
     handleSetVideoOff = (data) => {
@@ -4519,6 +4530,7 @@ class RoomClient {
             if (this.producerTransport) this.producerTransport.close();
             if (this.socket) {
                 this.socket.off('disconnect');
+                this.socket.off('transportClosed');
                 this.socket.off('newProducers');
                 this.socket.off('consumerClosed');
                 this.socket.off('connect');

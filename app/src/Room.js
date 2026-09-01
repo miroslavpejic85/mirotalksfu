@@ -78,7 +78,7 @@ module.exports = class Room {
         this.webRtcTransport = config.mediasoup.webRtcTransport;
         this.router = null;
         this.routerSettings = config.mediasoup.router;
-        this.createTheRouter();
+        this.routerReady = this.createTheRouter();
 
         // RTMP configuration
         this.rtmpStreaming = new RtmpStreaming(this);
@@ -214,32 +214,44 @@ module.exports = class Room {
     // ROUTER
     // ####################################################
 
-    createTheRouter() {
+    async createTheRouter() {
         const { mediaCodecs } = this.routerSettings;
-        this.worker
-            .createRouter({
-                mediaCodecs,
-            })
-            .then((router) => {
-                this.router = router;
-                if (this.audioLevelObserverEnabled) {
-                    log.debug('Audio Level Observer enabled, starting observation...');
-                    this.startAudioLevelObservation().catch((err) => {
-                        log.error('Failed to start audio level observation', err);
-                    });
-                }
-                if (this.activeSpeakerObserverEnabled) {
-                    log.debug('Active Speaker Observer enabled, starting observation...');
-                    this.startActiveSpeakerObserver().catch((err) => {
-                        log.error('Failed to start active speaker observer', err);
-                    });
-                }
-                this.router.observer.on('close', () => {
-                    log.debug('---------------> Router is now closed as the last peer has left the room', {
-                        room: this.id,
-                    });
-                });
+        const router = await this.worker.createRouter({
+            mediaCodecs,
+        });
+
+        this.router = router;
+        const observerPromises = [];
+        if (this.audioLevelObserverEnabled) {
+            log.debug('Audio Level Observer enabled, starting observation...');
+            observerPromises.push(
+                this.startAudioLevelObservation().catch((error) => {
+                    log.error('Failed to start audio level observation', error);
+                })
+            );
+        }
+        if (this.activeSpeakerObserverEnabled) {
+            log.debug('Active Speaker Observer enabled, starting observation...');
+            observerPromises.push(
+                this.startActiveSpeakerObserver().catch((error) => {
+                    log.error('Failed to start active speaker observer', error);
+                })
+            );
+        }
+        await Promise.all(observerPromises);
+
+        this.router.observer.on('close', () => {
+            log.debug('---------------> Router is now closed as the last peer has left the room', {
+                room: this.id,
             });
+        });
+
+        return router;
+    }
+
+    async ready() {
+        await this.routerReady;
+        return this;
     }
 
     getRtpCapabilities() {
@@ -317,10 +329,14 @@ module.exports = class Room {
         }
     }
 
-    addProducerToAudioLevelObserver(producer) {
-        if (this.audioLevelObserverEnabled) {
-            this.audioLevelObserver.addProducer(producer);
+    async addProducerToAudioLevelObserver(producer) {
+        if (!this.audioLevelObserverEnabled || !this.audioLevelObserver || this.audioLevelObserver.closed) return;
+
+        try {
+            await this.audioLevelObserver.addProducer(producer);
             log.debug('Producer added to audio level observer', { producer });
+        } catch (error) {
+            log.warn('Failed to add producer to audio level observer', { producer, error: error.message });
         }
     }
 
@@ -375,10 +391,15 @@ module.exports = class Room {
         });
     }
 
-    addProducerToActiveSpeakerObserver(producer) {
-        if (this.activeSpeakerObserverEnabled) {
-            this.activeSpeakerObserver.addProducer(producer);
+    async addProducerToActiveSpeakerObserver(producer) {
+        if (!this.activeSpeakerObserverEnabled || !this.activeSpeakerObserver || this.activeSpeakerObserver.closed)
+            return;
+
+        try {
+            await this.activeSpeakerObserver.addProducer(producer);
             log.debug('Producer added to active speaker observer', { producer });
+        } catch (error) {
+            log.warn('Failed to add producer to active speaker observer', { producer, error: error.message });
         }
     }
 
@@ -599,13 +620,21 @@ module.exports = class Room {
         }
 
         const { id, type, iceParameters, iceCandidates, dtlsParameters, sctpParameters } = transport;
-        const { maxIncomingBitrate } = this.webRtcTransport;
+        const { maxIncomingBitrate, minimumAvailableOutgoingBitrate } = this.webRtcTransport;
 
         if (maxIncomingBitrate) {
             try {
                 await transport.setMaxIncomingBitrate(maxIncomingBitrate);
             } catch (error) {
                 log.warn('Failed to set max incoming bitrate', error);
+            }
+        }
+
+        if (minimumAvailableOutgoingBitrate) {
+            try {
+                await transport.setMinOutgoingBitrate(minimumAvailableOutgoingBitrate);
+            } catch (error) {
+                log.warn('Failed to set minimum outgoing bitrate', error);
             }
         }
 
@@ -632,6 +661,7 @@ module.exports = class Room {
 
         const { peer_name } = peer;
         const { iceConsentTimeout = 35 } = this.webRtcTransport;
+        let iceDisconnectTimeout = null;
 
         transport.observer.on('newproducer', (producer) => {
             log.debug('---> new producer created [id:%s]', producer.id);
@@ -642,11 +672,20 @@ module.exports = class Room {
         });
 
         transport.observer.on('close', () => {
-            log.debug('---> transport close [id:%s]', transport.id);
+            if (iceDisconnectTimeout) {
+                clearTimeout(iceDisconnectTimeout);
+                iceDisconnectTimeout = null;
+            }
+            peer.delTransport(transport.id);
+            this.send(socket_id, 'transportClosed', { transport_id: transport.id });
+            transport.removeAllListeners();
+            transport.observer.removeAllListeners();
+            log.debug('Transport closed', {
+                peer_name: peer_name,
+                transport_id: transport.id,
+                transport_closed: transport.closed,
+            });
         });
-
-        // Track ICE disconnect timeout so it can be cancelled on transport close
-        let iceDisconnectTimeout = null;
 
         transport.on('icestatechange', (iceState) => {
             const iceLog = {
@@ -701,22 +740,6 @@ module.exports = class Room {
                     transport.close();
                 }
             }
-        });
-
-        transport.on('close', () => {
-            // Clear any pending ICE disconnect timeout
-            if (iceDisconnectTimeout) {
-                clearTimeout(iceDisconnectTimeout);
-                iceDisconnectTimeout = null;
-            }
-            // Remove all listeners from this transport to prevent memory leaks
-            transport.removeAllListeners();
-            transport.observer.removeAllListeners();
-            log.debug('Transport closed', {
-                peer_name: peer_name,
-                transport_id: transport.id,
-                transport_closed: transport.closed,
-            });
         });
 
         return {
@@ -1041,8 +1064,8 @@ module.exports = class Room {
 
         const { dataConsumer, params } = result;
 
-        dataConsumer.once('producerclose', () => {
-            log.debug('DataConsumer closed due to "producerclose" event', {
+        dataConsumer.once('dataproducerclose', () => {
+            log.debug('DataConsumer closed due to "dataproducerclose" event', {
                 dataConsumer_id: dataConsumer.id,
                 dataProducer_id: dataProducerId,
                 peer_name,

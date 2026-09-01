@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.15
+ * @version 2.4.16
  *
  */
 
@@ -2205,9 +2205,10 @@ function startServer() {
     // START SERVER
     // ####################################################
 
-    server.listen(config?.server?.listen?.port || 3010, () => {
-        log.log(
-            `%c
+    function startServer() {
+        server.listen(config?.server?.listen?.port || 3010, () => {
+            log.log(
+                `%c
     
         ███████╗██╗ ██████╗ ███╗   ██╗      ███████╗███████╗██████╗ ██╗   ██╗███████╗██████╗ 
         ██╔════╝██║██╔════╝ ████╗  ██║      ██╔════╝██╔════╝██╔══██╗██║   ██║██╔════╝██╔══██╗
@@ -2217,30 +2218,31 @@ function startServer() {
         ╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝      ╚══════╝╚══════╝╚═╝  ╚═╝  ╚═══╝  ╚══════╝╚═╝  ╚═╝ started...
     
         `,
-            'font-family:monospace'
-        );
+                'font-family:monospace'
+            );
 
-        if (config?.integrations?.ngrok?.enabled && config?.integrations?.ngrok?.authToken !== '') {
-            return ngrokStart();
-        }
-        log.info('Server config', getServerConfig());
-
-        // Warn if default secrets are still in use
-        if (config.api?.keySecret === 'mirotalksfu_default_secret') {
-            log.warn('WARNING: API_KEY_SECRET is set to the default value. Change it before deploying!');
-        }
-        if (jwtCfg.JWT_KEY === 'mirotalksfu_jwt_secret') {
-            log.warn('WARNING: JWT_SECRET is set to the default value. Change it before deploying!');
-        }
-        if (rtmpEnabled) {
-            const rtmpApiSecret = rtmpCfg?.apiSecret || '';
-            if (!rtmpApiSecret || RTMP_LEGACY_DEFAULT_API_SECRETS.includes(rtmpApiSecret)) {
-                log.warn(
-                    'WARNING: RTMP is enabled but RTMP_API_SECRET is unset or uses a known default. In-room streaming still works (per-session token), but external callers of the RTMP HTTP endpoints will be rejected until a strong secret is set!'
-                );
+            if (config?.integrations?.ngrok?.enabled && config?.integrations?.ngrok?.authToken !== '') {
+                return ngrokStart();
             }
-        }
-    });
+            log.info('Server config', getServerConfig());
+
+            // Warn if default secrets are still in use
+            if (config.api?.keySecret === 'mirotalksfu_default_secret') {
+                log.warn('WARNING: API_KEY_SECRET is set to the default value. Change it before deploying!');
+            }
+            if (jwtCfg.JWT_KEY === 'mirotalksfu_jwt_secret') {
+                log.warn('WARNING: JWT_SECRET is set to the default value. Change it before deploying!');
+            }
+            if (rtmpEnabled) {
+                const rtmpApiSecret = rtmpCfg?.apiSecret || '';
+                if (!rtmpApiSecret || RTMP_LEGACY_DEFAULT_API_SECRETS.includes(rtmpApiSecret)) {
+                    log.warn(
+                        'WARNING: RTMP is enabled but RTMP_API_SECRET is unset or uses a known default. In-room streaming still works (per-session token), but external callers of the RTMP HTTP endpoints will be rejected until a strong secret is set!'
+                    );
+                }
+            }
+        });
+    }
 
     // ####################################################
     // WORKERS
@@ -2249,6 +2251,7 @@ function startServer() {
     (async () => {
         try {
             await createWorkers();
+            startServer();
         } catch (err) {
             log.error('Create Worker ERROR --->', err);
             process.exit(1);
@@ -2258,7 +2261,7 @@ function startServer() {
     async function createWorkers() {
         const { numWorkers } = config.mediasoup;
 
-        const { logLevel, logTags, rtcMinPort, rtcMaxPort, disableLiburing } = config.mediasoup.worker;
+        const { logLevel, logTags, disableLiburing } = config.mediasoup.worker;
 
         log.info('WORKERS:', numWorkers);
 
@@ -2267,8 +2270,6 @@ function startServer() {
             const worker = await mediasoup.createWorker({
                 logLevel: logLevel,
                 logTags: logTags,
-                rtcMinPort: Number(rtcMinPort),
-                rtcMaxPort: Number(rtcMaxPort),
                 disableLiburing: Boolean(disableLiburing),
             });
 
@@ -2365,10 +2366,16 @@ function startServer() {
             if (roomList.has(socket.room_id)) {
                 callback({ error: 'already exists' });
             } else {
-                log.debug('Created room', { room_id: socket.room_id });
-                const worker = await getMediasoupWorker();
-                roomList.set(socket.room_id, new Room(socket.room_id, worker, io));
-                callback({ room_id: socket.room_id });
+                try {
+                    const worker = await getMediasoupWorker();
+                    const room = await new Room(socket.room_id, worker, io).ready();
+                    roomList.set(socket.room_id, room);
+                    log.debug('Created room', { room_id: socket.room_id });
+                    callback({ room_id: socket.room_id });
+                } catch (error) {
+                    log.error('Create room failed', { room_id: socket.room_id, error: error.message });
+                    callback({ error: 'Failed to initialize room' });
+                }
             }
         });
 
@@ -2811,8 +2818,10 @@ function startServer() {
 
                 // add & monitor producer audio level and dominant speaker
                 if (kind === 'audio') {
-                    room.addProducerToAudioLevelObserver({ producerId: producer_id });
-                    room.addProducerToActiveSpeakerObserver({ producerId: producer_id });
+                    await Promise.all([
+                        room.addProducerToAudioLevelObserver({ producerId: producer_id }),
+                        room.addProducerToActiveSpeakerObserver({ producerId: producer_id }),
+                    ]);
                 }
 
                 callback({ producer_id });

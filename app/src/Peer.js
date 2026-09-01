@@ -1,5 +1,6 @@
 'use strict';
 
+const { parseScalabilityMode } = require('mediasoup');
 const Logger = require('./Logger');
 const log = new Logger('Peer');
 
@@ -42,6 +43,7 @@ module.exports = class Peer {
         this.producers = new Map();
         this.dataProducers = new Map();
         this.dataConsumers = new Map();
+        this.closed = false;
     }
 
     // ####################################################
@@ -313,6 +315,10 @@ module.exports = class Peer {
     }
 
     async createConsumer(consumer_transport_id, producerId, rtpCapabilities) {
+        if (this.closed) {
+            throw new Error(`Cannot create consumer for closed peer ${this.peer_name}`);
+        }
+
         if (!consumer_transport_id || !producerId || !rtpCapabilities) {
             throw new Error('Missing required parameters for creating a consumer');
         }
@@ -372,6 +378,11 @@ module.exports = class Peer {
                 appData: { consumerTransportId: consumer_transport_id },
             });
 
+            if (this.closed) {
+                consumer.close();
+                throw new Error(`Peer ${this.peer_name} closed while creating consumer`);
+            }
+
             this.addConsumer(consumer.id, consumer);
         } catch (error) {
             log.error(`Error creating consumer for transport ID ${consumer_transport_id}`, {
@@ -390,8 +401,9 @@ module.exports = class Peer {
         if (['simulcast', 'svc'].includes(type)) {
             // simulcast - L1T3/L2T3/L3T3 | svc - L3T3
             const { scalabilityMode } = rtpParameters.encodings[0];
-            const spatialLayer = parseInt(scalabilityMode.substring(1, 2)); // 1/2/3
-            const temporalLayer = parseInt(scalabilityMode.substring(3, 4)); // 1/2/3
+            const { spatialLayers, temporalLayers } = parseScalabilityMode(scalabilityMode);
+            const spatialLayer = Math.max(spatialLayers - 1, 0);
+            const temporalLayer = Math.max(temporalLayers - 1, 0);
 
             try {
                 await consumer.setPreferredLayers({
@@ -661,6 +673,9 @@ module.exports = class Peer {
     // ####################################################
 
     close() {
+        if (this.closed) return;
+        this.closed = true;
+
         log.debug('Starting peer cleanup', {
             peer_id: this.id,
             peer_name: this.peer_name,
@@ -686,6 +701,7 @@ module.exports = class Peer {
         }
         this.consumers.clear();
         this.consumerByTransportProducer.clear();
+        this.consumerCreatePromises.clear();
 
         // Close all data consumers
         for (const [dataConsumer_id, dataConsumer] of this.dataConsumers.entries()) {
