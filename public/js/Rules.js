@@ -275,11 +275,11 @@ function handleRules(isPresenter, roomSetup = true) {
     BUTTONS.settings.tabNotificationsBtn ? show(tabNotificationsBtn) : hide(tabNotificationsBtn);
     BUTTONS.settings.tabModerator ? show(tabModeratorBtn) : hide(tabModeratorBtn);
     if (BUTTONS.settings.host_only_recording) {
-        show(recordingImage);
+        show(recordingActionButton);
         show(roomRecordingOptions);
         show(roomHostOnlyRecording);
     } else {
-        show(recordingImage);
+        show(recordingActionButton);
         show(roomRecordingOptions);
         hide(roomHostOnlyRecording);
     }

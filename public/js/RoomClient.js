@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.16
+ * @version 2.4.17
  *
  */
 
@@ -8501,37 +8501,13 @@ class RoomClient {
             const audioMixerTracks = audioMixerStreams.getTracks();
             console.log('Audio mixer tracks --->', audioMixerTracks);
 
-            this.isMobileDevice
-                ? this.startMobileRecording(options, audioMixerTracks)
-                : this.recordingOptions(options, audioMixerTracks);
+            const recordingType = this.isMobileDevice ? 'camera' : document.getElementById('recordingTypeSelect').value;
+            recordingType === 'screen'
+                ? this.startDesktopRecording(options, audioMixerTracks)
+                : this.startMobileRecording(options, audioMixerTracks);
         } catch (err) {
             this.handleRecordingError('Exception while creating MediaRecorder: ' + err);
         }
-    }
-
-    recordingOptions(options, audioMixerTracks) {
-        Swal.fire({
-            background: swalBackground,
-            position: 'top',
-            imageUrl: image.recording,
-            title: 'Recording options',
-            text: 'Select the recording type you want to start. Audio will be recorded from all participants.',
-            showDenyButton: true,
-            showCancelButton: true,
-            cancelButtonColor: 'red',
-            denyButtonColor: 'green',
-            confirmButtonText: `Camera`,
-            denyButtonText: `Screen/Window`,
-            cancelButtonText: `Cancel`,
-            showClass: { popup: 'animate__animated animate__fadeInDown' },
-            hideClass: { popup: 'animate__animated animate__fadeOutUp' },
-        }).then((result) => {
-            if (result.isConfirmed) {
-                this.startMobileRecording(options, audioMixerTracks);
-            } else if (result.isDenied) {
-                this.startDesktopRecording(options, audioMixerTracks);
-            }
-        });
     }
 
     startMobileRecording(options, audioMixerTracks) {
@@ -8838,6 +8814,7 @@ class RoomClient {
     }
 
     disableRecordingOptions(disabled = true) {
+        recordingTypeSelect.disabled = disabled;
         switchServerRecording.disabled = disabled;
         switchHostOnlyRecording.disabled = disabled;
     }

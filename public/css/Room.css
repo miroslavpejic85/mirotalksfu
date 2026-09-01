@@ -1604,19 +1604,67 @@ body {
     color: white;
 }
 
-#recordingImage {
-    width: 128px;
-    height: auto;
-    margin-bottom: 10px;
-    margin-top: 5px;
-    border-radius: 30px;
-    cursor: pointer;
+.recording-type-field > .title {
+    margin-bottom: 8px;
 }
 
-#recordingImage:hover {
-    box-shadow: 0px 4px 8px 0px rgba(255, 255, 255, 0.2);
-    transform: scale(0.95);
-    transition: all 0.3s ease-in-out;
+#mySettings .recording-type-field select {
+    width: 100%;
+    margin: 0;
+}
+
+#mySettings .recording-field-hint {
+    display: block;
+    margin: 8px 0 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    font-size: 0.78rem;
+}
+
+.recording-controls {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin: 18px 0 10px;
+}
+
+.recording-controls .btn-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 1 1 160px;
+    width: auto;
+    margin: 0;
+}
+
+#mySettings .recording-controls .btn-custom i,
+#mySettings .recording-controls .btn-custom p,
+#mySettings .recording-time i,
+#mySettings .recording-time p {
+    margin: 0;
+    padding: 0;
+}
+
+#recordingActionButton.recording-active {
+    border-color: #ff4500;
+    color: #ff8a65;
+}
+
+#mySettings #recordingActionButton.recording-active:hover {
+    border-color: #ff6b6b;
+    color: #fff;
+    background: #b42318 !important;
+}
+
+.recording-time {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 12px 0 20px;
+    color: #ff8a65;
+    font-weight: 700;
 }
 
 #extraInfo {

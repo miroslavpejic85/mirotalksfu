@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.16
+ * @version 2.4.17
  *
  */
 
@@ -459,7 +459,6 @@ async function initClient() {
         setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
         setTippy('roomId', 'Room name (click to copy)', 'right');
         setTippy('sessionTime', 'Session time', 'right');
-        setTippy('recordingImage', 'Toggle recording', 'right');
         setTippy(
             'switchHostOnlyRecording',
             'Only the host (presenter) has the capability to record the meeting',
@@ -2700,7 +2699,11 @@ function handleButtons() {
     fullScreenButton.onclick = () => {
         rc.toggleRoomFullScreen();
     };
-    recordingImage.onclick = () => {
+    if (isMobileDevice) {
+        recordingTypeSelect.value = 'camera';
+        recordingScreenOption.disabled = true;
+    }
+    recordingActionButton.onclick = () => {
         isRecording ? stopRecButton.click() : startRecButton.click();
     };
     startRecButton.onclick = () => {
@@ -4228,6 +4231,8 @@ function handleRoomClientEvents() {
         show(stopRecButton);
         show(pauseRecButton);
         show(recordingTime);
+        recordingActionButton.querySelector('p').textContent = 'Stop recording';
+        recordingActionButton.classList.add('recording-active');
         startRecordingTimer();
         isRecording = true;
         rc.updatePeerInfo(peer_name, socket.id, 'recording', true);
@@ -4252,6 +4257,8 @@ function handleRoomClientEvents() {
         hide(resumeRecButton);
         hide(recordingTime);
         show(startRecButton);
+        recordingActionButton.querySelector('p').textContent = 'Start recording';
+        recordingActionButton.classList.remove('recording-active');
         stopRecordingTimer();
         isRecording = false;
         rc.updatePeerInfo(peer_name, socket.id, 'recording', false);
@@ -4420,7 +4427,8 @@ function handleRoomClientEvents() {
                 rc.saveRecording('Room event: host only recording enabled, going to stop recording');
             }
             hide(startRecButton);
-            hide(recordingImage);
+            hide(recordingActionButton);
+            hide(recordingTypeField);
             hide(roomHostOnlyRecording);
             hide(roomRecordingOptions);
             hide(roomRecordingServer);
@@ -4432,7 +4440,8 @@ function handleRoomClientEvents() {
         if (isRulesActive && !isPresenter) {
             console.log('Room event: host only recording disabled');
             show(startRecButton);
-            show(recordingImage);
+            show(recordingActionButton);
+            show(recordingTypeField);
             hide(roomHostOnlyRecording);
             hide(recordingMessage);
             hostOnlyRecording = false;
@@ -8140,7 +8149,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.16',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.17',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

@@ -1232,7 +1232,17 @@
                             <h3>Recording</h3>
                             <p>Control who can record and where meeting recordings are saved.</p>
                         </div>
-                        <img id="recordingImage" class="hidden" src="../images/recording.png" />
+                        <div id="recordingTypeField" class="recording-type-field">
+                            <div class="title">
+                                <i class="fa-solid fa-film"></i>
+                                <p>Recording type</p>
+                            </div>
+                            <select id="recordingTypeSelect">
+                                <option value="camera">Camera</option>
+                                <option id="recordingScreenOption" value="screen">Screen/Window</option>
+                            </select>
+                            <p class="recording-field-hint">Audio from all participants is included.</p>
+                        </div>
                         <div id="roomRecordingOptions" class="hidden">
                             <hr />
                             <table class="settingsTable">
@@ -1272,27 +1282,24 @@
                                 </tr>
                             </table>
                         </div>
-                        <button id="pauseRecButton" class="hidden btn-custom">
-                            <i class="far fa-pause-circle"></i>
-                            <p>Pause recording</p>
-                        </button>
-                        <button id="resumeRecButton" class="hidden btn-custom">
-                            <i class="far fa-play-circle"></i>
-                            <p>Resume recording</p>
-                        </button>
-                        <div id="recordingTime" class="hidden">
-                            <hr />
-                            <table class="settingsTable">
-                                <tr>
-                                    <td>
-                                        <div class="title">
-                                            <i class="fa-solid fa-circle pulsate red"></i>
-                                            <p>REC time:</p>
-                                        </div>
-                                    </td>
-                                    <td id="recordingStatus" translate="no">0s</td>
-                                </tr>
-                            </table>
+                        <div class="recording-controls">
+                            <button id="recordingActionButton" class="hidden btn-custom">
+                                <i class="fas fa-record-vinyl"></i>
+                                <p>Start recording</p>
+                            </button>
+                            <button id="pauseRecButton" class="hidden btn-custom">
+                                <i class="far fa-pause-circle"></i>
+                                <p>Pause recording</p>
+                            </button>
+                            <button id="resumeRecButton" class="hidden btn-custom">
+                                <i class="far fa-play-circle"></i>
+                                <p>Resume recording</p>
+                            </button>
+                        </div>
+                        <div id="recordingTime" class="hidden recording-time" aria-live="polite">
+                            <i class="fa-solid fa-circle pulsate red"></i>
+                            <p>REC time:</p>
+                            <span id="recordingStatus" translate="no">0s</span>
                         </div>
                         <div id="recordingMessage" class="hidden">
                             <div class="title">
