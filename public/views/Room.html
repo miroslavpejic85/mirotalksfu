@@ -1358,10 +1358,22 @@
                             <h3>Share media</h3>
                             <p>Play a video or audio source for everyone in the room.</p>
                         </div>
-                        <button id="videoShareButton" class="btn-custom">
-                            <i class="fab fa-youtube"></i>
-                            <p>Share a Video or Audio</p>
-                        </button>
+                        <div class="share-media-field">
+                            <label for="shareMediaUrlInput">Video or audio URL</label>
+                            <div class="share-media-row">
+                                <input
+                                    id="shareMediaUrlInput"
+                                    type="url"
+                                    placeholder="Paste a video or audio URL..."
+                                    maxlength="2048"
+                                />
+                                <button id="videoShareButton" class="btn-custom">
+                                    <i class="fas fa-share-nodes"></i>
+                                    <p>Share</p>
+                                </button>
+                            </div>
+                            <p class="share-media-hint">Supported: YouTube links, .mp4, .mp3, .webm, .ogg</p>
+                        </div>
                         <br />
                         <button id="videoCloseBtn" class="hidden btn-custom">
                             <i class="fas fa-times"></i>

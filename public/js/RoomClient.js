@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.13
+ * @version 2.4.14
  *
  */
 
@@ -9650,34 +9650,7 @@ class RoomClient {
             hideClass: { popup: 'animate__animated animate__fadeOutUp' },
         }).then((result) => {
             if (result.value) {
-                result.value = filterXSS(result.value);
-                // if (!this.thereAreParticipants()) {
-                //     return userLog('info', 'No participants detected', 'top-end');
-                // }
-                if (!this.isVideoTypeSupported(result.value)) {
-                    return userLog('warning', 'Something wrong, try with another Video or audio URL');
-                }
-                /*
-                    https://www.youtube.com/watch?v=RT6_Id5-7-s
-                    https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
-                    https://www.learningcontainer.com/wp-content/uploads/2020/02/Kalimba.mp3
-                */
-                let is_youtube = this.getVideoType(result.value) == 'na' ? true : false;
-                let video_url = is_youtube ? this.getYoutubeEmbed(result.value) : result.value;
-                if (video_url) {
-                    let data = {
-                        peer_id: peer_id,
-                        peer_name: this.peer_name,
-                        video_url: video_url,
-                        is_youtube: is_youtube,
-                        action: 'open',
-                    };
-                    console.log('Video URL: ', video_url);
-                    this.socket.emit('shareVideoAction', data);
-                    this.openVideo(data);
-                } else {
-                    this.userLog('error', 'Not valid video URL', 'top-end', 6000);
-                }
+                this.shareVideoUrl(result.value, peer_id, peer_name);
             }
         });
 
@@ -9698,6 +9671,56 @@ class RoomClient {
             .catch(() => {
                 return false;
             });
+    }
+
+    prefillShareMediaUrlFromClipboard() {
+        if (shareMediaUrlInput.value.trim() || !navigator.clipboard?.readText) return;
+        navigator.clipboard
+            .readText()
+            .then((clipboardText) => {
+                if (!clipboardText) return;
+                const sanitizedText = filterXSS(clipboardText.trim());
+                if (this.isVideoTypeSupported(sanitizedText)) shareMediaUrlInput.value = sanitizedText;
+            })
+            .catch(() => {});
+    }
+
+    shareVideoFromSettings() {
+        if (this._moderator.media_cant_sharing) {
+            return userLog('warning', 'The moderator does not allow you to share any media', 'top-end', 6000);
+        }
+        const mediaUrl = shareMediaUrlInput.value.trim();
+        if (!mediaUrl) return userLog('warning', 'Please paste a Video or audio URL to share');
+        if (this.shareVideoUrl(mediaUrl, 'all')) shareMediaUrlInput.value = '';
+    }
+
+    shareVideoUrl(url, peer_id = 'all', peer_name = 'all') {
+        const mediaUrl = filterXSS(url.trim());
+        if (!mediaUrl) return false;
+        // if (!this.thereAreParticipants()) {
+        //     return userLog('info', 'No participants detected', 'top-end');
+        // }
+        if (!this.isVideoTypeSupported(mediaUrl)) {
+            userLog('warning', 'Something wrong, try with another Video or audio URL');
+            return false;
+        }
+        const is_youtube = this.getVideoType(mediaUrl) == 'na';
+        const video_url = is_youtube ? this.getYoutubeEmbed(mediaUrl) : mediaUrl;
+        if (!video_url) {
+            this.userLog('error', 'Not valid video URL', 'top-end', 6000);
+            return false;
+        }
+        const data = {
+            peer_id: peer_id,
+            peer_name: this.peer_name,
+            video_url: video_url,
+            is_youtube: is_youtube,
+            action: 'open',
+        };
+        console.log('Video URL: ', video_url, peer_name);
+        this.socket.emit('shareVideoAction', data);
+        this.openVideo(data);
+        return true;
     }
 
     getVideoType(url) {

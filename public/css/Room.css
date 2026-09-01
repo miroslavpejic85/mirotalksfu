@@ -2549,6 +2549,54 @@ body {
     line-height: 1.45;
 }
 
+.share-media-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: var(--fg-1);
+    font-weight: 600;
+}
+
+.share-media-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+}
+
+#mySettings .share-media-row input {
+    flex: 1 1 auto;
+    min-width: 0;
+    box-sizing: border-box;
+    height: 40px;
+    margin: 0;
+}
+
+.share-media-row .btn-custom {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    box-sizing: border-box;
+    width: auto;
+    height: 40px;
+    margin: 0;
+    padding: 0 14px;
+    white-space: nowrap;
+}
+
+.share-media-row .btn-custom p {
+    margin: 0;
+}
+
+#mySettings .share-media-hint {
+    display: block;
+    margin: 8px 0 0;
+    padding: 0;
+    color: color-mix(in srgb, var(--fg-1) 64%, transparent);
+    font-size: 0.78rem;
+}
+
 .tabActions {
     position: relative;
     width: 65%;
