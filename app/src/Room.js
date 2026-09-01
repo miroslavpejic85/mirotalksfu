@@ -513,6 +513,14 @@ module.exports = class Room {
         return producerList;
     }
 
+    getProducerById(producerId) {
+        for (const peer of this.peers.values()) {
+            const producer = peer.getProducer(producerId);
+            if (producer && !producer.closed) return producer;
+        }
+        return null;
+    }
+
     removePeer(socket_id) {
         if (!this.peers.has(socket_id)) return;
 
@@ -852,6 +860,13 @@ module.exports = class Room {
 
         const peer = this.getPeer(socket_id);
         const { peer_name } = peer;
+
+        if (!this.getProducerById(producerId)) {
+            const error = new Error(`Producer with ID ${producerId} is no longer available`);
+            error.code = 'PRODUCER_NOT_FOUND';
+            error.retryable = false;
+            throw error;
+        }
 
         if (!this.router.canConsume({ producerId, rtpCapabilities })) {
             throw new Error(

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.14
+ * @version 2.4.15
  *
  */
 
@@ -528,7 +528,18 @@ class RoomClient {
                 }
                 socket.emit(type, data, (response) => {
                     if (response && response.error) {
-                        finish(reject, response.error);
+                        if (response.code || typeof response.error === 'object') {
+                            const error = new Error(
+                                typeof response.error === 'string'
+                                    ? response.error
+                                    : response.error.message || 'Request failed'
+                            );
+                            error.code = response.code || response.error.code;
+                            error.retryable = response.retryable ?? response.error.retryable;
+                            finish(reject, error);
+                        } else {
+                            finish(reject, response.error);
+                        }
                     } else {
                         finish(resolve, response);
                     }
@@ -547,6 +558,7 @@ class RoomClient {
                     return await socket.request(type, data, timeout);
                 } catch (error) {
                     lastError = error;
+                    if (error.retryable === false) break;
                     if (attempt < attempts) {
                         console.warn(`Retrying '${type}' request`, { attempt, error });
                         await new Promise((resolve) => setTimeout(resolve, delay * attempt));
@@ -3677,6 +3689,11 @@ class RoomClient {
                 this.removeConsumer(consumer.id, consumer.kind);
             });
         } catch (error) {
+            if (error.code === 'PRODUCER_NOT_FOUND') {
+                console.debug('Consume skipped: producer is no longer available', { producer_id, type });
+                return;
+            }
+
             console.error('Error in consume', error);
 
             if (createdConsumer && this.consumers.has(createdConsumer.id)) {
