@@ -1537,8 +1537,9 @@ body {
 
 #mySettings
     :is(.form-control, input[type='text'], input[type='url'], input[type='password'], input[type='number']):focus {
+    outline: none;
     border-color: var(--room-accent);
-    box-shadow: 0 0 0 3px color-mix(in srgb, var(--room-accent) 14%, transparent);
+    box-shadow: 0 0 0 1px color-mix(in srgb, var(--room-accent) 24%, transparent);
 }
 
 #myProfileAvatar {
