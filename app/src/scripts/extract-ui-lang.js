@@ -129,6 +129,10 @@ function scanJs(file) {
     const fieldTplRe = new RegExp(`\\b(${DIALOG_FIELDS.join('|')})\\s*:\\s*\`([^\`$]*)\``, 'g');
     while ((m = fieldTplRe.exec(src))) add('dialogs', unescapeJs(m[2]));
 
+    // Dialog validation messages displayed by SweetAlert.
+    const validationRe = /Swal\.showValidationMessage\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*\)/g;
+    while ((m = validationRe.exec(src))) add('dialogs', unescapeJs(m[2]));
+
     // Dynamically-built UI text: device menu headers/options, text nodes, textContent assignments.
     const helperRe = /(?:appendMenuHeader|appendSelectOptions)\([^,]*,[^,]*,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = helperRe.exec(src))) add('labels', unescapeJs(m[2]));

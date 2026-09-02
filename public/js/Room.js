@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.18
+ * @version 2.4.19
  *
  */
 
@@ -1724,10 +1724,10 @@ function shareRoomByEmail() {
         background: swalBackground,
         imageUrl: image.email,
         position: 'center',
-        title: 'Select a Date and Time',
+        title: 'Schedule email invitation',
         html: renderRoomTemplate('popupDateTimePickerTemplate'),
         showCancelButton: true,
-        confirmButtonText: 'OK',
+        confirmButtonText: 'Open email',
         cancelButtonColor: 'red',
         showClass: { popup: 'animate__animated animate__fadeInDown' },
         hideClass: { popup: 'animate__animated animate__fadeOutUp' },
@@ -1742,7 +1742,7 @@ function shareRoomByEmail() {
             const selectedDateTime = Swal.getPopup()?.querySelector('#datetimePicker')?.value?.trim() || '';
 
             if (!selectedDateTime) {
-                Swal.showValidationMessage('Please select a date and time');
+                Swal.showValidationMessage('Choose a meeting date and time');
                 return false;
             }
 
@@ -8149,7 +8149,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.18',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.19',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

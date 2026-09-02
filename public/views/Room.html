@@ -2866,7 +2866,19 @@ Note</textarea>
         </template>
 
         <template id="popupDateTimePickerTemplate">
-            <input type="text" id="datetimePicker" class="flatpickr" />
+            <div class="email-invitation-date-field">
+                <label for="datetimePicker">Meeting date and time</label>
+                <div class="email-invitation-date-control">
+                    <i class="fas fa-calendar-days" aria-hidden="true"></i>
+                    <input
+                        type="text"
+                        id="datetimePicker"
+                        class="flatpickr"
+                        placeholder="Choose date and time"
+                        aria-label="Meeting date and time"
+                    />
+                </div>
+            </div>
         </template>
 
         <!-- Breakout Templates -->

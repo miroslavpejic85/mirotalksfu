@@ -2801,13 +2801,56 @@ body {
 # Settings - data time picker
 --------------------------------------------------------------*/
 
-#datetimePicker {
-    padding: 10px;
-    text-align: center;
-    color: white;
-    background: var(--body-bg);
-    border: var(--border);
-    border-radius: 10px;
+.email-invitation-date-field {
+    width: min(100%, 360px);
+    margin: 1rem auto 0;
+    text-align: left;
+}
+
+.email-invitation-date-field label {
+    display: block;
+    margin-bottom: 8px;
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.email-invitation-date-control {
+    position: relative;
+}
+
+.email-invitation-date-control i {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    z-index: 1;
+    color: var(--room-accent);
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.email-invitation-date-control input {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 48px;
+    padding: 0 16px 0 46px;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 8px;
+    outline: none;
+    color: #fff;
+    background: rgba(255, 255, 255, 0.08);
+    cursor: pointer;
+}
+
+.email-invitation-date-control input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.email-invitation-date-control input:hover,
+.email-invitation-date-control input:focus {
+    border-color: var(--room-accent);
+    background: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 0 0 3px var(--room-accent-soft);
 }
 
 /*--------------------------------------------------------------
