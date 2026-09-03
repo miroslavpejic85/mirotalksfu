@@ -9,6 +9,8 @@
     --room-border-strong: color-mix(in srgb, var(--dd-color) 24%, transparent);
     --room-accent: var(--dd-color);
     --room-accent-soft: color-mix(in srgb, var(--dd-color) 16%, transparent);
+    --room-switch-accent: var(--color-accent);
+    --room-switch-ink: white;
     --room-danger-soft: rgba(255, 75, 75, 0.14);
     --room-shadow: 0 18px 52px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
@@ -1607,6 +1609,54 @@ body {
 
 .form-check-input {
     cursor: pointer;
+}
+
+.form-switch.form-switch-md {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    min-height: 30px;
+    padding-left: 0;
+}
+
+.form-switch.form-switch-md .form-check-input {
+    width: 64px;
+    height: 30px;
+    margin: 0;
+}
+
+.form-switch.form-switch-md .form-check-input:not(:checked) {
+    border-color: color-mix(in srgb, var(--select-bg) 60%, var(--dd-color) 40%);
+    background-color: color-mix(in srgb, var(--select-bg) 40%, #101314 60%);
+    background-image: radial-gradient(circle, #dce2e0 0 11px, transparent 12px);
+    background-size: 30px 30px;
+}
+
+.form-switch.form-switch-md .form-check-input:checked {
+    border-color: var(--room-switch-accent);
+    background-color: var(--room-switch-accent);
+    background-image: radial-gradient(circle, var(--room-switch-ink) 0 11px, transparent 12px);
+    background-size: 30px 30px;
+}
+
+.form-switch.form-switch-md::after {
+    content: 'OFF';
+    position: absolute;
+    top: 50%;
+    right: 8px;
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    line-height: 1;
+    pointer-events: none;
+    transform: translateY(-50%);
+}
+
+.form-switch.form-switch-md:has(.form-check-input:checked)::after {
+    content: 'ON';
+    right: auto;
+    left: 8px;
+    color: var(--room-switch-ink);
 }
 
 .title {

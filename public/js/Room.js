@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.23
+ * @version 2.4.24
  *
  */
 
@@ -7529,6 +7529,8 @@ let themeMap = {
         '--wb-bg': 'linear-gradient(135deg, #0e0e14, #1e1e28)',
         '--btns-bg-color': 'rgba(10, 10, 16, 0.8)',
         '--dd-color': '#E8E8EC',
+        '--room-switch-accent': '#4678F9',
+        '--room-switch-ink': '#FFFFFF',
     },
     dark: {
         '--body-bg': 'linear-gradient(135deg, #0d0d12, #181820)',
@@ -7543,6 +7545,8 @@ let themeMap = {
         '--wb-bg': 'linear-gradient(135deg, #0d0d12, #181820)',
         '--btns-bg-color': 'rgba(10, 10, 16, 0.85)',
         '--dd-color': '#E0E0E6',
+        '--room-switch-accent': '#4678F9',
+        '--room-switch-ink': '#FFFFFF',
     },
     grey: {
         '--body-bg': 'linear-gradient(135deg, #1c1c24, #3a3a46)',
@@ -7557,6 +7561,8 @@ let themeMap = {
         '--wb-bg': 'linear-gradient(135deg, #1c1c24, #3a3a46)',
         '--btns-bg-color': 'rgba(22, 22, 30, 0.75)',
         '--dd-color': '#E4E4EA',
+        '--room-switch-accent': '#4678F9',
+        '--room-switch-ink': '#FFFFFF',
     },
     green: {
         '--body-bg': 'linear-gradient(135deg, #0f1d1a, #1a3830)',
@@ -7663,6 +7669,8 @@ function applyTheme(props) {
     for (const [key, value] of Object.entries(props)) {
         root.setProperty(key, value);
     }
+    root.setProperty('--room-switch-accent', props['--room-switch-accent'] || props['--dd-color']);
+    root.setProperty('--room-switch-ink', props['--room-switch-ink'] || '#101314');
     swalBackground = props['--body-bg'];
     document.body.style.background = props['--body-bg'];
 }
@@ -7683,6 +7691,8 @@ function setCustomTheme() {
         '--wb-bg': grad,
         '--btns-bg-color': 'rgba(0, 0, 0, 0.7)',
         '--dd-color': '#FFFFFF',
+        '--room-switch-accent': `color-mix(in srgb, ${color} 45%, white)`,
+        '--room-switch-ink': '#101314',
     });
 }
 
@@ -8223,7 +8233,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.23',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.24',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
