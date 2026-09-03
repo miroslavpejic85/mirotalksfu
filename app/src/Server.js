@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.24
+ * @version 2.4.25
  *
  */
 
@@ -3230,7 +3230,10 @@ function startServer() {
                 case 'broadcasting':
                     if (!isPresenter) return;
                     room.setIsBroadcasting(data.room_broadcasting);
-                    room.broadCast(socket.id, 'roomAction', data.action);
+                    room.broadCast(socket.id, 'roomAction', {
+                        action: data.action,
+                        room_broadcasting: data.room_broadcasting,
+                    });
                     break;
                 case 'lock':
                     if (!isPresenter) return;

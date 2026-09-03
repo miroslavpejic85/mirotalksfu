@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.24
+ * @version 2.4.25
  *
  */
 
@@ -1920,7 +1920,7 @@ function roomIsReady() {
     BUTTONS.main.whiteboardButton && show(whiteboardButton);
     if (BUTTONS.main.documentPiPButton && showDocumentPipBtn) show(documentPiPButton);
     BUTTONS.main.settingsButton && show(settingsButton);
-    if (!isMobileDevice) show(participantViewDropdown);
+    updateParticipantViewButtonVisibility();
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     if (!BUTTONS.main.startAudioButton) {
@@ -3283,6 +3283,10 @@ function handleCameraMirror(video) {
     video.classList.toggle('mirror', !!sessionVideoMirror);
 }
 
+function updateParticipantViewButtonVisibility() {
+    !isMobileDevice && !isBroadcastingEnabled ? show(participantViewDropdown) : hide(participantViewDropdown);
+}
+
 function setParticipantViewMode(requestedMode, persist = true, notify = true) {
     const supportedModes = new Set([
         'grid',
@@ -3442,6 +3446,7 @@ function handleSelects() {
     // room
     switchBroadcasting.onchange = (e) => {
         isBroadcastingEnabled = e.currentTarget.checked;
+        updateParticipantViewButtonVisibility();
         rc.roomAction('broadcasting');
         localStorageSettings.broadcasting = isBroadcastingEnabled;
         lS.setSettings(localStorageSettings);
@@ -8233,7 +8238,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.24',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.25',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

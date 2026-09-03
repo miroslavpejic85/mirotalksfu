@@ -441,4 +441,5 @@ function handleRulesBroadcasting() {
     elemDisplay('startVideoDeviceDropdown', false);
     elemDisplay('startAudioDeviceDropdown', false);
     elemDisplay('settingsExtraDropdown', false);
+    elemDisplay('participantViewDropdown', false);
 }
