@@ -5643,29 +5643,33 @@ class RoomClient {
 
     toggleVideoPin(position) {
         if (!this.isVideoPinned) return;
+        const pinnedPanelWidth = this.getPinnedSidePanelWidth();
+        const contentWidth = 100 - pinnedPanelWidth;
+        const speakerWidth = contentWidth * 0.75;
+        const thumbnailWidth = contentWidth * 0.25;
         this.videoPinMediaContainer.style.top = 0;
         this.videoPinMediaContainer.style.left = 0;
-        this.videoPinMediaContainer.style.width = '100%';
+        this.videoPinMediaContainer.style.width = contentWidth + '%';
         this.videoPinMediaContainer.style.height = '100%';
         this.videoMediaContainer.style.display = 'flex';
         this.videoMediaContainer.style.top = 0;
         this.videoMediaContainer.style.left = '';
         this.videoMediaContainer.style.right = '';
-        this.videoMediaContainer.style.width = '100%';
+        this.videoMediaContainer.style.width = contentWidth + '%';
         this.videoMediaContainer.style.height = '100%';
         switch (position) {
             case 'speaker-bottom':
             case 'top':
                 this.videoPinMediaContainer.style.top = '25%';
-                this.videoPinMediaContainer.style.width = '100%';
+                this.videoPinMediaContainer.style.width = contentWidth + '%';
                 this.videoPinMediaContainer.style.height = '75%';
                 this.videoMediaContainer.style.height = '25%';
                 break;
             case 'speaker-left':
             case 'vertical':
-                this.videoPinMediaContainer.style.width = '75%';
-                this.videoMediaContainer.style.width = '25%';
-                this.videoMediaContainer.style.right = 0;
+                this.videoPinMediaContainer.style.width = speakerWidth + '%';
+                this.videoMediaContainer.style.width = thumbnailWidth + '%';
+                this.videoMediaContainer.style.right = pinnedPanelWidth + '%';
                 break;
             case 'speaker-top':
             case 'horizontal':
@@ -5674,9 +5678,9 @@ class RoomClient {
                 this.videoMediaContainer.style.height = '25%';
                 break;
             case 'speaker-right':
-                this.videoPinMediaContainer.style.left = '25%';
-                this.videoPinMediaContainer.style.width = '75%';
-                this.videoMediaContainer.style.width = '25%';
+                this.videoPinMediaContainer.style.left = thumbnailWidth + '%';
+                this.videoPinMediaContainer.style.width = speakerWidth + '%';
+                this.videoMediaContainer.style.width = thumbnailWidth + '%';
                 break;
             case 'speaker-1:1':
             case 'livestream':
@@ -5686,6 +5690,16 @@ class RoomClient {
                 break;
         }
         if (position !== 'speaker-1:1' && position !== 'livestream') resizeVideoMedia();
+    }
+
+    getPinnedSidePanelWidth() {
+        if (this.isEditorPinned || this.isBreakoutPinned) return 30;
+        if (this.isChatPinned || this.isPollPinned || this.transcription.isPin()) return 25;
+        return 0;
+    }
+
+    refreshVideoPinLayout() {
+        if (this.isVideoPinned) this.toggleVideoPin(pinVideoPosition.value);
     }
 
     // ####################################################
@@ -6364,6 +6378,7 @@ class RoomClient {
         if (chatRoom.classList.contains('container')) chatRoom.classList.remove('container');
         this.chatPinned();
         this.isChatPinned = true;
+        this.refreshVideoPinLayout();
         setColor(chatTogglePin, 'lime');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -6383,6 +6398,7 @@ class RoomClient {
         BUTTONS.chat.chatMaxButton && show(chatMaxButton);
         this.chatCenter();
         this.isChatPinned = false;
+        this.refreshVideoPinLayout();
         setColor(chatTogglePin, 'white');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -7546,6 +7562,7 @@ class RoomClient {
         }
         this.pollPinned();
         this.isPollPinned = true;
+        this.refreshVideoPinLayout();
         setColor(pollTogglePin, 'lime');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -7562,6 +7579,7 @@ class RoomClient {
         pollRoom.style.maxHeight = '700px';
         this.pollCenter();
         this.isPollPinned = false;
+        this.refreshVideoPinLayout();
         setColor(pollTogglePin, 'white');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -7638,6 +7656,7 @@ class RoomClient {
         if (!this.isMobileDevice) this.makeUnDraggable(breakoutPanel, breakoutPanelHeader);
         this.breakoutPinned();
         this.isBreakoutPinned = true;
+        this.refreshVideoPinLayout();
         setColor(breakoutTogglePin, 'lime');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -7650,6 +7669,7 @@ class RoomClient {
         breakoutPanel.classList.remove('panel-slide-in');
         this.breakoutCenter();
         this.isBreakoutPinned = false;
+        this.refreshVideoPinLayout();
         setColor(breakoutTogglePin, 'white');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -8111,6 +8131,7 @@ class RoomClient {
         }
         this.editorPinned();
         this.isEditorPinned = true;
+        this.refreshVideoPinLayout();
         setColor(editorTogglePin, 'lime');
         this.resizeVideoMenuBar();
         resizeVideoMedia();
@@ -8126,6 +8147,7 @@ class RoomClient {
         editorRoom.style.maxHeight = '100%';
         this.pollCenter();
         this.isEditorPinned = false;
+        this.refreshVideoPinLayout();
         editorRoom.classList.remove('panel-slide-in');
         setColor(editorTogglePin, 'white');
         this.resizeVideoMenuBar();

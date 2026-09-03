@@ -360,6 +360,7 @@ class Transcription {
         }
         this.pin();
         this.isPinned = true;
+        rc.refreshVideoPinLayout();
         setColor(transcriptionTogglePinBtn, 'lime');
         resizeVideoMedia();
         transcriptionRoom.style.resize = 'none';
@@ -394,6 +395,7 @@ class Transcription {
         show(transcriptionMaxBtn);
         this.center();
         this.isPinned = false;
+        rc.refreshVideoPinLayout();
         setColor(transcriptionTogglePinBtn, 'white');
         rc.resizeVideoMenuBar();
         resizeVideoMedia();
