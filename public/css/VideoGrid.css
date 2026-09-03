@@ -285,6 +285,25 @@
     flex: 0 0 auto;
 }
 
+@container camera (max-width: 500px) {
+    .videoMenuBar > .navbar-session-time,
+    .videoMenuBar > .navbar-secondary-action {
+        display: none !important;
+    }
+
+    .videoMenuBar button {
+        min-width: 32px;
+        min-height: 32px;
+        font-size: 0.75rem;
+    }
+}
+
+@container camera (max-width: 250px) {
+    .videoMenuBar > .navbar-compact-action {
+        display: none !important;
+    }
+}
+
 /* Dropdown overrides - must beat .videoMenuBar div */
 .videoMenuBar div.navbar-dropdown-content {
     display: none !important;
@@ -364,6 +383,13 @@
 
 .navbar-dropdown-item span {
     flex: 1;
+}
+
+.navbar-dropdown-control input[type='range'] {
+    width: 88px;
+    max-width: 40vw;
+    accent-color: var(--hover-color);
+    cursor: pointer;
 }
 
 #videoMediaContainer video {

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.26
+ * @version 2.4.27
  *
  */
 
@@ -3243,7 +3243,11 @@ class RoomClient {
                 mv = this.createButton(id + '__mirror', html.mirror);
                 dw = this.createButton(id + '__draw', html.draw);
                 pn = this.createButton(id + '__pin', html.pin);
-                st = this.createElement(id + '__sessionTime', 'span', 'current-session-time notranslate');
+                st = this.createElement(
+                    id + '__sessionTime',
+                    'span',
+                    'current-session-time notranslate navbar-session-time'
+                );
                 vp = this.createButton(this.peer_id + '__vp', html.videoPrivacy);
                 au = this.createButton(
                     this.peer_id + '__audio',
@@ -3296,6 +3300,21 @@ class RoomClient {
                 myDropdownDiv.className = 'navbar-dropdown';
                 myDropdownContent.className = 'navbar-dropdown-content';
 
+                !this.isMobileDevice &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(pn, 'Pin Video', 'compact'));
+                BUTTONS.producerVideo.focusVideoButton &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(ha, 'Focus Mode'));
+                BUTTONS.producerVideo.videoPictureInPicture &&
+                    this.isVideoPictureInPictureSupported &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(pip, 'Picture in Picture'));
+                BUTTONS.producerVideo.snapShotButton &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(ts, 'Take Snapshot'));
+                BUTTONS.producerVideo.videoPrivacyButton &&
+                    !isScreen &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(vp, 'Video Privacy'));
+                BUTTONS.producerVideo.drawingButton &&
+                    isScreen &&
+                    myDropdownContent.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
                 myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
                 BUTTONS.producerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
@@ -4061,6 +4080,19 @@ class RoomClient {
                 pv.value = 100;
 
                 // Build dropdown items
+                !this.isMobileDevice && eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin Video', 'compact'));
+                BUTTONS.consumerVideo.focusVideoButton &&
+                    eVc.appendChild(this.createResponsiveDropdownItem(ha, 'Focus Mode'));
+                BUTTONS.consumerVideo.videoPictureInPicture &&
+                    this.isVideoPictureInPictureSupported &&
+                    eVc.appendChild(this.createResponsiveDropdownItem(pip, 'Picture in Picture'));
+                BUTTONS.consumerVideo.snapShotButton &&
+                    eVc.appendChild(this.createResponsiveDropdownItem(ts, 'Take Snapshot'));
+                BUTTONS.consumerVideo.drawingButton &&
+                    remoteIsScreen &&
+                    eVc.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
+                BUTTONS.consumerVideo.audioVolumeInput &&
+                    eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
                 BUTTONS.consumerVideo.presenterRoleButton &&
                     eVc.appendChild(
                         this.createDropdownItem(
@@ -5788,6 +5820,40 @@ class RoomClient {
             dispatching = false;
             if (dropdownContent) dropdownContent.classList.remove('show');
         });
+        return item;
+    }
+
+    createResponsiveDropdownItem(sourceButton, label, tier = 'secondary') {
+        sourceButton.classList.add(`navbar-${tier}-action`);
+        const proxyButton = sourceButton.cloneNode(false);
+        proxyButton.removeAttribute('id');
+        proxyButton.removeAttribute('style');
+        proxyButton.addEventListener('click', () => sourceButton.click());
+        return this.createDropdownItem(proxyButton, label);
+    }
+
+    createResponsiveDropdownRangeItem(sourceRange, label, iconClass) {
+        sourceRange.classList.add('navbar-secondary-action');
+        const item = document.createElement('div');
+        item.className = 'navbar-dropdown-item navbar-dropdown-control';
+
+        const icon = document.createElement('i');
+        icon.className = `fas ${iconClass}`;
+        const span = document.createElement('span');
+        span.textContent = label;
+        const proxyRange = sourceRange.cloneNode(false);
+        proxyRange.removeAttribute('id');
+        proxyRange.removeAttribute('style');
+
+        proxyRange.addEventListener('input', () => {
+            sourceRange.value = proxyRange.value;
+            sourceRange.dispatchEvent(new Event('input', { bubbles: true }));
+        });
+        sourceRange.addEventListener('input', () => {
+            proxyRange.value = sourceRange.value;
+        });
+
+        item.append(icon, span, proxyRange);
         return item;
     }
 
