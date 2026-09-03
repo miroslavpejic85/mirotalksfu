@@ -901,15 +901,28 @@ module.exports = class Room {
         try {
             peerConsumer = await peer.createConsumer(consumer_transport_id, producerId, rtpCapabilities);
         } catch (error) {
-            log.error(`Error creating consumer for peer ${peer_name} with socket ID ${socket_id}`, {
+            const transportUnavailable = error.code === 'CONSUMER_TRANSPORT_NOT_FOUND';
+            const logDetails = {
                 consumer_transport_id,
                 producerId,
                 type,
                 error: error.message,
-            });
-            throw new Error(
+            };
+
+            transportUnavailable
+                ? log.warn(
+                      `Skipped consumer for peer ${peer_name} because its transport is no longer available`,
+                      logDetails
+                  )
+                : log.error(`Error creating consumer for peer ${peer_name} with socket ID ${socket_id}`, logDetails);
+
+            const wrapped = new Error(
                 `Failed to create consumer for peer ${peer_name} with transport ID ${consumer_transport_id} and producer ID ${producerId} type ${type} for peer ${socket_id}`
             );
+            wrapped.code = error.code;
+            wrapped.transient = error.transient;
+            wrapped.retryable = error.retryable;
+            throw wrapped;
         }
 
         if (!peerConsumer) {

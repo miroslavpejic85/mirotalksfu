@@ -38,6 +38,35 @@ describe('test-Room', () => {
         canConsumeCalled.should.equal(false);
     });
 
+    it('preserves the transient classification for a stale consumer transport', async () => {
+        const room = Object.create(Room.prototype);
+        const transportError = new Error('Consumer transport with ID stale-transport-id not found');
+        transportError.code = 'CONSUMER_TRANSPORT_NOT_FOUND';
+        transportError.transient = true;
+        transportError.retryable = false;
+        const peer = {
+            peer_name: 'Consumer',
+            getProducer: () => ({ id: 'producer-id' }),
+            createConsumer: async () => {
+                throw transportError;
+            },
+        };
+
+        room.peers = new Map([['consumer-peer-id', peer]]);
+        room.router = { canConsume: () => true };
+
+        let consumeError;
+        try {
+            await room.consume('consumer-peer-id', 'stale-transport-id', 'producer-id', {}, 'audioType');
+        } catch (error) {
+            consumeError = error;
+        }
+
+        consumeError.should.have.property('code', 'CONSUMER_TRANSPORT_NOT_FOUND');
+        consumeError.should.have.property('transient', true);
+        consumeError.should.have.property('retryable', false);
+    });
+
     it('removes and reports a data consumer when its data producer closes', async () => {
         const room = Object.create(Room.prototype);
         const dataConsumer = Object.assign(new EventEmitter(), {

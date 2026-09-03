@@ -25,6 +25,21 @@ describe('test-Peer', () => {
         once: () => {},
     });
 
+    it('classifies a missing consumer transport as a transient lifecycle race', async () => {
+        const peer = createPeer();
+
+        let consumeError;
+        try {
+            await peer.createConsumer('stale-transport-id', 'producer-id', {});
+        } catch (error) {
+            consumeError = error;
+        }
+
+        consumeError.should.have.property('code', 'CONSUMER_TRANSPORT_NOT_FOUND');
+        consumeError.should.have.property('transient', true);
+        consumeError.should.have.property('retryable', false);
+    });
+
     it('reuses a consumer on the same transport when an acknowledgement is retried', async () => {
         const peer = createPeer();
         let consumeCalls = 0;

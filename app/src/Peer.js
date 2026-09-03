@@ -324,7 +324,11 @@ module.exports = class Peer {
         }
 
         if (!this.transports.has(consumer_transport_id)) {
-            throw new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
+            const error = new Error(`Consumer transport with ID ${consumer_transport_id} not found`);
+            error.code = 'CONSUMER_TRANSPORT_NOT_FOUND';
+            error.transient = true;
+            error.retryable = false;
+            throw error;
         }
 
         const consumerTransport = this.getTransport(consumer_transport_id);
