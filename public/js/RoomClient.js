@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.25
+ * @version 2.4.26
  *
  */
 
@@ -5799,14 +5799,28 @@ class RoomClient {
                 clearTimeout(closeTimer);
                 closeTimer = null;
             }
-            const rect = dropdownBtn.getBoundingClientRect();
-            dropdownContent.style.top = rect.bottom + 2 + 'px';
-            dropdownContent.style.right = window.innerWidth - rect.right + 'px';
-            dropdownContent.style.left = 'auto';
             document.querySelectorAll('.navbar-dropdown-content.show').forEach((el) => {
                 if (el !== dropdownContent) el.classList.remove('show');
             });
             dropdownContent.classList.add('show');
+
+            const gap = 2;
+            const viewportMargin = 8;
+            const buttonRect = dropdownBtn.getBoundingClientRect();
+            const menuRect = dropdownContent.getBoundingClientRect();
+            const spaceBelow = window.innerHeight - buttonRect.bottom - viewportMargin;
+            const top =
+                spaceBelow >= menuRect.height
+                    ? buttonRect.bottom + gap
+                    : Math.max(viewportMargin, buttonRect.top - menuRect.height - gap);
+            const left = Math.min(
+                Math.max(viewportMargin, buttonRect.right - menuRect.width),
+                window.innerWidth - menuRect.width - viewportMargin
+            );
+
+            dropdownContent.style.top = top + 'px';
+            dropdownContent.style.right = 'auto';
+            dropdownContent.style.left = Math.max(viewportMargin, left) + 'px';
         };
 
         const scheduleClose = () => {
