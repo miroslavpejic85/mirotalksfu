@@ -3320,6 +3320,8 @@ function setParticipantViewMode(requestedMode, persist = true, notify = true) {
             rc.userLog('info', 'No participant video is available for this speaker view', 'top-end');
         }
     } else {
+        pinVideoPosition.value = 'speaker-left';
+        localStorageSettings.pin_grid = pinVideoPosition.selectedIndex;
         clearTimeout(rc.participantViewRestoreTimer);
         rc.participantViewRestoreTimer = null;
     }
