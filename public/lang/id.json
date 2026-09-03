@@ -648,7 +648,7 @@
         "Hidden": "Tersembunyi",
         "Visible": "Terlihat",
         "Personalize the interface theme and control placement.": "Personalisasikan tema antarmuka dan penempatan kontrol.",
-        "Save custom color": "Simpan warna khusus",
+        "Keep custom color": "Pertahankan warna khusus",
         "Language": "Bahasa",
         "Choose the language used by the meeting interface.": "Pilih bahasa yang digunakan oleh antarmuka rapat."
     },
@@ -753,7 +753,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",

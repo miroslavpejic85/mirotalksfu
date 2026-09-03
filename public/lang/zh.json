@@ -648,7 +648,7 @@
         "Hidden": "隐",
         "Visible": "可见的",
         "Personalize the interface theme and control placement.": "个性化界面主题和控件放置。",
-        "Save custom color": "保存自定义颜色",
+        "Keep custom color": "保留自定义颜色",
         "Language": "语言",
         "Choose the language used by the meeting interface.": "选择会议界面使用的语言。"
     },
@@ -753,7 +753,7 @@
         "Unmute": "取消静音",
         "Unmute Video": "开启视频声音",
         "Username already in use": "用户名已被使用",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "白板快捷键",
         "Would you like to continue the room broadcast?": "您想继续房间广播吗？",
         "Yes": "是",

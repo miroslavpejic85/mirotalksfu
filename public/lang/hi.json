@@ -648,7 +648,7 @@
         "Hidden": "छिपा हुआ",
         "Visible": "दर्शनीय",
         "Personalize the interface theme and control placement.": "इंटरफ़ेस थीम को वैयक्तिकृत करें और प्लेसमेंट को नियंत्रित करें।",
-        "Save custom color": "कस्टम रंग सहेजें",
+        "Keep custom color": "कस्टम रंग बनाए रखें",
         "Language": "भाषा",
         "Choose the language used by the meeting interface.": "मीटिंग इंटरफ़ेस द्वारा उपयोग की जाने वाली भाषा चुनें."
     },
@@ -753,7 +753,7 @@
         "Unmute": "अनम्यूट करें",
         "Unmute Video": "वीडियो की ध्वनि चालू करें",
         "Username already in use": "उपयोगकर्ता नाम पहले से उपयोग में है",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "व्हाइटबोर्ड शॉर्टकट",
         "Would you like to continue the room broadcast?": "क्या आप रूम प्रसारण जारी रखना चाहते हैं?",
         "Yes": "हाँ",

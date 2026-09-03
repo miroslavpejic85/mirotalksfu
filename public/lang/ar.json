@@ -648,7 +648,7 @@
         "Hidden": "مخفي",
         "Visible": "مرئية",
         "Personalize the interface theme and control placement.": "إضفاء الطابع الشخصي على موضوع الواجهة والتحكم في الموضع.",
-        "Save custom color": "حفظ اللون المخصص",
+        "Keep custom color": "الاحتفاظ باللون المخصص",
         "Language": "اللغة",
         "Choose the language used by the meeting interface.": "اختر اللغة التي تستخدمها واجهة الاجتماع."
     },
@@ -753,7 +753,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",

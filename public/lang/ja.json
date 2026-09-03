@@ -648,7 +648,7 @@
         "Hidden": "隠された",
         "Visible": "見える",
         "Personalize the interface theme and control placement.": "インターフェイスのテーマをカスタマイズし、配置を制御します。",
-        "Save custom color": "カスタムカラーを保存する",
+        "Keep custom color": "カスタムカラーを保持する",
         "Language": "言語",
         "Choose the language used by the meeting interface.": "会議インターフェイスで使用される言語を選択します。"
     },
@@ -753,7 +753,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",

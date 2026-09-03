@@ -648,7 +648,7 @@
         "Hidden": "Скривено",
         "Visible": "Видљиво",
         "Personalize the interface theme and control placement.": "Персонализујте тему интерфејса и контролишите постављање.",
-        "Save custom color": "Сачувајте прилагођену боју",
+        "Keep custom color": "Задржи прилагођену боју",
         "Language": "Језик",
         "Choose the language used by the meeting interface.": "Изаберите језик који користи интерфејс састанка."
     },
@@ -753,7 +753,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",

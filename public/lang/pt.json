@@ -648,7 +648,7 @@
         "Hidden": "Escondido",
         "Visible": "Visível",
         "Personalize the interface theme and control placement.": "Personalize o tema da interface e controle o posicionamento.",
-        "Save custom color": "Salvar cor personalizada",
+        "Keep custom color": "Manter cor personalizada",
         "Language": "Linguagem",
         "Choose the language used by the meeting interface.": "Escolha o idioma usado pela interface da reunião."
     },
@@ -753,7 +753,7 @@
         "Unmute": "Tirar o silêncio",
         "Unmute Video": "Ativar o som do vídeo",
         "Username already in use": "Nome de usuário já em uso",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "Atalhos do quadro branco",
         "Would you like to continue the room broadcast?": "Deseja continuar a transmissão da sala?",
         "Yes": "Sim",

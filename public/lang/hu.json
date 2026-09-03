@@ -648,7 +648,7 @@
         "Hidden": "Rejtett",
         "Visible": "Látható",
         "Personalize the interface theme and control placement.": "Személyre szabhatja a felület témáját és a vezérlőelhelyezést.",
-        "Save custom color": "Mentse el az egyéni színt",
+        "Keep custom color": "Egyéni szín megtartása",
         "Language": "Nyelv",
         "Choose the language used by the meeting interface.": "Válassza ki az értekezlet felületén használt nyelvet."
     },
@@ -753,7 +753,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.4.22": "WebRTC SFU v2.4.22",
+        "WebRTC SFU v2.4.23": "WebRTC SFU v2.4.23",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
