@@ -311,6 +311,41 @@
                 <i class="fas fa-users" aria-hidden="true"></i>
                 <span id="participantsCountBadge"></span>
             </button>
+            <div id="participantViewDropdown" class="dropdown dropup hidden">
+                <button
+                    id="participantViewButton"
+                    class="dropdown-toggle"
+                    type="button"
+                    data-bs-toggle="dropdown"
+                    aria-expanded="false"
+                    aria-label="Participant view"
+                >
+                    <i class="fa-solid fa-table-cells-large"></i>
+                </button>
+                <div id="participantViewMenu" class="dropdown-menu text-start" aria-labelledby="participantViewButton">
+                    <button type="button" data-participant-view="grid">
+                        <i class="fa-solid fa-border-all"></i> Grid
+                    </button>
+                    <button type="button" data-participant-view="speaker-top">
+                        <i class="fa-solid fa-window-maximize"></i> Speaker top
+                    </button>
+                    <button type="button" data-participant-view="speaker-bottom">
+                        <i class="fa-solid fa-window-minimize"></i> Speaker bottom
+                    </button>
+                    <button type="button" data-participant-view="speaker-left">
+                        <i class="fa-solid fa-table-columns"></i> Speaker left
+                    </button>
+                    <button type="button" data-participant-view="speaker-right">
+                        <i class="fa-solid fa-table-columns"></i> Speaker right
+                    </button>
+                    <button type="button" data-participant-view="speaker-1:1">
+                        <i class="fa-solid fa-square"></i> Speaker 1:1
+                    </button>
+                    <button type="button" data-participant-view="livestream">
+                        <i class="fa-solid fa-tower-broadcast"></i> Livestream
+                    </button>
+                </div>
+            </div>
             <div id="settingsSplit" class="split-btn">
                 <button id="settingsButton" class="hidden"><i class="fas fa-cogs"></i></button>
                 <div id="settingsExtraDropdown" class="dropdown dropup hidden">
@@ -1751,8 +1786,48 @@
                     <div id="tabAspect" class="tabcontent">
                         <div class="settings-section-intro">
                             <h3>Video layout</h3>
-                            <p>Control the shape and cropping of video tiles.</p>
+                            <p>Control participant arrangement, controls, tile shape, and cropping.</p>
                         </div>
+                        <div class="title">
+                            <i class="fa-solid fa-table-cells-large"></i>
+                            <p>Participant view:</p>
+                        </div>
+                        <br />
+                        <select id="participantViewMode" class="form-select text-light bg-dark">
+                            <option value="grid">Grid</option>
+                            <option value="speaker-top">Speaker top</option>
+                            <option value="speaker-bottom">Speaker bottom</option>
+                            <option value="speaker-left">Speaker left</option>
+                            <option value="speaker-right">Speaker right</option>
+                            <option value="speaker-1:1">Speaker 1:1</option>
+                            <option value="livestream">Livestream</option>
+                        </select>
+                        <br />
+                        <div id="pinUnpinGridDiv" class="hidden">
+                            <div class="title">
+                                <i class="fa-solid fa-map-pin"></i>
+                                <p>Pin video position:</p>
+                            </div>
+                            <br />
+                            <select id="pinVideoPosition" class="form-select text-light bg-dark">
+                                <option value="speaker-left">Left</option>
+                                <option value="speaker-top">Top</option>
+                                <option value="speaker-bottom">Bottom</option>
+                                <option value="speaker-right">Right</option>
+                                <option value="speaker-1:1">Full screen</option>
+                            </select>
+                        </div>
+                        <br />
+                        <div class="title">
+                            <i class="fa-solid fa-up-down-left-right"></i>
+                            <p>Buttons bar:</p>
+                        </div>
+                        <br />
+                        <select id="BtnsBarPosition" class="form-select text-light bg-dark">
+                            <option value="vertical">Vertical</option>
+                            <option value="horizontal">Horizontal</option>
+                        </select>
+                        <br />
                         <div class="title">
                             <i class="fa-solid fa-tv"></i>
                             <p>Aspect ratio:</p>
@@ -1794,7 +1869,7 @@
                     <div id="tabStyling" class="tabcontent">
                         <div class="settings-section-intro">
                             <h3>Appearance</h3>
-                            <p>Personalize the interface theme and control placement.</p>
+                            <p>Personalize the interface theme.</p>
                         </div>
                         <div class="title">
                             <i class="fa-solid fa-palette"></i>
@@ -1871,29 +1946,6 @@
                             <div class="form-check form-switch form-switch-md title">
                                 <input id="keepCustomTheme" class="form-check-input" type="checkbox" />
                             </div>
-                        </div>
-                        <br />
-                        <div class="title">
-                            <i class="fa-solid fa-up-down-left-right"></i>
-                            <p>Buttons bar:</p>
-                        </div>
-                        <br />
-                        <select id="BtnsBarPosition" class="form-select text-light bg-dark">
-                            <option value="vertical">Vertical</option>
-                            <option value="horizontal">Horizontal</option>
-                        </select>
-                        <br />
-                        <div id="pinUnpinGridDiv" class="hidden">
-                            <div class="title">
-                                <i class="fa-solid fa-map-pin"></i>
-                                <p>Pin video position:</p>
-                            </div>
-                            <br />
-                            <select id="pinVideoPosition" class="form-select text-light bg-dark">
-                                <option value="vertical">Vertical</option>
-                                <option value="horizontal">Horizontal</option>
-                                <option value="top">Top</option>
-                            </select>
                         </div>
                         <br />
                     </div>

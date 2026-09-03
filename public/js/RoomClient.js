@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.20
+ * @version 2.4.21
  *
  */
 
@@ -376,6 +376,8 @@ class RoomClient {
         this.showChatOnMessage = true;
         this.isChatBgTransparent = false;
         this.isVideoPinned = false;
+        this.isApplyingParticipantViewMode = false;
+        this.participantViewRestoreTimer = null;
         this.isFollowMeActive = false;
         this.isChatPinned = false;
         this.isChatMaximized = false;
@@ -5602,6 +5604,11 @@ class RoomClient {
                     this.videoMediaContainer.appendChild(cam);
                     this.removeVideoPinMediaContainer();
                     setColor(btnPn, 'white');
+                    if (!this.isApplyingParticipantViewMode && typeof setParticipantViewMode === 'function') {
+                        clearTimeout(this.participantViewRestoreTimer);
+                        this.participantViewRestoreTimer = null;
+                        setParticipantViewMode('grid', true, false);
+                    }
                 }
                 this.resizeVideoMenuBar();
                 handleAspectRatio();
@@ -5616,45 +5623,69 @@ class RoomClient {
             });
 
             if (isAvatar && !this.isMobileDevice && this.videoMediaContainer.childElementCount > 1) btnPn.click();
+            this.scheduleParticipantViewRestore();
         }
+    }
+
+    scheduleParticipantViewRestore() {
+        if (this.isMobileDevice || this.isVideoPinned) return;
+        const mode = localStorageSettings?.participant_view;
+        if (!mode?.startsWith('speaker-') && mode !== 'livestream') return;
+
+        clearTimeout(this.participantViewRestoreTimer);
+        this.participantViewRestoreTimer = setTimeout(() => {
+            this.participantViewRestoreTimer = null;
+            if (!this.isVideoPinned && typeof setParticipantViewMode === 'function') {
+                setParticipantViewMode(mode, false, false);
+            }
+        }, 250);
     }
 
     toggleVideoPin(position) {
         if (!this.isVideoPinned) return;
+        this.videoPinMediaContainer.style.top = 0;
+        this.videoPinMediaContainer.style.left = 0;
+        this.videoPinMediaContainer.style.width = '100%';
+        this.videoPinMediaContainer.style.height = '100%';
+        this.videoMediaContainer.style.display = 'flex';
+        this.videoMediaContainer.style.top = 0;
+        this.videoMediaContainer.style.left = '';
+        this.videoMediaContainer.style.right = '';
+        this.videoMediaContainer.style.width = '100%';
+        this.videoMediaContainer.style.height = '100%';
         switch (position) {
+            case 'speaker-bottom':
             case 'top':
                 this.videoPinMediaContainer.style.top = '25%';
                 this.videoPinMediaContainer.style.width = '100%';
                 this.videoPinMediaContainer.style.height = '75%';
-                this.videoMediaContainer.style.top = '0%';
-                this.videoMediaContainer.style.right = null;
-                this.videoMediaContainer.style.width = null;
-                this.videoMediaContainer.style.width = '100% !important';
                 this.videoMediaContainer.style.height = '25%';
                 break;
+            case 'speaker-left':
             case 'vertical':
-                this.videoPinMediaContainer.style.top = 0;
                 this.videoPinMediaContainer.style.width = '75%';
-                this.videoPinMediaContainer.style.height = '100%';
-                this.videoMediaContainer.style.top = 0;
                 this.videoMediaContainer.style.width = '25%';
-                this.videoMediaContainer.style.height = '100%';
                 this.videoMediaContainer.style.right = 0;
                 break;
+            case 'speaker-top':
             case 'horizontal':
-                this.videoPinMediaContainer.style.top = 0;
-                this.videoPinMediaContainer.style.width = '100%';
                 this.videoPinMediaContainer.style.height = '75%';
                 this.videoMediaContainer.style.top = '75%';
-                this.videoMediaContainer.style.right = null;
-                this.videoMediaContainer.style.width = null;
-                this.videoMediaContainer.style.width = '100% !important';
                 this.videoMediaContainer.style.height = '25%';
+                break;
+            case 'speaker-right':
+                this.videoPinMediaContainer.style.left = '25%';
+                this.videoPinMediaContainer.style.width = '75%';
+                this.videoMediaContainer.style.width = '25%';
+                break;
+            case 'speaker-1:1':
+            case 'livestream':
+                this.videoMediaContainer.style.display = 'none';
                 break;
             default:
                 break;
         }
-        resizeVideoMedia();
+        if (position !== 'speaker-1:1' && position !== 'livestream') resizeVideoMedia();
     }
 
     // ####################################################
@@ -5892,8 +5923,10 @@ class RoomClient {
     }
 
     videoMediaContainerUnpin() {
+        this.videoMediaContainer.style.display = 'flex';
         this.videoMediaContainer.style.top = 0;
-        this.videoMediaContainer.style.right = null;
+        this.videoMediaContainer.style.left = '';
+        this.videoMediaContainer.style.right = '';
         this.videoMediaContainer.style.width = '100%';
         this.videoMediaContainer.style.height = '100%';
         this.resizeVideoMenuBar();
@@ -12606,6 +12639,38 @@ class RoomClient {
             if (video.getAttribute('name') === peerId) return video;
         }
         return null;
+    }
+
+    getAutoPinVideoElement() {
+        if (this.isVideoPinned && this.pinnedVideoPlayerId) {
+            return this.getId(this.pinnedVideoPlayerId);
+        }
+
+        const presenterIds = [];
+        if (this.peer_info.peer_presenter) presenterIds.push(this.peer_id);
+        for (const peer of this.peers.values()) {
+            const peerInfo = peer?.peer_info;
+            if (peerInfo?.peer_presenter) presenterIds.push(peerInfo.peer_id);
+        }
+        for (const presenterId of new Set(presenterIds)) {
+            const presenterVideo = this.getVideoElementByPeerId(presenterId);
+            if (presenterVideo) return presenterVideo;
+        }
+
+        const dominantConsumerId = this._dominantSpeakerState?.prevConsumerId;
+        const dominantVideo = dominantConsumerId ? this.getId(dominantConsumerId) : null;
+        if (dominantVideo) return dominantVideo;
+
+        return Array.from(document.querySelectorAll('video[name]')).find((video) => this.getId(`${video.id}__pin`));
+    }
+
+    autoPinVideoForLayout() {
+        if (this.isVideoPinned) return true;
+        const videoEl = this.getAutoPinVideoElement();
+        const pinButton = videoEl ? this.getId(`${videoEl.id}__pin`) : null;
+        if (!pinButton) return false;
+        pinButton.click();
+        return this.isVideoPinned;
     }
 
     // ####################################################

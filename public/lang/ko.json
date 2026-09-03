@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "참가자 보기 변경",
         "Stop all screens sharing": "모든 화면 공유 중지",
         "Share file to all": "모두에게 파일 공유",
         "Share audio/video to all": "모두에게 오디오/비디오 공유",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "활성화되면 자막이 모든 참가자에게 전송됩니다"
     },
     "buttons": {
+        "Participant view": "참가자 보기",
         "Abort": "중단",
         "About": "정보",
         "Accept all waiting guests": "대기 중인 모든 게스트 수락",
@@ -244,6 +246,19 @@
         "Use room default": "방의 기본 대상 사용"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "참가자 배치, 컨트롤, 타일 모양 및 자르기를 조정합니다.",
+        "Participant view:": "참가자 보기:",
+        "Grid": "그리드",
+        "Speaker top": "발표자 위쪽",
+        "Speaker bottom": "발표자 아래쪽",
+        "Speaker left": "발표자 왼쪽",
+        "Speaker right": "발표자 오른쪽",
+        "Speaker 1:1": "발표자 1:1",
+        "Livestream": "라이브 스트림",
+        "Left": "왼쪽",
+        "Bottom": "아래쪽",
+        "Right": "오른쪽",
+        "Personalize the interface theme.": "인터페이스 테마를 맞춤 설정합니다.",
         "Mirror": "미러",
         "Private Message": "비공개 메시지",
         "Send File": "파일 보내기",
@@ -738,7 +753,7 @@
         "Unmute": "음소거 해제",
         "Unmute Video": "비디오 음소거 해제",
         "Username already in use": "사용자 이름이 이미 사용 중입니다",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "화이트보드 단축키",
         "Would you like to continue the room broadcast?": "방 방송을 계속하시겠습니까?",
         "Yes": "예",
@@ -747,6 +762,8 @@
         "Join meeting": "회의 참가"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "라이브 스트림 보기를 사용하기 전에 방송을 활성화하세요",
+        "No participant video is available for this speaker view": "이 발표자 보기에 사용할 수 있는 참가자 영상이 없습니다",
         "Add at least one room first": "먼저 방을 하나 이상 추가하세요",
         "All breakout rooms cleared": "모든 소그룹 방이 지워졌습니다",
         "All participants are already assigned": "모든 참가자가 이미 배정되었습니다",

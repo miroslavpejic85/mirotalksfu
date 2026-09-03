@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "تغيير عرض المشاركين",
         "Stop all screens sharing": "إيقاف مشاركة جميع الشاشات",
         "Share file to all": "مشاركة ملف مع الجميع",
         "Share audio/video to all": "مشاركة الصوت/الفيديو مع الجميع",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "عند التفعيل، سيتم إرسال التفريغ النصي الخاص بك إلى جميع المشاركين"
     },
     "buttons": {
+        "Participant view": "عرض المشاركين",
         "Abort": "إحباط",
         "About": "حول",
         "Accept all waiting guests": "قبول جميع الضيوف المنتظرين",
@@ -244,6 +246,19 @@
         "Use room default": "استخدم الوجهة الافتراضية للغرفة"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "تحكم في ترتيب المشاركين وعناصر التحكم وشكل مربعات الفيديو واقتصاصها.",
+        "Participant view:": "عرض المشاركين:",
+        "Grid": "شبكة",
+        "Speaker top": "المتحدث في الأعلى",
+        "Speaker bottom": "المتحدث في الأسفل",
+        "Speaker left": "المتحدث على اليسار",
+        "Speaker right": "المتحدث على اليمين",
+        "Speaker 1:1": "المتحدث 1:1",
+        "Livestream": "بث مباشر",
+        "Left": "يسار",
+        "Bottom": "أسفل",
+        "Right": "يمين",
+        "Personalize the interface theme.": "خصّص سمة الواجهة.",
         "Mirror": "عكس",
         "Private Message": "رسالة خاصة",
         "Send File": "إرسال ملف",
@@ -738,7 +753,7 @@
         "Unmute": "إلغاء الكتم",
         "Unmute Video": "تشغيل صوت الفيديو",
         "Username already in use": "اسم المستخدم مستخدم بالفعل",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "اختصارات السبورة",
         "Would you like to continue the room broadcast?": "هل تريد متابعة بث الغرفة؟",
         "Yes": "نعم",
@@ -747,6 +762,8 @@
         "Join meeting": "الانضمام إلى الاجتماع"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "فعّل البث قبل استخدام عرض البث المباشر",
+        "No participant video is available for this speaker view": "لا يتوفر فيديو لأي مشارك لعرض المتحدث هذا",
         "Add at least one room first": "أضف غرفة واحدة على الأقل أولاً",
         "All breakout rooms cleared": "تم مسح جميع الغرف الفرعية",
         "All participants are already assigned": "تم تعيين جميع المشاركين بالفعل",

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.20
+ * @version 2.4.21
  *
  */
 
@@ -560,6 +560,7 @@ function refreshMainButtonsToolTipPlacement() {
         setTippy('lowerHandButton', 'Lower your hand', bPlacement);
         setTippy('chatButton', 'Toggle the chat', bPlacement);
         setTippy('participantsButton', 'Toggle participants list', bPlacement);
+        setTippy('participantViewButton', 'Change participant view', bPlacement);
         setTippy('settingsButton', 'Toggle the settings', bPlacement);
         refreshExitButtonTooltip(bPlacement);
     }
@@ -1919,6 +1920,7 @@ function roomIsReady() {
     BUTTONS.main.whiteboardButton && show(whiteboardButton);
     if (BUTTONS.main.documentPiPButton && showDocumentPipBtn) show(documentPiPButton);
     BUTTONS.main.settingsButton && show(settingsButton);
+    if (!isMobileDevice) show(participantViewDropdown);
     isAudioAllowed ? show(stopAudioButton) : BUTTONS.main.startAudioButton && show(startAudioButton);
     isVideoAllowed ? show(stopVideoButton) : BUTTONS.main.startVideoButton && show(startVideoButton);
     if (!BUTTONS.main.startAudioButton) {
@@ -2398,6 +2400,12 @@ function handleButtons() {
     };
     settingsButton.onclick = () => {
         rc.toggleMySettings();
+    };
+    participantViewMenu.onclick = (e) => {
+        const viewButton = e.target.closest('[data-participant-view]');
+        if (!viewButton) return;
+        setParticipantViewMode(viewButton.dataset.participantView);
+        setTimeout(() => bootstrap.Dropdown.getOrCreateInstance(participantViewButton).hide());
     };
     mySettingsCloseBtn.onclick = () => {
         rc.toggleMySettings();
@@ -3275,6 +3283,66 @@ function handleCameraMirror(video) {
     video.classList.toggle('mirror', !!sessionVideoMirror);
 }
 
+function setParticipantViewMode(requestedMode, persist = true, notify = true) {
+    const supportedModes = new Set([
+        'grid',
+        'speaker-top',
+        'speaker-bottom',
+        'speaker-left',
+        'speaker-right',
+        'speaker-1:1',
+        'livestream',
+    ]);
+    const migratedMode = requestedMode === 'default' ? 'grid' : requestedMode;
+    let mode = supportedModes.has(migratedMode) ? migratedMode : 'grid';
+
+    if (mode === 'livestream' && !isBroadcastingEnabled) {
+        if (notify) rc.userLog('info', 'Enable broadcasting before using Livestream view', 'top-end');
+        mode = 'grid';
+    }
+
+    participantViewMode.value = mode;
+    document.querySelectorAll('#participantViewMenu [data-participant-view]').forEach((button) => {
+        const active = button.dataset.participantView === mode;
+        button.classList.toggle('active', active);
+        button.setAttribute('aria-pressed', active);
+    });
+
+    const pinPosition = mode === 'livestream' ? 'speaker-1:1' : mode;
+    const isSpeakerView = pinPosition.startsWith('speaker-');
+
+    if (isSpeakerView) {
+        pinVideoPosition.value = pinPosition;
+        localStorageSettings.pin_grid = pinVideoPosition.selectedIndex;
+        rc.autoPinVideoForLayout();
+        rc.toggleVideoPin(pinPosition);
+        if (notify && !rc.isVideoPinned) {
+            rc.userLog('info', 'No participant video is available for this speaker view', 'top-end');
+        }
+    } else {
+        clearTimeout(rc.participantViewRestoreTimer);
+        rc.participantViewRestoreTimer = null;
+    }
+
+    if (!isSpeakerView && rc.isVideoPinned && rc.pinnedVideoPlayerId) {
+        const pinButton = getId(`${rc.pinnedVideoPlayerId}__pin`);
+        if (pinButton) {
+            rc.isApplyingParticipantViewMode = true;
+            try {
+                pinButton.click();
+            } finally {
+                rc.isApplyingParticipantViewMode = false;
+            }
+        }
+    }
+
+    if (persist) {
+        localStorageSettings.participant_view = mode;
+        lS.setSettings(localStorageSettings);
+    }
+    if (!isSpeakerView) resizeVideoMedia();
+}
+
 function handleSelects() {
     // devices options
     videoSelect.onchange = (e) => {
@@ -3472,6 +3540,9 @@ function handleSelects() {
         localStorageSettings.aspect_ratio = BtnAspectRatio.selectedIndex;
         lS.setSettings(localStorageSettings);
     };
+    participantViewMode.onchange = () => {
+        setParticipantViewMode(participantViewMode.value);
+    };
     BtnVideoObjectFit.onchange = () => {
         rc.handleVideoObjectFit(BtnVideoObjectFit.value);
         localStorageSettings.video_obj_fit = BtnVideoObjectFit.selectedIndex;
@@ -3502,9 +3573,7 @@ function handleSelects() {
         refreshMainButtonsToolTipPlacement();
     };
     pinVideoPosition.onchange = () => {
-        rc.toggleVideoPin(pinVideoPosition.value);
-        localStorageSettings.pin_grid = pinVideoPosition.selectedIndex;
-        lS.setSettings(localStorageSettings);
+        setParticipantViewMode(pinVideoPosition.value);
     };
     // chat
     showChatOnMsg.onchange = (e) => {
@@ -4181,6 +4250,7 @@ function loadSettingsFromLocalStorage() {
     isKeepButtonsVisible = localStorageSettings.keep_buttons_visible;
     isChatPinEnabled = localStorageSettings.chat_pin !== undefined ? localStorageSettings.chat_pin : true;
     isShortcutsEnabled = localStorageSettings.keyboard_shortcuts;
+    isBroadcastingEnabled = localStorageSettings.broadcasting;
     showChatOnMsg.checked = rc.showChatOnMessage;
     transcriptShowOnMsg.checked = transcription.showOnMessage;
     transcriptSendToAll.checked = transcription.sendToAll;
@@ -4192,6 +4262,7 @@ function loadSettingsFromLocalStorage() {
     switchKeepButtonsVisible.checked = isKeepButtonsVisible;
     switchChatPin.checked = isChatPinEnabled;
     switchShortcuts.checked = isShortcutsEnabled;
+    switchBroadcasting.checked = isBroadcastingEnabled;
 
     switchServerRecording.checked = localStorageSettings.rec_server;
 
@@ -4213,10 +4284,11 @@ function loadSettingsFromLocalStorage() {
     BtnVideoControls.selectedIndex = localStorageSettings.video_controls;
     BtnsBarPosition.selectedIndex = localStorageSettings.buttons_bar;
     pinVideoPosition.selectedIndex = localStorageSettings.pin_grid;
+    participantViewMode.value = localStorageSettings.participant_view || 'grid';
     rc.handleVideoObjectFit(BtnVideoObjectFit.value);
     rc.handleVideoControls(BtnVideoControls.value);
     rc.changeBtnsBarPosition(BtnsBarPosition.value);
-    rc.toggleVideoPin(pinVideoPosition.value);
+    setParticipantViewMode(participantViewMode.value, false, false);
     refreshMainButtonsToolTipPlacement();
 }
 
@@ -8149,7 +8221,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.20',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.21',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

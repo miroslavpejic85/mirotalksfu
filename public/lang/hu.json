@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Résztvevői nézet módosítása",
         "Stop all screens sharing": "Minden képernyőmegosztás leállítása",
         "Share file to all": "Fájl megosztása mindenkivel",
         "Share audio/video to all": "Hang/videó megosztása mindenkivel",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Ha engedélyezve van, az átiratod minden résztvevőnek elküldésre kerül"
     },
     "buttons": {
+        "Participant view": "Résztvevői nézet",
         "Abort": "Megszakítás",
         "About": "Névjegy",
         "Accept all waiting guests": "Minden várakozó vendég elfogadása",
@@ -244,6 +246,19 @@
         "Use room default": "A szoba alapértelmezett céljának használata"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "A résztvevők elrendezésének, a vezérlőknek, a csempék alakjának és vágásának beállítása.",
+        "Participant view:": "Résztvevői nézet:",
+        "Grid": "Rács",
+        "Speaker top": "Beszélő felül",
+        "Speaker bottom": "Beszélő alul",
+        "Speaker left": "Beszélő balra",
+        "Speaker right": "Beszélő jobbra",
+        "Speaker 1:1": "Beszélő 1:1",
+        "Livestream": "Élő közvetítés",
+        "Left": "Bal",
+        "Bottom": "Alul",
+        "Right": "Jobb",
+        "Personalize the interface theme.": "A felület témájának személyre szabása.",
         "Mirror": "Tükrözés",
         "Private Message": "Privát üzenet",
         "Send File": "Fájl küldése",
@@ -738,7 +753,7 @@
         "Unmute": "Némítás feloldása",
         "Unmute Video": "Videó hangjának bekapcsolása",
         "Username already in use": "A felhasználónév már használatban van",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Tábla gyorsbillentyűi",
         "Would you like to continue the room broadcast?": "Szeretnéd folytatni a szoba közvetítését?",
         "Yes": "Igen",
@@ -747,6 +762,8 @@
         "Join meeting": "Csatlakozás a megbeszéléshez"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Az élő közvetítés nézet használata előtt engedélyezze a közvetítést",
+        "No participant video is available for this speaker view": "Ehhez a beszélőnézethez nem érhető el résztvevői videó",
         "Add at least one room first": "Először adj hozzá legalább egy szobát",
         "All breakout rooms cleared": "Minden csoportszoba törölve",
         "All participants are already assigned": "Minden résztvevő már hozzá van rendelve",

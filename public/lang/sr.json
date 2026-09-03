@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Промени приказ учесника",
         "Stop all screens sharing": "Zaustavi deljenje svih ekrana",
         "Share file to all": "Podeli datoteku sa svima",
         "Share audio/video to all": "Podeli audio/video sa svima",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Kada je omogućeno, vaša transkripcija će biti poslata svim učesnicima"
     },
     "buttons": {
+        "Participant view": "Приказ учесника",
         "Abort": "Prekini",
         "About": "O aplikaciji",
         "Accept all waiting guests": "Prihvati sve goste na čekanju",
@@ -244,6 +246,19 @@
         "Use room default": "Користи подразумевано одредиште собе"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Подесите распоред учесника, контроле, облик плочица и исецање.",
+        "Participant view:": "Приказ учесника:",
+        "Grid": "Мрежа",
+        "Speaker top": "Говорник горе",
+        "Speaker bottom": "Говорник доле",
+        "Speaker left": "Говорник лево",
+        "Speaker right": "Говорник десно",
+        "Speaker 1:1": "Говорник 1:1",
+        "Livestream": "Пренос уживо",
+        "Left": "Лево",
+        "Bottom": "Доле",
+        "Right": "Десно",
+        "Personalize the interface theme.": "Прилагодите тему интерфејса.",
         "Mirror": "Ogledalo",
         "Private Message": "Privatna poruka",
         "Send File": "Pošalji datoteku",
@@ -738,7 +753,7 @@
         "Unmute": "Uključi zvuk",
         "Unmute Video": "Uključi zvuk videa",
         "Username already in use": "Korisničko ime je već u upotrebi",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Prečice table",
         "Would you like to continue the room broadcast?": "Želite li da nastavite emitovanje sobe?",
         "Yes": "Da",
@@ -747,6 +762,8 @@
         "Join meeting": "Pridruži se sastanku"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Омогућите емитовање пре коришћења приказа преноса уживо",
+        "No participant video is available for this speaker view": "Ниједан видео учесника није доступан за овај приказ говорника",
         "Add at least one room first": "Prvo dodajte bar jednu sobu",
         "All breakout rooms cleared": "Sve podsobe su obrisane",
         "All participants are already assigned": "Svi učesnici su već dodeljeni",

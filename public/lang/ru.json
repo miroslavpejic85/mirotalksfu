@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Изменить вид участников",
         "Stop all screens sharing": "Остановить показ всех экранов",
         "Share file to all": "Отправить файл всем",
         "Share audio/video to all": "Отправить аудио/видео всем",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Если включено, ваша расшифровка будет отправлена всем участникам"
     },
     "buttons": {
+        "Participant view": "Вид участников",
         "Abort": "Прервать",
         "About": "О программе",
         "Accept all waiting guests": "Принять всех ожидающих гостей",
@@ -244,6 +246,19 @@
         "Use room default": "Использовать адрес комнаты по умолчанию"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Настройте расположение участников, элементы управления, форму и обрезку плиток.",
+        "Participant view:": "Вид участников:",
+        "Grid": "Сетка",
+        "Speaker top": "Докладчик сверху",
+        "Speaker bottom": "Докладчик снизу",
+        "Speaker left": "Докладчик слева",
+        "Speaker right": "Докладчик справа",
+        "Speaker 1:1": "Докладчик 1:1",
+        "Livestream": "Прямая трансляция",
+        "Left": "Слева",
+        "Bottom": "Снизу",
+        "Right": "Справа",
+        "Personalize the interface theme.": "Настройте тему интерфейса.",
         "Mirror": "Зеркало",
         "Private Message": "Личное сообщение",
         "Send File": "Отправить файл",
@@ -738,7 +753,7 @@
         "Unmute": "Включить звук",
         "Unmute Video": "Включить звук видео",
         "Username already in use": "Имя пользователя уже используется",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Горячие клавиши доски",
         "Would you like to continue the room broadcast?": "Хотите продолжить трансляцию комнаты?",
         "Yes": "Да",
@@ -747,6 +762,8 @@
         "Join meeting": "Присоединиться к встрече"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Включите трансляцию перед использованием режима прямой трансляции",
+        "No participant video is available for this speaker view": "Для этого вида докладчика нет доступного видео участника",
         "Add at least one room first": "Сначала добавьте хотя бы одну комнату",
         "All breakout rooms cleared": "Все сессионные залы удалены",
         "All participants are already assigned": "Все участники уже распределены",

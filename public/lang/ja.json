@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "参加者ビューを変更",
         "Stop all screens sharing": "すべての画面共有を停止",
         "Share file to all": "全員にファイルを共有",
         "Share audio/video to all": "全員に音声/動画を共有",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "有効にすると、文字起こしがすべての参加者に送信されます"
     },
     "buttons": {
+        "Participant view": "参加者ビュー",
         "Abort": "中止",
         "About": "情報",
         "Accept all waiting guests": "待機中のゲストをすべて承認",
@@ -244,6 +246,19 @@
         "Use room default": "ルームのデフォルト配信先を使用"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "参加者の配置、コントロール、タイルの形状、トリミングを調整します。",
+        "Participant view:": "参加者ビュー：",
+        "Grid": "グリッド",
+        "Speaker top": "発言者を上に表示",
+        "Speaker bottom": "発言者を下に表示",
+        "Speaker left": "発言者を左に表示",
+        "Speaker right": "発言者を右に表示",
+        "Speaker 1:1": "発言者 1:1",
+        "Livestream": "ライブ配信",
+        "Left": "左",
+        "Bottom": "下",
+        "Right": "右",
+        "Personalize the interface theme.": "インターフェイスのテーマをカスタマイズします。",
         "Mirror": "ミラー",
         "Private Message": "プライベートメッセージ",
         "Send File": "ファイルを送信",
@@ -738,7 +753,7 @@
         "Unmute": "ミュート解除",
         "Unmute Video": "ビデオの音声をオンにする",
         "Username already in use": "ユーザー名は既に使用されています",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "ホワイトボードのショートカット",
         "Would you like to continue the room broadcast?": "ルームの配信を続けますか？",
         "Yes": "はい",
@@ -747,6 +762,8 @@
         "Join meeting": "会議に参加"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "ライブ配信ビューを使用する前に配信を有効にしてください",
+        "No participant video is available for this speaker view": "この発言者ビューで利用できる参加者の映像がありません",
         "Add at least one room first": "先に少なくとも 1 つのルームを追加してください",
         "All breakout rooms cleared": "すべてのブレイクアウトルームをクリアしました",
         "All participants are already assigned": "すべての参加者は既に割り当てられています",

@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Alterar vista dos participantes",
         "Stop all screens sharing": "Parar todas as partilhas de ecrã",
         "Share file to all": "Partilhar ficheiro com todos",
         "Share audio/video to all": "Partilhar áudio/vídeo com todos",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Quando ativado, sua transcrição será enviada a todos os participantes"
     },
     "buttons": {
+        "Participant view": "Vista dos participantes",
         "Abort": "Cancelar",
         "About": "Sobre",
         "Accept all waiting guests": "Aceitar todos os convidados em espera",
@@ -244,6 +246,19 @@
         "Use room default": "Usar o destino padrão da sala"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Controle a disposição dos participantes, os controlos, a forma e o recorte dos mosaicos.",
+        "Participant view:": "Vista dos participantes:",
+        "Grid": "Grelha",
+        "Speaker top": "Orador em cima",
+        "Speaker bottom": "Orador em baixo",
+        "Speaker left": "Orador à esquerda",
+        "Speaker right": "Orador à direita",
+        "Speaker 1:1": "Orador 1:1",
+        "Livestream": "Transmissão em direto",
+        "Left": "Esquerda",
+        "Bottom": "Em baixo",
+        "Right": "Direita",
+        "Personalize the interface theme.": "Personalize o tema da interface.",
         "Mirror": "Espelhar",
         "Private Message": "Mensagem privada",
         "Send File": "Enviar arquivo",
@@ -738,7 +753,7 @@
         "Unmute": "Tirar o silêncio",
         "Unmute Video": "Ativar o som do vídeo",
         "Username already in use": "Nome de usuário já em uso",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Atalhos do quadro branco",
         "Would you like to continue the room broadcast?": "Deseja continuar a transmissão da sala?",
         "Yes": "Sim",
@@ -747,6 +762,8 @@
         "Join meeting": "Entrar na reunião"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Ative a transmissão antes de utilizar a vista de transmissão em direto",
+        "No participant video is available for this speaker view": "Não há vídeo de participante disponível para esta vista do orador",
         "Add at least one room first": "Adicione primeiro pelo menos uma sala",
         "All breakout rooms cleared": "Todas as salas de grupos removidas",
         "All participants are already assigned": "Todos os participantes já estão atribuídos",

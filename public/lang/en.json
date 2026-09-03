@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Change participant view",
         "Stop all screens sharing": "Stop all screens sharing",
         "Share file to all": "Share file to all",
         "Share audio/video to all": "Share audio/video to all",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "When enabled, your transcription will be sent to all participants"
     },
     "buttons": {
+        "Participant view": "Participant view",
         "Abort": "Abort",
         "About": "About",
         "Accept all waiting guests": "Accept all waiting guests",
@@ -244,6 +246,19 @@
         "Use room default": "Use room default"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Control participant arrangement, controls, tile shape, and cropping.",
+        "Participant view:": "Participant view:",
+        "Grid": "Grid",
+        "Speaker top": "Speaker top",
+        "Speaker bottom": "Speaker bottom",
+        "Speaker left": "Speaker left",
+        "Speaker right": "Speaker right",
+        "Speaker 1:1": "Speaker 1:1",
+        "Livestream": "Livestream",
+        "Left": "Left",
+        "Bottom": "Bottom",
+        "Right": "Right",
+        "Personalize the interface theme.": "Personalize the interface theme.",
         "Mirror": "Mirror",
         "Private Message": "Private Message",
         "Send File": "Send File",
@@ -738,7 +753,7 @@
         "Unmute": "Unmute",
         "Unmute Video": "Unmute Video",
         "Username already in use": "Username already in use",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Whiteboard Shortcuts",
         "Would you like to continue the room broadcast?": "Would you like to continue the room broadcast?",
         "Yes": "Yes",
@@ -747,6 +762,8 @@
         "Join meeting": "Join meeting"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Enable broadcasting before using Livestream view",
+        "No participant video is available for this speaker view": "No participant video is available for this speaker view",
         "Add at least one room first": "Add at least one room first",
         "All breakout rooms cleared": "All breakout rooms cleared",
         "All participants are already assigned": "All participants are already assigned",

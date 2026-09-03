@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Katılımcı görünümünü değiştir",
         "Stop all screens sharing": "Tüm ekran paylaşımlarını durdur",
         "Share file to all": "Dosyayı herkesle paylaş",
         "Share audio/video to all": "Sesi/videoyu herkesle paylaş",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Etkinleştirildiğinde metin dökümünüz tüm katılımcılara gönderilir"
     },
     "buttons": {
+        "Participant view": "Katılımcı görünümü",
         "Abort": "İptal et",
         "About": "Hakkında",
         "Accept all waiting guests": "Bekleyen tüm misafirleri kabul et",
@@ -244,6 +246,19 @@
         "Use room default": "Odanın varsayılan hedefini kullan"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Katılımcı düzenini, kontrolleri, kutucuk şeklini ve kırpmayı ayarlayın.",
+        "Participant view:": "Katılımcı görünümü:",
+        "Grid": "Izgara",
+        "Speaker top": "Konuşmacı üstte",
+        "Speaker bottom": "Konuşmacı altta",
+        "Speaker left": "Konuşmacı solda",
+        "Speaker right": "Konuşmacı sağda",
+        "Speaker 1:1": "Konuşmacı 1:1",
+        "Livestream": "Canlı yayın",
+        "Left": "Sol",
+        "Bottom": "Alt",
+        "Right": "Sağ",
+        "Personalize the interface theme.": "Arayüz temasını kişiselleştirin.",
         "Mirror": "Aynala",
         "Private Message": "Özel mesaj",
         "Send File": "Dosya gönder",
@@ -738,7 +753,7 @@
         "Unmute": "Sesini aç",
         "Unmute Video": "Videonun sesini aç",
         "Username already in use": "Kullanıcı adı zaten kullanımda",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Beyaz Tahta Kısayolları",
         "Would you like to continue the room broadcast?": "Oda yayınını sürdürmek ister misiniz?",
         "Yes": "Evet",
@@ -747,6 +762,8 @@
         "Join meeting": "Toplantıya katıl"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Canlı yayın görünümünü kullanmadan önce yayını etkinleştirin",
+        "No participant video is available for this speaker view": "Bu konuşmacı görünümü için katılımcı videosu mevcut değil",
         "Add at least one room first": "Önce en az bir oda ekleyin",
         "All breakout rooms cleared": "Tüm alt gruplar temizlendi",
         "All participants are already assigned": "Tüm katılımcılar zaten atandı",

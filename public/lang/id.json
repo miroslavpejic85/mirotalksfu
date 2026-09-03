@@ -1,5 +1,6 @@
 {
     "tooltips": {
+        "Change participant view": "Ubah tampilan peserta",
         "Stop all screens sharing": "Hentikan semua berbagi layar",
         "Share file to all": "Bagikan file ke semua",
         "Share audio/video to all": "Bagikan audio/video ke semua",
@@ -123,6 +124,7 @@
         "When enabled, your transcription will be sent to all participants": "Jika diaktifkan, transkripsi Anda akan dikirim ke semua peserta"
     },
     "buttons": {
+        "Participant view": "Tampilan peserta",
         "Abort": "Batalkan",
         "About": "Tentang",
         "Accept all waiting guests": "Terima semua tamu yang menunggu",
@@ -244,6 +246,19 @@
         "Use room default": "Gunakan tujuan default ruangan"
     },
     "labels": {
+        "Control participant arrangement, controls, tile shape, and cropping.": "Atur susunan peserta, kontrol, bentuk ubin, dan pemotongan.",
+        "Participant view:": "Tampilan peserta:",
+        "Grid": "Kisi",
+        "Speaker top": "Pembicara di atas",
+        "Speaker bottom": "Pembicara di bawah",
+        "Speaker left": "Pembicara di kiri",
+        "Speaker right": "Pembicara di kanan",
+        "Speaker 1:1": "Pembicara 1:1",
+        "Livestream": "Siaran langsung",
+        "Left": "Kiri",
+        "Bottom": "Bawah",
+        "Right": "Kanan",
+        "Personalize the interface theme.": "Personalisasikan tema antarmuka.",
         "Mirror": "Cermin",
         "Private Message": "Pesan pribadi",
         "Send File": "Kirim file",
@@ -738,7 +753,7 @@
         "Unmute": "Suarakan",
         "Unmute Video": "Suarakan Video",
         "Username already in use": "Nama pengguna sudah digunakan",
-        "WebRTC SFU v2.4.20": "WebRTC SFU v2.4.20",
+        "WebRTC SFU v2.4.21": "WebRTC SFU v2.4.21",
         "Whiteboard Shortcuts": "Pintasan Papan Tulis",
         "Would you like to continue the room broadcast?": "Apakah Anda ingin melanjutkan siaran ruangan?",
         "Yes": "Ya",
@@ -747,6 +762,8 @@
         "Join meeting": "Gabung rapat"
     },
     "toasts": {
+        "Enable broadcasting before using Livestream view": "Aktifkan penyiaran sebelum menggunakan tampilan siaran langsung",
+        "No participant video is available for this speaker view": "Tidak ada video peserta yang tersedia untuk tampilan pembicara ini",
         "Add at least one room first": "Tambahkan setidaknya satu ruangan terlebih dahulu",
         "All breakout rooms cleared": "Semua ruang kelompok dihapus",
         "All participants are already assigned": "Semua peserta sudah ditetapkan",

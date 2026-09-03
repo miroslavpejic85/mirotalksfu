@@ -974,6 +974,39 @@ body {
     bottom: 14px !important;
 }
 
+#bottomButtons #participantViewDropdown {
+    position: relative;
+}
+
+#bottomButtons #participantViewMenu {
+    min-width: 190px !important;
+    padding: 8px 6px;
+    border: 1px solid var(--room-border) !important;
+    border-radius: 12px !important;
+    background: var(--room-panel-raised) !important;
+    box-shadow: var(--room-shadow);
+}
+
+#bottomButtons #participantViewMenu button {
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    align-items: center;
+    gap: 10px;
+    color: #fff;
+    text-align: left;
+}
+
+#bottomButtons #participantViewMenu button i {
+    width: 18px;
+    text-align: center;
+}
+
+#bottomButtons #participantViewMenu button.active {
+    color: #fff;
+    background: var(--btns-bg-color);
+}
+
 #bottomButtons[data-position='horizontal'] .dropdown-menu {
     max-height: calc(100vh - 24px);
 }
@@ -1086,7 +1119,8 @@ body {
 
 #bottomButtons #startAudioDeviceMenu button,
 #bottomButtons #startVideoDeviceMenu button,
-#bottomButtons #settingsExtraMenu button {
+#bottomButtons #settingsExtraMenu button,
+#bottomButtons #participantViewMenu button {
     display: flex;
     width: 100%;
     height: 35px;
