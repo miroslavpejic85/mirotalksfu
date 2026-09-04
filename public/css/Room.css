@@ -2577,7 +2577,7 @@ body {
     color: #ff5252;
 }
 
-.participant-menu-header {
+.participant-list-dropdown-menu .participant-menu-header {
     display: flex;
     align-items: center;
     gap: 10px;
