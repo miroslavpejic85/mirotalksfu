@@ -197,3 +197,23 @@
     float: right;
     right: 20px;
 }
+
+@media (max-width: 400px) {
+    .pls-container {
+        padding: 12px;
+    }
+
+    .poll-header-btns {
+        right: 12px;
+        gap: 5px;
+    }
+
+    .poll-btns {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    #addPollButton {
+        flex: 1 0 100%;
+    }
+}

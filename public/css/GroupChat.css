@@ -851,6 +851,17 @@ input[type='text'] {
 
 /* handle screen sizes */
 @media screen and (max-width: 600px) {
+    .chat .chat-header .chat-about {
+        box-sizing: border-box;
+        max-width: calc(100% - 120px);
+    }
+
+    .chat .chat-header .chat-about h6 {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
     .people-list {
         width: 100% !important;
         height: 100% !important;

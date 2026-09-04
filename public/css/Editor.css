@@ -1,6 +1,8 @@
 .editor-container {
     z-index: 5;
     position: absolute;
+    container-type: inline-size;
+    container-name: editor;
     padding: 20px;
     width: var(--editor-container-width);
     height: var(--editor-container-height);
@@ -14,19 +16,81 @@
 }
 
 .editor-header {
-    display: inline-flex;
+    display: flex;
+    align-items: center;
+    box-sizing: border-box;
     text-align: left;
-    margin-bottom: 35px;
+    min-height: 36px;
+    margin-bottom: 6px;
     width: 100%;
     cursor: move;
 }
 
 .editor-header-btns {
     display: flex;
+    align-items: center;
     gap: 5px;
-    position: absolute;
-    float: right;
-    right: 20px;
+    margin-left: auto;
+}
+
+.editor-compact-menu {
+    display: none;
+}
+
+.editor-compact-menu .dropdown-menu {
+    padding: 8px;
+}
+
+.editor-compact-menu .dropdown-menu button {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+    gap: 8px;
+}
+
+.editor-compact-menu .dropdown-menu .editor-narrow-action {
+    display: none;
+}
+
+@media (max-width: 560px) {
+    .editor-container {
+        padding: 12px;
+    }
+}
+
+@container editor (max-width: 560px) {
+    .editor-header-btns {
+        gap: 3px;
+    }
+
+    .editor-header-btns > button,
+    .editor-header-btns > .dropdown > button {
+        width: 40px;
+        height: 40px;
+        padding: 8px;
+    }
+
+    .editor-header-btns > #editorCopyBtn,
+    .editor-header-btns > #editorSaveBtn,
+    .editor-header-btns > #editorCleanBtn {
+        display: none !important;
+    }
+
+    .editor-compact-menu {
+        display: inline-flex;
+    }
+}
+
+@container editor (max-width: 340px) {
+    .editor-header-btns > #editorUndoBtn,
+    .editor-header-btns > #editorRedoBtn {
+        display: none !important;
+    }
+
+    .editor-compact-menu .dropdown-menu .editor-narrow-action {
+        display: flex;
+    }
 }
 
 .editor {
@@ -77,9 +141,21 @@
     color: #ffb300;
     pointer-events: none;
     z-index: 6;
+    line-height: 36px;
 }
-.editor-container.editor-private-mode .editor-header-btns {
-    margin-top: 18px;
+.editor-container.editor-private-mode .editor-header {
+    padding-left: 180px;
+}
+@container editor (max-width: 500px) {
+    .editor-container.editor-private-mode::before {
+        line-height: normal;
+    }
+
+    .editor-container.editor-private-mode .editor-header {
+        min-height: 68px;
+        padding-top: 28px;
+        padding-left: 0;
+    }
 }
 .editor-container.editor-private-mode #editorPrivateBtn {
     color: #ffb300 !important;

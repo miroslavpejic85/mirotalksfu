@@ -2088,6 +2088,21 @@
                             <i class="fas fa-bars"></i>
                         </button>
                         <div class="dropdown-menu text-start" aria-labelledby="whiteboardDropDownMenu">
+                            <button class="whiteboard-narrow-action" data-panel-action-target="whiteboardGhostButton">
+                                <i class="fas fa-circle-half-stroke"></i> Toggle background
+                            </button>
+                            <button class="whiteboard-compact-action" data-panel-action-target="whiteboardGridBtn">
+                                <i class="fas fa-table-cells-large"></i> Toggle grid
+                            </button>
+                            <button class="whiteboard-compact-action" data-panel-action-target="whiteboardVanishingBtn">
+                                <i class="fas fa-highlighter"></i> Vanishing pen
+                            </button>
+                            <button class="whiteboard-compact-action" data-panel-action-target="whiteboardObjectBtn">
+                                <i class="fas fa-mouse-pointer"></i> Object mode
+                            </button>
+                            <button class="whiteboard-compact-action" data-panel-action-target="whiteboardEraserBtn">
+                                <i class="fas fa-eraser"></i> Eraser
+                            </button>
                             <button id="whiteboardImgFileBtn"><i class="far fa-image"></i> Add image file</button>
                             <button id="whiteboardImgUrlBtn"><i class="fas fa-link"></i> Add image URL</button>
                             <button id="whiteboardPdfFileBtn"><i class="far fa-file-pdf"></i> Add pdf file</button>
@@ -2497,6 +2512,31 @@
                     <button id="editorCopyBtn" class="fas fa-paste"></button>
                     <button id="editorSaveBtn" class="fas fa-floppy-disk"></button>
                     <button id="editorCleanBtn" class="fas fa-trash"></button>
+                    <div class="dropdown editor-compact-menu">
+                        <button
+                            class="dropdown-toggle fas fa-bars"
+                            type="button"
+                            id="editorDropDownMenu"
+                            data-bs-toggle="dropdown"
+                            aria-expanded="false"
+                            aria-label="More editor actions"
+                        ></button>
+                        <div class="dropdown-menu dropdown-menu-end text-start" aria-labelledby="editorDropDownMenu">
+                            <button class="editor-narrow-action" data-panel-action-target="editorUndoBtn">
+                                <i class="fas fa-undo"></i> Undo
+                            </button>
+                            <button class="editor-narrow-action" data-panel-action-target="editorRedoBtn">
+                                <i class="fas fa-redo"></i> Redo
+                            </button>
+                            <button data-panel-action-target="editorCopyBtn"><i class="fas fa-paste"></i> Copy</button>
+                            <button data-panel-action-target="editorSaveBtn">
+                                <i class="fas fa-floppy-disk"></i> Save
+                            </button>
+                            <button data-panel-action-target="editorCleanBtn">
+                                <i class="fas fa-trash"></i> Clean
+                            </button>
+                        </div>
+                    </div>
                     <button id="editorCloseBtn" class="fas fa-times"></button>
                 </div>
             </div>
