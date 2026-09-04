@@ -2647,7 +2647,10 @@ body {
     gap: 2px;
     border: 1px solid var(--room-border);
     border-radius: 12px;
-    width: 35%;
+    width: max-content;
+    min-width: 180px;
+    max-width: 42%;
+    flex: 0 0 auto;
     background: color-mix(in srgb, var(--select-bg) 72%, transparent);
     min-height: 480px;
     display: flex;
@@ -2738,7 +2741,9 @@ body {
 
 .tabActions {
     position: relative;
-    width: 65%;
+    width: auto;
+    min-width: 0;
+    flex: 1 1 0;
     overflow: hidden;
     display: flex;
     flex-direction: column;
@@ -2820,6 +2825,8 @@ body {
 
 /* Style the buttons inside the tab */
 .tab button {
+    display: flex;
+    align-items: center;
     margin: 1px 0;
     padding: 11px;
     float: left;
@@ -2835,6 +2842,17 @@ body {
         color var(--motion-fast) ease,
         background-color var(--motion-fast) ease,
         border-color var(--motion-fast) ease;
+}
+
+.tab button::before {
+    flex: 0 0 1.25rem;
+    width: 1.25rem;
+    text-align: center;
+}
+
+.tabButtonText {
+    margin: 0 !important;
+    white-space: nowrap;
 }
 
 /* Change background color of buttons on hover */

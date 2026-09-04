@@ -249,7 +249,7 @@ function handleRules(isPresenter, roomSetup = true) {
         // VideoAI is presenter-only and shown only when the room has it enabled
         if (rc.videoAIEnabled) {
             VideoAI.enabled = true;
-            elemDisplay('tabVideoAIBtn', true);
+            elemDisplay('tabVideoAIBtn', true, 'flex');
         } else {
             VideoAI.enabled = false;
             elemDisplay('tabVideoAIBtn', false);
