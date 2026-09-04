@@ -591,35 +591,3 @@ input[type='range'] {
 .video-drawing-inactive .upper-canvas {
     pointer-events: none !important;
 }
-
-/* Floating label showing who is drawing on the video */
-.video-drawing-label {
-    position: absolute;
-    top: 8px;
-    left: 8px;
-    z-index: 10;
-    padding: 3px 8px;
-    max-width: calc(100% - 16px);
-    background: rgba(0, 0, 0, 0.65);
-    color: #fff;
-    font-size: 12px;
-    font-weight: 500;
-    border-radius: 10px;
-    pointer-events: none;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    opacity: 0;
-    transition: opacity 0.35s ease;
-}
-
-/* Smaller label on narrow video tiles (mobile) */
-@container camera (max-width: 250px) {
-    .video-drawing-label {
-        top: 4px;
-        left: 4px;
-        max-width: calc(100% - 8px);
-        padding: 2px 5px;
-        font-size: 10px;
-    }
-}

@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.30
+ * @version 2.4.31
  *
  */
 
@@ -6088,7 +6088,12 @@ class RoomClient {
                 cameraId = consumerId + '__video';
             }
         }
-        VideoDrawingOverlay.receiveRemoteDrawing({ cameraId, paths: data.paths, peerName: data.peer_name });
+        VideoDrawingOverlay.receiveRemoteDrawing({
+            cameraId,
+            paths: data.paths,
+            drawerId: data.drawerId,
+            peerName: data.peer_name,
+        });
     }
 
     handleDW(dwBtnId, camDivId) {
@@ -6100,6 +6105,9 @@ class RoomClient {
         // Translates the local cameraId to a canonical producerId so remote
         // peers can resolve it to their own consumer div.
         if (typeof VideoDrawingOverlay !== 'undefined' && !VideoDrawingOverlay.onEmitDrawing) {
+            VideoDrawingOverlay.getLocalDrawerId = () => this.socket.id;
+            VideoDrawingOverlay.resolveDrawerName = (drawerId) =>
+                drawerId === this.socket.id ? this.peer_name : 'Participant';
             VideoDrawingOverlay.onEmitDrawing = (data) => {
                 // if not peers, don't send
                 if (!this.thereAreParticipants()) return;
@@ -6117,7 +6125,6 @@ class RoomClient {
                 }
 
                 this.socket.emit('videoDrawing', {
-                    peer_name: this.peer_name,
                     producerId: producerId,
                     paths: data.paths,
                 });

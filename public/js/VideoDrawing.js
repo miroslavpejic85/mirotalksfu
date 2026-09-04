@@ -45,6 +45,10 @@ class VideoDrawingOverlay {
      */
     static onEmitDrawing = null;
 
+    static getLocalDrawerId = null;
+
+    static resolveDrawerName = null;
+
     /**
      * Create a drawing overlay for a .Camera container.
      * @param {HTMLElement} cameraDivEl - The .Camera wrapper div
@@ -54,6 +58,7 @@ class VideoDrawingOverlay {
         this.cameraId = cameraDivEl.id;
         this.isActive = false;
         this._clearTimers = new Map();
+        this._drawerLabels = new Map();
 
         /** Pending local strokes (normalized) waiting to be batched and sent */
         this._pendingPaths = [];
@@ -132,8 +137,12 @@ class VideoDrawingOverlay {
             // Tag as local so we can identify it
             path._isLocal = true;
 
+            const drawerId = VideoDrawingOverlay.getLocalDrawerId?.() || 'local';
+            const drawerName = VideoDrawingOverlay.resolveDrawerName?.(drawerId) || 'Participant';
+            this._showDrawerLabel(drawerId, drawerName, path);
+
             // Schedule auto-clear
-            this._scheduleAutoClear(path);
+            this._scheduleAutoClear(path, drawerId);
 
             // Normalize and queue for sync
             this._queuePathForSync(path);
@@ -143,11 +152,17 @@ class VideoDrawingOverlay {
     /**
      * Schedule removal of a path after AUTO_CLEAR_MS.
      * @param {fabric.Path} path
+     * @param {string} drawerId
      * @private
      */
-    _scheduleAutoClear(path) {
+    _scheduleAutoClear(path, drawerId) {
         const timerId = setTimeout(() => {
             this.fabricCanvas.remove(path);
+            const drawerLabel = this._drawerLabels.get(drawerId);
+            if (drawerLabel?.path === path) {
+                this.fabricCanvas.remove(drawerLabel.group);
+                this._drawerLabels.delete(drawerId);
+            }
             this.fabricCanvas.requestRenderAll();
             this._clearTimers.delete(path);
         }, VideoDrawingOverlay.AUTO_CLEAR_MS);
@@ -300,8 +315,9 @@ class VideoDrawingOverlay {
      * current canvas size.
      * @param {Array<{d: Array, color: string, width: number}>} paths
      * @param {string} [peerName] - Name of the peer who drew (shown as a label)
+     * @param {string} [drawerId] - Stable ID of the peer who drew
      */
-    addRemotePaths(paths, peerName) {
+    addRemotePaths(paths, peerName, drawerId = 'remote') {
         const w = this.fabricCanvas.getWidth();
         const h = this.fabricCanvas.getHeight();
         if (w <= 0 || h <= 0) return;
@@ -331,56 +347,64 @@ class VideoDrawingOverlay {
 
             this.fabricCanvas.add(fabricPath);
 
+            this._showDrawerLabel(drawerId, peerName || 'Participant', fabricPath);
+
             // Auto-clear remote paths too
-            this._scheduleAutoClear(fabricPath);
+            this._scheduleAutoClear(fabricPath, drawerId);
         }
 
         this.fabricCanvas.requestRenderAll();
-
-        // Show who is drawing
-        if (peerName) {
-            this._showDrawerLabel(peerName);
-        }
     }
 
     /**
-     * Show a floating label indicating who is drawing on this video.
-     * The label auto-hides after AUTO_CLEAR_MS to match the drawing lifecycle.
-     * Repeated calls reset the timer and update the name.
+     * Show a label beside a drawer's latest stroke.
+     * @param {string} drawerId
      * @param {string} peerName
+     * @param {fabric.Path} path
      * @private
      */
-    _showDrawerLabel(peerName) {
-        const wrapper = this.fabricCanvas.wrapperEl;
-        if (!wrapper) return;
-
-        // Create the label element lazily
-        if (!this._drawerLabel) {
-            this._drawerLabel = document.createElement('div');
-            this._drawerLabel.className = 'video-drawing-label';
-            wrapper.appendChild(this._drawerLabel);
-        }
-
-        this._drawerLabel.textContent = `✏️ ${peerName}`;
-        this._drawerLabel.style.opacity = '1';
-        this._drawerLabel.style.display = 'block';
-
-        // Reset the hide timer
-        if (this._drawerLabelTimer) {
-            clearTimeout(this._drawerLabelTimer);
-        }
-        this._drawerLabelTimer = setTimeout(() => {
-            if (this._drawerLabel) {
-                this._drawerLabel.style.opacity = '0';
-                // Remove from display after the CSS transition finishes
-                setTimeout(() => {
-                    if (this._drawerLabel) {
-                        this._drawerLabel.style.display = 'none';
-                    }
-                }, 400);
-            }
-            this._drawerLabelTimer = null;
-        }, VideoDrawingOverlay.AUTO_CLEAR_MS);
+    _showDrawerLabel(drawerId, peerName, path) {
+        const bounds = path.getBoundingRect();
+        const canvasWidth = this.fabricCanvas.getWidth();
+        const canvasHeight = this.fabricCanvas.getHeight();
+        const label =
+            String(peerName || 'Participant')
+                .trim()
+                .slice(0, 40) || 'Participant';
+        const text = new fabric.Text(label, {
+            left: 6,
+            top: 4,
+            fontSize: 12,
+            fontWeight: 600,
+            fontFamily: 'sans-serif',
+            fill: '#fff',
+            selectable: false,
+            evented: false,
+        });
+        const labelWidth = Math.min(172, Math.max(40, (text.width || 0) + 12));
+        if ((text.width || 0) > labelWidth - 12) text.scaleX = (labelWidth - 12) / text.width;
+        const background = new fabric.Rect({
+            width: labelWidth,
+            height: 22,
+            fill: 'rgba(0, 0, 0, 0.78)',
+            rx: 3,
+            ry: 3,
+            selectable: false,
+            evented: false,
+        });
+        const left = Math.max(0, Math.min(canvasWidth - labelWidth, bounds.left + bounds.width + 10));
+        const top = Math.max(0, Math.min(canvasHeight - 22, bounds.top + bounds.height - 32));
+        const group = new fabric.Group([background, text], {
+            left,
+            top,
+            selectable: false,
+            evented: false,
+            excludeFromExport: true,
+        });
+        const previous = this._drawerLabels.get(drawerId);
+        if (previous) this.fabricCanvas.remove(previous.group);
+        this._drawerLabels.set(drawerId, { group, path });
+        this.fabricCanvas.add(group);
     }
 
     /**
@@ -392,6 +416,7 @@ class VideoDrawingOverlay {
             clearTimeout(timerId);
         }
         this._clearTimers.clear();
+        this._drawerLabels.clear();
 
         // Clear pending sync queue
         this._pendingPaths = [];
@@ -423,15 +448,7 @@ class VideoDrawingOverlay {
         }
         this._pendingPaths = [];
 
-        // Clean up drawer label
-        if (this._drawerLabelTimer) {
-            clearTimeout(this._drawerLabelTimer);
-            this._drawerLabelTimer = null;
-        }
-        if (this._drawerLabel) {
-            this._drawerLabel.remove();
-            this._drawerLabel = null;
-        }
+        this._drawerLabels.clear();
 
         // Disconnect resize observer
         if (this._resizeObserver) {
@@ -512,7 +529,7 @@ class VideoDrawingOverlay {
             overlay = new VideoDrawingOverlay(camDiv);
         }
 
-        overlay.addRemotePaths(data.paths, data.peerName);
+        overlay.addRemotePaths(data.paths, data.peerName, data.drawerId);
     }
 
     /**
