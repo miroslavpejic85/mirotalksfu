@@ -3398,6 +3398,9 @@ class RoomClient {
                     this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    BUTTONS.producerVideo.drawingButton &&
+                        isScreen &&
+                        this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
                     this.setTippy(vp.id, 'Toggle video privacy', 'bottom');
                     this.setTippy(au.id, 'Audio status', 'bottom');
                 }
@@ -4202,6 +4205,9 @@ class RoomClient {
                     this.setTippy(ha.id, 'Toggle Focus mode', 'bottom');
                     this.setTippy(pip.id, 'Toggle picture in picture', 'bottom');
                     this.setTippy(ts.id, 'Snapshot', 'bottom');
+                    BUTTONS.consumerVideo.drawingButton &&
+                        remoteIsScreen &&
+                        this.setTippy(dw.id, 'Enable screen drawing', 'bottom');
                     this.setTippy(cm.id, 'Hide', 'bottom');
                     this.setTippy(au.id, 'Mute', 'bottom');
                     this.setTippy(pv.id, '🔊 Volume', 'bottom');
