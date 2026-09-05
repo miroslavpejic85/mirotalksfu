@@ -102,11 +102,13 @@ depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
 
 ## Regenerating the English template
 
-`en.json` is generated from the in-room source strings:
+`en.json` is generated from the in-room source strings, and every other language file is
+synchronized to the same namespace and key structure:
 
 ```bash
 node app/src/scripts/extract-ui-lang.js
 ```
 
-Review the regenerated `en.json` before using it as the starting point for new translations
-or syncing existing ones. Existing per-language files are never touched by the script.
+The script preserves existing translated values. Missing keys are added to each language
+with the English source text as a fallback, ready for human translation, and stale keys are
+removed. Review the generated changes before committing them.

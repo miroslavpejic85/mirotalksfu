@@ -17,15 +17,10 @@ const path = require('path');
 
 const ROOT = path.join(__dirname, '../../..');
 const HTML_FILE = path.join(ROOT, 'public/views/Room.html');
-const JS_FILES = [
-    path.join(ROOT, 'public/js/Room.js'),
-    path.join(ROOT, 'public/js/RoomClient.js'),
-    path.join(ROOT, 'public/js/Transcription.js'),
-    path.join(ROOT, 'public/js/WhisperTranscription.js'),
-];
-const OUT_FILE = path.join(ROOT, 'public/lang/en.json');
+const LANG_DIR = path.join(ROOT, 'public/lang');
+const OUT_FILE = path.join(LANG_DIR, 'en.json');
 
-const ATTR_KEYS = ['title', 'placeholder', 'aria-label'];
+const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
 const DIALOG_FIELDS = [
     'title',
     'titleText',
@@ -81,6 +76,7 @@ const STOPLIST = new Set([
     'nameTitle',
     'UserName',
     'scale-down',
+    'Lobby users (',
 ]);
 
 function isTranslatable(str) {
@@ -105,6 +101,57 @@ function unescapeJs(str) {
     return str.replace(/\\(['"\\])/g, '$1').replace(/\\n/g, ' ');
 }
 
+function getRoomJsFiles() {
+    const html = fs.readFileSync(HTML_FILE, 'utf8');
+    const files = new Set();
+    const scriptRe = /<script[^>]+src\s*=\s*['"]\.\.\/js\/([^'"?#]+\.js)['"]/gi;
+    let match;
+    while ((match = scriptRe.exec(html))) files.add(path.join(ROOT, 'public/js', match[1]));
+    return [...files];
+}
+
+function seedCuratedKeys() {
+    if (!fs.existsSync(OUT_FILE)) return;
+    const english = JSON.parse(fs.readFileSync(OUT_FILE, 'utf8'));
+    for (const [namespace, entries] of Object.entries(english)) {
+        if (!buckets[namespace] || !entries || typeof entries !== 'object') continue;
+        for (const key of Object.keys(entries)) add(namespace, key);
+    }
+}
+
+function scanCallbackReturns(src, property, bucket) {
+    const callbackRe = new RegExp(`\\b${property}\\s*:\\s*\\([^)]*\\)\\s*=>\\s*\\{`, 'g');
+    let callback;
+    while ((callback = callbackRe.exec(src))) {
+        const start = callbackRe.lastIndex;
+        let depth = 1;
+        let index = start;
+        let quote = null;
+        let escaped = false;
+
+        for (; index < src.length && depth > 0; index++) {
+            const char = src[index];
+            if (quote) {
+                if (escaped) escaped = false;
+                else if (char === '\\') escaped = true;
+                else if (char === quote) quote = null;
+                continue;
+            }
+            if (char === "'" || char === '"' || char === '`') quote = char;
+            else if (char === '{') depth++;
+            else if (char === '}') depth--;
+        }
+
+        const body = src.slice(start, index - 1);
+        const returnRe = /return\s+(?:[^;?\n]+\?\s*)?(['"])((?:\\.|(?!\1).)*)\1(?:\s*:\s*(['"])((?:\\.|(?!\3).)*)\3)?/g;
+        let returned;
+        while ((returned = returnRe.exec(body))) {
+            add(bucket, unescapeJs(returned[2]));
+            if (returned[4]) add(bucket, unescapeJs(returned[4]));
+        }
+    }
+}
+
 // ####################################################
 // JS scan
 // ####################################################
@@ -116,6 +163,13 @@ function scanJs(file) {
     const tippyRe = /setTippy\(\s*[^,]+?,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     let m;
     while ((m = tippyRe.exec(src))) add('tooltips', unescapeJs(m[2]));
+
+    const tippyConditionalRe =
+        /setTippy\(\s*[^,]+?,\s*[^,?]+\?\s*(['"])((?:\\.|(?!\1).)*)\1\s*:\s*(['"])((?:\\.|(?!\3).)*)\3/g;
+    while ((m = tippyConditionalRe.exec(src))) {
+        add('tooltips', unescapeJs(m[2]));
+        add('tooltips', unescapeJs(m[4]));
+    }
 
     // Toasts: userLog(<type>, '<text>', ...) - only plain string literals (skip templates)
     const logRe = /userLog\(\s*[^,]+?,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
@@ -129,16 +183,31 @@ function scanJs(file) {
     const fieldTplRe = new RegExp(`\\b(${DIALOG_FIELDS.join('|')})\\s*:\\s*\`([^\`$]*)\``, 'g');
     while ((m = fieldTplRe.exec(src))) add('dialogs', unescapeJs(m[2]));
 
+    const conditionalFieldRe = new RegExp(
+        `\\b(${DIALOG_FIELDS.join('|')})\\s*:\\s*[^,?]+\\?\\s*(['"])((?:\\\\.|(?!\\2).)*)\\2\\s*:\\s*(['"])((?:\\\\.|(?!\\4).)*)\\4`,
+        'g'
+    );
+    while ((m = conditionalFieldRe.exec(src))) {
+        add('dialogs', unescapeJs(m[3]));
+        add('dialogs', unescapeJs(m[5]));
+    }
+
     // Dialog validation messages displayed by SweetAlert.
-    const validationRe = /Swal\.showValidationMessage\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*\)/g;
+    const validationRe = /Swal\.showValidationMessage\(\s*(?:t\(\s*)?(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = validationRe.exec(src))) add('dialogs', unescapeJs(m[2]));
+
+    scanCallbackReturns(src, 'inputValidator', 'dialogs');
+
+    // Explicit translation calls mark dynamically-built labels that a DOM scan cannot infer.
+    const translateRe = /\bt\(\s*(['"])((?:\\.|(?!\1).)*)\1\s*\)/g;
+    while ((m = translateRe.exec(src))) add('labels', unescapeJs(m[2]));
 
     // Dynamically-built UI text: device menu headers/options, text nodes, textContent assignments.
     const helperRe = /(?:appendMenuHeader|appendSelectOptions)\([^,]*,[^,]*,\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = helperRe.exec(src))) add('labels', unescapeJs(m[2]));
     const textNodeRe = /createTextNode\(\s*(['"])((?:\\.|(?!\1).)*)\1/g;
     while ((m = textNodeRe.exec(src))) add('labels', unescapeJs(m[2]));
-    const textContentRe = /\.(?:textContent|innerText)\s*=\s*(['"])((?:\\.|(?!\1).)*)\1/g;
+    const textContentRe = /\.(?:textContent|innerText)\s*=\s*(['"])((?:\\.|(?!\1).)*)\1\s*;/g;
     while ((m = textContentRe.exec(src))) add('labels', unescapeJs(m[2]));
 }
 
@@ -166,7 +235,7 @@ function scanHtml(file) {
         const isButton = tagName === 'button';
         const bucket = isButton || buttonDepth > 0 ? 'buttons' : 'labels';
         for (const key of ATTR_KEYS) {
-            const re = new RegExp(`${key}\\s*=\\s*(['"])(.*?)\\1`, 'i');
+            const re = new RegExp(`(?:^|\\s)${key}\\s*=\\s*(['"])(.*?)\\1`, 'i');
             const am = re.exec(attrStr);
             if (am) add(bucket, am[2]);
         }
@@ -193,7 +262,8 @@ function scanHtml(file) {
 // Build output
 // ####################################################
 
-JS_FILES.forEach(scanJs);
+seedCuratedKeys();
+getRoomJsFiles().forEach(scanJs);
 scanHtml(HTML_FILE);
 
 const output = {};
@@ -206,8 +276,27 @@ for (const [ns, set] of Object.entries(buckets)) {
 fs.mkdirSync(path.dirname(OUT_FILE), { recursive: true });
 fs.writeFileSync(OUT_FILE, JSON.stringify(output, null, 4) + '\n', 'utf8');
 
+for (const file of fs.readdirSync(LANG_DIR).filter((file) => file.endsWith('.json') && file !== 'en.json')) {
+    const filePath = path.join(LANG_DIR, file);
+    const existing = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    const synced = {};
+    for (const [namespace, englishEntries] of Object.entries(output)) {
+        synced[namespace] = {};
+        for (const [key, translated] of Object.entries(existing[namespace] || {})) {
+            if (Object.hasOwn(englishEntries, key)) synced[namespace][key] = translated;
+        }
+        for (const key of Object.keys(englishEntries)) {
+            if (!Object.hasOwn(synced[namespace], key)) synced[namespace][key] = key;
+        }
+    }
+    fs.writeFileSync(filePath, JSON.stringify(synced, null, 4) + '\n', 'utf8');
+}
+
 const counts = Object.entries(buckets)
     .map(([ns, set]) => `${ns}: ${set.size}`)
     .join(', ');
 console.log(`Wrote ${OUT_FILE}`);
 console.log(`Strings -> ${counts}`);
+console.log(
+    `Synchronized ${fs.readdirSync(LANG_DIR).filter((file) => file.endsWith('.json') && file !== 'en.json').length} locale files`
+);
