@@ -5325,9 +5325,20 @@ button:hover {
     color: #ffffff;
 }
 
-.whiteboard-close-button:hover {
+:is(
+    #mySettingsCloseBtn,
+    #videoCloseBtn,
+    #whiteboardCloseBtn,
+    #chatCloseButton,
+    #pollCloseBtn,
+    #editorCloseBtn,
+    #transcriptionCloseBtn,
+    #breakoutPanelCloseBtn,
+    .room-emoji-close-btn
+):hover {
     background: rgba(255, 92, 92, 0.18) !important;
     color: #ff8a8a !important;
+    transform: none;
 }
 
 .whiteboard-responsive-action span {

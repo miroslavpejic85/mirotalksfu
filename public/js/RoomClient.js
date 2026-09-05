@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.34
+ * @version 2.4.35
  *
  */
 
@@ -8182,12 +8182,11 @@ class RoomClient {
 
         const btnToShow = this.isEditorLocked ? editorLockBtn : editorUnlockBtn;
         const btnToHide = this.isEditorLocked ? editorUnlockBtn : editorLockBtn;
-        const btnColor = this.isEditorLocked ? 'red' : 'white';
         const action = this.isEditorLocked ? 'lock' : 'unlock';
 
         show(btnToShow);
         hide(btnToHide);
-        setColor(editorLockBtn, btnColor);
+        this.setEditorControlState(editorLockBtn, this.isEditorLocked);
 
         this.editorSendAction(action);
 
@@ -8202,6 +8201,11 @@ class RoomClient {
         editorRoom.style.transform = 'translate(-50%, -50%)';
         editorRoom.style.top = '50%';
         editorRoom.style.left = '50%';
+    }
+
+    setEditorControlState(button, isActive) {
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
     }
 
     toggleEditorPin() {
@@ -8230,7 +8234,7 @@ class RoomClient {
         this.editorPinned();
         this.isEditorPinned = true;
         this.refreshVideoPinLayout();
-        setColor(editorTogglePin, 'lime');
+        this.setEditorControlState(editorTogglePin, true);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '80vh');
@@ -8247,7 +8251,7 @@ class RoomClient {
         this.isEditorPinned = false;
         this.refreshVideoPinLayout();
         editorRoom.classList.remove('panel-slide-in');
-        setColor(editorTogglePin, 'white');
+        this.setEditorControlState(editorTogglePin, false);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         document.documentElement.style.setProperty('--editor-height', '85vh');
@@ -8388,6 +8392,8 @@ class RoomClient {
         show(editorPrivateBtn);
         hide(editorCollabBtn);
         editorRoom.classList.add('editor-private-mode');
+        this.setEditorControlState(editorCollabBtn, false);
+        this.setEditorControlState(editorPrivateBtn, true);
         this.userLog(
             'info',
             `${icons.editor} Private Note mode: your edits are NOT shared and NOT saved`,
@@ -8446,6 +8452,8 @@ class RoomClient {
         show(editorCollabBtn);
         hide(editorPrivateBtn);
         editorRoom.classList.remove('editor-private-mode');
+        this.setEditorControlState(editorCollabBtn, false);
+        this.setEditorControlState(editorPrivateBtn, false);
         this.userLog('info', `${icons.editor} Collaborative editor restored`, 'top-end', 4000);
         this.sound('click');
     }

@@ -2580,17 +2580,46 @@
 
         <section id="editorRoom" class="editor-container fadein hidden">
             <div id="editorHeader" class="editor-header">
+                <div class="editor-header-title">
+                    <span class="editor-title-mark" aria-hidden="true"><i class="fas fa-file-pen"></i></span>
+                    <span class="editor-title-text">Editor</span>
+                </div>
                 <div class="editor-header-btns">
-                    <button id="editorTogglePin" class="fas fa-map-pin hidden"></button>
-                    <button id="editorUnlockBtn" class="fa-solid fa-lock-open hidden"></button>
-                    <button id="editorLockBtn" class="fa-solid fa-lock hidden"></button>
-                    <button id="editorCollabBtn" class="fa-solid fa-users"></button>
-                    <button id="editorPrivateBtn" class="fa-solid fa-user-secret hidden"></button>
-                    <button id="editorUndoBtn" class="fas fa-undo"></button>
-                    <button id="editorRedoBtn" class="fas fa-redo"></button>
-                    <button id="editorCopyBtn" class="fas fa-paste"></button>
-                    <button id="editorSaveBtn" class="fas fa-floppy-disk"></button>
-                    <button id="editorCleanBtn" class="fas fa-trash"></button>
+                    <div class="editor-tool-group editor-session-tools" aria-label="Editor mode">
+                        <button
+                            id="editorTogglePin"
+                            class="fas fa-map-pin hidden"
+                            aria-label="Pin editor"
+                            aria-pressed="false"
+                        ></button>
+                        <button
+                            id="editorUnlockBtn"
+                            class="fa-solid fa-lock-open hidden"
+                            aria-label="Unlock editor"
+                        ></button>
+                        <button id="editorLockBtn" class="fa-solid fa-lock hidden" aria-label="Lock editor"></button>
+                        <button
+                            id="editorCollabBtn"
+                            class="fa-solid fa-users"
+                            aria-label="Switch to private note"
+                            aria-pressed="false"
+                        ></button>
+                        <button
+                            id="editorPrivateBtn"
+                            class="fa-solid fa-user-secret hidden"
+                            aria-label="Return to collaborative editor"
+                            aria-pressed="true"
+                        ></button>
+                    </div>
+                    <div class="editor-tool-group editor-history-tools" aria-label="Edit history">
+                        <button id="editorUndoBtn" class="fas fa-undo" aria-label="Undo"></button>
+                        <button id="editorRedoBtn" class="fas fa-redo" aria-label="Redo"></button>
+                    </div>
+                    <div class="editor-tool-group editor-document-tools" aria-label="Document actions">
+                        <button id="editorCopyBtn" class="fas fa-paste" aria-label="Copy"></button>
+                        <button id="editorSaveBtn" class="fas fa-floppy-disk" aria-label="Save"></button>
+                        <button id="editorCleanBtn" class="fas fa-trash" aria-label="Clean"></button>
+                    </div>
                     <div class="dropdown editor-compact-menu">
                         <button
                             class="dropdown-toggle fas fa-bars"
@@ -2616,7 +2645,7 @@
                             </button>
                         </div>
                     </div>
-                    <button id="editorCloseBtn" class="fas fa-times"></button>
+                    <button id="editorCloseBtn" class="fas fa-times" aria-label="Close editor"></button>
                 </div>
             </div>
             <div class="editor" id="editor"></div>
