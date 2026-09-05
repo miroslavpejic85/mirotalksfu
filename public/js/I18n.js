@@ -43,6 +43,7 @@
         id: { flag: '🇮🇩', name: 'Bahasa Indonesia' },
         ko: { flag: '🇰🇷', name: '한국어' },
         tr: { flag: '🇹🇷', name: 'Türkçe' },
+        nl: { flag: '🇳🇱', name: 'Nederlands' },
     };
 
     const ATTR_KEYS = ['title', 'placeholder', 'aria-label', 'data-tippy-content'];
