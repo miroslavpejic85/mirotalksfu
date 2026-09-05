@@ -2346,9 +2346,9 @@
                 <div id="chat" class="chat">
                     <!-- CHAT HEADER -->
                     <div id="chatHeader" class="chat-header clearfix">
-                        <div class="w-100">
+                        <div class="chat-header-content">
                             <!-- CHAT ABOUT -->
-                            <div id="chatAbout" class="text-start">
+                            <div id="chatAbout" class="chat-header-title text-start">
                                 <a data-toggle="modal" data-target="#view_info">
                                     <img src="../images/all.png" alt="avatar" />
                                 </a>
@@ -2359,78 +2359,88 @@
 
                             <!-- CHAT OPTIONS -->
                             <div class="chat-option-buttons">
-                                <button id="chatTogglePin" class="hidden">
-                                    <i class="fas fa-map-pin"></i>
-                                </button>
-                                <button id="chatMaxButton" class="hidden">
-                                    <i class="fas fa-expand"></i>
-                                </button>
-                                <button id="chatMinButton" class="hidden">
-                                    <i class="fas fa-compress"></i>
-                                </button>
-                                <!-- CHAT MORE OPTIONS -->
-                                <div class="dropdown">
+                                <div class="chat-tool-group chat-layout-tools" aria-label="Panel layout">
                                     <button
-                                        class="dropdown-toggle"
-                                        type="button"
-                                        id="chatDropDownMenu"
-                                        data-bs-toggle="dropdown"
-                                        aria-expanded="false"
+                                        id="chatTogglePin"
+                                        class="hidden"
+                                        aria-label="Pin chat"
+                                        aria-pressed="false"
                                     >
-                                        <i class="fas fa-bars"></i>
+                                        <i class="fas fa-map-pin"></i>
                                     </button>
-                                    <ul class="dropdown-menu text-start" aria-labelledby="chatDropDownMenu">
-                                        <li>
-                                            <hr />
-                                            <div class="transcription-switch-row">
-                                                <i class="fa-solid fa-eye"></i>
-                                                <label class="transcription-switch-label" for="showChatOnMsg"
-                                                    >Show on msg</label
-                                                >
-                                                <div class="form-check form-switch form-switch-md">
-                                                    <input
-                                                        class="form-check-input"
-                                                        type="checkbox"
-                                                        id="showChatOnMsg"
-                                                        checked
-                                                    />
-                                                </div>
-                                            </div>
-                                        </li>
-                                        <li id="speechMsgDiv">
-                                            <div class="transcription-switch-row">
-                                                <i class="fas fa-volume-high"></i>
-                                                <label class="transcription-switch-label" for="speechIncomingMsg"
-                                                    >Speech msg</label
-                                                >
-                                                <div class="form-check form-switch form-switch-md">
-                                                    <input
-                                                        class="form-check-input"
-                                                        type="checkbox"
-                                                        id="speechIncomingMsg"
-                                                    />
-                                                </div>
-                                            </div>
-                                            <hr />
-                                        </li>
-                                        <li>
-                                            <button id="chatGhostButton" class="btn-sm">
-                                                <i class="fas fa-circle-half-stroke"></i> Toggle bg
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button id="chatSaveButton" class="btn-sm">
-                                                <i class="fas fa-save"></i> Save messages
-                                            </button>
-                                        </li>
-                                        <li>
-                                            <button id="chatCleanButton" class="btn-sm">
-                                                <i class="fas fa-trash"></i> Clean messages
-                                            </button>
-                                        </li>
-                                    </ul>
+                                    <button id="chatMaxButton" class="hidden" aria-label="Maximize chat">
+                                        <i class="fas fa-expand"></i>
+                                    </button>
+                                    <button id="chatMinButton" class="hidden" aria-label="Restore chat">
+                                        <i class="fas fa-compress"></i>
+                                    </button>
                                 </div>
-                                <button id="chatCloseButton">
+                                <div class="chat-tool-group chat-menu-tools" aria-label="Chat actions">
+                                    <!-- CHAT MORE OPTIONS -->
+                                    <div class="dropdown">
+                                        <button
+                                            class="dropdown-toggle"
+                                            type="button"
+                                            id="chatDropDownMenu"
+                                            data-bs-toggle="dropdown"
+                                            aria-expanded="false"
+                                            aria-label="Chat menu"
+                                        >
+                                            <i class="fas fa-bars"></i>
+                                        </button>
+                                        <ul class="dropdown-menu text-start" aria-labelledby="chatDropDownMenu">
+                                            <li>
+                                                <hr />
+                                                <div class="transcription-switch-row">
+                                                    <i class="fa-solid fa-eye"></i>
+                                                    <label class="transcription-switch-label" for="showChatOnMsg"
+                                                        >Show on msg</label
+                                                    >
+                                                    <div class="form-check form-switch form-switch-md">
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            id="showChatOnMsg"
+                                                            checked
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </li>
+                                            <li id="speechMsgDiv">
+                                                <div class="transcription-switch-row">
+                                                    <i class="fas fa-volume-high"></i>
+                                                    <label class="transcription-switch-label" for="speechIncomingMsg"
+                                                        >Speech msg</label
+                                                    >
+                                                    <div class="form-check form-switch form-switch-md">
+                                                        <input
+                                                            class="form-check-input"
+                                                            type="checkbox"
+                                                            id="speechIncomingMsg"
+                                                        />
+                                                    </div>
+                                                </div>
+                                                <hr />
+                                            </li>
+                                            <li>
+                                                <button id="chatGhostButton" class="btn-sm">
+                                                    <i class="fas fa-circle-half-stroke"></i> Toggle bg
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button id="chatSaveButton" class="btn-sm">
+                                                    <i class="fas fa-save"></i> Save messages
+                                                </button>
+                                            </li>
+                                            <li>
+                                                <button id="chatCleanButton" class="btn-sm">
+                                                    <i class="fas fa-trash"></i> Clean messages
+                                                </button>
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <button id="chatCloseButton" aria-label="Close chat">
                                     <i class="fas fa-times"></i>
                                 </button>
                             </div>

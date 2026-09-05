@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.37
+ * @version 2.4.38
  *
  */
 
@@ -6430,6 +6430,11 @@ class RoomClient {
         this.sound('click');
     }
 
+    setChatControlState(button, isActive) {
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    }
+
     chatMaximize() {
         this.isChatMaximized = true;
         hide(chatMaxButton);
@@ -6477,7 +6482,7 @@ class RoomClient {
         this.chatPinned();
         this.isChatPinned = true;
         this.refreshVideoPinLayout();
-        setColor(chatTogglePin, 'lime');
+        this.setChatControlState(chatTogglePin, true);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         chatRoom.style.resize = 'none';
@@ -6497,7 +6502,7 @@ class RoomClient {
         this.chatCenter();
         this.isChatPinned = false;
         this.refreshVideoPinLayout();
-        setColor(chatTogglePin, 'white');
+        this.setChatControlState(chatTogglePin, false);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(chatRoom, chatHeader);
