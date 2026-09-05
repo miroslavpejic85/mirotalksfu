@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.31
+ * @version 2.4.32
  *
  */
 
@@ -1917,12 +1917,6 @@ class RoomClient {
         console.log('Disconnected.');
 
         // Immediately save recording if there is one, a paused one included.
-        //
-        // `pauseRecording()` sets `_isRecording = false` while leaving the MediaRecorder alive
-        // and holding everything captured so far, so `isRecording()` alone answers no for a
-        // recording that very much exists. `saveRecording()` already guards itself with
-        // `_isRecording || hasActiveRecorder()`; this caller used the narrower test, so a
-        // recording that happened to be paused when the socket dropped was never saved.
         if (this.isRecording() || this.hasActiveRecorder()) {
             this.saveRecording('Socket disconnected');
         }
