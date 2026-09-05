@@ -1916,8 +1916,14 @@ class RoomClient {
         window.localStorage.isReconnected = true;
         console.log('Disconnected.');
 
-        // Immediately save recording if active
-        if (this.isRecording()) {
+        // Immediately save recording if there is one, a paused one included.
+        //
+        // `pauseRecording()` sets `_isRecording = false` while leaving the MediaRecorder alive
+        // and holding everything captured so far, so `isRecording()` alone answers no for a
+        // recording that very much exists. `saveRecording()` already guards itself with
+        // `_isRecording || hasActiveRecorder()`; this caller used the narrower test, so a
+        // recording that happened to be paused when the socket dropped was never saved.
+        if (this.isRecording() || this.hasActiveRecorder()) {
             this.saveRecording('Socket disconnected');
         }
 
