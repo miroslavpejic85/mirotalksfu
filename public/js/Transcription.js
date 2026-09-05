@@ -352,6 +352,11 @@ class Transcription {
         return this.isPinned;
     }
 
+    setPinControlState(isActive) {
+        transcriptionTogglePinBtn.classList.toggle('is-active', isActive);
+        transcriptionTogglePinBtn.setAttribute('aria-pressed', String(isActive));
+    }
+
     pinned() {
         if (!rc.isVideoPinned) {
             rc.videoMediaContainer.style.top = 0;
@@ -361,7 +366,7 @@ class Transcription {
         this.pin();
         this.isPinned = true;
         rc.refreshVideoPinLayout();
-        setColor(transcriptionTogglePinBtn, 'lime');
+        this.setPinControlState(true);
         resizeVideoMedia();
         transcriptionRoom.style.resize = 'none';
         if (!rc.isMobileDevice) rc.makeUnDraggable(transcriptionRoom, transcriptionHeader);
@@ -396,7 +401,7 @@ class Transcription {
         this.center();
         this.isPinned = false;
         rc.refreshVideoPinLayout();
-        setColor(transcriptionTogglePinBtn, 'white');
+        this.setPinControlState(false);
         rc.resizeVideoMenuBar();
         resizeVideoMedia();
         resizeTranscriptionRoom();
