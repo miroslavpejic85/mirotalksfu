@@ -9,7 +9,7 @@
 
 /* Chat Room */
 .chat-container {
-    --chat-accent: #59c2ff;
+    --chat-accent: var(--room-switch-accent, #4678f9);
     --chat-toolbar-surface: rgba(18, 18, 21, 0.88);
     --chat-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 5;
@@ -469,9 +469,9 @@
 
 #chatTogglePin.is-active,
 #chatTogglePin[aria-pressed='true'] {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--chat-accent) 18%, transparent);
     color: var(--chat-accent) !important;
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chat-accent) 40%, transparent);
 }
 
 .chat-menu-tools .dropdown-toggle::after {

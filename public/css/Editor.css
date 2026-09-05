@@ -1,5 +1,5 @@
 .editor-container {
-    --editor-accent: #59c2ff;
+    --editor-accent: var(--room-switch-accent, #4678f9);
     --editor-toolbar-surface: rgba(18, 18, 21, 0.88);
     --editor-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 5;
@@ -56,7 +56,7 @@
     height: 30px;
     flex: 0 0 30px;
     border-radius: 7px;
-    background: rgba(89, 194, 255, 0.14);
+    background: color-mix(in srgb, var(--editor-accent) 14%, transparent);
     color: var(--editor-accent);
 }
 
@@ -121,9 +121,9 @@
 
 .editor-header-btns button.is-active,
 .editor-header-btns button[aria-pressed='true'] {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--editor-accent) 18%, transparent);
     color: var(--editor-accent) !important;
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--editor-accent) 40%, transparent);
 }
 
 .editor-compact-menu {

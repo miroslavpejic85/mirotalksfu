@@ -1,5 +1,5 @@
 .pls-container {
-    --poll-accent: #59c2ff;
+    --poll-accent: var(--room-switch-accent, #4678f9);
     --poll-toolbar-surface: rgba(18, 18, 21, 0.88);
     --poll-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 5;
@@ -57,7 +57,7 @@
     height: 30px;
     flex: 0 0 30px;
     border-radius: 7px;
-    background: rgba(89, 194, 255, 0.14);
+    background: color-mix(in srgb, var(--poll-accent) 14%, transparent);
     color: var(--poll-accent);
 }
 
@@ -122,9 +122,9 @@
 
 .poll-header-btns button.is-active,
 .poll-header-btns button[aria-pressed='true'] {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--poll-accent) 18%, transparent);
     color: var(--poll-accent) !important;
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--poll-accent) 40%, transparent);
 }
 
 .polls {

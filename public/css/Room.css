@@ -3260,7 +3260,7 @@ body {
 --------------------------------------------------------------*/
 
 .transcription-room {
-    --transcription-accent: #59c2ff;
+    --transcription-accent: var(--room-switch-accent, #4678f9);
     --transcription-toolbar-surface: rgba(18, 18, 21, 0.88);
     --transcription-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 5;
@@ -3331,7 +3331,7 @@ body {
     padding: 0;
     border: none;
     border-radius: 7px;
-    background: rgba(89, 194, 255, 0.14);
+    background: color-mix(in srgb, var(--transcription-accent) 14%, transparent);
     color: var(--transcription-accent);
 }
 
@@ -3400,9 +3400,9 @@ body {
 
 #transcriptionTogglePinBtn.is-active,
 #transcriptionTogglePinBtn[aria-pressed='true'] {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--transcription-accent) 18%, transparent);
     color: var(--transcription-accent) !important;
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--transcription-accent) 40%, transparent);
 }
 
 .transcription-menu-tools .dropdown-toggle::after {
@@ -3618,7 +3618,7 @@ body {
 /* Emoji Picker (Room) */
 
 .roomEmoji {
-    --room-emoji-accent: #59c2ff;
+    --room-emoji-accent: var(--room-switch-accent, #4678f9);
     --room-emoji-toolbar-surface: rgba(18, 18, 21, 0.88);
     --room-emoji-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 18;
@@ -3677,7 +3677,7 @@ body {
     height: 30px;
     flex: 0 0 30px;
     border-radius: 7px;
-    background: rgba(89, 194, 255, 0.14);
+    background: color-mix(in srgb, var(--room-emoji-accent) 14%, transparent);
     color: var(--room-emoji-accent);
 }
 
@@ -3754,9 +3754,9 @@ body {
 }
 
 .room-emoji-tab.active {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--room-emoji-accent) 18%, transparent);
     color: var(--room-emoji-accent);
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--room-emoji-accent) 40%, transparent);
 }
 
 .room-emoji-mart {
@@ -5390,7 +5390,7 @@ button:hover {
 --------------------------------------------------------------*/
 
 #whiteboard {
-    --wb-accent: #59c2ff;
+    --wb-accent: var(--room-switch-accent, #4678f9);
     --wb-toolbar-surface: rgba(18, 18, 21, 0.88);
     --wb-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 4;
@@ -5444,7 +5444,7 @@ button:hover {
     height: 30px;
     flex: 0 0 30px;
     border-radius: 7px;
-    background: rgba(89, 194, 255, 0.14);
+    background: color-mix(in srgb, var(--wb-accent) 14%, transparent);
     color: var(--wb-accent);
 }
 
@@ -5509,9 +5509,9 @@ button:hover {
 
 .whiteboard-header-options button.is-active,
 .whiteboard-header-options button[aria-pressed='true'] {
-    background: rgba(89, 194, 255, 0.18);
+    background: color-mix(in srgb, var(--wb-accent) 18%, transparent);
     color: var(--wb-accent) !important;
-    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--wb-accent) 40%, transparent);
 }
 
 .whiteboard-color-control {
