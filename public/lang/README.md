@@ -36,15 +36,19 @@ Notes on behavior:
 
 ## How to add a language
 
-1. Copy the English template to a new file named after the language code used in
-   `UI_LANGUAGE`, e.g. Hungarian:
+Use `public/lang/en.json` as the starting point for every translation. It contains the
+current in-room UI strings, grouped by namespace, with each English source string used as
+both the key and the initial value.
+
+1. Copy `en.json` to a new file named after the language code used in `UI_LANGUAGE`, e.g.
+   Hungarian:
 
     ```bash
     cp public/lang/en.json public/lang/hu.json
     ```
 
-2. Open `hu.json` and replace each **value** with the human translation. Leave the **key**
-   (the English source string) unchanged.
+2. Open `hu.json` and translate each **value**. Leave every **key** (the English source
+   string) unchanged.
 
     ```json
     {
@@ -104,5 +108,5 @@ depending on where it appears (e.g. "Cancel" as a dialog button vs. a tooltip):
 node app/src/scripts/extract-ui-lang.js
 ```
 
-The output is a starting point, review it by hand before committing. Existing per-language
-files are never touched by the script.
+Review the regenerated `en.json` before using it as the starting point for new translations
+or syncing existing ones. Existing per-language files are never touched by the script.
