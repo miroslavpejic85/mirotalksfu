@@ -2528,21 +2528,30 @@
 
         <section id="pollRoom" class="pls-container fadein hidden">
             <div id="pollHeader" class="poll-header">
-                <h2 class="poll-h2">Polls</h2>
+                <div class="poll-header-title">
+                    <span class="poll-title-mark" aria-hidden="true">
+                        <i class="fas fa-square-poll-horizontal"></i>
+                    </span>
+                    <span class="poll-title-text">Polls</span>
+                </div>
                 <div class="poll-header-btns">
-                    <button id="pollTogglePin" class="hidden">
-                        <i class="fas fa-map-pin"></i>
-                    </button>
-                    <button id="pollMaxButton" class="hidden">
-                        <i class="fas fa-expand"></i>
-                    </button>
-                    <button id="pollMinButton" class="hidden">
-                        <i class="fas fa-compress"></i>
-                    </button>
-                    <button id="pollSaveButton">
-                        <i class="fas fa-floppy-disk"></i>
-                    </button>
-                    <button id="pollCloseBtn">
+                    <div class="poll-tool-group poll-layout-tools" aria-label="Panel layout">
+                        <button id="pollTogglePin" class="hidden" aria-label="Pin polls" aria-pressed="false">
+                            <i class="fas fa-map-pin"></i>
+                        </button>
+                        <button id="pollMaxButton" class="hidden" aria-label="Maximize polls">
+                            <i class="fas fa-expand"></i>
+                        </button>
+                        <button id="pollMinButton" class="hidden" aria-label="Restore polls">
+                            <i class="fas fa-compress"></i>
+                        </button>
+                    </div>
+                    <div class="poll-tool-group poll-document-tools" aria-label="Poll actions">
+                        <button id="pollSaveButton" aria-label="Save poll results">
+                            <i class="fas fa-floppy-disk"></i>
+                        </button>
+                    </div>
+                    <button id="pollCloseBtn" aria-label="Close polls">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>

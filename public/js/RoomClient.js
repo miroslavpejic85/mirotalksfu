@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.35
+ * @version 2.4.36
  *
  */
 
@@ -7654,6 +7654,11 @@ class RoomClient {
         this.sound('click');
     }
 
+    setPollControlState(button, isActive) {
+        button.classList.toggle('is-active', isActive);
+        button.setAttribute('aria-pressed', String(isActive));
+    }
+
     pollPin() {
         if (!this.isVideoPinned) {
             this.videoMediaContainerPin();
@@ -7661,7 +7666,7 @@ class RoomClient {
         this.pollPinned();
         this.isPollPinned = true;
         this.refreshVideoPinLayout();
-        setColor(pollTogglePin, 'lime');
+        this.setPollControlState(pollTogglePin, true);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         pollRoom.style.resize = 'none';
@@ -7678,7 +7683,7 @@ class RoomClient {
         this.pollCenter();
         this.isPollPinned = false;
         this.refreshVideoPinLayout();
-        setColor(pollTogglePin, 'white');
+        this.setPollControlState(pollTogglePin, false);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
         if (!this.isMobileDevice) this.makeDraggable(pollRoom, pollHeader);
