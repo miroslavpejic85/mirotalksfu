@@ -3626,7 +3626,7 @@ body {
     display: none;
     container-type: inline-size;
     container-name: room-emoji;
-    width: min(352px, calc(100vw - 16px));
+    width: min(370px, calc(100vw - 16px));
     max-height: calc(100dvh - 16px);
     padding: 8px;
     background: var(--body-bg);
