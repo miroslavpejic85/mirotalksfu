@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.33
+ * @version 2.4.34
  *
  */
 
@@ -3633,6 +3633,7 @@ function handleSelects() {
     };
     whiteboardGhostButton.onclick = (e) => {
         wbIsBgTransparent = !wbIsBgTransparent;
+        setWhiteboardControlState(whiteboardGhostButton, wbIsBgTransparent);
         wbIsBgTransparent ? wbCanvasBackgroundColor('rgba(0, 0, 0, 0.100)') : setTheme();
     };
     whiteboardGridBtn.onclick = (e) => {
@@ -5741,7 +5742,7 @@ function drawCanvasGrid() {
     wbCanvas.add(gridGroup);
     gridGroup.sendToBack();
     wbCanvas.renderAll();
-    setColor(whiteboardGridBtn, 'green');
+    setWhiteboardControlState(whiteboardGridBtn, true);
 }
 
 function createGridLine(x1, y1, x2, y2) {
@@ -5759,7 +5760,7 @@ function removeCanvasGrid() {
     });
     wbGridLines = [];
     wbCanvas.renderAll();
-    setColor(whiteboardGridBtn, 'white');
+    setWhiteboardControlState(whiteboardGridBtn, false);
 }
 
 function toggleCanvasGrid() {
@@ -5784,27 +5785,32 @@ function whiteboardResetAllMode() {
     whiteboardIsEraserMode(false);
 }
 
+function setWhiteboardControlState(button, isActive) {
+    button.classList.toggle('is-active', isActive);
+    button.setAttribute('aria-pressed', String(isActive));
+}
+
 function whiteboardIsPencilMode(status) {
     wbCanvas.isDrawingMode = status;
     wbIsPencil = status;
-    setColor(whiteboardPencilBtn, wbIsPencil ? 'green' : 'white');
+    setWhiteboardControlState(whiteboardPencilBtn, wbIsPencil);
 }
 
 function whiteboardIsVanishingMode(status) {
     wbCanvas.isDrawingMode = status;
     wbIsVanishing = status;
     wbCanvas.freeDrawingBrush.color = wbIsVanishing ? 'yellow' : wbDrawingColorEl.value;
-    setColor(whiteboardVanishingBtn, wbIsVanishing ? 'green' : 'white');
+    setWhiteboardControlState(whiteboardVanishingBtn, wbIsVanishing);
 }
 
 function whiteboardIsObjectMode(status) {
     wbIsObject = status;
-    setColor(whiteboardObjectBtn, status ? 'green' : 'white');
+    setWhiteboardControlState(whiteboardObjectBtn, status);
 }
 
 function whiteboardIsEraserMode(status) {
     wbIsEraser = status;
-    setColor(whiteboardEraserBtn, wbIsEraser ? 'green' : 'white');
+    setWhiteboardControlState(whiteboardEraserBtn, wbIsEraser);
 }
 
 function whiteboardAddObj(type) {
@@ -8243,7 +8249,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.33',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.34',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

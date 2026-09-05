@@ -5183,6 +5183,9 @@ button:hover {
 --------------------------------------------------------------*/
 
 #whiteboard {
+    --wb-accent: #59c2ff;
+    --wb-toolbar-surface: rgba(18, 18, 21, 0.88);
+    --wb-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 4;
     position: absolute;
     container-type: inline-size;
@@ -5196,69 +5199,143 @@ button:hover {
     background: var(--wb-bg);
     border: var(--border);
     box-shadow: var(--box-shadow);
-    border-radius: 14px;
+    border-radius: 10px;
     box-sizing: border-box;
-    /* overflow: hidden; */
 }
-
-/* Mobile optimizations */
-@media (max-width: 768px) {
-    #whiteboard {
-        padding: 5px;
-        border-radius: 10px;
-    }
-
-    .whiteboard-header {
-        padding: 2px;
-    }
-
-    .whiteboard-header-title button,
-    .whiteboard-header-options button {
-        padding: 8px;
-        font-size: 0.85rem;
-        min-width: 40px;
-        height: 40px;
-    }
-}
-
-/* #wbCanvas {
-    border: var(--border);
-} */
 
 .whiteboard-header {
+    position: relative;
+    z-index: 2;
     display: flex;
-    background: rgba(0, 0, 0, 0.2);
-    border-radius: 14px;
-    padding: 5px;
-    color: #fff;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    min-height: 48px;
+    padding: 5px 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: var(--wb-toolbar-surface);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
+    backdrop-filter: blur(14px);
+    color: #ffffff;
     cursor: move;
-}
-
-.whiteboard-header button {
-    padding: 8px;
-    border-radius: 10px;
-    border: none !important;
 }
 
 .whiteboard-header-title {
     display: flex;
     align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0 4px;
 }
 
-.whiteboard-header-title button {
-    font-size: 1.2rem;
-    height: 36px;
+.whiteboard-title-mark {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    flex: 0 0 30px;
+    border-radius: 7px;
+    background: rgba(89, 194, 255, 0.14);
+    color: var(--wb-accent);
+}
+
+.whiteboard-title-text {
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0;
 }
 
 .whiteboard-header-options {
     display: flex;
     align-items: center;
-    gap: 4px;
+    justify-content: flex-end;
+    gap: 5px;
+    min-width: 0;
     margin-left: auto;
 }
 
+.whiteboard-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 36px;
+    padding: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    background: var(--wb-control-surface);
+}
+
+.whiteboard-header-title button,
 .whiteboard-header-options button {
-    height: 36px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    min-width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none !important;
+    border-radius: 6px;
+    background: transparent;
+    color: #ffffff;
+    font-size: 0.88rem;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.whiteboard-header-title button:hover,
+.whiteboard-header-options button:hover {
+    background: rgba(255, 255, 255, 0.11);
+}
+
+.whiteboard-header-title button:focus-visible,
+.whiteboard-header-options button:focus-visible,
+.whiteboard-color-control:focus-within {
+    outline: 2px solid var(--wb-accent);
+    outline-offset: 2px;
+}
+
+.whiteboard-header-options button.is-active,
+.whiteboard-header-options button[aria-pressed='true'] {
+    background: rgba(89, 194, 255, 0.18);
+    color: var(--wb-accent) !important;
+    box-shadow: inset 0 0 0 1px rgba(89, 194, 255, 0.4);
+}
+
+.whiteboard-color-control {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 32px;
+    padding: 0 7px;
+    border-radius: 6px;
+    color: rgba(255, 255, 255, 0.68);
+    font-size: 0.65rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.whiteboard-color-control:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #ffffff;
+}
+
+.whiteboard-close-button:hover {
+    background: rgba(255, 92, 92, 0.18) !important;
+    color: #ff8a8a !important;
+}
+
+.whiteboard-responsive-action span {
+    display: none;
+}
+
+.whiteboard-responsive-action i {
+    pointer-events: none;
 }
 
 .whiteboard-header-options .dropdown {
@@ -5268,19 +5345,21 @@ button:hover {
 
 .whiteboard-header-options .dropdown-menu {
     max-height: var(--wb-height) !important;
-    min-width: 200px;
-    max-width: 260px;
-    padding-left: 6px;
-    padding-right: 6px;
+    width: 264px;
+    max-width: calc(100vw - 16px);
+    padding: 8px;
+    box-sizing: border-box;
 }
 
 .whiteboard-header-options .dropdown-menu button {
+    justify-content: flex-start;
+    gap: 8px;
     width: 100%;
     min-width: 0;
     height: auto;
     min-height: 36px;
-    white-space: normal;
-    overflow-wrap: anywhere;
+    padding: 9px 10px;
+    white-space: nowrap;
     line-height: 1.3;
 }
 .whiteboard-header-options .dropdown-menu button:hover {
@@ -5310,10 +5389,10 @@ button:hover {
         min-width: 0;
     }
 
-    .whiteboard-header-options > #whiteboardGridBtn,
-    .whiteboard-header-options > #whiteboardVanishingBtn,
-    .whiteboard-header-options > #whiteboardObjectBtn,
-    .whiteboard-header-options > #whiteboardEraserBtn {
+    .whiteboard-tool-group > #whiteboardGridBtn,
+    .whiteboard-tool-group > #whiteboardVanishingBtn,
+    .whiteboard-tool-group > #whiteboardObjectBtn,
+    .whiteboard-tool-group > #whiteboardEraserBtn {
         display: none !important;
     }
 
@@ -5323,7 +5402,7 @@ button:hover {
 }
 
 @container whiteboard (max-width: 340px) {
-    .whiteboard-header-options > #whiteboardGhostButton {
+    .whiteboard-tool-group > #whiteboardGhostButton {
         display: none !important;
     }
 
@@ -5390,14 +5469,13 @@ button:hover {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
-    box-sizing: border-box;
-    padding: 3px;
-    width: 28px;
-    height: 28px;
-    margin: 2px;
+    padding: 0;
+    width: 18px;
+    height: 18px;
+    margin: 0;
     border-radius: 50%;
-    border: none;
-    box-shadow: none;
+    border: 2px solid rgba(255, 255, 255, 0.28);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     background: transparent;
     cursor: pointer;
     transition:
@@ -5408,21 +5486,13 @@ button:hover {
     vertical-align: middle;
 }
 
-@media (max-width: 768px) {
-    .whiteboardColorPicker {
-        width: 32px;
-        height: 32px;
-        padding: 4px;
-    }
-}
-
 .whiteboardColorPicker:hover {
     box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.18);
     border: 2px solid #66beff;
     transform: scale(1.12);
 }
 .whiteboardColorPicker::-webkit-color-swatch {
-    border: 2px solid #afadad38;
+    border: none;
     border-radius: 50%;
     padding: 0;
 }
@@ -5432,7 +5502,7 @@ button:hover {
     padding: 0;
 }
 .whiteboardColorPicker::-moz-color-swatch {
-    border: 2px solid #afadad38;
+    border: none;
     border-radius: 50%;
     padding: 0;
 }
@@ -5442,7 +5512,7 @@ button:hover {
     padding: 0;
 }
 .whiteboardColorPicker::color-swatch {
-    border: 2px solid #afadad38;
+    border: none;
     border-radius: 50%;
     padding: 0;
 }
@@ -5450,6 +5520,83 @@ button:hover {
     border: none;
     border-radius: 50%;
     padding: 0;
+}
+
+@media (max-width: 768px) {
+    #whiteboard {
+        padding: 5px;
+        border-radius: 8px;
+    }
+
+    .whiteboard-header {
+        gap: 4px;
+        min-height: 38px;
+        padding: 2px;
+    }
+
+    .whiteboard-title-text,
+    .whiteboard-color-control > span {
+        display: none;
+    }
+
+    .whiteboard-title-mark {
+        width: 28px;
+        height: 28px;
+        flex-basis: 28px;
+    }
+
+    .whiteboard-header-title {
+        gap: 2px;
+        padding: 0;
+    }
+
+    .whiteboard-tool-group {
+        min-height: 30px;
+        padding: 0;
+        border: none;
+        background: transparent;
+    }
+
+    .whiteboard-canvas-tools {
+        order: 1;
+    }
+
+    .whiteboard-drawing-tools {
+        order: 2;
+    }
+
+    .whiteboard-history-tools {
+        order: 3;
+    }
+
+    .whiteboard-header-options > .dropdown {
+        order: 4;
+    }
+
+    .whiteboard-close-button {
+        order: 5;
+    }
+
+    .whiteboard-header-title button,
+    .whiteboard-header-options button {
+        width: 28px;
+        min-width: 28px;
+        height: 28px;
+        padding: 5px;
+        font-size: 0.75rem;
+    }
+
+    .whiteboardColorPicker {
+        width: 18px;
+        height: 18px;
+    }
+
+    .whiteboard-color-control {
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        justify-content: center;
+    }
 }
 
 /* Whiteboard Shortcuts Styles */
