@@ -723,14 +723,23 @@
                         </table>
                         <hr />
                         <table class="settingsTable">
-                            <tr>
+                            <tr class="room-id-row">
                                 <td>
                                     <div class="title">
                                         <i class="fa-solid fa-person-shelter"></i>
-                                        <p id="roomId" class="cp">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</p>
+                                        <p id="roomId">xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx</p>
                                     </div>
                                 </td>
-                                <td></td>
+                                <td>
+                                    <button
+                                        id="copyRoomUrlBtn"
+                                        class="settings-icon-btn"
+                                        type="button"
+                                        aria-label="Copy room link"
+                                    >
+                                        <i class="fa-regular fa-copy" aria-hidden="true"></i>
+                                    </button>
+                                </td>
                             </tr>
                             <tr>
                                 <td>

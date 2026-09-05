@@ -235,6 +235,7 @@ const settingsExtraDropdown = getId('settingsExtraDropdown');
 const settingsExtraToggle = getId('settingsExtraToggle');
 const settingsExtraMenu = getId('settingsExtraMenu');
 const noExtraButtons = getId('noExtraButtons');
+const copyRoomUrlBtn = getId('copyRoomUrlBtn');
 
 const exitDropdown = getId('exitDropdown');
 const exitMenu = getId('exitMenu');
@@ -457,7 +458,8 @@ async function initClient() {
         setTippy('switchKeepButtonsVisible', 'Keep buttons always visible', 'right');
         setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
         setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
-        setTippy('roomId', 'Room name (click to copy)', 'right');
+        setTippy('roomId', 'Room name', 'right');
+        setTippy('copyRoomUrlBtn', isMobileDevice ? 'Share room link' : 'Copy room link', 'left');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy(
             'switchHostOnlyRecording',
@@ -2488,7 +2490,7 @@ function handleButtons() {
     speakerTestBtn.onclick = () => {
         playSpeaker(speakerSelect?.value, 'speaker');
     };
-    roomId.onclick = () => {
+    copyRoomUrlBtn.onclick = () => {
         isMobileDevice ? shareRoom(true) : copyRoomURL();
     };
     roomSendEmail.onclick = () => {

@@ -1875,6 +1875,35 @@ body {
     align-items: center;
 }
 
+#mySettings .room-id-row td:last-child {
+    width: 140px;
+    padding-left: 0;
+    text-align: left;
+}
+
+#mySettings .settings-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 34px;
+    height: 34px;
+    margin-left: 15px;
+    padding: 0;
+    border: 1px solid var(--room-border);
+    background: transparent;
+    color: var(--fg-1);
+}
+
+#mySettings .settings-icon-btn:hover {
+    background: var(--room-control-hover);
+    transform: none;
+}
+
+#mySettings .settings-icon-btn i {
+    margin: 0;
+    padding: 0;
+}
+
 /* Optional alternating row background */
 /* .settingsTable tr:nth-child(even) {
     background: var(--select-bg);
