@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.40
+ * @version 2.4.41
  *
  */
 
@@ -459,7 +459,7 @@ async function initClient() {
         setTippy('switchKeepAwake', 'Prevent the device from sleeping (if supported)', 'right');
         setTippy('switchChatPin', 'Auto pin chat when opened', 'right');
         setTippy('roomId', 'Room name', 'right');
-        setTippy('copyRoomUrlBtn', isMobileDevice ? 'Share room link' : 'Copy room link', 'left');
+        setTippy('copyRoomUrlBtn', 'Share room link', 'left');
         setTippy('sessionTime', 'Session time', 'right');
         setTippy(
             'switchHostOnlyRecording',
@@ -2491,7 +2491,7 @@ function handleButtons() {
         playSpeaker(speakerSelect?.value, 'speaker');
     };
     copyRoomUrlBtn.onclick = () => {
-        isMobileDevice ? shareRoom(true) : copyRoomURL();
+        navigator.share ? shareRoom(true) : copyRoomURL();
     };
     roomSendEmail.onclick = () => {
         shareRoomByEmail();
@@ -8281,7 +8281,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.40',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.41',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
