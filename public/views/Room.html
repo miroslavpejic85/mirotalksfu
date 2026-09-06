@@ -2827,27 +2827,48 @@
         <section id="breakoutPanel" class="breakout-panel fadein center hidden">
             <header id="breakoutPanelHeader" class="breakout-panel-header">
                 <div class="breakout-panel-title">
-                    <i class="fas fa-object-ungroup breakout-accent"></i>
-                    <span>Breakout Rooms</span>
+                    <span class="breakout-title-mark" aria-hidden="true">
+                        <i class="fas fa-object-ungroup"></i>
+                    </span>
+                    <span class="breakout-title-text">Breakout Rooms</span>
                 </div>
                 <div class="breakout-panel-header-actions">
-                    <button id="breakoutTogglePin" class="fas fa-map-pin hidden"></button>
-                    <button id="breakoutRefreshBtn" class="fas fa-sync-alt"></button>
-                    <button id="breakoutDeleteAllBtn" class="breakout-header-action-btn hidden" type="button">
-                        <i class="fas fa-trash"></i>
-                        <span>Delete all</span>
-                    </button>
-                    <button id="breakoutPanelCloseBtn" class="fas fa-times"></button>
+                    <div class="breakout-tool-group" aria-label="Breakout room controls">
+                        <button
+                            id="breakoutTogglePin"
+                            class="fas fa-map-pin hidden"
+                            aria-label="Toggle pin"
+                            aria-pressed="false"
+                        ></button>
+                        <button id="breakoutRefreshBtn" class="fas fa-sync-alt" aria-label="Refresh rooms"></button>
+                        <button
+                            id="breakoutDeleteAllBtn"
+                            class="breakout-header-action-btn hidden"
+                            type="button"
+                            aria-label="Delete all rooms"
+                        >
+                            <i class="fas fa-trash"></i>
+                        </button>
+                        <button
+                            id="breakoutPanelCloseBtn"
+                            class="fas fa-times"
+                            aria-label="Close breakout rooms"
+                        ></button>
+                    </div>
                 </div>
             </header>
             <main class="breakout-panel-body">
                 <!-- Create Room -->
                 <div class="breakout-create-section">
                     <div class="breakout-create-row">
-                        <button id="breakoutAddRoomBtn" class="breakout-action-btn">
+                        <button id="breakoutAddRoomBtn" class="breakout-action-btn" type="button">
                             <i class="fas fa-plus"></i> Add Room
                         </button>
-                        <button id="breakoutLaunchBtn" class="breakout-action-btn breakout-launch-btn hidden">
+                        <button
+                            id="breakoutLaunchBtn"
+                            class="breakout-action-btn breakout-launch-btn hidden"
+                            type="button"
+                        >
                             <i class="fas fa-rocket"></i> Launch
                         </button>
                     </div>
@@ -2866,7 +2887,7 @@
                 <!-- Actions -->
                 <div id="breakoutActionsBar" class="breakout-actions-bar hidden">
                     <div class="breakout-actions-row">
-                        <button id="breakoutEndAllBtn" class="breakout-end-all-btn hidden">
+                        <button id="breakoutEndAllBtn" class="breakout-end-all-btn hidden" type="button">
                             <i class="fas fa-stop-circle"></i> End All Sessions
                         </button>
                     </div>
@@ -2881,7 +2902,9 @@
                         <button
                             id="breakoutBroadcastAllBtn"
                             class="breakout-broadcast-all-btn"
+                            type="button"
                             title="Send to all rooms"
+                            aria-label="Send message to all rooms"
                         >
                             <i class="fas fa-paper-plane"></i>
                         </button>
@@ -2895,6 +2918,7 @@
                             id="breakoutAutoAssignBtn"
                             class="breakout-auto-assign-btn hidden"
                             title="Auto-assign participants randomly"
+                            type="button"
                         >
                             <i class="fas fa-random"></i> Auto-assign
                         </button>
@@ -2904,6 +2928,7 @@
                         class="breakout-participant-search"
                         type="text"
                         placeholder="Search participants..."
+                        aria-label="Search participants"
                         maxlength="100"
                     />
                     <div id="breakoutParticipantsList" class="breakout-participants-list"></div>
@@ -3210,17 +3235,29 @@ Note</textarea>
                     ></span>
                 </div>
                 <div class="breakout-room-actions">
-                    <button class="breakout-room-join-btn" data-template-attr-onclick="joinOnClick">
+                    <button
+                        class="breakout-room-join-btn"
+                        type="button"
+                        aria-label="Join breakout room"
+                        data-template-attr-onclick="joinOnClick"
+                    >
                         <i class="fas fa-sign-in-alt"></i> Join
                     </button>
                     <button
                         class="breakout-room-msg-btn"
+                        type="button"
+                        aria-label="Send message to this room"
                         data-template-attr-onclick="messageOnClick"
                         title="Send message to this room"
                     >
                         <i class="fas fa-paper-plane"></i>
                     </button>
-                    <button class="breakout-room-remove-btn" data-template-attr-onclick="removeOnClick">
+                    <button
+                        class="breakout-room-remove-btn"
+                        type="button"
+                        aria-label="Remove breakout room"
+                        data-template-attr-onclick="removeOnClick"
+                    >
                         <i class="fas fa-times"></i>
                     </button>
                 </div>

@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.41
+ * @version 2.4.42
  *
  */
 
@@ -499,6 +499,9 @@ async function initClient() {
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
         setTippy('breakoutTogglePin', 'Toggle pin', 'bottom');
+        setTippy('breakoutRefreshBtn', 'Refresh rooms', 'bottom');
+        setTippy('breakoutDeleteAllBtn', 'Delete all rooms', 'bottom');
+        setTippy('breakoutPanelCloseBtn', 'Close', 'bottom');
         setTippy('pollMaxButton', 'Maximize', 'bottom');
         setTippy('pollMinButton', 'Minimize', 'bottom');
         setTippy('pollSaveButton', 'Save results', 'bottom');
@@ -8281,7 +8284,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.41',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.42',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
