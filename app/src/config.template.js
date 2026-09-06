@@ -1312,7 +1312,7 @@ module.exports = {
                         <a
                             class="about-primary-action"
                             data-umami-event="About button"
-                            href="${process.env.SUPPORT_URL || 'https://docs.mirotalk.com/sites/sfu.html'}"
+                            href="${process.env.SUPPORT_URL || 'https://docs.mirotalk.com/sites/sfu'}"
                             target="_blank"
                             rel="noopener noreferrer"
                         >
