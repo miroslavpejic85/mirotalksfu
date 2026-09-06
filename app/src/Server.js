@@ -63,7 +63,7 @@ dev dependencies: {
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.42
+ * @version 2.4.43
  *
  */
 
@@ -344,6 +344,14 @@ const hostCfg = {
     api_room_exists: config?.security?.host?.api_room_exists,
     presenters: config?.security?.host?.presenters,
 };
+
+// Validate host user passwords if host protection or user authentication is enabled
+if (
+    (hostCfg.protected || hostCfg.user_auth) &&
+    (!Array.isArray(hostCfg.users) || hostCfg.users.some((user) => !user || !Validator.isValidPassword(user.password)))
+) {
+    throw new Error('HOST_USERS passwords must contain between 1 and 36 characters');
+}
 
 const widget = {
     enabled: config?.ui?.brand?.widget?.enabled,
@@ -1253,6 +1261,11 @@ function startServer() {
         if (!username || !password) {
             log.warn('Login failed: missing username or password', req.body);
             return res.status(400).json({ message: 'Missing username or password' });
+        }
+
+        if (!Validator.isValidPassword(password)) {
+            log.warn('Login failed: invalid password length', { ip });
+            return res.status(400).json({ message: 'Invalid password' });
         }
 
         const isPeerValid = await isAuthPeer(username, password);
@@ -5276,6 +5289,10 @@ function startServer() {
     }
 
     async function isAuthPeer(username, password) {
+        if (!Validator.isValidPassword(password)) {
+            return false;
+        }
+
         if (hostCfg.users_from_db && hostCfg.users_api_endpoint) {
             try {
                 // Using either email or username, as the username can also be an email here.

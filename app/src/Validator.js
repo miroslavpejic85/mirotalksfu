@@ -6,6 +6,12 @@ const dns = require('dns').promises;
 
 const checkXSS = require('./XSS.js');
 
+const MAX_PASSWORD_LENGTH = 36;
+
+function isValidPassword(input) {
+    return typeof input === 'string' && input.length > 0 && input.length <= MAX_PASSWORD_LENGTH;
+}
+
 // Hostnames that are internal by definition and must never be fetched server side
 const BLOCKED_HOSTNAMES = new Set([
     'localhost',
@@ -300,6 +306,7 @@ function sanitizeWbCanvasJson(payload, onDrop) {
 }
 
 module.exports = {
+    isValidPassword,
     isValidRoomName,
     isValidRecFileNameFormat,
     hasPathTraversal,

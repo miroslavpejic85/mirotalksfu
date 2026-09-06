@@ -7,6 +7,20 @@ require('should');
 const checkValidator = require('../app/src/Validator');
 
 describe('test-Validator', () => {
+    describe('0. Validate passwords', () => {
+        it('should accept non-empty passwords up to 36 characters', () => {
+            checkValidator.isValidPassword('password').should.be.true();
+            checkValidator.isValidPassword('a'.repeat(36)).should.be.true();
+        });
+
+        it('should reject empty, oversized, and non-string passwords', () => {
+            checkValidator.isValidPassword('').should.be.false();
+            checkValidator.isValidPassword('a'.repeat(37)).should.be.false();
+            checkValidator.isValidPassword(null).should.be.false();
+            checkValidator.isValidPassword(123).should.be.false();
+        });
+    });
+
     describe('1. Handling invalid room name', () => {
         it('should return false for non-string inputs', () => {
             checkValidator.isValidRoomName(123).should.be.false();
