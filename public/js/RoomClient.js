@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.44
+ * @version 2.4.45
  *
  */
 
@@ -5655,7 +5655,7 @@ class RoomClient {
                 }
                 this.resizeVideoMenuBar();
                 handleAspectRatio();
-                if (this.isFollowMeActive && isPresenter) {
+                if (this.isFollowMeActive && isPresenter && !this.isApplyingDominantSpeaker) {
                     if (this.isVideoPinned) {
                         const peerId = videoPlayer.getAttribute('name');
                         this.emitFollowMe({ action: 'pin', peerId: peerId });
@@ -11266,12 +11266,37 @@ class RoomClient {
         }, timeout); // 10 seconds
     }
 
+    handleDominantSpeakerPin(peerId) {
+        const videoEl = this.getVideoElementByPeerId(peerId);
+        const pinButton = videoEl ? this.getId(`${videoEl.id}__pin`) : null;
+        if (!pinButton || this.pinnedVideoPlayerId === videoEl.id) return;
+
+        this.isApplyingDominantSpeaker = true;
+        this.isApplyingParticipantViewMode = true;
+        try {
+            this.clearVideoFocusMode();
+
+            if (this.isVideoPinned && this.pinnedVideoPlayerId) {
+                const pinnedButton = this.getId(`${this.pinnedVideoPlayerId}__pin`);
+                if (pinnedButton) pinnedButton.click();
+            }
+            pinButton.click();
+            this.toggleVideoPin(participantViewMode.value);
+        } finally {
+            this.isApplyingParticipantViewMode = false;
+            this.isApplyingDominantSpeaker = false;
+        }
+    }
+
     handleDominantSpeaker(data) {
         console.log('Dominant Speaker', data);
         const { peer_id, producer_id } = data;
         this.handleDominantSpeakerHighlight(peer_id);
         if (this.dominantSpeaker && switchDominantSpeakerFocus.checked) {
-            this.handleDominantSpeakerFocus(producer_id);
+            const viewMode = participantViewMode.value;
+            viewMode.startsWith('speaker-') || viewMode === 'livestream'
+                ? this.handleDominantSpeakerPin(peer_id)
+                : this.handleDominantSpeakerFocus(producer_id);
         }
     }
 
@@ -11601,12 +11626,27 @@ class RoomClient {
                 ? applyParticipantGridVisibility()
                 : resizeVideoMedia();
         }
-        if (this.isFollowMeActive && isPresenter) {
+        if (this.isFollowMeActive && isPresenter && !this.isApplyingDominantSpeaker) {
             const videoEl = videoContainer ? videoContainer.querySelector('video[name]') : null;
             const peerId = videoEl ? videoEl.getAttribute('name') : null;
             if (peerId) {
                 this.emitFollowMe({ action: isHideALLVideosActive ? 'focus' : 'unfocus', peerId: peerId });
             }
+        }
+    }
+
+    clearVideoFocusMode() {
+        if (!isHideALLVideosActive) return;
+        const focused = this.videoMediaContainer.querySelector('[focus-mode]');
+        if (!focused) return;
+
+        const focusButtonId = focused.id.replace(/__video$/, '__hideALL');
+        this.toggleFocusMode(focused.id, this.getId(focusButtonId));
+
+        if (this._dominantSpeakerState?.timeout) clearTimeout(this._dominantSpeakerState.timeout);
+        if (this._dominantSpeakerState) {
+            this._dominantSpeakerState.timeout = null;
+            this._dominantSpeakerState.prevConsumerId = null;
         }
     }
 
