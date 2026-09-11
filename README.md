@@ -283,6 +283,7 @@ Do you find MiroTalk SFU indispensable for your needs? Join us in supporting thi
 | [![EvoPlat](public/sponsors/EvoPlat.png)](https://evoplat.com)                 | [![Cloudron](public/sponsors/Cloudron.png)](https://cloudron.io)                                                   | [![EffectsSDK](public/sponsors/EffectsSDK.png)](https://effectssdk.ai/)                                                           |
 | [![QuestionPro](public/sponsors/QuestionPro.png)](https://www.questionpro.com) | [![TestMuAI](public/sponsors/TestMuAIBlack.svg)](https://www.testmuai.com/?utm_medium=sponsor&utm_source=mirotalk) | [![BrowserStack](public/sponsors/BrowserStack.png)](https://www.browserstack.com)                                                 |
 | [![CrystalSound](public/sponsors/CrystalSound.png)](https://crystalsound.ai)   | [![Netcup](public/sponsors/Netcup.png)](https://www.netcup.com/en/?ref=309627)                                     | [![LiveAvatar](public/sponsors/LiveAvatarByHeyGen.png)](https://www.liveavatar.com/?utm_medium=sponsership&utm_campaign=mirotalk) |
+| [![ApiSmart](public/sponsors/ApiSmart.png)](https://www.apismart.ai)           |                                                                                                                    |                                                                                                                                   |
 
 </details>
 
