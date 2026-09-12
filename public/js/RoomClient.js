@@ -3268,6 +3268,7 @@ class RoomClient {
                 i = document.createElement('i');
                 i.id = this.peer_id + '__hand';
                 i.className = html.userHand;
+                i.style.display = this.peer_info.peer_hand ? 'inline-flex' : 'none';
 
                 pm = document.createElement('div');
                 pb = document.createElement('div');
@@ -4060,6 +4061,7 @@ class RoomClient {
                 i = document.createElement('i');
                 i.id = remotePeerId + '__hand';
                 i.className = html.userHand;
+                i.style.display = peer_info.peer_hand ? 'inline-flex' : 'none';
 
                 p = document.createElement('p');
                 p.id = remotePeerId + '__name';
