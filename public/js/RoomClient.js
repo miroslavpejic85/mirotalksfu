@@ -4461,8 +4461,8 @@ class RoomClient {
         vb.appendChild(eDiv);
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         vb.appendChild(au);
-        if (!remotePeer) vb.appendChild(st);
         if (!this.isMobileDevice) vb.appendChild(pn);
+        if (!remotePeer) vb.appendChild(st);
 
         d.appendChild(i);
         d.appendChild(p);
