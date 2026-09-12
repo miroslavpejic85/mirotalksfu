@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.46
+ * @version 2.4.47
  *
  */
 
@@ -4425,6 +4425,7 @@ class RoomClient {
         h = document.createElement('i');
         h.id = peer_id + '__hand';
         h.className = html.userHand;
+        h.style.display = peer_info.peer_hand ? 'inline-flex' : 'none';
 
         pm = document.createElement('div');
         pb = document.createElement('div');
@@ -12889,15 +12890,17 @@ class RoomClient {
             if (peerInfo?.peer_presenter) presenterIds.push(peerInfo.peer_id);
         }
         for (const presenterId of new Set(presenterIds)) {
-            const presenterVideo = this.getVideoElementByPeerId(presenterId);
-            if (presenterVideo) return presenterVideo;
+            const presenterMediaElement = this.getParticipantMediaElementByPeerId(presenterId);
+            if (presenterMediaElement) return presenterMediaElement;
         }
 
         const dominantMediaElementId = this._dominantSpeakerState?.prevMediaElementId;
         const dominantMediaElement = dominantMediaElementId ? this.getId(dominantMediaElementId) : null;
         if (dominantMediaElement) return dominantMediaElement;
 
-        return Array.from(document.querySelectorAll('video[name]')).find((video) => this.getId(`${video.id}__pin`));
+        return Array.from(
+            this.videoMediaContainer.querySelectorAll('video[name], [data-camera-off="true"] > img')
+        ).find((mediaElement) => this.getId(`${mediaElement.id}__pin`));
     }
 
     autoPinVideoForLayout() {
