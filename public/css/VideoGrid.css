@@ -76,6 +76,27 @@
     font-size: 1.5rem !important;
 }
 
+.pinned-video-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.pinned-video-container .user-hand {
+    z-index: 1;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 10px !important;
+    font-size: 1.5rem !important;
+}
+
+.pinned-video-container[data-camera-off='true'] .user-hand {
+    top: calc(50% - var(--vmi-wh) / 2);
+    left: 50%;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
+}
+
 #videoMediaContainer i {
     position: absolute;
     display: none;

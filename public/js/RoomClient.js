@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.45
+ * @version 2.4.46
  *
  */
 
@@ -4351,7 +4351,8 @@ class RoomClient {
 
     setVideoOff(peer_info, remotePeer = false) {
         //console.log('setVideoOff', peer_info);
-        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, hg, p, pm, pb, pv, st, ri, role;
+        let d, vb, i, h, au, sf, sm, sv, gl, ban, ko, hg, p, pm, pb, pv, pn, st, ri, role;
+        let eDiv, eBtn, eVc;
 
         const { peer_id, peer_name, peer_avatar, peer_audio, peer_presenter } = peer_info;
 
@@ -4367,7 +4368,15 @@ class RoomClient {
         vb.id = peer_id + '__vb';
         vb.className = 'videoMenuBar hidden';
 
+        eDiv = document.createElement('div');
+        eDiv.className = 'navbar-dropdown';
+        eBtn = this.createButton(peer_id + '_video_off_expandBtn', html.expand);
+        eVc = document.createElement('div');
+        eVc.className = 'navbar-dropdown-content';
+        eVc.id = peer_id + '_video_off_videoExpandContent';
+
         au = this.createButton(peer_id + '__audio', peer_audio ? html.audioOn : html.audioOff);
+        pn = this.createButton(peer_id + '__img__pin', html.pin);
 
         pv = document.createElement('input');
         pv.id = peer_id + '___pVolume';
@@ -4390,7 +4399,11 @@ class RoomClient {
             );
             if (peer_presenter) role.classList.add('presenter-role-active');
         } else {
-            st = this.createElement(peer_id + '__sessionTime', 'span', 'current-session-time notranslate');
+            st = this.createElement(
+                peer_id + '__sessionTime',
+                'span',
+                'current-session-time notranslate navbar-session-time'
+            );
         }
 
         i = document.createElement('img');
@@ -4422,20 +4435,33 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
 
+        !this.isMobileDevice && eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin', 'compact'));
+        BUTTONS.videoOff.audioVolumeInput &&
+            eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
         if (remotePeer) {
-            BUTTONS.videoOff.ejectButton && vb.appendChild(ko);
-            BUTTONS.videoOff.banButton && vb.appendChild(ban);
-            BUTTONS.videoOff.presenterRoleButton && vb.appendChild(role);
-            BUTTONS.videoOff.geolocationButton && vb.appendChild(gl);
-            BUTTONS.videoOff.sendVideoButton && vb.appendChild(sv);
-            BUTTONS.videoOff.sendFileButton && vb.appendChild(sf);
-            BUTTONS.videoOff.sendMessageButton && vb.appendChild(sm);
+            BUTTONS.videoOff.presenterRoleButton &&
+                eVc.appendChild(
+                    this.createDropdownItem(role, peer_presenter ? 'Remove presenter role' : 'Set as presenter', eVc)
+                );
+            BUTTONS.videoOff.hideFromGridButton && eVc.appendChild(this.createDropdownItem(hg, 'Hide from grid', eVc));
+            BUTTONS.videoOff.sendMessageButton && eVc.appendChild(this.createDropdownItem(sm, 'Private Message', eVc));
+            BUTTONS.videoOff.geolocationButton && eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
+            BUTTONS.videoOff.sendFileButton && eVc.appendChild(this.createDropdownItem(sf, 'Send File', eVc));
+            BUTTONS.videoOff.sendVideoButton && eVc.appendChild(this.createDropdownItem(sv, 'Send Video/Audio', eVc));
+            BUTTONS.videoOff.banButton && eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
+            BUTTONS.videoOff.ejectButton && eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
         }
-        BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
 
+        eDiv.appendChild(eBtn);
+        document.body.appendChild(eVc);
+        eBtn._dropdownContent = eVc;
+        this.handleDropdownEvents(eDiv, eBtn, eVc);
+
+        vb.appendChild(eDiv);
+        BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
         vb.appendChild(au);
-        remotePeer && BUTTONS.videoOff.hideFromGridButton && vb.appendChild(hg);
         if (!remotePeer) vb.appendChild(st);
+        if (!this.isMobileDevice) vb.appendChild(pn);
 
         d.appendChild(i);
         d.appendChild(p);
@@ -4479,6 +4505,7 @@ class RoomClient {
 
         this.handleVB(d.id, vb.id);
         this.handleDD(d.id, peer_id, !remotePeer);
+        this.handlePN(i.id, pn.id, d.id);
         this.popupPeerInfo(p.id, peer_info);
         this.checkPeerInfoStatus(peer_info);
         this.setVideoAvatarImgName(i.id, peer_name, peer_avatar);
@@ -4492,6 +4519,7 @@ class RoomClient {
             this.setTippy(sv.id, 'Send video', 'bottom');
             this.setTippy(au.id, 'Mute', 'bottom');
             this.setTippy(pv.id, '🔊 Volume', 'bottom');
+            this.setTippy(pn.id, 'Pin', 'bottom');
             this.setTippy(gl.id, 'Geolocation', 'bottom');
             this.setTippy(ban.id, 'Ban', 'bottom');
             this.setTippy(ko.id, 'Eject', 'bottom');
@@ -4516,7 +4544,17 @@ class RoomClient {
         const pvOff = this.getId(peer_id + '__videoOff');
         const vb = this.getId(peer_id + '__vb');
 
-        if (vb) vb.parentNode.removeChild(vb);
+        if (pvOff?.hasAttribute('focus-mode')) this.toggleFocusMode(pvOff.id);
+        if (this.isVideoPinned && this.pinnedVideoPlayerId === peer_id + '__img') {
+            this.getId(peer_id + '__img__pin')?.click();
+        }
+
+        if (vb) {
+            vb.querySelectorAll('[id$="_expandBtn"], [id$="__dropdownBtn"]').forEach((btn) => {
+                btn._dropdownContent?.remove();
+            });
+            vb.parentNode.removeChild(vb);
+        }
 
         if (pvOff) {
             pvOff.parentNode.removeChild(pvOff);
@@ -5627,7 +5665,7 @@ class RoomClient {
                     if (!videoPlayer.classList.contains('videoCircle')) {
                         videoPlayer.style.objectFit = 'contain';
                     }
-                    cam.className = '';
+                    cam.className = 'pinned-video-container';
                     cam.style.width = '100%';
                     cam.style.height = '100%';
                     this.toggleVideoPin(pinVideoPosition.value);
@@ -11215,37 +11253,40 @@ class RoomClient {
         }
     }
 
-    handleDominantSpeakerFocus(producer_id, consumer_id = null, timeout = 10000) {
-        // Find the consumer id for this producer
-        const consumerId = consumer_id ? consumer_id : this.getConsumerIdByProducerId(producer_id);
+    handleDominantSpeakerFocus(peerId, timeout = 10000) {
+        const mediaElement = this.getParticipantMediaElementByPeerId(peerId);
+        const videoContainer = mediaElement?.closest('.Camera');
 
-        console.log('handleDominantSpeakerFocus', { consumersList: this.consumers, consumerId, producer_id });
+        console.log('handleDominantSpeakerFocus', { peerId, mediaElementId: mediaElement?.id });
 
-        if (!consumerId) return;
+        if (!mediaElement || !videoContainer) return;
 
         // Track the currently focused video container
         if (!this._dominantSpeakerState) {
-            this._dominantSpeakerState = { prevConsumerId: null, timeout: null };
+            this._dominantSpeakerState = { prevMediaElementId: null, timeout: null };
         }
 
         // Remove focus mode from previous dominant speaker if any
-        if (this._dominantSpeakerState.prevConsumerId && this._dominantSpeakerState.prevConsumerId !== consumerId) {
-            const prevVideoContainer = this.getId(this._dominantSpeakerState.prevConsumerId + '__video');
-            const prevFocusBtn = this.getId(this._dominantSpeakerState.prevConsumerId + '__hideALL');
-            if (prevVideoContainer && prevVideoContainer.hasAttribute('focus-mode') && prevFocusBtn) {
-                prevFocusBtn.click();
+        if (
+            this._dominantSpeakerState.prevMediaElementId &&
+            this._dominantSpeakerState.prevMediaElementId !== mediaElement.id
+        ) {
+            const prevMediaElement = this.getId(this._dominantSpeakerState.prevMediaElementId);
+            const prevVideoContainer = prevMediaElement?.closest('.Camera');
+            const prevFocusBtn = this.getId(this._dominantSpeakerState.prevMediaElementId + '__hideALL');
+            if (prevVideoContainer?.hasAttribute('focus-mode')) {
+                this.toggleFocusMode(prevVideoContainer.id, prevFocusBtn);
             }
         }
 
         // Set focus mode for the new dominant speaker
-        const videoContainer = this.getId(consumerId + '__video');
-        const focusBtn = this.getId(consumerId + '__hideALL');
-        if (videoContainer && focusBtn && !videoContainer.hasAttribute('focus-mode')) {
-            focusBtn.click();
+        const focusBtn = this.getId(mediaElement.id + '__hideALL');
+        if (!videoContainer.hasAttribute('focus-mode')) {
+            this.toggleFocusMode(videoContainer.id, focusBtn);
         }
 
         // Update the state
-        this._dominantSpeakerState.prevConsumerId = consumerId;
+        this._dominantSpeakerState.prevMediaElementId = mediaElement.id;
 
         // Clear any previous timeout
         if (this._dominantSpeakerState.timeout) {
@@ -11255,21 +11296,22 @@ class RoomClient {
         // Set a timeout to remove focus after 'timeout' seconds of inactivity
         this._dominantSpeakerState.timeout = setTimeout(() => {
             // Remove focus mode if still focused
-            if (this._dominantSpeakerState.prevConsumerId) {
-                const prevVideoContainer = this.getId(this._dominantSpeakerState.prevConsumerId + '__video');
-                const prevFocusBtn = this.getId(this._dominantSpeakerState.prevConsumerId + '__hideALL');
-                if (prevVideoContainer && prevVideoContainer.hasAttribute('focus-mode') && prevFocusBtn) {
-                    prevFocusBtn.click();
+            if (this._dominantSpeakerState.prevMediaElementId) {
+                const prevMediaElement = this.getId(this._dominantSpeakerState.prevMediaElementId);
+                const prevVideoContainer = prevMediaElement?.closest('.Camera');
+                const prevFocusBtn = this.getId(this._dominantSpeakerState.prevMediaElementId + '__hideALL');
+                if (prevVideoContainer?.hasAttribute('focus-mode')) {
+                    this.toggleFocusMode(prevVideoContainer.id, prevFocusBtn);
                 }
-                this._dominantSpeakerState.prevConsumerId = null;
+                this._dominantSpeakerState.prevMediaElementId = null;
             }
         }, timeout); // 10 seconds
     }
 
     handleDominantSpeakerPin(peerId) {
-        const videoEl = this.getVideoElementByPeerId(peerId);
-        const pinButton = videoEl ? this.getId(`${videoEl.id}__pin`) : null;
-        if (!pinButton || this.pinnedVideoPlayerId === videoEl.id) return;
+        const mediaElement = this.getParticipantMediaElementByPeerId(peerId);
+        const pinButton = mediaElement ? this.getId(`${mediaElement.id}__pin`) : null;
+        if (!pinButton || this.pinnedVideoPlayerId === mediaElement.id) return;
 
         this.isApplyingDominantSpeaker = true;
         this.isApplyingParticipantViewMode = true;
@@ -11290,13 +11332,13 @@ class RoomClient {
 
     handleDominantSpeaker(data) {
         console.log('Dominant Speaker', data);
-        const { peer_id, producer_id } = data;
+        const { peer_id } = data;
         this.handleDominantSpeakerHighlight(peer_id);
         if (this.dominantSpeaker && switchDominantSpeakerFocus.checked) {
             const viewMode = participantViewMode.value;
             viewMode.startsWith('speaker-') || viewMode === 'livestream'
                 ? this.handleDominantSpeakerPin(peer_id)
-                : this.handleDominantSpeakerFocus(producer_id);
+                : this.handleDominantSpeakerFocus(peer_id);
         }
     }
 
@@ -11540,31 +11582,37 @@ class RoomClient {
             );
         });
 
-        // Remote video-off tiles: controls are appended directly to the menu bar (vb)
+        // Remote video-off tiles: moderation controls live in the dropdown
         this.videoMediaContainer.querySelectorAll('.Camera[id$="__videoOff"]').forEach((tile) => {
             const peerId = tile.dataset.peerId;
             if (!peerId || peerId === this.peer_id) return;
 
             const vb = this.getId(peerId + '__vb');
             if (!vb) return;
+            const expandBtn = vb.querySelector('[id$="_expandBtn"]');
+            const eVc = expandBtn ? expandBtn._dropdownContent : null;
+            if (!eVc) return;
 
             const peerPresenter = !!this.peers.get(peerId)?.peer_info?.peer_presenter;
             const prefix = `remotePeer___${peerId}___`;
 
-            this.reconcilePresenterMenuItem(vb, `${prefix}kickOut`, canModerate && BUTTONS.videoOff.ejectButton, () => {
-                const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
-                vb.insertBefore(ko, vb.firstChild);
-                this.handleKO(ko.id, peerId);
-                if (!this.isMobileDevice) this.setTippy(ko.id, 'Eject', 'bottom');
-            });
-            this.reconcilePresenterMenuItem(vb, `${prefix}ban`, canModerate && BUTTONS.videoOff.banButton, () => {
+            this.reconcilePresenterMenuItem(
+                eVc,
+                `${prefix}kickOut`,
+                canModerate && BUTTONS.videoOff.ejectButton,
+                () => {
+                    const ko = this.createButton(`${prefix}kickOut`, html.kickOut);
+                    eVc.appendChild(this.createDropdownItem(ko, 'Kick Out', eVc, 'red'));
+                    this.handleKO(ko.id, peerId);
+                }
+            );
+            this.reconcilePresenterMenuItem(eVc, `${prefix}ban`, canModerate && BUTTONS.videoOff.banButton, () => {
                 const ban = this.createButton(`${prefix}ban`, html.ban);
-                vb.insertBefore(ban, vb.firstChild);
+                eVc.appendChild(this.createDropdownItem(ban, 'Ban', eVc, 'red'));
                 this.handleBAN(ban.id, peerId);
-                if (!this.isMobileDevice) this.setTippy(ban.id, 'Ban', 'bottom');
             });
             this.reconcilePresenterMenuItem(
-                vb,
+                eVc,
                 `${prefix}role`,
                 canModerate && BUTTONS.videoOff.presenterRoleButton,
                 () => {
@@ -11573,22 +11621,23 @@ class RoomClient {
                         peerPresenter ? html.presenterRoleRemove : html.presenterRole
                     );
                     if (peerPresenter) role.classList.add('presenter-role-active');
-                    vb.insertBefore(role, vb.firstChild);
+                    const item = this.createDropdownItem(
+                        role,
+                        peerPresenter ? 'Remove presenter role' : 'Set as presenter',
+                        eVc
+                    );
+                    eVc.insertBefore(item, eVc.firstChild);
                     this.handleRole(role.id, peerId, peerPresenter);
-                    if (!this.isMobileDevice) {
-                        this.setTippy(role.id, peerPresenter ? 'Remove presenter role' : 'Set as presenter', 'bottom');
-                    }
                 }
             );
             this.reconcilePresenterMenuItem(
-                vb,
+                eVc,
                 `${prefix}geoLocation`,
                 canModerate && BUTTONS.videoOff.geolocationButton,
                 () => {
                     const gl = this.createButton(`${prefix}geoLocation`, html.geolocation);
-                    vb.insertBefore(gl, vb.firstChild);
+                    eVc.appendChild(this.createDropdownItem(gl, 'Geo Location', eVc));
                     this.handleGL(gl.id, peerId);
-                    if (!this.isMobileDevice) this.setTippy(gl.id, 'Geolocation', 'bottom');
                 }
             );
         });
@@ -11646,7 +11695,7 @@ class RoomClient {
         if (this._dominantSpeakerState?.timeout) clearTimeout(this._dominantSpeakerState.timeout);
         if (this._dominantSpeakerState) {
             this._dominantSpeakerState.timeout = null;
-            this._dominantSpeakerState.prevConsumerId = null;
+            this._dominantSpeakerState.prevMediaElementId = null;
         }
     }
 
@@ -12824,6 +12873,10 @@ class RoomClient {
         return null;
     }
 
+    getParticipantMediaElementByPeerId(peerId) {
+        return this.getVideoElementByPeerId(peerId) || this.getId(peerId + '__img');
+    }
+
     getAutoPinVideoElement() {
         if (this.isVideoPinned && this.pinnedVideoPlayerId) {
             return this.getId(this.pinnedVideoPlayerId);
@@ -12840,9 +12893,9 @@ class RoomClient {
             if (presenterVideo) return presenterVideo;
         }
 
-        const dominantConsumerId = this._dominantSpeakerState?.prevConsumerId;
-        const dominantVideo = dominantConsumerId ? this.getId(dominantConsumerId) : null;
-        if (dominantVideo) return dominantVideo;
+        const dominantMediaElementId = this._dominantSpeakerState?.prevMediaElementId;
+        const dominantMediaElement = dominantMediaElementId ? this.getId(dominantMediaElementId) : null;
+        if (dominantMediaElement) return dominantMediaElement;
 
         return Array.from(document.querySelectorAll('video[name]')).find((video) => this.getId(`${video.id}__pin`));
     }
