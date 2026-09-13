@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.48
+ * @version 2.4.49
  *
  */
 
@@ -3302,7 +3302,8 @@ class RoomClient {
                 myDropdownDiv.className = 'navbar-dropdown';
                 myDropdownContent.className = 'navbar-dropdown-content';
 
-                !this.isMobileDevice &&
+                BUTTONS.producerVideo.pinVideoButton &&
+                    !this.isMobileDevice &&
                     myDropdownContent.appendChild(this.createResponsiveDropdownItem(pn, 'Pin Video', 'compact'));
                 BUTTONS.producerVideo.focusVideoButton &&
                     myDropdownContent.appendChild(this.createResponsiveDropdownItem(ha, 'Focus Mode'));
@@ -3317,7 +3318,8 @@ class RoomClient {
                 BUTTONS.producerVideo.drawingButton &&
                     isScreen &&
                     myDropdownContent.appendChild(this.createResponsiveDropdownItem(dw, 'Draw'));
-                myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
+                BUTTONS.producerVideo.videoMirrorButton &&
+                    myDropdownContent.appendChild(this.createDropdownItem(mv, 'Mirror', myDropdownContent));
                 BUTTONS.producerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
                     myDropdownContent.appendChild(this.createDropdownItem(fs, 'Full Screen', myDropdownContent));
@@ -3337,7 +3339,7 @@ class RoomClient {
                     vb.appendChild(pip);
                 BUTTONS.producerVideo.drawingButton && isScreen && vb.appendChild(dw);
                 BUTTONS.producerVideo.focusVideoButton && vb.appendChild(ha);
-                if (!this.isMobileDevice) vb.appendChild(pn);
+                if (BUTTONS.producerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
 
                 vb.appendChild(st);
 
@@ -4086,7 +4088,9 @@ class RoomClient {
                 pv.value = 100;
 
                 // Build dropdown items
-                !this.isMobileDevice && eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin Video', 'compact'));
+                BUTTONS.consumerVideo.pinVideoButton &&
+                    !this.isMobileDevice &&
+                    eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin Video', 'compact'));
                 BUTTONS.consumerVideo.focusVideoButton &&
                     eVc.appendChild(this.createResponsiveDropdownItem(ha, 'Focus Mode'));
                 BUTTONS.consumerVideo.videoPictureInPicture &&
@@ -4109,7 +4113,7 @@ class RoomClient {
                     );
                 BUTTONS.consumerVideo.hideFromGridButton &&
                     eVc.appendChild(this.createDropdownItem(hg, 'Hide from grid', eVc));
-                eVc.appendChild(this.createDropdownItem(mv, 'Mirror', eVc));
+                BUTTONS.consumerVideo.videoMirrorButton && eVc.appendChild(this.createDropdownItem(mv, 'Mirror', eVc));
                 BUTTONS.consumerVideo.fullScreenButton &&
                     this.isVideoFullScreenSupported &&
                     eVc.appendChild(this.createDropdownItem(fs, 'Full Screen', eVc));
@@ -4131,8 +4135,8 @@ class RoomClient {
 
                 vb.appendChild(eDiv);
                 BUTTONS.consumerVideo.audioVolumeInput && vb.appendChild(pv);
-                vb.appendChild(au);
-                vb.appendChild(cm);
+                BUTTONS.consumerVideo.muteAudioButton && vb.appendChild(au);
+                BUTTONS.consumerVideo.muteVideoButton && vb.appendChild(cm);
                 BUTTONS.consumerVideo.snapShotButton && vb.appendChild(ts);
                 BUTTONS.consumerVideo.videoPictureInPicture &&
                     this.isVideoPictureInPictureSupported &&
@@ -4140,7 +4144,7 @@ class RoomClient {
                 BUTTONS.consumerVideo.drawingButton && remoteIsScreen && vb.appendChild(dw);
                 BUTTONS.consumerVideo.focusVideoButton && vb.appendChild(ha);
 
-                if (!this.isMobileDevice) vb.appendChild(pn);
+                if (BUTTONS.consumerVideo.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
 
                 d.appendChild(elem);
                 d.appendChild(remoteVideoLoader);
@@ -4439,7 +4443,9 @@ class RoomClient {
         pb.style.height = '1%';
         pm.appendChild(pb);
 
-        !this.isMobileDevice && eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin', 'compact'));
+        BUTTONS.videoOff.pinVideoButton &&
+            !this.isMobileDevice &&
+            eVc.appendChild(this.createResponsiveDropdownItem(pn, 'Pin', 'compact'));
         BUTTONS.videoOff.audioVolumeInput &&
             eVc.appendChild(this.createResponsiveDropdownRangeItem(pv, 'Volume', 'fa-volume-high'));
         if (remotePeer) {
@@ -4463,8 +4469,8 @@ class RoomClient {
 
         vb.appendChild(eDiv);
         BUTTONS.videoOff.audioVolumeInput && vb.appendChild(pv);
-        vb.appendChild(au);
-        if (!this.isMobileDevice) vb.appendChild(pn);
+        BUTTONS.videoOff.muteAudioButton && vb.appendChild(au);
+        if (BUTTONS.videoOff.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
         if (!remotePeer) vb.appendChild(st);
 
         d.appendChild(i);
@@ -10056,8 +10062,8 @@ class RoomClient {
         video.setAttribute('width', '100%');
         video.setAttribute('height', '100%');
         vb.appendChild(e);
-        vb.appendChild(fsBtn);
-        if (!this.isMobileDevice) vb.appendChild(pn);
+        BUTTONS.videoShare.fullScreenButton && vb.appendChild(fsBtn);
+        if (BUTTONS.videoShare.pinVideoButton && !this.isMobileDevice) vb.appendChild(pn);
         d.appendChild(video);
         d.appendChild(vb);
         this.videoMediaContainer.appendChild(d);

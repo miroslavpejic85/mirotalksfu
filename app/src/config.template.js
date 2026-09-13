@@ -2,7 +2,7 @@
 
 /**
  * ==============================================
- * MiroTalk SFU v2.4.48 - Configuration File
+ * MiroTalk SFU v2.4.49 - Configuration File
  * ==============================================
  *
  * This file contains all configurable settings for the MiroTalk SFU application.
@@ -1481,6 +1481,7 @@ module.exports = {
                 tabRTMPStreamingBtn: process.env.SHOW_RTMP_TAB !== 'false',
                 tabNotificationsBtn: process.env.SHOW_NOTIFICATIONS_TAB !== 'false',
                 tabModerator: process.env.SHOW_MODERATOR_TAB !== 'false',
+                tabVideoAIBtn: process.env.SHOW_VIDEOAI_TAB !== 'false',
                 tabRecording: process.env.SHOW_RECORDING_TAB !== 'false',
                 host_only_recording: process.env.HOST_ONLY_RECORDING !== 'false',
                 pushToTalk: process.env.ENABLE_PUSH_TO_TALK !== 'false',
@@ -1493,6 +1494,7 @@ module.exports = {
             producerVideo: {
                 videoPictureInPicture: process.env.ENABLE_PIP !== 'false',
                 videoMirrorButton: process.env.SHOW_MIRROR_BUTTON !== 'false',
+                pinVideoButton: process.env.SHOW_PIN_BUTTON !== 'false',
                 fullScreenButton: process.env.SHOW_FULLSCREEN !== 'false',
                 snapShotButton: process.env.SHOW_SNAPSHOT_BUTTON !== 'false',
                 focusVideoButton: process.env.SHOW_FOCUS_BUTTON !== 'false',
@@ -1506,6 +1508,7 @@ module.exports = {
             consumerVideo: {
                 videoPictureInPicture: process.env.ENABLE_PIP !== 'false',
                 videoMirrorButton: process.env.SHOW_MIRROR_BUTTON !== 'false',
+                pinVideoButton: process.env.SHOW_PIN_BUTTON !== 'false',
                 fullScreenButton: process.env.SHOW_FULLSCREEN !== 'false',
                 snapShotButton: process.env.SHOW_SNAPSHOT_BUTTON !== 'false',
                 focusVideoButton: process.env.SHOW_FOCUS_BUTTON !== 'false',
@@ -1525,6 +1528,7 @@ module.exports = {
 
             // Controls when video is off
             videoOff: {
+                pinVideoButton: process.env.SHOW_PIN_BUTTON !== 'false',
                 hideFromGridButton: process.env.SHOW_HIDE_FROM_GRID_BUTTON !== 'false',
                 sendMessageButton: process.env.SHOW_SEND_MESSAGE !== 'false',
                 sendFileButton: process.env.SHOW_SEND_FILE !== 'false',
@@ -1535,6 +1539,12 @@ module.exports = {
                 banButton: process.env.SHOW_BAN_BUTTON !== 'false',
                 ejectButton: process.env.SHOW_EJECT_BUTTON !== 'false',
                 presenterRoleButton: process.env.SHOW_PRESENTER_ROLE_BUTTON !== 'false',
+            },
+
+            // Controls for shared video/audio feeds
+            videoShare: {
+                pinVideoButton: process.env.SHOW_PIN_BUTTON !== 'false',
+                fullScreenButton: process.env.SHOW_FULLSCREEN !== 'false',
             },
 
             // Chat interface controls

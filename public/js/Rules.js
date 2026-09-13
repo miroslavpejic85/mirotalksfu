@@ -56,6 +56,7 @@ let BUTTONS = {
         tabRTMPStreamingBtn: true, // presenter
         tabNotificationsBtn: true, // presenter
         tabModerator: true, // presenter
+        tabVideoAIBtn: true, // presenter
         tabRecording: true,
         host_only_recording: true, // presenter
         pushToTalk: true,
@@ -66,6 +67,7 @@ let BUTTONS = {
     producerVideo: {
         videoPictureInPicture: true,
         videoMirrorButton: true,
+        pinVideoButton: true,
         fullScreenButton: true,
         snapShotButton: true,
         focusVideoButton: true,
@@ -77,9 +79,11 @@ let BUTTONS = {
     consumerVideo: {
         videoPictureInPicture: true,
         videoMirrorButton: true,
+        pinVideoButton: true,
         fullScreenButton: true,
         snapShotButton: true,
         focusVideoButton: true,
+        hideFromGridButton: true,
         sendMessageButton: true,
         sendFileButton: true,
         sendVideoButton: true,
@@ -93,6 +97,8 @@ let BUTTONS = {
         drawingButton: true, // presenter
     },
     videoOff: {
+        pinVideoButton: true,
+        hideFromGridButton: true,
         sendMessageButton: true,
         sendFileButton: true,
         sendVideoButton: true,
@@ -102,6 +108,10 @@ let BUTTONS = {
         banButton: true, // presenter
         ejectButton: true, // presenter
         presenterRoleButton: true, // presenter
+    },
+    videoShare: {
+        pinVideoButton: true,
+        fullScreenButton: true,
     },
     chat: {
         chatPinButton: true,
@@ -247,7 +257,7 @@ function handleRules(isPresenter, roomSetup = true) {
             loadModeratorDataFromRoom();
         }
         // VideoAI is presenter-only and shown only when the room has it enabled
-        if (rc.videoAIEnabled) {
+        if (rc.videoAIEnabled && BUTTONS.settings.tabVideoAIBtn) {
             VideoAI.enabled = true;
             elemDisplay('tabVideoAIBtn', true, 'flex');
         } else {
