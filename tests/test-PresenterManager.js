@@ -37,12 +37,14 @@ describe('PresenterManager', () => {
         admittedPeer.updatePeerInfo.calledOnceWithExactly({ type: 'presenter', status: true }).should.be.true();
         lobbyPeer.updatePeerInfo.notCalled.should.be.true();
         presenters.room1['admitted-peer'].is_presenter.should.be.true();
-        room.sendToAll.calledOnceWithExactly('setPresenterRole', {
-            peer_id: 'admitted-peer',
-            peer_name: 'Participant',
-            is_presenter: true,
-            from_peer_name: 'Room',
-        }).should.be.true();
+        room.sendToAll
+            .calledOnceWithExactly('setPresenterRole', {
+                peer_id: 'admitted-peer',
+                peer_name: 'Participant',
+                is_presenter: true,
+                from_peer_name: 'Room',
+            })
+            .should.be.true();
     });
 
     it('does not promote a peer when automatic first-presenter assignment is disabled', () => {
