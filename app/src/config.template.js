@@ -526,7 +526,8 @@ module.exports = {
          *                 the display name is unverified client input, so each entry acts as a
          *                 shared secret. Use unique, non-guessable values (never a real name or
          *                 email) or anyone who guesses it becomes presenter. Empty by default.
-         * - join_first  : First joiner becomes presenter (default: true)
+         * - join_first  : First joiner becomes presenter; when the last presenter leaves,
+         *                 promote the first admitted participant (default: true)
          *
          * Documentation:
          * -------------

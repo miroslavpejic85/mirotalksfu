@@ -94,6 +94,7 @@ const mime = require('mime-types');
 const Host = require('./Host');
 const Room = require('./Room');
 const Peer = require('./Peer');
+const { assignFallbackPresenter } = require('./PresenterManager');
 const ServerApi = require('./ServerApi');
 const Logger = require('./Logger');
 const Validator = require('./Validator');
@@ -4983,6 +4984,20 @@ function startServer() {
                 delete presenters[socket.room_id][socket.id];
             }
 
+            const fallbackPresenter = assignFallbackPresenter(
+                socket.room_id,
+                room,
+                presenters,
+                hostCfg?.presenters?.join_first
+            );
+            if (fallbackPresenter) {
+                log.info('[Disconnect] - assigned fallback presenter', {
+                    room_id: socket.room_id,
+                    peer_id: fallbackPresenter.id,
+                    peer_name: fallbackPresenter.peer_name,
+                });
+            }
+
             if (room.getPeersCount() === 0) {
                 //
                 stopRTMPActiveStreams(isPresenter, room);
@@ -5046,6 +5061,20 @@ function startServer() {
             // Clean up this peer's presenter entry immediately
             if (socket.room_id in presenters && socket.id in presenters[socket.room_id]) {
                 delete presenters[socket.room_id][socket.id];
+            }
+
+            const fallbackPresenter = assignFallbackPresenter(
+                socket.room_id,
+                room,
+                presenters,
+                hostCfg?.presenters?.join_first
+            );
+            if (fallbackPresenter) {
+                log.info('[REMOVE ME] - assigned fallback presenter', {
+                    room_id: socket.room_id,
+                    peer_id: fallbackPresenter.id,
+                    peer_name: fallbackPresenter.peer_name,
+                });
             }
 
             if (room.getPeersCount() === 0) {
