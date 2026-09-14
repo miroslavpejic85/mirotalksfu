@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.50
+ * @version 2.4.51
  *
  */
 
@@ -3418,7 +3418,8 @@ function handleSelects() {
     };
     switchPushToTalk.onchange = async (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
-        if (!producerExist && !isPushToTalkActive) {
+        const enablePushToTalk = e.currentTarget.checked;
+        if (!producerExist && enablePushToTalk) {
             console.log('Push-to-talk: start audio producer');
             setAudioButtonsDisabled(true);
             if (!isEnumerateAudioDevices) initEnumerateAudioDevices();
@@ -3428,7 +3429,7 @@ function handleSelects() {
                 rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
             }, 1000);
         }
-        isPushToTalkActive = !isPushToTalkActive;
+        isPushToTalkActive = enablePushToTalk;
         if (producerExist && !isPushToTalkActive) {
             console.log('Push-to-talk: resume audio producer');
             await rc.resumeProducer(RoomClient.mediaType.audio);
@@ -5338,6 +5339,34 @@ function setupQuickDeviceSwitchDropdowns() {
         menuEl.appendChild(divider);
     }
 
+    function appendMenuToggle(menuEl, id, labelText, settingsSwitch) {
+        const toggleRow = document.createElement('div');
+        toggleRow.className = 'device-menu-toggle-row';
+
+        const label = document.createElement('label');
+        label.className = 'title';
+        label.htmlFor = id;
+        label.textContent = labelText;
+
+        const switchDiv = document.createElement('div');
+        switchDiv.className = 'form-check form-switch form-switch-md title';
+
+        const checkbox = document.createElement('input');
+        checkbox.id = id;
+        checkbox.type = 'checkbox';
+        checkbox.className = 'form-check-input';
+        checkbox.checked = settingsSwitch.checked;
+        checkbox.addEventListener('change', () => {
+            settingsSwitch.checked = checkbox.checked;
+            settingsSwitch.dispatchEvent(new Event('change'));
+        });
+
+        switchDiv.appendChild(checkbox);
+        toggleRow.appendChild(label);
+        toggleRow.appendChild(switchDiv);
+        menuEl.appendChild(toggleRow);
+    }
+
     function appendSelectOptions(menuEl, selectEl, emptyLabel, rebuildFn, meterCollector) {
         if (!selectEl) return;
 
@@ -5476,47 +5505,31 @@ function setupQuickDeviceSwitchDropdowns() {
         appendSelectOptions(audioMenu, microphoneSelect, 'No microphones found', buildAudioMenu, audioMeterEntries);
         if (audioMeterManager.active) audioMeterManager.start(audioMeterEntries);
 
-        // Noise cancellation toggle (only when custom noise suppression is enabled & supported)
-        if (BUTTONS.settings.customNoiseSuppression && rc.isRNNoiseSupported) {
+        const showNoiseSuppression = BUTTONS.settings.customNoiseSuppression && rc.isRNNoiseSupported;
+        const showPushToTalk = BUTTONS.settings.pushToTalk;
+        const showDominantSpeakerFocus = rc.dominantSpeaker;
+
+        if (showNoiseSuppression || showPushToTalk || showDominantSpeakerFocus) {
             appendMenuDivider(audioMenu);
             appendMenuHeader(audioMenu, 'fas fa-ear-listen', 'Microphone Effects');
 
-            const toggleRow = document.createElement('div');
-            toggleRow.className = 'device-menu-toggle-row';
-
-            const labelDiv = document.createElement('div');
-            labelDiv.className = 'title';
-            const label = document.createElement('p');
-            label.textContent = 'Noise cancellation';
-            labelDiv.appendChild(label);
-
-            const switchDiv = document.createElement('div');
-            switchDiv.className = 'form-check form-switch form-switch-md title';
-
-            const checkbox = document.createElement('input');
-            checkbox.type = 'checkbox';
-            checkbox.className = 'form-check-input';
-            checkbox.checked = switchNoiseSuppression ? switchNoiseSuppression.checked : false;
-
-            switchDiv.appendChild(checkbox);
-
-            toggleRow.appendChild(labelDiv);
-            toggleRow.appendChild(switchDiv);
-
-            checkbox.addEventListener('change', () => {
-                // Sync with the settings switch
-                if (switchNoiseSuppression) {
-                    switchNoiseSuppression.checked = checkbox.checked;
-                    switchNoiseSuppression.dispatchEvent(new Event('change'));
-                }
-            });
-
-            audioMenu.appendChild(toggleRow);
-
-            appendMenuDivider(audioMenu);
-        } else {
-            appendMenuDivider(audioMenu);
+            if (showNoiseSuppression) {
+                appendMenuToggle(audioMenu, 'deviceMenuNoiseSuppression', 'Noise cancellation', switchNoiseSuppression);
+            }
+            if (showPushToTalk) {
+                appendMenuToggle(audioMenu, 'deviceMenuPushToTalk', 'Push to talk', switchPushToTalk);
+            }
+            if (showDominantSpeakerFocus) {
+                appendMenuToggle(
+                    audioMenu,
+                    'deviceMenuDominantSpeakerFocus',
+                    'Speaker Focus',
+                    switchDominantSpeakerFocus
+                );
+            }
         }
+
+        appendMenuDivider(audioMenu);
 
         appendMenuHeader(audioMenu, 'fas fa-volume-high', 'Speakers');
         if (!speakerSelect || speakerSelect.disabled) {
@@ -5632,6 +5645,16 @@ function setupQuickDeviceSwitchDropdowns() {
     if (videoSelect) videoSelect.addEventListener('change', rebuildVideoMenu);
     if (microphoneSelect) microphoneSelect.addEventListener('change', rebuildAudioMenu);
     if (speakerSelect) speakerSelect.addEventListener('change', rebuildAudioMenu);
+    [
+        [switchNoiseSuppression, 'deviceMenuNoiseSuppression'],
+        [switchPushToTalk, 'deviceMenuPushToTalk'],
+        [switchDominantSpeakerFocus, 'deviceMenuDominantSpeakerFocus'],
+    ].forEach(([settingsSwitch, menuSwitchId]) => {
+        settingsSwitch.addEventListener('change', () => {
+            const menuSwitch = getId(menuSwitchId);
+            if (menuSwitch) menuSwitch.checked = settingsSwitch.checked;
+        });
+    });
 
     // Keep arrow buttons visible only when Start buttons are visible
     syncVisibility();
@@ -8288,7 +8311,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.50',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.51',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
