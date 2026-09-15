@@ -620,7 +620,7 @@
 /* Chat message */
 .chat .chat-message {
     z-index: 4;
-    padding: 12px 16px;
+    padding: 12px 16px 16px;
     flex: 0 0 auto;
     max-height: none;
     position: sticky;
@@ -825,7 +825,7 @@
     z-index: 0;
     position: absolute;
     left: 5px;
-    bottom: 160px;
+    bottom: 132px;
     background: var(--body-bg);
     border: var(--border);
     border-radius: 10px;

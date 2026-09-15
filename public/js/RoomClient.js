@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.52
+ * @version 2.4.53
  *
  */
 
@@ -6407,8 +6407,8 @@ class RoomClient {
 
         chat.style.marginLeft = isParticipantsListHidden ? 0 : '300px';
         chat.style.borderLeft = isParticipantsListHidden ? 'none' : '1px solid rgba(255, 255, 255, 0.08)';
-        if (this.isChatPinned) elemDisplay(chat.id, isParticipantsListHidden);
-        if (!this.isChatPinned) elemDisplay(chat.id, true);
+        if (this.isChatPinned) elemDisplay(chat.id, isParticipantsListHidden, 'flex');
+        if (!this.isChatPinned) elemDisplay(chat.id, true, 'flex');
         this.toggleChatHistorySize(isParticipantsListHidden && (this.isChatPinned || this.isChatMaximized));
         plist.style.width = this.isChatPinned || this.isMobileDevice ? '100%' : '300px';
         plist.style.position = this.isMobileDevice ? 'fixed' : 'absolute';
@@ -6455,7 +6455,7 @@ class RoomClient {
     toggleChatHistorySize(max = true) {
         const chatHistory = this.getId('chatHistory');
         chatHistory.style.minHeight = max ? 'calc(100vh - 270px)' : '430px';
-        chatHistory.style.maxHeight = max ? 'calc(100vh - 270px)' : '430px';
+        chatHistory.style.maxHeight = 'none';
     }
 
     toggleChatPin() {
