@@ -459,7 +459,8 @@ class Transcription {
         for (let i = 1; i < list.length; i++) {
             transcriptionDialect.options.add(new Option(list[i][1], list[i][0]));
         }
-        transcriptionDialect.style.visibility = list[1].length == 1 ? 'hidden' : 'visible';
+        const dialectField = transcriptionDialect.closest('.transcription-select-field');
+        dialectField?.classList.toggle('hidden', list[1].length === 1);
     }
 
     handleLanguages() {
@@ -607,7 +608,8 @@ class Transcription {
 
     updateSelectorsVisibility() {
         const hideSelectors = this.whisper.mode || !this.isSupported();
-        hideSelectors ? hide(transcriptionLanguage) : show(transcriptionLanguage);
-        hideSelectors ? hide(transcriptionDialect) : show(transcriptionDialect);
+        const languageControls = transcriptionLanguage.closest('.transcription-language-controls');
+        languageControls?.classList.toggle('hidden', hideSelectors);
+        transcriptionFooter.classList.toggle('is-selectorless', hideSelectors);
     }
 }

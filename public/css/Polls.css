@@ -4,6 +4,8 @@
     --poll-control-surface: rgba(255, 255, 255, 0.06);
     z-index: 5;
     position: absolute;
+    display: flex;
+    flex-direction: column;
     container-type: inline-size;
     container-name: polls;
     padding: 10px;
@@ -19,6 +21,34 @@
     transition: max-width 0.5s ease-in-out;
 }
 
+.pls-container.show {
+    display: flex !important;
+}
+
+.pls-container.is-maximized {
+    padding: 12px;
+    border-radius: 0;
+}
+
+.pls-container.is-maximized .poll-creation {
+    width: min(100%, 760px);
+    margin-right: auto;
+    margin-left: auto;
+}
+
+.pls-container.is-maximized .polls-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
+    gap: 10px;
+    width: min(100%, 1200px);
+    margin: 0 auto;
+}
+
+.pls-container.is-maximized .poll {
+    min-width: 0;
+    margin-bottom: 0;
+}
+
 .poll-header {
     position: relative;
     z-index: 2;
@@ -28,7 +58,6 @@
     gap: 10px;
     min-height: 48px;
     padding: 5px 6px;
-    text-align: left;
     margin-bottom: 14px;
     width: 100%;
     border: 1px solid rgba(255, 255, 255, 0.08);
@@ -37,8 +66,10 @@
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.24);
     backdrop-filter: blur(14px);
     box-sizing: border-box;
-    color: #ffffff;
+    color: #fff;
+    text-align: left;
     cursor: move;
+    flex: 0 0 auto;
 }
 
 .poll-header-title {
@@ -98,7 +129,7 @@
     border: none !important;
     border-radius: 6px;
     background: transparent;
-    color: #ffffff;
+    color: #fff;
     font-size: 0.88rem;
     cursor: pointer;
     transition:
@@ -127,64 +158,49 @@
     box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--poll-accent) 40%, transparent);
 }
 
-.polls {
-    width: 100%;
-    height: 100%;
-    max-height: 400px;
-    overflow-x: hidden;
-}
-
 .poll-creation {
-    margin-bottom: 20px;
-    max-height: 480px;
-    overflow: hidden;
-}
-
-.poll-h1,
-.poll-h2,
-.poll-h3 {
-    margin-top: 5px;
-    color: #fff !important;
-}
-
-.poll-question {
-    font-weight: bold;
+    flex: 0 0 auto;
+    margin-bottom: 14px;
+    padding: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: var(--poll-toolbar-surface);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(14px);
 }
 
 .form {
     display: flex;
     flex-direction: column;
-    max-height: 500px;
-    overflow-x: hidden;
+    gap: 14px;
 }
 
 .form-group {
-    margin-bottom: 15px;
-}
-
-.form-group label {
-    margin-bottom: 15px;
+    margin: 0;
 }
 
 .form label {
-    margin-bottom: 10px;
-    font-weight: bold;
+    display: block;
+    margin-bottom: 7px;
     color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
 }
 
 .form input {
-    padding: 10px;
-    border: var(--border);
-    border-radius: 8px;
-    background: var(--select-bg);
-    color: #fff;
     width: 100%;
+    height: 40px;
+    padding: 0 12px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    background: var(--poll-control-surface);
     box-sizing: border-box;
+    color: #fff;
     outline: none;
     transition:
-        border-color 0.2s ease,
-        box-shadow 0.2s ease,
-        background 0.2s ease;
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
 .form input::placeholder {
@@ -192,122 +208,249 @@
 }
 
 .form input:focus {
-    border-color: #66beff;
-    background: color-mix(in srgb, var(--select-bg) 88%, rgba(255, 255, 255, 0.05));
-    box-shadow: 0 0 0 2px rgba(102, 190, 255, 0.18);
+    border-color: var(--poll-accent);
+    background: rgba(255, 255, 255, 0.09);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--poll-accent) 22%, transparent);
+}
+
+.poll-options-heading {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 7px;
+}
+
+.poll-field-label {
+    margin: 0;
+    color: #fff;
+    font-size: 0.72rem;
+    font-weight: 600;
+}
+
+.poll-option-actions,
+.poll-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    background: var(--poll-control-surface);
+}
+
+.poll-option-actions button,
+.poll-card-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    padding: 0;
+    border: none;
+    border-radius: 6px;
+    background: transparent;
+    color: #fff;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        color 0.18s ease,
+        transform 0.15s ease;
+}
+
+.poll-option-actions button {
+    width: 28px;
+    height: 28px;
+    font-size: 0.72rem;
+}
+
+.poll-option-actions button:hover,
+.poll-card-action:hover {
+    background: rgba(255, 255, 255, 0.11);
+}
+
+#pollDelOptionBtn:hover,
+.poll-card-action-danger:hover {
+    background: color-mix(in srgb, var(--color-danger, #ff4b4b) 18%, transparent);
+    color: #fca5a5;
+}
+
+.poll-option-actions button:active,
+.poll-card-action:active {
+    transform: scale(0.92);
+}
+
+.poll-option-actions button:focus-visible,
+.poll-card-action:focus-visible,
+.poll-primary-btn:focus-visible {
+    outline: 2px solid var(--poll-accent);
+    outline-offset: 2px;
+}
+
+#optionsContainer {
+    display: grid;
+    gap: 7px;
+}
+
+.option-input {
+    margin: 0;
 }
 
 .poll-btns {
     display: flex;
-    gap: 10px;
+    justify-content: flex-end;
+    gap: 6px;
+    margin-top: 12px;
 }
 
-.poll-btn {
-    padding: 10px 15px;
-    background: var(--body-bg);
-    color: #fff;
+.poll-primary-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 40px;
+    padding: 0 16px;
     border: none;
     border-radius: 8px;
+    background: var(--poll-accent);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--poll-accent) 30%, transparent);
+    color: var(--room-switch-ink, #fff);
+    font-size: 0.78rem;
+    font-weight: 600;
     cursor: pointer;
-    transition: background 0.3s;
+    transition:
+        background 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.15s ease;
 }
 
-.poll-btn:hover {
-    background: var(--btns-bg-color) !important;
-    color: #fff;
+.poll-primary-btn:hover {
+    background: color-mix(in srgb, var(--poll-accent) 84%, white);
+    color: var(--room-switch-ink, #fff);
 }
 
-.del-btn {
-    padding: 10px 15px;
-    background: #dc3545;
-    color: #fff;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background 0.3s;
+.poll-primary-btn:active {
+    transform: scale(0.97);
 }
 
-.del-btn:hover {
-    background: #c82333;
-    color: #fff;
+.polls {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
 }
 
 .polls-container {
-    margin-bottom: 70px;
+    padding: 0 2px 10px;
 }
 
 .poll {
-    background: var(--body-bg);
-    padding: 15px;
-    margin-bottom: 20px;
-    border-radius: 12px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 14px;
+    margin-bottom: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    background: var(--poll-toolbar-surface);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.18);
+    backdrop-filter: blur(14px);
+}
+
+.poll-question {
+    margin: 0;
+    color: #fff;
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.4;
 }
 
 .poll .options {
-    margin-top: 10px;
+    display: grid;
+    gap: 7px;
+    margin-top: 12px;
 }
 
-.poll .options div {
-    margin-bottom: 5px;
+.poll-option-row {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 40px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 7px;
+    background: var(--poll-control-surface);
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
-.poll ul {
-    list-style-type: none;
-    padding: 0;
-    margin-top: 10px;
+.poll-option-row:hover {
+    background: rgba(255, 255, 255, 0.1);
 }
 
-.poll ul li {
-    background: var(--body-bg);
-    padding: 8px;
-    border: var(--border);
-    border-radius: 8px;
-    margin-bottom: 5px;
-    color: #fff;
+.poll-option-row:has(input:checked) {
+    border-color: color-mix(in srgb, var(--poll-accent) 52%, transparent);
+    background: color-mix(in srgb, var(--poll-accent) 14%, transparent);
+    box-shadow: inset 3px 0 0 var(--poll-accent);
 }
 
-.options input {
-    cursor: pointer;
+.poll-option-row:focus-within {
+    border-color: var(--poll-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--poll-accent) 20%, transparent);
 }
 
-.option-input {
-    margin-bottom: 8px;
+.poll-option-row input[type='radio'] {
+    position: absolute;
+    left: 12px;
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: var(--poll-accent);
 }
 
 .options label {
-    margin-left: 5px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 12px 10px 38px;
     color: #fff;
-}
-
-.view-btn {
-    padding: 10px 15px;
-    background: var(--body-bg);
-    color: #fff;
-    border: none;
-    border-radius: 8px;
+    font-size: 0.78rem;
+    line-height: 1.35;
     cursor: pointer;
-    transition: background 0.3s;
 }
 
-.view-btn:hover {
-    background: var(--btns-bg-color) !important;
-    color: #fff;
+.poll hr {
+    margin: 12px 0 8px;
+    border-color: rgba(255, 255, 255, 0.08);
+    opacity: 1;
+}
+
+.poll-card-actions {
+    justify-content: flex-end;
+    width: fit-content;
+    margin-left: auto;
+}
+
+.poll ul {
+    padding: 0;
+    margin: 10px 0 0;
+    list-style-type: none;
+}
+
+.poll ul li {
+    padding: 7px 10px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 0.72rem;
+}
+
+.poll ul li:last-child {
+    border-bottom: none;
 }
 
 @media (max-width: 400px) {
     .pls-container {
         padding: 5px;
         border-radius: 8px;
-    }
-
-    .poll-btns {
-        flex-wrap: wrap;
-        gap: 8px;
-    }
-
-    #addPollButton {
-        flex: 1 0 100%;
     }
 }
 
@@ -362,5 +505,13 @@
         height: 28px;
         padding: 5px;
         font-size: 0.75rem;
+    }
+
+    .poll-creation {
+        padding: 10px;
+    }
+
+    #addPollButton {
+        width: 100%;
     }
 }

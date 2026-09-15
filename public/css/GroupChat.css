@@ -772,14 +772,37 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 4px;
+    gap: 8px;
+    min-width: 0;
 }
 
 .chat-toolbar-left {
     display: flex;
     align-items: center;
-    gap: 4px;
-    flex-wrap: wrap;
+    gap: 6px;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.chat-toolbar-left::-webkit-scrollbar {
+    display: none;
+}
+
+.chat-compose-tool-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    min-height: 36px;
+    padding: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 8px;
+    background: var(--chat-control-surface);
+    flex: 0 0 auto;
+}
+
+.chat-compose-tool-group:not(:has(> button:not(.hidden))) {
+    display: none;
 }
 
 .chat-toolbar-right {
@@ -791,11 +814,11 @@
 
 /* Toolbar buttons */
 .chat-toolbar-btn {
-    width: 36px;
-    height: 36px;
-    border-radius: 10px;
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
     border: none;
-    background: rgba(255, 255, 255, 0.08);
+    background: transparent;
     color: #fff;
     cursor: pointer;
     display: inline-flex;
@@ -812,12 +835,39 @@
 
 .chat-toolbar-btn:hover {
     color: #fff;
-    background: rgba(255, 255, 255, 0.16);
+    background: rgba(255, 255, 255, 0.11);
     transform: none;
 }
 
 .chat-toolbar-btn:active {
     transform: scale(0.92);
+}
+
+.chat-toolbar-btn:focus-visible {
+    outline: 2px solid var(--chat-accent);
+    outline-offset: 2px;
+}
+
+.chat-toolbar-btn.is-active,
+.chat-toolbar-btn[aria-pressed='true'] {
+    background: color-mix(in srgb, var(--chat-accent) 18%, transparent);
+    color: var(--chat-accent) !important;
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--chat-accent) 40%, transparent);
+}
+
+.chat-clear-text-btn:hover {
+    background: rgba(239, 68, 68, 0.16);
+    color: #fca5a5;
+}
+
+@container chat-panel (max-width: 420px) {
+    .chat .chat-message {
+        padding: 10px 10px 12px;
+    }
+
+    .chat-input-hint {
+        display: none;
+    }
 }
 
 /* Chat emoji */

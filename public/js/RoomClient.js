@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.53
+ * @version 2.4.54
  *
  */
 
@@ -362,6 +362,7 @@ class RoomClient {
         this.isChatEmojiOpen = false;
         this.isPollOpen = false;
         this.isPollPinned = false;
+        this.isPollMaximized = false;
         this.isEditorOpen = false;
         this.isEditorLocked = false;
         this.isEditorPinned = false;
@@ -5782,7 +5783,7 @@ class RoomClient {
 
     getPinnedSidePanelWidth() {
         if (this.isEditorPinned || this.isBreakoutPinned) return 30;
-        if (this.isChatPinned || this.isPollPinned || this.transcription.isPin()) return 25;
+        if (this.isChatPinned || (this.isPollPinned && !this.isPollMaximized) || this.transcription.isPin()) return 25;
         return 0;
     }
 
@@ -6017,19 +6018,16 @@ class RoomClient {
     }
 
     resizeVideoMenuBar() {
+        const isPollDocked = this.isPollPinned && !this.isPollMaximized;
         const somethingPinned =
             this.isVideoPinned ||
             this.isChatPinned ||
             this.isEditorPinned ||
-            this.isPollPinned ||
+            isPollDocked ||
             this.isBreakoutPinned ||
             transcription.isPin();
         const menuBarWidth =
-            this.isVideoPinned ||
-            this.isChatPinned ||
-            this.isPollPinned ||
-            this.isBreakoutPinned ||
-            transcription.isPin()
+            this.isVideoPinned || this.isChatPinned || isPollDocked || this.isBreakoutPinned || transcription.isPin()
                 ? '75%'
                 : '70%';
         const videoMenuBar = rc.getEcN('videoMenuBar');
@@ -7671,6 +7669,10 @@ class RoomClient {
     togglePoll() {
         pollRoom.classList.toggle('show');
         if (!this.isPollOpen) {
+            this.isPollMaximized = false;
+            pollRoom.classList.remove('is-maximized');
+            pollRoom.style.maxWidth = '600px';
+            pollRoom.style.maxHeight = '700px';
             hide(pollMinButton);
             if (!this.isMobileDevice) {
                 BUTTONS.poll.pollMaxButton && show(pollMaxButton);
@@ -7713,6 +7715,10 @@ class RoomClient {
         if (!this.isVideoPinned) {
             this.videoMediaContainerPin();
         }
+        this.isPollMaximized = false;
+        pollRoom.classList.remove('is-maximized');
+        hide(pollMinButton);
+        BUTTONS.poll.pollMaxButton && show(pollMaxButton);
         this.pollPinned();
         this.isPollPinned = true;
         this.refreshVideoPinLayout();
@@ -7727,6 +7733,8 @@ class RoomClient {
         if (!this.isVideoPinned) {
             this.videoMediaContainerUnpin();
         }
+        this.isPollMaximized = false;
+        pollRoom.classList.remove('is-maximized');
         pollRoom.classList.remove('panel-slide-in');
         pollRoom.style.maxWidth = '600px';
         pollRoom.style.maxHeight = '700px';
@@ -7760,14 +7768,20 @@ class RoomClient {
     }
 
     pollMaximize() {
+        this.isPollMaximized = true;
+        pollRoom.classList.remove('panel-slide-in');
+        pollRoom.classList.add('is-maximized');
         pollRoom.style.maxHeight = '100vh';
         pollRoom.style.maxWidth = '100vw';
         this.pollCenter();
+        this.isVideoPinned ? this.refreshVideoPinLayout() : this.videoMediaContainerUnpin();
         hide(pollMaxButton);
         BUTTONS.poll.pollMaxButton && show(pollMinButton);
     }
 
     pollMinimize() {
+        this.isPollMaximized = false;
+        pollRoom.classList.remove('is-maximized');
         this.pollCenter();
         hide(pollMinButton);
         BUTTONS.poll.pollMaxButton && show(pollMaxButton);
@@ -7980,12 +7994,14 @@ class RoomClient {
             const options = document.createElement('div');
             options.className = 'options';
 
-            poll.options.forEach((option) => {
+            poll.options.forEach((option, optionIndex) => {
                 const optionDiv = document.createElement('div');
+                optionDiv.className = 'poll-option-row';
                 const input = document.createElement('input');
                 input.type = 'radio';
                 input.name = `poll${index}`;
                 input.value = option;
+                input.id = `poll-${index}-option-${optionIndex}`;
                 if (this.pollSelectedOptions[index] === option) {
                     input.checked = true;
                 }
@@ -7997,6 +8013,7 @@ class RoomClient {
 
                 const label = document.createElement('label');
                 label.textContent = option;
+                label.htmlFor = input.id;
 
                 optionDiv.appendChild(input);
                 optionDiv.appendChild(label);
@@ -8007,14 +8024,12 @@ class RoomClient {
             // Only the presenters
             // if (isPresenter) {
             const pollButtonsDiv = document.createElement('div');
-            pollButtonsDiv.className = 'poll-btns';
+            pollButtonsDiv.className = 'poll-card-actions';
 
             // Toggle voters button
             const toggleButton = document.createElement('button');
             const toggleButtonIcon = document.createElement('i');
             toggleButtonIcon.className = 'fas fa-users';
-            toggleButton.id = 'toggleVoters';
-            toggleButton.className = 'view-btn';
             // Append the icon to the button
             toggleButton.insertBefore(toggleButtonIcon, toggleButton.firstChild);
             toggleButton.addEventListener('click', () => {
@@ -8022,14 +8037,20 @@ class RoomClient {
                     ? (votersList.style.display = 'block')
                     : (votersList.style.display = 'none');
             });
+            toggleButton.type = 'button';
+            toggleButton.id = `toggleVoters-${index}`;
+            toggleButton.className = 'poll-card-action';
+            toggleButton.setAttribute('aria-label', 'Toggle voters');
             pollButtonsDiv.appendChild(toggleButton);
 
             // Edit poll button using swal
             const editPollButton = document.createElement('button');
             const editPollButtonIcon = document.createElement('i');
             editPollButtonIcon.className = 'fas fa-pen-to-square';
-            editPollButton.id = 'editPoll';
-            editPollButton.className = 'poll-btn';
+            editPollButton.type = 'button';
+            editPollButton.id = `editPoll-${index}`;
+            editPollButton.className = 'poll-card-action';
+            editPollButton.setAttribute('aria-label', 'Edit poll');
             editPollButton.insertBefore(editPollButtonIcon, editPollButton.firstChild);
             editPollButton.addEventListener('click', () => {
                 Swal.fire({
@@ -8064,8 +8085,10 @@ class RoomClient {
             const deletePollButton = document.createElement('button');
             const deletePollButtonIcon = document.createElement('i');
             deletePollButtonIcon.className = 'fas fa-trash';
-            deletePollButton.id = 'delPoll';
-            deletePollButton.className = 'del-btn';
+            deletePollButton.type = 'button';
+            deletePollButton.id = `delPoll-${index}`;
+            deletePollButton.className = 'poll-card-action poll-card-action-danger';
+            deletePollButton.setAttribute('aria-label', 'Delete poll');
             deletePollButton.insertBefore(deletePollButtonIcon, deletePollButton.firstChild);
             deletePollButton.addEventListener('click', () => {
                 // confirm before delete poll
@@ -8096,6 +8119,7 @@ class RoomClient {
 
             // Create voter lists
             const votersList = document.createElement('ul');
+            votersList.className = 'poll-voters-list';
             votersList.style.display = 'none';
             for (const [user, vote] of Object.entries(poll.voters)) {
                 const voter = document.createElement('li');
@@ -8108,9 +8132,9 @@ class RoomClient {
             pollsContainer.appendChild(pollDiv);
 
             if (!this.isMobileDevice) {
-                setTippy('toggleVoters', 'Toggle voters', 'top');
-                setTippy('delPoll', 'Delete poll', 'top');
-                setTippy('editPoll', 'Edit poll', 'top');
+                setTippy(toggleButton.id, 'Toggle voters', 'top');
+                setTippy(deletePollButton.id, 'Delete poll', 'top');
+                setTippy(editPollButton.id, 'Edit poll', 'top');
             }
         });
     }
@@ -8135,26 +8159,28 @@ class RoomClient {
 
         e.target.reset();
         optionsContainer.innerHTML = '';
-        const initialOptionInput = document.createElement('input');
-        initialOptionInput.type = 'text';
-        initialOptionInput.name = 'option';
-        initialOptionInput.className = 'option-input';
-        initialOptionInput.required = true;
-        optionsContainer.appendChild(initialOptionInput);
+        optionsContainer.appendChild(this.createPollOptionInput(1));
+        optionsContainer.appendChild(this.createPollOptionInput(2));
     }
 
     pollAddOptions() {
+        const optionIndex = document.querySelectorAll('.option-input').length + 1;
+        optionsContainer.appendChild(this.createPollOptionInput(optionIndex));
+    }
+
+    createPollOptionInput(optionIndex) {
         const optionInput = document.createElement('input');
         optionInput.type = 'text';
         optionInput.name = 'option';
         optionInput.className = 'option-input';
+        optionInput.placeholder = `Option ${optionIndex}`;
         optionInput.required = true;
-        optionsContainer.appendChild(optionInput);
+        return optionInput;
     }
 
     pollDeleteOptions() {
         const optionInputs = document.querySelectorAll('.option-input');
-        if (optionInputs.length > 1) {
+        if (optionInputs.length > 2) {
             optionsContainer.removeChild(optionInputs[optionInputs.length - 1]);
         }
     }

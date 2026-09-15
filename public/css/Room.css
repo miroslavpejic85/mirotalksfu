@@ -3558,21 +3558,152 @@ body {
 .transcription-inputarea {
     display: flex;
     align-items: center;
-    width: 100%;
-    padding: 10px;
-    background: var(--body-bg);
-    border: none !important;
+    gap: 8px;
+    margin: 0 10px 10px;
+    padding: 6px;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 10px;
+    background: var(--transcription-toolbar-surface);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(14px);
+}
+
+.transcription-inputarea.is-selectorless {
+    justify-content: flex-end;
+    padding: 0;
+    border-color: transparent !important;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+}
+
+.transcription-language-controls {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 6px;
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.transcription-language-controls:has(.transcription-select-field.hidden) {
+    grid-template-columns: minmax(0, 1fr);
+}
+
+.transcription-select-field {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    margin: 0;
+}
+
+.transcription-select-field > i {
+    position: absolute;
+    z-index: 1;
+    left: 11px;
+    width: 16px;
+    color: rgba(255, 255, 255, 0.58);
+    font-size: 0.78rem;
+    text-align: center;
+    pointer-events: none;
 }
 
 .transcription-inputarea select {
-    margin: 0 5px;
-    background-color: var(--select-bg) !important;
+    width: 100%;
+    min-width: 0;
+    height: 40px;
+    margin: 0;
+    padding: 0 30px 0 34px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 7px;
+    background-color: var(--transcription-control-surface) !important;
+    color: #fff;
+    font-size: 0.78rem;
+    text-overflow: ellipsis;
     cursor: pointer;
+    box-shadow: none;
+    transition:
+        border-color 0.18s ease,
+        background 0.18s ease,
+        box-shadow 0.18s ease;
 }
 
-#transcriptionSpeechStart,
-#transcriptionSpeechStop {
-    margin-left: auto;
+.transcription-inputarea select:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.transcription-inputarea select:focus {
+    border-color: var(--transcription-accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--transcription-accent) 22%, transparent);
+}
+
+.transcription-inputarea select:disabled {
+    opacity: 0.55;
+    cursor: not-allowed;
+}
+
+.transcription-speech-actions {
+    display: flex;
+    align-items: center;
+    flex: 0 0 40px;
+}
+
+.transcription-speech-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-size: 0.82rem;
+    cursor: pointer;
+    transition:
+        background 0.18s ease,
+        box-shadow 0.18s ease,
+        transform 0.15s ease;
+}
+
+.transcription-speech-start {
+    background: var(--transcription-accent);
+    color: var(--room-switch-ink, #fff);
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--transcription-accent) 32%, transparent);
+}
+
+.transcription-speech-start:hover {
+    background: color-mix(in srgb, var(--transcription-accent) 84%, white);
+}
+
+.transcription-speech-stop {
+    background: color-mix(in srgb, var(--color-danger-strong, #dc3545) 82%, var(--transcription-accent));
+    color: #fff;
+    box-shadow: 0 4px 12px color-mix(in srgb, var(--color-danger-strong, #dc3545) 28%, transparent);
+}
+
+.transcription-speech-stop:hover {
+    background: color-mix(in srgb, var(--color-danger, #ff4b4b) 88%, var(--transcription-accent));
+}
+
+.transcription-speech-btn:active {
+    transform: scale(0.92);
+}
+
+.transcription-speech-btn:focus-visible {
+    outline: 2px solid #fff;
+    outline-offset: 2px;
+}
+
+@container transcription (max-width: 420px) {
+    .transcription-inputarea {
+        margin: 0 8px 8px;
+    }
+
+    .transcription-inputarea select {
+        padding-right: 24px;
+        font-size: 0.72rem;
+    }
 }
 
 /*--------------------------------------------------------------

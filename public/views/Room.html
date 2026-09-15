@@ -2491,7 +2491,12 @@
                                     placeholder="Type a message..."
                                     rows="1"
                                 ></textarea>
-                                <button id="chatSendButton" class="chat-send-btn hidden">
+                                <button
+                                    id="chatSendButton"
+                                    class="chat-send-btn hidden"
+                                    type="button"
+                                    aria-label="Send message"
+                                >
                                     <i class="fas fa-paper-plane"></i>
                                 </button>
                             </div>
@@ -2501,42 +2506,74 @@
                             </div>
                             <div class="chat-toolbar">
                                 <div class="chat-toolbar-left">
-                                    <button id="chatEmojiButton" class="chat-toolbar-btn hidden" title="Emoji">
-                                        <i class="fas fa-smile"></i>
-                                    </button>
-
-                                    <button id="chatMarkdownButton" class="chat-toolbar-btn hidden" title="Markdown">
-                                        <i class="fab fa-markdown"></i>
-                                    </button>
-                                    <button
-                                        id="fileShareChatButton"
-                                        class="chat-toolbar-btn hidden"
-                                        title="Attach file"
-                                    >
-                                        <i class="fas fa-paperclip"></i>
-                                    </button>
-                                    <button id="chatSpeechStartButton" class="chat-toolbar-btn hidden" title="Speech">
-                                        <i class="fas fa-microphone-slash"></i>
-                                    </button>
-                                    <button
-                                        id="chatSpeechStopButton"
-                                        class="chat-toolbar-btn hidden"
-                                        title="Stop speech"
-                                    >
-                                        <i class="fas fa-microphone"></i>
-                                    </button>
-                                    <button id="chatPasteButton" class="chat-toolbar-btn hidden" title="Paste">
-                                        <i class="fas fa-paste"></i>
-                                    </button>
-                                    <button id="chatCleanTextButton" class="chat-toolbar-btn hidden" title="Clear text">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
+                                    <div class="chat-compose-tool-group" aria-label="Message tools">
+                                        <button
+                                            id="chatEmojiButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Choose emoji"
+                                        >
+                                            <i class="fas fa-smile"></i>
+                                        </button>
+                                        <button
+                                            id="chatMarkdownButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Toggle Markdown"
+                                            aria-pressed="false"
+                                        >
+                                            <i class="fab fa-markdown"></i>
+                                        </button>
+                                        <button
+                                            id="fileShareChatButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Attach file"
+                                        >
+                                            <i class="fas fa-paperclip"></i>
+                                        </button>
+                                        <button
+                                            id="chatSpeechStartButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Start speech recognition"
+                                        >
+                                            <i class="fas fa-microphone-slash"></i>
+                                        </button>
+                                        <button
+                                            id="chatSpeechStopButton"
+                                            class="chat-toolbar-btn hidden is-active"
+                                            type="button"
+                                            aria-label="Stop speech recognition"
+                                        >
+                                            <i class="fas fa-microphone"></i>
+                                        </button>
+                                    </div>
+                                    <div class="chat-compose-tool-group chat-text-tool-group" aria-label="Text actions">
+                                        <button
+                                            id="chatPasteButton"
+                                            class="chat-toolbar-btn hidden"
+                                            type="button"
+                                            aria-label="Paste text"
+                                        >
+                                            <i class="fas fa-paste"></i>
+                                        </button>
+                                        <button
+                                            id="chatCleanTextButton"
+                                            class="chat-toolbar-btn chat-clear-text-btn hidden"
+                                            type="button"
+                                            aria-label="Clear text"
+                                        >
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="chat-toolbar-right">
                                     <button
                                         id="chatShowParticipantsListBtn"
                                         class="chat-toolbar-btn chat-header-participants-btn hidden"
-                                        title="Participants"
+                                        type="button"
+                                        aria-label="Show participants"
                                     >
                                         <i class="fas fa-users"></i>
                                     </button>
@@ -2581,23 +2618,33 @@
             <div id="pollForm" class="poll-creation">
                 <form id="pollCreateForm" class="form">
                     <div class="form-group">
-                        <label for="question">Question:</label>
-                        <input type="text" id="question" name="question" required />
+                        <label for="question">Question</label>
+                        <input
+                            type="text"
+                            id="question"
+                            name="question"
+                            placeholder="What would you like to ask?"
+                            required
+                        />
                     </div>
                     <div class="form-group">
-                        <label for="options">Options:</label>
-                        <div id="optionsContainer">
-                            <input type="text" name="option" class="option-input" required />
+                        <div class="poll-options-heading">
+                            <span class="poll-field-label">Options</span>
+                            <div class="poll-option-actions" aria-label="Manage poll options">
+                                <button type="button" id="pollAddOptionBtn" aria-label="Add option">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button type="button" id="pollDelOptionBtn" aria-label="Remove last option">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
-                        <br />
+                        <div id="optionsContainer">
+                            <input type="text" name="option" class="option-input" placeholder="Option 1" required />
+                            <input type="text" name="option" class="option-input" placeholder="Option 2" required />
+                        </div>
                         <div class="poll-btns">
-                            <button type="button" id="pollAddOptionBtn" class="poll-btn">
-                                <i class="fas fa-plus"></i>
-                            </button>
-                            <button type="button" id="pollDelOptionBtn" class="del-btn">
-                                <i class="fas fa-minus"></i>
-                            </button>
-                            <button type="submit" id="addPollButton" class="poll-btn">
+                            <button type="submit" id="addPollButton" class="poll-primary-btn">
                                 <i class="fas fa-square-poll-horizontal"></i> Create Poll
                             </button>
                         </div>
@@ -2813,10 +2860,42 @@
                     </div>
                 </main>
                 <div id="transcriptionFooter" class="transcription-inputarea">
-                    <select id="transcriptionLanguage" class="form-select text-light bg-dark"></select>
-                    <select id="transcriptionDialect" class="form-select text-light bg-dark"></select>
-                    <button id="transcriptionSpeechStart" class=""><i class="fas fa-play"></i></button>
-                    <button id="transcriptionSpeechStop" class="hidden"><i class="fas fa-stop"></i></button>
+                    <div class="transcription-language-controls">
+                        <label class="transcription-select-field">
+                            <i class="fas fa-language" aria-hidden="true"></i>
+                            <select
+                                id="transcriptionLanguage"
+                                class="form-select text-light bg-dark"
+                                aria-label="Transcription language"
+                            ></select>
+                        </label>
+                        <label class="transcription-select-field">
+                            <i class="fas fa-globe" aria-hidden="true"></i>
+                            <select
+                                id="transcriptionDialect"
+                                class="form-select text-light bg-dark"
+                                aria-label="Transcription dialect"
+                            ></select>
+                        </label>
+                    </div>
+                    <div class="transcription-speech-actions" aria-label="Transcription controls">
+                        <button
+                            id="transcriptionSpeechStart"
+                            class="transcription-speech-btn transcription-speech-start"
+                            type="button"
+                            aria-label="Start transcription"
+                        >
+                            <i class="fas fa-play"></i>
+                        </button>
+                        <button
+                            id="transcriptionSpeechStop"
+                            class="transcription-speech-btn transcription-speech-stop hidden"
+                            type="button"
+                            aria-label="Stop transcription"
+                        >
+                            <i class="fas fa-stop"></i>
+                        </button>
+                    </div>
                 </div>
             </section>
         </section>
