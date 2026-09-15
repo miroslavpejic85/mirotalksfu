@@ -8110,12 +8110,16 @@ class RoomClient {
             });
             pollButtonsDiv.appendChild(deletePollButton);
 
+            const pollFooter = document.createElement('div');
+            pollFooter.className = 'poll-card-footer';
+
             // Add thematic break
             const hr = document.createElement('hr');
-            pollDiv.appendChild(hr);
+            pollFooter.appendChild(hr);
 
             // Append buttons to poll
-            pollDiv.appendChild(pollButtonsDiv);
+            pollFooter.appendChild(pollButtonsDiv);
+            pollDiv.appendChild(pollFooter);
 
             // Create voter lists
             const votersList = document.createElement('ul');
