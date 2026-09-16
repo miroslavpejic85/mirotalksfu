@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.54
+ * @version 2.4.55
  *
  */
 
@@ -293,7 +293,8 @@ isPresenter = isPeerPresenter();
 let peer_info = null;
 
 let isPushToTalkActive = false;
-let isSpaceDown = false;
+let isPushToTalkPressed = false;
+let pushToTalkAudioContext = null;
 let isPitchBarEnabled = true;
 let isSoundEnabled = true;
 let isKeepButtonsVisible = false;
@@ -2777,6 +2778,17 @@ function handleButtons() {
 
         rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
     };
+
+    [startAudioButton, stopAudioButton].forEach((button) => {
+        button.addEventListener('pointerdown', (e) => {
+            if (!isPushToTalkActive) return;
+            button.setPointerCapture(e.pointerId);
+            setPushToTalkPressed(true);
+        });
+        button.addEventListener('pointerup', () => setPushToTalkPressed(false));
+        button.addEventListener('pointercancel', () => setPushToTalkPressed(false));
+    });
+
     startVideoButton.onclick = async () => {
         const moderator = rc.getModerator();
         if (moderator.video_cant_unhide) {
@@ -3364,6 +3376,67 @@ function setParticipantViewMode(requestedMode, persist = true, notify = true) {
     if (!isSpeakerView) resizeVideoMedia();
 }
 
+function playPushToTalkBlip(pressed) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return;
+
+    try {
+        if (!pushToTalkAudioContext || pushToTalkAudioContext.state === 'closed') {
+            pushToTalkAudioContext = new AudioContextClass();
+        }
+        if (pushToTalkAudioContext.state === 'suspended') {
+            pushToTalkAudioContext.resume().catch((err) => console.warn('Push-to-talk AudioContext resume', err));
+        }
+
+        const oscillator = pushToTalkAudioContext.createOscillator();
+        const gain = pushToTalkAudioContext.createGain();
+        const now = pushToTalkAudioContext.currentTime;
+        const duration = 0.08;
+
+        oscillator.connect(gain);
+        gain.connect(pushToTalkAudioContext.destination);
+        oscillator.frequency.setValueAtTime(pressed ? 880 : 800, now);
+        oscillator.frequency.linearRampToValueAtTime(pressed ? 1200 : 500, now + duration);
+        gain.gain.setValueAtTime(0.18, now);
+        gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+        oscillator.start(now);
+        oscillator.stop(now + duration);
+    } catch (err) {
+        console.warn('Unable to play push-to-talk blip', err);
+    }
+}
+
+function updatePushToTalkUi(enabled, transmitting = false) {
+    const audioSplit = getId('startAudioSplit');
+    const status = getId('pushToTalkStatus');
+    const startIcon = startAudioButton.querySelector('i');
+    const stopIcon = stopAudioButton.querySelector('i');
+
+    audioSplit.classList.toggle('ptt-enabled', enabled);
+    audioSplit.classList.toggle('ptt-transmitting', enabled && transmitting);
+    status.classList.toggle('hidden', !enabled || !transmitting);
+    startIcon.className = enabled ? 'fas fa-microphone-lines' : 'fas fa-microphone-slash';
+    stopIcon.className = enabled ? 'fas fa-microphone-lines' : 'fas fa-microphone';
+}
+
+async function setPushToTalkPressed(pressed) {
+    if (!isPushToTalkActive || pressed === isPushToTalkPressed) return;
+
+    isPushToTalkPressed = pressed;
+    updatePushToTalkUi(true, pressed);
+    playPushToTalkBlip(pressed);
+
+    if (pressed) {
+        await rc.resumeProducer(RoomClient.mediaType.audio);
+        rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
+        console.log('Push-to-talk: audio resumed');
+    } else {
+        await rc.pauseProducer(RoomClient.mediaType.audio);
+        rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
+        console.log('Push-to-talk: audio paused');
+    }
+}
+
 function handleSelects() {
     // devices options
     videoSelect.onchange = (e) => {
@@ -3417,6 +3490,7 @@ function handleSelects() {
         lS.setSettings(localStorageSettings);
         e.target.blur();
     };
+
     switchPushToTalk.onchange = async (e) => {
         const producerExist = rc.producerExist(RoomClient.mediaType.audio);
         const enablePushToTalk = e.currentTarget.checked;
@@ -3431,6 +3505,8 @@ function handleSelects() {
             }, 1000);
         }
         isPushToTalkActive = enablePushToTalk;
+        isPushToTalkPressed = false;
+        updatePushToTalkUi(isPushToTalkActive);
         if (producerExist && !isPushToTalkActive) {
             console.log('Push-to-talk: resume audio producer');
             await rc.resumeProducer(RoomClient.mediaType.audio);
@@ -3440,24 +3516,11 @@ function handleSelects() {
         rc.roomMessage('ptt', isPushToTalkActive);
         console.log(`Push-to-talk enabled: ${isPushToTalkActive}`);
     };
-    document.addEventListener('keydown', async (e) => {
-        if (!isPushToTalkActive) return;
-        if (e.code === 'Space') {
-            if (isSpaceDown) return;
-            await rc.resumeProducer(RoomClient.mediaType.audio);
-            rc.updatePeerInfo(peer_name, socket.id, 'audio', true);
-            isSpaceDown = true;
-            console.log('Push-to-talk: audio resumed');
-        }
+    document.addEventListener('keydown', (e) => {
+        if (isPushToTalkActive && e.code === 'Space') setPushToTalkPressed(true);
     });
-    document.addEventListener('keyup', async (e) => {
-        if (!isPushToTalkActive) return;
-        if (e.code === 'Space') {
-            await rc.pauseProducer(RoomClient.mediaType.audio);
-            rc.updatePeerInfo(peer_name, socket.id, 'audio', false);
-            isSpaceDown = false;
-            console.log('Push-to-talk: audio paused');
-        }
+    document.addEventListener('keyup', (e) => {
+        if (isPushToTalkActive && e.code === 'Space') setPushToTalkPressed(false);
     });
     // room
     switchBroadcasting.onchange = (e) => {
@@ -8312,7 +8375,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.54',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.55',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

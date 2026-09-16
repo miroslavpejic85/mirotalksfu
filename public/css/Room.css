@@ -824,6 +824,31 @@ body {
     background: var(--btns-bg-color);
 }
 
+#bottomButtons .push-to-talk-status {
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 8px);
+    z-index: 2;
+    padding: 5px 9px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 6px;
+    background: var(--room-panel-raised);
+    box-shadow: var(--room-shadow);
+    color: #fff;
+    font-size: 12px;
+    font-weight: 600;
+    line-height: 1;
+    white-space: nowrap;
+    pointer-events: none;
+    transform: translateX(-50%);
+}
+
+#bottomButtons #startAudioSplit.ptt-transmitting > button:not(.hidden) {
+    border-color: #19bb5c !important;
+    color: #fff !important;
+    box-shadow: 0 0 0 3px rgba(25, 187, 92, 0.2);
+}
+
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
 #bottomButtons #startAudioDeviceDropdown,
 #bottomButtons #startVideoDeviceDropdown,
