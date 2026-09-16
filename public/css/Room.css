@@ -843,10 +843,8 @@ body {
     transform: translateX(-50%);
 }
 
-#bottomButtons #startAudioSplit.ptt-transmitting > button:not(.hidden) {
-    border-color: #19bb5c !important;
-    color: #fff !important;
-    box-shadow: 0 0 0 3px rgba(25, 187, 92, 0.2);
+#bottomButtons #startAudioSplit.ptt-transmitting > button:not(.hidden) > i {
+    color: #19bb5c !important;
 }
 
 /* Let the dropdown menu anchor to the whole split button (not only the arrow). */
