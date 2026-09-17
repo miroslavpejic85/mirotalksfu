@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.59
+ * @version 2.4.60
  *
  */
 
@@ -2921,14 +2921,29 @@ function handleButtons() {
     whiteboardLineBtn.onclick = () => {
         whiteboardAddObj('line');
     };
+    whiteboardArrowBtn.onclick = () => {
+        whiteboardAddObj('arrow');
+    };
     whiteboardRectBtn.onclick = () => {
         whiteboardAddObj('rect');
+    };
+    whiteboardDiamondBtn.onclick = () => {
+        whiteboardAddObj('diamond');
     };
     whiteboardTriangleBtn.onclick = () => {
         whiteboardAddObj('triangle');
     };
     whiteboardCircleBtn.onclick = () => {
         whiteboardAddObj('circle');
+    };
+    whiteboardFrameBtn.onclick = () => {
+        whiteboardAddObj('frame');
+    };
+    whiteboardGroupBtn.onclick = () => {
+        whiteboardGroupSelection();
+    };
+    whiteboardUngroupBtn.onclick = () => {
+        whiteboardUngroupSelection();
     };
     whiteboardEraserBtn.onclick = () => {
         whiteboardResetAllMode();
@@ -6014,6 +6029,29 @@ function whiteboardAddObj(type) {
             });
             addWbCanvasObj(line);
             break;
+        case 'arrow':
+            const arrowColor = wbCanvas.freeDrawingBrush.color;
+            const arrow = new fabric.Group(
+                [
+                    new fabric.Line([0, 30, 180, 30], {
+                        stroke: arrowColor,
+                        strokeWidth: wbCanvas.freeDrawingBrush.width,
+                    }),
+                    new fabric.Triangle({
+                        left: 180,
+                        top: 30,
+                        width: 24,
+                        height: 28,
+                        fill: arrowColor,
+                        originX: 'center',
+                        originY: 'center',
+                        angle: 90,
+                    }),
+                ],
+                { left: 100, top: 100 }
+            );
+            addWbCanvasObj(arrow);
+            break;
         case 'circle':
             const circle = new fabric.Circle({
                 radius: 50,
@@ -6035,6 +6073,25 @@ function whiteboardAddObj(type) {
             });
             addWbCanvasObj(rect);
             break;
+        case 'diamond':
+            const diamond = new fabric.Polygon(
+                [
+                    { x: 75, y: 0 },
+                    { x: 150, y: 55 },
+                    { x: 75, y: 110 },
+                    { x: 0, y: 55 },
+                ],
+                {
+                    left: 100,
+                    top: 100,
+                    fill: 'transparent',
+                    stroke: wbCanvas.freeDrawingBrush.color,
+                    strokeWidth: wbCanvas.freeDrawingBrush.width,
+                    strokeUniform: true,
+                }
+            );
+            addWbCanvasObj(diamond);
+            break;
         case 'triangle':
             const triangle = new fabric.Triangle({
                 top: 0,
@@ -6046,6 +6103,32 @@ function whiteboardAddObj(type) {
                 strokeWidth: wbCanvas.freeDrawingBrush.width,
             });
             addWbCanvasObj(triangle);
+            break;
+        case 'frame':
+            const frameColor = wbCanvas.freeDrawingBrush.color;
+            const frame = new fabric.Group(
+                [
+                    new fabric.Rect({
+                        width: 360,
+                        height: 220,
+                        fill: 'transparent',
+                        stroke: frameColor,
+                        strokeWidth: 2,
+                        strokeDashArray: [10, 6],
+                        strokeUniform: true,
+                    }),
+                    new fabric.Textbox('Frame title', {
+                        left: 12,
+                        top: 10,
+                        width: 320,
+                        fontSize: 20,
+                        fontFamily: 'Montserrat',
+                        fill: frameColor,
+                    }),
+                ],
+                { left: 100, top: 100 }
+            );
+            addWbCanvasObj(frame);
             break;
         default:
             break;
@@ -6097,6 +6180,27 @@ function whiteboardCloneObject() {
             wbCanvas.requestRenderAll();
         }
     }
+}
+
+function whiteboardGroupSelection() {
+    const selection = wbCanvas?.getActiveObject?.();
+    if (!selection || selection.type !== 'activeSelection' || selection.size() < 2) {
+        return userLog('info', 'Select two or more objects to group.', 'top-end');
+    }
+    const group = selection.toGroup();
+    wbCanvas.setActiveObject(group);
+    wbCanvas.requestRenderAll();
+    wbCanvasToJson();
+}
+
+function whiteboardUngroupSelection() {
+    const group = wbCanvas?.getActiveObject?.();
+    if (!group || group.type !== 'group') {
+        return userLog('info', 'Select a grouped object to ungroup.', 'top-end');
+    }
+    group.toActiveSelection();
+    wbCanvas.requestRenderAll();
+    wbCanvasToJson();
 }
 
 function wbHandleVanishingObjects() {
@@ -6385,6 +6489,9 @@ function setupWhiteboardLocalListeners() {
     wbCanvas.on('mouse:down', function (e) {
         mouseDown(e);
     });
+    wbCanvas.on('mouse:dblclick', function (e) {
+        editWhiteboardGroupedText(e);
+    });
     wbCanvas.on('mouse:up', function () {
         mouseUp();
     });
@@ -6394,6 +6501,34 @@ function setupWhiteboardLocalListeners() {
     wbCanvas.on('object:added', function () {
         objectAdded();
     });
+}
+
+async function editWhiteboardGroupedText(e) {
+    const group = e.target;
+    if (!group || group.type !== 'group' || typeof group.getObjects !== 'function') return;
+
+    const objects = group.getObjects();
+    const frameBorder = objects.find((obj) => obj.type === 'rect' && obj.strokeDashArray?.length);
+    const frameTitle = objects.find((obj) => obj.type === 'textbox');
+    if (!frameBorder || !frameTitle) return;
+
+    const result = await Swal.fire({
+        background: swalBackground,
+        title: 'Edit frame title',
+        input: 'text',
+        inputValue: frameTitle.text,
+        inputAttributes: { maxlength: 120 },
+        showCancelButton: true,
+        confirmButtonText: 'Save',
+        inputValidator: (value) => (!value.trim() ? 'Enter a frame title' : undefined),
+    });
+    if (!result.isConfirmed) return;
+
+    frameTitle.set('text', result.value.trim());
+    group.addWithUpdate();
+    group.setCoords();
+    wbCanvas.requestRenderAll();
+    wbCanvasToJson();
 }
 
 function mouseDown(e) {
@@ -6764,6 +6899,10 @@ function setupWhiteboardShortcuts() {
                     whiteboardAddObj('line');
                     event.preventDefault();
                     break;
+                case 'KeyA': // Arrow
+                    whiteboardAddObj('arrow');
+                    event.preventDefault();
+                    break;
                 case 'KeyC': // Circle
                     whiteboardAddObj('circle');
                     event.preventDefault();
@@ -6774,6 +6913,14 @@ function setupWhiteboardShortcuts() {
                     break;
                 case 'KeyG': // Triangle (G for Geometry)
                     whiteboardAddObj('triangle');
+                    event.preventDefault();
+                    break;
+                case 'KeyD': // Diamond
+                    whiteboardAddObj('diamond');
+                    event.preventDefault();
+                    break;
+                case 'KeyF': // Frame
+                    whiteboardAddObj('frame');
                     event.preventDefault();
                     break;
                 case 'KeyN': // Sticky Note
@@ -8394,7 +8541,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.59',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.60',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
