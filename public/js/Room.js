@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.58
+ * @version 2.4.59
  *
  */
 
@@ -2694,7 +2694,8 @@ function handleButtons() {
     chatSendButton.onclick = () => {
         rc.sendMessage();
     };
-    chatEmojiButton.onclick = () => {
+    chatEmojiButton.onclick = (event) => {
+        if (!isMobileDevice && event.detail > 0) return;
         rc.toggleChatEmoji();
     };
     chatMarkdownButton.onclick = () => {
@@ -4117,15 +4118,33 @@ function handleChatEmojiPicker() {
 
     function addEmojiToMsg(data) {
         chatMessage.value += data.native;
-        rc.toggleChatEmoji();
+        rc.setChatEmojiOpen(false);
     }
 
     const chatEmojiButton = getId('chatEmojiButton');
     const chatEmoji = getId('chatEmoji');
+
+    if (!isMobileDevice) {
+        let closeTimer;
+        const cancelClose = () => clearTimeout(closeTimer);
+        const openPicker = () => {
+            cancelClose();
+            rc.setChatEmojiOpen(true);
+        };
+        const scheduleClose = () => {
+            cancelClose();
+            closeTimer = setTimeout(() => rc.setChatEmojiOpen(false), 300);
+        };
+
+        chatEmojiButton.addEventListener('mouseenter', openPicker);
+        chatEmojiButton.addEventListener('mouseleave', scheduleClose);
+        chatEmoji.addEventListener('mouseenter', cancelClose);
+        chatEmoji.addEventListener('mouseleave', scheduleClose);
+    }
+
     handleClickOutside(emojiPicker, chatEmojiButton, () => {
         if (chatEmoji && chatEmoji.classList.contains('show')) {
-            chatEmoji.classList.remove('show');
-            chatEmojiButton.style.color = '#FFFFFF';
+            rc.setChatEmojiOpen(false);
         }
     });
 }
@@ -8375,7 +8394,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.58',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.59',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,

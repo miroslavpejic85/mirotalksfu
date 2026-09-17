@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.58
+ * @version 2.4.59
  *
  */
 
@@ -6577,9 +6577,15 @@ class RoomClient {
     }
 
     toggleChatEmoji() {
-        this.getId('chatEmoji').classList.toggle('show');
-        this.isChatEmojiOpen = !this.isChatEmojiOpen;
-        this.getId('chatEmojiButton').style.color = this.isChatEmojiOpen ? '#FFFF00' : '#FFFFFF';
+        this.setChatEmojiOpen(!this.isChatEmojiOpen);
+    }
+
+    setChatEmojiOpen(isOpen) {
+        this.isChatEmojiOpen = isOpen;
+        this.getId('chatEmoji').classList.toggle('show', isOpen);
+        const chatEmojiButton = this.getId('chatEmojiButton');
+        chatEmojiButton.style.color = isOpen ? '#FFFF00' : '#FFFFFF';
+        chatEmojiButton.setAttribute('aria-expanded', String(isOpen));
     }
 
     addEmojiToMsg(data) {
