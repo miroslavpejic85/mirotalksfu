@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Kada je omogućeno, vaša transkripcija će biti poslata svim učesnicima"
     },
     "buttons": {
+        "Add arrow": "Dodaj strelicu",
+        "Add diamond": "Dodaj romb",
+        "Add frame": "Dodaj okvir",
+        "Group selection": "Grupiši izbor",
+        "Ungroup selection": "Razgrupiši izbor",
         "Abort": "Prekini",
         "About": "O aplikaciji",
         "Accept all waiting guests": "Prihvati sve goste na čekanju",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Strelica",
+        "= Diamond": "= Romb",
+        "= Frame": "= Okvir",
+        "Frame title": "Naslov okvira",
         "= Circle": "= Krug",
         "= Clear all": "= Obriši sve",
         "= Image": "= Slika",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Vaša sesija snimanja biće sačuvana na serveru."
     },
     "dialogs": {
+        "Edit frame title": "Izmeni naslov okvira",
+        "Enter a frame title": "Unesite naslov okvira",
         "A presenter is required to start the meeting. Please try joining again later.": "Za početak sastanka potreban je voditelj. Pokušajte da se pridružite ponovo kasnije.",
         "Apply": "Primeni",
         "Are you sure you want to clean the board?": "Da li ste sigurni da želite da očistite tablu?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Vaše sačuvano podešavanje drži učesnike sa isključenom kamerom sakrivene iz mreže u svakoj sobi. Zadržati ovde?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Izaberite grupisani objekat za razgrupisavanje.",
+        "Select two or more objects to group.": "Izaberite dva ili više objekata za grupisanje.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

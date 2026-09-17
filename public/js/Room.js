@@ -6117,7 +6117,7 @@ function whiteboardAddObj(type) {
                         strokeDashArray: [10, 6],
                         strokeUniform: true,
                     }),
-                    new fabric.Textbox('Frame title', {
+                    new fabric.Textbox(window.i18n?.t('Frame title', 'labels') || 'Frame title', {
                         left: 12,
                         top: 10,
                         width: 320,
@@ -6520,7 +6520,8 @@ async function editWhiteboardGroupedText(e) {
         inputAttributes: { maxlength: 120 },
         showCancelButton: true,
         confirmButtonText: 'Save',
-        inputValidator: (value) => (!value.trim() ? 'Enter a frame title' : undefined),
+        inputValidator: (value) =>
+            !value.trim() ? window.i18n?.t('Enter a frame title', 'dialogs') || 'Enter a frame title' : undefined,
     });
     if (!result.isConfirmed) return;
 

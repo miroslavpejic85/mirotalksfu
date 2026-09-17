@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Als dit aan staat wordt je transcriptie naar alle deelnemers gestuurd"
     },
     "buttons": {
+        "Add arrow": "Pijl toevoegen",
+        "Add diamond": "Ruit toevoegen",
+        "Add frame": "Kader toevoegen",
+        "Group selection": "Selectie groeperen",
+        "Ungroup selection": "Selectie degroeperen",
         "Abort": "Afbreken",
         "About": "Over",
         "Accept all waiting guests": "Alle wachtende gasten toelaten",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Pijl",
+        "= Diamond": "= Ruit",
+        "= Frame": "= Kader",
+        "Frame title": "Kadertitel",
         "= Circle": "= Cirkel",
         "= Clear all": "= Alles wissen",
         "= Image": "= Afbeelding",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Je opname wordt op de server bewaard."
     },
     "dialogs": {
+        "Edit frame title": "Kadertitel bewerken",
+        "Enter a frame title": "Voer een kadertitel in",
         "A presenter is required to start the meeting. Please try joining again later.": "Er is een presentator nodig om de vergadering te starten. Probeer het later opnieuw.",
         "Apply": "Toepassen",
         "Are you sure you want to clean the board?": "Weet je zeker dat je het bord wilt wissen?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Je opgeslagen voorkeur houdt deelnemers met de camera uit in elke ruimte buiten het raster. Hier ook?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Selecteer een gegroepeerd object om de groepering op te heffen.",
+        "Select two or more objects to group.": "Selecteer twee of meer objecten om te groeperen.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

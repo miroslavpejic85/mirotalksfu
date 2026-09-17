@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "有効にすると、文字起こしがすべての参加者に送信されます"
     },
     "buttons": {
+        "Add arrow": "矢印を追加",
+        "Add diamond": "ひし形を追加",
+        "Add frame": "フレームを追加",
+        "Group selection": "選択項目をグループ化",
+        "Ungroup selection": "選択項目のグループ化を解除",
         "Abort": "中止",
         "About": "情報",
         "Accept all waiting guests": "待機中のゲストをすべて承認",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= 矢印",
+        "= Diamond": "= ひし形",
+        "= Frame": "= フレーム",
+        "Frame title": "フレームタイトル",
         "= Circle": "= 円",
         "= Clear all": "= すべてクリア",
         "= Image": "= 画像",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "録画セッションはサーバーに保存されます。"
     },
     "dialogs": {
+        "Edit frame title": "フレームタイトルを編集",
+        "Enter a frame title": "フレームタイトルを入力してください",
         "A presenter is required to start the meeting. Please try joining again later.": "会議を開始するには発表者が必要です。後でもう一度参加を試みてください。",
         "Apply": "適用",
         "Are you sure you want to clean the board?": "本当にボードをクリアしますか？",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "保存された設定により、カメラをオフにしている参加者はすべてのルームでグリッドから非表示になります。ここでも維持しますか？"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "グループ化を解除するオブジェクトを選択してください。",
+        "Select two or more objects to group.": "グループ化するオブジェクトを2つ以上選択してください。",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

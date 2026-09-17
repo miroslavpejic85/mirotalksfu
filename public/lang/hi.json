@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "सक्षम होने पर, आपका ट्रांसक्रिप्शन सभी प्रतिभागियों को भेजा जाएगा"
     },
     "buttons": {
+        "Add arrow": "तीर जोड़ें",
+        "Add diamond": "हीराकार जोड़ें",
+        "Add frame": "फ़्रेम जोड़ें",
+        "Group selection": "चयन को समूहित करें",
+        "Ungroup selection": "चयन का समूह हटाएँ",
         "Abort": "रद्द करें",
         "About": "परिचय",
         "Accept all waiting guests": "सभी प्रतीक्षारत अतिथियों को स्वीकार करें",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= तीर",
+        "= Diamond": "= हीराकार",
+        "= Frame": "= फ़्रेम",
+        "Frame title": "फ़्रेम शीर्षक",
         "= Circle": "= वृत्त",
         "= Clear all": "= सभी साफ़ करें",
         "= Image": "= छवि",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "आपका रिकॉर्डिंग सत्र सर्वर पर संग्रहीत किया जाएगा।"
     },
     "dialogs": {
+        "Edit frame title": "फ़्रेम शीर्षक संपादित करें",
+        "Enter a frame title": "फ़्रेम शीर्षक दर्ज करें",
         "A presenter is required to start the meeting. Please try joining again later.": "मीटिंग शुरू करने के लिए एक प्रस्तुतकर्ता आवश्यक है। कृपया बाद में फिर से शामिल होने का प्रयास करें।",
         "Apply": "लागू करें",
         "Are you sure you want to clean the board?": "क्या आप वाकई बोर्ड साफ़ करना चाहते हैं?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "आपकी सहेजी गई प्राथमिकता हर कमरे में कैमरा बंद करने वाले प्रतिभागियों को ग्रिड से छिपाए रखती है। इसे यहाँ रखें?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "समूह हटाने के लिए समूहित ऑब्जेक्ट चुनें।",
+        "Select two or more objects to group.": "समूहित करने के लिए दो या अधिक ऑब्जेक्ट चुनें।",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

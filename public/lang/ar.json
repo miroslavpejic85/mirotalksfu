@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "عند التفعيل، سيتم إرسال التفريغ النصي الخاص بك إلى جميع المشاركين"
     },
     "buttons": {
+        "Add arrow": "إضافة سهم",
+        "Add diamond": "إضافة شكل ماسي",
+        "Add frame": "إضافة إطار",
+        "Group selection": "تجميع التحديد",
+        "Ungroup selection": "فك تجميع التحديد",
         "Abort": "إحباط",
         "About": "حول",
         "Accept all waiting guests": "قبول جميع الضيوف المنتظرين",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= سهم",
+        "= Diamond": "= شكل ماسي",
+        "= Frame": "= إطار",
+        "Frame title": "عنوان الإطار",
         "= Circle": "= دائرة",
         "= Clear all": "= مسح الكل",
         "= Image": "= صورة",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "سيتم تخزين جلسة التسجيل الخاصة بك على الخادم."
     },
     "dialogs": {
+        "Edit frame title": "تعديل عنوان الإطار",
+        "Enter a frame title": "أدخل عنوانًا للإطار",
         "A presenter is required to start the meeting. Please try joining again later.": "يلزم وجود مقدّم عرض لبدء الاجتماع. يُرجى محاولة الانضمام مرة أخرى لاحقًا.",
         "Apply": "تطبيق",
         "Are you sure you want to clean the board?": "هل أنت متأكد من أنك تريد تنظيف السبورة؟",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "يُبقي إعدادك المحفوظ المشاركين ذوي الكاميرا المغلقة مخفيين من الشبكة في كل غرفة. هل تريد الإبقاء عليه هنا؟"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "حدد كائنًا مجمعًا لفك تجميعه.",
+        "Select two or more objects to group.": "حدد عنصرين أو أكثر لتجميعهما.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

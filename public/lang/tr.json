@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Etkinleştirildiğinde metin dökümünüz tüm katılımcılara gönderilir"
     },
     "buttons": {
+        "Add arrow": "Ok ekle",
+        "Add diamond": "Eşkenar dörtgen ekle",
+        "Add frame": "Çerçeve ekle",
+        "Group selection": "Seçimi grupla",
+        "Ungroup selection": "Seçimin grubunu çöz",
         "Abort": "İptal et",
         "About": "Hakkında",
         "Accept all waiting guests": "Bekleyen tüm misafirleri kabul et",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Ok",
+        "= Diamond": "= Eşkenar dörtgen",
+        "= Frame": "= Çerçeve",
+        "Frame title": "Çerçeve başlığı",
         "= Circle": "= Daire",
         "= Clear all": "= Tümünü temizle",
         "= Image": "= Resim",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Kayıt oturumunuz sunucuda saklanacak."
     },
     "dialogs": {
+        "Edit frame title": "Çerçeve başlığını düzenle",
+        "Enter a frame title": "Bir çerçeve başlığı girin",
         "A presenter is required to start the meeting. Please try joining again later.": "Toplantıyı başlatmak için bir sunum yapan gereklidir. Lütfen daha sonra tekrar katılmayı deneyin.",
         "Apply": "Uygula",
         "Are you sure you want to clean the board?": "Tahtayı temizlemek istediğinizden emin misiniz?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Kaydettiğiniz tercih, kamerası kapalı katılımcıları her odada ızgaradan gizli tutar. Burada da korunsun mu?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Grubunu çözmek için gruplanmış bir nesne seçin.",
+        "Select two or more objects to group.": "Gruplamak için iki veya daha fazla nesne seçin.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

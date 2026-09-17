@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "When enabled, your transcription will be sent to all participants"
     },
     "buttons": {
+        "Add arrow": "Add arrow",
+        "Add diamond": "Add diamond",
+        "Add frame": "Add frame",
+        "Group selection": "Group selection",
+        "Ungroup selection": "Ungroup selection",
         "Abort": "Abort",
         "About": "About",
         "Accept all waiting guests": "Accept all waiting guests",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Arrow",
+        "= Diamond": "= Diamond",
+        "= Frame": "= Frame",
+        "Frame title": "Frame title",
         "= Circle": "= Circle",
         "= Clear all": "= Clear all",
         "= Image": "= Image",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Your recording session will be stored on the server."
     },
     "dialogs": {
+        "Edit frame title": "Edit frame title",
+        "Enter a frame title": "Enter a frame title",
         "A presenter is required to start the meeting. Please try joining again later.": "A presenter is required to start the meeting. Please try joining again later.",
         "Apply": "Apply",
         "Are you sure you want to clean the board?": "Are you sure you want to clean the board?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Select a grouped object to ungroup.",
+        "Select two or more objects to group.": "Select two or more objects to group.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Wenn aktiviert, wird Ihr Transkript an alle Teilnehmer gesendet"
     },
     "buttons": {
+        "Add arrow": "Pfeil hinzufügen",
+        "Add diamond": "Raute hinzufügen",
+        "Add frame": "Rahmen hinzufügen",
+        "Group selection": "Auswahl gruppieren",
+        "Ungroup selection": "Gruppierung der Auswahl aufheben",
         "Abort": "Abbrechen",
         "About": "Über",
         "Accept all waiting guests": "Alle wartenden Gäste annehmen",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Pfeil",
+        "= Diamond": "= Raute",
+        "= Frame": "= Rahmen",
+        "Frame title": "Rahmentitel",
         "= Circle": "= Kreis",
         "= Clear all": "= Alles löschen",
         "= Image": "= Bild",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Ihre Aufzeichnungssitzung wird auf dem Server gespeichert."
     },
     "dialogs": {
+        "Edit frame title": "Rahmentitel bearbeiten",
+        "Enter a frame title": "Geben Sie einen Rahmentitel ein",
         "A presenter is required to start the meeting. Please try joining again later.": "Zum Starten der Besprechung ist ein Moderator erforderlich. Bitte versuchen Sie später erneut beizutreten.",
         "Apply": "Anwenden",
         "Are you sure you want to clean the board?": "Möchten Sie das Board wirklich bereinigen?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Deine gespeicherte Einstellung blendet Teilnehmer mit ausgeschalteter Kamera in jedem Raum aus dem Raster aus. Hier beibehalten?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Wählen Sie ein gruppiertes Objekt aus, um die Gruppierung aufzuheben.",
+        "Select two or more objects to group.": "Wählen Sie zwei oder mehr Objekte zum Gruppieren aus.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

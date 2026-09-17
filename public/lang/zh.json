@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "启用后，您的转录将发送给所有参与者"
     },
     "buttons": {
+        "Add arrow": "添加箭头",
+        "Add diamond": "添加菱形",
+        "Add frame": "添加框架",
+        "Group selection": "组合所选对象",
+        "Ungroup selection": "取消组合所选对象",
         "Abort": "中止",
         "About": "关于",
         "Accept all waiting guests": "接受所有等待的访客",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= 箭头",
+        "= Diamond": "= 菱形",
+        "= Frame": "= 框架",
+        "Frame title": "框架标题",
         "= Circle": "= 圆形",
         "= Clear all": "= 全部清除",
         "= Image": "= 图片",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "您的录制会话将存储在服务器上。"
     },
     "dialogs": {
+        "Edit frame title": "编辑框架标题",
+        "Enter a frame title": "请输入框架标题",
         "A presenter is required to start the meeting. Please try joining again later.": "启动会议需要一位演示者。请稍后再尝试加入。",
         "Apply": "应用",
         "Are you sure you want to clean the board?": "您确定要清理白板吗？",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "您保存的偏好会在每个房间中将关闭摄像头的参与者从网格中隐藏。在此处保留吗？"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "请选择一个已组合的对象以取消组合。",
+        "Select two or more objects to group.": "请选择两个或更多对象进行组合。",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Cuando está activado, tu transcripción se enviará a todos los participantes"
     },
     "buttons": {
+        "Add arrow": "Añadir flecha",
+        "Add diamond": "Añadir rombo",
+        "Add frame": "Añadir marco",
+        "Group selection": "Agrupar selección",
+        "Ungroup selection": "Desagrupar selección",
         "Abort": "Cancelar",
         "About": "Acerca de",
         "Accept all waiting guests": "Aceptar a todos los invitados en espera",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Flecha",
+        "= Diamond": "= Rombo",
+        "= Frame": "= Marco",
+        "Frame title": "Título del marco",
         "= Circle": "= Círculo",
         "= Clear all": "= Borrar todo",
         "= Image": "= Imagen",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Tu sesión de grabación se almacenará en el servidor."
     },
     "dialogs": {
+        "Edit frame title": "Editar título del marco",
+        "Enter a frame title": "Introduce un título para el marco",
         "A presenter is required to start the meeting. Please try joining again later.": "Se necesita un presentador para iniciar la reunión. Intenta entrar de nuevo más tarde.",
         "Apply": "Aplicar",
         "Are you sure you want to clean the board?": "¿Seguro que quieres limpiar la pizarra?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Tu preferencia guardada mantiene ocultos de la cuadrícula a los participantes con la cámara apagada en cada sala. ¿Mantenerla aquí?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Selecciona un objeto agrupado para desagruparlo.",
+        "Select two or more objects to group.": "Selecciona dos o más objetos para agruparlos.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

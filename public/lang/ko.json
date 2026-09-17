@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "활성화되면 자막이 모든 참가자에게 전송됩니다"
     },
     "buttons": {
+        "Add arrow": "화살표 추가",
+        "Add diamond": "마름모 추가",
+        "Add frame": "프레임 추가",
+        "Group selection": "선택 항목 그룹화",
+        "Ungroup selection": "선택 항목 그룹 해제",
         "Abort": "중단",
         "About": "정보",
         "Accept all waiting guests": "대기 중인 모든 게스트 수락",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= 화살표",
+        "= Diamond": "= 마름모",
+        "= Frame": "= 프레임",
+        "Frame title": "프레임 제목",
         "= Circle": "= 원",
         "= Clear all": "= 모두 지우기",
         "= Image": "= 이미지",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "녹화 세션이 서버에 저장됩니다."
     },
     "dialogs": {
+        "Edit frame title": "프레임 제목 편집",
+        "Enter a frame title": "프레임 제목을 입력하세요",
         "A presenter is required to start the meeting. Please try joining again later.": "회의를 시작하려면 발표자가 필요합니다. 나중에 다시 참가해 주세요.",
         "Apply": "적용",
         "Are you sure you want to clean the board?": "보드를 지우시겠습니까?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "저장된 기본 설정은 모든 방에서 카메라를 끈 참가자를 그리드에서 숨깁니다. 여기서도 유지하시겠습니까?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "그룹을 해제할 그룹 개체를 선택하세요.",
+        "Select two or more objects to group.": "그룹화할 개체를 두 개 이상 선택하세요.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",

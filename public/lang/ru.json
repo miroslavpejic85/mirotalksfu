@@ -134,6 +134,11 @@
         "When enabled, your transcription will be sent to all participants": "Если включено, ваша расшифровка будет отправлена всем участникам"
     },
     "buttons": {
+        "Add arrow": "Добавить стрелку",
+        "Add diamond": "Добавить ромб",
+        "Add frame": "Добавить рамку",
+        "Group selection": "Сгруппировать выбранное",
+        "Ungroup selection": "Разгруппировать выбранное",
         "Abort": "Прервать",
         "About": "О программе",
         "Accept all waiting guests": "Принять всех ожидающих гостей",
@@ -282,6 +287,10 @@
         "YouTube Live": "YouTube Live"
     },
     "labels": {
+        "= Arrow": "= Стрелка",
+        "= Diamond": "= Ромб",
+        "= Frame": "= Рамка",
+        "Frame title": "Заголовок рамки",
         "= Circle": "= Круг",
         "= Clear all": "= Очистить всё",
         "= Image": "= Изображение",
@@ -710,6 +719,8 @@
         "Your recording session will be stored on the server.": "Ваш сеанс записи будет сохранён на сервере."
     },
     "dialogs": {
+        "Edit frame title": "Изменить заголовок рамки",
+        "Enter a frame title": "Введите заголовок рамки",
         "A presenter is required to start the meeting. Please try joining again later.": "Для начала встречи требуется ведущий. Попробуйте войти снова позже.",
         "Apply": "Применить",
         "Are you sure you want to clean the board?": "Вы уверены, что хотите очистить доску?",
@@ -853,6 +864,8 @@
         "Your saved preference keeps participants with their camera off hidden from the grid in every room. Keep it here?": "Ваша сохранённая настройка скрывает участников с выключенной камерой из сетки в каждой комнате. Оставить её здесь?"
     },
     "toasts": {
+        "Select a grouped object to ungroup.": "Выберите сгруппированный объект для разгруппировки.",
+        "Select two or more objects to group.": "Выберите два или более объекта для группировки.",
         "⚪ Wake Lock released": "⚪ Wake Lock released",
         "🔴 Failed to request Wake Lock:": "🔴 Failed to request Wake Lock:",
         "🟢 Wake Lock is active": "🟢 Wake Lock is active",
