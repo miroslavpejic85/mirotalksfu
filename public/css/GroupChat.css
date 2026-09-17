@@ -484,6 +484,12 @@
     max-width: calc(100vw - 16px);
 }
 
+.chat-menu-tools .dropdown-menu button {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+}
+
 @container chat-panel (max-width: 420px) {
     .chat .chat-header .status,
     .chat-header-category {
