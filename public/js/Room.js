@@ -11,7 +11,7 @@ if (location.href.substr(0, 5) !== 'https') location.href = 'https' + location.h
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.60
+ * @version 2.4.62
  *
  */
 
@@ -500,6 +500,8 @@ async function initClient() {
         setTippy('chatMinButton', 'Minimize', 'bottom');
         setTippy('pollTogglePin', 'Toggle pin', 'bottom');
         setTippy('breakoutTogglePin', 'Toggle pin', 'bottom');
+        setTippy('breakoutMaxButton', 'Maximize', 'bottom');
+        setTippy('breakoutMinButton', 'Minimize', 'bottom');
         setTippy('breakoutRefreshBtn', 'Refresh rooms', 'bottom');
         setTippy('breakoutDeleteAllBtn', 'Delete all rooms', 'bottom');
         setTippy('breakoutPanelCloseBtn', 'Close', 'bottom');
@@ -2564,6 +2566,12 @@ function handleButtons() {
     };
     breakoutTogglePin.onclick = () => {
         rc.toggleBreakoutPin();
+    };
+    breakoutMaxButton.onclick = () => {
+        rc.breakoutMaximize();
+    };
+    breakoutMinButton.onclick = () => {
+        rc.breakoutMinimize();
     };
     breakoutLaunchBtn.onclick = () => {
         launchBreakoutRooms();
@@ -8542,7 +8550,7 @@ function showAbout() {
         position: 'center',
         imageUrl: BRAND.about?.imageUrl && BRAND.about.imageUrl.trim() !== '' ? BRAND.about.imageUrl : image.about,
         customClass: { image: 'img-about' },
-        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.60',
+        title: BRAND.about?.title && BRAND.about.title.trim() !== '' ? BRAND.about.title : 'WebRTC SFU v2.4.62',
         html: renderRoomTemplate('popupAboutTemplate', {
             html: {
                 aboutContent: BRAND.about.html,
@@ -8634,6 +8642,7 @@ function toggleBreakoutPanel() {
     isBreakoutPanelOpen = !isBreakoutPanelOpen;
 
     if (isBreakoutPanelOpen) {
+        rc.isMobileDevice ? rc.breakoutMaximize() : rc.breakoutMinimize();
         show(panel);
         refreshBreakoutPanel();
         sound('open');
@@ -8645,6 +8654,7 @@ function toggleBreakoutPanel() {
         }
     } else {
         if (rc.isBreakoutPinned) rc.breakoutUnpin();
+        if (rc.isBreakoutMaximized) rc.breakoutMinimize();
         hide(panel);
     }
 }

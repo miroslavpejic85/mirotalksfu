@@ -6953,6 +6953,31 @@ hr {
     max-height: calc(85vh - 55px);
 }
 
+.breakout-panel.is-maximized .breakout-panel-header {
+    cursor: default;
+}
+
+.breakout-panel.is-maximized .breakout-panel-body {
+    width: min(100%, 1400px);
+    max-height: none !important;
+    margin: 0 auto;
+    padding: 18px 24px 24px;
+}
+
+.breakout-panel.is-maximized .breakout-rooms-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(280px, 100%), 1fr));
+    align-items: start;
+    gap: 12px;
+}
+
+.breakout-panel.is-maximized .breakout-room-card {
+    min-height: 64px;
+    padding: 14px 16px;
+    background: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+}
+
 /* Create Room Section */
 .breakout-create-section {
     margin-bottom: 16px;

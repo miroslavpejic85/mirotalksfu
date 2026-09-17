@@ -9,7 +9,7 @@
  * @license For commercial or closed source, contact us at license.mirotalk@gmail.com or purchase directly via CodeCanyon
  * @license CodeCanyon: https://codecanyon.net/item/mirotalk-sfu-webrtc-realtime-video-conferences/40769970
  * @author  Miroslav Pejic - miroslav.pejic.85@gmail.com
- * @version 2.4.60
+ * @version 2.4.62
  *
  */
 
@@ -370,6 +370,7 @@ class RoomClient {
         this.collabEditorDelta = null;
         this._privatePersistTimer = null;
         this.isBreakoutPinned = false;
+        this.isBreakoutMaximized = false;
         this.isSpeechSynthesisSupported = isSpeechSynthesisSupported;
         this.isParticipantsOpen = false;
         this.isChatOpenedByParticipantsBtn = false;
@@ -7831,6 +7832,10 @@ class RoomClient {
             this.videoMediaContainer.style.width = '70%';
             this.videoMediaContainer.style.height = '100%';
         }
+        this.isBreakoutMaximized = false;
+        breakoutPanel.classList.remove('is-maximized');
+        hide(breakoutMinButton);
+        show(breakoutMaxButton);
         if (!this.isMobileDevice) this.makeUnDraggable(breakoutPanel, breakoutPanelHeader);
         this.breakoutPinned();
         this.isBreakoutPinned = true;
@@ -7851,6 +7856,37 @@ class RoomClient {
         this.setBreakoutControlState(breakoutTogglePin, false);
         this.resizeVideoMenuBar();
         resizeVideoMedia();
+        if (!this.isMobileDevice) this.makeDraggable(breakoutPanel, breakoutPanelHeader);
+    }
+
+    breakoutMaximize() {
+        if (this.isBreakoutPinned) this.breakoutUnpin();
+        this.isBreakoutMaximized = true;
+        breakoutPanel.classList.remove('panel-slide-in');
+        breakoutPanel.classList.add('is-maximized');
+        breakoutPanel.style.position = 'fixed';
+        breakoutPanel.style.inset = '';
+        breakoutPanel.style.top = '50%';
+        breakoutPanel.style.right = '';
+        breakoutPanel.style.left = '50%';
+        breakoutPanel.style.transform = 'translate(-50%, -50%)';
+        breakoutPanel.style.width = '100%';
+        breakoutPanel.style.height = '100%';
+        breakoutPanel.style.maxWidth = '100%';
+        breakoutPanel.style.maxHeight = '100%';
+        breakoutPanel.style.borderRadius = '0';
+        hide(breakoutMaxButton);
+        show(breakoutMinButton);
+        if (!this.isMobileDevice) this.makeUnDraggable(breakoutPanel, breakoutPanelHeader);
+    }
+
+    breakoutMinimize() {
+        this.isBreakoutMaximized = false;
+        breakoutPanel.classList.remove('is-maximized');
+        breakoutPanel.style.inset = '';
+        hide(breakoutMinButton);
+        show(breakoutMaxButton);
+        this.breakoutCenter();
         if (!this.isMobileDevice) this.makeDraggable(breakoutPanel, breakoutPanelHeader);
     }
 
@@ -7932,6 +7968,7 @@ class RoomClient {
             this.getBreakoutPanelLayoutElements();
 
         breakoutPanel.style.position = 'fixed';
+        breakoutPanel.style.inset = '';
         breakoutPanel.style.transform = 'translate(-50%, -50%)';
         breakoutPanel.style.top = '50%';
         breakoutPanel.style.left = '50%';
